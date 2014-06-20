@@ -1,0 +1,20 @@
+Heng Li from the Sanger Institute wrote most of the initial source codes
+of SAMtools and various converters.
+
+Bob Handsaker from the Broad Institute is a major contributor to the
+SAM/BAM specification. He designed and implemented the BGZF format, the
+underlying indexable compression format for the BAM format. BGZF does
+not support arithmetic between file offsets.
+
+Jue Ruan for the Beijing Genome Institute designed and implemented the
+RAZF format, an alternative indexable compression format. RAZF supports
+arithmetic between file offsets, at the cost of increased index file
+size and the full compatibility with gzip. RAZF is optional and only
+used in `faidx' for indexing RAZF compressed fasta files.
+
+Colin Hercus updated novo2sam.pl to support gapped alignment by
+novoalign.
+
+Petr Danecek contributed the header parsing library sam_header.c and 
+sam2vcf.pl script and added knet support to the RAZF library.
+

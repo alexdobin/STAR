@@ -1,0 +1,120 @@
+2.3.1z9 06/19/2014
+2.3.1z8 
+2.3.1z7 
+Fixed problems with transcriptomic output.
+Changed --sjdbFileChrStartEnd importing to allow direct import from SJ.out.tab
+
+
+
+2.3.1z6 05/30/2014
+2.3.1z5 05/30/2014
+Fixed a bug causing problems with multiple zipped input files.
+Preliminary release of BAM sorting and wiggle output
+
+2.3.1z4 05/06/2014
+Preliminary release with transcriptome output.
+
+2.3.1z2 04/29/2014
+Fixed a bug causing problems in some chimeric alignments.
+Fixed a bug causing overflowing of SAM ISIZE.
+Fixed chimeric output problems with --outFilterType BySJout option
+Added extra Log.out messages for multi-threaded jobs.
+
+2.3.1z1 03/13/2014
+SAM header changes: 
+    removed "cl:" attribute from the @PG line, output it as a separate comment line
+    added --outSAMheaderHD, --outSAMheaderPG, --outSAMheaderCommentFile options
+Added --outTmpDir, which set the path forSTAr temporary directory independent of --outFileNamePrefix
+
+2.3.1z 02/05/2014
+Fixed the incorrect behavior of --genomeLoad LoadAndRemove option.
+
+2.3.1y 01/24/2014
+Added read group sam attribute via --outSAMattrRGline parameter.
+Fixed gcc 4.7.0. compilation problem.
+Correct reverse complementarity of all IUPAC nucleotide codes in the SAM output.
+
+2.3.1x 01/08/2014
+Fixed a bug with --alignEndsType EndToEnd.
+
+2.3.1v 12/21/2013
+Added --alignEndsType EndToEnd option to align reads end-to-end, i.e. prohibit soft-clipping.
+--outSAMattributes now allows to specify the SAM attributes in the desired combination and order.
+Implemented standard (samtools-like) NM and MD tags.
+Added --outSAMmapqUnique parameter (=255 by default), MAPQ value for unique mappers.
+
+2.3.1u 11/23/2013
+Added --outSAMreadID={Standard,Number} parameter to output read numbered read IDs.
+Aded --outSAMmode NoQS option to suppress output of quality scores.
+
+2.3.1t 11/20/2013
+Fixed a bug that prevented alignment to the very beginning of the first reference.
+
+2.3.1s 11/06/2013
+Fixed a bug that produced incorrect placement of short deletions.
+
+2.3.1r 10/01/2013
+Compilation option to output "local alignment chanins".
+Compilation option to output suffix array as a text file.
+
+2.3.1q 08/15/2013
+Fixed a problem with junction overhang in SJ.out.tab file for overlapping mates.
+
+2.3.1p 04/13/2013
+Fixed GCC 4.7 compatibility problems.
+Changed min memory requirement for genome generation.
+
+2.3.1o 04/13/2013
+Fixed a bug with comma separated lists of input files.
+
+2.3.1n 04/30/2013
+Replaced incorretly released 2.3.1m.
+
+2.3.1m 04/24/2013
+Fixed a bug which in some cases caused problems with long reads.
+
+2.3.1l 04/15/2013
+Fixed a problem with --readFilesCommand.
+
+2.3.1k 04/15/2013
+Fixed chimeric output for single-end reads.
+Fixed a problem with --outFilterScoreMinOverLread 0 --outFilterMatchNminOverLread 0 settings.
+
+2.3.1j 04/11/2013
+Allowed spaces in paths: paths that contain spaces should be quoted with " ". Thanks for Tyler Hyndman for suggesting this patch.
+
+2.3.1i 04/10/2013
+Fixed problems with overflowing SJ buffer, new input parameters: --limitOutSJcollapsed, --limitOutSJoneRead.
+
+2.3.1h 04/02/2013
+Prevent output of strangely overlapping mates as chimeras.
+Report error if --sjdbOverhang=0 with set --sjdbFileChrStartEnd or --sjdbGTFfile.
+
+2.3.1g 03/29/2013
+Implemented detection of proximal same-strand chimeras. Now it is possible to detect circular RNA (conisdered "chimeric").
+More accurate treatment of overlapping mates.
+
+2.3.1f 03/21/2013
+New option --outSAMorder PairedKeepInputOrder to output alignments in the same order as they appear in the input FASTQ/A files.
+
+2.3.1e 03/18/2013
+Fixed possible problems with multi-threaded runs for small files which could have caused empty Chimeric.* and Unmapped.* output on some systems.
+
+2.3.1d 03/17/2013
+New option --outSAMprimaryFlag AllBestScore for marking all alignments with the best score as primary.
+New parameter --limitOutSAMoneReadBytes 100000, limits the size of one SAM entry - important when a large number of multimappers is recorded.
+Fixed a possible problem with Unmapped.* and Chimeric.* output which could generate empty or truncated output on some systems.
+Coded a safer removal of the temporary directory _tmp which could have failed on some systems.
+Fixed a bug which resulted in unexpected behavior for alignIntronMax < 7.
+
+2.3.1c 03/01/2013
+Fixed a bug which duplicated output in Chimeric.* and Unmapped.* when --outFilterType BySJout option is used.
+
+2.3.1b 02/28/2013
+Fixed possible issue which in some cases could have resulted in empty Chimeric.out.*
+
+2.3.1a 02/25/2013
+Fixed incorrect processing of --sjdbGTFchrPrefix.
+
+2.3.0e
+
