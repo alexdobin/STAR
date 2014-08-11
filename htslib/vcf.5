@@ -1,0 +1,96 @@
+'\" t
+.TH vcf 5 "August 2013" "htslib" "Bioinformatics formats"
+.SH NAME
+vcf \- Variant Call Format
+.SH DESCRIPTION
+The Variant Call Format (VCF) is a TAB-delimited format with each data line
+consisting of the following fields:
+.TS
+nlbl.
+1	CHROM	CHROMosome name
+2	POS	the left-most POSition of the variant
+3	ID	unique variant IDentifier
+4	REF	the REFerence allele
+5	ALT	the ALTernate allele(s) (comma-separated)
+6	QUAL	variant/reference QUALity
+7	FILTER	FILTERs applied
+8	INFO	INFOrmation related to the variant (semicolon-separated)
+9	FORMAT	FORMAT of the genotype fields (optional; colon-separated)
+10+	SAMPLE	SAMPLE genotypes and per-sample information (optional)
+.TE
+.P
+The following table gives the \fBINFO\fP tags used by samtools and bcftools.
+.TP
+.B AF1
+Max-likelihood estimate of the site allele frequency (AF) of the first ALT allele
+(double)
+.TP
+.B DP
+Raw read depth (without quality filtering)
+(int)
+.TP
+.B DP4
+# high-quality reference forward bases, ref reverse, alternate for and alt rev bases
+(int[4])
+.TP
+.B FQ
+Consensus quality. Positive: sample genotypes different; negative: otherwise
+(int)
+.TP
+.B MQ
+Root-Mean-Square mapping quality of covering reads
+(int)
+.TP
+.B PC2
+Phred probability of AF in group1 samples being larger (,smaller) than in group2
+(int[2])
+.TP
+.B PCHI2
+Posterior weighted chi^2 P-value between group1 and group2 samples
+(double)
+.TP
+.B PV4
+P-value for strand bias, baseQ bias, mapQ bias and tail distance bias
+(double[4])
+.TP
+.B QCHI2
+Phred-scaled PCHI2
+(int)
+.TP
+.B RP
+# permutations yielding a smaller PCHI2
+(int)
+.TP
+.B CLR
+Phred log ratio of genotype likelihoods with and without the trio/pair constraint
+(int)
+.TP
+.B UGT
+Most probable genotype configuration without the trio constraint
+(string)
+.TP
+.B CGT
+Most probable configuration with the trio constraint
+(string)
+.TP
+.B VDB
+Tests variant positions within reads. Intended for filtering RNA-seq artifacts around splice sites
+(float)
+.TP
+.B RPB
+Mann-Whitney rank-sum test for tail distance bias
+(float)
+.TP
+.B HWE
+Hardy-Weinberg equilibrium test (Wigginton et al)
+(float)
+.P
+.SH SEE ALSO
+.TP
+https://github.com/samtools/hts-specs
+The full VCF/BCF file format specification
+.TP
+.I A note on exact tests of Hardy-Weinberg equilibrium
+Wigginton JE et al
+PMID:15789306
+.\" (http://www.ncbi.nlm.nih.gov/pubmed/15789306)
