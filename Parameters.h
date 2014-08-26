@@ -135,6 +135,9 @@ class Parameters {
             int type;
         } outWigFlags; 
         
+        //2-pass
+        uint twopass1readsN, twopassSJlimit;
+        
         
         //storage limits
         uint limitGenomeGenerateRAM;

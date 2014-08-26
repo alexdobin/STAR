@@ -8,9 +8,16 @@
 #include <cmath>
 #include <unistd.h>
 
+//addresses with respect to shmStart of several genome values
 #define SHM_sizeG 0
 #define SHM_sizeSA 8
 #define SHM_startG 16
+// #define SHM_startSA 24
+// 
+// //first available byt of the shm
+// #define SHM_startSHM 32
+
+//arbitrary number for ftok function
 #define SHM_projectID 23
 
 // Genome::Genome(Parameters* Pin) {
@@ -36,9 +43,10 @@ void Genome::genomeLoad(){//allocate and load Genome
     bool shmLoad=false;   
     key_t shmKey=ftok(P->genomeDir.c_str(),SHM_projectID);;    
     char *shmStart=NULL;
-    uint *shmNG=NULL, *shmNSA=NULL;   
-    uint64 shmSize=0;
-
+    uint *shmNG=NULL, *shmNSA=NULL;   //pointers to shm stored values , *shmSG, *shmSSA
+    uint64 shmSize=0;//, shmStartG=0; shmStartSA=0;
+    
+    
     uint L=200,K=6;    
     
     time_t rawtime;
@@ -121,7 +129,9 @@ void Genome::genomeLoad(){//allocate and load Genome
             errOut << "SOLUTION: check shared memory settigns as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;     
             exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_SHM, *P);
         };
-        if (!shmLoad) P->inOut->logMain <<"Found genome in shared memory\n"<<flush;
+        if (!shmLoad) {//genome is already in shm
+            P->inOut->logMain <<"Found genome in shared memory\n"<<flush;
+        };
     };
     
     if (P->genomeLoad=="Remove") {//kill the genome and exit
@@ -210,6 +220,15 @@ void Genome::genomeLoad(){//allocate and load Genome
     P->inOut->logMain << "nGenome=" << P->nGenome << ";  nSAbyte=" << P->nSAbyte <<endl<< flush;       
     P->inOut->logMain <<"GstrandBit="<<int(P->GstrandBit)<<"   SA number of indices="<<P->nSA<<endl<<flush;      
     
+//     if (twopass1readsN==0) {//not 2-pass
+//         shmStartG=SHM_startSHM;
+//         shmStartSA=0;
+//     } else {//2-pass
+//         ostringstream errOut;
+//         errOut << "EXITING because of FATAL ERROR: 2-pass procedure cannot be used with genome already loaded im memory'  "\n" ;
+//         errOut << "SOLUTION: check shared memory settigns as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;     
+//         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_SHM, *P);
+//     };
     
     /////////////////////////////////////// allocate arrays
     if (P->genomeLoad=="NoSharedMemory") {// simply allocate memory, do not use shared memory

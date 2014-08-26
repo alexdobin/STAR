@@ -47,6 +47,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                             
                             iline=1;
                         };
+                        //do not need to worry about 2nd stage, that's read directly from the files
 //                         else {//2nd stage of 2-stage mapping
 //                         read index and file index are already recorded with the read name, simply copy it
 //                         P->inOut->readIn[imate].getline(chunkIn[imate] + chunkInSizeBytesTotal[imate], DEF_readNameSeqLengthMax+1 );                            

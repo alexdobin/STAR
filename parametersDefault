@@ -432,10 +432,10 @@ quantMode                   -
                             - : None
                             TranscriptomeSAM : output SAM/BAM alignments to transcriptome into a separate file
 
+### 2-PASS
+twopass1readsN              0
+    int>0: number of reads to process for the 1st step. 0 : 1-step only, no 2nd pass; use very large number to map all reads in the first step
 
-### NOT USED Smith-Waterman alignment parameters for PacBio reads
-swMode              0
-    int>=0: 0: no SW alignments, 1: full SW alignment
+twopassSJlimit              1000000
+    int>=0: maximum number of junction detected in the 1st step
 
-swWinCoverageMinP   50
-    int>0: minimum read coverage percentage in a window that will be aligned with SW

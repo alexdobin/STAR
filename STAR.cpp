@@ -184,7 +184,7 @@ int main(int argInN, char* argIn[]) {
     
     if (P->outFilterBySJoutStage==1) {//completed stage 1, go to stage 2
         outputSJ(RAchunk,P);//collapse novel junctions
-        P->readFilesIndex=0;//TODO: mark not real input files with -1, the read groups will be read from read IDs
+        P->readFilesIndex=-1;
         
         P->outFilterBySJoutStage=2;
         P->inOut->logMain << "starting stage 2: filtering BySJout\n";

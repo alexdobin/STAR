@@ -122,23 +122,6 @@ uint genomeScanFastaFiles (Parameters *P, char* G, bool flagRun) {//scans fasta 
     return N;
 };        
 
-void radixPass(PackedArray &SA, char* G, uint N, uint K, uint shiftG, uint* groupStart, uint* SAtemp, uint* c, uint* cc) 
-{ // count occurrences 
-    for (uint ii = 0;  ii < K;  ii++) cc[ii] = 0;         // reset counters
-    
-    for (uint ii = 0;  ii < N;  ii++) cc[int(G[SA[ii]+shiftG])]++;    // count occurences; -s for reverse, +s for forward!
-    
-    c[0]=0;
-    for (uint ii = 0;  ii < K;  ii++) c[ii+1] = c[ii]+cc[ii]; // exclusiive prefix sums
-    
-    for (uint ii = 0;  ii < K+1;  ii++) groupStart[ii] = c[ii]; // copy c for output
-    
-    for (uint ii = 0;  ii < N;  ii++) SAtemp[c[int(G[SA[ii]+shiftG])]++] = SA[ii];      // sort; -s for reverse, +s for forward!
-    
-    for (uint ii = 0;  ii < N;  ii++) SA.writePacked(ii,SAtemp[ii]);
-}
-
-
 void genomeGenerate(Parameters *P) {
     
     //check parameters

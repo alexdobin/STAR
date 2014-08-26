@@ -176,9 +176,14 @@ Parameters::Parameters() {//initalize parameters info
     //quant
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "quantMode", &quantMode));
     
-    //SW parameters
-    parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "swMode", &swMode));
-    parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "swWinCoverageMinP", &swWinCoverageMinP));
+    //2-pass
+    parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "twopass1readsN", &twopass1readsN));
+    parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "twopassSJlimit", &twopassSJlimit));
+
+    
+//     //SW parameters
+//     parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "swMode", &swMode));
+//     parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "swWinCoverageMinP", &swWinCoverageMinP));
     
     parameterInputName.push_back("Default");
     parameterInputName.push_back("Command-Line-Initial");
