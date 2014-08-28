@@ -7,7 +7,7 @@
 class Genome {
     public:
         char *G, *sigG;
-        PackedArray SA;
+        PackedArray SA,SA2;
         PackedArray SAi;
         void genomeLoad();
         

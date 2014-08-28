@@ -53,6 +53,9 @@ void Genome::genomeLoad(){//allocate and load Genome
     time ( &rawtime );
     
     
+    //protect some parameters
+    uint sjdbOverhang1=P->sjdbOverhang;
+
     vector <uint> versionGenomeMin=P->versionGenome;
     P->versionGenome[0]=0;
     
@@ -84,6 +87,10 @@ void Genome::genomeLoad(){//allocate and load Genome
         errOut << "SOLUTION: please re-generate genome from scratch with the latest version of STAR\n";
         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_GENOME_FILES, *P);
     };
+
+
+    if (P->sjdbOverhang==0) P->sjdbOverhang=sjdbOverhang1; //for twopass sjdbOverhang nay be defined at the mapping stage
+    //TODO make a more careful check, if the values are different, break!
 
     P->inOut->logMain << "Started loading the genome: " << asctime (localtime ( &rawtime ))<<"\n"<<flush;    
   
@@ -201,10 +208,15 @@ void Genome::genomeLoad(){//allocate and load Genome
     /////////////////////////////////// at this point all array sizes should be known: calculate packed array lengths
     P->GstrandBit = (uint) floor(log(P->nGenome)/log(2))+1;
     if (P->GstrandBit<32) P->GstrandBit=32; //TODO: use simple access function for SA
-    
+
     P->GstrandMask = ~(1LLU<<P->GstrandBit);
     P->nSA=(P->nSAbyte*8)/(P->GstrandBit+1);
     SA.defineBits(P->GstrandBit+1,P->nSA);  
+    
+    if (P->twopass1readsN>0) {//2-pass: reserve extra memory
+        P->nGenome2=P->nGenome+P->twopassSJlimit*P->sjdbOverhang*2;
+        SA2.defineBits(P->GstrandBit+1,P->nSA+P->sjdbOverhang*2);
+    };
     
     P->SAiMarkNbit=P->GstrandBit+1;
     P->SAiMarkAbsentBit=P->GstrandBit+2;
@@ -233,11 +245,18 @@ void Genome::genomeLoad(){//allocate and load Genome
     /////////////////////////////////////// allocate arrays
     if (P->genomeLoad=="NoSharedMemory") {// simply allocate memory, do not use shared memory
         try {
-            G1=new char[P->nGenome+L+L];        
-            SA.allocateArray();
-            if (P->annotScoreScale>0) sigG=new char[P->nGenome];
+            if (P->twopass1readsN==0) {//2-pass: reserve extra memory
+                G1=new char[P->nGenome+L+L];        
+                SA.allocateArray();
+            } else {
+                P->nGenome2=P->nGenome+P->twopassSJlimit*P->sjdbLength;
+                SA2.defineBits(P->GstrandBit+1,P->nSA+P->sjdbLength);
+                G1=new char[P->nGenome2+L+L];        
+                SA2.allocateArray();
+                SA.pointArray(SA2.charArray+SA2.lengthByte-SA.lengthByte);
+            };            
             SAi.allocateArray();
-            P->inOut->logMain <<"Shared memory is not used for genomes. Allocated a private copy of the genome.\n"<<flush;
+            P->inOut->logMain <<"Shared memory is not used for genomes. Allocated a private copy of the genome.\n"<<flush;                
         } 
         catch (exception & exc) {
             ostringstream errOut;           

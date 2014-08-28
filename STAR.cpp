@@ -18,6 +18,7 @@
 #include "Transcriptome.h"
 #include "BAMbinSortByCoordinate.h"
 #include "signalFromBAM.h"
+#include "sjdbBuildIndex.h"
 
 #include "htslib/htslib/sam.h"
 extern int bam_cat(int nfn, char * const *fn, const bam_hdr_t *h, const char* outbam);
@@ -45,8 +46,18 @@ int main(int argInN, char* argIn[]) {
     
     Genome mainGenome (P);
     mainGenome.genomeLoad();
+    
+    
+    {//2-pass
+        time_t rawtime;
+        time ( &rawtime );
+        cout << timeMonthDayTime(rawtime) << "start sjdbBuild" <<endl;
+        sjdbBuildIndex (P, mainGenome.G, mainGenome.SA);
+        cout << timeMonthDayTime(rawtime) << "finished" <<endl;
+    };
     //calculate genome-related parameters
     P->winBinN = P->nGenome/(1LLU << P->winBinNbits)+1;
+    
 
     Transcriptome *mainTranscriptome=NULL;
     if (P->quantModeI>0) {//load transcriptome

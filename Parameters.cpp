@@ -846,6 +846,19 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         };
     };
             
+    //two-pass
+    if (twopass1readsN>0) {//2-pss parameters
+        twopassDir=outFileNamePrefix+"/_STARpass1/";
+        if (mkdir (twopassDir.c_str(),S_IRWXU)!=0) {
+//             ostringstream errOut;
+//             errOut <<"EXITING because of fatal ERROR: could not make pass1 directory: "<< twopassDir<<"\n";
+//             errOut <<"SOLUTION: please check the path and writing permissions \n";
+//             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };
+        
+        twopassSJpass1file=twopassDir+"/SJ.out.tab";
+        sjdbLength=sjdbOverhang*2+1;
+    };
     inOut->logMain << "Finished loading and checking parameters\n" <<flush;
 };
 

@@ -43,6 +43,8 @@ typedef uint8_t uint8;
 #define int64 long long
 #define int32 int
 
+#define GENOME_spacingChar 5
+
 #define uintWinBin unsigned short
 #define uintWinBinMax numeric_limits<uint16>::max()
 

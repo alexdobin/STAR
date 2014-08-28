@@ -137,7 +137,7 @@ class Parameters {
         
         //2-pass
         uint twopass1readsN, twopassSJlimit;
-        
+        string twopassDir,twopassSJpass1file;
         
         //storage limits
         uint limitGenomeGenerateRAM;
@@ -202,6 +202,7 @@ class Parameters {
             
     //Genome parameters
     uint nGenome, nSA, nSAbyte, nChrReal;//genome length, SA length, # of chromosomes, vector of chromosome start loci
+    uint nGenome2, nSA2, nSAbyte2, nChrReal2; //same for the 2nd pass
     uint nSAi; //size of the SAindex
     vector <string> chrName;
     map <string,uint> chrNameIndex;
