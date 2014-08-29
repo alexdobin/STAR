@@ -18,7 +18,7 @@ LDFLAGS := -pthread -Lhtslib -Bstatic -lhts -Bdynamic -lz
 LDFLAGS_static := -static -static-libgcc $(LDFLAGS)
 LDFLAGS_gdb := $(LDFLAGS)
 
-SVNDEF := -D'SVN_VERSION_COMPILED="$(shell svnversion -n .)"'
+SVNDEF := -D'SVN_VERSION_COMPILED="STAR_2.4.0b"'
 COMPTIMEPLACE := -D'COMPILATION_TIME_PLACE="$(shell echo `date` $(HOSTNAME):`pwd`)"'
 
 CCFLAGS_common := -pipe -std=c++0x -Wall -Wextra -fopenmp $(SVNDEF) $(COMPTIMEPLACE) $(OPTIMFLAGS) $(OPTIMFLAGS1)
@@ -38,7 +38,12 @@ all: STAR
 
 .PHONY: clean
 clean:
-	rm -f *.o STAR Depend.list
+	rm -f *.o STAR STARstatic Depend.list
+
+.PHONY: cleanRelease
+cleanRelease:
+	rm -f *.o Depend.list
+	$(MAKE) -C htslib clean
 
 .PHONY: CLEAN
 CLEAN:
@@ -69,6 +74,7 @@ parametersDefault.xxd: parametersDefault
 STAR : CCFLAGS=$(CCFLAGS_main)
 STAR : Depend.list parametersDefault.xxd $(OBJECTS)
 	$(CC) -o STAR $(CCFLAGS) $(OBJECTS) $(LDFLAGS)
+	$(CC) -o STARstatic $(OBJECTS) $(CCFLAGS) $(LDFLAGS_static)
 
 STARstatic : CCFLAGS=$(CCFLAGS_main)
 STARstatic : Depend.list parametersDefault.xxd $(OBJECTS)

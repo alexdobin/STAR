@@ -1,3 +1,7 @@
+2.4.0b 08/29/2014
+Fixed problems with spaces in --outFilePrefixName.
+Fixed version information.
+
 2.4.0a 08/11/2014
 Implemented --outFilterMismatchNoverReadLmax option for a more consistent control of mismatches.
 
