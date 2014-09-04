@@ -592,15 +592,15 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                     readFilesNames.at(imate).push_back(file1);
                     inOut->logMain <<file1<<endl;
                     
-                    readsCommandFile << "echo FILE " <<readFilesN << " > " << readFilesInTmp.at(imate) << "\n";
-                    readsCommandFile << readFilesCommandString << "   \"" << file1  <<"\"\n";
+                    readsCommandFile << "echo FILE " <<readFilesN << " > " << ("\""+readFilesInTmp.at(imate)+"\"") << "\n";
+                    readsCommandFile << readFilesCommandString << "   " <<("\""+file1+"\"") <<"\n";
                     ++readFilesN;//only increase file count for one mate
                     
                 } while (pos!= string::npos);
                                 
                 readsCommandFile.close();
                 chmod(readsCommandFileName.at(imate).c_str(),S_IXUSR | S_IRUSR | S_IWUSR);
-                system((readsCommandFileName.at(imate) + " > " + readFilesInTmp.at(imate) + " & ").c_str());
+                system((("\""+readsCommandFileName.at(imate)+"\"") + " > " + "\""+readFilesInTmp.at(imate)+"\"" + " & ").c_str());
                 inOut->readIn[imate].open(readFilesInTmp.at(imate).c_str());
                 
 //                 stringSubstituteAll(readFilesInString,",","\" \"");

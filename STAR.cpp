@@ -48,13 +48,12 @@ int main(int argInN, char* argIn[]) {
     mainGenome.genomeLoad();
     
     
-    {//2-pass
-        time_t rawtime;
-        time ( &rawtime );
-        cout << timeMonthDayTime(rawtime) << "start sjdbBuild" <<endl;
-        sjdbBuildIndex (P, mainGenome.G, mainGenome.SA);
-        cout << timeMonthDayTime(rawtime) << "finished" <<endl;
-    };
+     if (P->twopass1readsN>0) {//2-pass
+         time_t rawtime;
+         time ( &rawtime ); cout << timeMonthDayTime(rawtime) << "start sjdbBuild" <<endl;
+         sjdbBuildIndex (P, mainGenome.G, mainGenome.SA, mainGenome.SA2, mainGenome.SAi);
+         time ( &rawtime ); cout << timeMonthDayTime(rawtime) << "finished" <<endl;
+     };
     //calculate genome-related parameters
     P->winBinN = P->nGenome/(1LLU << P->winBinNbits)+1;
     

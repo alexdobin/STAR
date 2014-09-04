@@ -1,4 +1,4 @@
-#include "SuffixArraysFuns.h"
+#include "SuffixArrayFuns.h"
 #include "PackedArray.h"
 
 inline uint medianUint2(uint a, uint b) {
@@ -6,7 +6,7 @@ inline uint medianUint2(uint a, uint b) {
     return a/2 + b/2 + (a%2 + b%2)/2;
 };
 
-uint compareSeqToGenome(char** s2, uint S, uint N, uint L, char* g, PackedArray& SA, uint iSA, bool dirR, bool& comparRes, Parameters* P) {
+uint compareSeqToGenome(char** s2, uint S, uint N, uint L, char* g, PackedArray& SA, uint iSA, bool dirR, bool& compRes, Parameters* P) {
     // compare s to g, find the maximum identity length
     // s2[0] read sequence; s2[1] complementary sequence
     // S position to start search from in s2[0],s2[1]
@@ -24,21 +24,21 @@ uint compareSeqToGenome(char** s2, uint S, uint N, uint L, char* g, PackedArray&
         g += SAstr + L;
         for (ii=0;(uint) ii < N-L; ii++)
             if (s[ii]!=g[ii]) break;
-        if (s[ii]>g[ii]) {comparRes=true;} else {comparRes=false;};
+        if (s[ii]>g[ii]) {compRes=true;} else {compRes=false;};
         return ii+L;
     } else if (dirR && !dirG) {
         char* s  = s2[1] + S + L;
         g += P->nGenome-1-SAstr - L;
         for (ii=0; (uint) ii < N-L; ii++)
             if (s[ii]!=g[-ii]) break;
-        if (s[ii]>g[-ii] || g[-ii]>3) {comparRes=false;} else {comparRes=true;};
+        if (s[ii]>g[-ii] || g[-ii]>3) {compRes=false;} else {compRes=true;};
         return ii+L;
     } else if (!dirR && dirG) {
         char* s  = s2[1] + S - L;
         g += SAstr + L;
         for (ii=0; (uint) ii < N-L; ii++)
             if (s[-ii]!=g[ii]) break;
-        if (s[-ii]>g[ii]) {comparRes=true;} else {comparRes=false;};
+        if (s[-ii]>g[ii]) {compRes=true;} else {compRes=false;};
         return ii+L;
     } else {//if (!dirR && !dirG)
         char* s  = s2[0] + S - L;
@@ -46,7 +46,7 @@ uint compareSeqToGenome(char** s2, uint S, uint N, uint L, char* g, PackedArray&
         for (ii=0; (uint) ii < N-L; ii++){
             if (s[-ii]!=g[-ii]) break;
         };
-        if (s[-ii]>g[-ii] || g[-ii]>3) {comparRes=false;} else {comparRes=true;};
+        if (s[-ii]>g[-ii] || g[-ii]>3) {compRes=false;} else {compRes=true;};
         return ii+L;
     };    
 };
@@ -54,7 +54,7 @@ uint compareSeqToGenome(char** s2, uint S, uint N, uint L, char* g, PackedArray&
 uint findMultRange(uint i3, uint L3, uint i1, uint L1, uint i1a, uint L1a, uint i1b, uint L1b, char** s, char* g, PackedArray& SA, bool dirR, uint S, Parameters* P) {
     // given SA index i3 and identity length L3, return the index of the farthest element with the same length, starting from i1,L1 or i1a,L1a, or i1b,L1b
     
-    bool comparRes;    
+    bool compRes;    
     
     if (L1<L3) { //search between i1 and i3
         L1b=L1; i1b=i1; i1a=i3;
@@ -67,7 +67,7 @@ uint findMultRange(uint i3, uint L3, uint i1, uint L1, uint i1a, uint L1a, uint 
     while ( (i1b+1<i1a)|(i1b>i1a+1) ) { //L1a is the target length, i1a...i1b is the initial range, i1c,L1c is the value in the middle
         uint i1c=medianUint2(i1a,i1b);
         //uint L1c=identityLength(&g[SA[i3]+L1b],&g[SA[i1c]+L1b],L3-L1b)+L1b;
-        uint L1c=compareSeqToGenome(s,S,L3,L1b,g,SA,i1c,dirR,comparRes, P);                    
+        uint L1c=compareSeqToGenome(s,S,L3,L1b,g,SA,i1c,dirR,compRes, P);                    
         if (L1c==L3) {
             i1a=i1c;
         }
@@ -83,12 +83,12 @@ uint maxMappableLength(char** s, uint S, uint N, char* g, PackedArray& SA, uint 
     // returns number of mappings (1=unique);range indStartEnd; min mapped length = L
     // binary search in SA space
     
-    bool comparRes;
+    bool compRes;
     
     uint L1,L2,i3,L3,L1a,L1b,L2a,L2b,i1a,i1b,i2a,i2b;
         
-    L1=compareSeqToGenome(s,S,N,L,g,SA,i1,dirR,comparRes, P);
-    L2=compareSeqToGenome(s,S,N,L,g,SA,i2,dirR,comparRes, P);    
+    L1=compareSeqToGenome(s,S,N,L,g,SA,i1,dirR,compRes, P);
+    L2=compareSeqToGenome(s,S,N,L,g,SA,i2,dirR,compRes, P);    
 
 //     L1=identityLength(&s[L],&g[SA[i1]]);
 //     L2=identityLength(&s[L],&g[SA[i2]]);
@@ -100,11 +100,11 @@ uint maxMappableLength(char** s, uint S, uint N, char* g, PackedArray& SA, uint 
     i3=i1;L3=L1; //in case i1+1>=i2 an not iteration of the loope below is ever made
     while (i1+1<i2) {//main binary search loop
         i3=medianUint2(i1,i2);
-        L3=compareSeqToGenome(s,S,N,L,g,SA,i3,dirR,comparRes, P);
+        L3=compareSeqToGenome(s,S,N,L,g,SA,i3,dirR,compRes, P);
 
         if (L3==N) break; //found exact match, exit the binary search        
         
-        if (comparRes) { //move 1 to 3
+        if (compRes) { //move 1 to 3
             if (L3>L1) {
                L1b=L1a; L1a=L1; i1b=i1a; i1a=i1;
             };
@@ -140,5 +140,78 @@ uint maxMappableLength(char** s, uint S, uint N, char* g, PackedArray& SA, uint 
     return i2-i1+1;
 };
 
+uint suffixArraySearch(char** s2, uint S, uint N, char* G, PackedArray& SA, bool dirR, uint i1, uint i2, uint L, Parameters* P) {
+    // binary search in SA space
+    // s[0],s[1] - sequence, complementary sequence
+    // S - start offset
+    // N - sequence length
+    // g - genome sequence
+    // SA - suffix array
+    // dirR - direction, true=froward, false=reverse!!!!!!!NOT WORKING
+    // i1,i2 = starting indices in SA    
+    // L - starting length
+    // output: SA index < searched string, i.e. g[SA[index]]<s<g[SA[index+1]]
+    
+    bool compRes;
+    
+//    uint L1=compareSeqToGenome(s,S,N,L,g,SA,i1,dirR,compRes, P);
+//    uint L2=compareSeqToGenome(s,S,N,L,g,SA,i2,dirR,compRes, P);    
+    uint L1=0,L2=0;
+
+//     L1=identityLength(&s[L],&g[SA[i1]]);
+//     L2=identityLength(&s[L],&g[SA[i2]]);
+    L=min(L1,L2);
+    
+    
+    uint i3=i1,L3=L1; //in case i1+1>=i2 an not iteration of the loope below is ever made
+    while (i1+1<i2) {//main binary search loop
+        i3=medianUint2(i1,i2);
+        //L3=compareSeqToGenome(s,S,N,L,g,SA,i3,dirR,compRes, P);
+
+        {
+        register int64 ii;
+
+        uint SAstr=SA[i3];
+        bool dirG = (SAstr>>P->GstrandBit) == 0; //forward or reverse strand of the genome
+        SAstr &= P->GstrandMask;
+
+
+        if (dirG) {//forward on read, forward on genome
+            char* s = s2[0] + S + L;
+            char* g = G + SAstr + L;
+            for (ii=0;(uint) ii < N-L; ii++)
+                if (s[ii]!=g[ii]) break;
+            if (s[ii]>g[ii]) {compRes=true;} else {compRes=false;};
+            L3=ii+L;
+        } else {
+            char* s = s2[1] + S + L;
+            char* g = G + P->nGenome-1-SAstr - L;
+            for (ii=0; (uint) ii < N-L; ii++) {
+                if (s[ii]!=g[-ii]) break;
+            };
+
+            char s1=s[ii],g1=g[-ii];
+            if (s1<4) s1=3-s1;
+            if (g1<4) g1=3-g1;
+            if (s1>g1) {compRes=true;} else {compRes=false;};
+            L3=ii+L;
+        };
+        };
+
+        if (L3==N) {
+            cout << "L3==N"<<endl;
+            break; //found exact match of the whole read length, exit the binary search        
+        };
+        
+        if (compRes) { //move 1 to 3
+            i1=i3;L1=L3;
+        }
+        else {
+            i2=i3;L2=L3;
+        };    
+        L= min(L1,L2);
+    };
+    return i1;
+};
 
 

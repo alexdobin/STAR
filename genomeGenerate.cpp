@@ -1,6 +1,6 @@
 #include "IncludeDefine.h"
 #include "Parameters.h"
-#include "SuffixArraysFuns.h"
+#include "SuffixArrayFuns.h"
 #include "PackedArray.h"
 #include <math.h>
 #include "TimeFunctions.h"

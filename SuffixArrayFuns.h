@@ -11,5 +11,6 @@ uint findMultRange(uint i3, uint L3, uint i1, uint L1, uint i1a, uint L1a, uint 
 uint maxMappableLength(char** s, uint S, uint N, char* g, PackedArray& SA, uint i1, uint i2, bool dirR, uint& L, uint* indStartEnd, Parameters* P);
 void writePacked( char* a, uint jj, uint x);
 uint readPacked(char* a, uint jj);
+uint suffixArraySearch(char** s, uint S, uint N, char* g, PackedArray& SA, bool dirR, uint i1, uint i2, uint L, Parameters* P);
 
 #endif

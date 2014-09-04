@@ -1,5 +1,5 @@
 #include "ReadAlign.h"
-#include "SuffixArraysFuns.h"
+#include "SuffixArrayFuns.h"
 #include "ErrorWarning.h"
 
 uint ReadAlign::maxMappableLength2strands(uint pieceStartIn, uint pieceLengthIn, uint iDir, uint iSA1, uint iSA2, uint& maxLbest, uint iFrag) {

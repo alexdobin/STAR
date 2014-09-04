@@ -1,6 +1,6 @@
 #include "Genome.h"
 #include "Parameters.h"
-#include "SuffixArraysFuns.h"
+#include "SuffixArrayFuns.h"
 #include "PackedArray.h"
 #include "ErrorWarning.h"
 #include "streamFuns.h"
@@ -89,7 +89,7 @@ void Genome::genomeLoad(){//allocate and load Genome
     };
 
 
-    if (P->sjdbOverhang==0) P->sjdbOverhang=sjdbOverhang1; //for twopass sjdbOverhang nay be defined at the mapping stage
+    if (P->sjdbOverhang==0) P->sjdbOverhang=sjdbOverhang1; //for twopass sjdbOverhang may be defined at the mapping stage
     //TODO make a more careful check, if the values are different, break!
 
     P->inOut->logMain << "Started loading the genome: " << asctime (localtime ( &rawtime ))<<"\n"<<flush;    
@@ -250,7 +250,7 @@ void Genome::genomeLoad(){//allocate and load Genome
                 SA.allocateArray();
             } else {
                 P->nGenome2=P->nGenome+P->twopassSJlimit*P->sjdbLength;
-                SA2.defineBits(P->GstrandBit+1,P->nSA+P->sjdbLength);
+                SA2.defineBits(P->GstrandBit+1,P->nSA+2*P->twopassSJlimit*P->sjdbLength);
                 G1=new char[P->nGenome2+L+L];        
                 SA2.allocateArray();
                 SA.pointArray(SA2.charArray+SA2.lengthByte-SA.lengthByte);
