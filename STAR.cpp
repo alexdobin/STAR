@@ -19,6 +19,7 @@
 #include "BAMbinSortByCoordinate.h"
 #include "signalFromBAM.h"
 #include "sjdbBuildIndex.h"
+#include "mapThreadsSpawn.h"
 
 #include "htslib/htslib/sam.h"
 extern int bam_cat(int nfn, char * const *fn, const bam_hdr_t *h, const char* outbam);
@@ -46,24 +47,91 @@ int main(int argInN, char* argIn[]) {
     
     Genome mainGenome (P);
     mainGenome.genomeLoad();
-    
-    
-     if (P->twopass1readsN>0) {//2-pass
-         time_t rawtime;
-         time ( &rawtime ); cout << timeMonthDayTime(rawtime) << "start sjdbBuild" <<endl;
-         sjdbBuildIndex (P, mainGenome.G, mainGenome.SA, mainGenome.SA2, mainGenome.SAi);
-         time ( &rawtime ); cout << timeMonthDayTime(rawtime) << "finished" <<endl;
-     };
     //calculate genome-related parameters
     P->winBinN = P->nGenome/(1LLU << P->winBinNbits)+1;
     
-
     Transcriptome *mainTranscriptome=NULL;
     if (P->quantModeI>0) {//load transcriptome
         mainTranscriptome=new Transcriptome(P);
     };
 /////////////////////////////////////////////////////////////////////////////////////////////////START
+    if (P->runThreadN>1) {
+        g_threadChunks.threadArray=new pthread_t[P->runThreadN];
+        pthread_mutex_init(&g_threadChunks.mutexInRead, NULL);
+        pthread_mutex_init(&g_threadChunks.mutexOutSAM, NULL);
+        pthread_mutex_init(&g_threadChunks.mutexOutBAM1, NULL);
+        pthread_mutex_init(&g_threadChunks.mutexOutUnmappedFastx, NULL);
+        pthread_mutex_init(&g_threadChunks.mutexOutFilterBySJout, NULL);
+        pthread_mutex_init(&g_threadChunks.mutexStats, NULL);
+    };
+
+    g_statsAll.progressReportHeader(P->inOut->logProgress);    
     
+    if (P->twopass1readsN>0) {//2-pass
+        //re-define P for the pass1
+        
+        Parameters *P1=new Parameters;
+        *P1=*P;
+        //turn off unnecessary calculations
+        P1->outSAMtype[0]="None";
+        P1->outSAMbool=false;
+        P1->outBAMunsorted=false;
+        P1->outBAMcoord=false;
+    
+        P1->chimSegmentMin=0;
+        P1->quantModeI=0;
+        P1->outFilterBySJoutStage=0;
+        
+        P1->outReadsUnmapped="None";
+        
+        P1->outFileNamePrefix=P->twopassDir;
+
+        P1->readMapNumber=P->twopass1readsN;
+//         P1->inOut->logMain.open((P1->outFileNamePrefix + "Log.out").c_str());
+
+        g_statsAll.resetN();
+        time(&g_statsAll.timeStartMap);
+        P->inOut->logProgress << timeMonthDayTime(g_statsAll.timeStartMap) <<"\tStarted 1st pass mapping\n" <<flush;
+        *P->inOut->logStdOut << timeMonthDayTime(g_statsAll.timeStartMap) << " ..... Started 1st pass mapping\n" <<flush;
+
+        //run mapping for Pass1
+        ReadAlignChunk *RAchunk1[P->runThreadN];        
+        for (int ii=0;ii<P1->runThreadN;ii++) {
+            RAchunk1[ii]=new ReadAlignChunk(P1, mainGenome, mainTranscriptome, ii);
+        };    
+        mapThreadsSpawn(P1, RAchunk1);
+        outputSJ(RAchunk1,P1); //collapse and output junctions
+//         for (int ii=0;ii<P1->runThreadN;ii++) {
+//             delete [] RAchunk[ii];
+//         };          
+        
+        time_t rawtime; time (&rawtime);
+        P->inOut->logProgress << timeMonthDayTime(rawtime) <<"\tFinished 1st pass mapping\n";
+        *P->inOut->logStdOut << timeMonthDayTime(rawtime) << " ..... Finished 1st pass mapping\n" <<flush;
+        ofstream logFinal1 ( (P->twopassDir + "/Log.final.out").c_str());
+        g_statsAll.reportFinal(logFinal1,P1);
+
+        //re-build genome files
+        
+        sjdbBuildIndex (P, mainGenome.G, mainGenome.SA, mainGenome.SA2, mainGenome.SAi);
+        time ( &rawtime ); 
+        *P->inOut->logStdOut  << timeMonthDayTime(rawtime) << " ..... Finished inserting 1st pass junctions into genome" <<endl;
+        //re-calculate genome-related parameters
+        P->winBinN = P->nGenome/(1LLU << P->winBinNbits)+1;
+        
+        //reopen reads files
+        P->openReadsFiles();
+    };
+
+    //initialize Stats
+    g_statsAll.resetN();
+    g_statsAll.progressReportHeader(P->inOut->logProgress);    
+    time(&g_statsAll.timeStartMap);
+    *P->inOut->logStdOut << timeMonthDayTime(g_statsAll.timeStartMap) << " ..... Started mapping\n" <<flush;
+    
+    g_statsAll.timeLastReport=g_statsAll.timeStartMap;
+
+    //open SAM/BAM files for output
     if (P->outSAMmode != "None") {//open SAM file and write header
         ostringstream samHeaderStream;
 
@@ -143,82 +211,21 @@ int main(int argInN, char* argIn[]) {
     };
          
     // P->inOut->logMain << "mlock value="<<mlockall(MCL_CURRENT|MCL_FUTURE) <<"\n"<<flush;
-    
-   
+
+    // prepare chunks and spawn mapping threads    
     ReadAlignChunk *RAchunk[P->runThreadN];
     for (int ii=0;ii<P->runThreadN;ii++) {
         RAchunk[ii]=new ReadAlignChunk(P, mainGenome, mainTranscriptome, ii);
-        RAchunk[ii]->RA->iRead=0;
-        RAchunk[ii]->iThread=ii;
-    };
-    
-    if (P->runThreadN>1) {
-        g_threadChunks.threadArray=new pthread_t[P->runThreadN];
-        pthread_mutex_init(&g_threadChunks.mutexInRead, NULL);
-        pthread_mutex_init(&g_threadChunks.mutexOutSAM, NULL);
-        pthread_mutex_init(&g_threadChunks.mutexOutBAM1, NULL);
-        pthread_mutex_init(&g_threadChunks.mutexOutUnmappedFastx, NULL);
-        pthread_mutex_init(&g_threadChunks.mutexOutFilterBySJout, NULL);
-        pthread_mutex_init(&g_threadChunks.mutexStats, NULL);
-    };
-    
-    
-    ///////////////////////////////////////////////////////////////////
-    g_statsAll.progressReportHeader(P->inOut->logProgress);    
-    time(&g_statsAll.timeStartMap);
-    *P->inOut->logStdOut << timeMonthDayTime(g_statsAll.timeStartMap) << " ..... Started mapping\n" <<flush;
-    
-    g_statsAll.timeLastReport=g_statsAll.timeStartMap;
-    
-    for (int ithread=1;ithread<P->runThreadN;ithread++) {//spawn threads
-        int threadStatus=pthread_create(&g_threadChunks.threadArray[ithread], NULL, &g_threadChunks.threadRAprocessChunks, (void *) RAchunk[ithread]);
-        if (threadStatus>0) {//something went wrong with one of threads
-                ostringstream errOut;
-                errOut << "EXITING because of FATAL ERROR: phtread error while creating thread # " << ithread <<", error code: "<<threadStatus ;
-                exitWithError(errOut.str(),std::cerr, P->inOut->logMain, 1, *P);
-        };
-        P->inOut->logMain << "Created thread # " <<ithread <<endl;
-    };
-    
-    RAchunk[0]->processChunks(); //start main thread
-    
-    for (int ithread=1;ithread<P->runThreadN;ithread++) {//wait for all threads to complete
-        int threadStatus = pthread_join(g_threadChunks.threadArray[ithread], NULL);
-        if (threadStatus>0) {//something went wrong with one of threads
-                ostringstream errOut;
-                errOut << "EXITING because of FATAL ERROR: phtread error while joining thread # " << ithread <<", error code: "<<threadStatus ;
-                exitWithError(errOut.str(),std::cerr, P->inOut->logMain, 1, *P);
-        };
-        P->inOut->logMain << "Joined thread # " <<ithread <<"\n";        
     };    
+    
+    mapThreadsSpawn(P, RAchunk);
     
     if (P->outFilterBySJoutStage==1) {//completed stage 1, go to stage 2
         outputSJ(RAchunk,P);//collapse novel junctions
         P->readFilesIndex=-1;
         
         P->outFilterBySJoutStage=2;
-        P->inOut->logMain << "starting stage 2: filtering BySJout\n";
-        for (int ithread=1;ithread<P->runThreadN;ithread++) {//spawn threads
-            int threadStatus = pthread_create(&g_threadChunks.threadArray[ithread], NULL, &g_threadChunks.threadRAprocessChunks, (void *) RAchunk[ithread]);
-            if (threadStatus>0) {//something went wrong with one of threads
-                ostringstream errOut;
-                errOut << "EXITING because of FATAL ERROR: phtread error while creating thread # " << ithread <<", error code: "<<threadStatus ;
-                exitWithError(errOut.str(),std::cerr, P->inOut->logMain, 1, *P);
-            };
-            P->inOut->logMain << "Created thread # " <<ithread <<"\n";
-        };
-
-        RAchunk[0]->processChunks(); //start main thread
-
-        for (int ithread=1;ithread<P->runThreadN;ithread++) {//wait for all threads to complete
-            int threadStatus = pthread_join(g_threadChunks.threadArray[ithread], NULL);
-            if (threadStatus) {//something went wrong with one of threads
-                ostringstream errOut;
-                errOut << "EXITING because of FATAL ERROR: phtread error while joining thread # " << ithread <<", error code: "<<threadStatus ;
-                exitWithError(errOut.str(),std::cerr, P->inOut->logMain, 1, *P);
-            };
-            P->inOut->logMain << "Joined thread # " <<ithread <<"\n";        
-        };  
+        mapThreadsSpawn(P, RAchunk);
     };
     
     //close some BAM files

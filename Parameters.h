@@ -46,6 +46,7 @@ class Parameters {
         
         char genomeNumToNT[6];
         //read parameters
+        uint readMapNumber;
         uint iReadAll;
         int readFilesIndex;
         uint32 readFilesN;
@@ -219,5 +220,6 @@ class Parameters {
     int scanOneLine (string &lineIn, int inputLevel, int inputLevelRequested);
     void scanAllLines (istream &streamIn, int inputLevel, int inputLevelRequested);
     void inputParameters (int argInN, char* argIn[]); //input parameters: default, from files, from command line    
+    void openReadsFiles();
 };
 #endif  // Parameters.h

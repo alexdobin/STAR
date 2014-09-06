@@ -4,8 +4,12 @@
 
 ReadAlignChunk::ReadAlignChunk(Parameters* Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk) : P(Pin),Tr(TrIn) {//initialize chunk
     
+    iThread=iChunk;
+    
     RA = new ReadAlign(P,genomeIn, Tr);//new local copy of RA for each chunk
    
+    RA->iRead=0;
+    
     chunkIn=new char* [P->readNmates];
     readInStream=new istringstream* [P->readNmates];
 //     readInStream=new istringstream* [P->readNmates];

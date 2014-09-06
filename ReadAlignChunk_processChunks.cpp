@@ -15,7 +15,9 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
             uint chunkInSizeBytesTotal[2]={0,0};
             while (chunkInSizeBytesTotal[0] < P->chunkInSizeBytes && chunkInSizeBytesTotal[1] < P->chunkInSizeBytes && !P->inOut->readIn[0].eof() && !P->inOut->readIn[1].eof()) {
                 char nextChar=P->inOut->readIn[0].peek();
-                if (nextChar=='@') {//fastq, not multi-line
+                if (P->iReadAll==P->readMapNumber) {//do nto read any more reads
+                    break;
+                } else if (nextChar=='@') {//fastq, not multi-line
                     P->iReadAll++; //increment read number
                     for (uint imate=0; imate<P->readNmates; imate++) {//for all mates           
                         uint32 iline=0;
@@ -141,6 +143,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
         if (iThread==0 && P->runThreadN>1 && P->outSAMorder=="PairedKeepInputOrder") {//concatenate Aligned.* files
             chunkFilesCat(P->inOut->outSAM, P->outFileTmp + "/Aligned.out.sam.chunk", g_threadChunks.chunkOutN);
         };
+        
     };//cycle over input chunks
     
     if (P->outFilterBySJoutStage!=1) {//not the first stage of the 2-stage mapping 
