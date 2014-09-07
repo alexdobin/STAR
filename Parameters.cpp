@@ -774,6 +774,12 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             
     //two-pass
     if (twopass1readsN>0) {//2-pass parameters
+        if (sjdbOverhang<=0) {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: sjdbOverhang <=0 in the 2-pass mode\n";
+            errOut << "SOLUTION: for the 2-pass mode, specify sjdbOverhang>0, ideally readmateLength-1";
+            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };
         twopassDir=outFileNamePrefix+"/_STARpass1/";
         sysRemoveDir (twopassDir);                
         if (mkdir (twopassDir.c_str(),S_IRWXU)!=0) {
