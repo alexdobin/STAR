@@ -42,15 +42,19 @@ clean:
 
 .PHONY: CLEAN
 CLEAN:
-	rm -f *.o STAR Depend.list
+	rm -f *.o STAR Depend.list VERSION
+	$(MAKE) -C htslib clean
+
+.PHONY: cleanRelease
+cleanRelease:
+	rm -f *.o Depend.list
 	$(MAKE) -C htslib clean
 
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),STARforMac)
 ifneq ($(MAKECMDGOALS),STARforMacGDB)
-Depend.list: $(SOURCES) parametersDefault.xxd htslib
-	./gitVersion.sh
+Depend.list: $(SOURCES) parametersDefault.xxd htslib VERSION
 	echo $(SOURCES)
 	/bin/rm -f ./Depend.list
 	$(CC) $(CCFLAGS_common) -MM $^ >> Depend.list
@@ -66,6 +70,9 @@ htslib/libhts.a :
 
 parametersDefault.xxd: parametersDefault
 	xxd -i parametersDefault > parametersDefault.xxd
+
+VERSION :
+	./gitVersion.sh
 
 STAR : CCFLAGS=$(CCFLAGS_main)
 STAR : Depend.list parametersDefault.xxd $(OBJECTS)
