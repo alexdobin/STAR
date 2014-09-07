@@ -19,10 +19,9 @@ LDFLAGS := -pthread -Lhtslib -Bstatic -lhts -Bdynamic -lz
 LDFLAGS_static := -static -static-libgcc $(LDFLAGS)
 LDFLAGS_gdb := $(LDFLAGS)
 
-SVNDEF := -D'SVN_VERSION_COMPILED="$(shell svnversion -n .)"'
 COMPTIMEPLACE := -D'COMPILATION_TIME_PLACE="$(shell echo `date` $(HOSTNAME):`pwd`)"'
 
-CCFLAGS_common := -pipe -std=c++0x -Wall -Wextra -fopenmp $(SVNDEF) $(COMPTIMEPLACE) $(OPTIMFLAGS) $(OPTIMFLAGS1)
+CCFLAGS_common := -pipe -std=c++0x -Wall -Wextra -fopenmp $(COMPTIMEPLACE) $(OPTIMFLAGS) $(OPTIMFLAGS1)
 CCFLAGS_main := -O3 $(CCFLAGS_common)
 CCFLAGS_gdb :=  -O0 -g $(CCFLAGS_common)
 
@@ -51,6 +50,7 @@ ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),STARforMac)
 ifneq ($(MAKECMDGOALS),STARforMacGDB)
 Depend.list: $(SOURCES) parametersDefault.xxd htslib
+	./gitVersion.sh
 	echo $(SOURCES)
 	/bin/rm -f ./Depend.list
 	$(CC) $(CCFLAGS_common) -MM $^ >> Depend.list

@@ -1,3 +1,5 @@
+2.4.0c 09/07/2014
+Automated got version.
 Fixed a problem with overflowing SJ buffer.
 Implemented options --twopass1readsN, --twopassSJlimit, --readMapNumber.
 

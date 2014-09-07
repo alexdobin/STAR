@@ -21,6 +21,8 @@
 #include <stdint.h>
 #include <omp.h>
 
+#include "VERSION"
+
 //external libs
 #define SAMTOOLS_BGZF_H "htslib/htslib/bgzf.h"
 

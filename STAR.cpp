@@ -157,7 +157,7 @@ int main(int argInN, char* argIn[]) {
             samHeaderStream << "\n";
         };        
         
-        samHeaderStream << "@PG\tID:STAR\tPN:STAR\tVN:" << SVN_VERSION_COMPILED <<"\tCL:" << P->commandLineFull <<"\n";
+        samHeaderStream << "@PG\tID:STAR\tPN:STAR\tVN:" << STAR_VERSION <<"\tCL:" << P->commandLineFull <<"\n";
         
         if (P->outSAMheaderCommentFile!="-") {
             ifstream comstream (P->outSAMheaderCommentFile);

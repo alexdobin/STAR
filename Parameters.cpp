@@ -222,9 +222,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             string oneArg=string(argIn[iarg]);
             
             if (oneArg=="--version") {//print version and exit
-                std::cout << SVN_VERSION_COMPILED;
-//                 inOut->logMain << "STAR svn revision compiled=" << SVN_VERSION_COMPILED << endl;
-//                 inOut->logMain << "--version on command line, printed version, EXITING"<<endl;
+                std::cout << STAR_VERSION;
                 exit(0);
             };
             
@@ -255,7 +253,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
     
-    inOut->logMain << "STAR svn revision compiled=" << SVN_VERSION_COMPILED << "\n"<<flush;
+    inOut->logMain << "STAR version=" << STAR_VERSION << "\n"<<flush;
     inOut->logMain << "STAR compilation time,server,dir=" << COMPILATION_TIME_PLACE << "\n"<<flush;   
     
     
