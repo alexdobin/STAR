@@ -831,7 +831,7 @@ int Parameters::scanOneLine (string &lineIn, int inputLevel, int inputLevelReque
     lineInStream >> parV;
     if (parV=="") {//parameter value cannot be empty
         ostringstream errOut;
-        errOut << "EXITING: FATAL INPUT ERROR: empty value for paramter \""<< parIn << "\" in input \"" << parameterInputName.at(inputLevel) <<"\"\n";
+        errOut << "EXITING: FATAL INPUT ERROR: empty value for parameter \""<< parIn << "\" in input \"" << parameterInputName.at(inputLevel) <<"\"\n";
         errOut << "SOLUTION: use non-empty value for this parameter\n"<<flush;
         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };

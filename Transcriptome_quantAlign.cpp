@@ -4,11 +4,8 @@
 
 
 int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, uint32 *exLenCum1, uint16 exN1, Transcript &aT) {
-    
 
-
-    
-    //find exon that overlaps beginning of the rea
+    //find exon that overlaps beginning of the read
     uint32 g1=aG.exons[0][EX_G]-trS1;//start of the transcript
     uint32 ex1=binarySearch1<uint32>(g1, exSE1, 2*exN1);
     
@@ -87,20 +84,17 @@ uint32 Transcriptome::quantAlign (Transcript &aG, Transcript *aTall) {
     if (tr1==(uint32) -1) return 0; //alignment outside of range of all transcripts
     
     uint aGend=aG.exons[aG.nExons-1][EX_G];
-    uint8 aStrand=aG.Str+1; //TODO allow different strandedness
     
     ++tr1;
     do {//cycle back through all the transcripts
         --tr1;
         if (aGend<=trE[tr1]) {//this transcript contains the read
-//             if (aStrand==trStr[tr1]) {//correct strand only for now
                 int aStatus=alignToTranscript(aG, trS[tr1], trStr[tr1], exSE+2*trExI[tr1], exLenCum+trExI[tr1], trExN[tr1], aTall[nAtr]);
                 if (aStatus==1) {//align conforms with the transcript
                     aTall[nAtr].Chr = tr1;
                     aTall[nAtr].Str = trStr[tr1]==1 ? aG.Str : 1-aG.Str; //TODO strandedness
                     ++nAtr;
                 };
-//             };//TODO allow different strandedness
         };
     } while (trEmax[tr1]>=aGend && tr1>0);
     
