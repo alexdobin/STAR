@@ -120,6 +120,7 @@ int main(int argInN, char* argIn[]) {
         P->winBinN = P->nGenome/(1LLU << P->winBinNbits)+1;
         
         //reopen reads files
+        P->closeReadsFiles();
         P->openReadsFiles();
     };
 
@@ -300,7 +301,7 @@ int main(int argInN, char* argIn[]) {
         *P->inOut->logStdOut << timeMonthDayTime() << " ..... Started wiggle output\n" <<flush;
         P->inOut->logMain << timeMonthDayTime() << " ..... Started wiggle output\n" <<flush;
         string wigOutFileNamePrefix=P->outFileNamePrefix + "Signal";
-        signalFromBAM(P->outBAMfileCoordName, wigOutFileNamePrefix, P->outWigFlags.strand, P->outWigFlags.type, P->outWigReferencesPrefix);
+        signalFromBAM(P->outBAMfileCoordName, wigOutFileNamePrefix, P->outWigFlags.strand, P->outWigFlags.type, P->outWigReferencesPrefix, P);
     };
     
     //aggregate output (junctions, signal, etc)
@@ -316,6 +317,7 @@ int main(int argInN, char* argIn[]) {
     P->inOut->logMain  << "ALL DONE!\n"<<flush;
     sysRemoveDir (P->outFileTmp);
     
+    P->closeReadsFiles();//this will kill the readFilesCommand processes if necessary
     delete P->inOut; //to close files
     delete P;
     

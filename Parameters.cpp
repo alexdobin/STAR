@@ -8,6 +8,7 @@
 #include SAMTOOLS_BGZF_H
 #include "GlobalVariables.h"
 #include "signalFromBAM.h"
+#include "bamRemoveDuplicates.h"
 
 //for mkfifo
 #include <sys/stat.h>
@@ -45,6 +46,10 @@ Parameters::Parameters() {//initalize parameters info
     
     //input from BAM
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "inputBAMfile", &inputBAMfile));
+    
+    //BAM processing
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "bamRemoveDuplicatesType", &bamRemoveDuplicatesType));
+    parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "bamRemoveDuplicatesMate2basesN", &bamRemoveDuplicatesMate2basesN));
 
     //limits
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitGenomeGenerateRAM", &limitGenomeGenerateRAM));
@@ -392,7 +397,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     };
     if (outWigStrand.at(0)=="Stranded") {
         outWigFlags.strand=true;
-    } else if (outWigType.at(0)=="bedGraph") {
+    } else if (outWigStrand.at(0)=="Unstranded") {
         outWigFlags.strand=false;
     } else {
         ostringstream errOut;
@@ -406,6 +411,8 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     } else {
         if (outWigType.at(1)=="read1_5p") {
             outWigFlags.type=1;
+        } else if (outWigType.at(1)=="read2") {
+            outWigFlags.type=2;
         } else {
             ostringstream errOut;
             errOut << "EXITING because of FATAL INPUT ERROR: unrecognized second option in --outWigType=" << outWigType.at(1) << "\n";
@@ -422,10 +429,18 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             *inOut->logStdOut << timeMonthDayTime() << " ..... Reading from BAM, output wiggle\n" <<flush;
             inOut->logMain << timeMonthDayTime()    << " ..... Reading from BAM, output wiggle\n" <<flush;
             string wigOutFileNamePrefix=outFileNamePrefix + "Signal";
-            signalFromBAM(inputBAMfile, wigOutFileNamePrefix, outWigFlags.strand, outWigFlags.type, outWigReferencesPrefix);
+            signalFromBAM(inputBAMfile, wigOutFileNamePrefix, outWigFlags.strand, outWigFlags.type, outWigReferencesPrefix, this);
+            *inOut->logStdOut << timeMonthDayTime() << " ..... Done\n" <<flush;
+            inOut->logMain << timeMonthDayTime()    << " ..... Done\n" <<flush;            
+        } else if (bamRemoveDuplicatesType=="UniqueIdentical") {
+            *inOut->logStdOut << timeMonthDayTime() << " ..... Reading from BAM, remove duplicates, output BAM\n" <<flush;
+            inOut->logMain << timeMonthDayTime()    << " ..... Reading from BAM, remove duplicates, output BAM\n" <<flush;            
+            bamRemoveDuplicates(inputBAMfile,(outFileNamePrefix+"/Processed.out.bam").c_str(),this);
+            *inOut->logStdOut << timeMonthDayTime() << " ..... Done\n" <<flush;
+            inOut->logMain << timeMonthDayTime()    << " ..... Done\n" <<flush;
         } else {
             ostringstream errOut;
-            errOut <<"EXITING because of fatal INPUT ERROR: at the moment --runMode inputFromBAM only works with --outWigType bedGraph"<<"\n";
+            errOut <<"EXITING because of fatal INPUT ERROR: at the moment --runMode inputFromBAM only works with --outWigType bedGraph OR --bamRemoveDuplicatesType Identical"<<"\n";
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);                                    
         };
         exit(0);
@@ -437,7 +452,12 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     outBAMcoord=false;
     if (runMode=="alignReads" && outSAMmode != "None") {//open SAM file and write header
         if (outSAMtype.at(0)=="BAM") {
-
+            if (outSAMtype.size()<2) {
+                ostringstream errOut;
+                errOut <<"EXITING because of fatal PARAMETER error: missing BAM option\n";
+                errOut <<"SOLUTION: re-run STAR with one of the allowed values of --outSAMtype BAM Unsorted OR SortedByCoordinate OR both\n";
+                exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);                                    
+            };
             for (uint32 ii=1; ii<outSAMtype.size(); ii++) {
                 if (outSAMtype.at(ii)=="Unsorted") {
                     outBAMunsorted=true;
@@ -446,7 +466,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                 } else {
                     ostringstream errOut;
                     errOut <<"EXITING because of fatal input ERROR: unknown value for the word " <<ii+1<<" of outSAMtype: "<< outSAMtype.at(ii) <<"\n";
-                    errOut <<"SOLUTION: re-run STAR with one of the allowed values of outSAMtype: Unsorted or SortedByCoordinate\n"<<flush;
+                    errOut <<"SOLUTION: re-run STAR with one of the allowed values of --outSAMtype BAM Unsorted or SortedByCoordinate or both\n";
                     exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);                                    
                 };
             };
@@ -778,6 +798,13 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             errOut << "SOLUTION: for the 2-pass mode, specify sjdbOverhang>0, ideally readmateLength-1";
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
+        if (genomeLoad!="NoSharedMemory") {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: 2-pass method is not compatible with genomeLoad<<"<<genomeLoad<<"\n";
+            errOut << "SOLUTION: re-run STAR with --genomeLoad NoSharedMemory ; this is the only compatible option at the moment.s";
+            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };        
+        
         twopassDir=outFileNamePrefix+"/_STARpass1/";
         sysRemoveDir (twopassDir);                
         if (mkdir (twopassDir.c_str(),S_IRWXU)!=0) {

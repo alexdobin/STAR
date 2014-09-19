@@ -195,17 +195,28 @@ outSAMheaderPG          -
 outSAMheaderCommentFile -
     string: path to the file with @CO (comment) lines of the SAM header
 
+bamRemoveDuplicatesType  -
+    string: remove duplicates from BAM file, for now only works with sorted BAM feeded with inputBAMfile
+                        UniqueIdentical : removes all multimappers, and duplicate unique mappers. The coordinates, FLAG, CIGAR must be identical
+
+bamRemoveDuplicatesMate2basesN   0
+    int>0: number of bases from the 5' of mate 2 to use in collapsing (e.g. for RAMPAGE)
+
 ### OUTPUT WIGGLE
 outWigType          None
-    string: type of sginal output
+    string(s): type of signal output, e.g. "bedGraph" OR "bedGraph read1_5p"
+                    1st word:
                     None
                     bedGraph
+                    wiggle
+                    2nd word:
+                    read1_5p : signal from only 5' of the 1st read, useful for CAGE/RAMPAGE etc
+                    read2 : signal from only 2nd read
                     
 outWigStrand        Stranded
     string: strandedness of wigglle (bedGraph) output
                     Stranded: separate strands, str1 and str2
                     Unstranded: collapsed strands
-                    None: no output
 
 outWigReferencesPrefix    -
     string: prefix matching reference names to include in the output wiggle file, e.g. "chr.*"

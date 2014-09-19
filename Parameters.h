@@ -6,6 +6,8 @@
 #include "ParameterInfo.h"
 #include <map>
 #include "TimeFunctions.h"
+#include <unistd.h>
+#include <signal.h>
 
 #define PAR_quantModeI_TranscritomeSAM 0x1
 
@@ -55,6 +57,8 @@ class Parameters {
         uint readNmates;
         string readMatesLengthsIn;
         vector <string> readFilesCommand;
+        pid_t readFilesCommandPID[MAX_N_MATES];
+        
         string outSAMreadID;
         
         vector <uint> clip5pNbases, clip3pNbases, clip3pAfterAdapterNbases;    
@@ -104,6 +108,9 @@ class Parameters {
         bool outBAMunsorted, outBAMcoord, outSAMbool;
         uint32 outBAMcoordNbins;
         string outBAMsortTmpDir;
+        string bamRemoveDuplicatesType;
+        uint bamRemoveDuplicatesMate2basesN;
+        
         
         string outReadsUnmapped;
         int outQSconversionAdd;
@@ -221,5 +228,7 @@ class Parameters {
     void scanAllLines (istream &streamIn, int inputLevel, int inputLevelRequested);
     void inputParameters (int argInN, char* argIn[]); //input parameters: default, from files, from command line    
     void openReadsFiles();
+    void closeReadsFiles();
+
 };
 #endif  // Parameters.h

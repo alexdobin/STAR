@@ -49,14 +49,33 @@ void Parameters::openReadsFiles() {
                 inOut->logMain <<file1<<endl;
 
                 readsCommandFile << "echo FILE " <<readFilesN << " > " << ("\""+readFilesInTmp.at(imate)+"\"") << "\n";
-                readsCommandFile << readFilesCommandString << "   " <<("\""+file1+"\"") <<"\n";
+                readsCommandFile << readFilesCommandString << "   " <<("\""+file1+"\"") << (" > \""+readFilesInTmp.at(imate)+"\"") <<"\n";
                 ++readFilesN;//only increase file count for one mate
 
             } while (pos!= string::npos);
 
             readsCommandFile.close();
             chmod(readsCommandFileName.at(imate).c_str(),S_IXUSR | S_IRUSR | S_IWUSR);
-            system((("\""+readsCommandFileName.at(imate)+"\"") + " > " + "\""+readFilesInTmp.at(imate)+"\"" + " & ").c_str());
+            
+            readFilesCommandPID[imate]=0;
+            
+            pid_t PID=fork();
+            switch (PID) {
+                case -1:
+                    exitWithError("EXITING: because of fatal EXECUTION error: someting went wrong with forking readFilesCommand", std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+                    break;
+                
+                case 0:
+                    //this is the child
+                    execlp(readsCommandFileName.at(imate).c_str(), readsCommandFileName.at(imate).c_str(), (char*) NULL); 
+                    exit(0);
+                    
+                default:
+                    //this is the father, record PID of the children
+                    readFilesCommandPID[imate]=PID;
+            };
+            
+//             system((("\""+readsCommandFileName.at(imate)+"\"") + " & ").c_str());
             inOut->readIn[imate].open(readFilesInTmp.at(imate).c_str());                
         };
         if (readNmates==2 && readFilesNames.at(0).size() != readFilesNames.at(1).size()) {

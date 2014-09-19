@@ -2,7 +2,7 @@
 #include <iostream>
 #include <regex>
 
-void signalFromBAM(const string bamFileName, const string sigFileName, const bool flagStranded, const int signalType, const string outWigReferencesPrefix) {
+void signalFromBAM(const string bamFileName, const string sigFileName, const bool flagStranded, const int signalType, const string outWigReferencesPrefix, Parameters* P) {
 
     bam1_t *bamA;
     bamA=bam_init1();
@@ -144,7 +144,7 @@ void signalFromBAM(const string bamFileName, const string sigFileName, const boo
                     aG+=cigL;
                     break;
                 case(BAM_CIGAR_M):
-                    if (signalType==0) {//full signal
+                    if (signalType==0 || (signalType==2 && (bamA->core.flag & 0x80)>0 )) {//full signal, or second mate onyl signal
                         for (uint32_t ig=0;ig<cigL;ig++) {
                             if (aG>=chrLen) {
                                 cerr << "BUG: alignment extends past chromosome in signalFromBAM.cpp\n";
