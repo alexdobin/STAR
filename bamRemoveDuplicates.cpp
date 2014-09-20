@@ -1,3 +1,4 @@
+#include <unordered_map>
 #include "bamRemoveDuplicates.h"
 #include <iostream>
 #include "htslib/htslib/sam.h"
@@ -103,7 +104,7 @@ int funCompareCoordFlagCigarSeq(const void *a, const void *b) {
 
 void bamRemoveDuplicates(const string bamFileName, const string bamFileNameOut, Parameters* const P) {
     g_bamRemoveDuplicatesMate2basesN=P->bamRemoveDuplicatesMate2basesN;
-    
+
     bam1_t *bamA;
     bamA=bam_init1();
     

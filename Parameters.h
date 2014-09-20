@@ -135,12 +135,14 @@ class Parameters {
         vector <int32> outSJfilterIntronMaxVsReadN;
         
         //wiggle output
-        vector <string> outWigType,outWigStrand;
+        vector <string> outWigType, outWigStrand, outWigNorm;
         string outWigReferencesPrefix;
         struct {
             bool yes;
             bool strand;
             int type;
+            int format;
+            int norm;
         } outWigFlags; 
         
         //2-pass

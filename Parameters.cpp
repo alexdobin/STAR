@@ -94,6 +94,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoVector <string>   (-1, -1, "outWigType", &outWigType));
     parArray.push_back(new ParameterInfoVector <string>   (-1, -1, "outWigStrand", &outWigStrand));
     parArray.push_back(new ParameterInfoScalar <string>   (-1, -1, "outWigReferencesPrefix", &outWigReferencesPrefix));
+    parArray.push_back(new ParameterInfoVector <string>   (-1, -1, "outWigNorm", &outWigNorm));
 
     //output filtering
     parArray.push_back(new ParameterInfoScalar <string>   (-1, -1, "outFilterType", &outFilterType) );
@@ -389,6 +390,10 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         outWigFlags.yes=false;
     } else if (outWigType.at(0)=="bedGraph") {
         outWigFlags.yes=true;
+        outWigFlags.format=0;
+    } else if (outWigType.at(0)=="wiggle") {
+        outWigFlags.yes=true;
+        outWigFlags.format=1;
     } else {
         ostringstream errOut;
         errOut << "EXITING because of FATAL INPUT ERROR: unrecognized option in --outWigType=" << outWigType.at(0) << "\n";
@@ -421,6 +426,18 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         };
     };
     
+    //wigOut parameters
+    if (outWigNorm.at(0)=="None") {
+        outWigFlags.norm=0;
+    } else if (outWigType.at(0)=="RPM") {
+        outWigFlags.norm=1;
+    } else {
+        ostringstream errOut;
+        errOut << "EXITING because of fatal parameter ERROR: unrecognized option in --outWigNorm=" << outWigNorm.at(0) << "\n";
+        errOut << "SOLUTION: use one of the allowed values of --outWigNorm : 'None' or 'RPM' \n";     
+        exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };    
+    
     if (runMode=="alignReads") {
         inOut->logProgress.open((outFileNamePrefix + "Log.progress.out").c_str());
     } else if (runMode=="inputAlignmentsFromBAM") {
@@ -429,7 +446,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             *inOut->logStdOut << timeMonthDayTime() << " ..... Reading from BAM, output wiggle\n" <<flush;
             inOut->logMain << timeMonthDayTime()    << " ..... Reading from BAM, output wiggle\n" <<flush;
             string wigOutFileNamePrefix=outFileNamePrefix + "Signal";
-            signalFromBAM(inputBAMfile, wigOutFileNamePrefix, outWigFlags.strand, outWigFlags.type, outWigReferencesPrefix, this);
+            signalFromBAM(inputBAMfile, wigOutFileNamePrefix, *this);
             *inOut->logStdOut << timeMonthDayTime() << " ..... Done\n" <<flush;
             inOut->logMain << timeMonthDayTime()    << " ..... Done\n" <<flush;            
         } else if (bamRemoveDuplicatesType=="UniqueIdentical") {

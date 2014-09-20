@@ -301,7 +301,7 @@ int main(int argInN, char* argIn[]) {
         *P->inOut->logStdOut << timeMonthDayTime() << " ..... Started wiggle output\n" <<flush;
         P->inOut->logMain << timeMonthDayTime() << " ..... Started wiggle output\n" <<flush;
         string wigOutFileNamePrefix=P->outFileNamePrefix + "Signal";
-        signalFromBAM(P->outBAMfileCoordName, wigOutFileNamePrefix, P->outWigFlags.strand, P->outWigFlags.type, P->outWigReferencesPrefix, P);
+        signalFromBAM(P->outBAMfileCoordName, wigOutFileNamePrefix, *P);
     };
     
     //aggregate output (junctions, signal, etc)

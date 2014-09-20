@@ -222,6 +222,11 @@ outWigReferencesPrefix    -
     string: prefix matching reference names to include in the output wiggle file, e.g. "chr.*"
     default: "-" - include all references
  
+outWigNorm              RPM
+    string: type of normalization for the signal
+                        RPM : reads per million of mapped reads
+                        None : no normalization, "raw" counts
+
 ### OUTPUT FILTERING
 outFilterType                   Normal
     string: type of filtering

@@ -8,6 +8,6 @@
 
 using namespace std;
 
-void signalFromBAM(const string bamFileName, const string sigFileName, const bool flagStranded, const int signalType, const string outWigReferences, Parameters* P);
+void signalFromBAM(const string bamFileName, const string sigFileName, Parameters P);
 
 #endif
