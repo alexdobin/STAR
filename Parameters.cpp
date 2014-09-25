@@ -80,6 +80,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "outSAMheaderHD", &outSAMheaderHD));
     parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "outSAMheaderPG", &outSAMheaderPG));
     parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "outSAMheaderCommentFile", &outSAMheaderCommentFile));
+    parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "outBAMcompression", &outBAMcompression));
 
 
    //output SJ filtering
@@ -429,7 +430,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     //wigOut parameters
     if (outWigNorm.at(0)=="None") {
         outWigFlags.norm=0;
-    } else if (outWigType.at(0)=="RPM") {
+    } else if (outWigNorm.at(0)=="RPM") {
         outWigFlags.norm=1;
     } else {
         ostringstream errOut;
@@ -452,7 +453,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         } else if (bamRemoveDuplicatesType=="UniqueIdentical") {
             *inOut->logStdOut << timeMonthDayTime() << " ..... Reading from BAM, remove duplicates, output BAM\n" <<flush;
             inOut->logMain << timeMonthDayTime()    << " ..... Reading from BAM, remove duplicates, output BAM\n" <<flush;            
-            bamRemoveDuplicates(inputBAMfile,(outFileNamePrefix+"/Processed.out.bam").c_str(),this);
+            bamRemoveDuplicates(inputBAMfile,(outFileNamePrefix+"Processed.out.bam").c_str(),this);
             *inOut->logStdOut << timeMonthDayTime() << " ..... Done\n" <<flush;
             inOut->logMain << timeMonthDayTime()    << " ..... Done\n" <<flush;
         } else {
@@ -460,10 +461,10 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             errOut <<"EXITING because of fatal INPUT ERROR: at the moment --runMode inputFromBAM only works with --outWigType bedGraph OR --bamRemoveDuplicatesType Identical"<<"\n";
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);                                    
         };
+        sysRemoveDir (outFileTmp);
         exit(0);
     };
 
-    outBAMcompression=-1;//TODO make this input parameter
     outSAMbool=false;
     outBAMunsorted=false;
     outBAMcoord=false;

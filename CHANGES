@@ -1,5 +1,13 @@
+2.4.0d 09/25/2014
+Added .gitignore.
+Fixed the problem with 2nd field in the read name shorter than 3 bases (non-Illumina fastq).
+Added --outBAMcompression option.
+Added --bamRemoveDuplicatesType and --bamRemoveDuplicatesMate2basesN options.
+Added --outWigType wiggle read1_5p read2 options.
+Added --outWigNorm option.
+
 2.4.0c 09/07/2014
-Automated got version.
+Automated git version.
 Fixed a problem with overflowing SJ buffer.
 Implemented options --twopass1readsN, --twopassSJlimit, --readMapNumber.
 

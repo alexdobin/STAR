@@ -195,6 +195,9 @@ outSAMheaderPG          -
 outSAMheaderCommentFile -
     string: path to the file with @CO (comment) lines of the SAM header
 
+outBAMcompression   -1
+    int: -1 ... 10  BAM compression level, -1=default compression, 0=no compression, 10=maximum compression
+
 bamRemoveDuplicatesType  -
     string: remove duplicates from BAM file, for now only works with sorted BAM feeded with inputBAMfile
                         UniqueIdentical : removes all multimappers, and duplicate unique mappers. The coordinates, FLAG, CIGAR must be identical

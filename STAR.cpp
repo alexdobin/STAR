@@ -20,6 +20,7 @@
 #include "signalFromBAM.h"
 #include "sjdbBuildIndex.h"
 #include "mapThreadsSpawn.h"
+#include "ErrorWarning.h"
 
 #include "htslib/htslib/sam.h"
 extern int bam_cat(int nfn, char * const *fn, const bam_hdr_t *h, const char* outbam);
@@ -254,6 +255,26 @@ int main(int argInN, char* argIn[]) {
     
     if (P->outBAMcoord) {//sort BAM if needed
         *P->inOut->logStdOut << timeMonthDayTime() << " ..... Started sorting BAM\n" <<flush;
+        P->inOut->logMain << timeMonthDayTime() << " ..... Started sorting BAM\n" <<flush;
+        
+        //check max size needed for sorting
+        uint maxMem=0;
+        for (uint32 ibin=0; ibin<RAchunk[0]->chunkOutBAMcoord->nBins; ibin++) {
+            uint binS=0;
+            for (int it=0; it<P->runThreadN; it++) {//collect sizes from threads
+                binS += RAchunk[it]->chunkOutBAMcoord->binTotalBytes[ibin];
+            };        
+            if (binS>maxMem) maxMem=binS;
+        };
+        *P->inOut->logStdOut << "Max memory needed for sorting = "<<maxMem<<endl;
+        if (maxMem>P->limitBAMsortRAM) {
+            ostringstream errOut;
+            errOut <<"EXITING because of fatal ERROR: not enough memory for BAM sorting: \n";
+            errOut <<"SOLUTION: re-run STAR with at least --limitBAMsortRAM " <<maxMem+1000000000;
+            exitWithError(errOut.str(), std::cerr, P->inOut->logMain, EXIT_CODE_PARAMETER, *P);                                    
+        };
+        
+        
         uint totalMem=0;
 //         P->inOut->logMain << "Started sorting BAM ..." <<endl;
         #pragma omp parallel num_threads(P->runThreadN) 

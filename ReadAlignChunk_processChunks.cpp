@@ -38,8 +38,8 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                             if (P->inOut->readIn[imate].peek()!='\n') {//2nd field exists
                                 string field2;
                                 P->inOut->readIn[imate] >> field2;
-                                passFilterIllumina=field2.at(2);
-                                if (passFilterIllumina!='Y') passFilterIllumina='N';
+                                passFilterIllumina='N';
+                                if (field2.length()>=3 && field2.at(2)=='Y') passFilterIllumina='Y';
                             };
                             
                             //ignore the rest of the read name

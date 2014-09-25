@@ -134,6 +134,9 @@ void signalFromBAM(const string bamFileName, const string sigFileName, Parameter
         #define BAM_CIGAR_P 6
         #define BAM_CIGAR_EQ 7
         #define BAM_CIGAR_X 8
+
+        //by default, alignments marked as duplicate are not processed
+        if ( (bamA->core.flag & 0x400) > 0 ) continue;
         
         //NH attribute
         uint8_t* aNHp=bam_aux_get(bamA,"NH");
