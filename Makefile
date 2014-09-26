@@ -39,7 +39,7 @@ all: STAR
 
 .PHONY: clean
 clean:
-	rm -f *.o STAR Depend.list
+	rm -f *.o STAR STARstatic Depend.list
 
 .PHONY: CLEAN
 CLEAN:
