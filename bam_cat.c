@@ -93,7 +93,7 @@ int bam_cat(int nfn, char * const *fn, const bam_hdr_t *h, const char* outbam)
         if (h == 0 && i == 0) bam_hdr_write(fp, old);
 
         if (in->block_offset < in->block_length) {
-            bgzf_write(fp, in->uncompressed_block + in->block_offset, in->block_length - in->block_offset);
+            bgzf_write(fp, (void*)((char*)in->uncompressed_block + in->block_offset), in->block_length - in->block_offset);
             bgzf_flush(fp);
         }
 
