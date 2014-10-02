@@ -71,10 +71,10 @@ int funCompareCigarsExtendS(const uint32* const pa, const uint32* const pb){
 
 int funCompareCoordFlagCigarSeq(const void *a, const void *b) {
     uint32* pa1=(uint32*) *(uint32**) a;
-    uint32* pa2=(uint32*) *(uint32**) (a+8);
+    uint32* pa2=(uint32*) *(uint32**) ((char*)a+8);
     
     uint32* pb1=(uint32*) *(uint32**) b;
-    uint32* pb2=(uint32*) *(uint32**) (b+8);
+    uint32* pb2=(uint32*) *(uint32**) ((char*)b+8);
     
     compareReturn(funStartExtendS(pa1),funStartExtendS(pb1));//position match
     compareReturn(funStartExtendS(pa2),funStartExtendS(pb2));//2nd mate position match

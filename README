@@ -1,10 +1,9 @@
-STAR 2.3.1
+STAR 2.4
 Spliced Transcripts Alignment to a Reference
-© Alexander Dobin, 2009-20134
+© Alexander Dobin, 2009-2014
 
 AUTHOR/SUPPORT
 Alex Dobin, dobin@cshl.edu
-http://code.google.com/p/rna-star/
 https://groups.google.com/d/forum/rna-star
 
 INSTALLATION
@@ -18,7 +17,7 @@ $ make STARforMac
 HARDWARE/SOFTWARE REQUIREMENTS 
 x86-64 compatible processors
 64 bit Linux or Mac OS X 
-27GB of RAM for human genome 
+30GB of RAM for human genome 
 
 
 LIMITATIONS:
