@@ -4,16 +4,17 @@ versionSTAR             020201
 versionGenome           020101 020200
     int>0: oldest value of the Genome version compatible with this STAR release. Please do not change this value!
 
-### PARAMETERS
+### PARAMETER FILES
 parametersFiles          -
     string: name of a user-defined parameters file, "-": none. Can only be defined on the command line.
 
 ### RUN PARAMETERS
 
 runMode                         alignReads
-    string: type of the run:    alignReads                ... map reads
-                                genomeGenerate            ... generate genome files
-                                inputAlignmentsFromBAM    ... input alignments from BAM. Presently only works with --outWigType to generate wiggle files.
+    string: type of the run:    
+                                alignReads             ... map reads
+                                genomeGenerate         ... generate genome files
+                                inputAlignmentsFromBAM ... input alignments from BAM. Presently only works with --outWigType and --bamRemoveDuplicates.
 
 runThreadN                      1
     int: number of threads to run STAR
@@ -26,8 +27,8 @@ genomeDir                   ./GenomeDir/
     string: path to the directory where genome files are stored (if runMode!=generateGenome) or will be generated (if runMode==generateGenome)
 
 genomeLoad                NoSharedMemory
-    mode of shared memory usage for the genome files
-    string:               LoadAndKeep     ... load genome into shared and keep it in memory after run
+    string: mode of shared memory usage for the genome files
+                          LoadAndKeep     ... load genome into shared and keep it in memory after run
                           LoadAndRemove   ... load genome into shared but remove it after run
                           LoadAndExit     ... load genome into shared memory and exit, keeping the genome in memory for future runs
                           Remove          ... do not map anything, just remove loaded genome from memory
@@ -116,16 +117,16 @@ outTmpDir                       -
 
 outStd                          Log
     string: which output will be directed to stdout (standard out)
-                                Log : log messages
-                                SAM : alignments in SAM format (which normally are output to Aligned.out.sam file), normal standard output will go into Log.std.out
-                                BAM_Unsorted : alignments in BAM format, unsorted. Requires --outSAMtype BAM Unsorted
-                                BAM_SortedByCoordinate : alignments in BAM format, unsorted. Requires --outSAMtype BAM SortedByCoordinate
-                                BAM_Quant : alignments to transcriptome in BAM format, unsorted. Requires --quantMode TranscriptomeSAM
+                                Log                    ... log messages
+                                SAM                    ... alignments in SAM format (which normally are output to Aligned.out.sam file), normal standard output will go into Log.std.out
+                                BAM_Unsorted           ... alignments in BAM format, unsorted. Requires --outSAMtype BAM Unsorted
+                                BAM_SortedByCoordinate ... alignments in BAM format, unsorted. Requires --outSAMtype BAM SortedByCoordinate
+                                BAM_Quant              ... alignments to transcriptome in BAM format, unsorted. Requires --quantMode TranscriptomeSAM
 
 outReadsUnmapped                None
    string: output of unmapped reads (besides SAM)
-                                None    : no output
-                                Fastx   : output in separate fasta/fastq files, Unmapped.out.mate1/2
+                                None    ... no output
+                                Fastx   ... output in separate fasta/fastq files, Unmapped.out.mate1/2
 
 outQSconversionAdd              0
    int: add this number to the quality score (e.g. to convert from Illumina to Sanger, use -31)
@@ -135,33 +136,35 @@ outQSconversionAdd              0
 outSAMtype                      SAM
     strings: type of SAM/BAM output
                                 1st word: 
-                                BAM : output BAM without sorting
-                                SAM : output SAM without sorting
-                                None : no SAM/BAM output
-                                2nd, 3rd ...
-                                Unsorted : standard unsorted
-                                SortedByCoordinate : sorted by coordinate
+                                BAM  ... output BAM without sorting
+                                SAM  ... output SAM without sorting
+                                None ... no SAM/BAM output
+                                2nd, 3rd: 
+                                Unsorted           ... standard unsorted
+                                SortedByCoordinate ... sorted by coordinate
 
 outSAMmode                      Full
-    string: mode of SAM output  None : no SAM output
-                                Full : full SAM output
-                                NoQS : full SAM but without quality scores
+    string: mode of SAM output  
+                                None ... no SAM output
+                                Full ... full SAM output
+                                NoQS ... full SAM but without quality scores
 
 outSAMstrandField                               None
-    string: Cufflinks-like strand field flag    None        : not used
-                                                intronMotif : strand derived from the intron motif. Reads with inconsistent and/or non-canonical introns are filtered out.
+    string: Cufflinks-like strand field flag
+                                None        ... not used
+                                intronMotif ... strand derived from the intron motif. Reads with inconsistent and/or non-canonical introns are filtered out.
 
 outSAMattributes                Standard
     string: a string of desired SAM attributes, in the order desired for the output SAM
-                                NH HI AS nM NM MD jM jI XS
-                                Standard    : NH HI AS nM 
-                                All         : NH HI AS nM NM MD jM jI
-                                None
+                                NH HI AS nM NM MD jM jI XS ... any combination in any order
+                                Standard   ... NH HI AS nM 
+                                All        ... NH HI AS nM NM MD jM jI
+                                None       ... no attributes
 
 outSAMunmapped                  None
     string: output of unmapped reads in the SAM format
-                                None    : no output
-                                Within  : output unmapped reads within the main SAM file (i.e. Aligned.out.sam)
+                                None   ... no output
+                                Within ... output unmapped reads within the main SAM file (i.e. Aligned.out.sam)
 
 outSAMorder                     Paired
     string: type of sorting for the SAM output
@@ -170,13 +173,13 @@ outSAMorder                     Paired
 
 outSAMprimaryFlag		OneBestScore
     string: which alignments are considered primary - all others will be marked with 0x100 bit in the FLAG
-                                OneBestScore  : only one alignment with the best score is primary
-                                AllBestScore  : all alignments with the best score are primary
+                                OneBestScore ... only one alignment with the best score is primary
+                                AllBestScore ... all alignments with the best score are primary
 
 outSAMreadID			Standard
     string: read ID record type
-                                Standard  : first word (until space) from the FASTx read ID line, removing /1,/2 from the end
-                                Number    : read number (index) in the FASTx file
+                                Standard ... first word (until space) from the FASTx read ID line, removing /1,/2 from the end
+                                Number   ... read number (index) in the FASTx file
 
 outSAMmapqUnique        255
     int: 0 to 255: the MAPQ value for unique mappers
@@ -196,11 +199,15 @@ outSAMheaderCommentFile -
     string: path to the file with @CO (comment) lines of the SAM header
 
 outBAMcompression   -1
-    int: -1 ... 10  BAM compression level, -1=default compression, 0=no compression, 10=maximum compression
+    int: -1 to 10  BAM compression level, -1=default compression, 0=no compression, 10=maximum compression
+
+
+### BAM processing
 
 bamRemoveDuplicatesType  -
-    string: remove duplicates from BAM file, for now only works with sorted BAM feeded with inputBAMfile
-                        UniqueIdentical : removes all multimappers, and duplicate unique mappers. The coordinates, FLAG, CIGAR must be identical
+    string: mark duplicates in the BAM file, for now only works with sorted BAM feeded with inputBAMfile
+                        -               ... no duplicate removal/marking
+                        UniqueIdentical ... mark all multimappers, and duplicate unique mappers. The coordinates, FLAG, CIGAR must be identical
 
 bamRemoveDuplicatesMate2basesN   0
     int>0: number of bases from the 5' of mate 2 to use in collapsing (e.g. for RAMPAGE)
@@ -209,32 +216,31 @@ bamRemoveDuplicatesMate2basesN   0
 outWigType          None
     string(s): type of signal output, e.g. "bedGraph" OR "bedGraph read1_5p"
                     1st word:
-                    None
-                    bedGraph
-                    wiggle
+                    None       ... no signal output
+                    bedGraph   ... bedGraph format 
+                    wiggle     ... wiggle format
                     2nd word:
-                    read1_5p : signal from only 5' of the 1st read, useful for CAGE/RAMPAGE etc
-                    read2 : signal from only 2nd read
+                    read1_5p   ... signal from only 5' of the 1st read, useful for CAGE/RAMPAGE etc
+                    read2      ... signal from only 2nd read
                     
 outWigStrand        Stranded
-    string: strandedness of wigglle (bedGraph) output
-                    Stranded: separate strands, str1 and str2
-                    Unstranded: collapsed strands
+    string: strandedness of wiggle/bedGraph output
+                    Stranded   ...  separate strands, str1 and str2
+                    Unstranded ...  collapsed strands
 
 outWigReferencesPrefix    -
-    string: prefix matching reference names to include in the output wiggle file, e.g. "chr.*"
-    default: "-" - include all references
+    string: prefix matching reference names to include in the output wiggle file, e.g. "chr", default "-" - include all references
  
 outWigNorm              RPM
     string: type of normalization for the signal
-                        RPM : reads per million of mapped reads
-                        None : no normalization, "raw" counts
+                        RPM    ... reads per million of mapped reads
+                        None   ... no normalization, "raw" counts
 
 ### OUTPUT FILTERING
 outFilterType                   Normal
     string: type of filtering
-                                Normal: standard filtering using only current alignment
-                                BySJout: keep only those reads that contain junctions that passed filtering into SJ.out.tab
+                                Normal  ... standard filtering using only current alignment
+                                BySJout ... keep only those reads that contain junctions that passed filtering into SJ.out.tab
 
 outFilterMultimapScoreRange     1
     int: the score range below the maximum score for multimapping alignments
@@ -266,9 +272,9 @@ outFilterMatchNminOverLread     0.66
 
 outFilterIntronMotifs           None
     string: filter alignment using their motifs
-				None : no filtering
-				RemoveNoncanonical : filter out alignments that contain non-canonical junctions
-				RemoveNoncanonicalUnannotated : filter out alignments that contain non-canonical unannotated junctions when using annotated splice junctions database. The annotated non-canonical junctions will be kept.
+				None                           ... no filtering
+				RemoveNoncanonical             ... filter out alignments that contain non-canonical junctions
+				RemoveNoncanonicalUnannotated  ... filter out alignments that contain non-canonical unannotated junctions when using annotated splice junctions database. The annotated non-canonical junctions will be kept.
 
 
 
@@ -297,7 +303,7 @@ outSJfilterDistToOtherSJmin     10  0   5   10
                                 does not apply to annotated junctions
 
 outSJfilterIntronMaxVsReadN        50000 100000 200000
-    N integers>=0: maximum gap allowed for junctions supported by 1,2,3...N reads 
+    N integers>=0: maximum gap allowed for junctions supported by 1,2,3,,,N reads 
                                 i.e. by default junctions supported by 1 read can have gaps <=50000b, by 2 reads: <=100000b, by 3 reads: <=200000. by >=4 reads any gap <=alignIntronMax
                                 does not apply to annotated junctions
 
@@ -388,7 +394,7 @@ alignTranscriptsPerReadNmax               10000
 
 alignEndsType           Local
     string: type of read ends alignment
-                        Local   : standard local alignment with soft-clipping allowed
+                        Local  ...standard local alignment with soft-clipping allowed
                         EndToEnd: force end-to-end read alignment, do not soft-clip
 
 ### SPLICE JUNCTIONS DATABASE PARAMETERS
@@ -452,12 +458,12 @@ chimJunctionOverhangMin     20
 ### QUANTIFICATION OF ANNOTATIONS
 quantMode                   -
     string(s): types of qunatification requested
-                            - : None
-                            TranscriptomeSAM : output SAM/BAM alignments to transcriptome into a separate file
+                            -                ... none
+                            TranscriptomeSAM ... output SAM/BAM alignments to transcriptome into a separate file
 
 ### 2-PASS
 twopass1readsN              0
-    int>0: number of reads to process for the 1st step. 0 : 1-step only, no 2nd pass; use very large number to map all reads in the first step
+    int>0: number of reads to process for the 1st step. 0: 1-step only, no 2nd pass; use very large number to map all reads in the first step
 
 twopassSJlimit              1000000
     int>=0: maximum number of junction detected in the 1st step

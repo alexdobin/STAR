@@ -171,7 +171,7 @@ void Genome::genomeLoad(){//allocate and load Genome
         P->nSAbyte=(uint) (SAin.tellg());
         GenomeIn.clear();                
         SAin.seekg (0, ios::beg);
-        P->inOut->logMain <<"SA file size: "<<P->nGenome <<" bytes; state: good=" <<SAin.good()\
+        P->inOut->logMain <<"SA file size: "<<P->nSAbyte <<" bytes; state: good=" <<SAin.good()\
                 <<" eof="<<SAin.eof()<<" fail="<<SAin.fail()<<" bad="<<SAin.bad()<<"\n"<<flush;
         
     } else {//genome is in shared memory, attach it and record the sizes
