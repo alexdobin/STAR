@@ -266,7 +266,7 @@ int main(int argInN, char* argIn[]) {
             };        
             if (binS>maxMem) maxMem=binS;
         };
-        *P->inOut->logMain << "Max memory needed for sorting = "<<maxMem<<endl;
+        P->inOut->logMain << "Max memory needed for sorting = "<<maxMem<<endl;
         if (maxMem>P->limitBAMsortRAM) {
             ostringstream errOut;
             errOut <<"EXITING because of fatal ERROR: not enough memory for BAM sorting: \n";

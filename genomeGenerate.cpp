@@ -149,13 +149,8 @@ void genomeGenerate(Parameters *P) {
     
     
     //write genome parameters file
-    ofstream genomePar((P->genomeDir+("/genomeParameters.txt")).c_str());
-    if (genomePar.fail()) {//
-        ostringstream errOut;
-        errOut << "EXITING because of FATAL ERROR: could not create output file "<< P->genomeDir+("/genomeParameters.txt") << "\n";
-        errOut << "Solution: check that the genomeDir directory exists and you have write permission for it: genomeDir="<< P->genomeDir << "\n" <<flush;        
-        exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
-    };    
+    ofstream genomePar;
+    openOfstream(P->genomeDir+("/genomeParameters.txt"),"ERROR_00102", P, genomePar);   
     
     genomePar << "versionGenome\t" << P->versionSTAR <<"\n";
     genomePar << "genomeFastaFiles\t";
@@ -234,10 +229,12 @@ void genomeGenerate(Parameters *P) {
     P->nGenome=N;
     uint N2 = N*2;     
 
-    ofstream chrN((P->genomeDir+("/chrName.txt")).c_str());
-    ofstream chrS((P->genomeDir+("/chrStart.txt")).c_str());
-    ofstream chrL((P->genomeDir+("/chrLength.txt")).c_str());
-    ofstream chrNL((P->genomeDir+("/chrNameLength.txt")).c_str());
+    ofstream chrN,chrS,chrL,chrNL;
+    
+    openOfstream(P->genomeDir+"/chrName.txt","ERROR_00103", P, chrN);   
+    openOfstream(P->genomeDir+"/chrStart.txt","ERROR_00103", P, chrS);   
+    openOfstream(P->genomeDir+"/chrLength.txt","ERROR_00103", P, chrL);   
+    openOfstream(P->genomeDir+"/chrNameLength.txt","ERROR_00103", P, chrNL);   
     
     for (uint ii=0;ii<P->nChrReal;ii++) {//output names, starts, lengths               
         chrN<<P->chrName[ii]<<"\n";
@@ -256,12 +253,9 @@ void genomeGenerate(Parameters *P) {
     };    
     
     //write genome to disk
-    ofstream genomeOut((P->genomeDir+("/Genome")).c_str());    
-    if (genomeOut.fail()) {//
-        ostringstream errOut;                    
-        errOut << "FATAL ERROR: could not create output file=Genome, EXITING\n"<<"\n";
-        exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
-    };
+    ofstream genomeOut;
+    openOfstream(P->genomeDir+"/Genome","ERROR_00104", P, genomeOut);   
+
     P->inOut->logMain << "Writing genome to disk...";
     fstreamWriteBig(genomeOut,G,N);
     genomeOut.close();    
@@ -370,10 +364,10 @@ void genomeGenerate(Parameters *P) {
             for (uint ii=0;ii<indPrefChunkCount[iChunk];ii++) {    
                 saChunk[ii]=N2-1-saChunk[ii];
             };  
-            //wrtie files
-            ostringstream saChunkFileNameStream("");
-            saChunkFileNameStream<< P->genomeDir << "/SA_" << iChunk;
-            ofstream saChunkFile(saChunkFileNameStream.str().c_str());
+            //write files
+            ofstream saChunkFile;
+            openOfstream(P->genomeDir+"/SA_"+to_string( (uint) iChunk),"ERROR_00105", P, saChunkFile);   
+
             fstreamWriteBig(saChunkFile, (char*) saChunk, sizeof(saChunk[0])*indPrefChunkCount[iChunk]);
             saChunkFile.close();
             delete [] saChunk;
@@ -433,7 +427,7 @@ void genomeGenerate(Parameters *P) {
         *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... writing Suffix Array to disk ...\n" <<flush;   
         
         ofstream SAout;
-        SAout.open((P->genomeDir+("/SA")).c_str());
+        openOfstream(P->genomeDir+"/SA","ERROR_00106", P, SAout);   
         fstreamWriteBig(SAout,(char*) SA1.charArray, (streamsize) P->nSAbyte);
         SAout.close();
         
@@ -615,28 +609,20 @@ void genomeGenerate(Parameters *P) {
     P->inOut->logMain    << timeMonthDayTime(rawTime) <<" ... writing SAindex to disk\n" <<flush;   
     *P->inOut->logStdOut << timeMonthDayTime(rawTime) <<" ... writing SAindex to disk\n" <<flush;   
     
-    
     //write SAi to disk
-    genomeOut.open((P->genomeDir+("/SAindex")).c_str());    
-    if (genomeOut.fail()) {//
-        ostringstream errOut;
-        errOut << "FATAL ERROR: could not create output file=SAindex, EXITING\n"<<flush;
-        exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
-    };
+    ofstream SAiOut;
+    openOfstream(P->genomeDir+"/SAindex","ERROR_00107", P, SAiOut);   
 
-    fstreamWriteBig(genomeOut, (char*) &P->genomeSAindexNbases, sizeof(P->genomeSAindexNbases));
-    fstreamWriteBig(genomeOut, (char*) P->genomeSAindexStart, sizeof(P->genomeSAindexStart[0])*(P->genomeSAindexNbases+1));        
-    fstreamWriteBig(genomeOut,  SAip.charArray, SAip.lengthByte);
-    genomeOut.close();    
+    fstreamWriteBig(SAiOut, (char*) &P->genomeSAindexNbases, sizeof(P->genomeSAindexNbases));
+    fstreamWriteBig(SAiOut, (char*) P->genomeSAindexStart, sizeof(P->genomeSAindexStart[0])*(P->genomeSAindexNbases+1));        
+    fstreamWriteBig(SAiOut,  SAip.charArray, SAip.lengthByte);
+    SAiOut.close();    
     
     time(&rawTime);
     timeString=asctime(localtime ( &rawTime ));
     timeString.erase(timeString.end()-1,timeString.end());
     
-    
     time(&rawTime);        
     P->inOut->logMain    << timeMonthDayTime(rawTime) << " ..... Finished successfully\n" <<flush;    
     *P->inOut->logStdOut << timeMonthDayTime(rawTime) << " ..... Finished successfully\n" <<flush;
-    
-    
 };

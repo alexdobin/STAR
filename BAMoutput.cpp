@@ -43,6 +43,8 @@ BAMoutput::BAMoutput (uint64 bamArraySizeIn, BGZF *bgzfBAMin) {//allocate BAM ar
 
 void BAMoutput::unsortedOneAlign (char *bamIn, uint bamSize, uint bamSize2) {//record one alignment to the buffer, write buffer if needed
     
+    if (bamSize==0) return; //no output, could happen if one of the mates is not mapped    
+    
     if (binBytes1+bamSize2 > bamArraySize) {//write out this buffer
 
         if (g_threadChunks.threadBool) pthread_mutex_lock(&g_threadChunks.mutexOutSAM);  
@@ -65,6 +67,8 @@ void BAMoutput::unsortedFlush () {//flush all alignments
 };
 
 void BAMoutput::coordOneAlign (char *bamIn, uint bamSize, uint chrStart, uint iRead) {
+    
+    if (bamSize==0) return; //no output, could happen if one of the mates is not mapped
     
     uint iBin;
     uint32 alignG= *( (uint32*) (bamIn+2*sizeof(uint32)) );

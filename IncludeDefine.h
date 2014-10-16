@@ -117,6 +117,7 @@ typedef uint8_t uint8;
 #define EXIT_CODE_SHM 106
 #define EXIT_CODE_GenomeLoadingWaitedTooLong 107
 #define EXIT_CODE_MemoryAllocation 108
+#define EXIT_CODE_OPEN_FILE 109
 
 //cleaned-end
 

@@ -1,3 +1,5 @@
+Fixed some compilation issues on Mac OS X. Note that Clang by default lacks openMP support which is required for STAR compilation.
+
 2.4.0d 09/25/2014
 Added .gitignore.
 Fixed the problem with 2nd field in the read name shorter than 3 bases (non-Illumina fastq).
