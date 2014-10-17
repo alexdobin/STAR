@@ -2,25 +2,31 @@ STAR 2.4
 Spliced Transcripts Alignment to a Reference
 © Alexander Dobin, 2009-2014
 
-AUTHOR/SUPPORT
+AUTHOR/SUPPORT:
 Alex Dobin, dobin@cshl.edu
 https://groups.google.com/d/forum/rna-star
 
-INSTALLATION
-To compile, unzip into a directory, and run 
+DIRECTORIES CONTENTS:
+source: all source fils required for compilation
+bin: pre-compiled executables for Linux and Mac OS X
+
+
+COMPILING FROM SOURCE:
+To compile, unzip into a directory, and run
+$cd source
 $ make
 Standard gnu c++ installation is required, with all the paths to libraries and include files supplied.
-For Mac OS X run
+For Mac OS X, run
 $ make STARforMac
 
 
-HARDWARE/SOFTWARE REQUIREMENTS 
+HARDWARE/SOFTWARE REQUIREMENTS:
 x86-64 compatible processors
 64 bit Linux or Mac OS X 
 30GB of RAM for human genome 
 
 
 LIMITATIONS:
------ This release was tested with the default parameters for human and mouse genomes.
+This release was tested with the default parameters for human and mouse genomes.
 Please contact the author for a list of recommended parameters for much larger or much smaller genomes.
 
