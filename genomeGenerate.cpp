@@ -150,7 +150,7 @@ void genomeGenerate(Parameters *P) {
     
     //write genome parameters file
     ofstream genomePar;
-    openOfstream(P->genomeDir+("/genomeParameters.txt"),"ERROR_00102", P, genomePar);   
+    ofstrOpen(P->genomeDir+("/genomeParameters.txt"),"ERROR_00102", P, genomePar);   
     
     genomePar << "versionGenome\t" << P->versionSTAR <<"\n";
     genomePar << "genomeFastaFiles\t";
@@ -231,10 +231,10 @@ void genomeGenerate(Parameters *P) {
 
     ofstream chrN,chrS,chrL,chrNL;
     
-    openOfstream(P->genomeDir+"/chrName.txt","ERROR_00103", P, chrN);   
-    openOfstream(P->genomeDir+"/chrStart.txt","ERROR_00103", P, chrS);   
-    openOfstream(P->genomeDir+"/chrLength.txt","ERROR_00103", P, chrL);   
-    openOfstream(P->genomeDir+"/chrNameLength.txt","ERROR_00103", P, chrNL);   
+    ofstrOpen(P->genomeDir+"/chrName.txt","ERROR_00103", P, chrN);   
+    ofstrOpen(P->genomeDir+"/chrStart.txt","ERROR_00103", P, chrS);   
+    ofstrOpen(P->genomeDir+"/chrLength.txt","ERROR_00103", P, chrL);   
+    ofstrOpen(P->genomeDir+"/chrNameLength.txt","ERROR_00103", P, chrNL);   
     
     for (uint ii=0;ii<P->nChrReal;ii++) {//output names, starts, lengths               
         chrN<<P->chrName[ii]<<"\n";
@@ -254,10 +254,10 @@ void genomeGenerate(Parameters *P) {
     
     //write genome to disk
     ofstream genomeOut;
-    openOfstream(P->genomeDir+"/Genome","ERROR_00104", P, genomeOut);   
+    ofstrOpen(P->genomeDir+"/Genome","ERROR_00104", P, genomeOut);   
 
     P->inOut->logMain << "Writing genome to disk...";
-    fstreamWriteBig(genomeOut,G,N);
+    fstreamWriteBig(genomeOut,G,N,P->genomeDir+"/Genome","ERROR_00120",P);
     genomeOut.close();    
     P->inOut->logMain << " done.\n" <<flush;
       
@@ -366,9 +366,9 @@ void genomeGenerate(Parameters *P) {
             };  
             //write files
             ofstream saChunkFile;
-            openOfstream(P->genomeDir+"/SA_"+to_string( (uint) iChunk),"ERROR_00105", P, saChunkFile);   
-
-            fstreamWriteBig(saChunkFile, (char*) saChunk, sizeof(saChunk[0])*indPrefChunkCount[iChunk]);
+            string chunkFileName=P->genomeDir+"/SA_"+to_string( (uint) iChunk);
+            ofstrOpen(chunkFileName,"ERROR_00105", P, saChunkFile);   
+            fstreamWriteBig(saChunkFile, (char*) saChunk, sizeof(saChunk[0])*indPrefChunkCount[iChunk],chunkFileName,"ERROR_00121",P);
             saChunkFile.close();
             delete [] saChunk;
             saChunk=NULL;
@@ -427,8 +427,8 @@ void genomeGenerate(Parameters *P) {
         *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... writing Suffix Array to disk ...\n" <<flush;   
         
         ofstream SAout;
-        openOfstream(P->genomeDir+"/SA","ERROR_00106", P, SAout);   
-        fstreamWriteBig(SAout,(char*) SA1.charArray, (streamsize) P->nSAbyte);
+        ofstrOpen(P->genomeDir+"/SA","ERROR_00106", P, SAout);   
+        fstreamWriteBig(SAout,(char*) SA1.charArray, (streamsize) P->nSAbyte,P->genomeDir+"/SA","ERROR_00122",P);
         SAout.close();
         
         //DONE with suffix array generation
@@ -611,11 +611,11 @@ void genomeGenerate(Parameters *P) {
     
     //write SAi to disk
     ofstream SAiOut;
-    openOfstream(P->genomeDir+"/SAindex","ERROR_00107", P, SAiOut);   
+    ofstrOpen(P->genomeDir+"/SAindex","ERROR_00107", P, SAiOut);   
 
-    fstreamWriteBig(SAiOut, (char*) &P->genomeSAindexNbases, sizeof(P->genomeSAindexNbases));
-    fstreamWriteBig(SAiOut, (char*) P->genomeSAindexStart, sizeof(P->genomeSAindexStart[0])*(P->genomeSAindexNbases+1));        
-    fstreamWriteBig(SAiOut,  SAip.charArray, SAip.lengthByte);
+    fstreamWriteBig(SAiOut, (char*) &P->genomeSAindexNbases, sizeof(P->genomeSAindexNbases),P->genomeDir+"/SAindex","ERROR_00123",P);
+    fstreamWriteBig(SAiOut, (char*) P->genomeSAindexStart, sizeof(P->genomeSAindexStart[0])*(P->genomeSAindexNbases+1),P->genomeDir+"/SAindex","ERROR_00124",P);        
+    fstreamWriteBig(SAiOut,  SAip.charArray, SAip.lengthByte,P->genomeDir+"/SAindex","ERROR_00125",P);
     SAiOut.close();    
     
     time(&rawTime);

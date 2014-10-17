@@ -113,7 +113,7 @@ outFileNamePrefix               ./
 
 outTmpDir                       -
     string: path to a directory that will be used as temporary by STAR. All contents of this directory will be removed!
-            - the temp directory will default to outFileNamePrefix_tmp
+            - the temp directory will default to outFileNamePrefix_STARtmp
 
 outStd                          Log
     string: which output will be directed to stdout (standard out)
