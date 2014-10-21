@@ -4,11 +4,11 @@ versionSTAR             020201
 versionGenome           020101 020200
     int>0: oldest value of the Genome version compatible with this STAR release. Please do not change this value!
 
-### PARAMETER FILES
+### Parameter Files
 parametersFiles          -
     string: name of a user-defined parameters file, "-": none. Can only be defined on the command line.
 
-### RUN PARAMETERS
+### Run Parameters
 
 runMode                         alignReads
     string: type of the run:    
@@ -21,7 +21,7 @@ runThreadN                      1
 
 
 
-### GENOME PARAMETERS
+### Genome Parameters
 
 genomeDir                   ./GenomeDir/
     string: path to the directory where genome files are stored (if runMode!=generateGenome) or will be generated (if runMode==generateGenome)
@@ -36,11 +36,10 @@ genomeLoad                NoSharedMemory
 
 
 
-### GENOME GENERATION PARAMETERS
+### Genome Generation Parameters
 
 genomeFastaFiles            -
-    fasta files with genomic sequence for genome files generation, only used if runMode==genomeGenerate
-    string(s): path(s) to the files from the working directory (separated by spaces)
+    string(s): path(s) to the fasta files with genomic sequences for genome generation, separated by spaces. Only used if runMode==genomeGenerate.
 
 genomeChrBinNbits           18
     int: =log2(chrBin), where chrBin is the size of the bins for genome storage: each chromosome will occupy an integer number of bins
@@ -51,11 +50,33 @@ genomeSAindexNbases         14
 genomeSAsparseD             1
     int>0: suffux array sparsity, i.e. distance between indices: use bigger numbers to decrease needed RAM at the cost of mapping speed reduction
 
-### INPUT FROM BAM
+### Splice Junctions Database
+sjdbFileChrStartEnd                     -
+    string: path to the file with genomic coordinates (chr <tab> start <tab> end <tab> strand) for the introns
+
+sjdbGTFfile                             -
+    string: path to the GTF file with annotations
+
+sjdbGTFchrPrefix                        -
+    string: prefix for chromosome names in a GTF file (e.g. 'chr' for using ENSMEBL annotations with UCSC geneomes)
+
+sjdbGTFfeatureExon                      exon
+    string: feature type in GTF file to be used as exons for building transcripts
+
+sjdbGTFtagExonParentTranscript          transcript_id
+    string: tag name to be used as exons' parents for building transcripts
+
+sjdbOverhang                            0
+    int>=0: length of the donor/acceptor sequence on each side of the junctions, ideally = (mate_length - 1)
+            if =0, splice junction database is not used
+sjdbScore                               2
+    int: extra alignment score for alignmets that cross database junctions
+
+### Input Files
 inputBAMfile                -
     string: path to BAM input file, to be used with --runMode inputAlignmentsFromBAM
 
-### READ PARAMETERS
+### Read Parameters
 
 readFilesIn                 Read1 Read2
     string(s): paths to files that contain input read1 (and, if needed,  read2)
@@ -87,7 +108,7 @@ clip3pAfterAdapterNbases    0
     int(s): number of bases to clip from 3p of each mate after the adapter clipping. If one value is given, it will be assumed the same for both mates.
 
 
-### LIMITS
+### Limits
 
 limitGenomeGenerateRAM               31000000000
     int>0: maximum available RAM (bytes) for genome generation
@@ -107,7 +128,7 @@ limitOutSJcollapsed                  1000000
 limitBAMsortRAM                         0
     int>=0: maximum available RAM for sorting BAM. If =0, it will be set to the genome index size
 
-### OUTPUT: GENERAL
+### Output: general
 outFileNamePrefix               ./
     string: output files name prefix (including full or relative path). Can only be defined on the command line.
 
@@ -132,7 +153,7 @@ outQSconversionAdd              0
    int: add this number to the quality score (e.g. to convert from Illumina to Sanger, use -31)
 
 
-### OUTPUT: SAM/BAM
+### Output: SAM and BAM
 outSAMtype                      SAM
     strings: type of SAM/BAM output
                                 1st word: 
@@ -212,7 +233,7 @@ bamRemoveDuplicatesType  -
 bamRemoveDuplicatesMate2basesN   0
     int>0: number of bases from the 5' of mate 2 to use in collapsing (e.g. for RAMPAGE)
 
-### OUTPUT WIGGLE
+### Output Wiggle
 outWigType          None
     string(s): type of signal output, e.g. "bedGraph" OR "bedGraph read1_5p"
                     1st word:
@@ -236,7 +257,7 @@ outWigNorm              RPM
                         RPM    ... reads per million of mapped reads
                         None   ... no normalization, "raw" counts
 
-### OUTPUT FILTERING
+### Output Filtering
 outFilterType                   Normal
     string: type of filtering
                                 Normal  ... standard filtering using only current alignment
@@ -278,7 +299,7 @@ outFilterIntronMotifs           None
 
 
 
-### OUTPUT FILTERING: SPLICE JUNCTIONS
+### Output Filtering: Splice Junctions
 outSJfilterReads                All
     string: which reads to consider for collapsed splice junctions output
                 All: all reads, unique- and multi-mappers
@@ -307,7 +328,7 @@ outSJfilterIntronMaxVsReadN        50000 100000 200000
                                 i.e. by default junctions supported by 1 read can have gaps <=50000b, by 2 reads: <=100000b, by 3 reads: <=200000. by >=4 reads any gap <=alignIntronMax
                                 does not apply to annotated junctions
 
-### SCORING
+### Scoring
 scoreGap                     0
     gap open penalty
 
@@ -339,7 +360,7 @@ scoreStitchSJshift           1
     maximum score reduction while searching for SJ boundaries inthe stitching step
 
 
-### ALIGNMENT and SEED PARAMETERS
+### Alignments and Seeding
 
 seedSearchStartLmax             50
     int>0: defines the search start point through the read - the read is split into pieces no longer than this value
@@ -397,29 +418,9 @@ alignEndsType           Local
                         Local  ...standard local alignment with soft-clipping allowed
                         EndToEnd: force end-to-end read alignment, do not soft-clip
 
-### SPLICE JUNCTIONS DATABASE PARAMETERS
-sjdbFileChrStartEnd                     -
-    string: path to the file with genomic coordinates (chr <tab> start <tab> end <tab> strand) for the introns
 
-sjdbGTFfile                             -
-    string: path to the GTF file with annotations
 
-sjdbGTFchrPrefix                        -
-    string: prefix for chromosome names in a GTF file (e.g. 'chr' for using ENSMEBL annotations with UCSC geneomes)
-
-sjdbGTFfeatureExon                      exon
-    string: feature type in GTF file to be used as exons for building transcripts
-
-sjdbGTFtagExonParentTranscript          transcript_id
-    string: tag name to be used as exons' parents for building transcripts
-
-sjdbOverhang                            0
-    int>=0: length of the donor/acceptor sequence on each side of the junctions, ideally = (mate_length - 1)
-            if =0, splice junction database is not used
-sjdbScore                               2
-    int: extra alignment score for alignmets that cross database junctions
-
-### WINDOWS, ANCHORS, BINNING
+### Windows, Anchors, Binning
 
 winAnchorMultimapNmax           50
     int>0: max number of loci anchors are allowed to map to
@@ -435,7 +436,7 @@ winFlankNbins               4
 
 
 
-### CHIMERIC ALIGNMENTS
+### Chimeric Alignments
 
 chimSegmentMin              0
     int>=0: minimum length of chimeric segment length, if ==0, no chimeric output
@@ -455,13 +456,13 @@ chimScoreJunctionNonGTAG    -1
 chimJunctionOverhangMin     20
     int>=0: minimum overhang for a chimeric junction
 
-### QUANTIFICATION OF ANNOTATIONS
+### Quantification of Annotations
 quantMode                   -
     string(s): types of qunatification requested
                             -                ... none
                             TranscriptomeSAM ... output SAM/BAM alignments to transcriptome into a separate file
 
-### 2-PASS
+### 2-pass Mapping
 twopass1readsN              0
     int>0: number of reads to process for the 1st step. 0: 1-step only, no 2nd pass; use very large number to map all reads in the first step
 
