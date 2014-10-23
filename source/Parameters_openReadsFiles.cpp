@@ -33,11 +33,16 @@ void Parameters::openReadsFiles() {
             remove(readFilesInTmp.at(imate).c_str());                
             mkfifo(readFilesInTmp.at(imate).c_str(), S_IRUSR | S_IWUSR );
 
-            inOut->logMain << "Input read files for mate "<< imate+1 <<", from input string " << readFilesIn.at(imate) <<endl;
+            inOut->logMain << "\n   Input read files for mate "<< imate+1 <<", from input string " << readFilesIn.at(imate) <<endl;
 
             readsCommandFileName.push_back(outFileTmp+"/readsCommand_read" + to_string(imate+1));
-            ofstream readsCommandFile( readsCommandFileName.at(imate).c_str());
+            fstream readsCommandFile( readsCommandFileName.at(imate).c_str(), ios::out);
+            readsCommandFile.close();
+            readsCommandFile.open( readsCommandFileName.at(imate).c_str(), ios::in | ios::out);
+            //first line in the commands file: redirect stdout to temp fifo files
+            readsCommandFile << "exec > \""<<readFilesInTmp.at(imate)<<"\"\n" ;
 
+            
             string readFilesInString(readFilesIn.at(imate));
             size_t pos=0;
             readFilesN=0;
@@ -46,15 +51,22 @@ void Parameters::openReadsFiles() {
                 string file1 = readFilesInString.substr(0, pos);
                 readFilesInString.erase(0, pos + 1);
                 readFilesNames.at(imate).push_back(file1);
-                inOut->logMain <<file1<<endl;
+                
+                system(("ls -lL " + file1 + " >& "+ outFileTmp+"/readFilesIn.info").c_str());
+                ifstream readFilesIn_info((outFileTmp+"/readFilesIn.info").c_str());
+                inOut->logMain <<readFilesIn_info.rdbuf();
 
-                readsCommandFile << "echo FILE " <<readFilesN << " > " << ("\""+readFilesInTmp.at(imate)+"\"") << "\n";
-                readsCommandFile << readFilesCommandString << "   " <<("\""+file1+"\"") << (" > \""+readFilesInTmp.at(imate)+"\"") <<"\n";
+                readsCommandFile << "echo FILE " <<readFilesN << "\n";
+                readsCommandFile << readFilesCommandString << "   " <<("\""+file1+"\"") <<"\n";
                 ++readFilesN;//only increase file count for one mate
 
             } while (pos!= string::npos);
 
-            readsCommandFile.close();
+            readsCommandFile.flush();
+            readsCommandFile.seekg(0,ios::beg);
+            inOut->logMain <<"\n   readsCommandsFile:\n"<<readsCommandFile.rdbuf()<<endl;
+            readsCommandFile.close();            
+            
             chmod(readsCommandFileName.at(imate).c_str(),S_IXUSR | S_IRUSR | S_IWUSR);
             
             readFilesCommandPID[imate]=0;

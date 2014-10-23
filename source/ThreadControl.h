@@ -11,7 +11,7 @@ public:
     bool threadBool;
     
     pthread_t *threadArray;
-    pthread_mutex_t mutexInRead, mutexOutSAM, mutexOutBAM1, mutexOutChimSAM, mutexOutChimJunction, mutexOutUnmappedFastx, mutexOutFilterBySJout, mutexStats;
+    pthread_mutex_t mutexInRead, mutexOutSAM, mutexOutBAM1, mutexOutChimSAM, mutexOutChimJunction, mutexOutUnmappedFastx, mutexOutFilterBySJout, mutexStats, mutexLogMain;
     
     uint chunkInN,chunkOutN;
     

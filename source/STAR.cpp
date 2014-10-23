@@ -221,8 +221,9 @@ int main(int argInN, char* argIn[]) {
     };    
     
     mapThreadsSpawn(P, RAchunk);
-    
+   
     if (P->outFilterBySJoutStage==1) {//completed stage 1, go to stage 2
+        P->inOut->logMain << "Completed stage 1 mapping of outFilterBySJout mapping\n"<<flush;
         outputSJ(RAchunk,P);//collapse novel junctions
         P->readFilesIndex=-1;
         

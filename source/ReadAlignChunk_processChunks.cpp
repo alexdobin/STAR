@@ -13,7 +13,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
             if (P->runThreadN>1) pthread_mutex_lock(&g_threadChunks.mutexInRead);
 
             uint chunkInSizeBytesTotal[2]={0,0};
-            while (chunkInSizeBytesTotal[0] < P->chunkInSizeBytes && chunkInSizeBytesTotal[1] < P->chunkInSizeBytes && !P->inOut->readIn[0].eof() && !P->inOut->readIn[1].eof()) {
+            while (chunkInSizeBytesTotal[0] < P->chunkInSizeBytes && chunkInSizeBytesTotal[1] < P->chunkInSizeBytes && P->inOut->readIn[0].good() && P->inOut->readIn[1].good()) {
                 char nextChar=P->inOut->readIn[0].peek();
                 if (P->iReadAll==P->readMapNumber) {//do nto read any more reads
                     break;
@@ -82,7 +82,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
 //                         P->inOut->readIn[imate].getline(chunkIn[imate] + chunkInSizeBytesTotal[imate], DEF_readNameSeqLengthMax+1 );                            
 //                         };                        
                         nextChar=P->inOut->readIn[imate].peek();                        
-                        while (nextChar!='@' && nextChar!='>' && nextChar!=' ' && nextChar!='\n' && !P->inOut->readIn[0].eof()) {//read multi-line fasta
+                        while (nextChar!='@' && nextChar!='>' && nextChar!=' ' && nextChar!='\n' && P->inOut->readIn[0].good()) {//read multi-line fasta
                             P->inOut->readIn[imate].getline(chunkIn[imate] + chunkInSizeBytesTotal[imate], DEF_readSeqLengthMax + 1 );
                             if (P->inOut->readIn[imate].gcount()<2) break; //no more input
                             chunkInSizeBytesTotal[imate] += P->inOut->readIn[imate].gcount()-1;   
@@ -91,19 +91,22 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                         chunkIn[imate][chunkInSizeBytesTotal[imate]]='\n'; 
                         chunkInSizeBytesTotal[imate] ++;   
                     };                    
-                } else if (nextChar==' ' || nextChar=='\n' || P->inOut->readIn[0].eof()) {//end of stream
+                } else if (nextChar==' ' || nextChar=='\n' || !P->inOut->readIn[0].good()) {//end of stream
+                    P->inOut->logMain << "Thread #" <<iThread <<" end of input stream, nextChar="<<int(nextChar) <<endl;                    
                     break;
                 } else {
                     string word1;
                     P->inOut->readIn[0] >> word1;
                     if (word1=="FILE") {//new file marker
                         P->inOut->readIn[0] >> P->readFilesIndex;
+                        pthread_mutex_lock(&g_threadChunks.mutexLogMain);
                         P->inOut->logMain << "Starting to map file # " << P->readFilesIndex<<"\n";
                         for (uint imate=0; imate<P->readNmates; imate++) {
                             P->inOut->logMain << "mate " <<imate+1 <<":   "<<P->readFilesNames.at(imate).at(P->readFilesIndex) <<"\n";
                             P->inOut->readIn[imate].ignore(numeric_limits<streamsize>::max(),'\n');
                         };
                         P->inOut->logMain<<flush;
+                        pthread_mutex_unlock(&g_threadChunks.mutexLogMain);                        
 //                         if (P->readNmates==2) {//skip the FILE line for the second read
 //                             getline(P->inOut->readIn[1],word1);
 //                         };
@@ -162,6 +165,8 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
             };
         };
     };
+    if (P->runThreadN>1) pthread_mutex_lock(&g_threadChunks.mutexLogMain);
     P->inOut->logMain << "Completed: thread #" <<iThread <<endl;
+    if (P->runThreadN>1) pthread_mutex_unlock(&g_threadChunks.mutexLogMain);
 };
 

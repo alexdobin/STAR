@@ -17,7 +17,10 @@ OBJECTS = PackedArray.o SuffixArrayFuns.o STAR.o Parameters.o InOutStreams.o Seq
 SOURCES := $(wildcard *.cpp) $(wildcard *.c)
 
 LDFLAGS := -pthread -Lhtslib -Bstatic -lhts -Bdynamic -lz
-LDFLAGS_static := -static -static-libgcc $(LDFLAGS)
+LDFLAGS_static := -static -static-libgcc -pthread -Lhtslib -lhts -lz
+LDFLAGS_Mac :=-pthread -lz htslib/libhts.a
+LDFLAGS_Mac_static :=-pthread -lz -static-libgcc htslib/libhts.a
+
 LDFLAGS_gdb := $(LDFLAGS)
 
 COMPTIMEPLACE := -D'COMPILATION_TIME_PLACE="$(shell echo `date` $(HOSTNAME):`pwd`)"'
@@ -26,14 +29,14 @@ CCFLAGS_common := -pipe -std=c++0x -Wall -Wextra -fopenmp $(COMPTIMEPLACE) $(OPT
 CCFLAGS_main := -O3 $(CCFLAGS_common)
 CCFLAGS_gdb :=  -O0 -g $(CCFLAGS_common)
 
-CC :=g++
+CXX :=g++
 
 
 %.o : %.cpp
-	$(CC) -c $(CCFLAGS) $<
+	$(CXX) -c $(CCFLAGS) $<
 
 %.o : %.c
-	$(CC) -c $(CCFLAGS) $<
+	$(CXX) -c $(CCFLAGS) $<
 
 all: STAR
 
@@ -53,13 +56,17 @@ cleanRelease:
 
 
 ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(MAKECMDGOALS),cleanRelease)
+ifneq ($(MAKECMDGOALS),CLEAN)
 ifneq ($(MAKECMDGOALS),STARforMac)
 ifneq ($(MAKECMDGOALS),STARforMacGDB)
 Depend.list: $(SOURCES) parametersDefault.xxd htslib
 	echo $(SOURCES)
 	/bin/rm -f ./Depend.list
-	$(CC) $(CCFLAGS_common) -MM $^ >> Depend.list
+	$(CXX) $(CCFLAGS_common) -MM $^ >> Depend.list
 include Depend.list
+endif
+endif
 endif
 endif
 endif
@@ -74,39 +81,44 @@ parametersDefault.xxd: parametersDefault
 
 STAR : CCFLAGS=$(CCFLAGS_main)
 STAR : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CC) -o STAR $(CCFLAGS) $(OBJECTS) $(LDFLAGS)
+	$(CXX) -o STAR $(CCFLAGS) $(OBJECTS) $(LDFLAGS)
 
 STARstatic : CCFLAGS=$(CCFLAGS_main)
 STARstatic : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CC) -o STARstatic $(OBJECTS) $(CCFLAGS) $(LDFLAGS_static)
+	$(CXX) -o STARstatic $(OBJECTS) $(CCFLAGS) $(LDFLAGS_static)
 
 STARlong : CCFLAGS=-D'COMPILE_FOR_LONG_READS' $(CCFLAGS_main)
 STARlong : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CC) -o STAR $(CCFLAGS) $(OBJECTS) $(LDFLAGS)
+	$(CXX) -o STAR $(CCFLAGS) $(OBJECTS) $(LDFLAGS)
 
 STARlongStatic : CCFLAGS=-D'COMPILE_FOR_LONG_READS' $(CCFLAGS_main)
 STARlongStatic : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CC) -o STARstatic $(CCFLAGS) $(LDFLAGS_static) $(OBJECTS)
+	$(CXX) -o STARstatic $(CCFLAGS) $(LDFLAGS_static) $(OBJECTS)
 
 
 STARforMac : CCFLAGS=-D'COMPILE_FOR_MAC' -I ./Mac_Include/ $(CCFLAGS_main)
 STARforMac : parametersDefault.xxd $(OBJECTS)
-	$(CC) -o STAR $(CCFLAGS) $(LDFLAGS) $(OBJECTS)
+	$(CXX) -o STAR $(CCFLAGS) $(LDFLAGS_Mac) $(OBJECTS)
+
+STARforMacStatic : CCFLAGS=-D'COMPILE_FOR_MAC' -I ./Mac_Include/ $(CCFLAGS_main)
+STARforMacStatic : parametersDefault.xxd $(OBJECTS)
+	$(CXX) -o STAR $(CCFLAGS) $(LDFLAGS_Mac_static) $(OBJECTS)
+
 
 STARforMacGDB : CCFLAGS=-D'COMPILE_FOR_MAC' -I ./Mac_Include/ $(CCFLAGS_gdb)
 STARforMacGDB : parametersDefault.xxd $(OBJECTS)
-	$(CC) -o STAR $(CCFLAGS_gdb) $(OBJECTS) $(LDFLAGS_gdb)
+	$(CXX) -o STAR $(CCFLAGS_gdb) $(OBJECTS) $(LDFLAGS_gdb)
 
 gdb : CCFLAGS= $(CCFLAGS_gdb)
 gdb : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CC) -o STAR $(CCFLAGS_gdb) $(OBJECTS) $(LDFLAGS_gdb) 
+	$(CXX) -o STAR $(CCFLAGS_gdb) $(OBJECTS) $(LDFLAGS_gdb) 
 
 gdb-long : CCFLAGS= -D'COMPILE_FOR_LONG_READS' $(CCFLAGS_gdb)
 gdb-long : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CC) -o STAR $(CCFLAGS) $(LDFLAGS_gdb) $(OBJECTS)
+	$(CXX) -o STAR $(CCFLAGS) $(LDFLAGS_gdb) $(OBJECTS)
 
 localChains : CCFLAGS=-D'OUTPUT_localChains' $(CCFLAGS_main)
 localChains : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CC) -o STAR $(CCFLAGS) $(LDFLAGS) $(OBJECTS)
+	$(CXX) -o STAR $(CCFLAGS) $(LDFLAGS) $(OBJECTS)
 
 
