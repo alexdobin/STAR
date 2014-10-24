@@ -720,6 +720,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             outSAMattrPresent.jI=true;
         } else if (vAttr1.at(ii)== "RG") {
             outSAMattrOrder.push_back(ATTR_RG);
+            outSAMattrOrderQuant.push_back(ATTR_RG);
             outSAMattrPresent.RG=true;             
         } else if (vAttr1.at(ii)== "XS") {
             outSAMattrOrder.push_back(ATTR_XS);
