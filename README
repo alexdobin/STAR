@@ -13,6 +13,7 @@ DIRECTORIES CONTENTS:
 source: all source fils required for compilation
 bin: pre-compiled executables for Linux and Mac OS X
 doc: documentation
+extras: miscellaneous files and scripts
 
 COMPILING FROM SOURCE:
 Unzip and "cd" into source/ subdirectory.

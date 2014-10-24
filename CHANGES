@@ -1,10 +1,12 @@
-2.4.0e 10/23/2014
+2.4.0e 10/24/2014
 Added manual in PDF.
 New sub-directories: source, bin, doc.
 Output more information about read files into Log.out.
+Fixed some issues that may have caused dropping of multiple reads files.
 Added more thorough error checking for genome generation.
-Fixed a bug causing seg-faults with signle-mate alignments for BAM sorting.
-Fixed some compilation issues on Mac OS X. Note that Clang by default lacks openMP support which is required for STAR compilation.
+Fixed a bug causing seg-faults with single-mate alignments for BAM sorting.
+Fixed some compilation issues on Mac OS X. Note that the default Clang lacks openMP support which is required for STAR compilation.
+Added Mac OS X executable.
 
 2.4.0d 09/25/2014
 Added .gitignore.
