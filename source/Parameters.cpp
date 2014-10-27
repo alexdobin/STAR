@@ -579,11 +579,11 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                         errOut <<"SOLUTION: re-run STAR with all lines in --outSAMattrRGline starting with ID:xxx\n";
                         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
                     };
-                    size_t pos = outSAMattrRGlineSplit.back().find("\t");
-                    pos = (pos == string::npos) ? outSAMattrRGlineSplit.back().size() : pos;
-                    outSAMattrRG.push_back(outSAMattrRGlineSplit.back().substr(3, pos-3));
-                };
-                //outSAMattrRGlineSplit.back()+="\t" + outSAMattrRGline.at(ii);
+                    outSAMattrRG.push_back(outSAMattrRGlineSplit.back().substr(3));
+
+                }
+                else
+                    outSAMattrRGlineSplit.back()+="\t" + outSAMattrRGline.at(ii);
             };
         };    
     };
