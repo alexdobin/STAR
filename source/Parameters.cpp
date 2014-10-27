@@ -578,10 +578,12 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                         errOut <<"EXITING because of FATAL INPUT ERROR: the first word of a line from --outSAMattrRGline="<<outSAMattrRGlineSplit.back()<<" does not start with ID:xxx read group identifier\n";
                         errOut <<"SOLUTION: re-run STAR with all lines in --outSAMattrRGline starting with ID:xxx\n";
                         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-                    };   
-                    outSAMattrRG.push_back(outSAMattrRGlineSplit.back().substr(3));                    
+                    };
+                    size_t pos = outSAMattrRGlineSplit.back().find("\t");
+                    pos = (pos == string::npos) ? outSAMattrRGlineSplit.back().size() : pos;
+                    outSAMattrRG.push_back(outSAMattrRGlineSplit.back().substr(3, pos-3));
                 };
-                outSAMattrRGlineSplit.back()+="\t" + outSAMattrRGline.at(ii);
+                //outSAMattrRGlineSplit.back()+="\t" + outSAMattrRGline.at(ii);
             };
         };    
     };
@@ -739,6 +741,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     
     if (outSAMattrRG.size()>0 && !outSAMattrPresent.RG) {
         outSAMattrOrder.push_back(ATTR_RG);
+        outSAMattrOrderQuant.push_back(ATTR_RG);
         inOut->logMain << "WARNING --outSAMattrRG defines a read group, therefore STAR will output RG attribute" <<endl;
     } else if (outSAMattrRG.size()==0 && outSAMattrPresent.RG) {
             ostringstream errOut;
