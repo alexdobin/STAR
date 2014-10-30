@@ -249,7 +249,8 @@ int main(int argInN, char* argIn[]) {
     };
         
     //no need for genome anymore, free the memory
-    mainGenome.~Genome(); //need explicit call because of the delete P->inOut below
+//     mainGenome.~Genome(); //need explicit call because of the delete P->inOut below
+    mainGenome.freeMemory();
     
     if (P->runThreadN>1 && P->outSAMorder=="PairedKeepInputOrder") {//concatenate Aligned.* files
         RAchunk[0]->chunkFilesCat(P->inOut->outSAM, P->outFileTmp + "/Aligned.out.sam.chunk", g_threadChunks.chunkOutN);

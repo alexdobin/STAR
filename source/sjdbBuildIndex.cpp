@@ -59,15 +59,14 @@ void sjdbBuildIndex (Parameters *P, char *G, PackedArray &SA, PackedArray &SA2, 
     };
     SjdbClass sjdbLoci;
     sjdbLoadFromStream(sjdbStreamIn, sjdbLoci);
-    P->inOut->logMain << "Loaded database junctions from the 1st pass file: " << P->twopassSJpass1file <<": "<<sjdbLoci.chr.size()<<" junctions\n\n";
 
-//         time_t rawtime;
-//         time ( &rawtime );
-//         cout << timeMonthDayTime(rawtime) << "loaded SJs" <<endl;
+    time_t rawtime;
+    time ( &rawtime );
+    P->inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the 1st pass file: " << P->twopassSJpass1file <<": "<<sjdbLoci.chr.size()<<" junctions\n\n";
     
     sjdbPrepare (sjdbLoci, P, G, P->nGenome, P->twopassDir);//P->nGenome - change when replacing junctions
-//         time ( &rawtime );
-//         cout << timeMonthDayTime(rawtime) << "prepare" <<endl;
+    time ( &rawtime );
+    P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished preparing junctions" <<endl;
     
     #define SPACER_CHAR 5
 
@@ -108,9 +107,9 @@ void sjdbBuildIndex (Parameters *P, char *G, PackedArray &SA, PackedArray &SA2, 
         };
     };
 
-//         time ( &rawtime );
-//         cout << timeMonthDayTime(rawtime) << "SAsearch" <<endl;
-
+    time ( &rawtime );
+    P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished SA search" <<endl;
+    
     uint nInd=0;
     for (uint ii=0; ii<2*P->sjdbN*nIndicesSJ1; ii++) {
         if (indArray[ii*2]!= (uint) -1) {
@@ -124,10 +123,11 @@ void sjdbBuildIndex (Parameters *P, char *G, PackedArray &SA, PackedArray &SA2, 
 //         cout << timeMonthDayTime(rawtime) << "remove -1, nInd="<<nInd <<endl;
 
     qsort((void*) indArray, nInd, 2*sizeof(uint64), funCompareUintAndSuffixes);
-//     time ( &rawtime );    cout << timeMonthDayTime(rawtime) << "qsort" <<endl;
+    time ( &rawtime );
+    P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished sorting SA indicesL nInd="<<nInd <<endl;
 
-    indArray[2*nInd]=-1; //mark the last junction
-    indArray[2*nInd+1]=-1; //mark the last junction
+    indArray[2*nInd]=-999; //mark the last junction
+    indArray[2*nInd+1]=-999; //mark the last junction
     
     P->nSA+=nInd;
     SA2.defineBits(P->GstrandBit+1,P->nSA);
@@ -149,14 +149,14 @@ void sjdbBuildIndex (Parameters *P, char *G, PackedArray &SA, PackedArray &SA2, 
             ++isa2; ++isj;
         };
     };
-//     time ( &rawtime );    cout << timeMonthDayTime(rawtime) << "SA2" <<"   "<<isa2<<"   "<<isj <<"   "<<endl;
-   
+    time ( &rawtime );
+    P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished inserting junction indices" <<endl;
     
     //SAi insertions
     for (uint iL=0; iL < P->genomeSAindexNbases; iL++) {
         uint iSJ=0;
         uint ind0=P->genomeSAindexStart[iL]-1;
-        for (uint ii=P->genomeSAindexStart[iL];ii<P->genomeSAindexStart[iL+1]; ii++) {//scan through the longets index
+        for (uint ii=P->genomeSAindexStart[iL];ii<P->genomeSAindexStart[iL+1]; ii++) {//scan through the longest index
             uint iSA1=SAi[ii];
             uint iSA2=iSA1 & P->SAiMarkNmask & P->SAiMarkAbsentMask;
             
@@ -221,10 +221,12 @@ void sjdbBuildIndex (Parameters *P, char *G, PackedArray &SA, PackedArray &SA2, 
             };
         };
     };
-//     time ( &rawtime );    cout << timeMonthDayTime(rawtime) << "SAi finished " <<endl;    
+    time ( &rawtime );
+    P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished SAi" <<endl;
     
     //change parameters, most parameters are already re-defined in sjdbPrepare.cpp
-    SA=SA2;
+    SA.defineBits(P->GstrandBit+1,P->nSA);//same as SA2
+    SA.pointArray(SA2.charArray);
     P->sjGstart=P->nGenome;
     P->nGenome+=nGsj;
     
