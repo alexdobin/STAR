@@ -126,7 +126,7 @@ limitOutSJcollapsed                  1000000
     int>0: max number of collapsed junctions
 
 limitBAMsortRAM                         0
-    int>=0: maximum available RAM for sorting BAM. If =0, it will be set to the genome index size
+    int>=0: maximum available RAM for sorting BAM. If =0, it will be set to the genome index size. 0 value can only be used with --genomeLoad NoSharedMemory option.
 
 ### Output: general
 outFileNamePrefix               ./
@@ -162,7 +162,7 @@ outSAMtype                      SAM
                                 None ... no SAM/BAM output
                                 2nd, 3rd: 
                                 Unsorted           ... standard unsorted
-                                SortedByCoordinate ... sorted by coordinate
+                                SortedByCoordinate ... sorted by coordinate. This option will allocate extra memory for sorting which can be specified by --limitBAMsortRAM.
 
 outSAMmode                      Full
     string: mode of SAM output  

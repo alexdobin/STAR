@@ -136,16 +136,6 @@ int main(int argInN, char* argIn[]) {
     //open SAM/BAM files for output
     if (P->outSAMmode != "None") {//open SAM file and write header
         ostringstream samHeaderStream;
-
-        if (P->outSAMheaderHD.at(0)!="-") {
-            samHeaderStream << P->outSAMheaderHD.at(0);
-            for (uint ii=1;ii<P->outSAMheaderHD.size(); ii++) {
-                samHeaderStream << "\t" << P->outSAMheaderHD.at(ii);
-            };
-            samHeaderStream << "\n";
-        } else {
-            samHeaderStream << "@HD\tVN:1.4\n";
-        };
         
         for (uint ii=0;ii<P->nChrReal;ii++) {
             samHeaderStream << "@SQ\tSN:"<< P->chrName.at(ii) <<"\tLN:"<<P->chrLength[ii]<<"\n";
@@ -179,7 +169,19 @@ int main(int argInN, char* argIn[]) {
  
         samHeaderStream <<  "@CO\t" <<"user command line: " << P->commandLine <<"\n";
         
-        P->samHeader=samHeaderStream.str();
+        if (P->outSAMheaderHD.at(0)!="-") {
+            P->samHeaderHD = P->outSAMheaderHD.at(0);
+            for (uint ii=1;ii<P->outSAMheaderHD.size(); ii++) {
+                P->samHeaderHD +="\t" + P->outSAMheaderHD.at(ii);
+            };
+        } else {
+            P->samHeaderHD = "@HD\tVN:1.4";
+        };        
+        
+        
+        P->samHeader=P->samHeaderHD+"\n"+samHeaderStream.str();
+        //for the sorted BAM, need to add SO:cooridnate to the header line
+        P->samHeaderSortedCoord=P->samHeaderHD + (P->outSAMheaderHD.size()==0 ? "" : "\tSO:coordinate") + "\n" + samHeaderStream.str();
         
         if (P->outSAMbool) {//
             *P->inOut->outSAM << P->samHeader;

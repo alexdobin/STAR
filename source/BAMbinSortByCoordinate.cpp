@@ -43,7 +43,7 @@ void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, st
     
     BGZF *bgzfBin;
     bgzfBin=bgzf_open((dirBAMsort+"/b"+to_string((uint) iBin)).c_str(),("w"+to_string((long long) P->outBAMcompression)).c_str());
-    outBAMwriteHeader(bgzfBin,P->samHeader,P->chrName,P->chrLength);
+    outBAMwriteHeader(bgzfBin,P->samHeaderSortedCoord,P->chrName,P->chrLength);
     //send ordered aligns to bgzf one-by-one
     for (uint ia=0;ia<binN;ia++) {
         char* ib=bamIn+startPos[ia*3+2];

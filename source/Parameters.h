@@ -95,7 +95,7 @@ class Parameters {
         
         //SAM output
         string outBAMfileCoordName, outBAMfileUnsortedName, outQuantBAMfileName;        
-        string samHeader;
+        string samHeader, samHeaderHD, samHeaderSortedCoord;
         string outSAMmode, outSAMstrandField,  outSAMunmapped, outSAMorder, outSAMprimaryFlag;
         vector<string> outSAMattributes, outSAMheaderHD, outSAMheaderPG;
         vector<string> outSAMattrRGline,outSAMattrRGlineSplit,outSAMattrRG;

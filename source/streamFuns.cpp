@@ -58,3 +58,14 @@ void ofstrOpen (std::string fileName, std::string errorID, Parameters *P, ofstre
         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_FILE_OPEN, *P);
     };    
 };
+
+
+// void ifstrOpen (std::string fileName, std::string errorID, Parameters *P, ifstream & ofStream) {//open file 'fileName', generate error if cannot open
+//     ifStream.open(fileName.c_str());
+//     if (ifStream.fail()) {//
+//         ostringstream errOut;
+//         errOut << errorID<<": exiting because of *INPUT FILE* error: could not open input file "<< fileName <<"\n";
+//         errOut << "Solution: check that the path exists and you have write permission for this file\n";
+//         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_FILE_OPEN, *P);
+//     };    
+// };

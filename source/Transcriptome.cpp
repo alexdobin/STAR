@@ -1,11 +1,19 @@
 #include "Transcriptome.h"
+#include "ErrorWarning.h"
 
 Transcriptome::Transcriptome (Parameters* Pin) {
     
     P=Pin;
 
-    //load tr ans ex info
+    //load tr and ex info
     ifstream trinfo((P->genomeDir+"/transcriptInfo.tab").c_str());
+    if (trinfo.fail()) {//could not open file
+        ostringstream errOut;
+        errOut << "ERROR_01101: exiting because of *INPUT FILE* error: could not open for reading "<< (P->genomeDir+"/transcriptInfo.tab") <<"\n";
+        errOut << "SOLUTION: if this file is missing from the genome directory, you will need to *re-generate the genome*, \n";
+        errOut << "          if this file is present, check its read permissions\n";
+        exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_FILE_OPEN, *P);
+    };
 
     trinfo >> nTr;
     trS=new uint [nTr];

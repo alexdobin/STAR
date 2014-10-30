@@ -838,6 +838,16 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         twopassSJpass1file=twopassDir+"/SJ.out.tab";
         sjdbLength=sjdbOverhang*2+1;
     };
+    
+    if (limitBAMsortRAM==0) {//check limitBAMsortRAM
+        if (genomeLoad!="NoSharedMemory") {
+            ostringstream errOut;
+            errOut <<"EXITING because of fatal PARAMETERS error: limitBAMsortRAM=0 (default) cannot be used with --genomeLoad="<<genomeLoad <<", or any other shared memory options\n";
+            errOut <<"SOLUTION: please use default --genomeLoad NoSharedMemory, \n        OR specify --limitBAMsortRAM the amount of RAM (bytes) that can be allocated for BAM sorting in addition to shared memory allocated for the genome.\n        --limitBAMsortRAM typically has to be > 10000000000 (i.e 10GB).\n";
+            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };
+        inOut->logMain<<"WARNING: --limitBAMsortRAM=0, will use genome sizeas RAM linit foro BAM sorting\n";
+    };
     inOut->logMain << "Finished loading and checking parameters\n" <<flush;
 };
 
