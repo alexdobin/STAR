@@ -198,7 +198,10 @@ int main(int argInN, char* argIn[]) {
                 uint32 iex1=mainTranscriptome->trExI[ii]+mainTranscriptome->trExN[ii]-1; //last exon of the transcript
                 trlength.push_back(mainTranscriptome->exLenCum[iex1]+mainTranscriptome->exSE[2*iex1+1]-mainTranscriptome->exSE[2*iex1]+1);          
                 samHeaderStream << "@SQ\tSN:"<< mainTranscriptome->trID.at(ii) <<"\tLN:"<<trlength.back()<<"\n";
-            };            
+            };
+            for (uint32 ii=0;ii<P->outSAMattrRGlineSplit.size();ii++) {//@RG lines
+                samHeaderStream << "@RG\t" << P->outSAMattrRGlineSplit.at(ii) <<"\n";
+            };
             outBAMwriteHeader(P->inOut->outQuantBAMfile,samHeaderStream.str(),mainTranscriptome->trID,trlength);        
         };
         
