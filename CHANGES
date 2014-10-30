@@ -1,3 +1,6 @@
+Fixed a bug in the 2-pass method (--twopass1readsN).
+Fixed a problem with RAM allocation for BAM sorting.
+
 2.4.0e 10/24/2014
 Added manual in PDF.
 New sub-directories: source, bin, doc.

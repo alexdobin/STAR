@@ -1,5 +1,10 @@
 # include "PackedArray.h"
 
+PackedArray::PackedArray() {
+    charArray=NULL;
+    arrayAllocated=false;
+};
+
 void PackedArray::defineBits(uint Nbits, uint lengthIn){
     wordLength=Nbits;
     wordCompLength=sizeof(uint)*8LLU-wordLength;
@@ -24,4 +29,13 @@ void PackedArray::pointArray(char* pointerCharIn) {
 
 void PackedArray::allocateArray() {
     charArray=new char[lengthByte];
+    arrayAllocated=true;
+};
+
+void PackedArray::deallocateArray() {
+    if (arrayAllocated) {
+        delete[] charArray;
+        arrayAllocated=false;
+    };
+    charArray=NULL;
 };

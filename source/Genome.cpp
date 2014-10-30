@@ -35,7 +35,17 @@ Genome::~Genome() {
             shmctl(shmID,IPC_RMID,&shmStat);
             P->inOut->logMain <<"No other jobs are attached to the shared memory segement, removing it."<<endl;
         };
-    }; 
+    };
+};
+
+void Genome::freeMemory(){//free big chunks of memory used by genome and suffix array
+    if (P->genomeLoad=="NoSharedMemory") {//cannot deallocate for shared memory
+        delete[] G1;
+        G1=NULL;
+        SA.deallocateArray();
+        SA2.deallocateArray();
+        SAi.deallocateArray();
+    };
 };
 
 void Genome::genomeLoad(){//allocate and load Genome
@@ -45,7 +55,6 @@ void Genome::genomeLoad(){//allocate and load Genome
     char *shmStart=NULL;
     uint *shmNG=NULL, *shmNSA=NULL;   //pointers to shm stored values , *shmSG, *shmSSA
     uint64 shmSize=0;//, shmStartG=0; shmStartSA=0;
-    
     
     uint L=200,K=6;    
     
@@ -213,11 +222,6 @@ void Genome::genomeLoad(){//allocate and load Genome
     P->nSA=(P->nSAbyte*8)/(P->GstrandBit+1);
     SA.defineBits(P->GstrandBit+1,P->nSA);  
     
-    if (P->twopass1readsN>0) {//2-pass: reserve extra memory
-        P->nGenome2=P->nGenome+P->twopassSJlimit*P->sjdbOverhang*2;
-        SA2.defineBits(P->GstrandBit+1,P->nSA+P->sjdbOverhang*2);
-    };
-    
     P->SAiMarkNbit=P->GstrandBit+1;
     P->SAiMarkAbsentBit=P->GstrandBit+2;
     
@@ -245,10 +249,10 @@ void Genome::genomeLoad(){//allocate and load Genome
     /////////////////////////////////////// allocate arrays
     if (P->genomeLoad=="NoSharedMemory") {// simply allocate memory, do not use shared memory
         try {
-            if (P->twopass1readsN==0) {//2-pass: reserve extra memory
+            if (P->twopass1readsN==0) {//1-pass, no extra memory
                 G1=new char[P->nGenome+L+L];        
                 SA.allocateArray();
-            } else {
+            } else {//2-pass: reserve extra memory
                 P->nGenome2=P->nGenome+P->twopassSJlimit*P->sjdbLength;
                 SA2.defineBits(P->GstrandBit+1,P->nSA+2*P->twopassSJlimit*P->sjdbLength);
                 G1=new char[P->nGenome2+L+L];        
@@ -257,8 +261,7 @@ void Genome::genomeLoad(){//allocate and load Genome
             };            
             SAi.allocateArray();
             P->inOut->logMain <<"Shared memory is not used for genomes. Allocated a private copy of the genome.\n"<<flush;                
-        } 
-        catch (exception & exc) {
+        } catch (exception & exc) {
             ostringstream errOut;           
             errOut <<"EXITING: fatal error trying to allocate genome arrays, exception thrown: "<<exc.what()<<endl;
             errOut <<"Possible cause 1: not enough RAM. Check if you have enough RAM " << P->nGenome+L+L+SA.lengthByte+SAi.lengthByte+2000000000 << " bytes\n";

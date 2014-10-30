@@ -9,11 +9,13 @@ class Genome {
         char *G, *sigG;
         PackedArray SA,SA2;
         PackedArray SAi;
-        void genomeLoad();
         
         Genome (Parameters* Pin ) : P(Pin) {};
-        Genome () {};
-        ~Genome();
+        Genome () {};//empty constructor
+        ~Genome ();
+        void freeMemory();
+        void genomeLoad();
+
     private:
         char *G1; //pointer -200 of G
         Parameters* P;
