@@ -572,18 +572,17 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             for (uint ii=0;ii<outSAMattrRGline.size(); ii++) {//concatenate into one line
                 if (ii==0 || outSAMattrRGline.at(ii)==",") {//start new entry
                     if (ii>0) ++ii;//skip comma
-                    outSAMattrRGlineSplit.push_back(outSAMattrRGline.at(ii)); //star new RG line with an empty string
+                    outSAMattrRGlineSplit.push_back(outSAMattrRGline.at(ii)); //star new RG line with the first field which must be ID:xxx
                     if (outSAMattrRGlineSplit.back().substr(0,3)!="ID:") {
                         ostringstream errOut;
                         errOut <<"EXITING because of FATAL INPUT ERROR: the first word of a line from --outSAMattrRGline="<<outSAMattrRGlineSplit.back()<<" does not start with ID:xxx read group identifier\n";
                         errOut <<"SOLUTION: re-run STAR with all lines in --outSAMattrRGline starting with ID:xxx\n";
                         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
                     };
-                    outSAMattrRG.push_back(outSAMattrRGlineSplit.back().substr(3));
-
-                }
-                else
+                    outSAMattrRG.push_back(outSAMattrRGlineSplit.back().substr(3)); //this adds the ID field
+                } else {//keep adding fields to this RG line, until the next comma
                     outSAMattrRGlineSplit.back()+="\t" + outSAMattrRGline.at(ii);
+                };
             };
         };    
     };
