@@ -839,7 +839,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         sjdbLength=sjdbOverhang*2+1;
     };
     
-    if (limitBAMsortRAM==0) {//check limitBAMsortRAM
+    if (outBAMcoord && limitBAMsortRAM==0) {//check limitBAMsortRAM
         if (genomeLoad!="NoSharedMemory") {
             ostringstream errOut;
             errOut <<"EXITING because of fatal PARAMETERS error: limitBAMsortRAM=0 (default) cannot be used with --genomeLoad="<<genomeLoad <<", or any other shared memory options\n";

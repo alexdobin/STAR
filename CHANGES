@@ -1,4 +1,4 @@
-2.4.0f 10/30/2014
+2.4.0f1 10/30/2014
 Added read group (RG) BAM attributes to transcriptome BAM (contributed by https://github.com/godotgildor).
 Fixed a bug with double ID field in the RG header line (contributed by https://github.com/godotgildor).
 Fixed a bug in the 2-pass method (--twopass1readsN).

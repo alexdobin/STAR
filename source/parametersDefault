@@ -464,7 +464,7 @@ quantMode                   -
 
 ### 2-pass Mapping
 twopass1readsN              0
-    int>0: number of reads to process for the 1st step. 0: 1-step only, no 2nd pass; use very large number to map all reads in the first step
+    int>0: number of reads to process for the 1st step. 0: 1-step only, no 2nd pass; use very large number (or -1) to map all reads in the first step
 
 twopassSJlimit              1000000
     int>=0: maximum number of junction detected in the 1st step
