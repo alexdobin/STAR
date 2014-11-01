@@ -3,14 +3,16 @@
 #include "ErrorWarning.h"
 #include "serviceFuns.cpp"
 #include "SjdbClass.h"
+#include "streamFuns.h"
 
 #include <map>
 
 
-#define GTF_exonLoci_size 3
+#define GTF_exonLoci_size 4
 #define GTF_exonTrID(ii) ((ii)*GTF_exonLoci_size)
 #define GTF_exonStart(ii) ((ii)*GTF_exonLoci_size+1)
 #define GTF_exonEnd(ii) ((ii)*GTF_exonLoci_size+2)
+#define GTF_exonGeID(ii) ((ii)*GTF_exonLoci_size+3)
 
 #define GTF_extrLoci_size 5
 #define GTF_extrTrStart(ii) ((ii)*GTF_extrLoci_size)
@@ -18,6 +20,14 @@
 #define GTF_extrTrID(ii) ((ii)*GTF_extrLoci_size+2)
 #define GTF_extrExStart(ii) ((ii)*GTF_extrLoci_size+3)
 #define GTF_extrExEnd(ii) ((ii)*GTF_extrLoci_size+4)
+
+#define GTF_exgeLoci_size 5
+#define GTF_exgeExStart(ii) ((ii)*GTF_exgeLoci_size+0)
+#define GTF_exgeExEnd(ii) ((ii)*GTF_exgeLoci_size+1)
+#define GTF_exgeExStrand(ii) ((ii)*GTF_exgeLoci_size+2)
+#define GTF_exgeGeID(ii) ((ii)*GTF_exgeLoci_size+3)
+#define GTF_exgeTrID(ii) ((ii)*GTF_exgeLoci_size+4)
+
 
 
 uint loadGTF(SjdbClass &sjdbLoci, Parameters *P) {//load gtf file, add junctions to P->sjdb
@@ -30,7 +40,7 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P) {//load gtf file, add junctions
             exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
         };    
         
-        std::map <string,uint> transcriptIDnumber;
+        std::map <string,uint> transcriptIDnumber, geneIDnumber;
 
         uint exonN=0;
         while (sjdbStreamIn.good()) {//count the number of exons
@@ -43,7 +53,7 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P) {//load gtf file, add junctions
         };
         uint* exonLoci=new uint [exonN*GTF_exonLoci_size];
         char* transcriptStrand = new char [exonN];
-        vector <string> transcriptID;
+        vector <string> transcriptID, geneID;
 
         exonN=0;//re-calculate
         sjdbStreamIn.clear();
@@ -76,18 +86,21 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P) {//load gtf file, add junctions
                 oneLineStream.str(oneLine1);
                 oneLineStream.clear();
 
-                string trID(""), attr1("");
+                string trID(""), gID(""), attr1("");
                 while (oneLineStream.good()) {
                     oneLineStream >> attr1;
                     if (attr1==P->sjdbGTFtagExonParentTranscript) {
                         oneLineStream >> trID;
                         trID.erase(remove(trID.begin(),trID.end(),'"'),trID.end());
                         trID.erase(remove(trID.begin(),trID.end(),';'),trID.end());
-//                         cout <<trID<<endl;
+                    } else if (attr1==P->sjdbGTFtagExonParentGene) {
+                        oneLineStream >> gID;
+                        gID.erase(remove(gID.begin(),gID.end(),'"'),gID.end());
+                        gID.erase(remove(gID.begin(),gID.end(),';'),gID.end());
                     };
                 };
                 if (trID=="") {//no transcript ID
-                    P->inOut->logMain << "WARNING: while processing sjdbGTFfile=" << P->sjdbGTFfile <<": no transcript_id for exon feature for line:\n";
+                    P->inOut->logMain << "WARNING: while processing sjdbGTFfile=" << P->sjdbGTFfile <<": no transcript_id for line:\n";
                     P->inOut->logMain << oneLine <<"\n"<<flush;
                 } else {
                     transcriptIDnumber.insert(std::pair <string,uint> (trID,(uint) transcriptIDnumber.size()));//insert new element if necessary with a new numeric value
@@ -101,9 +114,18 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P) {//load gtf file, add junctions
                     };
                 };
                 
+                if (gID=="") {//no gene ID
+                    P->inOut->logMain << "WARNING: while processing sjdbGTFfile=" << P->sjdbGTFfile <<": no gene_id for line:\n";
+                    P->inOut->logMain << oneLine <<"\n"<<flush;
+                } else {//add gene ID if necessary
+                    geneIDnumber.insert(std::pair <string,uint> (gID,(uint) geneIDnumber.size()));//insert new element if necessary with a $
+                    if (geneID.size() < geneIDnumber.size()) geneID.push_back(gID);
+                };
+
                 exonLoci[GTF_exonTrID(exonN)]=transcriptIDnumber[trID];
                 exonLoci[GTF_exonStart(exonN)]=ex1+P->chrStart[P->chrNameIndex[chr1]]-1;
                 exonLoci[GTF_exonEnd(exonN)]=ex2+P->chrStart[P->chrNameIndex[chr1]]-1;
+                exonLoci[GTF_exonGeID(exonN)]=geneIDnumber[gID];
                 ++exonN;                
 
             };//if (chr1.substr(0,1)!="#" && featureType=="exon")
@@ -111,8 +133,41 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P) {//load gtf file, add junctions
         
         //sort exonLoci by transcript ID and exon coordinates
         qsort((void*) exonLoci, exonN, sizeof(uint)*GTF_exonLoci_size, funCompareUint2);
+
+        {//exon-gene data structures: exon start/end/strand/gene/transcript
+            //re-sort exons by exons loci
+            uint* exgeLoci=new uint [exonN*GTF_exgeLoci_size]; //this also contains transcripts start and end
+
+            for (uint iex=0; iex<=exonN; iex++) {
+                exgeLoci[GTF_exgeExStart(iex)]=exonLoci[GTF_exonStart(iex)];
+                exgeLoci[GTF_exgeExEnd(iex)]=exonLoci[GTF_exonEnd(iex)];
+                exgeLoci[GTF_exgeExStrand(iex)]=transcriptStrand[exonLoci[GTF_exonTrID(iex)]];
+                exgeLoci[GTF_exgeGeID(iex)]=exonLoci[GTF_exonGeID(iex)];
+                exgeLoci[GTF_exgeTrID(iex)]=exonLoci[GTF_exonTrID(iex)];
+            };
+
+            qsort((void*) exgeLoci, exonN, sizeof(uint)*GTF_exgeLoci_size, funCompareArrays<uint,5>);
+
+            ofstream exgeOut;
+            ofstrOpen(P->genomeDir+"/exonGeTrInfo.tab","ERROR_00201",P,exgeOut);
+            exgeOut<<exonN<<"\n";
+            for (uint iex=0; iex<exonN; iex++) {
+                 exgeOut<<exgeLoci[GTF_exgeExStart(iex)] <<"\t"<<  exgeLoci[GTF_exgeExEnd(iex)] <<"\t"<< exgeLoci[GTF_exgeExStrand(iex)] \
+                  <<"\t"<< exgeLoci[GTF_exgeGeID(iex)] <<"\t"<< exgeLoci[GTF_exgeTrID(iex)] <<"\n";
+            };
+            exgeOut.close();
+
+            ofstream geOut;
+            ofstrOpen(P->genomeDir+"/geneInfo.tab","ERROR_00202",P,geOut);
+            geOut << geneID.size() << "\n";
+            for (uint ig=0; ig<geneID.size(); ig++) {//just geneID for now
+                geOut << geneID.at(ig) <<"\n";
+            };
+            geOut.close();
+
+        };
         
-        {// transctipt data structures
+        {//exon-transctipt data structures
             //re-sort transcripts by transcript start/end
             uint* extrLoci=new uint [exonN*GTF_extrLoci_size]; //this also contains transcripts start and end
             

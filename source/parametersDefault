@@ -64,7 +64,10 @@ sjdbGTFfeatureExon                      exon
     string: feature type in GTF file to be used as exons for building transcripts
 
 sjdbGTFtagExonParentTranscript          transcript_id
-    string: tag name to be used as exons' parents for building transcripts
+    string: tag name to be used as exons' transcript-parents (default "transcript_id" works for GTF files)
+
+sjdbGTFtagExonParentGene                gene_id
+    string: tag name to be used as exons' gene-parents (default "gene_id" works for GTF files)
 
 sjdbOverhang                            0
     int>=0: length of the donor/acceptor sequence on each side of the junctions, ideally = (mate_length - 1)
@@ -458,7 +461,7 @@ chimJunctionOverhangMin     20
 
 ### Quantification of Annotations
 quantMode                   -
-    string(s): types of qunatification requested
+    string(s): types of quantification requested
                             -                ... none
                             TranscriptomeSAM ... output SAM/BAM alignments to transcriptome into a separate file
 

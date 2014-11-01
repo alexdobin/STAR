@@ -165,6 +165,7 @@ void genomeGenerate(Parameters *P) {
     genomePar << "sjdbGTFchrPrefix\t" << P->sjdbGTFchrPrefix <<"\n";
     genomePar << "sjdbGTFfeatureExon\t" << P->sjdbGTFfeatureExon <<"\n";
     genomePar << "sjdbGTFtagExonParentTranscript\t" << P->sjdbGTFtagExonParentTranscript <<"\n";
+    genomePar << "sjdbGTFtagExonParentGene\t" << P->sjdbGTFtagExonParentGene <<"\n";
     
     genomePar.close();    
     
@@ -189,9 +190,15 @@ void genomeGenerate(Parameters *P) {
     char *G=NULL, *G1=NULL;        
     uint nGenomeReal=genomeScanFastaFiles(P,G,false);//first scan the fasta file to fins all the sizes  
     P->chrBinFill();
-            
+
+    time(&rawTime);
+    P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ... Starting GTF processing\n" <<flush;
+    *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... Starting GTF processing\n" <<flush;           
     loadGTF(sjdbLoci, P);    
-    
+    time(&rawTime);
+    P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ... Finished GTF processing\n" <<flush;
+    *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... Finished GTF processing\n" <<flush;           
+
     uint L=10000;//maximum length of genome suffix    
     uint nG1alloc=(nGenomeReal + sjdbLoci.chr.size()*P->sjdbLength+L)*2;
     G1=new char[nG1alloc];
