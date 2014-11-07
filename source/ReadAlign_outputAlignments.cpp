@@ -103,9 +103,12 @@ void ReadAlign::outputAlignments() {
             mateMapped[trBest->exons[trBest->nExons-1][EX_iFrag]]=true;        
             if (P->readNmates>1 && !(mateMapped[0] && mateMapped[1]) ) unmapType=4;
             
-            if ( P->quantModeI > 0) {
-                quantTranscriptome(Tr, nTr, trMult,  alignTrAll);
+            if ( P->quant.trSAM.yes ) {
+                quantTranscriptome(chunkTr, nTr, trMult,  alignTrAll);
             };
+            if ( P->quant.geCount.yes ) {
+                chunkTr->geneCountsAddAlign(nTr, trMult);
+            };           
         };
     };
 
@@ -115,7 +118,7 @@ void ReadAlign::outputAlignments() {
             for (uint imate=0; imate<P->readNmates; imate++) {//output each mate
                 if (P->outBAMunsorted) outBAMunsorted->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], imate>0 ? 0 : outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1]);
                 //TODO clean for single-end alignments of PE reads
-                if ( (P->quantModeI & PAR_quantModeI_TranscritomeSAM) > 0 && unmapType!=4) outBAMquant->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], imate>0 ? 0 : outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1]);
+                if ( P->quant.trSAM.yes && unmapType!=4) outBAMquant->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], imate>0 ? 0 : outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1]);
                 if (P->outBAMcoord)    outBAMcoord->coordOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], 0, iReadAll);                                        
             };
         };

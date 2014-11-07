@@ -52,7 +52,7 @@ int main(int argInN, char* argIn[]) {
     P->winBinN = P->nGenome/(1LLU << P->winBinNbits)+1;
     
     Transcriptome *mainTranscriptome=NULL;
-    if (P->quantModeI>0) {//load transcriptome
+    if ( P->quant.yes ) {//load transcriptome
         mainTranscriptome=new Transcriptome(P);
     };
 /////////////////////////////////////////////////////////////////////////////////////////////////START
@@ -80,7 +80,7 @@ int main(int argInN, char* argIn[]) {
         P1->outBAMcoord=false;
     
         P1->chimSegmentMin=0;
-        P1->quantModeI=0;
+        P1->quant.yes=false;
         P1->outFilterBySJoutStage=0;
         
         P1->outReadsUnmapped="None";
@@ -193,7 +193,7 @@ int main(int argInN, char* argIn[]) {
 //                 outBAMwriteHeader(P->inOut->outBAMfileCoord,P->samHeader,P->chrName,P->chrLength);            
 //             };
         
-        if ( (P->quantModeI & PAR_quantModeI_TranscritomeSAM) > 0) {
+        if ( P->quant.trSAM.yes ) {
             samHeaderStream.str("");
             vector <uint> trlength;
             for (uint32 ii=0;ii<mainTranscriptome->trID.size();ii++) {
@@ -332,7 +332,7 @@ int main(int argInN, char* argIn[]) {
         signalFromBAM(P->outBAMfileCoordName, wigOutFileNamePrefix, *P);
     };
     
-    //aggregate output (junctions, signal, etc)
+    //aggregate output junctions
     //collapse splice junctions from different threads/chunks, and output them
     outputSJ(RAchunk,P);
     

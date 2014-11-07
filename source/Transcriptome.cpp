@@ -1,19 +1,16 @@
 #include "Transcriptome.h"
-#include "ErrorWarning.h"
+#include "streamFuns.h"
+
+//"ERROR_011000"
 
 Transcriptome::Transcriptome (Parameters* Pin) {
     
     P=Pin;
 
+if ( P->quant.trSAM.yes ) {//load exon-transcript structures
     //load tr and ex info
-    ifstream trinfo((P->genomeDir+"/transcriptInfo.tab").c_str());
-    if (trinfo.fail()) {//could not open file
-        ostringstream errOut;
-        errOut << "ERROR_01101: exiting because of *INPUT FILE* error: could not open for reading "<< (P->genomeDir+"/transcriptInfo.tab") <<"\n";
-        errOut << "SOLUTION: if this file is missing from the genome directory, you will need to *re-generate the genome*, \n";
-        errOut << "          if this file is present, check its read permissions\n";
-        exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_FILE_OPEN, *P);
-    };
+    ifstream trinfo;
+    ifstrOpenGenomeFile("transcriptInfo.tab", "ERROR_011001", P, trinfo);
 
     trinfo >> nTr;
     trS=new uint [nTr];
@@ -33,7 +30,8 @@ Transcriptome::Transcriptome (Parameters* Pin) {
 
     trinfo.close();
     
-    ifstream exinfo((P->genomeDir+"/exonInfo.tab").c_str());
+    ifstream exinfo;
+    ifstrOpenGenomeFile("exonInfo.tab", "ERROR_011002", P, exinfo);
 
     exinfo >> nEx;
     exSE = new uint32 [2*nEx];
@@ -48,4 +46,37 @@ Transcriptome::Transcriptome (Parameters* Pin) {
     //
     Ptr=Pin;
 
+} else if ( P->quant.geCount.yes ) {//load exon-gene structures
+    ifstream exinfo;
+    ifstrOpenGenomeFile("exonGeTrInfo.tab", "ERROR_011003", P, exinfo);
+    exinfo >> exG.nEx;
+
+    exG.s=new uint64[exG.nEx];
+    exG.e=new uint64[exG.nEx];
+    exG.str=new uint8[exG.nEx];
+    exG.g=new uint32[exG.nEx];
+    exG.t=new uint32[exG.nEx];
+
+    for (uint ii=0;ii<exG.nEx;ii++) {
+        exinfo >> exG.s[ii] >> exG.e[ii] >> exG.str[ii] >> exG.g[ii] >> exG.t[ii];
+    };
+    exinfo.close();
+
+    ifstream geStream;
+    ifstrOpenGenomeFile("geneInfo.tab", "ERROR_011004", P, geStream);
+    geStream >> nGe;
+    geID.resize(nGe);
+    for (uint ii=0;ii<nGe;ii++) {
+        geStream >> geID[ii];
+    };
+    geStream.close();
+
+};
+
+};
+
+void Transcriptome::quantsAllocate() {
+    if ( P->quant.geCount.yes ) {
+        quants = new Quantifications (nGe);
+    };
 };

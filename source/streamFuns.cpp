@@ -4,6 +4,7 @@
 #include <sys/statvfs.h>
 #include <stdio.h>
 #define fstream_Chunk_Max 2147483647
+
 unsigned long long fstreamReadBig(std::ifstream &S, char* A, unsigned long long N) {
     unsigned long long C=0;
     for (unsigned long long ii=0; ii<N/fstream_Chunk_Max; ii++) {
@@ -60,12 +61,21 @@ void ofstrOpen (std::string fileName, std::string errorID, Parameters *P, ofstre
 };
 
 
-// void ifstrOpen (std::string fileName, std::string errorID, Parameters *P, ifstream & ofStream) {//open file 'fileName', generate error if cannot open
-//     ifStream.open(fileName.c_str());
-//     if (ifStream.fail()) {//
-//         ostringstream errOut;
-//         errOut << errorID<<": exiting because of *INPUT FILE* error: could not open input file "<< fileName <<"\n";
-//         errOut << "Solution: check that the path exists and you have write permission for this file\n";
-//         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_FILE_OPEN, *P);
-//     };    
-// };
+void ifstrOpen (std::string fileName, std::string errorID, std::string solutionString, Parameters *P, ifstream & ifStream) {
+    //open file 'fileName', generate error if cannot open
+    ifStream.open(fileName.c_str());
+    if (ifStream.fail()) {//
+        ostringstream errOut;
+        errOut << errorID<<": exiting because of *INPUT FILE* error: could not open input file "<< fileName <<"\n";
+        errOut << "Solution: check that the file exists and you have read permission for this file\n";
+        if (solutionString.size()>0) {
+            errOut << "          "<< solutionString <<"\n";
+        };
+        exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_FILE_OPEN, *P);
+    };    
+};
+
+void ifstrOpenGenomeFile (std::string fileName, std::string errorID, Parameters *P, ifstream & ifStream) {
+     //open one of the genome files
+     ifstrOpen(P->genomeDir+"/"+fileName, errorID,  "if this file is missing from the genome directory, you will need to *re-generate the genome*", P, ifStream);
+};

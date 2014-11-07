@@ -527,6 +527,12 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         };
     };
 
+    if (!outBAMcoord && outWigFlags.yes && runMode=="alignReads") {
+        ostringstream errOut;
+        errOut <<"EXITING because of fatal PARAMETER error: generating signal with --outWigType requires sorted BAM\n";
+        errOut <<"SOLUTION: re-run STAR with with --outSAMtype BAM SortedByCoordinate, or, id you also need unsroted BAM, with --outSAMtype BAM SortedByCoordinate Unsorted\n";
+        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);                
+    };
     
     //versions
     for (uint ii=0;ii<2;ii++) {
@@ -792,24 +798,28 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     };
     
     //quantification parameters
-    quantModeI=0;
     if (quantMode.at(0) != "-") {
+        quant.yes=true;
         for (uint32 ii=0; ii<quantMode.size(); ii++) {
             if (quantMode.at(ii)=="TranscriptomeSAM") {
-                quantModeI = quantModeI | PAR_quantModeI_TranscritomeSAM;
+                quant.trSAM.yes=true;
                 if (outStd=="BAM_Quant") {
                     outFileNamePrefix="-";
                 } else {
                     outQuantBAMfileName=outFileNamePrefix + "Aligned.toTranscriptome.out.bam";
                 };
                 inOut->outQuantBAMfile=bgzf_open(outQuantBAMfileName.c_str(),("w"+to_string((long long) outBAMcompression)).c_str());
+            } else if  (quantMode.at(ii)=="GeneCounts") {
+                quant.geCount.yes=true;
             } else {
                 ostringstream errOut;
-                errOut << "EXITING because of FATAL INPUT ERROR: unrecognized option in --quantMode=" << quantMode.at(ii) << "\n";
+                errOut << "EXITING because of fatal INPUT error: unrecognized option in --quantMode=" << quantMode.at(ii) << "\n";
                 errOut << "SOLUTION: use one of the allowed values of --quantMode : TranscriptomeSAM or - .\n";     
                 exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
             };
         };
+    } else {
+        quant.yes=false; //no quantification
     };
             
     //two-pass

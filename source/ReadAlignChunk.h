@@ -7,19 +7,21 @@
 #include "OutSJ.h"
 #include "Transcriptome.h"
 #include "BAMoutput.h"
+#include "Quantifications.h"
 
 class ReadAlignChunk {//chunk of reads and alignments
 public:
     Parameters* P;
     ReadAlign* RA;
 
-    Transcriptome *Tr;
+    Transcriptome *chunkTr;
     
     char **chunkIn; //space for the chunk of input reads
     char *chunkOutBAM, *chunkOutBAM1;//space for the chunk of output SAM
     OutSJ *chunkOutSJ, *chunkOutSJ1;
 
     BAMoutput *chunkOutBAMcoord, *chunkOutBAMunsorted, *chunkOutBAMquant;
+    Quantifications *chunkQuants;
     
     istringstream** readInStream;
     ostringstream*  chunkOutBAMstream;

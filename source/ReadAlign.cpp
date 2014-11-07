@@ -3,7 +3,7 @@
 #include "Transcript.h"
 #include "ReadAlign.h"
 
-ReadAlign::ReadAlign (Parameters* Pin, const Genome &genomeIn, Transcriptome *TrIn) : P(Pin), Tr(TrIn) {//allocate arrays
+ReadAlign::ReadAlign (Parameters* Pin, const Genome &genomeIn, Transcriptome *TrIn) : P(Pin), chunkTr(TrIn) {//allocate arrays
 
     G=genomeIn.G;
     SA=genomeIn.SA;
@@ -17,7 +17,7 @@ ReadAlign::ReadAlign (Parameters* Pin, const Genome &genomeIn, Transcriptome *Tr
     memset(winBin[1],255,sizeof(winBin[0][0])*P->winBinN);
     
     //transcriptome
-    if ( (P->quantModeI & PAR_quantModeI_TranscritomeSAM) > 0) {
+    if ( P->quant.trSAM.yes ) {
         alignTrAll=new Transcript [P->alignTranscriptsPerReadNmax];
     };
     

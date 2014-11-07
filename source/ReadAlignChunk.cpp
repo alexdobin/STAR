@@ -2,11 +2,18 @@
 #include <pthread.h>
 #include "ErrorWarning.h"
 
-ReadAlignChunk::ReadAlignChunk(Parameters* Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk) : P(Pin),Tr(TrIn) {//initialize chunk
+ReadAlignChunk::ReadAlignChunk(Parameters* Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk) : P(Pin) {//initialize chunk
     
     iThread=iChunk;
+
+    if ( P->quant.yes ) {//allocate transcriptome structures
+        chunkTr=new Transcriptome(*TrIn);
+        chunkTr->quantsAllocate();
+    } else {
+        chunkTr=NULL;
+    };   
     
-    RA = new ReadAlign(P,genomeIn, Tr);//new local copy of RA for each chunk
+    RA = new ReadAlign(P, genomeIn, chunkTr);//new local copy of RA for each chunk
    
     RA->iRead=0;
     
@@ -48,14 +55,14 @@ ReadAlignChunk::ReadAlignChunk(Parameters* Pin, Genome &genomeIn, Transcriptome 
         RA->outBAMcoord=NULL;
     };    
     
-    if ( (P->quantModeI & PAR_quantModeI_TranscritomeSAM) > 0) {
+    if ( P->quant.trSAM.yes ) {
         chunkOutBAMquant = new BAMoutput (P->chunkOutBAMsizeBytes,P->inOut->outQuantBAMfile);
         RA->outBAMquant = chunkOutBAMquant;
     } else {
         chunkOutBAMquant=NULL;
         RA->outBAMquant=NULL;
     };         
-    
+
     chunkOutSJ=new OutSJ (P->limitOutSJcollapsed, P);
     chunkOutSJ1=new OutSJ (P->limitOutSJcollapsed, P);
 

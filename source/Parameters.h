@@ -9,8 +9,6 @@
 #include <unistd.h>
 #include <signal.h>
 
-#define PAR_quantModeI_TranscritomeSAM 0x1
-
 class Parameters {
     
     public:
@@ -191,7 +189,11 @@ class Parameters {
         //quantification parameters
             //input
         vector <string> quantMode; //quantification mode input string
-        uint32 quantModeI; //quantification mode integer
+        struct {
+          bool yes; //if any quantification is done
+          struct {bool yes;} trSAM;
+          struct {bool yes;} geCount;
+        } quant;
         
         //chimeric
         uint chimSegmentMin, chimJunctionOverhangMin; //min chimeric donor/acceptor length

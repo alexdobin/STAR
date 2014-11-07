@@ -39,7 +39,7 @@ genomeLoad                NoSharedMemory
 ### Genome Generation Parameters
 
 genomeFastaFiles            -
-    string(s): path(s) to the fasta files with genomic sequences for genome generation, separated by spaces. Only used if runMode==genomeGenerate.
+    string(s): path(s) to the fasta files with genomic sequences for genome generation, separated by spaces. Only used if runMode==genomeGenerate. These files should be plain text FASTA files, they *cannot* be zipped.
 
 genomeChrBinNbits           18
     int: =log2(chrBin), where chrBin is the size of the bins for genome storage: each chromosome will occupy an integer number of bins
@@ -238,7 +238,7 @@ bamRemoveDuplicatesMate2basesN   0
 
 ### Output Wiggle
 outWigType          None
-    string(s): type of signal output, e.g. "bedGraph" OR "bedGraph read1_5p"
+    string(s): type of signal output, e.g. "bedGraph" OR "bedGraph read1_5p". Requires sorted BAM: --outSAMtype BAM SortedByCoordinate .
                     1st word:
                     None       ... no signal output
                     bedGraph   ... bedGraph format 
@@ -464,6 +464,7 @@ quantMode                   -
     string(s): types of quantification requested
                             -                ... none
                             TranscriptomeSAM ... output SAM/BAM alignments to transcriptome into a separate file
+                            GeneCounts       ... count reads per gene
 
 ### 2-pass Mapping
 twopass1readsN              0

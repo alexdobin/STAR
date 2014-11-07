@@ -10,7 +10,7 @@
 #include <time.h>
 #include "Transcriptome.h"
 #include "BAMoutput.h"
-
+#include "Quantifications.h"
 
 class ReadAlign : public Genome {
     public:
@@ -20,7 +20,7 @@ class ReadAlign : public Genome {
         Stats statsRA;
         
         //quantification
-        Transcriptome *Tr;
+        Transcriptome *chunkTr;
         
         //mapping time
         time_t timeStart, timeFinish;

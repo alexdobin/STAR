@@ -63,6 +63,31 @@ inline uint32 binarySearch1(argType x, argType *X, uint32 N) {
     return i1;
 };
 
+template <class argType>
+inline int32 binarySearch1a(argType x, argType *X, int32 N) {
+    //binary search in the sorted list
+    //check the boundaries first
+    
+    if (x>X[N-1]) {
+        return N-1;
+    } else if (x<X[0]) {
+        return -1;
+    };
+    
+    int32 i1=0, i2=N-1, i3=N/2;
+    while (i2>i1+1) {//binary search
+        i3=(i1+i2)/2;
+        if (X[i3]>x) {
+            i2=i3;
+        } else {
+            i1=i3;
+        };
+    };
+    
+    while (i1<N && x==X[i1+1]) ++i1; //go forward to check for equals
+    return i1;
+};
+
 
 #endif
 
