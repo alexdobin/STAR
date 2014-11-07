@@ -284,7 +284,7 @@ int main(int argInN, char* argIn[]) {
         
         uint totalMem=0;
 //         P->inOut->logMain << "Started sorting BAM ..." <<endl;
-        #pragma omp parallel num_threads(P->runThreadN) 
+        #pragma omp parallel num_threads(P->outBAMsortingThreadNactual) 
         #pragma omp for schedule (dynamic,1)
         for (uint32 ibin=0; ibin<RAchunk[0]->chunkOutBAMcoord->nBins; ibin++) {
             

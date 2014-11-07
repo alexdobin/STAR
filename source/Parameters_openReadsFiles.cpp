@@ -79,7 +79,11 @@ void Parameters::openReadsFiles() {
                 
                 case 0:
                     //this is the child
-                    execlp(readsCommandFileName.at(imate).c_str(), readsCommandFileName.at(imate).c_str(), (char*) NULL); 
+                    if (sysShell!="-") {//executed via specified shell
+                        execlp(sysShell.c_str(), "-c", readsCommandFileName.at(imate).c_str(), (char*) NULL);                     
+                    } else {//execute the command directly with default shell
+                        execlp(readsCommandFileName.at(imate).c_str(), readsCommandFileName.at(imate).c_str(), (char*) NULL); 
+                    };
                     exit(0);
                     
                 default:

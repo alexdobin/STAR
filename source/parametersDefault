@@ -8,6 +8,11 @@ versionGenome           020101 020200
 parametersFiles          -
     string: name of a user-defined parameters file, "-": none. Can only be defined on the command line.
 
+### System
+sysShell            -
+    string: path to the shell binary, preferrably bash, e.g. /bin/bash. 
+                    - ... the default shell is executed, typically /bin/sh. This was reported to fail on some Ubuntu systems - then you need to specify path to bash.
+
 ### Run Parameters
 
 runMode                         alignReads
@@ -222,9 +227,11 @@ outSAMheaderPG          -
 outSAMheaderCommentFile -
     string: path to the file with @CO (comment) lines of the SAM header
 
-outBAMcompression   -1
-    int: -1 to 10  BAM compression level, -1=default compression, 0=no compression, 10=maximum compression
+outBAMcompression       1
+    int: -1 to 10  BAM compression level, -1=default compression (6?), 0=no compression, 10=maximum compression
 
+outBAMsortingThreadN    0
+    int: >=0: number of threads for BAM sorting. 0 will default to min(6,--runThreadN).
 
 ### BAM processing
 

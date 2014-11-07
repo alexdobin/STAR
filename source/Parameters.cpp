@@ -26,6 +26,9 @@ Parameters::Parameters() {//initalize parameters info
     //parameters
     parArray.push_back(new ParameterInfoVector <string> (-1, 2, "parametersFiles", &parametersFiles));
     
+    //system 
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "sysShell", &sysShell));            
+    
     //run
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "runMode", &runMode));
     parArray.push_back(new ParameterInfoScalar <int> (-1, -1, "runThreadN", &runThreadN));        
@@ -81,6 +84,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "outSAMheaderPG", &outSAMheaderPG));
     parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "outSAMheaderCommentFile", &outSAMheaderCommentFile));
     parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "outBAMcompression", &outBAMcompression));
+    parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "outBAMsortingThreadN", &outBAMsortingThreadN));
 
 
    //output SJ filtering
@@ -505,7 +509,12 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                     outBAMfileCoordName=outFileNamePrefix + "Aligned.sortedByCoord.out.bam";
                 };                
                 inOut->outBAMfileCoord = bgzf_open(outBAMfileCoordName.c_str(),("w"+to_string((long long) outBAMcompression)).c_str());
-                outBAMcoordNbins=max(runThreadN*3,10);
+                if (outBAMsortingThreadN==0) {
+                    outBAMsortingThreadNactual=min(6, runThreadN);
+                } else {
+                    outBAMsortingThreadNactual=outBAMsortingThreadN;
+                };                
+                outBAMcoordNbins=max(outBAMsortingThreadNactual*3,10);
                 outBAMsortTmpDir=outFileTmp+"/BAMsort/";
                 mkdir(outBAMsortTmpDir.c_str(),S_IRWXU);  
             };                
@@ -859,6 +868,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         };
         inOut->logMain<<"WARNING: --limitBAMsortRAM=0, will use genome sizeas RAM linit foro BAM sorting\n";
     };
+
     inOut->logMain << "Finished loading and checking parameters\n" <<flush;
 };
 

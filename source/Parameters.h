@@ -21,6 +21,9 @@ class Parameters {
         uint versionSTAR;
         vector <uint> versionGenome;
         
+        //system parameters
+        string sysShell; //shell for executing system commands
+        
         // run parameters
         string runMode;
         int   runThreadN;
@@ -108,7 +111,7 @@ class Parameters {
         string outBAMsortTmpDir;
         string bamRemoveDuplicatesType;
         uint bamRemoveDuplicatesMate2basesN;
-        
+        int outBAMsortingThreadN, outBAMsortingThreadNactual;
         
         string outReadsUnmapped;
         int outQSconversionAdd;
