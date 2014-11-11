@@ -69,6 +69,10 @@ int ReadAlign::oneRead() {//process one read: load, map, write
     //map the read
     mapOneRead();
     
+    #ifdef OFF_BEFORE_OUTPUT
+        #warning OFF_BEFORE_OUTPUT
+        return 0;
+    #endif
     //write out alignments
     outputAlignments();
     

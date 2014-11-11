@@ -118,6 +118,13 @@ void ReadAlign::stitchPieces(char **R, char **Q, char *G, PackedArray& SA, uint 
     
     nWall=nW;
     
+    #ifdef OFF_BEFORE_SEEDdistribution
+        #warning OFF_BEFORE_SEEDdistribution
+        nW=0;
+        nTr=0;
+        return;
+    #endif
+        
     for (uint iP=0; iP<nP; iP++) {//scan through all pieces/aligns, add them to alignment windows, create alignment coordinates
         uint aNrep=PC[iP][PC_Nrep];
         uint aFrag=PC[iP][PC_iFrag];  
@@ -355,7 +362,12 @@ for (uint iW=0;iW<nW;iW++) {
 std::time(&timeStart);
 #endif
     
-    
+    #ifdef OFF_BEFORE_STITCH
+        #warning OFF_BEFORE_STITCH
+        nW=0;
+        nTr=0;
+        return;
+    #endif
     //generate transcript for each window, choose the best
     trInit->nWAmax=0;
     trBest = trNext = trInit; //initialize next/best

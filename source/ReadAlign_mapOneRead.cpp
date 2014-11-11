@@ -4,6 +4,12 @@
 
 int ReadAlign::mapOneRead() {   
     
+    #ifdef OFF_BEFORE_SEEDING
+        #warning OFF_BEFORE_SEEDING
+        nW=0;
+        return 0;
+    #endif    
+    
     revertStrand = false; //the 2nd read is awlays on opposite strand. 1st and 2nd reads have already been reversed.        
     
     if (Lread>0) {
@@ -70,6 +76,11 @@ int ReadAlign::mapOneRead() {
             };//for (uint istart=0; istart<Nstart; istart++)
         };
     };
+    
+    #ifdef OFF_AFTER_SEEDING
+        #warning OFF_AFTER_SEEDING
+        return 0;
+    #endif
     
     nTr=0;//nothing mapped yet
     if (Lread<P->outFilterMatchNmin) {//read is too short (trimmed too much?)

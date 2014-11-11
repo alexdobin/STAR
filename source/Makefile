@@ -24,8 +24,9 @@ LDFLAGS_Mac_static :=-pthread -lz -static-libgcc htslib/libhts.a
 LDFLAGS_gdb := $(LDFLAGS)
 
 COMPTIMEPLACE := -D'COMPILATION_TIME_PLACE="$(shell echo `date` $(HOSTNAME):`pwd`)"'
+EXTRAFLAGS := 
 
-CCFLAGS_common := -pipe -std=c++0x -Wall -Wextra -fopenmp $(COMPTIMEPLACE) $(OPTIMFLAGS) $(OPTIMFLAGS1)
+CCFLAGS_common := -pipe -std=c++0x -Wall -Wextra -fopenmp $(COMPTIMEPLACE) $(OPTIMFLAGS) $(OPTIMFLAGS1) $(EXTRAFLAGS)
 CCFLAGS_main := -O3 $(CCFLAGS_common)
 CCFLAGS_gdb :=  -O0 -g $(CCFLAGS_common)
 

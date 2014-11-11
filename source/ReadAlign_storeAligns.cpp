@@ -14,6 +14,11 @@
 
 void ReadAlign::storeAligns (uint iDir, uint Shift, uint Nrep, uint L, uint indStartEnd[2], uint iFrag) {//fill in alignment data
 
+    #ifdef OFF_BEFORE_STORE
+        #warning OFF_BEFORE_STORE
+        return;
+    #endif   
+        
     if ( Nrep > P->seedMultimapNmax ) {// if a piece maps too many times, do not store it
         if ( Nrep < multNmin || multNmin==0 ) {multNmin=Nrep; multNminL=L;};
         return;     
@@ -35,6 +40,21 @@ void ReadAlign::storeAligns (uint iDir, uint Shift, uint Nrep, uint L, uint indS
     };
 
     iP=iP+1; //this is the insertion place
+
+//     int iP2=nP-1;
+//     bool replacePiece=false;
+// //     for (int iP1=0; iP1<nP; iP1++) {    
+//     for (int iP1=nP-1; iP1>=0; iP1--) {
+//         if ( (PC[iP1][PC_rStart]==rStart) && PC[iP1][PC_Length]==L ) return; //same alignment as before, do not store!   
+//         if ( rStart>=PC[iP1][PC_rStart] && 
+//         
+//         if ( iP2==nP-1 && rStart > PC[iP1][0] || (rStart == PC[iP1][0] && L<=PC[iP1][PC_Length]) ) {
+//             iP2=iP1;
+// //             break;
+//         };
+//     };
+// 
+//     int iP=iP2+1; //this is the insertion place
 
     for (int ii=nP-1;ii>=iP;ii--) {//move old entries to free space for the new one
         for (int jj=0;jj<PC_SIZE;jj++) PC[ii+1][jj]=PC[ii][jj];
