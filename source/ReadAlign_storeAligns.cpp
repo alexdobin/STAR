@@ -63,11 +63,14 @@ void ReadAlign::storeAligns (uint iDir, uint Shift, uint Nrep, uint L, uint indS
     for (iP1=0; iP1<nP; iP1++) {
         if ( (PC[iP1][PC_rStart]==rStart) && PC[iP1][PC_Length]==L ) return; //exactly the same piece
         if ( rStart >= PC[iP1][PC_rStart] ) {//is new seed within an old seed
-            if ( rStart+L <= PC[iP1][PC_rStart]+PC[iP1][PC_Length] ) {//new piece is within the old piece
-                //decide whether to keep the old one
-                if ( (PC[iP1][PC_Nrep]>P->winAnchorMultimapNmax || Nrep<=P->winAnchorMultimapNmax)) {//old piece is not anchor, or new piece is anchor
-                    PC[iP1][PC_Dir]=-1;//do not keep the old piece
-                    ++nRemove;
+            if ( rStart+L <= PC[iP1][PC_rStart]+PC[iP1][PC_Length] ) {//new seed is within the old piece
+                //decide whether to keep the new one
+                if ( (PC[iP1][PC_Nrep]==Nrep)) {//seeds map the same number of times  == to the same loci
+                    if (nRemove>0) {//debug
+                        cout << "BUG: nRemove="<<nRemove<<" iRead="<<iRead<<flush;
+                        exit(-1);
+                    };
+                    return;//do not store the new piece
                 };
             };
         };
@@ -75,12 +78,9 @@ void ReadAlign::storeAligns (uint iDir, uint Shift, uint Nrep, uint L, uint indS
         if ( rStart <= PC[iP1][PC_rStart] )  {//is old seed within new seed
             if ( rStart+L >= PC[iP1][PC_rStart]+PC[iP1][PC_Length] ) {//old piece is within the new piece
                 //decide whether to keep the new piece
-                if ( (Nrep>P->winAnchorMultimapNmax || PC[iP1][PC_Nrep]<=P->winAnchorMultimapNmax) ) {//new piece is not anchor, or old piece is an anchor
-                    if (nRemove>0) {//debug
-                        cout << "BUG: nRemove="<<nRemove<<" iRead="<<iRead<<flush;
-                        exit(-1);
-                    };
-                    return;//do not store the new piece
+                if ( (PC[iP1][PC_Nrep]==Nrep)) {//seeds map the same number of times  == to the same loci
+                    PC[iP1][PC_Dir]=-1;//do not keep the old piece
+                    ++nRemove;
                 };
             };
         };
