@@ -24,6 +24,7 @@ void ReadAlign::storeAligns (uint iDir, uint Shift, uint Nrep, uint L, uint indS
     
     uint rStart=iDir==0 ? Shift : Shift+1-L;//alignment read-start
         
+  #define OPTIM_STOREaligns_SIMPLE
   #ifdef OPTIM_STOREaligns_SIMPLE
     //find the place to insert the new entry to keep it sorted
     int iP;

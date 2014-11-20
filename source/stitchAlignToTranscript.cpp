@@ -37,6 +37,15 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
             uint gBend=gBstart+L-1;
             uint rBend=rBstart+L-1;    
 
+//             {//debug 
+//                 if (sjAB!=((uint) -1) && trA->exons[trA->nExons-1][EX_sjA]!=((uint) -1) && rBend<=rAend) {//
+//                     Score -= rAend-rBstart+1;
+//                     gAend -= rAend-rBstart+1;
+//                     rAend = rBstart-1;
+//                     trA->exons[trA->nExons-1][EX_L] =rAend-trA->exons[trA->nExons-1][EX_R]+1;
+//                 };
+//             };
+            
             //check if r-overlapping fully and exit
             if (rBend<=rAend) return -1000001; 
             if (gBend<=gAend && trA->exons[trA->nExons-1][EX_iFrag]==iFragB) return -1000002; 

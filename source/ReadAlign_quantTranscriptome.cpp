@@ -55,6 +55,15 @@ uint ReadAlign::quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript 
             outBAMquant->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], imate>0 ? 0 : outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1]);
         };        
     };
+    
+    if (nAlignT==0 && P->outSAMunmapped=="Within") {//read could not be mapped to transcriptome
+        uint unmapType=5;
+        bool mateMapped[2]={false,false};
+        alignBAM(*alignG[0], 0, 0, P->chrStart[alignG[0]->Chr], (uint) -1, (uint) -1, 0,  unmapType, mateMapped, P->outSAMattrOrder);
+            for (uint imate=0; imate<P->readNmates; imate++) {//output each mate
+                outBAMquant->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], imate>0 ? 0 : outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1]);
+            };
 
+    };
     return nAlignT;    
 };

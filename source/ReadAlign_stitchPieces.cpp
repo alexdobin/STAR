@@ -269,17 +269,11 @@ std::time(&timeStart);
     for (uint iW=0; iW<nW; iW++) {//transcripts for all windows
 
         if (nWA[iW]==0) continue; //the window does not contain any aligns because it was merged with other windows        
-
-//         {//debug
-//             for (uint ii=0;ii<nWA[iW];ii++) {
-//                         cout << iRead+1 <<"\t"<< WA[iW][ii][WA_Length] <<"\t"<< WA[iW][ii][WA_rStart] <<"\t"<< WA[iW][ii][WA_gStart] << "\n";
-//             };
-//             continue;
-//             cout << nWA[iW]<<" "<<swWinCov[iW]*100/Lread <<"   "<<flush;
-//     //         continue;
-//         
-//         };
         
+//         {//debug
+//             if ( WA[iW][0][WA_iFrag]==WA[iW][nWA[iW]-1][WA_iFrag] ) continue;
+//         };
+//         
         if (WlastAnchor[iW]<nWA[iW]) {
             WA[ iW ][ WlastAnchor[iW] ][ WA_Anchor]=2; //mark the last anchor
         };

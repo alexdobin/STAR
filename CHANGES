@@ -1,3 +1,4 @@
+Fixed a bug that prevented output of transcriptomic alignments (--quantMode TranscriptomeSAM)  with 1 base junction overhangs.
 Added --sysShell option to specify path to bash, in cases where bash is not the default shell.
 --outBAMcompression default changed 1, which apparently does not change deflation ratio, but is much faster.
 Add --outBAMsortingThreadN option tp specify number of threads for BAM sorting. By default (0) it's equal to min(6,runThreadN).

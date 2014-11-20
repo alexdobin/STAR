@@ -113,7 +113,7 @@ void ReadAlign::outputAlignments() {
     };
 
     if (unmapType>=0 && P->outSAMunmapped=="Within") {//unmapped read, at least one mate
-        if (P->outBAMunsorted || P->outBAMcoord) {//BAM output
+        if (P->outBAMunsorted || P->outBAMcoord || P->quant.trSAM.yes) {//BAM output
             alignBAM(*trBest, 0, 0, P->chrStart[trBest->Chr], (uint) -1, (uint) -1, 0,  unmapType, mateMapped, P->outSAMattrOrder);
             for (uint imate=0; imate<P->readNmates; imate++) {//output each mate
                 if (P->outBAMunsorted) outBAMunsorted->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], imate>0 ? 0 : outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1]);

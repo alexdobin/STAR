@@ -9,11 +9,14 @@ int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, ui
     uint32 g1=aG.exons[0][EX_G]-trS1;//start of the transcript
     uint32 ex1=binarySearch1<uint32>(g1, exSE1, 2*exN1);
     
-    if (ex1%2==1) {//beginning of the read in the middle of the exon?
-        return 0; //align does not belong to this transcript
-    } else {
-        ex1=ex1/2; //this is the first exon of the alignment
+    if (ex1%2==1) {//beginning of the read >=end of an exon
+        if (exSE1[ex1]==g1) {//first base of the read is exactly the last base of the exon
+            --ex1;
+        } else {
+            return 0;//beginning of the read is past the end of an exon, align does not belong to this transcript
+        };
     };
+    ex1=ex1/2; //this is the first exon of the alignment
     
     aT.nExons=0;
     
