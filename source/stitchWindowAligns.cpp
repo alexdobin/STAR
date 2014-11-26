@@ -81,7 +81,14 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
             };
         };
         };
-           
+        
+        if (P->alignSoftClipAtReferenceEnds=="No" &&  \
+                ( (trA.exons[trA.nExons-1][EX_G] + Lread-trA.exons[trA.nExons-1][EX_R]) > (P->chrStart[trA.Chr]+P->chrLength[trA.Chr]) || \
+                   trA.exons[0][EX_G]<(P->chrStart[trA.Chr]+trA.exons[0][EX_R]) ) ) {
+            return; //no soft clipping past the ends of the chromosome
+        };
+        
+        
         trA.rLength = 0;
         for (uint isj=0;isj<trA.nExons;isj++) {
             trA.rLength += trA.exons[isj][EX_L];

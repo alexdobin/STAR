@@ -11,7 +11,7 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
     if (unmapType>=0) {//unmapped reads: SAM
         for (uint imate=0;imate<P->readNmates;imate++) {//cycle over mates
             if (!mateMapped[imate]) {
-                int samFLAG=0x4;
+                uint16 samFLAG=0x4;
                 if (P->readNmates==2) {//paired read
                     samFLAG+=0x1 + (imate==0 ? 0x40 : 0x80);
                     if (mateMapped[1-imate]) {//mate mapped
@@ -185,7 +185,7 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
             MAPQ=3;
         };
         
-        *outStream << readName+1 <<"\t"<< samFLAG <<"\t"<< P->chrName[trOut.Chr] <<"\t"<< trOut.exons[iEx1][EX_G] + 1 - P->chrStart[trOut.Chr]
+        *outStream << readName+1 <<"\t"<< ((samFLAG & P->outSAMflagAND) | P->outSAMflagOR) <<"\t"<< P->chrName[trOut.Chr] <<"\t"<< trOut.exons[iEx1][EX_G] + 1 - P->chrStart[trOut.Chr]
                 <<"\t"<< MAPQ <<"\t"<< CIGAR;
 
         if (nMates>1) {

@@ -77,7 +77,7 @@ class Parameters {
         uint alignIntronMin;//min length to call a gap an intron
         uint alignIntronMax;//max length to call 
         uint alignMatesGapMax;//max gap between the mates (if paired-end)
-        string alignEndsType;
+        string alignEndsType, alignSoftClipAtReferenceEnds;
         
         //seed parameters
         uint seedMultimapNmax; //max number of multiple alignments per piece          
@@ -112,6 +112,7 @@ class Parameters {
         string bamRemoveDuplicatesType;
         uint bamRemoveDuplicatesMate2basesN;
         int outBAMsortingThreadN, outBAMsortingThreadNactual;
+        uint16 outSAMflagOR, outSAMflagAND;
         
         string outReadsUnmapped;
         int outQSconversionAdd;
@@ -175,7 +176,7 @@ class Parameters {
         string annotSignalFile;//binary file with annotation signal
     
         //SJ database parameters
-        string sjdbFileChrStartEnd;
+        vector <string> sjdbFileChrStartEnd;
         string sjdbGTFfile, sjdbGTFchrPrefix, sjdbGTFfeatureExon, sjdbGTFtagExonParentTranscript, sjdbGTFtagExonParentGene;
         uint sjdbOverhang,sjdbLength; //length of the donor/acceptor, length of the sj "chromosome" =2*sjdbOverhang+1 including spacer
         int sjdbScore;        

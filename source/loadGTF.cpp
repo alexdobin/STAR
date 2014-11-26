@@ -4,6 +4,8 @@
 #include "serviceFuns.cpp"
 #include "SjdbClass.h"
 #include "streamFuns.h"
+#include "TimeFunctions.h"
+#include <ctime>
 
 #include <map>
 
@@ -33,6 +35,11 @@
 uint loadGTF(SjdbClass &sjdbLoci, Parameters *P) {//load gtf file, add junctions to P->sjdb
     //returns number of added junctions
     if (P->sjdbOverhang>0 && P->sjdbGTFfile!="-") {       
+        time_t rawTime;
+        time(&rawTime);
+        P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ... Starting GTF processing\n" <<flush;
+        *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... Starting GTF processing\n" <<flush;           
+        
         ifstream sjdbStreamIn ( P->sjdbGTFfile.c_str() );   
         if (sjdbStreamIn.fail()) {
             ostringstream errOut;
@@ -262,6 +269,10 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P) {//load gtf file, add junctions
         
         P->inOut->logMain << "Processing sjdbGTFfile=" << P->sjdbGTFfile <<", found:\n";
         P->inOut->logMain << "\t\t"  << transcriptIDnumber.size() <<" transcripts\n" << "\t\t"  << exonN << " exons (non-collapsed)\n" << "\t\t"  << sjdbLoci.chr.size()-sjdbN1 << " collapsed junctions\n";
+        time(&rawTime);
+        P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ... Finished GTF processing\n" <<flush;
+        *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... Finished GTF processing\n" <<flush;           
+        
         
         return sjdbLoci.chr.size()-sjdbN1;
     } else {

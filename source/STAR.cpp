@@ -123,11 +123,12 @@ int main(int argInN, char* argIn[]) {
         //reopen reads files
         P->closeReadsFiles();
         P->openReadsFiles();
+    } else {//not 2-pass
+        //nothing for now
     };
 
     //initialize Stats
     g_statsAll.resetN();
-    g_statsAll.progressReportHeader(P->inOut->logProgress);    
     time(&g_statsAll.timeStartMap);
     *P->inOut->logStdOut << timeMonthDayTime(g_statsAll.timeStartMap) << " ..... Started mapping\n" <<flush;
     

@@ -1,3 +1,8 @@
+Added --alignSoftClipAtReferenceEnds No option which prevents soft clipping of alignments at the reference (chromosome) ends, for compatibility with Cufflinks/cuffmerge.
+Fixed wrong output of chimeric junctions boundaries in the Chimeric.out.junction file.
+Added --outSAMflagOR, --outSAMflagAND options to set specific bits of the SAM FLAG.
+--sjdbFileChrStartEnd can now accept multiple files which will be concatenated.
+Fixed the header of the Log.progress.out .
 Fixed a bug that prevented output of transcriptomic alignments (--quantMode TranscriptomeSAM)  with 1 base junction overhangs.
 Added --sysShell option to specify path to bash, in cases where bash is not the default shell.
 --outBAMcompression default changed 1, which apparently does not change deflation ratio, but is much faster.

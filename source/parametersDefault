@@ -57,7 +57,7 @@ genomeSAsparseD             1
 
 ### Splice Junctions Database
 sjdbFileChrStartEnd                     -
-    string: path to the file with genomic coordinates (chr <tab> start <tab> end <tab> strand) for the introns
+    string(s): path to the files with genomic coordinates (chr <tab> start <tab> end <tab> strand) for the splice junction introns. Multiple files can be supplied wand will be concatenated.
 
 sjdbGTFfile                             -
     string: path to the GTF file with annotations
@@ -213,10 +213,17 @@ outSAMreadID			Standard
 outSAMmapqUnique        255
     int: 0 to 255: the MAPQ value for unique mappers
 
+outSAMflagOR           0
+    int: 0 to 65535: sam FLAG will be bitwise OR'd with this value, i.e. FLAG=FLAG | outSAMflagOR. This is applied after all flags have been set by STAR, and after outSAMflagAND. Can be used to set specific bits that are not set otherwise.
+
+outSAMflagAND           65535
+    int: 0 to 65535: sam FLAG will be bitwise AND'd with this value, i.e. FLAG=FLAG & outSAMflagOR. This is applied after all flags have been set by STAR, but before outSAMflagOR. Can be used to unset specific bits that are not set otherwise.
+
 outSAMattrRGline        -
     string(s): SAM/BAM read group line. The first word contains the read group identifier and must start with "ID:", e.g. --outSAMattrRGline ID:xxx CN:yy "DS:z z z". 
             xxx will be added as RG tag to each output alignment. Any spaces in the tag values have to be double quoted.
-            Comma separated RG lines correspons to different (comma separated) input files in --readFilesIn.
+            Comma separated RG lines correspons to different (comma separated) input files in --readFilesIn. Commas have to be surrounded by spaces, e.g.
+            --outSAMattrRGline ID:xxx , ID:zzz "DS:z z" , ID:yyy DS:yyyy
 
 outSAMheaderHD          -
     strings: @HD (header) line of the SAM header
@@ -425,10 +432,13 @@ alignTranscriptsPerReadNmax               10000
 
 alignEndsType           Local
     string: type of read ends alignment
-                        Local  ...standard local alignment with soft-clipping allowed
-                        EndToEnd: force end-to-end read alignment, do not soft-clip
+                        Local  ... standard local alignment with soft-clipping allowed
+                        EndToEnd ... force end-to-end read alignment, do not soft-clip
 
-
+alignSoftClipAtReferenceEnds Yes
+    string: allow the soft-clipping of the alignments past the end of the chromosomes
+                        Yes ... allow
+                        No  ... prohibit, useful for compatibility with Cufflinks
 
 ### Windows, Anchors, Binning
 

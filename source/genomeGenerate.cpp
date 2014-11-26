@@ -7,7 +7,7 @@
 #include "ErrorWarning.h"
 #include "loadGTF.h"
 #include "SjdbClass.h"
-#include "sjdbLoadFromStream.h"
+#include "sjdbLoadFromFiles.h"
 #include "sjdbPrepare.h"
 
 #include "serviceFuns.cpp"
@@ -127,7 +127,7 @@ uint genomeScanFastaFiles (Parameters *P, char* G, bool flagRun) {//scans fasta 
 void genomeGenerate(Parameters *P) {
     
     //check parameters
-    if (P->sjdbOverhang==0 && (P->sjdbFileChrStartEnd!="-" || P->sjdbGTFfile!="-")) {
+    if (P->sjdbOverhang==0 && (P->sjdbFileChrStartEnd.at(0)!="-" || P->sjdbGTFfile!="-")) {
         ostringstream errOut;
         errOut << "EXITING because of FATAL INPUT PARAMETER ERROR: for generating genome with annotations (--sjdbFileChrStartEnd or --sjdbGTFfile options)\n";
         errOut << "you need to specify non-zero --sjdbOverhang\n";
@@ -160,7 +160,11 @@ void genomeGenerate(Parameters *P) {
     genomePar << "genomeChrBinNbits\t" << P->genomeChrBinNbits << "\n";
     genomePar << "genomeSAsparseD\t" << P->genomeSAsparseD <<"\n";
     genomePar << "sjdbOverhang\t" << P->sjdbOverhang <<"\n";
-    genomePar << "sjdbFileChrStartEnd\t" << P->sjdbFileChrStartEnd <<"\n";
+
+    genomePar << "sjdbFileChrStartEnd\t";
+    for (uint ii=0;ii<P->sjdbFileChrStartEnd.size();ii++) genomePar<< P->sjdbFileChrStartEnd.at(ii) << " ";
+    genomePar<<"\n";
+    
     genomePar << "sjdbGTFfile\t" << P->sjdbGTFfile <<"\n";
     genomePar << "sjdbGTFchrPrefix\t" << P->sjdbGTFchrPrefix <<"\n";
     genomePar << "sjdbGTFfeatureExon\t" << P->sjdbGTFfeatureExon <<"\n";
@@ -171,33 +175,13 @@ void genomeGenerate(Parameters *P) {
     
     //add the sjdb sequences to the genome
     SjdbClass sjdbLoci;
-    
-   
-    if (P->sjdbOverhang>0 && P->sjdbFileChrStartEnd!="-") {       
-        ifstream sjdbStreamIn ( P->sjdbFileChrStartEnd.c_str() );   
-        if (sjdbStreamIn.fail()) {
-            ostringstream errOut;
-            errOut << "FATAL INPUT error, could not open input file sjdbFileChrStartEnd=" << P->sjdbFileChrStartEnd <<"\n";
-            exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
-        };
-        
-        sjdbLoadFromStream(sjdbStreamIn, sjdbLoci);
-        
-        P->inOut->logMain << "Loaded database junctions from file: " << P->sjdbFileChrStartEnd <<": "<<sjdbLoci.chr.size()<<" junctions\n\n";
-        
-    }; //if (P->sjdbFileChrStartEnd!="-")
+    sjdbLoadFromFiles(P, sjdbLoci);
 
     char *G=NULL, *G1=NULL;        
     uint nGenomeReal=genomeScanFastaFiles(P,G,false);//first scan the fasta file to fins all the sizes  
     P->chrBinFill();
 
-    time(&rawTime);
-    P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ... Starting GTF processing\n" <<flush;
-    *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... Starting GTF processing\n" <<flush;           
     loadGTF(sjdbLoci, P);    
-    time(&rawTime);
-    P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ... Finished GTF processing\n" <<flush;
-    *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... Finished GTF processing\n" <<flush;           
 
     uint L=10000;//maximum length of genome suffix    
     uint nG1alloc=(nGenomeReal + sjdbLoci.chr.size()*P->sjdbLength+L)*2;

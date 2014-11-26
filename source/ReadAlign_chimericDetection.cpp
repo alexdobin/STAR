@@ -133,18 +133,18 @@ void ReadAlign::chimericDetection() {
                 chimN=2;
                 chimRepeat=0;
                 chimMotif=-1;
-                if (trChim[0].Str==1) {                    
+                if (trChim[0].Str==1) {//negative strand                    
                     chimJ0=trChim[0].exons[e0][EX_G]-1;
                 } else {
                     chimJ0=trChim[0].exons[e0][EX_G]+trChim[0].exons[e0][EX_L];                            
                 };            
-                if (trChim[1].Str==1) {                    
+                if (trChim[1].Str==0) {//positive strand                    
                     chimJ1=trChim[1].exons[e1][EX_G]-1;
                 } else {
                     chimJ1=trChim[1].exons[e1][EX_G]+trChim[1].exons[e1][EX_L];                            
                 };                    
             } else {//chimeric junctions is within one of the mates, check and shift chimeric junction if necessary
-                if (trChim[0].exons[e0][EX_L]>=P->chimJunctionOverhangMin && trChim[1].exons[e1][EX_L]>=P->chimJunctionOverhangMin ) {//large enough overhanh required
+                if (trChim[0].exons[e0][EX_L]>=P->chimJunctionOverhangMin && trChim[1].exons[e1][EX_L]>=P->chimJunctionOverhangMin ) {//large enough overhang required
                     uint roStart0 = trChim[0].Str==0 ? trChim[0].exons[e0][EX_R] : Lread - trChim[0].exons[e0][EX_R] - trChim[0].exons[e0][EX_L];
                     uint roStart1 = trChim[1].Str==0 ? trChim[1].exons[e1][EX_R] : Lread - trChim[1].exons[e1][EX_R] - trChim[1].exons[e1][EX_L];
 

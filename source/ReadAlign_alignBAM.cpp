@@ -133,7 +133,7 @@ void ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint
     //for SAM output need to split mates
     uint iExMate=0; //last exon of the first mate
 
-    uint samFLAG=0;
+    uint16 samFLAG=0;
     uint leftMate=0; //the mate (0 or 1) which is on the left    
 
     bool flagPaired = P->readNmates==2;   
@@ -385,7 +385,7 @@ void ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint
         };   
         
         //4: FLAG<<16|n cigar op; n cigar op is the number of operations in CIGAR.
-        pBAM[4]=( ( samFLAG << 16 ) | (nCIGAR) ); 
+        pBAM[4]=( ( ((samFLAG & P->outSAMflagAND) | P->outSAMflagOR) << 16 ) | (nCIGAR) ); 
 
         //5: l seq Length of SEQ
         pBAM[5]=readLengthOriginal[Mate];

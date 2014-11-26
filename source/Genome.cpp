@@ -86,9 +86,9 @@ void Genome::genomeLoad(){//allocate and load Genome
         errOut << "EXITING because of FATAL ERROR: read no value for the versionGenome parameter from genomeParameters.txt file\n";
         errOut << "SOLUTION: please re-generate genome from scratch with the latest version of STAR\n";
         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_GENOME_FILES, *P);
-    } else if (P->sjdbFileChrStartEnd=="-" && P->versionGenome.at(0) >= versionGenomeMin.at(0)) {//
+    } else if (P->sjdbFileChrStartEnd.at(0)=="-" && P->versionGenome.at(0) >= versionGenomeMin.at(0)) {//
         P->inOut->logMain << "Genome version is compatible with current STAR version\n";
-    } else if (P->sjdbFileChrStartEnd!="-" && P->versionGenome.at(0) >= versionGenomeMin.at(1)) {//
+    } else if (P->sjdbFileChrStartEnd.at(0)!="-" && P->versionGenome.at(0) >= versionGenomeMin.at(1)) {//
         P->inOut->logMain << "Genome version is compatible with current STAR version\n";        
     } else {
         ostringstream errOut;
