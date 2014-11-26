@@ -80,6 +80,7 @@ void ReadAlign::outputAlignments() {
             };            
             
             for (uint iTr=0;iTr<nTr;iTr++) {//write all transcripts
+                     
                 if (P->outBAMunsorted || P->outBAMcoord) {//BAM output
                     alignBAM(*(trMult[iTr]), nTr, iTr, P->chrStart[trMult[iTr]->Chr], (uint) -1, (uint) -1, 0, -1, NULL, P->outSAMattrOrder);
                     for (uint imate=0; imate<P->readNmates; imate++) {//output each mate
@@ -91,6 +92,16 @@ void ReadAlign::outputAlignments() {
                 if (P->outSAMbool){//SAM output
                     outBAMbytes+=outputTranscriptSAM(*(trMult[iTr]), nTr, iTr, (uint) -1, (uint) -1, 0, -1, NULL, outSAMstream);
                 };
+                
+//                 {//debug
+//                     intScore as=trMult[iTr]->maxScore;
+//                     uint nmm=trMult[iTr]->nMM;
+//                     trMult[iTr]->alignScore(Read1, G, P);
+//                     if (as!=trMult[iTr]->maxScore || nmm!=trMult[iTr]->nMM) {
+//                         cout << readName<<"   "<<as<<"   "<<trMult[iTr]->maxScore <<"   "<< nmm<<"   "<<trMult[iTr]->nMM<<endl;
+// //                         exit(-1);
+//                     };
+//                 };                
             };
                         
             if (P->outSJfilterReads=="All" || nTr==1) {

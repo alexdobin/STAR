@@ -311,6 +311,9 @@ void ReadAlign::chimericDetection() {
                     trChim[1].primaryFlag=false;
                 };
 
+                trChim[0].alignScore(Read1, G, P);
+                trChim[1].alignScore(Read1, G, P);
+                
                 for (uint iTr=0;iTr<chimN;iTr++) {//write all chimeric pieces
                     if (P->readNmates==2) {
                         outputTranscriptSAM(trChim[iTr], chimN, iTr, trChim[1-iTr].Chr, trChim[1-iTr].exons[0][EX_G], (int) (trChim[1-iTr].Str!=trChim[1-iTr].exons[0][EX_iFrag]), -1, NULL, &chunkOutChimSAM);

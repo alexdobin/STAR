@@ -1,4 +1,5 @@
-Added --alignSoftClipAtReferenceEnds No option which prevents soft clipping of alignments at the reference (chromosome) ends, for compatibility with Cufflinks/cuffmerge.
+Fixed a bug with output score (AS attribute) of some chimeric alignments.
+Added --alignSoftClipAtReferenceEnds No option which prevents soft clipping of alignments at the reference (chromosome) ends, for compatibility with Cufflinks/Cuffmerge.
 Fixed wrong output of chimeric junctions boundaries in the Chimeric.out.junction file.
 Added --outSAMflagOR, --outSAMflagAND options to set specific bits of the SAM FLAG.
 --sjdbFileChrStartEnd can now accept multiple files which will be concatenated.
