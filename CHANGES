@@ -1,3 +1,4 @@
+2.4.0g 11/26/2014
 Fixed a bug with output score (AS attribute) of some chimeric alignments.
 Added --alignSoftClipAtReferenceEnds No option which prevents soft clipping of alignments at the reference (chromosome) ends, for compatibility with Cufflinks/Cuffmerge.
 Fixed wrong output of chimeric junctions boundaries in the Chimeric.out.junction file.
