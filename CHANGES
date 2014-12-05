@@ -1,3 +1,7 @@
+Added --quantTranscriptomeBAMcompression option.
+Add newline at the end of STAR_VERSION string (contributed by Daniel Nicorici)
+Fixed a bug with parsing the last line of paired FASTA files (contributed by Alex Rolfe)
+
 2.4.0g 11/26/2014
 Fixed a bug with output score (AS attribute) of some chimeric alignments.
 Added --alignSoftClipAtReferenceEnds No option which prevents soft clipping of alignments at the reference (chromosome) ends, for compatibility with Cufflinks/Cuffmerge.

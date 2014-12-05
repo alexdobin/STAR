@@ -104,7 +104,7 @@ class Parameters {
         int outSAMmapqUnique;
         struct {bool NH,HI,AS,NM,MD,nM,jM,jI,RG,XS;} outSAMattrPresent, outSAMattrPresentQuant;
         vector <int> outSAMattrOrder, outSAMattrOrderQuant;
-        int outBAMcompression;
+        int outBAMcompression, quantTranscriptomeBAMcompression;
         vector <string> outSAMtype;
         bool outBAMunsorted, outBAMcoord, outSAMbool;
         uint32 outBAMcoordNbins;

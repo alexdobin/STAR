@@ -192,7 +192,8 @@ Parameters::Parameters() {//initalize parameters info
     
     //quant
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "quantMode", &quantMode));
-    
+    parArray.push_back(new ParameterInfoScalar <int>     (-1, -1, "quantTranscriptomeBAMcompression", &quantTranscriptomeBAMcompression));
+
     //2-pass
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "twopass1readsN", &twopass1readsN));
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "twopassSJlimit", &twopassSJlimit));
@@ -821,7 +822,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                 } else {
                     outQuantBAMfileName=outFileNamePrefix + "Aligned.toTranscriptome.out.bam";
                 };
-                inOut->outQuantBAMfile=bgzf_open(outQuantBAMfileName.c_str(),("w"+to_string((long long) outBAMcompression)).c_str());
+                inOut->outQuantBAMfile=bgzf_open(outQuantBAMfileName.c_str(),("w"+to_string((long long) quantTranscriptomeBAMcompression)).c_str());
             } else if  (quantMode.at(ii)=="GeneCounts") {
                 quant.geCount.yes=true;
             } else {

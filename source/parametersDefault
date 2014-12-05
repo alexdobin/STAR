@@ -483,6 +483,10 @@ quantMode                   -
                             TranscriptomeSAM ... output SAM/BAM alignments to transcriptome into a separate file
                             GeneCounts       ... count reads per gene
 
+quantTranscriptomeBAMcompression    1       1
+    int: -1 to 10  transcriptome BAM compression level, -1=default compression (6?), 0=no compression, 10=maximum compression
+
+
 ### 2-pass Mapping
 twopass1readsN              0
     int>0: number of reads to process for the 1st step. 0: 1-step only, no 2nd pass; use very large number (or -1) to map all reads in the first step
