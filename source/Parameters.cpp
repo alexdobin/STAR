@@ -238,7 +238,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             string oneArg=string(argIn[iarg]);
             
             if (oneArg=="--version") {//print version and exit
-                std::cout << STAR_VERSION;
+                std::cout << STAR_VERSION <<std::endl;
                 exit(0);
             };
             
