@@ -7,8 +7,8 @@ Added --outSAMflagOR, --outSAMflagAND options to set specific bits of the SAM FL
 Fixed the header of the Log.progress.out .
 Fixed a bug that prevented output of transcriptomic alignments (--quantMode TranscriptomeSAM)  with 1 base junction overhangs.
 Added --sysShell option to specify path to bash, in cases where bash is not the default shell.
---outBAMcompression default changed 1, which apparently does not change deflation ratio, but is much faster.
-Add --outBAMsortingThreadN option tp specify number of threads for BAM sorting. By default (0) it's equal to min(6,runThreadN).
+--outBAMcompression default changed to 1, which apparently does not change deflation ratio, but is much faster.
+Added --outBAMsortingThreadN option to specify number of threads for BAM sorting. By default (0) it's equal to min(6,runThreadN).
 
 2.4.0f1 10/30/2014
 Added read group (RG) BAM attributes to transcriptome BAM (contributed by https://github.com/godotgildor).

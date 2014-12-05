@@ -39,10 +39,12 @@ void Parameters::openReadsFiles() {
             fstream readsCommandFile( readsCommandFileName.at(imate).c_str(), ios::out);
             readsCommandFile.close();
             readsCommandFile.open( readsCommandFileName.at(imate).c_str(), ios::in | ios::out);
-            //first line in the commands file: redirect stdout to temp fifo files
-            readsCommandFile << "exec > \""<<readFilesInTmp.at(imate)<<"\"\n" ;
-
-            
+            //first line in the commands file
+            if (sysShell!="-") {//executed via specified shell
+                readsCommandFile << "#!" <<sysShell <<"\n";
+            };
+            readsCommandFile << "exec > \""<<readFilesInTmp.at(imate)<<"\"\n" ; // redirect stdout to temp fifo files
+                        
             string readFilesInString(readFilesIn.at(imate));
             size_t pos=0;
             readFilesN=0;
@@ -79,11 +81,7 @@ void Parameters::openReadsFiles() {
                 
                 case 0:
                     //this is the child
-                    if (sysShell!="-") {//executed via specified shell
-                        execlp(sysShell.c_str(), "-c", readsCommandFileName.at(imate).c_str(), (char*) NULL);                     
-                    } else {//execute the command directly with default shell
-                        execlp(readsCommandFileName.at(imate).c_str(), readsCommandFileName.at(imate).c_str(), (char*) NULL); 
-                    };
+                    execlp(readsCommandFileName.at(imate).c_str(), readsCommandFileName.at(imate).c_str(), (char*) NULL); 
                     exit(0);
                     
                 default:
