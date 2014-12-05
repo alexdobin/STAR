@@ -82,7 +82,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
 //                         P->inOut->readIn[imate].getline(chunkIn[imate] + chunkInSizeBytesTotal[imate], DEF_readNameSeqLengthMax+1 );                            
 //                         };                        
                         nextChar=P->inOut->readIn[imate].peek();                        
-                        while (nextChar!='@' && nextChar!='>' && nextChar!=' ' && nextChar!='\n' && P->inOut->readIn[0].good()) {//read multi-line fasta
+                        while (nextChar!='@' && nextChar!='>' && nextChar!=' ' && nextChar!='\n' && P->inOut->readIn[imate].good()) {//read multi-line fasta
                             P->inOut->readIn[imate].getline(chunkIn[imate] + chunkInSizeBytesTotal[imate], DEF_readSeqLengthMax + 1 );
                             if (P->inOut->readIn[imate].gcount()<2) break; //no more input
                             chunkInSizeBytesTotal[imate] += P->inOut->readIn[imate].gcount()-1;   
