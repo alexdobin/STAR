@@ -54,7 +54,7 @@ void Parameters::openReadsFiles() {
                 readFilesInString.erase(0, pos + 1);
                 readFilesNames.at(imate).push_back(file1);
                 
-                system(("ls -lL " + file1 + " >& "+ outFileTmp+"/readFilesIn.info").c_str());
+                system(("ls -lL " + file1 + " > "+ outFileTmp+"/readFilesIn.info 2>&1").c_str());
                 ifstream readFilesIn_info((outFileTmp+"/readFilesIn.info").c_str());
                 inOut->logMain <<readFilesIn_info.rdbuf();
 
