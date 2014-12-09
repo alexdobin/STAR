@@ -1,3 +1,4 @@
+2.4.0h 12/09/2014
 Fixed the problem causing Ubuntu error: "sh: 1: Syntax error: Bad fd number".
 Added --quantTranscriptomeBAMcompression option.
 Add newline at the end of STAR_VERSION string (contributed by Daniel Nicorici).
