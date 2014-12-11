@@ -17,7 +17,7 @@ OBJECTS = PackedArray.o SuffixArrayFuns.o STAR.o Parameters.o InOutStreams.o Seq
         bam_cat.o
 SOURCES := $(wildcard *.cpp) $(wildcard *.c)
 
-LDFLAGS := -pthread -Lhtslib -Bstatic -lhts -Bdynamic -lz
+LDFLAGS := -pthread -Lhtslib -Bstatic -lhts -Bdynamic -lz -lrt
 LDFLAGS_static := -static -static-libgcc -pthread -Lhtslib -lhts -lz
 LDFLAGS_Mac :=-pthread -lz htslib/libhts.a
 LDFLAGS_Mac_static :=-pthread -lz -static-libgcc htslib/libhts.a
@@ -84,6 +84,10 @@ parametersDefault.xxd: parametersDefault
 STAR : CCFLAGS=$(CCFLAGS_main)
 STAR : Depend.list parametersDefault.xxd $(OBJECTS)
 	$(CXX) -o STAR $(CCFLAGS) $(OBJECTS) $(LDFLAGS)
+
+POSIXSHARED : CCFLAGS=$(CCFLAGS_main)
+POSIXSHARED : Depend.list parametersDefault.xxd $(OBJECTS)
+	$(CXX) -o STAR $(CCFLAGS) -DPOSIX_SHARED_MEM $(OBJECTS) $(LDFLAGS)
 
 STARstatic : CCFLAGS=$(CCFLAGS_main)
 STARstatic : Depend.list parametersDefault.xxd $(OBJECTS)

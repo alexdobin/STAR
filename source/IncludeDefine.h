@@ -16,6 +16,8 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <limits>
 #include <stdint.h>

@@ -17,26 +17,186 @@
 // //first available byt of the shm
 // #define SHM_startSHM 32
 
+
 //arbitrary number for ftok function
 #define SHM_projectID 23
 
-// Genome::Genome(Parameters* Pin) {
-//     P=Pin;
-// };
+Genome::Genome (Parameters* Pin ): P(Pin) {
+            shmKey=ftok(P->genomeDir.c_str(),SHM_projectID);
+        };
 
 Genome::~Genome() {
     P->inOut->logMain << "--genomeLoad=" << P->genomeLoad <<" ."<<endl;
     if (P->genomeLoad=="LoadAndRemove") {//mark genome for removal after the jobs complete, if there are no other jobs attached to it
-        struct shmid_ds shmStat;
-        shmctl(shmID,IPC_STAT,&shmStat);
-        if (shmStat.shm_nattch>1) {
-            P->inOut->logMain << shmStat.shm_nattch-1 << " other job(s) are attached to the shared memory segment, will not remove it." <<endl;
+        
+        int inUse = Genome::SharedObjectsUseCount(shmID);
+        if (inUse > 0) {
+            P->inOut->logMain << inUse-1 << " other job(s) are attached to the shared memory segment, will not remove it." <<endl;
         } else {
-            shmctl(shmID,IPC_RMID,&shmStat);
+            Genome::RemoveSharedObject(shmID, (void**)&shmStart, shmKey);
             P->inOut->logMain <<"No other jobs are attached to the shared memory segement, removing it."<<endl;
         };
     };
 };
+
+const char * Genome::GetPosixObjectKey(key_t shmKey)
+{
+    stringstream key;
+    key << "/" << shmKey;
+    return key.str().c_str();
+}
+
+int Genome::CreateSharedObject(key_t shmKey, uint64 shmSize)
+{    
+    int shmID = 0;
+    #ifdef POSIX_SHARED_MEM
+    shmID=shm_open(Genome::GetPosixObjectKey(shmKey), O_CREAT | O_TRUNC | O_RDWR, 0666);
+    #else
+    shmID = shmget(shmKey, shmSize, IPC_CREAT | SHM_NORESERVE | 0666); //        shmID = shmget(shmKey, shmSize, IPC_CREAT | SHM_NORESERVE | SHM_HUGETLB | 0666);
+    #endif
+
+    if (shmID == -1) {
+        ostringstream errOut;
+        errOut <<"EXITING: fatal error from shmget() trying to allocate shared memory piece: error type: " << strerror(errno) <<"\n";
+        errOut <<"Possible cause 1: not enough RAM. Check if you have enough RAM of at least " << shmSize+2000000000 << " bytes\n";
+        errOut <<"Possible cause 2: not enough virtual memory allowed with ulimit. SOLUTION: run ulimit -v " <<  shmSize+2000000000 <<"\n";
+        errOut <<"Possible cause 3: allowed shared memory size is not large enough. SOLUTIONS: (i) consult STAR manual on how to increase shared memory allocation; " \
+        "(ii) ask your system administrator to increase shared memory allocation; (iii) run STAR with --genomeLoad NoSharedMemory\n"<<flush;
+        exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_MemoryAllocation, *P);  
+    };
+
+    #ifdef POSIX_SHARED_MEM
+    int err = ftruncate(shmID, shmSize);
+    if (err == -1)
+    {
+        ostringstream errOut;
+        errOut <<"EXITING: fatal error from ftruncate() error shared memory: error type: " << strerror(errno) << endl;
+        errOut <<"Possible cause 1: not enough RAM. Check if you have enough RAM of at least " << shmSize+2000000000 << " bytes\n";
+        void * ptr = NULL;
+        Genome::RemoveSharedObject(shmID, &ptr, shmKey);
+
+        exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_MemoryAllocation, *P); 
+    }
+    #endif
+
+    return shmID;
+}
+
+bool Genome::GetSharedObjectByKey(key_t shmKey, int * shmID)
+{
+    #ifdef POSIX_SHARED_MEM
+    *shmID=shm_open(Genome::GetPosixObjectKey(shmKey), O_RDWR, 0);
+    #else
+    *shmID=shmget(shmKey,0,0);
+    #endif
+
+    bool shmLoadError=(*shmID==-1);
+    if (shmLoadError && errno !=ENOENT) {
+        ostringstream errOut;
+        errOut << "EXITING because of FATAL ERROR: problems with shared memory: error from shmget() or shm_open(): " << strerror(errno) << "\n" << flush;
+        errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;     
+        exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_SHM, *P);
+    }
+    return shmLoadError;
+}
+
+int Genome::SharedObjectsUseCount(int shmID)
+{
+    #ifdef POSIX_SHARED_MEM
+    return -1;
+    #else
+    struct shmid_ds shmStat;
+    shmctl(shmID,IPC_STAT,&shmStat);
+    return shmStat.shm_nattch;
+    #endif
+}
+
+void Genome::RemoveSharedObject(int shmID, void * * ptr, key_t shmKey)
+{
+    #ifdef POSIX_SHARED_MEM
+
+    if (*ptr != NULL)
+    {
+        struct stat buf = Genome::GetSharedObjectInfo(shmID);
+        int ret = munmap(*ptr, (size_t) buf.st_size);
+        *ptr = NULL;
+        if (ret == -1)
+        {
+            ostringstream errOut;
+            errOut <<"EXITING because of FATAL ERROR:  could not delete the shared object: " << strerror(errno) <<flush;
+            exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_SHM, *P);
+        }
+    }
+
+    int ret = shm_unlink(Genome::GetPosixObjectKey(shmKey));
+    if (ret == -1)
+    {
+        ostringstream errOut;
+        errOut <<"EXITING because of FATAL ERROR:  could not delete the shared object: " << strerror(errno) <<flush;
+        exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_SHM, *P);
+    }
+
+    #else
+    ptr=ptr; // squash build warning :(!
+    shmKey = shmKey;
+    
+    struct shmid_ds *buf=NULL;
+    int shmStatus=shmctl(shmID,IPC_RMID,buf);
+    if (shmStatus==-1) {
+        ostringstream errOut;
+        errOut << "EXITING because of FATAL ERROR: problems with shared memory: error from shmctl() while trying to remove shared memory piece: " << strerror(errno) << "\n" <<flush;
+        errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;     
+        exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_SHM, *P);
+    };    
+    #endif
+}
+
+struct stat Genome::GetSharedObjectInfo(int shmID)
+{
+    struct stat buf;
+    int err = fstat(shmID, &buf);
+    if (err == -1)
+    {
+        ostringstream errOut;
+        errOut << "EXITING because of FATAL ERROR: could not stat file: " << strerror(errno) << "\n" <<flush;     
+        exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_SHM, *P);
+    }
+    return buf;
+}
+
+void * Genome::MapSharedObjectToMemory(int shmID)
+{
+    void * ret = NULL;
+
+    #ifdef POSIX_SHARED_MEM
+    struct stat buf = Genome::GetSharedObjectInfo(shmID);
+    ret = mmap(NULL,(size_t) buf.st_size, PROT_READ | PROT_WRITE,MAP_ANONYMOUS| MAP_SHARED | MAP_LOCKED | MAP_NORESERVE, 0, (off_t) 0);
+    if (ret == (void*) -1)
+    {
+        ostringstream errOut;
+        errOut << "EXITING because of FATAL ERROR: could not map the shared object to memory: " << strerror(errno) << "\n" <<flush;     
+        exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_SHM, *P);
+    }
+    int err = close(shmID);
+    if (err == -1)
+    {
+        ostringstream errOut;
+        errOut << "EXITING because of FATAL ERROR: could not close the shared memory object: " << strerror(errno) << "\n" <<flush;     
+        exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_SHM, *P);
+    }
+
+    #else
+    ret= shmat(shmID, NULL, 0);
+    if (ret==((void *) -1)) {
+        ostringstream errOut;
+        errOut << "EXITING because of FATAL ERROR: problems with shared memory: error from shmat() while trying to get address of the shared memory piece: " << strerror(errno) << "\n" <<flush;
+        errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;     
+        exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_SHM, *P);
+    }; 
+    #endif
+
+    return ret;
+}
 
 void Genome::freeMemory(){//free big chunks of memory used by genome and suffix array
     if (P->genomeLoad=="NoSharedMemory") {//cannot deallocate for shared memory
@@ -50,9 +210,7 @@ void Genome::freeMemory(){//free big chunks of memory used by genome and suffix 
 
 void Genome::genomeLoad(){//allocate and load Genome
     shmID=0;
-    bool shmLoad=false;   
-    key_t shmKey=ftok(P->genomeDir.c_str(),SHM_projectID);;    
-    char *shmStart=NULL;
+    bool shmLoadError=false;
     uint *shmNG=NULL, *shmNSA=NULL;   //pointers to shm stored values , *shmSG, *shmSSA
     uint64 shmSize=0;//, shmStartG=0; shmStartSA=0;
     
@@ -135,39 +293,26 @@ void Genome::genomeLoad(){//allocate and load Genome
     P->nSAi=P->genomeSAindexStart[P->genomeSAindexNbases];
     P->inOut->logMain << "Read from SAindex: genomeSAindexNbases=" << P->genomeSAindexNbases <<"  nSAi="<< P->nSAi <<endl <<flush;
     
-    //search for the genome in shared memory, if found, shmLoad is false, shmID is the ID
+    //search for the genome in shared memory, if found, shmLoadError is false, shmID is the ID
     if (P->genomeLoad=="LoadAndKeep" || P->genomeLoad=="LoadAndRemove" || P->genomeLoad=="Remove" || P->genomeLoad=="LoadAndExit") {// find shared memory fragment
-        shmID=shmget(shmKey,0,0);
-        shmLoad=(shmID==-1);
-        if (shmLoad && errno !=ENOENT) {
-            ostringstream errOut;
-            errOut << "EXITING because of FATAL ERROR: problems with shared memory: error from shmget():" << strerror(errno) << "\n" <<flush;
-            errOut << "SOLUTION: check shared memory settigns as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;     
-            exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_SHM, *P);
-        };
-        if (!shmLoad) {//genome is already in shm
+        shmLoadError = Genome::GetSharedObjectByKey(shmKey, &shmID);
+
+        if (!shmLoadError) {//genome is already in shm
             P->inOut->logMain <<"Found genome in shared memory\n"<<flush;
         };
     };
     
     if (P->genomeLoad=="Remove") {//kill the genome and exit
-        if (shmLoad) {//did not find genome in shared memory, nothing to kill
+        if (shmLoadError) {//did not find genome in shared memory, nothing to kill
             ostringstream errOut;
             errOut << "EXITING: Did not find the genome in memory, did not remove any genomes from shared memory\n";
             exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_GENOME_FILES, *P);
         } else {
-            struct shmid_ds *buf=NULL;
-            int shmStatus=shmctl(shmID,IPC_RMID,buf);
-            if (shmStatus==-1) {
-                ostringstream errOut;
-                errOut << "EXITING because of FATAL ERROR: problems with shared memory: error from shmctl() while trying to remove shared memory piece:" << strerror(errno) << "\n" <<flush;
-                errOut << "SOLUTION: check shared memory settigns as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;     
-                exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_SHM, *P);
-            };            
+            Genome::RemoveSharedObject(shmID, (void**)&shmStart, shmKey);
             P->inOut->logMain <<"DONE: removed the genome from shared memory\n"<<flush;            
             exit(0);
         };
-    } else if (P->genomeLoad=="NoSharedMemory" || shmLoad) {//find the size of the genome and SAs from files - the genome is not in shared memory
+    } else if (P->genomeLoad=="NoSharedMemory" || shmLoadError) {//find the size of the genome and SAs from files - the genome is not in shared memory
      
         GenomeIn.seekg (0, ios::end);
         P->nGenome=(uint) GenomeIn.tellg();
@@ -185,13 +330,7 @@ void Genome::genomeLoad(){//allocate and load Genome
         
     } else {//genome is in shared memory, attach it and record the sizes
     
-        shmStart = (char*) shmat(shmID, NULL, 0);
-        if (shmStart==((void *) -1)) {
-            ostringstream errOut;
-            errOut << "EXITING because of FATAL ERROR: problems with shared memory: error from shmat() while trying to get address of the shared memory piece:" << strerror(errno) << "\n" <<flush;
-            errOut << "SOLUTION: check shared memory settigns as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;     
-            exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_SHM, *P);
-        };          
+        shmStart = (char*) Genome::MapSharedObjectToMemory(shmID);         
         shmNG= (uint*) (shmStart+SHM_sizeG);
         shmNSA= (uint*) (shmStart+SHM_sizeSA);       
    
@@ -242,7 +381,7 @@ void Genome::genomeLoad(){//allocate and load Genome
 //     } else {//2-pass
 //         ostringstream errOut;
 //         errOut << "EXITING because of FATAL ERROR: 2-pass procedure cannot be used with genome already loaded im memory'  "\n" ;
-//         errOut << "SOLUTION: check shared memory settigns as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;     
+//         errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;     
 //         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_SHM, *P);
 //     };
     
@@ -270,22 +409,13 @@ void Genome::genomeLoad(){//allocate and load Genome
         };
     } else {//using shared memeory
         
-        if (shmLoad) {//genome was not in shared memory: allocate shm
+        if (shmLoadError) {//genome was not in shared memory: allocate shm
             shmSize=SA.lengthByte + P->nGenome+L+L+SHM_startG+8;
             shmSize+= SAi.lengthByte;                
             if (P->annotScoreScale>0) shmSize+=P->nGenome;
-            shmID = shmget(shmKey, shmSize, IPC_CREAT | SHM_NORESERVE | 0666); //        shmID = shmget(shmKey, shmSize, IPC_CREAT | SHM_NORESERVE | SHM_HUGETLB | 0666);
-            if (shmID < 0) {
-                ostringstream errOut;
-                errOut <<"EXITING: fatal error from shmget() trying to allocate shared memory piece: error type" << strerror(errno) <<"\n";
-                errOut <<"Possible cause 1: not enough RAM. Check if you have enough RAM of at least" << shmSize+2000000000 << " bytes\n";
-                errOut <<"Possible cause 2: not enough virtual memory allowed with ulimit. SOLUTION: run ulimit -v " <<  shmSize+2000000000 <<"\n";
-                errOut <<"Possible cause 3: allowed shared memory size is not large enough. SOLUTIONS: (i) consult STAR manual on how to increase shared memory allocation; " \
-                         "(ii) ask your system administrator to increase shared memory allocation; (iii) run STAR with --genomeLoad NoSharedMemory\n"<<flush;
-                exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_MemoryAllocation, *P);            
 
-            };
-            shmStart = (char*) shmat(shmID, NULL, 0);
+            shmID = Genome::CreateSharedObject(shmKey, shmSize);
+            shmStart = (char*) Genome::MapSharedObjectToMemory(shmID);
             shmNG= (uint*) (shmStart+SHM_sizeG);
             shmNSA= (uint*) (shmStart+SHM_sizeSA);                          
         };
@@ -305,7 +435,7 @@ void Genome::genomeLoad(){//allocate and load Genome
 
     G=G1+L;
 
-    if (P->genomeLoad=="NoSharedMemory" || shmLoad) {//load genome and SAs from files
+    if (P->genomeLoad=="NoSharedMemory" || shmLoadError) {//load genome and SAs from files
         //load genome
         P->inOut->logMain <<"Genome file size: "<<P->nGenome <<" bytes; state: good=" <<GenomeIn.good()\
                 <<" eof="<<GenomeIn.eof()<<" fail="<<GenomeIn.fail()<<" bad="<<GenomeIn.bad()<<"\n"<<flush;        
@@ -336,7 +466,7 @@ void Genome::genomeLoad(){//allocate and load Genome
     
     SAiIn.close();            
 
-    if (shmLoad && (P->genomeLoad=="LoadAndKeep" || P->genomeLoad=="LoadAndRemove" || P->genomeLoad=="LoadAndExit") ) {//record sizes. This marks the end of genome loading
+    if (shmLoadError && (P->genomeLoad=="LoadAndKeep" || P->genomeLoad=="LoadAndRemove" || P->genomeLoad=="LoadAndExit") ) {//record sizes. This marks the end of genome loading
         *shmNG=P->nGenome;
         *shmNSA=P->nSAbyte;
     };
