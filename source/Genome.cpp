@@ -29,13 +29,18 @@ Genome::~Genome() {
     P->inOut->logMain << "--genomeLoad=" << P->genomeLoad <<" ."<<endl;
     if (P->genomeLoad=="LoadAndRemove") {//mark genome for removal after the jobs complete, if there are no other jobs attached to it
         
+    #ifdef POSIX_SHARED_MEM
+        Genome::RemoveSharedObject(shmID, (void**)&shmStart, shmKey);
+        P->inOut->logMain <<"Removing shared memory segment, removing it."<<endl;
+    #else
         int inUse = Genome::SharedObjectsUseCount(shmID);
         if (inUse > 0) {
             P->inOut->logMain << inUse-1 << " other job(s) are attached to the shared memory segment, will not remove it." <<endl;
         } else {
             Genome::RemoveSharedObject(shmID, (void**)&shmStart, shmKey);
-            P->inOut->logMain <<"No other jobs are attached to the shared memory segement, removing it."<<endl;
+            P->inOut->logMain <<"No other jobs are attached to the shared memory segment, removing it."<<endl;
         };
+    #endif
     };
 };
 
@@ -139,7 +144,7 @@ void Genome::RemoveSharedObject(int shmID, void * * ptr, key_t shmKey)
     #else
     ptr=ptr; // squash build warning :(!
     shmKey = shmKey;
-    
+
     struct shmid_ds *buf=NULL;
     int shmStatus=shmctl(shmID,IPC_RMID,buf);
     if (shmStatus==-1) {
