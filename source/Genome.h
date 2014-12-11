@@ -21,7 +21,7 @@ class Genome {
 
     private:
         key_t shmKey;  
-        char *shmStart=NULL;
+        char *shmStart;
         char *G1; //pointer -200 of G
         Parameters* P;
         int shmID;

@@ -21,7 +21,7 @@
 //arbitrary number for ftok function
 #define SHM_projectID 23
 
-Genome::Genome (Parameters* Pin ): P(Pin) {
+Genome::Genome (Parameters* Pin ): P(Pin), shmStart(NULL) {
             shmKey=ftok(P->genomeDir.c_str(),SHM_projectID);
         };
 
