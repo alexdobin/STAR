@@ -85,9 +85,9 @@ STAR : CCFLAGS=$(CCFLAGS_main)
 STAR : Depend.list parametersDefault.xxd $(OBJECTS)
 	$(CXX) -o STAR $(CCFLAGS) $(OBJECTS) $(LDFLAGS)
 
-POSIXSHARED : CCFLAGS=$(CCFLAGS_main)
+POSIXSHARED : CCFLAGS=$(CCFLAGS_main) -DPOSIX_SHARED_MEM
 POSIXSHARED : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STAR $(CCFLAGS) -DPOSIX_SHARED_MEM $(OBJECTS) $(LDFLAGS)
+	$(CXX) -o STAR $(CCFLAGS) $(OBJECTS) $(LDFLAGS)
 
 STARstatic : CCFLAGS=$(CCFLAGS_main)
 STARstatic : Depend.list parametersDefault.xxd $(OBJECTS)

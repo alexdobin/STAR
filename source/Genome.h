@@ -20,10 +20,10 @@ class Genome {
         void genomeLoad();
 
     private:
+	Parameters* P;
         key_t shmKey;  
         char *shmStart;
         char *G1; //pointer -200 of G
-        Parameters* P;
         int shmID;
 
         bool GetSharedObjectByKey(key_t shmKey, int * shmID);
