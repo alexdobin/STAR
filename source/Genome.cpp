@@ -175,7 +175,7 @@ void * Genome::MapSharedObjectToMemory(int shmID)
 
     #ifdef POSIX_SHARED_MEM
     struct stat buf = Genome::GetSharedObjectInfo(shmID);
-    ret = mmap(NULL,(size_t) buf.st_size, PROT_READ | PROT_WRITE,MAP_ANONYMOUS| MAP_SHARED | MAP_LOCKED | MAP_NORESERVE, 0, (off_t) 0);
+    ret = mmap(NULL,(size_t) buf.st_size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_NORESERVE, shmID, (off_t) 0);
     if (ret == (void*) -1)
     {
         ostringstream errOut;
