@@ -55,7 +55,7 @@ int Genome::CreateSharedObject(key_t shmKey, uint64 shmSize)
 {    
     int shmID = 0;
     #ifdef POSIX_SHARED_MEM
-    shmID=shm_open(Genome::GetPosixObjectKey(shmKey), O_CREAT | O_TRUNC | O_RDWR, 0666);
+    shmID=shm_open(Genome::GetPosixObjectKey(shmKey), O_CREAT | O_RDWR, 0666);
     #else
     shmID = shmget(shmKey, shmSize, IPC_CREAT | SHM_NORESERVE | 0666); //        shmID = shmget(shmKey, shmSize, IPC_CREAT | SHM_NORESERVE | SHM_HUGETLB | 0666);
     #endif
