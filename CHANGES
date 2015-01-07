@@ -1,3 +1,4 @@
+Fixed a bug causing seg-faults for genome generation.
 Fixed a bug causing seg-faults for --quantMode TranscriptomeSAM
 
 2.4.0h 12/09/2014

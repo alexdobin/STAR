@@ -145,7 +145,7 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P) {//load gtf file, add junctions
             //re-sort exons by exons loci
             uint* exgeLoci=new uint [exonN*GTF_exgeLoci_size]; //this also contains transcripts start and end
 
-            for (uint iex=0; iex<=exonN; iex++) {
+            for (uint iex=0; iex<exonN; iex++) {
                 exgeLoci[GTF_exgeExStart(iex)]=exonLoci[GTF_exonStart(iex)];
                 exgeLoci[GTF_exgeExEnd(iex)]=exonLoci[GTF_exonEnd(iex)];
                 exgeLoci[GTF_exgeExStrand(iex)]=transcriptStrand[exonLoci[GTF_exonTrID(iex)]];
