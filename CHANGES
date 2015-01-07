@@ -1,3 +1,5 @@
+Fixed a bug causing seg-faults with --quantMode TranscriptomeSAM
+
 2.4.0h 12/09/2014
 Fixed the problem causing Ubuntu error: "sh: 1: Syntax error: Bad fd number".
 Added --quantTranscriptomeBAMcompression option.
