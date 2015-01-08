@@ -851,7 +851,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };        
         
-        twopassDir=outFileNamePrefix+"/_STARpass1/";
+        twopassDir=outFileNamePrefix+"_STARpass1/";
         sysRemoveDir (twopassDir);                
         if (mkdir (twopassDir.c_str(),S_IRWXU)!=0) {
             ostringstream errOut;

@@ -1,3 +1,4 @@
+Fixed a bug with the _STARtmp temporary directory names for the 2-pass runs.
 Fixed a bug causing seg-faults for genome generation.
 Fixed a bug causing seg-faults for --quantMode TranscriptomeSAM
 
