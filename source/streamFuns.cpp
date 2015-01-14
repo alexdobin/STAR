@@ -2,6 +2,7 @@
 #include "ErrorWarning.h"
 #include <fstream>
 #include <sys/statvfs.h>
+#include <sys/stat.h>
 #include <stdio.h>
 #define fstream_Chunk_Max 2147483647
 
@@ -24,32 +25,41 @@ void fstreamWriteBig(std::ofstream &S, char* A, unsigned long long N, std::strin
     P->inOut->logMain << "Writing " << N << " bytes into " <<fileName << " ; empty space on disk = " << statvfsBuf.f_bavail * statvfsBuf.f_bsize <<" bytes ..." <<flush;
     
     unsigned long long C=0;
-    for (unsigned long long ii=0; ii<N/fstream_Chunk_Max; ii++) {
+    unsigned long long iC;
+    for (iC=0; iC<N/fstream_Chunk_Max; iC++) {
         S.write(A+C,fstream_Chunk_Max);
         C+=fstream_Chunk_Max;
     };
-    S.write(A+C,N%fstream_Chunk_Max);
+    if (!S.fail()) S.write(A+C,N%fstream_Chunk_Max);
     if (S.fail()) {//failed to write
 
         struct statvfs statvfsBuf;
         statvfs(fileName.c_str(), &statvfsBuf);
-
+    
+//         system(( "ls -lL "+ P->genomeDir + " > "+ P->genomeDir +"/error.info 2>&1").c_str());
+//         ifstream error_info((P->genomeDir +"/error.info").c_str());
+//         P->inOut->logMain <<error_info.rdbuf();
+        
+        struct stat statBuf;
+        stat(fileName.c_str(), &statBuf);
+        
         remove(fileName.c_str());
         
         ostringstream errOut;
         errOut << errorID<<": exiting because of *OUTPUT FILE* error: could not write the output file "<< fileName <<"\n";
         errOut << "fail()=" <<S.fail() <<" ; bad()="<< S.bad()<<"\n";
+        errOut << "Error while trying to write chunk # " << iC << "; "<< C << " bytes\n";
+        errOut << "File size full = "<< N <<" bytes\n";        
+        errOut << "File size on disk = " << statBuf.st_size<<" bytes\n";
         errOut << "Solution: check that you have enough space on the disk\n";
-        errOut <<"File size = "<< N <<" bytes\n";
-        errOut <<"Empty space on disk = " << statvfsBuf.f_bavail * statvfsBuf.f_bsize <<" bytes\n";
+        errOut << "Empty space on disk = " << statvfsBuf.f_bavail * statvfsBuf.f_bsize <<" bytes\n";
         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_FILE_WRITE, *P);
     };
     P->inOut->logMain << " done\n" <<flush;
-    C+=N%fstream_Chunk_Max;
 };
 
 void ofstrOpen (std::string fileName, std::string errorID, Parameters *P, ofstream & ofStream) {//open file 'fileName', generate error if cannot open
-    ofStream.open(fileName.c_str());
+    ofStream.open(fileName.c_str(), std::fstream::out | std::fstream::trunc);
     if (ofStream.fail()) {//
 //         dir1=fileName.substr(0,fileName.find_last_of("/")+1);
 //         if (dir1=="") dir1="./";

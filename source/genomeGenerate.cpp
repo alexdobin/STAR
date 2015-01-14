@@ -246,11 +246,8 @@ void genomeGenerate(Parameters *P) {
     //write genome to disk
     ofstream genomeOut;
     ofstrOpen(P->genomeDir+"/Genome","ERROR_00104", P, genomeOut);   
-
-    P->inOut->logMain << "Writing genome to disk...";
     fstreamWriteBig(genomeOut,G,N,P->genomeDir+"/Genome","ERROR_00120",P);
     genomeOut.close();    
-    P->inOut->logMain << " done.\n" <<flush;
       
     
     //preparing to generate SA
