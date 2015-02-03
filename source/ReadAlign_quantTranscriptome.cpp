@@ -6,10 +6,12 @@
 uint ReadAlign::quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT) {
     uint nAlignT=0;    
     for (uint iag=0; iag<nAlignG; iag++) {//transform all alignments
-        if (alignG[iag]->nDel>0 || alignG[iag]->nIns>0) continue; //prevent indels
+        //prevent indels and single-end alignments
+        if (alignG[iag]->nDel>0 || alignG[iag]->nIns>0 \
+                || (P->readNmates==2 && alignG[iag]->exons[0][EX_iFrag]==alignG[iag]->exons[alignG[iag]->nExons-1][EX_iFrag]) ) continue; 
         uint nMM1=0;
         char* R=Read1[alignG[iag]->roStr==0 ? 0:2];
-        for (uint32 iab=0; iab<alignG[iag]->nExons; iab++) {//check for soft-clips and indels
+        for (uint32 iab=0; iab<alignG[iag]->nExons; iab++) {
             uint left1=0,right1=0;//how many bases to move left or right
             if (iab==0) {
                 left1=alignG[iag]->exons[iab][EX_R];

@@ -24,7 +24,11 @@
 //     P=Pin;
 // };
 
-Genome::~Genome() {
+// Genome::~Genome() {
+// 
+// };
+
+void Genome::freeMemory(){//free big chunks of memory used by genome and suffix array
     P->inOut->logMain << "--genomeLoad=" << P->genomeLoad <<" ."<<endl;
     if (P->genomeLoad=="LoadAndRemove") {//mark genome for removal after the jobs complete, if there are no other jobs attached to it
         struct shmid_ds shmStat;
@@ -33,13 +37,9 @@ Genome::~Genome() {
             P->inOut->logMain << shmStat.shm_nattch-1 << " other job(s) are attached to the shared memory segment, will not remove it." <<endl;
         } else {
             shmctl(shmID,IPC_RMID,&shmStat);
-            P->inOut->logMain <<"No other jobs are attached to the shared memory segement, removing it."<<endl;
+            P->inOut->logMain <<"No other jobs are attached to the shared memory segment, removing it."<<endl;
         };
-    };
-};
-
-void Genome::freeMemory(){//free big chunks of memory used by genome and suffix array
-    if (P->genomeLoad=="NoSharedMemory") {//cannot deallocate for shared memory
+    } else if (P->genomeLoad=="NoSharedMemory") {//can deallocate only for non-shared memory
         delete[] G1;
         G1=NULL;
         SA.deallocateArray();

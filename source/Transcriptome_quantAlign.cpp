@@ -8,7 +8,7 @@ int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, ui
     //find exon that overlaps beginning of the read
     uint32 g1=aG.exons[0][EX_G]-trS1;//start of the transcript
     uint32 ex1=binarySearch1<uint32>(g1, exSE1, 2*exN1);
-    if (ex1>=exN1) return 0; //align start is to the right of all exons
+    if (ex1>=2*exN1) return 0; //align start is to the right of all exons
     
     if (ex1%2==1) {//beginning of the read >=end of an exon
         if (exSE1[ex1]==g1) {//first base of the read is exactly the last base of the exon

@@ -1,3 +1,6 @@
+Fixed a bug preventing parameter value to be "-".
+Fixed --genomeLoad LoadAndRemove option.
+
 2.4.0i 01/14/2015
 Fixed a bug with the _STARtmp temporary directory name for the 2-pass runs.
 Fixed a bug causing seg-faults for genome generation.
