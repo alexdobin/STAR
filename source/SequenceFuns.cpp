@@ -55,21 +55,21 @@ void revComplementNucleotides(char* ReadsIn, char* ReadsOut, uint Lread) {//comp
 char  nuclToNumBAM(char cc){
     switch (cc) {//=ACMGRSVTWYHKDBN
         case ('='): cc=0;break;
-        case ('A'): cc=1;break;
-        case ('C'): cc=2;break;
-        case ('M'): cc=3;break;
-        case ('G'): cc=4;break;
-        case ('R'): cc=5;break;
-        case ('S'): cc=6;break;
-        case ('V'): cc=7;break;
-        case ('T'): cc=8;break;
-        case ('W'): cc=9;break;
-        case ('Y'): cc=10;break;
-        case ('H'): cc=11;break;
-        case ('K'): cc=12;break;
-        case ('D'): cc=13;break;
-        case ('B'): cc=14;break;
-        case ('N'): cc=15;break;
+        case ('A'): case ('a'): cc=1;break;
+        case ('C'): case ('c'): cc=2;break;
+        case ('M'): case ('m'): cc=3;break;
+        case ('G'): case ('g'): cc=4;break;
+        case ('R'): case ('r'): cc=5;break;
+        case ('S'): case ('s'): cc=6;break;
+        case ('V'): case ('v'): cc=7;break;
+        case ('T'): case ('t'): cc=8;break;
+        case ('W'): case ('w'): cc=9;break;
+        case ('Y'): case ('y'): cc=10;break;
+        case ('H'): case ('h'): cc=11;break;
+        case ('K'): case ('k'): cc=12;break;
+        case ('D'): case ('d'): cc=13;break;
+        case ('B'): case ('b'): cc=14;break;
+        case ('N'): case ('n'): cc=15;break;
         default: cc=15;
     };
     return cc;

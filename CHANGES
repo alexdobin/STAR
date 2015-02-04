@@ -1,3 +1,8 @@
+2.4.0j 02/04/2015
+Fixed a problem with scoring alignments for STARlong. STARlong alignments are slightly modified.
+Fixed a bug introduced in 2.4.0i that dropped a large number of aligmnents for --quantMode TranscriptomeSAM.
+	Transcriptome alignments are now the same as in version 2.4.0h.
+Fixed a problem with lower case read sequences for --outSAMtype BAM options.
 Fixed a bug preventing parameter value to be "-".
 Fixed --genomeLoad LoadAndRemove option.
 

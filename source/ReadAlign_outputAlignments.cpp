@@ -93,7 +93,7 @@ void ReadAlign::outputAlignments() {
                     outBAMbytes+=outputTranscriptSAM(*(trMult[iTr]), nTr, iTr, (uint) -1, (uint) -1, 0, -1, NULL, outSAMstream);
                 };
                 
-//                 {//debug
+//                 {//debug: check maxScore
 //                     intScore as=trMult[iTr]->maxScore;
 //                     uint nmm=trMult[iTr]->nMM;
 //                     trMult[iTr]->alignScore(Read1, G, P);
