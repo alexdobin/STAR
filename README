@@ -10,7 +10,7 @@ MANUAL:
 https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf
 
 DIRECTORIES CONTENTS:
-source: all source fils required for compilation
+source: all source files required for compilation
 bin: pre-compiled executables for Linux and Mac OS X
 doc: documentation
 extras: miscellaneous files and scripts
@@ -18,8 +18,8 @@ extras: miscellaneous files and scripts
 COMPILING FROM SOURCE:
 Unzip and "cd" into source/ subdirectory.
 Linux:    run "make STAR" .
-Mac OS X: run "make STARforMac" . 
-          If g++ compiler (true g++, not Clang sym-link) is not on the path, run "make STARforMac CXX=/path/to/gcc" .
+Mac OS X: run "make STARforMacStatic" . 
+          If g++ compiler (true g++, not Clang sym-link) is not on the path, run "make STARforMacStatic CXX=/path/to/gcc" .
 
 
 HARDWARE/SOFTWARE REQUIREMENTS:

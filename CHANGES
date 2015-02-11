@@ -1,3 +1,17 @@
+2.4.0j 02/04/2015
+Fixed a problem with scoring alignments for STARlong. STARlong alignments are slightly modified.
+Fixed a bug introduced in 2.4.0i that dropped a large number of aligmnents for --quantMode TranscriptomeSAM.
+	Transcriptome alignments are now the same as in version 2.4.0h.
+Fixed a problem with lower case read sequences for --outSAMtype BAM options.
+Fixed a bug preventing parameter value to be "-".
+Fixed --genomeLoad LoadAndRemove option.
+
+2.4.0i 01/14/2015
+Fixed a bug with the _STARtmp temporary directory name for the 2-pass runs.
+Fixed a bug causing seg-faults for genome generation.
+Fixed a bug causing seg-faults for --quantMode TranscriptomeSAM
+
+2.4.0h 12/09/2014
 Fixed the problem causing Ubuntu error: "sh: 1: Syntax error: Bad fd number".
 Added --quantTranscriptomeBAMcompression option.
 Add newline at the end of STAR_VERSION string (contributed by Daniel Nicorici).

@@ -121,7 +121,7 @@ gdb : Depend.list parametersDefault.xxd $(OBJECTS)
 
 gdb-long : CCFLAGS= -D'COMPILE_FOR_LONG_READS' $(CCFLAGS_gdb)
 gdb-long : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STAR $(CCFLAGS) $(LDFLAGS_gdb) $(OBJECTS)
+	$(CXX) -o STAR $(CCFLAGS_gdb) $(OBJECTS) $(LDFLAGS_gdb) 
 
 localChains : CCFLAGS=-D'OUTPUT_localChains' $(CCFLAGS_main)
 localChains : Depend.list parametersDefault.xxd $(OBJECTS)

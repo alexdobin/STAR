@@ -59,7 +59,7 @@ inline uint32 binarySearch1(argType x, argType *X, uint32 N) {
         };
     };
     
-    while (i1<N && x==X[i1+1]) ++i1; //go forward to check for equals
+    while (i1<N-1 && x==X[i1+1]) ++i1; //go forward to check for equals
     return i1;
 };
 

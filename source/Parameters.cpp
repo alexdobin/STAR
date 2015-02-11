@@ -243,13 +243,13 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                 exit(0);
             };
             
-            if (oneArg.at(0)!='-' || oneArg.at(1)!='-') {
+            if (oneArg.substr(0,2)=="--") {//parameter name, cut -- 
+                commandLineFile +='\n' + oneArg.substr(2);
+            } else {//parameter value
                 if (oneArg.find_first_of(" \t")!=std::string::npos) {//there is white space in the argument, put "" around
                     oneArg ='\"'  + oneArg +'\"';
                 };
-                commandLineFile +=' ' + oneArg;
-            } else {
-                commandLineFile +='\n' + oneArg.substr(2);
+                commandLineFile +=' ' + oneArg;                
             };            
             commandLine += ' ' + oneArg;
         };
@@ -851,7 +851,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };        
         
-        twopassDir=outFileNamePrefix+"/_STARpass1/";
+        twopassDir=outFileNamePrefix+"_STARpass1/";
         sysRemoveDir (twopassDir);                
         if (mkdir (twopassDir.c_str(),S_IRWXU)!=0) {
             ostringstream errOut;

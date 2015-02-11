@@ -4,6 +4,7 @@
 #include "ReadAlign.h"
 #include "stitchAlignToTranscript.h"
 #include "extendAlign.h"
+#include <math.h>
 
 void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* G) {//stitches all seeds in one window: iW
 
@@ -75,11 +76,13 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* 
         };
     };
     
+    int Score=0;
     {//build final transcript form seedChain      
         {//initiate transcript
             
             uint iS1=seedChain[seedN-1];
-            trA.maxScore = WA[iW][iS1][WA_Length];
+            Score= WA[iW][iS1][WA_Length];
+            trA.maxScore = Score;
             trA.nMatch = WA[iW][iS1][WA_Length]; //# of matches
             trA.nMM = 0;
             
@@ -98,12 +101,14 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* 
                                         WA[iW][iS2][WA_rStart], WA[iW][iS2][WA_gStart], WA[iW][iS2][WA_Length], WA[iW][iS2][WA_iFrag],  WA[iW][iS2][WA_sjA], \
                                         P, R, Q, G, &trA, outFilterMismatchNmaxTotal);  
 //            if (scoreStitch>0) {
-                trA.maxScore+=scoreStitch;
+                Score+=scoreStitch;
 //           } else {
 //                 cout <<"BUG"<<endl;
 //                return;//this should not happen
 //            };
         };
+        
+        trA.maxScore=Score;
         
         {//extend to the left
             uint iS1=seedChain[seedN-1];
@@ -111,9 +116,10 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* 
             if ( trA.exons[0][EX_R]>0 \
                  && extendAlign(R, Q, G, trA.exons[0][EX_R]-1, trA.exons[0][EX_G]-1, -1, -1, min(trA.exons[0][EX_R], trA.exons[0][EX_G] - P->chrStart[WC[iW][WC_Str]]), 100000, 0, outFilterMismatchNmaxTotal, P->outFilterMismatchNoverLmax1, &trA1) ) {//if could extend
 
-                trA.maxScore += trA1.maxScore + WA[iW][iS1][WA_Length];
-                trA.nMatch += trA1.nMatch + WA[iW][iS1][WA_Length]; //# of matches
-                trA.nMM += trA1.nMM;
+                trA.add(&trA1);
+//                 trA.maxScore += trA1.maxScore + WA[iW][iS1][WA_Length];
+//                 trA.nMatch += trA1.nMatch + WA[iW][iS1][WA_Length]; //# of matches
+//                 trA.nMM += trA1.nMM;
 
                 trA.exons[0][EX_R] -=  trA1.extendL;
                 trA.exons[0][EX_G] -=  trA1.extendL;
@@ -178,6 +184,12 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* 
             };
         };
 
+        if (P->scoreGenomicLengthLog2scale!=0) {//add gap length score
+            trA.maxScore += int(ceil( log2( (double) ( trA.exons[trA.nExons-1][EX_G]+trA.exons[trA.nExons-1][EX_L] - trA.exons[0][EX_G]) ) \
+                     * P->scoreGenomicLengthLog2scale - 0.5));
+            trA.maxScore = max(0,trA.maxScore);
+        };        
+        
 //         if (P->outFilterIntronMotifs=="KeepCanonical" && (trA.intronMotifs[0]>0 || (trA.intronMotifs[1]>0 && trA.intronMotifs[2]>0) ) ) {//keep only conistent canonical introns
 //             return;
 //         };        

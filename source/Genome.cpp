@@ -27,16 +27,13 @@ Genome::Genome (Parameters* Pin ): P(Pin), shmStart(NULL) {
             shmKey=ftok(P->genomeDir.c_str(),SHM_projectID);
         };
 
-Genome::~Genome()
-{
+void Genome::freeMemory(){//free big chunks of memory used by genome and suffix array
     if (sharedMemory != NULL)
         delete sharedMemory;
 
     sharedMemory = NULL;
-}
 
-void Genome::freeMemory(){//free big chunks of memory used by genome and suffix array
-    if (P->genomeLoad=="NoSharedMemory") {//cannot deallocate for shared memory
+    if (P->genomeLoad=="NoSharedMemory") {//can deallocate only for non-shared memory
         delete[] G1;
         G1=NULL;
         SA.deallocateArray();
@@ -122,7 +119,7 @@ void Genome::genomeLoad(){//allocate and load Genome
   
     ifstream GenomeIn, SAin, SAiIn;
 
-    P->nGenome =OpenStream("Genome",GenomeIn);
+    P->nGenome = OpenStream("Genome",GenomeIn);
     P->nSAbyte = OpenStream("SA",SAin);
     OpenStream("/SAindex",SAiIn);
 
