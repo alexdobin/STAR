@@ -778,7 +778,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     outFilterMismatchNoverLmax1=outFilterMismatchNoverLmax;
     if (alignEndsType=="EndToEnd") {
         outFilterMismatchNoverLmax1=-1;
-    } else if (alignEndsType=="Local") {
+    } else if (alignEndsType=="Local" || alignEndsType=="Extend5pOfRead1" ) {
         //nothing to do for now
     } else {
         ostringstream errOut;
