@@ -14,7 +14,7 @@ SharedMemory::SharedMemory(key_t key, bool unloadLast): _key(key), _unloadLast(u
 {
     _needsAllocation = false;
 
-    OpenIfExists(_key);
+    OpenIfExists();
 }
 
 SharedMemory::~SharedMemory()
@@ -62,7 +62,7 @@ void SharedMemory::Allocate(size_t shmSize)
         ClearError(); // someone else came in first
     }
 
-    OpenIfExists(_key);
+    OpenIfExists();
     
     _isAllocator = true;
 
@@ -101,18 +101,18 @@ void SharedMemory::CreateAndInitSharedObject(size_t shmSize)
     int err = ftruncate(_shmID, toReserve);
     if (err == -1)
     {
-        Delete();
+        Destroy();
         ThrowError(ErrorState::EFTRUNCATE);
     }
 #endif
 }
 
-void SharedMemory::OpenIfExists(key_t shmKey)
+void SharedMemory::OpenIfExists()
 {
 #ifdef POSIX_SHARED_MEM
-    _shmID=shm_open(SharedMemory::GetPosixObjectKey(shmKey), O_RDWR, 0);
+    _shmID=shm_open(SharedMemory::GetPosixObjectKey(), O_RDWR, 0);
 #else
-    _shmID=shmget(shmKey,0,0);
+    _shmID=shmget(_key,0,0);
 #endif
 
     bool exists=(_shmID!=-1);
@@ -179,7 +179,7 @@ void SharedMemory::Close()
 void SharedMemory::Unlink()
 {
 #ifdef POSIX_SHARED_MEM
-    int ret = shm_unlink(SharedMemory::GetPosixObjectKey(_key));
+    int ret = shm_unlink(SharedMemory::GetPosixObjectKey());
     if (ret == -1)
         ThrowError(EUNLINK);
 

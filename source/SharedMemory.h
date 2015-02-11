@@ -182,7 +182,7 @@ private:
         bool _unloadLast = true;
 		
 		int SharedObjectsUseCount();
-		void OpenIfExists(key_t shmKey);
+		void OpenIfExists();
         void CreateAndInitSharedObject(size_t shmSize);
         void MapSharedObjectToMemory(size_t size);
         const char * GetPosixObjectKey();
