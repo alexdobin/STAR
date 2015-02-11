@@ -15,7 +15,6 @@ class Genome {
         Genome (Parameters* Pin );
 
         Genome () {};//empty constructor
-//         ~Genome ();
         void freeMemory();
         void genomeLoad();
 
