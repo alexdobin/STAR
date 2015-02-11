@@ -240,7 +240,6 @@ void SharedMemory::SharedUseDecrement()
 
 int SharedMemory::SharedObjectsUseCount()
 {
-#ifdef POSIX_SHARED_MEM
     SharedMemory::EnsureCounter();
     int sval=-1;
     int ret = sem_getvalue(_sem, &sval);
@@ -249,10 +248,4 @@ int SharedMemory::SharedObjectsUseCount()
         ThrowError(ECOUNTERUSE);
 
     return sval;
-
-#else
-    struct shmid_ds shmStat;
-    shmctl(_shmID,IPC_STAT,&shmStat);
-    return shmStat.shm_nattch;
-#endif
 }
