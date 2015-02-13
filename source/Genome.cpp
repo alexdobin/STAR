@@ -28,10 +28,6 @@ Genome::Genome (Parameters* Pin ): P(Pin), shmStart(NULL) {
         };
 
 void Genome::freeMemory(){//free big chunks of memory used by genome and suffix array
-    if (sharedMemory != NULL)
-        delete sharedMemory;
-
-    sharedMemory = NULL;
 
     if (P->genomeLoad=="NoSharedMemory") {//can deallocate only for non-shared memory
         delete[] G1;
@@ -163,25 +159,75 @@ void Genome::genomeLoad(){//allocate and load Genome
          P->genomeLoad=="Remove") && sharedMemory == NULL)
     {
         bool unloadLast = P->genomeLoad=="LoadAndRemove";
-        sharedMemory = new SharedMemory(shmKey, unloadLast);
+        try
+        {
+            sharedMemory = new SharedMemory(shmKey, unloadLast);
 
-        if (!sharedMemory->NeedsAllocation())
-            P->inOut->logMain <<"Found genome in shared memory\n"<<flush;
+            if (!sharedMemory->NeedsAllocation())
+                P->inOut->logMain <<"Found genome in shared memory\n"<<flush;
 
-        if (P->genomeLoad=="Remove") {//kill the genome and exit
-            if (sharedMemory->NeedsAllocation()) {//did not find genome in shared memory, nothing to kill
-                ostringstream errOut;
-                errOut << "EXITING: Did not find the genome in memory, did not remove any genomes from shared memory\n";
-                exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_GENOME_FILES, *P);
-            } else {
-                sharedMemory->Destroy();
-                P->inOut->logMain <<"DONE: removed the genome from shared memory\n"<<flush;            
-                exit(0);
-            };
+            if (P->genomeLoad=="Remove") {//kill the genome and exit
+                if (sharedMemory->NeedsAllocation()) {//did not find genome in shared memory, nothing to kill
+                    ostringstream errOut;
+                    errOut << "EXITING: Did not find the genome in memory, did not remove any genomes from shared memory\n";
+                    exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_GENOME_FILES, *P);
+                } else {
+                    sharedMemory->Clean();
+                    P->inOut->logMain <<"DONE: removed the genome from shared memory\n"<<flush;            
+                    return;
+                };
+            }
+
+            if (sharedMemory->NeedsAllocation())
+                sharedMemory->Allocate(shmSize);
         }
+        catch (const SharedMemoryException & exc)
+        {
+            ostringstream errOut;
+            errOut << "SharedMemory Exception: " << exc.GetErrorCode() << ", errno: " << exc.GetErrorDetail() << endl;
+            int err = exc.GetErrorDetail();
 
-        if (sharedMemory->NeedsAllocation())
-            sharedMemory->Allocate(shmSize);
+            int exitCode = EXIT_CODE_SHM;
+            switch (exc.GetErrorCode())
+            {
+                case EOPENFAILED:            
+                    errOut << "EXITING because of FATAL ERROR: problems with shared memory: error from shmget() or shm_open(): " << strerror(err) << "\n" << flush;
+                    errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;     
+                case EEXISTS:
+                    errOut << "EXITING: fatal error from shmget() trying to allocate shared memory piece: error type: " << strerror(err) <<"\n";
+                    errOut << "Possible cause 1: not enough RAM. Check if you have enough RAM of at least " << shmSize+2000000000 << " bytes\n";
+                    errOut << "Possible cause 2: not enough virtual memory allowed with ulimit. SOLUTION: run ulimit -v " <<  shmSize+2000000000 <<"\n";
+                    errOut << "Possible cause 3: allowed shared memory size is not large enough. SOLUTIONS: (i) consult STAR manual on how to increase shared memory allocation; " \
+                    "(ii) ask your system administrator to increase shared memory allocation; (iii) run STAR with --genomeLoad NoSharedMemory\n"<<flush;
+                case EFTRUNCATE:
+                    errOut << "EXITING: fatal error from ftruncate() error shared memory: error type: " << strerror(err) << endl;
+                    errOut << "Possible cause 1: not enough RAM. Check if you have enough RAM of at least " << shmSize+2000000000 << " bytes\n";
+                    exitCode = EXIT_CODE_MEMORY_ALLOCATION;
+                case EMAPFAILED:
+                    errOut << "EXITING because of FATAL ERROR: problems with shared memory: error from shmat() while trying to get address of the shared memory piece: " << strerror(err) << "\n" <<flush;
+                    errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;     
+                case ECLOSE:
+                    errOut << "EXITING because of FATAL ERROR: could not close the shared memory object: " << strerror(err) << "\n" <<flush;     
+                case EUNLINK:
+                    #ifdef POSIX_SHARED_MEM
+                    errOut << "EXITING because of FATAL ERROR:  could not delete the shared object: " << strerror(err) <<flush;
+                    #else
+                    errOut << "EXITING because of FATAL ERROR: problems with shared memory: error from shmctl() while trying to remove shared memory piece: " << strerror(err) << "\n" <<flush;
+                    errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;     
+                    #endif
+                default:
+                    errOut << "EXITING because of FATAL ERROR: There was an issue with the shared memory allocation.";
+            }      
+
+            try 
+            {
+                sharedMemory->Clean();
+            }
+            catch(...)
+            {}
+
+            exitWithError(errOut.str(),std::cerr, P->inOut->logMain, exitCode, *P);
+        }
 
         shmStart = (char*) sharedMemory->GetMapped();
         shmNG= (uint*) (shmStart+SHM_sizeG);
@@ -328,11 +374,12 @@ void Genome::genomeLoad(){//allocate and load Genome
     #endif
     
     if (P->genomeLoad=="LoadAndExit") {
-	uint shmSum=0;
-	for (uint ii=0;ii<shmSize;ii++) shmSum+=shmStart[ii];
+    	uint shmSum=0;
+    	for (uint ii=0;ii<shmSize;ii++) shmSum+=shmStart[ii];
         P->inOut->logMain << "genomeLoad=LoadAndExit: completed, the genome is loaded and kept in RAM, EXITING now.\n"<<flush;
 //         system("echo `date` ..... Finished genome loading >> Log.timing.out");
-        exit(0);
+//        exit(0);
+    return;
     };
     
     //find chr starts from files

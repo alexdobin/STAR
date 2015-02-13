@@ -14,87 +14,66 @@ enum ErrorState {
 ENONE,
 ENOTALLOCATED,
 ETRYAGAIN,
-EALREADYALLOCATED, 
-
-EOPENFAILED,        	 
-// errOut << "EXITING because of FATAL ERROR: problems with shared memory: error from shmget() or shm_open(): " << strerror(errno) << "\n" << flush;
-// errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;     
-// exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_SHM, *P);
-
+EALREADYALLOCATED,
+EOPENFAILED,
 EEXISTS,
-// ostringstream errOut;
-// errOut <<"EXITING: fatal error from shmget() trying to allocate shared memory piece: error type: " << strerror(errno) <<"\n";
-// errOut <<"Possible cause 1: not enough RAM. Check if you have enough RAM of at least " << shmSize+2000000000 << " bytes\n";
-// errOut <<"Possible cause 2: not enough virtual memory allowed with ulimit. SOLUTION: run ulimit -v " <<  shmSize+2000000000 <<"\n";
-// errOut <<"Possible cause 3: allowed shared memory size is not large enough. SOLUTIONS: (i) consult STAR manual on how to increase shared memory allocation; "
-// "(ii) ask your system administrator to increase shared memory allocation; (iii) run STAR with --genomeLoad NoSharedMemory\n"<<flush;
-// exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_MEMORY_ALLOCATION, *P);  
-
 EFTRUNCATE,
-
-
-// ostringstream errOut;
-// errOut <<"EXITING: fatal error from ftruncate() error shared memory: error type: " << strerror(errno) << endl;
-// errOut <<"Possible cause 1: not enough RAM. Check if you have enough RAM of at least " << shmSize+2000000000 << " bytes\n";
-// void * ptr = NULL;
-
-// exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_MEMORY_ALLOCATION, *P); 
-
 EMAPFAILED,
-
-
-// ostringstream errOut;
-// errOut << "EXITING because of FATAL ERROR: problems with shared memory: error from shmat() while trying to get address of the shared memory piece: " << strerror(errno) << "\n" <<flush;
-// errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;     
-// exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_SHM, *P);
-
-// ostringstream errOut;
-// errOut <<"EXITING because of FATAL ERROR:  could not delete the shared object: " << strerror(errno) <<flush;
-// exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_SHM, *P);
-
-
 ECLOSE,
-
-// ostringstream errOut;
-// errOut << "EXITING because of FATAL ERROR: could not close the shared memory object: " << strerror(errno) << "\n" <<flush;     
-// exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_SHM, *P);
-
 EUNLINK,
-
-// ostringstream errOut;
-// errOut <<"EXITING because of FATAL ERROR:  could not delete the shared object: " << strerror(errno) <<flush;
-// exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_SHM, *P);
-
-
-// ostringstream errOut;
-// errOut << "EXITING because of FATAL ERROR: problems with shared memory: error from shmctl() while trying to remove shared memory piece: " << strerror(errno) << "\n" <<flush;
-// errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;     
-// exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_SHM, *P);    
-
-
 ECOUNTERCREATE,
 ECOUNTERREMOVE,
 ECOUNTERINC,
 ECOUNTERDEC,
 ECOUNTERUSE
-
-
 };
 
 
 class SharedMemoryException: public std::exception
 {
 private:
-	ErrorState _error;
+	bool _hasError = false;
+	ErrorState _error = ErrorState::ENONE;
+	int _errorDetail = 0;
 
 public:
 
-	SharedMemoryException(int error): _error((ErrorState)error)
+	SharedMemoryException()
 	{};
 
-	ErrorState GetErrorCode()
+	SharedMemoryException(ErrorState error): _error(error)
+	{};
+
+	ErrorState GetErrorCode() const
 	{
 		return _error;
+	};
+
+	int GetErrorDetail() const
+	{
+		return _errorDetail;
+	}
+
+	bool HasError() const
+	{
+		return _hasError;
+	};
+
+	void SetError(ErrorState error, int detail)
+	{
+		if (!_hasError)
+		{
+		    _hasError = true;
+		    _error = error;
+		    _errorDetail = detail;
+		}
+	}
+
+	void ClearError()
+	{
+	    _hasError = false;
+	    _error = ErrorState::ENONE;
+	    _errorDetail = 0;
 	};
 };
 
@@ -111,64 +90,52 @@ public:
 			if (!_needsAllocation)
 				return *_length - sizeof(size_t);
 			
-			SetError(ENOTALLOCATED);
+			_exception.SetError(ENOTALLOCATED, 0);
 			return -1;
 		};
 
-		bool NeedsAllocation()
+		bool NeedsAllocation() const
 		{
 			return _needsAllocation;
 		};
 
 		// the owner is the first one that created the named shared memory segment
-		bool IsAllocator()
+		bool IsAllocator() const
 		{
 			return _isAllocator;
 		};
 
-		bool HasError()
+		int GetId() const
 		{
-			return _hasError;
+			return _shmID;
 		};
 
-		void SetError(ErrorState error)
+		bool HasError() const
 		{
-			if (!_hasError)
-			{
-			    _hasError = true;
-			    _error = error;
-			}
+			return _exception.HasError();
 		}
+
+		void ThrowError(ErrorState error, int detail)
+		{
+			if (!_exception.HasError())
+			{
+				_exception.SetError(error, detail);
+			}
+			throw _exception;
+		};
 
 		void ThrowError(ErrorState error)
 		{
-			SetError(error);
-			throw new SharedMemoryException(_error);
-		};
-
-		ErrorState GetErrorCode()
-		{
-			return _error;
-		};
-
-		void ClearError()
-		{
-		    _hasError = false;
-		    _error = ErrorState::ENONE;
-		};
-
-		int GetId()
-		{
-			return _shmID;
+			ThrowError(error, 0);
 		};
 
 		SharedMemory(key_t key, bool unloadLast);
 		~SharedMemory();
 		void Allocate(size_t shmSize);
-		void Destroy();
+		void Clean();
 
 private:
-		ErrorState _error;
+		SharedMemoryException _exception;
 
         int _shmID = 0;
         void * _mapped=NULL;
@@ -176,7 +143,6 @@ private:
         sem_t * _sem=NULL;
         bool _isAllocator = false;
         bool _needsAllocation = true;
-		bool _hasError = false;
 
 		key_t _key;
         bool _unloadLast = true;
@@ -184,7 +150,7 @@ private:
 		int SharedObjectsUseCount();
 		void OpenIfExists();
         void CreateAndInitSharedObject(size_t shmSize);
-        void MapSharedObjectToMemory(size_t size);
+        void MapSharedObjectToMemory();
         const char * GetPosixObjectKey();
         struct stat GetSharedObjectInfo();
         void Close();

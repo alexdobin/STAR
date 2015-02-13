@@ -12,8 +12,6 @@ using namespace std;
 
 SharedMemory::SharedMemory(key_t key, bool unloadLast): _key(key), _unloadLast(unloadLast)
 {
-    _needsAllocation = false;
-
     OpenIfExists();
 }
 
@@ -22,7 +20,6 @@ SharedMemory::~SharedMemory()
     try
     {
         int inUse = SharedObjectsUseCount() - 1;
-        SharedUseDecrement();
         Close();
 
         if (inUse > 0)
@@ -32,41 +29,33 @@ SharedMemory::~SharedMemory()
         else if (_unloadLast)
         {
             cerr << "No other jobs are attached to the shared memory segment, removing it."<<endl;
-            Unlink();
-            RemoveSharedCounter();
+            Clean();
         };
     }
     catch (const SharedMemoryException & exc)
     {
-        Unlink();
-        RemoveSharedCounter();
+        //cerr << exc.GetErrorCode() << " " << exc.GetErrorDetail() << endl;
+        Clean();
     }
 }
 
 void SharedMemory::Allocate(size_t shmSize)
 {
-    ClearError();
+    _exception.ClearError();
 
     if (!_needsAllocation)
         ThrowError(ErrorState::EALREADYALLOCATED);
+    
+    CreateAndInitSharedObject(shmSize);
 
-    try
-    {
-        CreateAndInitSharedObject(shmSize);
-    }
-    catch (SharedMemoryException & exc)
-    {
-        if (exc.GetErrorCode() != ErrorState::EEXISTS)
-            rethrow_exception(current_exception());
-        
-        ClearError(); // someone else came in first
-    }
+    if (_exception.HasError() && _exception.GetErrorCode() != ErrorState::EEXISTS)
+        throw _exception;
+
+    _exception.ClearError(); // someone else came in first
 
     OpenIfExists();
     
     _isAllocator = true;
-
-    //TODO: Error validation
 }
 
 const char * SharedMemory::GetPosixObjectKey()
@@ -79,7 +68,7 @@ const char * SharedMemory::GetPosixObjectKey()
 string SharedMemory::CounterName()
 {
     ostringstream counterName;
-    counterName << "/shared_use_counter" << _shmID;
+    counterName << "/shared_use_counter" << _key;
     return counterName.str();
 }
 
@@ -91,17 +80,19 @@ void SharedMemory::CreateAndInitSharedObject(size_t shmSize)
 #ifdef POSIX_SHARED_MEM
     _shmID=shm_open(GetPosixObjectKey(), O_CREAT | O_RDWR | O_EXCL  , 0666);
 #else
-    _shmID = shmget(_key, toReserve, IPC_CREAT | IPC_EXCL | SHM_NORESERVE | 0666); //        _shmID = shmget(shmKey, shmSize, IPC_CREAT | SHM_NORESERVE | SHM_HUGETLB | 0666);
+    _shmID=shmget(_key, toReserve, IPC_CREAT | IPC_EXCL | SHM_NORESERVE | 0666); //        _shmID = shmget(shmKey, shmSize, IPC_CREAT | SHM_NORESERVE | SHM_HUGETLB | 0666);
 #endif
 
     if (_shmID == -1 && errno == EEXIST)
-        ThrowError(ErrorState::EEXISTS);
+    {
+        _exception.SetError(ErrorState::EEXISTS, 0);
+        return;
+    }
 
 #ifdef POSIX_SHARED_MEM
     int err = ftruncate(_shmID, toReserve);
     if (err == -1)
     {
-        Destroy();
         ThrowError(ErrorState::EFTRUNCATE);
     }
 #endif
@@ -109,90 +100,103 @@ void SharedMemory::CreateAndInitSharedObject(size_t shmSize)
 
 void SharedMemory::OpenIfExists()
 {
+    errno=0;
+    if (_shmID <= 0){
 #ifdef POSIX_SHARED_MEM
-    _shmID=shm_open(SharedMemory::GetPosixObjectKey(), O_RDWR, 0);
+        _shmID=shm_open(SharedMemory::GetPosixObjectKey(), O_RDWR, 0);
 #else
-    _shmID=shmget(_key,0,0);
+        _shmID=shmget(_key,0,0);
 #endif
+}
+    bool exists=_shmID>0;
 
-    bool exists=(_shmID!=-1);
-
-    if (!exists && errno !=ENOENT)
-        ThrowError(EOPENFAILED);
+    if (! (exists || errno == ENOENT))
+        ThrowError(EOPENFAILED); // it's there but we couldn't get a handle
 
     if (exists)
     {
-        // mandatory since on first re-open we don't have the size of object
-        struct stat buf = SharedMemory::GetSharedObjectInfo(); 
-        size_t size = (size_t) buf.st_size;
-
-        MapSharedObjectToMemory(size);
+        MapSharedObjectToMemory();
         
         _needsAllocation = false;
-        SharedUseIncrement();
     }
 }
 
+#ifdef POSIX_SHARED_MEM
 struct stat SharedMemory::GetSharedObjectInfo()
 {
     struct stat buf;
     int err = fstat(_shmID, &buf);
     if (err == -1)
-        ThrowError(EOPENFAILED);
+        ThrowError(EOPENFAILED, errno);
 
     return buf;
 }
+#endif
 
-void SharedMemory::MapSharedObjectToMemory(size_t size)
+void SharedMemory::MapSharedObjectToMemory()
 {
+    size_t size=0;
 #ifdef POSIX_SHARED_MEM
+    struct stat buf = SharedMemory::GetSharedObjectInfo(); 
+    size = (size_t) buf.st_size;
     _mapped = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_NORESERVE, _shmID, (off_t) 0);
 #else
+    // size is not needed
     _mapped= shmat(_shmID, NULL, 0);
 #endif
 
     if (_mapped==((void *) -1)) 
-        ThrowError(EMAPFAILED);
+        ThrowError(EMAPFAILED, errno);
+    
+    SharedUseIncrement();
+
     // set the length field
     _length = (size_t *) _mapped;
+#ifdef POSIX_SHARED_MEM
     *_length = size;
+#endif
 }
 
 void SharedMemory::Close()
 {
     if (_mapped != NULL)
     {
-        int ret = munmap(_mapped, (size_t) _length);
+        int ret = munmap(_mapped, (size_t) *_length);
         _mapped = NULL;
         if (ret == -1)
-            ThrowError(EMAPFAILED);
+            ThrowError(EMAPFAILED, errno);
+        SharedUseDecrement();
     }
 
     if (_shmID != 0)
     {
         int err = close(_shmID);
+        _shmID=0;
         if (err == -1)
-            ThrowError(ECLOSE);
+            ThrowError(ECLOSE, errno);
     }
 }
 
 void SharedMemory::Unlink()
 {
-#ifdef POSIX_SHARED_MEM
-    int ret = shm_unlink(SharedMemory::GetPosixObjectKey());
-    if (ret == -1)
-        ThrowError(EUNLINK);
+    if (!_needsAllocation)
+    {
+        int shmStatus=-1;
+    #ifdef POSIX_SHARED_MEM
+        shmStatus = shm_unlink(SharedMemory::GetPosixObjectKey());
 
-#else
-    struct shmid_ds *buf=NULL;
-    int shmStatus=shmctl(_shmID,IPC_RMID,buf);
-    if (shmStatus==-1) 
-        ThrowError(EUNLINK);
+    #else
+        struct shmid_ds *buf=NULL;
+        shmStatus=shmctl(_shmID,IPC_RMID,buf);
+    #endif
+        if (shmStatus == -1)
+            ThrowError(EUNLINK, errno);
 
-#endif
+        _needsAllocation = true;
+    }
 }
 
-void SharedMemory::Destroy()
+void SharedMemory::Clean()
 {
     Close();
     Unlink();
@@ -205,21 +209,27 @@ void SharedMemory::EnsureCounter()
         return;
 
     const char * counterName = SharedMemory::CounterName().c_str();
-    _sem = sem_open(counterName, 0);
-    if ((errno & ENOENT) == ENOENT)
-    {
-        _sem = sem_open(counterName, O_CREAT, 0666, 0);
-        if (errno != 0)
-            ThrowError(ECOUNTERCREATE);
-    }
+
+    _sem = sem_open(counterName, O_CREAT, 0666, 0);
+    if (_sem == SEM_FAILED)
+        ThrowError(ECOUNTERCREATE, errno);
 }
 
 void SharedMemory::RemoveSharedCounter()
 {
     const char * counterName = SharedMemory::CounterName().c_str();
-    int ret = sem_unlink(counterName);
-    if (ret == -1)
-            ThrowError(ECOUNTERREMOVE);
+
+    if (_sem != NULL)
+    {
+        int ret = sem_close(_sem);
+        if (ret == -1)
+            ThrowError(ECLOSE, errno);
+        
+        ret = sem_unlink(counterName);
+        if (ret == -1)
+            ThrowError(ECOUNTERREMOVE, errno);
+        _sem = NULL;
+    }
 }
 
 void SharedMemory::SharedUseIncrement()
@@ -227,7 +237,8 @@ void SharedMemory::SharedUseIncrement()
     SharedMemory::EnsureCounter();
     int ret = sem_post(_sem);
     if (ret == -1)
-        ThrowError(ECOUNTERINC);
+        ThrowError(ECOUNTERINC, errno);
+    cerr << "incremented shared memory fragment usage to " << SharedObjectsUseCount() << endl;
 }
 
 void SharedMemory::SharedUseDecrement()
@@ -235,7 +246,8 @@ void SharedMemory::SharedUseDecrement()
     SharedMemory::EnsureCounter();
     int ret = sem_trywait(_sem);
     if (ret == -1)
-        ThrowError(ECOUNTERDEC);
+        ThrowError(ECOUNTERDEC, errno);
+    cerr << "incremented shared memory fragment usage to " << SharedObjectsUseCount() << endl;
 }
 
 int SharedMemory::SharedObjectsUseCount()
@@ -245,7 +257,7 @@ int SharedMemory::SharedObjectsUseCount()
     int ret = sem_getvalue(_sem, &sval);
 
     if (ret == -1 || sval == -1)
-        ThrowError(ECOUNTERUSE);
+        ThrowError(ECOUNTERUSE, errno);
 
     return sval;
 }

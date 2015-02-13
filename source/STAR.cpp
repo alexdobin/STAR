@@ -48,6 +48,11 @@ int main(int argInN, char* argIn[]) {
     
     Genome mainGenome (P);
     mainGenome.genomeLoad();
+
+    if (P->genomeLoad=="LoadAndExit" ||
+        P->genomeLoad=="Remove")
+    return 0;
+
     //calculate genome-related parameters
     P->winBinN = P->nGenome/(1LLU << P->winBinNbits)+1;
     
