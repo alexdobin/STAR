@@ -247,7 +247,7 @@ void SharedMemory::SharedUseDecrement()
     int ret = sem_trywait(_sem);
     if (ret == -1)
         ThrowError(ECOUNTERDEC, errno);
-    cerr << "incremented shared memory fragment usage to " << SharedObjectsUseCount() << endl;
+    cerr << "decremented shared memory fragment usage to " << SharedObjectsUseCount() << endl;
 }
 
 int SharedMemory::SharedObjectsUseCount()
