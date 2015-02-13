@@ -27,6 +27,13 @@ Genome::Genome (Parameters* Pin ): P(Pin), shmStart(NULL) {
             shmKey=ftok(P->genomeDir.c_str(),SHM_projectID);
         };
 
+Genome::~Genome()
+{
+    if (sharedMemory != NULL)
+        delete sharedMemory;
+    sharedMemory = NULL;
+}
+
 void Genome::freeMemory(){//free big chunks of memory used by genome and suffix array
 
     if (P->genomeLoad=="NoSharedMemory") {//can deallocate only for non-shared memory
@@ -378,8 +385,7 @@ void Genome::genomeLoad(){//allocate and load Genome
     	for (uint ii=0;ii<shmSize;ii++) shmSum+=shmStart[ii];
         P->inOut->logMain << "genomeLoad=LoadAndExit: completed, the genome is loaded and kept in RAM, EXITING now.\n"<<flush;
 //         system("echo `date` ..... Finished genome loading >> Log.timing.out");
-//        exit(0);
-    return;
+        return;
     };
     
     //find chr starts from files

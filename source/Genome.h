@@ -13,8 +13,9 @@ class Genome {
         PackedArray SAi;
         
         Genome (Parameters* Pin );
-
         Genome () {};//empty constructor
+        ~Genome();
+        
         void freeMemory();
         void genomeLoad();
 
