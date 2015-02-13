@@ -137,7 +137,7 @@ public:
 private:
 		SharedMemoryException _exception;
 
-        int _shmID = 0;
+        int _shmID = -1;
         void * _mapped=NULL;
 		size_t * _length = NULL;
         sem_t * _sem=NULL;

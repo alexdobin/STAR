@@ -22,7 +22,7 @@ SharedMemory::~SharedMemory()
         int inUse = SharedObjectsUseCount() - 1;
         Close();
 
-        if (inUse > 0)
+        if (inUse > 0 && _unloadLast)
         {
             cerr << inUse << " other job(s) are attached to the shared memory segment, will not remove it." <<endl;
         } 
@@ -51,7 +51,7 @@ void SharedMemory::Allocate(size_t shmSize)
     if (_exception.HasError() && _exception.GetErrorCode() != ErrorState::EEXISTS)
         throw _exception;
 
-    _exception.ClearError(); // someone else came in first
+    _exception.ClearError(); // someone else came in first so retry open
 
     OpenIfExists();
     
@@ -83,9 +83,16 @@ void SharedMemory::CreateAndInitSharedObject(size_t shmSize)
     _shmID=shmget(_key, toReserve, IPC_CREAT | IPC_EXCL | SHM_NORESERVE | 0666); //        _shmID = shmget(shmKey, shmSize, IPC_CREAT | SHM_NORESERVE | SHM_HUGETLB | 0666);
 #endif
 
-    if (_shmID == -1 && errno == EEXIST)
+    if (_shmID == -1)
     {
-        _exception.SetError(ErrorState::EEXISTS, 0);
+        switch (errno)
+        {
+            case EEXIST:
+                _exception.SetError(ErrorState::EEXISTS, 0);
+                break;
+            default:
+                ThrowError(ErrorState::EOPENFAILED, errno);
+        }
         return;
     }
 
@@ -101,17 +108,16 @@ void SharedMemory::CreateAndInitSharedObject(size_t shmSize)
 void SharedMemory::OpenIfExists()
 {
     errno=0;
-    if (_shmID <= 0){
+    if (_shmID < 0){
 #ifdef POSIX_SHARED_MEM
         _shmID=shm_open(SharedMemory::GetPosixObjectKey(), O_RDWR, 0);
 #else
         _shmID=shmget(_key,0,0);
 #endif
 }
-    bool exists=_shmID>0;
-
+    bool exists=_shmID>=0;
     if (! (exists || errno == ENOENT))
-        ThrowError(EOPENFAILED); // it's there but we couldn't get a handle
+        ThrowError(EOPENFAILED, errno); // it's there but we couldn't get a handle
 
     if (exists)
     {
@@ -141,6 +147,7 @@ void SharedMemory::MapSharedObjectToMemory()
     size = (size_t) buf.st_size;
     _mapped = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_NORESERVE, _shmID, (off_t) 0);
 #else
+
     // size is not needed
     _mapped= shmat(_shmID, NULL, 0);
 #endif
@@ -161,20 +168,24 @@ void SharedMemory::Close()
 {
     if (_mapped != NULL)
     {
+    #ifdef POSIX_SHARED_MEM
         int ret = munmap(_mapped, (size_t) *_length);
-        _mapped = NULL;
         if (ret == -1)
             ThrowError(EMAPFAILED, errno);
+    #endif
+        _mapped = NULL;
         SharedUseDecrement();
     }
 
-    if (_shmID != 0)
+    #ifdef POSIX_SHARED_MEM
+    if (_shmID != -1)
     {
         int err = close(_shmID);
-        _shmID=0;
+        _shmID=-1;
         if (err == -1)
             ThrowError(ECLOSE, errno);
     }
+    #endif
 }
 
 void SharedMemory::Unlink()
@@ -186,8 +197,8 @@ void SharedMemory::Unlink()
         shmStatus = shm_unlink(SharedMemory::GetPosixObjectKey());
 
     #else
-        struct shmid_ds *buf=NULL;
-        shmStatus=shmctl(_shmID,IPC_RMID,buf);
+        struct shmid_ds buf;
+        shmStatus=shmctl(_shmID,IPC_RMID,&buf);
     #endif
         if (shmStatus == -1)
             ThrowError(EUNLINK, errno);
@@ -245,7 +256,7 @@ void SharedMemory::SharedUseDecrement()
 {
     SharedMemory::EnsureCounter();
     int ret = sem_trywait(_sem);
-    if (ret == -1)
+    if (ret == -1 && errno != EAGAIN)
         ThrowError(ECOUNTERDEC, errno);
     cerr << "decremented shared memory fragment usage to " << SharedObjectsUseCount() << endl;
 }
