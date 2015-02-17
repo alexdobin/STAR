@@ -122,13 +122,20 @@ int bamAttrArrayWriteInt(intType x, const char* tagName, char* attrArray, Parame
 
 
 
-void ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint trChrStart, uint mateChr, uint mateStart, char mateStrand, int unmapType, bool *mateMapped, vector<int> outSAMattrOrder) {    
+int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint trChrStart, uint mateChr, uint mateStart, char mateStrand, int alignType, bool *mateMapped, vector<int> outSAMattrOrder, char** outBAMarray, uint* outBAMarrayN) {    
+    //return: number of lines (mates)   
+ 
+    //alignType>=0: unmapped reads
+    //          -1: normal mapped reads
+    //          -11: chimeric alignment, chimeric junction on the left
+    //          -12: chimeric alignment, chimeric junction on the right
     
-    if (P->outSAMmode=="None") return; //no SAM/BAM output
+    
+    if (P->outSAMmode=="None") return 0; //no SAM/BAM output
     
     uint32 recSize=0; //record size - total for both mates
-    outBAMoneAlignNbytes[0]=0;
-    outBAMoneAlignNbytes[1]=0;
+    outBAMarrayN[0]=0;
+    outBAMarrayN[1]=0;
 
     //for SAM output need to split mates
     uint iExMate=0; //last exon of the first mate
@@ -139,7 +146,7 @@ void ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint
     bool flagPaired = P->readNmates==2;   
     
     uint nMates=1;    
-    if (unmapType<0) {//unmapped reads: SAM
+    if (alignType<0) {//mapped reads: SAM
         for (iExMate=0;iExMate<trOut.nExons-1;iExMate++) {
             if (trOut.canonSJ[iExMate]==-3){
                 nMates=2;
@@ -150,7 +157,7 @@ void ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint
         nMates=0;
     };
 
-    for (uint imate=0;imate < (unmapType<0 ? nMates:P->readNmates);imate++) {
+    for (uint imate=0;imate < (alignType<0 ? nMates:P->readNmates);imate++) {
             
         uint iEx1=0;
         uint iEx2=0;
@@ -161,8 +168,9 @@ void ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint
         int MAPQ=0;
         uint32 attrN=0;
         char attrOutArray[BAM_ATTR_MaxSize];
+        uint trimL1, trimR1;
 
-        if (unmapType>=0) {//this mate is unmapped
+        if (alignType>=0) {//this mate is unmapped
             if (mateMapped!=NULL && mateMapped[imate]) continue; //this mate was mapped, do not record it aws unmapped
             samFLAG=0x4;
             if (P->readNmates==2) {//paired read
@@ -175,7 +183,7 @@ void ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint
             };
 
             if (readFilter=='Y') samFLAG+=0x200; //not passing quality control
-
+                            
             Mate=imate;
             Str=Mate;
             
@@ -184,7 +192,7 @@ void ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint
             attrN+=bamAttrArrayWriteInt(0,"HI",attrOutArray+attrN,P);
             attrN+=bamAttrArrayWriteInt(trBest->maxScore,"AS",attrOutArray+attrN,P);
             attrN+=bamAttrArrayWriteInt(trBest->nMM,"nM",attrOutArray+attrN,P);
-            attrN+=bamAttrArrayWrite((to_string((uint) unmapType)).at(0), "uT",attrOutArray+attrN); //cast to uint is only necessary for old compilers
+            attrN+=bamAttrArrayWrite((to_string((uint) alignType)).at(0), "uT",attrOutArray+attrN); //cast to uint is only necessary for old compilers
             if (!P->outSAMattrRG.empty()) attrN+=bamAttrArrayWrite(P->outSAMattrRG.at(readFilesIndex),"RG",attrOutArray+attrN);                        
 
         } else {            
@@ -201,7 +209,12 @@ void ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint
 
             if (readFilter=='Y') samFLAG+=0x200; //not passing quality control
             
-            
+            if (alignType==-11 || alignType==-12) {
+                samFLAG+=0x800; //mark chimeric alignments
+            } else {//only non-chimeric alignments will be marked as non-primary, since chimeric are already marked with 0x800
+                if (!trOut.primaryFlag) samFLAG +=0x100;//mark not primary align
+            };
+
             iEx1 = (imate==0 ? 0 : iExMate+1);
             iEx2 = (imate==0 ? iExMate : trOut.nExons-1);
             Mate=trOut.exons[iEx1][EX_iFrag];        
@@ -221,8 +234,6 @@ void ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint
                 if (flagPaired && nMates==1 && mateStrand==1) samFLAG +=0x20;//revert strand using inout value of mateStrand (e.g. for chimeric aligns)
             };        
 
-            //not primary align?
-            if (!trOut.primaryFlag) samFLAG +=0x100;
 
             uint trimL;
             if (Str==0 && Mate==0) {
@@ -237,9 +248,9 @@ void ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint
 
             nCIGAR=0; //number of CIGAR operations
 
-            uint trimL1 = trimL + trOut.exons[iEx1][EX_R] - (trOut.exons[iEx1][EX_R]<readLength[leftMate] ? 0 : readLength[leftMate]+1);
+            trimL1 = trimL + trOut.exons[iEx1][EX_R] - (trOut.exons[iEx1][EX_R]<readLength[leftMate] ? 0 : readLength[leftMate]+1);
             if (trimL1>0) {
-                packedCIGAR[nCIGAR++]=trimL1<<BAM_CIGAR_OperationShift | BAM_CIGAR_S; 
+                packedCIGAR[nCIGAR++]=trimL1<<BAM_CIGAR_OperationShift | (alignType==-11 ? BAM_CIGAR_H : BAM_CIGAR_S); 
             };                      
 
             vector<int32> SJintron;
@@ -272,11 +283,11 @@ void ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint
                 SJintron.push_back(-1); 
             };
 
-            uint trimR1=(trOut.exons[iEx1][EX_R]<readLength[leftMate] ? \
+            trimR1=(trOut.exons[iEx1][EX_R]<readLength[leftMate] ? \
                 readLengthOriginal[leftMate] : readLength[leftMate]+1+readLengthOriginal[Mate]) \
                 - trOut.exons[iEx2][EX_R]-trOut.exons[iEx2][EX_L] - trimL;
             if ( trimR1 > 0 ) {
-                packedCIGAR[nCIGAR++]=trimR1<<BAM_CIGAR_OperationShift | BAM_CIGAR_S;             
+                packedCIGAR[nCIGAR++]=trimR1<<BAM_CIGAR_OperationShift | (alignType==-12 ? BAM_CIGAR_H : BAM_CIGAR_S);             
             };
 
             MAPQ=P->outSAMmapqUnique;
@@ -355,29 +366,39 @@ void ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint
             qualOut=&qualMate[0];            
         };        
         
+        uint seqMateLength=readLengthOriginal[Mate];
+        if (alignType==-11) {//hard-clip on the left
+            seqMateLength-=trimL1;
+            seqOut+=trimL1;
+            qualOut+=trimL1;
+        } else if (alignType==-12) {
+            seqMateLength-=trimR1;
+        } else {//no-chimeric alignment
+        };
+        
         //pack sequence
-        nuclPackBAM(seqOut,seqMate,readLengthOriginal[Mate]);        
+        nuclPackBAM(seqOut,seqMate,seqMateLength);       
         
 /////////////////////////////////// write BAM
-        uint32 *pBAM=(uint32*) (outBAMoneAlign[imate]);
+        uint32 *pBAM=(uint32*) (outBAMarray[imate]);
         recSize=0;
 
         //1: refID: Reference sequence ID, -1 <= refID <= n ref; -1 for a read without a mapping position.       
-        if (unmapType<0) {
+        if (alignType<0) {
             pBAM[1]=trOut.Chr;
         } else {
             pBAM[1]=(uint32) -1;
         };
         
         //2: pos: 0-based leftmost coordinate (= POS - 1): int32_t
-        if (unmapType<0) {
+        if (alignType<0) {
             pBAM[2]=trOut.exons[iEx1][EX_G] - trChrStart;
         } else {
             pBAM[2]=(uint32) -1;
         };            
 
         //3: bin mq nl bin<<16|MAPQ<<8|l read name; bin is computed by the > reg2bin() function in Section 4.3; l read name is the length> of read name below (= length(QNAME) + 1).> uint32 t
-        if (unmapType<0) {
+        if (alignType<0) {
             pBAM[3]=( ( reg2bin(trOut.exons[iEx1][EX_G] - trChrStart,trOut.exons[iEx2][EX_G] + trOut.exons[iEx2][EX_L] - trChrStart) << 16 ) \
                    |( MAPQ<<8 ) | ( strlen(readName) ) ); //note:read length includes 0-char
         } else {
@@ -388,7 +409,7 @@ void ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint
         pBAM[4]=( ( ((samFLAG & P->outSAMflagAND) | P->outSAMflagOR) << 16 ) | (nCIGAR) ); 
 
         //5: l seq Length of SEQ
-        pBAM[5]=readLengthOriginal[Mate];
+        pBAM[5]=seqMateLength;
 
         //6: next refID Ref-ID of the next segment (􀀀1  mate refID < n ref)
         if (nMates>1) {
@@ -420,35 +441,36 @@ void ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint
         recSize+=9*sizeof(int32); //core record size
         
         //Read name1, NULL terminated (QNAME plus a tailing `\0')
-        strcpy(outBAMoneAlign[imate]+recSize,readName+1);        
+        strcpy(outBAMarray[imate]+recSize,readName+1);        
         recSize+=strlen(readName);
         
         //CIGAR: op len<<4|op. `MIDNSHP=X'!`012345678'
-        memcpy(outBAMoneAlign[imate]+recSize,packedCIGAR, nCIGAR*sizeof(int32));
+        memcpy(outBAMarray[imate]+recSize,packedCIGAR, nCIGAR*sizeof(int32));
         recSize+=nCIGAR*sizeof(int32);
         
         //4-bit encoded read: `=ACMGRSVTWYHKDBN'! [0; 15]; other characters mapped to `N'; high nybble rst (1st base in the highest 4-bit of the 1st byte)
-        memcpy(outBAMoneAlign[imate]+recSize,seqMate,(readLengthOriginal[Mate]+1)/2);
-        recSize+=(readLengthOriginal[Mate]+1)/2;
+        memcpy(outBAMarray[imate]+recSize,seqMate,(seqMateLength+1)/2);
+        recSize+=(seqMateLength+1)/2;
         
         //Phred base quality (a sequence of 0xFF if absent)
-        if (readFileType==2 && P->outSAMmode != "NoQS") {//output qaultiy
-            for (uint32 ii=0; ii<readLengthOriginal[Mate]; ii++) {
-                outBAMoneAlign[imate][recSize+ii]=qualOut[ii]-33;
+        if (readFileType==2 && P->outSAMmode != "NoQS") {//output qualtiy
+            for (uint32 ii=0; ii<seqMateLength; ii++) {
+                outBAMarray[imate][recSize+ii]=qualOut[ii]-33;
             };
 //             memcpy(outBAM+recSize,qualOut,readLengthOriginal[Mate]);
         } else {
-            memset(outBAMoneAlign[imate]+recSize,0xFF,readLengthOriginal[Mate]);
+            memset(outBAMarray[imate]+recSize,0xFF,seqMateLength);
         };
-        recSize+=readLengthOriginal[Mate];
+        recSize+=seqMateLength;
         
         //atributes
-        memcpy(outBAMoneAlign[imate]+recSize,attrOutArray,attrN);
+        memcpy(outBAMarray[imate]+recSize,attrOutArray,attrN);
         recSize+=attrN;
         
         //total size of the record
         pBAM[0]=recSize-sizeof(uint32);//record size excluding the size entry itself
-        outBAMoneAlignNbytes[imate]=recSize;
+        outBAMarrayN[imate]=recSize;
     };//for (uint imate=0;imate<nMates;imate++)
     
+    return ( outBAMarrayN[1]==0 ? 1 : 2);
 };

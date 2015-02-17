@@ -10,7 +10,8 @@ void ReadAlign::outputAlignments() {
     bool mateMapped[2]={false,false};
     
     if (P->outFilterBySJoutStage<=1) {//no chimeric output for stage=2
-        chimericDetection();
+        if ( chimericDetection() && P->chimOutType=="WithinBAM" ) return; 
+        //if chimeric alignment was recorded in main BAM files, it contains the representative portion, so non-chimeric aligmnent is not output
     };
     
     if ( nW==0 ) {//no good windows
@@ -82,7 +83,7 @@ void ReadAlign::outputAlignments() {
             for (uint iTr=0;iTr<nTr;iTr++) {//write all transcripts
                      
                 if (P->outBAMunsorted || P->outBAMcoord) {//BAM output
-                    alignBAM(*(trMult[iTr]), nTr, iTr, P->chrStart[trMult[iTr]->Chr], (uint) -1, (uint) -1, 0, -1, NULL, P->outSAMattrOrder);
+                    alignBAM(*(trMult[iTr]), nTr, iTr, P->chrStart[trMult[iTr]->Chr], (uint) -1, (uint) -1, 0, -1, NULL, P->outSAMattrOrder,outBAMoneAlign, outBAMoneAlignNbytes);
                     for (uint imate=0; imate<P->readNmates; imate++) {//output each mate
                         if (P->outBAMunsorted) outBAMunsorted->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], imate>0 ? 0 : outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1]);
                         if (P->outBAMcoord)    outBAMcoord->coordOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], P->chrStart[trMult[iTr]->Chr], (iReadAll<<32) | (iTr<<8) | trMult[iTr]->exons[0][EX_iFrag] );                        
@@ -125,7 +126,7 @@ void ReadAlign::outputAlignments() {
 
     if (unmapType>=0 && P->outSAMunmapped=="Within") {//unmapped read, at least one mate
         if (P->outBAMunsorted || P->outBAMcoord || P->quant.trSAM.yes) {//BAM output
-            alignBAM(*trBest, 0, 0, P->chrStart[trBest->Chr], (uint) -1, (uint) -1, 0,  unmapType, mateMapped, P->outSAMattrOrder);
+            alignBAM(*trBest, 0, 0, P->chrStart[trBest->Chr], (uint) -1, (uint) -1, 0,  unmapType, mateMapped, P->outSAMattrOrder, outBAMoneAlign, outBAMoneAlignNbytes);
             for (uint imate=0; imate<P->readNmates; imate++) {//output each mate
                 if (P->outBAMunsorted) outBAMunsorted->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], imate>0 ? 0 : outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1]);
                 //TODO clean for single-end alignments of PE reads

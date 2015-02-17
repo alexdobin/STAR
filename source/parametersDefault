@@ -458,6 +458,10 @@ winFlankNbins               4
 
 
 ### Chimeric Alignments
+chimOutType                 SeparateSAMold
+    string: type of chimeric output
+                            SeparateSAMold  ... output old SAM into separate Chimeric.out.sam file
+                            WithinBAM       ... output into main aligned BAM files (Aligned.*.bam)
 
 chimSegmentMin              0
     int>=0: minimum length of chimeric segment length, if ==0, no chimeric output

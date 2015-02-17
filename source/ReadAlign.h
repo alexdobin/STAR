@@ -34,8 +34,10 @@ class ReadAlign : public Genome {
         uint outBAMbytes, outBAMbytes1; //number of bytes output to SAM/BAM with oneRead
         char *outBAMarray, *outBAMarray1;//pointer to the (last+1) position of the SAM/BAM output array
         BAMoutput *outBAMcoord, *outBAMunsorted, *outBAMquant;//sorted by coordinate, unsorted, transcriptomic BAM structure
-        char outBAMoneAlign[MAX_N_MATES][BAMoutput_oneAlignMaxBytes];//tmp array to store BAM alignmnent
-        uint outBAMoneAlignNbytes[MAX_N_MATES];//number of bytes in the tmp BAM array
+//        char outBAMoneAlign[MAX_N_MATES][BAMoutput_oneAlignMaxBytes];//tmp array to store BAM alignmnent
+//        uint outBAMoneAlignNbytes[MAX_N_MATES];//number of bytes in the tmp BAM array
+        char** outBAMoneAlign;
+        uint* outBAMoneAlignNbytes;
         
         ostringstream samStreamCIGAR, samStreamSJmotif, samStreamSJintron,samStreamSJannot;
         
@@ -118,7 +120,7 @@ class ReadAlign : public Genome {
         
         bool outputTranscript(Transcript *trOut, uint nTrOut, ofstream *outBED);
         uint outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint mateChr, uint mateStart, char mateStrand, int unmapType, bool *mateMapped, ostream *outStream);
-        void alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint trChrStart, uint mateChr, uint mateStart, char mateStrand, int unmapType, bool *mateMapped, vector<int> outSAMattrOrder);
+        int alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint trChrStart, uint mateChr, uint mateStart, char mateStrand, int unmapType, bool *mateMapped, vector<int> outSAMattrOrder, char** outBAMarray, uint* outBAMarrayN);
         void samAttrNM_MD (Transcript const &trOut, uint iEx1, uint iEx2, uint &tagNM, string &tagMD);
         
         void outputTranscriptSJ(Transcript const &trOut, uint nTrOut, OutSJ *outStream, uint sjReadStartN );
@@ -127,7 +129,7 @@ class ReadAlign : public Genome {
         int createExtendWindowsWithAlign(uint a1, uint aStr); //extends and windows with one alignment
         void assignAlignToWindow(uint a1, uint aLength, uint aStr, uint aNrep, uint aFrag, uint aRstart,bool aAnchor, uint sjA); //assigns one alignment to a window
         void stitchPieces(char **R, char **Q, char *G, PackedArray& SA, uint Lread);
-        void chimericDetection();
+        bool chimericDetection();
         void outputAlignments();
         void stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* G);//stitches all seeds in one window: iW
         

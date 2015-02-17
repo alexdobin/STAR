@@ -1,3 +1,4 @@
+Implemented --chimOutType WithinBAM option for chimeric output merged into main BAM files.
 Implemented --alignEndsType Extend5pOfRead1 option.
 
 2.4.0j 02/04/2015
