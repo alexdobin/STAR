@@ -20,7 +20,7 @@ class Genome {
         void genomeLoad();
 
     private:
-	Parameters* P;
+    Parameters* P;
     key_t shmKey;  
     char *shmStart;
     char *G1; //pointer -200 of G

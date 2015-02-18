@@ -32,127 +32,127 @@ ECOUNTERUSE
 class SharedMemoryException: public std::exception
 {
 private:
-	bool _hasError;
-	ErrorState _error;
-	int _errorDetail;
+    bool _hasError;
+    ErrorState _error;
+    int _errorDetail;
 
 public:
 
-	SharedMemoryException()
-	{
-		_hasError = false;
-        	_error = ErrorState::ENONE;
-		_errorDetail = 0;
-	};
+    SharedMemoryException()
+    {
+        _hasError = false;
+            _error = ErrorState::ENONE;
+        _errorDetail = 0;
+    };
 
-	SharedMemoryException(ErrorState error): _error(error)
-	{};
+    SharedMemoryException(ErrorState error): _error(error)
+    {};
 
-	ErrorState GetErrorCode() const
-	{
-		return _error;
-	};
+    ErrorState GetErrorCode() const
+    {
+        return _error;
+    };
 
-	int GetErrorDetail() const
-	{
-		return _errorDetail;
-	}
+    int GetErrorDetail() const
+    {
+        return _errorDetail;
+    }
 
-	bool HasError() const
-	{
-		return _hasError;
-	};
+    bool HasError() const
+    {
+        return _hasError;
+    };
 
-	void SetError(ErrorState error, int detail)
-	{
-		if (!_hasError)
-		{
-		    _hasError = true;
-		    _error = error;
-		    _errorDetail = detail;
-		}
-	}
+    void SetError(ErrorState error, int detail)
+    {
+        if (!_hasError)
+        {
+            _hasError = true;
+            _error = error;
+            _errorDetail = detail;
+        }
+    }
 
-	void ClearError()
-	{
-	    _hasError = false;
-	    _error = ErrorState::ENONE;
-	    _errorDetail = 0;
-	};
+    void ClearError()
+    {
+        _hasError = false;
+        _error = ErrorState::ENONE;
+        _errorDetail = 0;
+    };
 };
 
 class SharedMemory
 {
 public:
-		void * GetMapped()
-		{
-			return (void *) ((char*) _mapped + sizeof(size_t));
-		};
+        void * GetMapped()
+        {
+            return (void *) ((char*) _mapped + sizeof(size_t));
+        };
 
-		size_t GetSize()
-		{
-			if (!_needsAllocation)
-				return *_length - sizeof(size_t);
-			
-			_exception.SetError(ENOTALLOCATED, 0);
-			return -1;
-		};
+        size_t GetSize()
+        {
+            if (!_needsAllocation)
+                return *_length - sizeof(size_t);
+            
+            _exception.SetError(ENOTALLOCATED, 0);
+            return -1;
+        };
 
-		bool NeedsAllocation() const
-		{
-			return _needsAllocation;
-		};
+        bool NeedsAllocation() const
+        {
+            return _needsAllocation;
+        };
 
-		// the owner is the first one that created the named shared memory segment
-		bool IsAllocator() const
-		{
-			return _isAllocator;
-		};
+        // the owner is the first one that created the named shared memory segment
+        bool IsAllocator() const
+        {
+            return _isAllocator;
+        };
 
-		int GetId() const
-		{
-			return _shmID;
-		};
+        int GetId() const
+        {
+            return _shmID;
+        };
 
-		bool HasError() const
-		{
-			return _exception.HasError();
-		}
+        bool HasError() const
+        {
+            return _exception.HasError();
+        }
 
-		void ThrowError(ErrorState error, int detail)
-		{
-			if (!_exception.HasError())
-			{
-				_exception.SetError(error, detail);
-			}
-			throw _exception;
-		};
+        void ThrowError(ErrorState error, int detail)
+        {
+            if (!_exception.HasError())
+            {
+                _exception.SetError(error, detail);
+            }
+            throw _exception;
+        };
 
-		void ThrowError(ErrorState error)
-		{
-			ThrowError(error, 0);
-		};
+        void ThrowError(ErrorState error)
+        {
+            ThrowError(error, 0);
+        };
 
-		SharedMemory(key_t key, bool unloadLast);
-		~SharedMemory();
-		void Allocate(size_t shmSize);
-		void Clean();
+        SharedMemory(key_t key, bool unloadLast);
+        ~SharedMemory();
+        void Allocate(size_t shmSize);
+        void Clean();
 
 private:
-		SharedMemoryException _exception;
+        SharedMemoryException _exception;
 
         int _shmID;
         void * _mapped;
-		size_t * _length;
+        size_t * _length;
         sem_t * _sem;
         bool _isAllocator;
         bool _needsAllocation;
 
-		key_t _key;
+        key_t _key;
         bool _unloadLast;
-		
-		int SharedObjectsUseCount();
-		void OpenIfExists();
+        
+        int SharedObjectsUseCount();
+        void OpenIfExists();
         void CreateAndInitSharedObject(size_t shmSize);
         void MapSharedObjectToMemory();
         const char * GetPosixObjectKey();
@@ -160,12 +160,12 @@ private:
         void Close();
         void Unlink();
 
-		std::string CounterName();
+        std::string CounterName();
 
-		void EnsureCounter();
-		void RemoveSharedCounter();
-		void SharedUseIncrement();
-		void SharedUseDecrement();
+        void EnsureCounter();
+        void RemoveSharedCounter();
+        void SharedUseIncrement();
+        void SharedUseDecrement();
 
 };
 
