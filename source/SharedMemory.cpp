@@ -149,8 +149,8 @@ struct stat SharedMemory::GetSharedObjectInfo()
 
 void SharedMemory::MapSharedObjectToMemory()
 {
-    size_t size=0;
 #ifdef POSIX_SHARED_MEM
+    size_t size=0;
     struct stat buf = SharedMemory::GetSharedObjectInfo(); 
     size = (size_t) buf.st_size;
     _mapped = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_NORESERVE, _shmID, (off_t) 0);
