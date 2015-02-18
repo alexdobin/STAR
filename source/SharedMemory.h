@@ -32,14 +32,18 @@ ECOUNTERUSE
 class SharedMemoryException: public std::exception
 {
 private:
-	bool _hasError = false;
-	ErrorState _error = ErrorState::ENONE;
-	int _errorDetail = 0;
+	bool _hasError;
+	ErrorState _error;
+	int _errorDetail;
 
 public:
 
 	SharedMemoryException()
-	{};
+	{
+		_hasError = false;
+        	_error = ErrorState::ENONE;
+		_errorDetail = 0;
+	};
 
 	SharedMemoryException(ErrorState error): _error(error)
 	{};
@@ -137,15 +141,15 @@ public:
 private:
 		SharedMemoryException _exception;
 
-        int _shmID = -1;
-        void * _mapped=NULL;
-		size_t * _length = NULL;
-        sem_t * _sem=NULL;
-        bool _isAllocator = false;
-        bool _needsAllocation = true;
+        int _shmID;
+        void * _mapped;
+		size_t * _length;
+        sem_t * _sem;
+        bool _isAllocator;
+        bool _needsAllocation;
 
 		key_t _key;
-        bool _unloadLast = true;
+        bool _unloadLast;
 		
 		int SharedObjectsUseCount();
 		void OpenIfExists();

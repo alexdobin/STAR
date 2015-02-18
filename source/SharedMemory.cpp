@@ -12,6 +12,14 @@ using namespace std;
 
 SharedMemory::SharedMemory(key_t key, bool unloadLast): _key(key), _unloadLast(unloadLast)
 {
+    _shmID = -1;
+    _mapped=NULL;
+    _length = NULL;
+    _sem=NULL;
+    _isAllocator = false;
+    _needsAllocation = true;
+    _unloadLast = true;
+
     OpenIfExists();
 }
 

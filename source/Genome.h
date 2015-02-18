@@ -24,7 +24,7 @@ class Genome {
     key_t shmKey;  
     char *shmStart;
     char *G1; //pointer -200 of G
-    SharedMemory * sharedMemory = NULL;
+    SharedMemory * sharedMemory;
     uint OpenStream(string name, ifstream & stream);
 };
 #endif
