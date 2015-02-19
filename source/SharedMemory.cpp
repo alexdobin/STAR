@@ -18,7 +18,6 @@ SharedMemory::SharedMemory(key_t key, bool unloadLast): _key(key), _unloadLast(u
     _sem=NULL;
     _isAllocator = false;
     _needsAllocation = true;
-    _unloadLast = true;
 
     OpenIfExists();
 }
