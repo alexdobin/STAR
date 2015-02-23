@@ -27,6 +27,7 @@
 
 //external libs
 #define SAMTOOLS_BGZF_H "htslib/htslib/bgzf.h"
+#define SAMTOOLS_SAM_H  "htslib/htslib/sam.h"
 
 using namespace std;
 

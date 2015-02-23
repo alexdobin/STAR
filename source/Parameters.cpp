@@ -173,12 +173,13 @@ Parameters::Parameters() {//initalize parameters info
 
 
     //chimeric
-    parArray.push_back(new ParameterInfoScalar <uint>      (-1, -1, "chimSegmentMin", &chimSegmentMin));    
-    parArray.push_back(new ParameterInfoScalar <int>       (-1, -1, "chimScoreMin", &chimScoreMin));
-    parArray.push_back(new ParameterInfoScalar <int>       (-1, -1, "chimScoreDropMax", &chimScoreDropMax));    
-    parArray.push_back(new ParameterInfoScalar <int>       (-1, -1, "chimScoreSeparation", &chimScoreSeparation));    
-    parArray.push_back(new ParameterInfoScalar <int>       (-1, -1, "chimScoreJunctionNonGTAG", &chimScoreJunctionNonGTAG));    
+    parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "chimSegmentMin", &chimSegmentMin));    
+    parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "chimScoreMin", &chimScoreMin));
+    parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "chimScoreDropMax", &chimScoreDropMax));    
+    parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "chimScoreSeparation", &chimScoreSeparation));    
+    parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "chimScoreJunctionNonGTAG", &chimScoreJunctionNonGTAG));    
     parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "chimJunctionOverhangMin", &chimJunctionOverhangMin));    
+    parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "chimOutType", &chimOutType));
     
     //sjdb
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "sjdbFileChrStartEnd", &sjdbFileChrStartEnd));
@@ -656,7 +657,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     if (outSAMmapqUnique<0 || outSAMmapqUnique>255) {
             ostringstream errOut;
             errOut <<"EXITING because of FATAL input ERROR: out of range value for outSAMmapqUnique=" << outSAMmapqUnique <<"\n";
-            errOut <<"SOLUTION: specify outSAMmapqUnique withing the range of 0 to 255\n";
+            errOut <<"SOLUTION: specify outSAMmapqUnique within the range of 0 to 255\n";
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);                        
     };
     
@@ -774,11 +775,17 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         outSAMattrOrder.push_back(ATTR_XS);
         inOut->logMain << "WARNING --outSAMstrandField=intronMotif, therefore STAR will output XS attribute" <<endl;
     };    
+
+    if (chimOutType=="WithinBAM" && !outSAMattrPresent.NM) {
+       outSAMattrOrder.push_back(ATTR_NM);
+       inOut->logMain << "WARNING --chimOutType=WithinBAM, therefore STAR will output NM attribute" <<endl;
+    };
+
     
     outFilterMismatchNoverLmax1=outFilterMismatchNoverLmax;
     if (alignEndsType=="EndToEnd") {
         outFilterMismatchNoverLmax1=-1;
-    } else if (alignEndsType=="Local") {
+    } else if (alignEndsType=="Local" || alignEndsType=="Extend5pOfRead1" ) {
         //nothing to do for now
     } else {
         ostringstream errOut;
@@ -874,6 +881,13 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         inOut->logMain<<"WARNING: --limitBAMsortRAM=0, will use genome sizeas RAM linit foro BAM sorting\n";
     };
 
+    if (chimOutType=="WithinBAM" && !outBAMunsorted && !outBAMcoord) {
+            ostringstream errOut;
+            errOut <<"EXITING because of fatal PARAMETERS error: --chimOutType WithinBAM requires BAM output\n";
+            errOut <<"SOLUTION: re-run with --outSAMtype BAM Unsorted/SortedByCoordinate\n";
+            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
+    
     inOut->logMain << "Finished loading and checking parameters\n" <<flush;
 };
 

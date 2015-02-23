@@ -432,8 +432,9 @@ alignTranscriptsPerReadNmax               10000
 
 alignEndsType           Local
     string: type of read ends alignment
-                        Local  ... standard local alignment with soft-clipping allowed
-                        EndToEnd ... force end-to-end read alignment, do not soft-clip
+                        Local           ... standard local alignment with soft-clipping allowed
+                        EndToEnd        ... force end-to-end read alignment, do not soft-clip
+                        Extend5pOfRead1 ... fully extend only the 5p of the read1, all other ends: local alignment
 
 alignSoftClipAtReferenceEnds Yes
     string: allow the soft-clipping of the alignments past the end of the chromosomes
@@ -457,6 +458,10 @@ winFlankNbins               4
 
 
 ### Chimeric Alignments
+chimOutType                 SeparateSAMold
+    string: type of chimeric output
+                            SeparateSAMold  ... output old SAM into separate Chimeric.out.sam file
+                            WithinBAM       ... output into main aligned BAM files (Aligned.*.bam)
 
 chimSegmentMin              0
     int>=0: minimum length of chimeric segment length, if ==0, no chimeric output

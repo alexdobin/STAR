@@ -2,6 +2,7 @@
 #include "Parameters.h"
 #include "Transcript.h"
 #include "ReadAlign.h"
+#include "BAMfunctions.h"
 //#include "SequenceFuns.h"
 //#include "stitchWindowAligns.h"
 //#include "sjSplitAlign.cpp"
@@ -10,8 +11,9 @@
 //#include "GlobalVariables.h"
 //#include <time.h>
 
-void ReadAlign::chimericDetection() {
+bool ReadAlign::chimericDetection() {
 
+    bool chimRecord=false;
     //output chains for out-of-STAR chimeric detection
     #ifdef OUTPUT_localChains
     {
@@ -296,25 +298,109 @@ void ReadAlign::chimericDetection() {
              //&& minOverhang2
              //&& (diff str || diff chr || 
              //|| gap > (alignIntronMax,alignMatesGapMax) ) negative gap = very large # because of uint
+                        
+                chimRecord=true; //chimeric alignment was recorded
 
-                if (trChim[0].exons[0][EX_iFrag]!=trChim[0].exons[trChim[0].nExons-1][EX_iFrag]) {
+                int chimRepresent = -1;        
+                if (trChim[0].exons[0][EX_iFrag]!=trChim[0].exons[trChim[0].nExons-1][EX_iFrag]) {//tr0 has both mates
+                    chimRepresent = 0;
                     trChim[0].primaryFlag=true;//paired portion is primary
                     trChim[1].primaryFlag=false;
-                } else if (trChim[1].exons[0][EX_iFrag]!=trChim[1].exons[trChim[1].nExons-1][EX_iFrag]) {
+                } else if (trChim[1].exons[0][EX_iFrag]!=trChim[1].exons[trChim[1].nExons-1][EX_iFrag]) {//tr1 has both mates
+                    chimRepresent = 1;
                     trChim[1].primaryFlag=true;//paired portion is primary
                     trChim[0].primaryFlag=false;                    
-                } else if (trChim[0].exons[0][EX_iFrag]!=trChim[1].exons[0][EX_iFrag]) {
+                } else if (trChim[0].exons[0][EX_iFrag]!=trChim[1].exons[0][EX_iFrag]) {//tr0 and tr1 are single different mates 
                     trChim[1].primaryFlag=true;//paired portion is primary
                     trChim[0].primaryFlag=true;
                 } else  {//two chimeric segments are on the same mate, another mate not mapped
                     trChim[0].primaryFlag=true;//paired portion is primary
                     trChim[1].primaryFlag=false;
+                    chimRepresent = (trChim[0].maxScore > trChim[1].maxScore) ? 0 : 1;
                 };
 
+                //re-calculate the score for chimeric transcripts
                 trChim[0].alignScore(Read1, G, P);
                 trChim[1].alignScore(Read1, G, P);
                 
-                for (uint iTr=0;iTr<chimN;iTr++) {//write all chimeric pieces
+                //if both of chimeric segments are un-paired, the one with max score is "representative"
+                //if  (chimRepresent ==-1) chimRepresent = (trChim[0].maxScore > trChim[1].maxScore) ? 0 : 1;
+                
+                if (P->chimOutType=="WithinBAM") {//BAM output
+                  vector <string> tagSA;
+                  int bamN=0, bamNsuppl=0;
+                  uint bamBytesTotal=0;//estimate of the total size of all bam records, for output buffering
+                  for (uint iTr=0;iTr<chimN;iTr++) {//generate bam for all chimeric pieces
+                            
+                        int alignType=0;
+                        if (chimRepresent==iTr || chimRepresent==-1) {
+                            alignType=-1; //this is representative part of chimeric alignment, record is as normal; if encompassing chimeric junction, both are recorded as normal
+                            //bamNrepresent=bamN;
+                        } else {//"supplementary" chimeric segment
+                            alignType=( (iTr%2)==(trChim[iTr].Str) ) ? -12 : -11; //right:left chimeric junction
+                            bamNsuppl=bamN;
+                        };
+                       
+                        if (P->readNmates==2) {        //only unique chimeric alignments are allowed for now
+                            bamN+=alignBAM(trChim[iTr], 1, 1, P->chrStart[trChim[iTr].Chr], trChim[1-iTr].Chr, trChim[1-iTr].exons[0][EX_G], \
+                                           (int) (trChim[1-iTr].Str!=trChim[1-iTr].exons[0][EX_iFrag]), alignType, NULL, P->outSAMattrOrder, outBAMoneAlign+bamN, outBAMoneAlignNbytes+bamN);
+                        } else {
+                            bamN+=alignBAM(trChim[iTr], 1, 1, P->chrStart[trChim[iTr].Chr], (uint) -1,          (uint) -1,                    \
+                                           0,                                                           alignType, NULL, P->outSAMattrOrder, outBAMoneAlign+bamN, outBAMoneAlignNbytes+bamN);                       
+                        };                        
+
+                        bamBytesTotal+=outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1];
+                        if (chimRepresent>=0) {
+                           bam1_t *b;
+                           b=bam_init1();
+                           bam_read1_fromArray(outBAMoneAlign[bamN-1], b);
+                           uint8_t* auxp=bam_aux_get(b,"NM");
+                           uint32_t auxv=bam_aux2i(auxp);
+                           tagSA.push_back( P->chrName[b->core.tid]+','+to_string((uint)b->core.pos+1) +',' + ( (b->core.flag&0x10)==0 ? '+':'-') + \
+                                    ',' + bam_cigarString(b) + ',' + to_string((uint)b->core.qual) + ',' + to_string((uint)auxv) + ';' );
+                        };
+                  };                        
+
+//                  if (chimRepresent>=0) {
+//                      for (int ii=0; ii<bamN; ii++) {//calculate SA tag
+//                           bam1_t *b;
+//                           b=bam_init1();
+//                           bam_read1_fromArray(outBAMoneAlign[ii], b);
+//                           uint8_t* auxp=bam_aux_get(b,"NM");
+//                           uint32_t auxv=bam_aux2i(auxp);
+//                           tagSA.push_back( P->chrName[b->core.tid]+','+to_string((uint)b->core.pos+1) +',' + ( (b->core.flag&0x10)==0 ? '+':'-') + \
+//                                    ',' + bam_cigarString(b) + ',' + to_string((uint)b->core.qual) + ',' + to_string((uint)auxv) + ';' );
+//                           bamBytesTotal+=outBAMoneAlignNbytes[ii]+tagSA.at(ii).size()*bamN;
+//                      };
+//                  };
+                  //write all bam lines
+                  for (int ii=0; ii<bamN; ii++) {//output all pieces
+                     if (chimRepresent>=0) {
+                         
+//                         string tagSA1("SAZ");
+
+//                         if (ii!=bamNrepresent) {//first is the representative
+//                             tagSA1+=tagSA[chimRepresent];
+//                         };
+//                         for (int jj=0; jj<bamN; jj++) {//SA tag includes all fragments except the current one, and chimRepresent was already recorded first
+//                             if (jj!=bamNrepresent && jj!=ii) {
+//                                 tagSA1+=tagSA[jj];
+//                             };
+//                         };
+
+                         string tagSA1="SAZ"+(ii==bamNsuppl ? tagSA[chimRepresent] : tagSA[1-chimRepresent]);
+                         memcpy( (void*) (outBAMoneAlign[ii]+outBAMoneAlignNbytes[ii]), tagSA1.c_str(), tagSA1.size()+1);//copy string including \0 at the end
+                         outBAMoneAlignNbytes[ii]+=tagSA1.size()+1;
+                         * ( (uint32*) outBAMoneAlign[ii] ) = outBAMoneAlignNbytes[ii]-sizeof(uint32);
+                     };
+                     if (P->outBAMunsorted) outBAMunsorted->unsortedOneAlign(outBAMoneAlign[ii], outBAMoneAlignNbytes[ii], ii>0 ? 0 : bamBytesTotal);
+                     if (P->outBAMcoord)    outBAMcoord->coordOneAlign(outBAMoneAlign[ii], outBAMoneAlignNbytes[ii], \
+                                                P->chrStart[ * ( (uint32*) outBAMoneAlign[ii]+1 )], (iReadAll<<32) );
+                  };
+                };        
+                
+                
+                for (uint iTr=0;iTr<chimN;iTr++) {//write all chimeric pieces to Chimeric.out.sam/junction
                     if (P->readNmates==2) {
                         outputTranscriptSAM(trChim[iTr], chimN, iTr, trChim[1-iTr].Chr, trChim[1-iTr].exons[0][EX_G], (int) (trChim[1-iTr].Str!=trChim[1-iTr].exons[0][EX_iFrag]), -1, NULL, &chunkOutChimSAM);
                     } else {
@@ -330,4 +416,5 @@ void ReadAlign::chimericDetection() {
             };
         };//chimeric score
     };//chimeric search
+    return chimRecord;
 };//END

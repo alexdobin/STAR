@@ -82,7 +82,18 @@ ReadAlign::ReadAlign (Parameters* Pin, const Genome &genomeIn, Transcriptome *Tr
     Qual0[1]  = new char [DEF_readSeqLengthMax+1];
 
     readNameMates=new char* [P->readNmates];
-    for (uint ii=0; ii<P->readNmates; ii++) readNameMates[ii]=new char [DEF_readNameLengthMax];
+    for (uint ii=0; ii<P->readNmates; ii++) {
+        readNameMates[ii]=new char [DEF_readNameLengthMax];
+    };
+
+    
+    outBAMoneAlignNbytes = new uint [P->readNmates+2]; //extra piece for chimeric reads
+    outBAMoneAlign = new char* [P->readNmates+2]; //extra piece for chimeric reads
+    for (uint ii=0; ii<P->readNmates+2; ii++) {
+        outBAMoneAlign[ii]=new char [BAMoutput_oneAlignMaxBytes];
+    };
+
+
     
     readName = readNameMates[0];
     Read1 = new char*[3];

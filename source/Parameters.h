@@ -203,6 +203,7 @@ class Parameters {
         uint chimSegmentMin, chimJunctionOverhangMin; //min chimeric donor/acceptor length
         uint maxChimReadGap; //max read gap for stitching chimeric windows
         int chimScoreMin,chimScoreDropMax,chimScoreSeparation, chimScoreJunctionNonGTAG; //min chimeric score
+        string chimOutType;
         
         //splitting
         char Qsplit;
