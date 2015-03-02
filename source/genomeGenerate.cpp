@@ -424,7 +424,9 @@ void genomeGenerate(Parameters *P) {
         for (uint ii=0;ii<N;ii++) {//return to normal order for future use
             swap(G[N2-1-ii],G[ii]);
         };         
-        
+        delete [] indPrefCount;
+        delete [] indPrefStart;
+        delete [] indPrefChunkCount;
     };    
 
     time ( &rawTime );
@@ -593,6 +595,9 @@ void genomeGenerate(Parameters *P) {
         SAip.writePacked(ii,SAi[ii]);
     };
     
+    delete [] indSAlast;
+    delete [] ind0;
+    
     time(&rawTime);    
     P->inOut->logMain    << timeMonthDayTime(rawTime) <<" ... writing SAindex to disk\n" <<flush;   
     *P->inOut->logStdOut << timeMonthDayTime(rawTime) <<" ... writing SAindex to disk\n" <<flush;   
@@ -605,7 +610,10 @@ void genomeGenerate(Parameters *P) {
     fstreamWriteBig(SAiOut, (char*) P->genomeSAindexStart, sizeof(P->genomeSAindexStart[0])*(P->genomeSAindexNbases+1),P->genomeDir+"/SAindex","ERROR_00124",P);        
     fstreamWriteBig(SAiOut,  SAip.charArray, SAip.lengthByte,P->genomeDir+"/SAindex","ERROR_00125",P);
     SAiOut.close();    
-    
+
+    SA1.deallocateArray();
+    delete [] SAi;    
+
     time(&rawTime);
     timeString=asctime(localtime ( &rawTime ));
     timeString.erase(timeString.end()-1,timeString.end());
