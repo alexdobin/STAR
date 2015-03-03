@@ -270,7 +270,7 @@ int main(int argInN, char* argIn[]) {
         for (uint32 ibin=0; ibin<RAchunk[0]->chunkOutBAMcoord->nBins; ibin++) {
             uint binS=0;
             for (int it=0; it<P->runThreadN; it++) {//collect sizes from threads
-                binS += RAchunk[it]->chunkOutBAMcoord->binTotalBytes[ibin];
+                binS += RAchunk[it]->chunkOutBAMcoord->binTotalBytes[ibin]+24*RAchunk[it]->chunkOutBAMcoord->binTotalN[ibin];
             };        
             if (binS>maxMem) maxMem=binS;
         };
