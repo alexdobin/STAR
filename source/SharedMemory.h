@@ -41,7 +41,7 @@ public:
     SharedMemoryException()
     {
         _hasError = false;
-            _error = ErrorState::ENONE;
+        _error = ENONE;
         _errorDetail = 0;
     };
 
@@ -76,7 +76,7 @@ public:
     void ClearError()
     {
         _hasError = false;
-        _error = ErrorState::ENONE;
+        _error = ENONE;
         _errorDetail = 0;
     };
 };

@@ -7,6 +7,7 @@
 #include <sys/stat.h>        /* For mode constants */
 #include <fcntl.h>           /* For O_* constants */
 #include <semaphore.h>
+#include <errno.h>
 
 using namespace std;
 
@@ -51,11 +52,11 @@ void SharedMemory::Allocate(size_t shmSize)
     _exception.ClearError();
 
     if (!_needsAllocation)
-        ThrowError(ErrorState::EALREADYALLOCATED);
+        ThrowError(EALREADYALLOCATED);
     
     CreateAndInitSharedObject(shmSize);
 
-    if (_exception.HasError() && _exception.GetErrorCode() != ErrorState::EEXISTS)
+    if (_exception.HasError() && _exception.GetErrorCode() != EEXISTS)
         throw _exception;
 
     _exception.ClearError(); // someone else came in first so retry open
@@ -95,10 +96,10 @@ void SharedMemory::CreateAndInitSharedObject(size_t shmSize)
         switch (errno)
         {
             case EEXIST:
-                _exception.SetError(ErrorState::EEXISTS, 0);
+                _exception.SetError(EEXISTS, 0);
                 break;
             default:
-                ThrowError(ErrorState::EOPENFAILED, errno);
+                ThrowError(EOPENFAILED, errno);
         }
         return;
     }
@@ -107,7 +108,7 @@ void SharedMemory::CreateAndInitSharedObject(size_t shmSize)
     int err = ftruncate(_shmID, toReserve);
     if (err == -1)
     {
-        ThrowError(ErrorState::EFTRUNCATE);
+        ThrowError(EFTRUNCATE);
     }
 #endif
 }
