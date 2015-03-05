@@ -1,3 +1,6 @@
+// SharedMemory.cpp
+// Gery Vessere - gvessere@illumina.com, gery@vessere.com
+// An abstraction over both SysV and POSIX shared memory APIs
 
 #ifndef SHAREDMEMORY_H
 #define SHAREDMEMORY_H

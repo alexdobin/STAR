@@ -1,5 +1,8 @@
-#include "SharedMemory.h"
+// SharedMemory.cpp
+// Gery Vessere - gvessere@illumina.com, gery@vessere.com
+// An abstraction over both SysV and POSIX shared memory APIs
 
+#include "SharedMemory.h"
 #include <iostream>
 #include <sstream>
 #include <sys/mman.h>
