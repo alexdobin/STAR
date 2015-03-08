@@ -17,6 +17,7 @@
 #include "BAMfunctions.h"
 #include "Transcriptome.h"
 #include "BAMbinSortByCoordinate.h"
+#include "BAMbinSortUnmapped.h"
 #include "signalFromBAM.h"
 #include "sjdbBuildIndex.h"
 #include "mapThreadsSpawn.h"
@@ -64,6 +65,7 @@ int main(int argInN, char* argIn[]) {
         pthread_mutex_init(&g_threadChunks.mutexOutUnmappedFastx, NULL);
         pthread_mutex_init(&g_threadChunks.mutexOutFilterBySJout, NULL);
         pthread_mutex_init(&g_threadChunks.mutexStats, NULL);
+        pthread_mutex_init(&g_threadChunks.mutexBAMsortBins, NULL);
     };
 
     g_statsAll.progressReportHeader(P->inOut->logProgress);    
@@ -287,27 +289,34 @@ int main(int argInN, char* argIn[]) {
 //         P->inOut->logMain << "Started sorting BAM ..." <<endl;
         #pragma omp parallel num_threads(P->outBAMsortingThreadNactual) 
         #pragma omp for schedule (dynamic,1)
-        for (uint32 ibin=0; ibin<RAchunk[0]->chunkOutBAMcoord->nBins; ibin++) {
+        for (uint32 ibin1=0; ibin1<RAchunk[0]->chunkOutBAMcoord->nBins; ibin1++) {
+            uint32 ibin=RAchunk[0]->chunkOutBAMcoord->nBins-1-ibin1;//start with the last bin - unmapped reads
             
             uint binN=0, binS=0;
             for (int it=0; it<P->runThreadN; it++) {//collect sizes from threads
                 binN += RAchunk[it]->chunkOutBAMcoord->binTotalN[ibin];
                 binS += RAchunk[it]->chunkOutBAMcoord->binTotalBytes[ibin];
             };
-            
-            uint newMem=binS+binN*24;
-            bool boolWait=true;
-            while (boolWait) {
-                #pragma omp critical
-                if (totalMem+newMem < P->limitBAMsortRAM) {
-                    boolWait=false;
-                    totalMem+=newMem;
+          
+            if (binS==0) continue; //empty bin
+  
+            if (ibin == RAchunk[0]->chunkOutBAMcoord->nBins-1) {//last bin for unmapped reads
+                BAMbinSortUnmapped(ibin,P->runThreadN,P->outBAMsortTmpDir,P->inOut->outBAMfileCoord, P);
+            } else {
+                uint newMem=binS+binN*24;
+                bool boolWait=true;
+                while (boolWait) {
+                    #pragma omp critical
+                    if (totalMem+newMem < P->limitBAMsortRAM) {
+                        boolWait=false;
+                        totalMem+=newMem;
+                    };
+                    sleep(0.1);
                 };
-                sleep(0.1);
+                BAMbinSortByCoordinate(ibin,binN,binS,P->runThreadN,P->outBAMsortTmpDir,P->inOut->outBAMfileCoord, P);
+                #pragma omp critical
+                totalMem-=newMem;//"release" RAM
             };
-            BAMbinSortByCoordinate(ibin,binN,binS,P->runThreadN,P->outBAMsortTmpDir,P->inOut->outBAMfileCoord, P);
-            #pragma omp critical
-            totalMem-=newMem;//"release" RAM
         };
         //concatenate all BAM files, using bam_cat
         char **bamBinNames = new char* [RAchunk[0]->chunkOutBAMcoord->nBins];

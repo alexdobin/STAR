@@ -112,6 +112,7 @@ class Parameters {
         string bamRemoveDuplicatesType;
         uint bamRemoveDuplicatesMate2basesN;
         int outBAMsortingThreadN, outBAMsortingThreadNactual;
+        uint64 *outBAMsortingBinStart; //genomic starts for bins for sorting BAM files
         uint16 outSAMflagOR, outSAMflagAND;
         
         string outReadsUnmapped;

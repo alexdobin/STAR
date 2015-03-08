@@ -521,6 +521,8 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                     outBAMsortingThreadNactual=outBAMsortingThreadN;
                 };                
                 outBAMcoordNbins=max(outBAMsortingThreadNactual*3,10);
+                outBAMsortingBinStart= new uint64 [outBAMcoordNbins];
+                
                 outBAMsortTmpDir=outFileTmp+"/BAMsort/";
                 mkdir(outBAMsortTmpDir.c_str(),S_IRWXU);  
             };                
