@@ -235,7 +235,14 @@ int main(int argInN, char* argIn[]) {
         outputSJ(RAchunk,P);//collapse novel junctions
         P->readFilesIndex=-1;
         
+
         P->outFilterBySJoutStage=2;
+        if (P->outBAMcoord) {
+            for (int it=0; it<P->runThreadN; it++) {//prepare the unmapped bin 
+                RAchunk[it]->chunkOutBAMcoord->coordUnmappedPrepareBySJout();
+            };
+        };
+
         mapThreadsSpawn(P, RAchunk);
     };
     
@@ -287,10 +294,11 @@ int main(int argInN, char* argIn[]) {
         
         uint totalMem=0;
 //         P->inOut->logMain << "Started sorting BAM ..." <<endl;
+        uint32 nBins=RAchunk[0]->chunkOutBAMcoord->nBins;
         #pragma omp parallel num_threads(P->outBAMsortingThreadNactual) 
         #pragma omp for schedule (dynamic,1)
-        for (uint32 ibin1=0; ibin1<RAchunk[0]->chunkOutBAMcoord->nBins; ibin1++) {
-            uint32 ibin=RAchunk[0]->chunkOutBAMcoord->nBins-1-ibin1;//start with the last bin - unmapped reads
+        for (uint32 ibin1=0; ibin1<nBins; ibin1++) {
+            uint32 ibin=nBins-1-ibin1;//reverse order to start with the last bin - unmapped reads
             
             uint binN=0, binS=0;
             for (int it=0; it<P->runThreadN; it++) {//collect sizes from threads
@@ -300,7 +308,7 @@ int main(int argInN, char* argIn[]) {
           
             if (binS==0) continue; //empty bin
   
-            if (ibin == RAchunk[0]->chunkOutBAMcoord->nBins-1) {//last bin for unmapped reads
+            if (ibin == nBins-1) {//last bin for unmapped reads
                 BAMbinSortUnmapped(ibin,P->runThreadN,P->outBAMsortTmpDir,P->inOut->outBAMfileCoord, P);
             } else {
                 uint newMem=binS+binN*24;
@@ -319,9 +327,9 @@ int main(int argInN, char* argIn[]) {
             };
         };
         //concatenate all BAM files, using bam_cat
-        char **bamBinNames = new char* [RAchunk[0]->chunkOutBAMcoord->nBins];
+        char **bamBinNames = new char* [nBins];
         vector <string> bamBinNamesV;
-        for (uint32 ibin=0; ibin<RAchunk[0]->chunkOutBAMcoord->nBins; ibin++) {
+        for (uint32 ibin=0; ibin<nBins; ibin++) {
             
             bamBinNamesV.push_back(P->outBAMsortTmpDir+"/b"+to_string((uint) ibin));            
             struct stat buffer;

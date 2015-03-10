@@ -409,8 +409,7 @@ bool ReadAlign::chimericDetection() {
                          * ( (uint32*) outBAMoneAlign[ii] ) = outBAMoneAlignNbytes[ii]-sizeof(uint32);
                      };
                      if (P->outBAMunsorted) outBAMunsorted->unsortedOneAlign(outBAMoneAlign[ii], outBAMoneAlignNbytes[ii], ii>0 ? 0 : bamBytesTotal);
-                     if (P->outBAMcoord)    outBAMcoord->coordOneAlign(outBAMoneAlign[ii], outBAMoneAlignNbytes[ii], \
-                                                P->chrStart[ * ( (uint32*) outBAMoneAlign[ii]+1 )], (iReadAll<<32) );
+                     if (P->outBAMcoord)    outBAMcoord->coordOneAlign(outBAMoneAlign[ii], outBAMoneAlignNbytes[ii], -1, (iReadAll<<32) );
                   };
                 };        
                 

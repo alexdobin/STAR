@@ -522,6 +522,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                 };                
                 outBAMcoordNbins=max(outBAMsortingThreadNactual*3,10);
                 outBAMsortingBinStart= new uint64 [outBAMcoordNbins];
+                outBAMsortingBinStart[0]=1;//this initial value means that the bin sizes have not been determined yet
                 
                 outBAMsortTmpDir=outFileTmp+"/BAMsort/";
                 mkdir(outBAMsortTmpDir.c_str(),S_IRWXU);  

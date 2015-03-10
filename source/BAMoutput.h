@@ -9,12 +9,13 @@ class BAMoutput {//
 public:
     //sorted output
     BAMoutput (int iChunk, string tmpDir, Parameters *Pin);
-    void coordOneAlign (char *bamIn, uint bamSize, uint chrStart, uint iRead);
+    void coordOneAlign (char *bamIn, uint bamSize, int32 iBinFlush, uint iRead);
     void coordFlush ();
     //unsorted output
     BAMoutput (BGZF *bgzfBAMin, Parameters *Pin);
     void unsortedOneAlign (char *bamIn, uint bamSize, uint bamSize2);
     void unsortedFlush ();
+    void coordUnmappedPrepareBySJout();
     
     uint32 nBins; //number of bins to split genome into
     uint* binTotalN; //total number of aligns in each bin
@@ -29,6 +30,7 @@ private:
     ofstream **binStream;//output streams for each bin
     BGZF *bgzfBAM;
     Parameters *P;
+    string bamDir;
 };
 
 #endif
