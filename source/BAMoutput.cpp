@@ -77,15 +77,13 @@ void BAMoutput::unsortedFlush () {//flush all alignments
     binBytes1=0;//rewind the buffer
 };
 
-void BAMoutput::coordOneAlign (char *bamIn, uint bamSize, int32 iBinFlush, uint iRead) {
+void BAMoutput::coordOneAlign (char *bamIn, uint bamSize, uint iRead) {
     
     uint32 *bamIn32;
     uint alignG;
     uint32 iBin=0;
     
-    if (iBinFlush>=0) {//bamSize=-1 signals the need to flush
-        iBin=iBinFlush;    
-    } else if (bamSize==0) {
+    if (bamSize==0) {
         return; //no output, could happen if one of the mates is not mapped
     } else {
         //determine which bin this alignment belongs to
@@ -105,60 +103,13 @@ void BAMoutput::coordOneAlign (char *bamIn, uint bamSize, int32 iBinFlush, uint 
 //     };
         
     //write buffer is filled
-    if (binBytes[iBin]+bamSize+sizeof(uint) > ( (iBin>0 || nBins>1) ? binSize : binSize1) || iBinFlush>=0) {//write out this buffer
+    if (binBytes[iBin]+bamSize+sizeof(uint) > ( (iBin>0 || nBins>1) ? binSize : binSize1) ) {//write out this buffer
         if ( nBins>1 || iBin==(P->outBAMcoordNbins-1) ) {//normal writing, bins have already been determined
             binStream[iBin]->write(binStart[iBin],binBytes[iBin]);
             binBytes[iBin]=0;//rewind the buffer
         } else {//the first chunk of reads was written in one bin, need to determine bin sizes, and re-distribute reads into bins
-            nBins=P->outBAMcoordNbins;//this is the true number of bins
-            
-            //mutex here
-            if (P->runThreadN>1) pthread_mutex_lock(&g_threadChunks.mutexBAMsortBins);
-            if (P->outBAMsortingBinStart[0]!=0) {//it's set to 0 only after the bin sizes are determined
-                //extract coordinates and sort
-                uint *startPos = new uint [binTotalN[0]];//array of aligns start positions
-                for (uint ib=0,ia=0;ia<binTotalN[0];ia++) {
-                    uint32 *bamIn32=(uint32*) (binStart[0]+ib);
-                    startPos[ia]  =( ((uint) bamIn32[1]) << 32) | ( (uint)bamIn32[2] );
-                    ib+=bamIn32[0]+sizeof(uint32)+sizeof(uint);//note that size of the BAM record does not include the size record itself
-                };
-                qsort((void*) startPos, binTotalN[0], sizeof(uint), funCompareUint1);
-
-                //determine genomic starts of the bins
-                P->inOut->logMain << "BAM sorting: "<<binTotalN[0]<< " mapped reads\n";
-                P->inOut->logMain << "BAM sorting bins genomic start loci:\n";
-
-                P->outBAMsortingBinStart[0]=0;
-                for (uint32 ib=1; ib<(nBins-1); ib++) {
-                    P->outBAMsortingBinStart[ib]=startPos[binTotalN[0]/(nBins-1)*ib];
-                    P->inOut->logMain << ib <<"\t"<< (P->outBAMsortingBinStart[ib]>>32) << "\t" << ((P->outBAMsortingBinStart[ib]<<32)>>32) <<endl;
-                    //how to deal with equal boundaries???
-                };
-                delete [] startPos;
-            };
-            //mutex here
-            if (P->runThreadN>1) pthread_mutex_unlock(&g_threadChunks.mutexBAMsortBins);
-            
-            //re-allocate binStart
-            uint binTotalNold=binTotalN[0];
-            char *binStartOld=new char [binSize1];
-            memcpy(binStartOld,binStart[0],binBytes[0]);
-
-            binBytes[0]=0;    
-            binTotalN[0]=0;
-            binTotalBytes[0]=0;              
-            
-            //re-bin all aligns
-            for (uint ib=0,ia=0;ia<binTotalNold;ia++) {
-                uint32 *bamIn32=(uint32*) (binStartOld+ib);
-                uint ib1=ib+bamIn32[0]+sizeof(uint32);//note that size of the BAM record does not include the size record itself
-                coordOneAlign (binStartOld+ib, (uint) (bamIn32[0]+sizeof(uint32)), -1, *((uint*) (binStartOld+ib1)) );
-                ib=ib1+sizeof(uint);//iRead at the end of the BAM record
-            };
-            delete [] binStartOld;
-            if (bamSize>0) {
-                coordOneAlign (bamIn, bamSize, -1, iRead);
-            };
+            coordBins();
+            coordOneAlign (bamIn, bamSize, iRead);//record the current align into the new bins
             return;
         };
     };
@@ -170,18 +121,72 @@ void BAMoutput::coordOneAlign (char *bamIn, uint bamSize, int32 iBinFlush, uint 
     binBytes[iBin] += sizeof(uint);
     binTotalBytes[iBin] += bamSize+sizeof(uint);
     binTotalN[iBin] += 1;
-    
+    return;
+};
+
+void BAMoutput::coordBins() {//define genomic starts for bins
+    nBins=P->outBAMcoordNbins;//this is the true number of bins
+
+    //mutex here
+    if (P->runThreadN>1) pthread_mutex_lock(&g_threadChunks.mutexBAMsortBins);
+    if (P->outBAMsortingBinStart[0]!=0) {//it's set to 0 only after the bin sizes are determined
+        //extract coordinates and sort
+        uint *startPos = new uint [binTotalN[0]];//array of aligns start positions
+        for (uint ib=0,ia=0;ia<binTotalN[0];ia++) {
+            uint32 *bamIn32=(uint32*) (binStart[0]+ib);
+            startPos[ia]  =( ((uint) bamIn32[1]) << 32) | ( (uint)bamIn32[2] );
+            ib+=bamIn32[0]+sizeof(uint32)+sizeof(uint);//note that size of the BAM record does not include the size record itself
+        };
+        qsort((void*) startPos, binTotalN[0], sizeof(uint), funCompareUint1);
+
+        //determine genomic starts of the bins
+        P->inOut->logMain << "BAM sorting: "<<binTotalN[0]<< " mapped reads\n";
+        P->inOut->logMain << "BAM sorting bins genomic start loci:\n";
+
+        P->outBAMsortingBinStart[0]=0;
+        for (uint32 ib=1; ib<(nBins-1); ib++) {
+            P->outBAMsortingBinStart[ib]=startPos[binTotalN[0]/(nBins-1)*ib];
+            P->inOut->logMain << ib <<"\t"<< (P->outBAMsortingBinStart[ib]>>32) << "\t" << ((P->outBAMsortingBinStart[ib]<<32)>>32) <<endl;
+            //how to deal with equal boundaries???
+        };
+        delete [] startPos;
+    };
+    //mutex here
+    if (P->runThreadN>1) pthread_mutex_unlock(&g_threadChunks.mutexBAMsortBins);
+
+    //re-allocate binStart
+    uint binTotalNold=binTotalN[0];
+    char *binStartOld=new char [binSize1];
+    memcpy(binStartOld,binStart[0],binBytes[0]);
+
+    binBytes[0]=0;    
+    binTotalN[0]=0;
+    binTotalBytes[0]=0;              
+
+    //re-bin all aligns
+    for (uint ib=0,ia=0;ia<binTotalNold;ia++) {
+        uint32 *bamIn32=(uint32*) (binStartOld+ib);
+        uint ib1=ib+bamIn32[0]+sizeof(uint32);//note that size of the BAM record does not include the size record itself
+        coordOneAlign (binStartOld+ib, (uint) (bamIn32[0]+sizeof(uint32)), *((uint*) (binStartOld+ib1)) );
+        ib=ib1+sizeof(uint);//iRead at the end of the BAM record
+    };
+    delete [] binStartOld;
+    return;
 };
 
 void BAMoutput::coordFlush () {//flush all alignments
-    for (int32 iBin=0; iBin<(int32)nBins; iBin++) {
-        coordOneAlign(NULL,0,iBin,0);
+    if (nBins==1) {
+        coordBins();
+    };
+    for (uint32 iBin=0; iBin<nBins; iBin++) {
+        binStream[iBin]->write(binStart[iBin],binBytes[iBin]);
         binStream[iBin]->flush();
+        binBytes[iBin]=0;//rewind the buffer
     };
 };
 
 void BAMoutput::coordUnmappedPrepareBySJout () {//flush all alignments
-    uint iBin=nBins-1;  
+    uint iBin=P->outBAMcoordNbins-1;  
     binStream[iBin]->write(binStart[iBin],binBytes[iBin]);
     binStream[iBin]->flush();
     binBytes[iBin]=0;//rewind the buffer

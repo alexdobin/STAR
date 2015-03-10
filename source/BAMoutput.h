@@ -9,7 +9,8 @@ class BAMoutput {//
 public:
     //sorted output
     BAMoutput (int iChunk, string tmpDir, Parameters *Pin);
-    void coordOneAlign (char *bamIn, uint bamSize, int32 iBinFlush, uint iRead);
+    void coordOneAlign (char *bamIn, uint bamSize, uint iRead);
+    void coordBins ();
     void coordFlush ();
     //unsorted output
     BAMoutput (BGZF *bgzfBAMin, Parameters *Pin);

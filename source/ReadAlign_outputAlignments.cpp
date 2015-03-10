@@ -86,7 +86,7 @@ void ReadAlign::outputAlignments() {
                     alignBAM(*(trMult[iTr]), nTr, iTr, P->chrStart[trMult[iTr]->Chr], (uint) -1, (uint) -1, 0, -1, NULL, P->outSAMattrOrder,outBAMoneAlign, outBAMoneAlignNbytes);
                     for (uint imate=0; imate<P->readNmates; imate++) {//output each mate
                         if (P->outBAMunsorted) outBAMunsorted->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], imate>0 ? 0 : outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1]);
-                        if (P->outBAMcoord)    outBAMcoord->coordOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], -1, (iReadAll<<32) | (iTr<<8) | trMult[iTr]->exons[0][EX_iFrag] );                        
+                        if (P->outBAMcoord)    outBAMcoord->coordOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], (iReadAll<<32) | (iTr<<8) | trMult[iTr]->exons[0][EX_iFrag] );                        
                     };
                 };
             
@@ -131,7 +131,7 @@ void ReadAlign::outputAlignments() {
                 if (P->outBAMunsorted) outBAMunsorted->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], imate>0 ? 0 : outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1]);
                 //TODO clean for single-end alignments of PE reads
                 if ( P->quant.trSAM.yes && unmapType!=4) outBAMquant->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], imate>0 ? 0 : outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1]);
-                if (P->outBAMcoord)    outBAMcoord->coordOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], -1, iReadAll);                                        
+                if (P->outBAMcoord)    outBAMcoord->coordOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], iReadAll);                                        
             };
         };
         if (P->outSAMbool) {
