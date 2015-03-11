@@ -273,10 +273,11 @@ int main(int argInN, char* argIn[]) {
     if (P->outBAMcoord) {//sort BAM if needed
         *P->inOut->logStdOut << timeMonthDayTime() << " ..... Started sorting BAM\n" <<flush;
         P->inOut->logMain << timeMonthDayTime() << " ..... Started sorting BAM\n" <<flush;
+        uint32 nBins=P->outBAMcoordNbins;
         
         //check max size needed for sorting
         uint maxMem=0;
-        for (uint32 ibin=0; ibin<RAchunk[0]->chunkOutBAMcoord->nBins; ibin++) {
+        for (uint32 ibin=0; ibin<nBins-1; ibin++) {//check akk bins
             uint binS=0;
             for (int it=0; it<P->runThreadN; it++) {//collect sizes from threads
                 binS += RAchunk[it]->chunkOutBAMcoord->binTotalBytes[ibin]+24*RAchunk[it]->chunkOutBAMcoord->binTotalN[ibin];
@@ -294,7 +295,6 @@ int main(int argInN, char* argIn[]) {
         
         uint totalMem=0;
 //         P->inOut->logMain << "Started sorting BAM ..." <<endl;
-        uint32 nBins=P->outBAMcoordNbins;
         #pragma omp parallel num_threads(P->outBAMsortingThreadNactual) 
         #pragma omp for schedule (dynamic,1)
         for (uint32 ibin1=0; ibin1<nBins; ibin1++) {
