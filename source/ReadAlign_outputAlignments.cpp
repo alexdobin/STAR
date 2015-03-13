@@ -126,7 +126,14 @@ void ReadAlign::outputAlignments() {
 
     if (unmapType>=0 && P->outSAMunmapped=="Within") {//unmapped read, at least one mate
         if (P->outBAMunsorted || P->outBAMcoord || P->quant.trSAM.yes) {//BAM output
-            alignBAM(*trBest, 0, 0, P->chrStart[trBest->Chr], (uint) -1, (uint) -1, 0,  unmapType, mateMapped, P->outSAMattrOrder, outBAMoneAlign, outBAMoneAlignNbytes);
+            uint mateChr=(uint) -1, mateStart=(uint) -1;
+            uint8_t mateStr=0;
+            if (unmapType==4) {//other mate is mapped, record its position
+                mateChr=trBest->Chr;
+                mateStart=trBest->exons[0][EX_G];
+                mateStr=(uint8_t) (trBest->Str!=trBest->exons[0][EX_iFrag]);
+            };
+            alignBAM(*trBest, 0, 0, P->chrStart[trBest->Chr], mateChr, mateStart, mateStr, unmapType, mateMapped, P->outSAMattrOrder, outBAMoneAlign, outBAMoneAlignNbytes);
             for (uint imate=0; imate<P->readNmates; imate++) {//output each mate
                 if (P->outBAMunsorted) outBAMunsorted->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], imate>0 ? 0 : outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1]);
                 //TODO clean for single-end alignments of PE reads
