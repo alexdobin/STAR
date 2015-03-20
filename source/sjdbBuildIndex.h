@@ -1,7 +1,6 @@
 #ifndef CODE_sjdbBuildIndex
 #define CODE_sjdbBuildIndex
 
-#include "SjdbClass.h"
 #include "Parameters.h"
 #include "PackedArray.h"
 

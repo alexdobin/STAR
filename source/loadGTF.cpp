@@ -47,6 +47,12 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P) {//load gtf file, add junctions
             exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
         };    
         
+        if (P->chrNameIndex.size()==0) 
+        {
+            for (uint ii=0;ii<P->nChrReal;ii++) {
+                P->chrNameIndex[P->chrName[ii]]=ii;
+            };        
+        };
         std::map <string,uint> transcriptIDnumber, geneIDnumber;
 
         uint exonN=0;
@@ -174,7 +180,7 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P) {//load gtf file, add junctions
 
         };
         
-        {//exon-transctipt data structures
+        {//exon-transcript data structures
             //re-sort transcripts by transcript start/end
             uint* extrLoci=new uint [exonN*GTF_extrLoci_size]; //this also contains transcripts start and end
             

@@ -19,9 +19,13 @@
 #include "BAMbinSortByCoordinate.h"
 #include "BAMbinSortUnmapped.h"
 #include "signalFromBAM.h"
-#include "sjdbBuildIndex.h"
+// #include "sjdbBuildIndex.h"
 #include "mapThreadsSpawn.h"
 #include "ErrorWarning.h"
+// #include "sjdbLoadFromStream.h"
+// #include "sjdbPrepare.h"
+#include "sjdbInsertJunctions.h"
+
 
 #include "htslib/htslib/sam.h"
 extern int bam_cat(int nfn, char * const *fn, const bam_hdr_t *h, const char* outbam);
@@ -114,14 +118,8 @@ int main(int argInN, char* argIn[]) {
         ofstream logFinal1 ( (P->twopassDir + "/Log.final.out").c_str());
         g_statsAll.reportFinal(logFinal1,P1);
 
-        //re-build genome files
-        
-        sjdbBuildIndex (P, mainGenome.G, mainGenome.SA, mainGenome.SA2, mainGenome.SAi);
-        time ( &rawtime ); 
-        *P->inOut->logStdOut  << timeMonthDayTime(rawtime) << " ..... Finished inserting 1st pass junctions into genome" <<endl;
-        //re-calculate genome-related parameters
-        P->winBinN = P->nGenome/(1LLU << P->winBinNbits)+1;
-        
+        sjdbInsertJunctions(P, mainGenome);
+                
         //reopen reads files
         P->closeReadsFiles();
         P->openReadsFiles();

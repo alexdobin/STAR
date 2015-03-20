@@ -76,7 +76,7 @@ void Genome::genomeLoad(){//allocate and load Genome
     } else {
         ostringstream errOut;
         errOut << "EXITING because of FATAL ERROR: could not open genome file "<< P->genomeDir+("/genomeParameters.txt") << endl;
-        errOut << "SOLUTION: check that the path to genome files, specified in --genomDir is correct and the files are present, and have user read permsissions\n" <<flush;     
+        errOut << "SOLUTION: check that the path to genome files, specified in --genomeDir is correct and the files are present, and have user read permsissions\n" <<flush;     
         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_GENOME_FILES, *P);
     };            
     
@@ -108,7 +108,7 @@ void Genome::genomeLoad(){//allocate and load Genome
     if (!GenomeIn.good()) {
         ostringstream errOut;
         errOut << "EXITING because of FATAL ERROR: could not open genome file "<< P->genomeDir<<"/Genome" <<"\n" << endl;
-        errOut << "SOLUTION: check that the path to genome files, specified in --genomDir is correct and the files are present, and have user read permsissions\n" <<flush;     
+        errOut << "SOLUTION: check that the path to genome files, specified in --genomeDir is correct and the files are present, and have user read permsissions\n" <<flush;     
         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_GENOME_FILES, *P);
     };
     
@@ -116,7 +116,7 @@ void Genome::genomeLoad(){//allocate and load Genome
     if (!SAin.good()) {
         ostringstream errOut;
         errOut << "EXITING because of FATAL ERROR: could not open genome file "<< P->genomeDir<<"/SA" <<"\n" << endl;
-        errOut << "SOLUTION: check that the path to genome files, specified in --genomDir is correct and the files are present, and have user read permsissions\n" <<flush;     
+        errOut << "SOLUTION: check that the path to genome files, specified in --genomeDir is correct and the files are present, and have user read permsissions\n" <<flush;     
         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_GENOME_FILES, *P);
     };
     
@@ -124,7 +124,7 @@ void Genome::genomeLoad(){//allocate and load Genome
     if (!SAiIn.good()) {
         ostringstream errOut;
         errOut << "EXITING because of FATAL ERROR: could not open genome file "<< P->genomeDir<<"/SAindex" <<"\n" << endl;
-        errOut << "SOLUTION: check that the path to genome files, specified in --genomDir is correct and the files are present, and have user read permsissions\n" <<flush;     
+        errOut << "SOLUTION: check that the path to genome files, specified in --genomeDir is correct and the files are present, and have user read permsissions\n" <<flush;     
         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_GENOME_FILES, *P);
     };
 
@@ -380,7 +380,7 @@ void Genome::genomeLoad(){//allocate and load Genome
         if (sjdbInfo.fail()) {
             ostringstream errOut;                            
             errOut << "EXITING because of FATAL error, could not open file " << (P->genomeDir+"/sjdbInfo.txt") <<"\n";
-            errOut << "SOLUTION: check that the path to genome files, specified in --genomDir is correct and the files are present, and have user read permsissions\n" <<flush;     
+            errOut << "SOLUTION: check that the path to genome files, specified in --genomeDir is correct and the files are present, and have user read permsissions\n" <<flush;     
             exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
         };
     
