@@ -14,17 +14,17 @@ void sjdbInsertJunctions(Parameters *P, Genome &genome) {
     time_t rawtime;
 
     //load 1st pass junctions
-    if (P->twopassSJpass1file.size()>0)
+    if (P->twoPass.pass1sjFile.size()>0)
     {
-        ifstream sjdbStreamIn ( P->twopassSJpass1file.c_str() );   
+        ifstream sjdbStreamIn ( P->twoPass.pass1sjFile.c_str() );   
         if (sjdbStreamIn.fail()) {
             ostringstream errOut;
-            errOut << "FATAL INPUT error, could not open input file with junctions from the 1st pass=" << P->twopassSJpass1file <<"\n";
+            errOut << "FATAL INPUT error, could not open input file with junctions from the 1st pass=" << P->twoPass.pass1sjFile <<"\n";
             exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
         };
         sjdbLoadFromStream(sjdbStreamIn, sjdbLoci);
         time ( &rawtime );
-        P->inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the 1st pass file: " << P->twopassSJpass1file <<": "<<sjdbLoci.chr.size()<<" total junctions\n\n";
+        P->inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the 1st pass file: " << P->twoPass.pass1sjFile <<": "<<sjdbLoci.chr.size()<<" total junctions\n\n";
     };
     
     //load from junction files
@@ -41,7 +41,7 @@ void sjdbInsertJunctions(Parameters *P, Genome &genome) {
         P->inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the GTF file: " << P->sjdbGTFfile<<": "<<sjdbLoci.chr.size()<<" total junctions\n\n";
     };
 
-    sjdbPrepare (sjdbLoci, P, genome.G, P->nGenome, P->twopassDir);//P->nGenome - change when replacing junctions
+    sjdbPrepare (sjdbLoci, P, genome.G, P->nGenome, P->twoPass.dir);//P->nGenome - change when replacing junctions
     time ( &rawtime );
     P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished preparing junctions" <<endl;
 

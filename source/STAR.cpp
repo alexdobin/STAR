@@ -53,7 +53,10 @@ int main(int argInN, char* argIn[]) {
     
     Genome mainGenome (P);
     mainGenome.genomeLoad();
-    sjdbInsertJunctions(P, mainGenome);
+    if (P->sjdbInsert.pass1) 
+    {//for now, cannot insert junctions on the fly in 2-pass run
+        sjdbInsertJunctions(P, mainGenome);
+    };
     
     //calculate genome-related parameters
     Transcriptome *mainTranscriptome=NULL;
@@ -73,7 +76,7 @@ int main(int argInN, char* argIn[]) {
 
     g_statsAll.progressReportHeader(P->inOut->logProgress);    
     
-    if (P->twopass1readsN>0) {//2-pass
+    if (P->twoPass.pass1readsN>0) {//2-pass
         //re-define P for the pass1
         
         Parameters *P1=new Parameters;
@@ -90,9 +93,9 @@ int main(int argInN, char* argIn[]) {
         
         P1->outReadsUnmapped="None";
         
-        P1->outFileNamePrefix=P->twopassDir;
+        P1->outFileNamePrefix=P->twoPass.dir;
 
-        P1->readMapNumber=P->twopass1readsN;
+        P1->readMapNumber=P->twoPass.pass1readsN;
 //         P1->inOut->logMain.open((P1->outFileNamePrefix + "Log.out").c_str());
 
         g_statsAll.resetN();
@@ -114,10 +117,10 @@ int main(int argInN, char* argIn[]) {
         time_t rawtime; time (&rawtime);
         P->inOut->logProgress << timeMonthDayTime(rawtime) <<"\tFinished 1st pass mapping\n";
         *P->inOut->logStdOut << timeMonthDayTime(rawtime) << " ..... Finished 1st pass mapping\n" <<flush;
-        ofstream logFinal1 ( (P->twopassDir + "/Log.final.out").c_str());
+        ofstream logFinal1 ( (P->twoPass.dir + "/Log.final.out").c_str());
         g_statsAll.reportFinal(logFinal1,P1);
 
-        P->twopassSJpass1file=P->twopassDir+"/SJ.out.tab";
+        P->twoPass.pass1sjFile=P->twoPass.dir+"/SJ.out.tab";
         
         sjdbInsertJunctions(P, mainGenome);
                 

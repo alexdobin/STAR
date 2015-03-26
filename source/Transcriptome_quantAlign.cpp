@@ -40,7 +40,7 @@ int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, ui
             aT.exons[aT.nExons-1][EX_L]+=aG.exons[iab][EX_L];
         };
         switch (aG.canonSJ[iab]) {
-            case -999: //last exon, do nothing
+            case -999: //last exon
                 if (trStr1==2) {//convert align coordinates if on the -strand
                     uint32 trlength=exLenCum1[exN1-1]+exSE1[2*exN1-1]-exSE1[2*exN1-2]+1; //transcript length
                     for (uint32 iex=0; iex<aT.nExons; iex++) {

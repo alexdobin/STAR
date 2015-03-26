@@ -136,6 +136,10 @@ limitOutSJcollapsed                  1000000
 limitBAMsortRAM                         0
     int>=0: maximum available RAM for sorting BAM. If =0, it will be set to the genome index size. 0 value can only be used with --genomeLoad NoSharedMemory option.
 
+limitOnTheFlySJ                     1000000
+    int>=0: maximum number of junction to be inserted to the genome on the fly at the mapping stage, including those from annotations and those detected in the 1st step of the 2-pass run
+
+
 ### Output: general
 outFileNamePrefix               ./
     string: output files name prefix (including full or relative path). Can only be defined on the command line.
@@ -495,7 +499,4 @@ quantTranscriptomeBAMcompression    1       1
 ### 2-pass Mapping
 twopass1readsN              0
     int>0: number of reads to process for the 1st step. 0: 1-step only, no 2nd pass; use very large number (or -1) to map all reads in the first step
-
-twopassSJlimit              1000000
-    int>=0: maximum number of junction detected in the 1st step
 

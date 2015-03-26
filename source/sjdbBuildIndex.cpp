@@ -245,10 +245,10 @@ void sjdbBuildIndex (Parameters *P, char *G, PackedArray &SA, PackedArray &SA2, 
         };
     };    
     
-    ofstream genomeOut((P->twopassDir+("/Genome")).c_str());
+    ofstream genomeOut((P->twoPass.dir+("/Genome")).c_str());
     fstreamWriteBig(genomeOut,G,P->nGenome+nGsj);
     genomeOut.close(); 
-    genomeOut.open((P->twopassDir+("/SA")).c_str());
+    genomeOut.open((P->twoPass.dir+("/SA")).c_str());
     fstreamWriteBig(genomeOut,SA2.charArray,SA2.lengthByte);
     genomeOut.close();
     */

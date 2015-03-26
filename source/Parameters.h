@@ -149,13 +149,20 @@ class Parameters {
         } outWigFlags; 
         
         //2-pass
-//         uint twopass1readsN, twopassSJlimit;
-//         string twopassDir,twopassSJpass1file;
+//         uint twoPass.pass1readsN, twoPass.sjLimit;
+//         string twoPass.dir,twopassSJpass1file;
         struct {
             bool yes;
-            uint pass1readsN, sjLimit;
-            string dir,pass1SJfile;            
+            uint pass1readsN;
+            string dir;
+            string pass1sjFile;            
         } twoPass;
+        
+        //inserting junctions on the fly
+        struct {
+            bool pass1;//insert on the 1st pass?
+            bool pass2;//insert on the 2nd pass?
+        } sjdbInsert;
         
         //storage limits
         uint limitGenomeGenerateRAM;
@@ -163,6 +170,7 @@ class Parameters {
         uint limitOutSAMoneReadBytes;
         uint limitOutSJoneRead, limitOutSJcollapsed;
         uint limitBAMsortRAM;
+        uint limitOnTheFlySJ;
         
         // penalties
         intScore scoreGap, scoreGapNoncan, scoreGapGCAG, scoreGapATAC, scoreDelBase, scoreDelOpen, scoreInsBase, scoreInsOpen; 

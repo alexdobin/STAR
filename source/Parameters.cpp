@@ -61,6 +61,8 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitOutSJcollapsed", &limitOutSJcollapsed));
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitOutSJoneRead", &limitOutSJoneRead));
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitBAMsortRAM", &limitBAMsortRAM));
+    parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitOnTheFlySJ", &limitOnTheFlySJ));
+
 
     //output
     parArray.push_back(new ParameterInfoScalar <string>     (-1, 2, "outFileNamePrefix", &outFileNamePrefix));
@@ -196,8 +198,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <int>     (-1, -1, "quantTranscriptomeBAMcompression", &quantTranscriptomeBAMcompression));
 
     //2-pass
-    parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "twopass1readsN", &twopass1readsN));
-    parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "twopassSJlimit", &twopassSJlimit));
+    parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "twopass1readsN", &twoPass.pass1readsN));
 
     
 //     //SW parameters
@@ -845,26 +846,11 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     } else {
         quant.yes=false; //no quantification
     };
-            
-    //run-time genome directory
-    if (runMode=="alignReads" && (sjdbFileChrStartEnd.at(0)!="-" || sjdbGTFfile!="-")) 
-    {//this is needed for genome files generated on the fly
-        genomeDirOut=outFileNamePrefix+"_STARgenome/";
-        sysRemoveDir (genomeDirOut);  
-        if (mkdir (genomeDirOut.c_str(),S_IRWXU)!=0) {
-            ostringstream errOut;
-            errOut <<"EXITING because of fatal ERROR: could not make run-time genome directory directory: "<< genomeDirOut<<"\n";
-            errOut <<"SOLUTION: please check the path and writing permissions \n";
-            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-        };    
-    } else         
-    {
-        genomeDirOut=genomeDir;
-    };
-        
+                    
     
     //two-pass
-    if (twopass1readsN>0) {//2-pass parameters
+    twoPass.yes=false;
+    if (twoPass.pass1readsN>0) {//2-pass parameters
         if (sjdbOverhang<=0) {
             ostringstream errOut;
             errOut << "EXITING because of fatal PARAMETERS error: sjdbOverhang <=0 in the 2-pass mode\n";
@@ -877,18 +863,55 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             errOut << "SOLUTION: re-run STAR with --genomeLoad NoSharedMemory ; this is the only compatible option at the moment.s";
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };        
-        
-        twopassDir=outFileNamePrefix+"_STARpass1/";
-        sysRemoveDir (twopassDir);                
-        if (mkdir (twopassDir.c_str(),S_IRWXU)!=0) {
+        twoPass.yes=true;
+        twoPass.dir=outFileNamePrefix+"_STARpass1/";
+        sysRemoveDir (twoPass.dir);                
+        if (mkdir (twoPass.dir.c_str(),S_IRWXU)!=0) {
             ostringstream errOut;
-            errOut <<"EXITING because of fatal ERROR: could not make pass1 directory: "<< twopassDir<<"\n";
+            errOut <<"EXITING because of fatal ERROR: could not make pass1 directory: "<< twoPass.dir<<"\n";
             errOut <<"SOLUTION: please check the path and writing permissions \n";
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
-        
         sjdbLength=sjdbOverhang*2+1;
     };
+    
+   //sjdb insert on the fly
+
+    sjdbInsert.pass1=false;
+    sjdbInsert.pass2=false;
+    if (sjdbFileChrStartEnd.at(0)!="-" || sjdbGTFfile!="-")
+    {//will insert annotated sjdb on the fly
+        if (twoPass.yes) 
+        {
+            sjdbInsert.pass2=true;
+        } else 
+        {//for now, in the twoPass run annotated junctions can be inserted only in the 2nd pass
+            sjdbInsert.pass1=true;
+        };
+    };
+    
+    if (runMode=="alignReads" && (sjdbInsert.pass1 || sjdbInsert.pass2) ) 
+    {//run-time genome directory, this is needed for genome files generated on the fly
+        if (sjdbOverhang<=0) {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: sjdbOverhang <=0 while junctions are inserted on the fly with --sjdbFileChrStartEnd or/and --sjdbGTFfile\n";
+            errOut << "SOLUTION: specify sjdbOverhang>0, ideally readmateLength-1";
+            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };        
+        genomeDirOut=outFileNamePrefix+"_STARgenome/";
+        sysRemoveDir (genomeDirOut);  
+        if (mkdir (genomeDirOut.c_str(),S_IRWXU)!=0) {
+            ostringstream errOut;
+            errOut <<"EXITING because of fatal ERROR: could not make run-time genome directory directory: "<< genomeDirOut<<"\n";
+            errOut <<"SOLUTION: please check the path and writing permissions \n";
+            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };    
+    } else         
+    {
+        genomeDirOut=genomeDir;
+    };    
+    
+
     
     if (outBAMcoord && limitBAMsortRAM==0) {//check limitBAMsortRAM
         if (genomeLoad!="NoSharedMemory") {

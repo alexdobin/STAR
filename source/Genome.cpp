@@ -234,7 +234,7 @@ void Genome::genomeLoad(){//allocate and load Genome
     P->inOut->logMain << "nGenome=" << P->nGenome << ";  nSAbyte=" << P->nSAbyte <<endl<< flush;       
     P->inOut->logMain <<"GstrandBit="<<int(P->GstrandBit)<<"   SA number of indices="<<P->nSA<<endl<<flush;      
     
-//     if (twopass1readsN==0) {//not 2-pass
+//     if (twoPass.pass1readsN==0) {//not 2-pass
 //         shmStartG=SHM_startSHM;
 //         shmStartSA=0;
 //     } else {//2-pass
@@ -247,10 +247,10 @@ void Genome::genomeLoad(){//allocate and load Genome
     /////////////////////////////////////// allocate arrays
     if (P->genomeLoad=="NoSharedMemory") {// simply allocate memory, do not use shared memory
         try {
-            if (P->twopass1readsN==0)
-            {//2-pass: reserve extra memory
-                P->nGenome2=P->nGenome+P->twopassSJlimit*P->sjdbLength;
-                SA2.defineBits(P->GstrandBit+1,P->nSA+2*P->twopassSJlimit*P->sjdbLength);
+            if (P->twoPass.yes || P->sjdbInsert.pass1)
+            {//2-pass, or annotations: reserve extra memory
+                P->nGenome2=P->nGenome+P->limitOnTheFlySJ*P->sjdbLength;
+                SA2.defineBits(P->GstrandBit+1,P->nSA+2*P->limitOnTheFlySJ*P->sjdbLength);
                 G1=new char[P->nGenome2+L+L];        
                 SA2.allocateArray();
                 SA.pointArray(SA2.charArray+SA2.lengthByte-SA.lengthByte);
@@ -450,7 +450,7 @@ void Genome::genomeLoad(){//allocate and load Genome
     };
     
     P->winBinChrNbits=P->genomeChrBinNbits-P->winBinNbits;
-    
+    P->winBinN = P->nGenome/(1LLU << P->winBinNbits)+1;//this may be chenaged later
 };
 
 
