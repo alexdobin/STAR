@@ -846,6 +846,23 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         quant.yes=false; //no quantification
     };
             
+    //run-time genome directory
+    if (runMode=="alignReads" && (sjdbFileChrStartEnd.at(0)!="-" || sjdbGTFfile!="-")) 
+    {//this is needed for genome files generated on the fly
+        genomeDirOut=outFileNamePrefix+"_STARgenome/";
+        sysRemoveDir (genomeDirOut);  
+        if (mkdir (genomeDirOut.c_str(),S_IRWXU)!=0) {
+            ostringstream errOut;
+            errOut <<"EXITING because of fatal ERROR: could not make run-time genome directory directory: "<< genomeDirOut<<"\n";
+            errOut <<"SOLUTION: please check the path and writing permissions \n";
+            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };    
+    } else         
+    {
+        genomeDirOut=genomeDir;
+    };
+        
+    
     //two-pass
     if (twopass1readsN>0) {//2-pass parameters
         if (sjdbOverhang<=0) {
@@ -870,7 +887,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
         
-        twopassSJpass1file=twopassDir+"/SJ.out.tab";
         sjdbLength=sjdbOverhang*2+1;
     };
     

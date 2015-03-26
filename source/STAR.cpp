@@ -53,13 +53,12 @@ int main(int argInN, char* argIn[]) {
     
     Genome mainGenome (P);
     mainGenome.genomeLoad();
-    //calculate genome-related parameters
-    P->winBinN = P->nGenome/(1LLU << P->winBinNbits)+1;
+    sjdbInsertJunctions(P, mainGenome);
     
+    //calculate genome-related parameters
     Transcriptome *mainTranscriptome=NULL;
-    if ( P->quant.yes ) {//load transcriptome
-        mainTranscriptome=new Transcriptome(P);
-    };
+    
+    
 /////////////////////////////////////////////////////////////////////////////////////////////////START
     if (P->runThreadN>1) {
         g_threadChunks.threadArray=new pthread_t[P->runThreadN];
@@ -118,6 +117,8 @@ int main(int argInN, char* argIn[]) {
         ofstream logFinal1 ( (P->twopassDir + "/Log.final.out").c_str());
         g_statsAll.reportFinal(logFinal1,P1);
 
+        P->twopassSJpass1file=P->twopassDir+"/SJ.out.tab";
+        
         sjdbInsertJunctions(P, mainGenome);
                 
         //reopen reads files
@@ -127,6 +128,10 @@ int main(int argInN, char* argIn[]) {
         //nothing for now
     };
 
+    if ( P->quant.yes ) {//load transcriptome
+        mainTranscriptome=new Transcriptome(P);
+    };    
+    
     //initialize Stats
     g_statsAll.resetN();
     time(&g_statsAll.timeStartMap);

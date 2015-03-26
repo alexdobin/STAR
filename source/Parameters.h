@@ -36,7 +36,7 @@ class Parameters {
         
         //genome, SA, ...
         vector <uint> chrStart, chrLength;
-        string genomeDir,genomeLoad;
+        string genomeDir,genomeDirOut,genomeLoad;
         vector <string> genomeFastaFiles; 
         uint genomeSAsparseD;//sparsity=distance between indices
         //binning,windows,anchors
@@ -149,8 +149,13 @@ class Parameters {
         } outWigFlags; 
         
         //2-pass
-        uint twopass1readsN, twopassSJlimit;
-        string twopassDir,twopassSJpass1file;
+//         uint twopass1readsN, twopassSJlimit;
+//         string twopassDir,twopassSJpass1file;
+        struct {
+            bool yes;
+            uint pass1readsN, sjLimit;
+            string dir,pass1SJfile;            
+        } twoPass;
         
         //storage limits
         uint limitGenomeGenerateRAM;

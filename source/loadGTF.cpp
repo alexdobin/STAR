@@ -32,7 +32,7 @@
 
 
 
-uint loadGTF(SjdbClass &sjdbLoci, Parameters *P) {//load gtf file, add junctions to P->sjdb
+uint loadGTF(SjdbClass &sjdbLoci, Parameters *P, string dirOut) {//load gtf file, add junctions to P->sjdb
     //returns number of added junctions
     if (P->sjdbOverhang>0 && P->sjdbGTFfile!="-") {       
         time_t rawTime;
@@ -162,7 +162,7 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P) {//load gtf file, add junctions
             qsort((void*) exgeLoci, exonN, sizeof(uint)*GTF_exgeLoci_size, funCompareArrays<uint,5>);
 
             ofstream exgeOut;
-            ofstrOpen(P->genomeDir+"/exonGeTrInfo.tab","ERROR_00201",P,exgeOut);
+            ofstrOpen(dirOut+"/exonGeTrInfo.tab","ERROR_00201",P,exgeOut);
             exgeOut<<exonN<<"\n";
             for (uint iex=0; iex<exonN; iex++) {
                  exgeOut<<exgeLoci[GTF_exgeExStart(iex)] <<"\t"<<  exgeLoci[GTF_exgeExEnd(iex)] <<"\t"<< exgeLoci[GTF_exgeExStrand(iex)] \
@@ -171,7 +171,7 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P) {//load gtf file, add junctions
             exgeOut.close();
 
             ofstream geOut;
-            ofstrOpen(P->genomeDir+"/geneInfo.tab","ERROR_00202",P,geOut);
+            ofstrOpen(dirOut+"/geneInfo.tab","ERROR_00202",P,geOut);
             geOut << geneID.size() << "\n";
             for (uint ig=0; ig<geneID.size(); ig++) {//just geneID for now
                 geOut << geneID.at(ig) <<"\n";
@@ -201,9 +201,9 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P) {//load gtf file, add junctions
             
             qsort((void*) extrLoci, exonN, sizeof(uint)*GTF_extrLoci_size, funCompareArrays<uint,5>);
             
-            ofstream trOut ((P->genomeDir+"/transcriptInfo.tab").c_str());
+            ofstream trOut ((dirOut+"/transcriptInfo.tab").c_str());
             trOut<<transcriptID.size() << "\n";
-            ofstream exOut ((P->genomeDir+"/exonInfo.tab").c_str());
+            ofstream exOut ((dirOut+"/exonInfo.tab").c_str());
             exOut<<exonN<<"\n";
             
             uint trid=extrLoci[GTF_extrTrID(0)];
@@ -267,7 +267,7 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P) {//load gtf file, add junctions
             };
         };
         
-        ofstream sjdbList ((P->genomeDir+"/sjdbList.fromGTF.out.tab").c_str());
+        ofstream sjdbList ((dirOut+"/sjdbList.fromGTF.out.tab").c_str());
         for (uint ii=sjdbN1;ii<sjdbLoci.chr.size(); ii++) {
             sjdbList << sjdbLoci.chr.at(ii)<<"\t"<< sjdbLoci.start.at(ii) << "\t"<< sjdbLoci.end.at(ii)  <<"\t"<< sjdbLoci.str.at(ii)<<"\n";
         };

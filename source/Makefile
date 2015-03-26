@@ -22,7 +22,7 @@ LDFLAGS_static := -static -static-libgcc -pthread -Lhtslib -lhts -lz
 LDFLAGS_Mac :=-pthread -lz htslib/libhts.a
 LDFLAGS_Mac_static :=-pthread -lz -static-libgcc htslib/libhts.a
 
-LDFLAGS_gdb := $(LDFLAGS)
+LDFLAGS_gdb := $(LDFLAGS_static)
 
 COMPTIMEPLACE := -D'COMPILATION_TIME_PLACE="$(shell echo `date` $(HOSTNAME):`pwd`)"'
 EXTRAFLAGS := 

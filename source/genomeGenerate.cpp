@@ -181,7 +181,7 @@ void genomeGenerate(Parameters *P) {
     uint nGenomeReal=genomeScanFastaFiles(P,G,false);//first scan the fasta file to fins all the sizes  
     P->chrBinFill();
 
-    loadGTF(sjdbLoci, P);    
+    loadGTF(sjdbLoci, P, P->genomeDir);    
 
     uint L=10000;//maximum length of genome suffix    
     uint nG1alloc=(nGenomeReal + sjdbLoci.chr.size()*P->sjdbLength+L)*2;

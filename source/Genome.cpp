@@ -60,18 +60,13 @@ void Genome::genomeLoad(){//allocate and load Genome
     
     time_t rawtime;
     time ( &rawtime );
-    
-    
-    //protect some parameters
-    uint sjdbOverhang1=P->sjdbOverhang;
 
-    vector <uint> versionGenomeMin=P->versionGenome;
-    P->versionGenome[0]=0;
+    Parameters *P1 = new Parameters;
     
     ifstream parFile((P->genomeDir+("/genomeParameters.txt")).c_str());
     if (parFile.good()) {
         P->inOut->logMain << "Reading genome generation parameters:\n";
-        P->scanAllLines(parFile,3,-1);
+        P1->scanAllLines(parFile,3,-1);
         parFile.close();
     } else {
         ostringstream errOut;
@@ -81,14 +76,14 @@ void Genome::genomeLoad(){//allocate and load Genome
     };            
     
     //check genome version
-    if (P->versionGenome[0]==0) {//
+    if (P1->versionGenome.size()==0 || P1->versionGenome[0]==0) {//
         ostringstream errOut;
         errOut << "EXITING because of FATAL ERROR: read no value for the versionGenome parameter from genomeParameters.txt file\n";
         errOut << "SOLUTION: please re-generate genome from scratch with the latest version of STAR\n";
         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_GENOME_FILES, *P);
-    } else if (P->sjdbFileChrStartEnd.at(0)=="-" && P->versionGenome.at(0) >= versionGenomeMin.at(0)) {//
+    } else if (P->sjdbFileChrStartEnd.at(0)=="-" && P1->versionGenome.at(0) >= P->versionGenome.at(0)) {//
         P->inOut->logMain << "Genome version is compatible with current STAR version\n";
-    } else if (P->sjdbFileChrStartEnd.at(0)!="-" && P->versionGenome.at(0) >= versionGenomeMin.at(1)) {//
+    } else if (P->sjdbFileChrStartEnd.at(0)!="-" && P1->versionGenome.at(0) >= P->versionGenome.at(1)) {//
         P->inOut->logMain << "Genome version is compatible with current STAR version\n";        
     } else {
         ostringstream errOut;
@@ -97,8 +92,11 @@ void Genome::genomeLoad(){//allocate and load Genome
         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_GENOME_FILES, *P);
     };
 
-
-    if (P->sjdbOverhang==0) P->sjdbOverhang=sjdbOverhang1; //for twopass sjdbOverhang may be defined at the mapping stage
+    //record required genome parameters in P
+    P->genomeSAindexNbases=P1->genomeSAindexNbases;
+    P->genomeChrBinNbits=P1->genomeChrBinNbits;
+    P->genomeSAsparseD=P1->genomeSAsparseD;
+    if (P->sjdbOverhang==0) P->sjdbOverhang=P1->sjdbOverhang; //for twopass sjdbOverhang may be defined at the mapping stage
     //TODO make a more careful check, if the values are different, break!
 
     P->inOut->logMain << "Started loading the genome: " << asctime (localtime ( &rawtime ))<<"\n"<<flush;    
@@ -249,15 +247,18 @@ void Genome::genomeLoad(){//allocate and load Genome
     /////////////////////////////////////// allocate arrays
     if (P->genomeLoad=="NoSharedMemory") {// simply allocate memory, do not use shared memory
         try {
-            if (P->twopass1readsN==0) {//1-pass, no extra memory
-                G1=new char[P->nGenome+L+L];        
-                SA.allocateArray();
-            } else {//2-pass: reserve extra memory
+            if (P->twopass1readsN==0)
+            {//2-pass: reserve extra memory
                 P->nGenome2=P->nGenome+P->twopassSJlimit*P->sjdbLength;
                 SA2.defineBits(P->GstrandBit+1,P->nSA+2*P->twopassSJlimit*P->sjdbLength);
                 G1=new char[P->nGenome2+L+L];        
                 SA2.allocateArray();
                 SA.pointArray(SA2.charArray+SA2.lengthByte-SA.lengthByte);
+            } else 
+            {//1-pass, no extra memory
+                G1=new char[P->nGenome+L+L];        
+                SA.allocateArray();
+                
             };            
             SAi.allocateArray();
             P->inOut->logMain <<"Shared memory is not used for genomes. Allocated a private copy of the genome.\n"<<flush;                

@@ -14,7 +14,7 @@ void sjdbInsertJunctions(Parameters *P, Genome &genome) {
     time_t rawtime;
 
     //load 1st pass junctions
-    if (P->twopassSJpass1file!="-")
+    if (P->twopassSJpass1file.size()>0)
     {
         ifstream sjdbStreamIn ( P->twopassSJpass1file.c_str() );   
         if (sjdbStreamIn.fail()) {
@@ -37,7 +37,7 @@ void sjdbInsertJunctions(Parameters *P, Genome &genome) {
     //load from GTF
     if (P->sjdbGTFfile!="-")
     {
-        loadGTF(sjdbLoci, P);
+        loadGTF(sjdbLoci, P, P->genomeDirOut);
         P->inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the GTF file: " << P->sjdbGTFfile<<": "<<sjdbLoci.chr.size()<<" total junctions\n\n";
     };
 
