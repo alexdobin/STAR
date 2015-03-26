@@ -88,7 +88,11 @@ int main(int argInN, char* argIn[]) {
         P1->outBAMcoord=false;
     
         P1->chimSegmentMin=0;
+        
         P1->quant.yes=false;
+        P1->quant.trSAM.yes=false;
+        P1->quant.geCount.yes=false;
+        
         P1->outFilterBySJoutStage=0;
         
         P1->outReadsUnmapped="None";

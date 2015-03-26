@@ -194,8 +194,9 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <int>    (-1, -1, "sjdbScore", &sjdbScore));
     
     //quant
-    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "quantMode", &quantMode));
-    parArray.push_back(new ParameterInfoScalar <int>     (-1, -1, "quantTranscriptomeBAMcompression", &quantTranscriptomeBAMcompression));
+    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "quantMode", &quant.mode));
+    parArray.push_back(new ParameterInfoScalar <int>     (-1, -1, "quantTranscriptomeBAMcompression", &quant.trSAM.bamCompression));
+    parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "quantTranscriptomeBan", &quant.trSAM.ban));
 
     //2-pass
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "twopass1readsN", &twoPass.pass1readsN));
@@ -823,23 +824,34 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     };
     
     //quantification parameters
-    if (quantMode.at(0) != "-") {
+    if (quant.mode.at(0) != "-") {
         quant.yes=true;
-        for (uint32 ii=0; ii<quantMode.size(); ii++) {
-            if (quantMode.at(ii)=="TranscriptomeSAM") {
+        for (uint32 ii=0; ii<quant.mode.size(); ii++) {
+            if (quant.mode.at(ii)=="TranscriptomeSAM") {
                 quant.trSAM.yes=true;
                 if (outStd=="BAM_Quant") {
                     outFileNamePrefix="-";
                 } else {
                     outQuantBAMfileName=outFileNamePrefix + "Aligned.toTranscriptome.out.bam";
                 };
-                inOut->outQuantBAMfile=bgzf_open(outQuantBAMfileName.c_str(),("w"+to_string((long long) quantTranscriptomeBAMcompression)).c_str());
-            } else if  (quantMode.at(ii)=="GeneCounts") {
+                inOut->outQuantBAMfile=bgzf_open(outQuantBAMfileName.c_str(),("w"+to_string((long long) quant.trSAM.bamCompression)).c_str());
+                if (quant.trSAM.ban=="IndelSoftclipSingleend")
+                {
+                    quant.trSAM.indel=false;
+                    quant.trSAM.softClip=false;
+                    quant.trSAM.singleEnd=false;
+                } else if (quant.trSAM.ban=="Singleend")
+                {
+                    quant.trSAM.indel=true;
+                    quant.trSAM.softClip=true;
+                    quant.trSAM.singleEnd=false;
+                };
+            } else if  (quant.mode.at(ii)=="GeneCounts") {
                 quant.geCount.yes=true;
             } else {
                 ostringstream errOut;
-                errOut << "EXITING because of fatal INPUT error: unrecognized option in --quantMode=" << quantMode.at(ii) << "\n";
-                errOut << "SOLUTION: use one of the allowed values of --quantMode : TranscriptomeSAM or - .\n";     
+                errOut << "EXITING because of fatal INPUT error: unrecognized option in --quant.mode=" << quant.mode.at(ii) << "\n";
+                errOut << "SOLUTION: use one of the allowed values of --quant.mode : TranscriptomeSAM or - .\n";     
                 exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
             };
         };

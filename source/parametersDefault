@@ -495,6 +495,10 @@ quantMode                   -
 quantTranscriptomeBAMcompression    1       1
     int: -1 to 10  transcriptome BAM compression level, -1=default compression (6?), 0=no compression, 10=maximum compression
 
+quantTranscriptomeBan       IndelSoftclipSingleend
+    string: prohibit various alignment type
+                            IndelSoftclipSingleend  ... prohibit indels, soft clipping and single-end alignments - compatible with RSEM
+                            Singleend               ... prohibit single-end alignments
 
 ### 2-pass Mapping
 twopass1readsN              0

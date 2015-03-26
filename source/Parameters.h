@@ -104,7 +104,7 @@ class Parameters {
         int outSAMmapqUnique;
         struct {bool NH,HI,AS,NM,MD,nM,jM,jI,RG,XS;} outSAMattrPresent, outSAMattrPresentQuant;
         vector <int> outSAMattrOrder, outSAMattrOrderQuant;
-        int outBAMcompression, quantTranscriptomeBAMcompression;
+        int outBAMcompression;
         vector <string> outSAMtype;
         bool outBAMunsorted, outBAMcoord, outSAMbool;
         uint32 outBAMcoordNbins;
@@ -206,11 +206,27 @@ class Parameters {
         
         //quantification parameters
             //input
-        vector <string> quantMode; //quantification mode input string
-        struct {
+        
+        struct 
+        {
           bool yes; //if any quantification is done
-          struct {bool yes;} trSAM;
-          struct {bool yes;} geCount;
+          vector <string> mode; //quantification mode input string
+                  
+          struct 
+          {
+              bool yes;
+              bool indel;
+              bool softClip;
+              bool singleEnd;
+              int bamCompression;
+              string ban;
+          } trSAM;
+          
+          struct 
+          {
+              bool yes;
+          } geCount;
+          
         } quant;
         
         //chimeric
