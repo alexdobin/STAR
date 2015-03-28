@@ -101,7 +101,7 @@ main: {
     
     my $spanning_reads_to_genes_file = "$out_prefix.spanning_reads_to_genes.txt";
     $cmd = "$UTILDIR/STAR_spanning_to_genes.pl $chimeric_out_sam $ref_GTF > $spanning_reads_to_genes_file";
-    $pipeliner->add_commands(Command->new($cmd, &make_hidden("$spanning_reads_to_genes_file")));
+    $pipeliner->add_commands(Command->new($cmd, &make_hidden("$spanning_reads_to_genes_file.ok")));
     
     ## make a joint summary file:
     my $star_fusions_outfile = "$out_prefix.fusion_candidates.txt";

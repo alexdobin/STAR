@@ -105,6 +105,11 @@ sub add_overlapping_genes {
 sub parse_junctions {
     my ($gtf_file) = @_;
 
+    if ($gtf_file =~ /\.gz$/) {
+        $gtf_file = "gunzip -c $gtf_file | ";
+    }
+    
+
     my %chr_exons_interval_tree;
 
     my $counter = 0;

@@ -15,6 +15,10 @@ my $annot_gtf_file = $ARGV[1] or die $usage;
 main: {
     
     my %gene_to_junctions = &parse_junctions($annot_gtf_file);
+
+    if ($junctions_file =~ /\.gz$/) {
+        $junctions_file = "gunzip -c $junctions_file | ";
+    }
     
     open (my $fh, $junctions_file) or die "Error, cannot open file $junctions_file";
     while (<$fh>) {
@@ -66,6 +70,10 @@ sub parse_junctions {
     my %junctions;
 
     my $counter = 0;
+
+    if ($gtf_file =~ /\.gz$/) {
+        $gtf_file = "gunzip -c $gtf_file | ";
+    }
     
     open (my $fh, $gtf_file) or die "Error, cannot open file $gtf_file";
     while (<$fh>) {

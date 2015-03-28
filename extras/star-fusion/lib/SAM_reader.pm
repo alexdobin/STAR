@@ -34,6 +34,9 @@ sub _init {
     if ($self->{filename} =~ /\.bam$/) {
         open ($self->{_fh}, "samtools view $self->{filename} |") or confess "Error, cannot open file " . $self->{filename};
     }
+    elsif ($self->{filename} =~ /\.gz$/) {
+        open ($self->{_fh}, "gunzip -c $self->{filename} | ") or confess "Error, cannot open file " . $self->{filename};
+    }
     else {
         open ($self->{_fh}, $self->{filename}) or confess "Error, cannot open file " . $self->{filename};
     }
