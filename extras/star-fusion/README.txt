@@ -25,6 +25,21 @@ The output from running star will include two primary output files that contain 
 	  Chimeric.out.sam : contains alignments for fusion-spanning reads.
 
 
+###############################
+## Installation Requirements ##
+###############################
+
+  STAR-Fusion requires the following Perl module from CPAN : Set/IntervalTree.pm
+  found here:
+  http://search.cpan.org/~benbooth/Set-IntervalTree-0.02/lib/Set/IntervalTree.pm
+
+  A typical perl module installation may involve:
+  perl -MCPAN -e shell
+    install Set::IntervalTree 
+ 	
+  *This CPAN module tends to install trouble-free on Linux.  Note, if you have trouble installing Set::IntervalTree on Mac OS X (as I did), try the following:  download the tarball from the above, run the perl Makefile.pl, then edit the generated 'Makefile' and remove all occurrences of '-arch i386'. Then try 'make', 'make test', and finally 'make install'.
+
+
 #########################
 ## Running STAR-Fusion ##
 #########################
