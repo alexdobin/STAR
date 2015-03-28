@@ -1,0 +1,132 @@
+#!/usr/bin/env perl
+
+# contributed by Brian Haas, Broad Institute, 2015
+
+use strict;
+use warnings;
+use Carp;
+use Cwd;
+use FindBin;
+
+use lib ("$FindBin::Bin/lib");
+use Pipeliner;
+use File::Basename;
+
+use Getopt::Long qw(:config posix_default no_ignore_case bundling pass_through);
+
+my $UTILDIR = "$FindBin::Bin/util";
+
+
+=recommended_STAR_settings
+
+  # From Stransky et al. 2014   PMID: 25204415
+
+   STAR --genomeDir Hg19.fa_star_index \
+        --readFilesIn left.fq right.fq \
+        --outSAMstrandField intronMotif \
+        --outFilterIntronMotifs RemoveNoncanonicalUnannotated \
+        --outReadsUnmapped None --chimSegmentMin 15 \
+        --chimJunctionOverhangMin 15 \
+        --alignMatesGapMax 200000 \
+        --alignIntronMax 200000 \
+        --runThreadN 4 \
+        --outSAMtype BAM SortedByCoordinate 
+
+=cut
+
+
+
+## Options
+my $out_prefix = "star-fusion";
+my $chimeric_junction_file;
+my $chimeric_out_sam;
+my $ref_GTF;
+my $help_flag;
+
+my $usage = <<__EOUSAGE__;
+
+###################################################################################
+#
+#  Required:
+#
+#    --chimeric_out_sam|S <string>      Chimeric.out.sam file
+#
+#    --chimeric_junction|J <string>     Chimeric.out.junction file
+#
+#    --ref_GTF|G <string>               reference annotation GTF file (ie. gencode.gtf)
+#
+# 
+#  Optional:
+#
+#    --out_prefix|O <string>         output file prefix (default: $out_prefix)
+#
+###################################################################################
+
+
+__EOUSAGE__
+
+    ;
+
+
+&GetOptions ( 'h' => \$help_flag,
+              
+              'chimeric_out_sam|S=s' => \$chimeric_out_sam,
+              'chimeric_junction|J=s' => \$chimeric_junction_file,
+              'ref_GTF|G=s' => \$ref_GTF,
+
+              'out_prefix|O=s' => \$out_prefix,
+    );
+
+
+if ($help_flag) {
+    die $usage;
+}
+unless ($chimeric_out_sam && $chimeric_junction_file && $ref_GTF) {
+    die $usage;
+}
+
+
+main: {
+    
+        
+    my $pipeliner = new Pipeliner(-verbose => 1);
+    
+    ##  assign fusion junctions to genes:
+    
+    my $junction_reads_to_genes_file = "$out_prefix.junction_reads_to_genes.txt";
+    my $cmd = "$UTILDIR/STAR_junction_to_genes.pl $chimeric_junction_file $ref_GTF > $junction_reads_to_genes_file";
+    $pipeliner->add_commands(Command->new($cmd, &make_hidden("$junction_reads_to_genes_file.ok")));
+    
+    ## assign spanning reads to genes:
+    
+    my $spanning_reads_to_genes_file = "$out_prefix.spanning_reads_to_genes.txt";
+    $cmd = "$UTILDIR/STAR_spanning_to_genes.pl $chimeric_out_sam $ref_GTF > $spanning_reads_to_genes_file";
+    $pipeliner->add_commands(Command->new($cmd, &make_hidden("$spanning_reads_to_genes_file")));
+    
+    ## make a joint summary file:
+    my $star_fusions_outfile = "$out_prefix.fusion_candidates.txt";
+    $cmd = "set -o pipefail && $UTILDIR/STAR_collate_junction_and_spanning_results.pl "
+        . " $junction_reads_to_genes_file $spanning_reads_to_genes_file "
+        . " | sort -k2,2nr -k3,3nr > $star_fusions_outfile";
+    $pipeliner->add_commands(Command->new($cmd, &make_hidden("$star_fusions_outfile.ok")));
+    
+    $pipeliner->run();
+
+    print STDERR "Done.  See fusion candidates: $star_fusions_outfile\n\n";
+    
+    exit(0);
+
+    
+}
+
+####
+sub make_hidden {
+    my ($file) = @_;
+
+    my $d = dirname($file);
+    my $f = basename($file);
+
+    my $h = "$d/.$f";
+
+    return($h);
+}
