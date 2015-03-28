@@ -7,6 +7,7 @@ use warnings;
 use Carp;
 use Cwd;
 use FindBin;
+use Set::IntervalTree;
 
 use lib ("$FindBin::Bin/lib");
 use Pipeliner;
