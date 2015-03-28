@@ -177,11 +177,11 @@ void sjdbPrepare (SjdbClass &sjdbLoci, Parameters *P, char *G, uint nGenomeReal,
     //first line is some general useful information
     sjdbInfo << P->sjdbN <<"\t"<< P->sjdbOverhang <<"\n";
     uint sjGstart=P->chrStart[P->nChrReal];
-    for (uint ii=0;ii<P->sjdbN;ii++) {            
-        //add sjdb sequence to genome   
+    for (uint ii=0;ii<P->sjdbN;ii++) 
+    {//add sjdb sequence to genome   
         P->sjDstart[ii]   = P->sjdbStart[ii]  - P->sjdbOverhang; 
         P->sjAstart[ii]   = P->sjdbEnd[ii] + 1;     
-        if (P->sjdbMotif[ii]==0) {//shinon-canonical junctions back to their true coordinates
+        if (P->sjdbMotif[ii]==0) {//shift non-canonical junctions back to their true coordinates
             P->sjDstart[ii] += P->sjdbShiftLeft[ii];
             P->sjAstart[ii] += P->sjdbShiftLeft[ii];
         };            

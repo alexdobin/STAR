@@ -55,7 +55,9 @@ int main(int argInN, char* argIn[]) {
     mainGenome.genomeLoad();
     if (P->sjdbInsert.pass1) 
     {//for now, cannot insert junctions on the fly in 2-pass run
-        sjdbInsertJunctions(P, mainGenome);
+        Parameters *P1=new Parameters;
+        *P1=*P;
+        sjdbInsertJunctions(P, P1, mainGenome);
     };
     
     //calculate genome-related parameters
@@ -126,7 +128,7 @@ int main(int argInN, char* argIn[]) {
 
         P->twoPass.pass1sjFile=P->twoPass.dir+"/SJ.out.tab";
         
-        sjdbInsertJunctions(P, mainGenome);
+        sjdbInsertJunctions(P, P1, mainGenome);
                 
         //reopen reads files
         P->closeReadsFiles();

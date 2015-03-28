@@ -7,8 +7,9 @@
 #include "SjdbClass.h"
 #include "loadGTF.h"
 #include "sjdbBuildIndex.h"
+#include "streamFuns.h"
 
-void sjdbInsertJunctions(Parameters *P, Genome &genome) {
+void sjdbInsertJunctions(Parameters *P, Parameters *P1, Genome &genome) {
         
     SjdbClass sjdbLoci;        
     time_t rawtime;
@@ -40,13 +41,23 @@ void sjdbInsertJunctions(Parameters *P, Genome &genome) {
         loadGTF(sjdbLoci, P, P->genomeDirOut);
         P->inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the GTF file: " << P->sjdbGTFfile<<": "<<sjdbLoci.chr.size()<<" total junctions\n\n";
     };
+    
+    //load from the already generated genome
+    if (P->sjdbN>0)
+    {
+        ifstream sjdbStreamIn;
+        ifstrOpen(P->genomeDir+"/sjdbList.out.tab", "ERROR_012003", "SOLUTION: re-generate the genome in genomeDir=" + P->genomeDir, P, sjdbStreamIn);
+        sjdbLoadFromStream(sjdbStreamIn, sjdbLoci);
+        time ( &rawtime );
+        P->inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the generated genome " << P->genomeDir+"/sjdbList.out.tab" <<": "<<sjdbLoci.chr.size()<<" total junctions\n\n";
+    };
 
-    sjdbPrepare (sjdbLoci, P, genome.G, P->nGenome, P->twoPass.dir);//P->nGenome - change when replacing junctions
+    sjdbPrepare (sjdbLoci, P, genome.G, P->chrStart[P->nChrReal], P->twoPass.dir);//P->nGenome - change when replacing junctions
     time ( &rawtime );
     P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished preparing junctions" <<endl;
 
     //insert junctions into the genome and SA and SAi
-    sjdbBuildIndex (P, genome.G, genome.SA, genome.SA2, genome.SAi);
+    sjdbBuildIndex (P, P1, genome.G, genome.SA, genome.SA2, genome.SAi);
     time ( &rawtime ); 
     *P->inOut->logStdOut  << timeMonthDayTime(rawtime) << " ..... Finished inserting 1st pass junctions into genome" <<endl;
     //re-calculate genome-related parameters

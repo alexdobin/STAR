@@ -7,6 +7,7 @@
 #include "serviceFuns.cpp"
 #include "IncludeDefine.h"
 #include "streamFuns.h"
+#include "binarySearch2.h"
 
 char* globalG1;
 
@@ -50,62 +51,77 @@ inline int64 funCalcSAi(char* G, uint iL) {
 };
 
 
-void sjdbBuildIndex (Parameters *P, char *G, PackedArray &SA, PackedArray &SA2, PackedArray &SAi) {
+void sjdbBuildIndex (Parameters *P, Parameters *P1, char *G, PackedArray &SA, PackedArray &SA2, PackedArray &SAi) {
     
     #define SPACER_CHAR 5
 
     uint nGsj=P->sjdbLength*P->sjdbN;
     globalG1=new char[nGsj*2+1];
-    memcpy(globalG1,G+P->nGenome,nGsj);
-    for (uint ii=1; ii<=P->sjdbN; ii++) globalG1[ii*P->sjdbLength-1]=SPACER_CHAR; //to make sure this is > than any genome char
+    memcpy(globalG1,G+P->chrStart[P->nChrReal],nGsj);
+    for (uint ii=1; ii<=P->sjdbN; ii++) 
+    {
+        globalG1[ii*P->sjdbLength-1]=SPACER_CHAR; //to make sure this is > than any genome char
+    };
     globalG1[nGsj*2]=SPACER_CHAR+1;//mark the end of the text
 
-    for (uint ii=0; ii<nGsj; ii++) {//reverse complement
+    for (uint ii=0; ii<nGsj; ii++) {//reverse complement junction sequences
         globalG1[nGsj*2-1-ii]=globalG1[ii]<4 ? 3-globalG1[ii] : globalG1[ii]; //reverse complement
     };
 
     char* G1c=new char[nGsj*2+1];
     complementSeqNumbers(globalG1, G1c, nGsj*2+1);
 
+    uint32* oldSJind=new uint32[P1->sjdbN];
+    
     uint nIndicesSJ1=P->sjdbOverhang; //use P->sjdbLength-1 to keep all indices
 //     nIndicesSJ1=P->sjdbLength;
     uint64* indArray=new uint64[2*P->sjdbN*nIndicesSJ1*2];//8+4 bytes for SA index and index in the genome * nJunction * nIndeices per junction * 2 for reverse compl
-
+    uint64 sjNew=0;
     #pragma omp parallel num_threads(P->runThreadN)
-    #pragma omp for schedule (dynamic,1000)
+    #pragma omp for schedule (dynamic,1000) reduction(+:sjNew)
     for (uint isj=0; isj<2*P->sjdbN; isj++) {//find insertion points for each of the sequences
 
         char** seq1=new char*[2];
         seq1[0]=globalG1+isj*P->sjdbLength;
         seq1[1]=G1c+isj*P->sjdbLength;
-
-
+        
+        uint isj1=isj<P->sjdbN ? isj : 2*P->sjdbN-1-isj;
+        int sjdbInd = P1->sjdbN==0 ? -1 : binarySearch2(P->sjdbStart[isj1],P->sjdbEnd[isj1],P1->sjdbStart,P1->sjdbEnd,P1->sjdbN);
+        if (sjdbInd<0) 
+        {//count new junctions
+            ++sjNew;
+        } else 
+        {//record new index of the old junctions
+            oldSJind[sjdbInd]=isj1;
+        };
+        
         for (uint istart=0; istart<nIndicesSJ1;istart++) {
             uint ind1=2*(isj*nIndicesSJ1+istart);
-            if (seq1[0][istart]>3) {//no index for suffices starting with N
+            if (sjdbInd>=0 || seq1[0][istart]>3) 
+            {//no index for already included junctions, or suffices starting with N
                 indArray[ind1]=-1;
-                continue; 
+            } else 
+            {
+                indArray[ind1] =  suffixArraySearch(seq1, istart, 10000, G, SA, true, 0, P->nSA-1, 0, P) ;
+                indArray[ind1+1] = isj*P->sjdbLength+istart;
             };
-            indArray[ind1] =  suffixArraySearch(seq1, istart, 10000, G, SA, true, 0, P->nSA-1, 0, P) ;
-            indArray[ind1+1] = isj*P->sjdbLength+istart;
         };
     };
 
+    sjNew = sjNew/2;//novel junctions were double counted on two strands
+    
     time_t rawtime;
     time ( &rawtime );
-    P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished SA search" <<endl;
+    P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished SA search: number of new junctions=" << sjNew <<", old junctions="<<P->sjdbN-sjNew<<endl;
     
-    uint nInd=0;
-    for (uint ii=0; ii<2*P->sjdbN*nIndicesSJ1; ii++) {
+    uint nInd=0;//true number of new indices
+    for (uint ii=0; ii<2*P->sjdbN*nIndicesSJ1; ii++) {//remove entries that cannot be inserted, this cannot be done in the parallel cycle above
         if (indArray[ii*2]!= (uint) -1) {
             indArray[nInd*2]=indArray[ii*2];
             indArray[nInd*2+1]=indArray[ii*2+1];
             ++nInd;
         };
     };
-
-//         time ( &rawtime );
-//         cout << timeMonthDayTime(rawtime) << "remove -1, nInd="<<nInd <<endl;
 
     qsort((void*) indArray, nInd, 2*sizeof(uint64), funCompareUintAndSuffixes);
     time ( &rawtime );
@@ -114,21 +130,49 @@ void sjdbBuildIndex (Parameters *P, char *G, PackedArray &SA, PackedArray &SA2, 
     indArray[2*nInd]=-999; //mark the last junction
     indArray[2*nInd+1]=-999; //mark the last junction
     
+    P->nGenome=P->chrStart[P->nChrReal]+nGsj;    
     P->nSA+=nInd;
     SA2.defineBits(P->GstrandBit+1,P->nSA);
+    uint nGsjNew=sjNew*P->sjdbLength; //this is the actual number of bytes added to the genome, while nGsj is the total size of all junctions
+    
     uint N2bit= 1LLU << P->GstrandBit;
+    uint strandMask=~N2bit;
+    
+    
     uint isj=0, isa2=0;
     for (uint isa=0;isa<P->nSA;isa++) {
         uint ind1=SA[isa];
-        if ( (ind1 & N2bit)>0 ) ind1+=nGsj; //reverse complementary indices are all shifted by the length of junctions
+        
+        if ( (ind1 & N2bit)>0 ) 
+        {//- strand
+            uint ind1s = P1->nGenome - (ind1 & strandMask);
+            if (ind1s>P->chrStart[P->nChrReal])
+            {//this index was an old sj, may need to shift it
+                uint sj1 = (ind1s-P->chrStart[P->nChrReal])/P->sjdbLength;//old junction index
+                ind1s += (oldSJind[sj1]-sj1)*P->sjdbLength;
+                ind1 = (P->nGenome - ind1s) | N2bit;
+            } else
+            {
+                ind1+=nGsjNew; //reverse complementary indices are all shifted by the length of junctions
+            };
+        } else
+        {//+ strand
+            if (ind1>P->chrStart[P->nChrReal])
+            {//this index was an old sj, may need to shift it
+                uint sj1 = (ind1-P->chrStart[P->nChrReal])/P->sjdbLength;//old junction index
+                ind1 += (oldSJind[sj1]-sj1)*P->sjdbLength;
+            };
+        };
+        
         SA2.writePacked(isa2,ind1); //TODO make sure that the first sj index is not before the first array index
         ++isa2;
-        while (isa==indArray[isj*2]) {//insert sj index
+        
+        while (isa==indArray[isj*2]) {//insert sj index after the existing index
             uint ind1=indArray[isj*2+1];
             if (ind1<nGsj) {
-                ind1+=P->nGenome;
-            } else {
-                ind1=( (ind1-nGsj) | N2bit);
+                ind1+=P->chrStart[P->nChrReal];
+            } else {//reverse strand
+                ind1=(ind1-nGsj) | N2bit;
             };
             SA2.writePacked(isa2,ind1);
             ++isa2; ++isj;
@@ -212,13 +256,12 @@ void sjdbBuildIndex (Parameters *P, char *G, PackedArray &SA, PackedArray &SA2, 
     //change parameters, most parameters are already re-defined in sjdbPrepare.cpp
     SA.defineBits(P->GstrandBit+1,P->nSA);//same as SA2
     SA.pointArray(SA2.charArray);
-    P->sjGstart=P->nGenome;
-    P->nGenome+=nGsj;
+    P->sjGstart=P->chrStart[P->nChrReal];
     
     /* testing
     PackedArray SAio=SAi;
     SAio.allocateArray();
-    ifstream oldSAin("/dev/shm/dobin/STAR2pass/SAindex");
+    ifstream oldSAin("/dev/shm/dobin/STARgenomeMale_new1//SAindex");
     oldSAin.read(SAio.charArray,128);//skip 128 bytes
     oldSAin.read(SAio.charArray,SAio.lengthByte);
     oldSAin.close();  
@@ -226,7 +269,7 @@ void sjdbBuildIndex (Parameters *P, char *G, PackedArray &SA, PackedArray &SA2, 
     PackedArray SAo;
     SAo.defineBits(P->GstrandBit+1,P->nSA+nInd);
     SAo.allocateArray();
-    oldSAin.open("/dev/shm/dobin/STAR2pass/SA");
+    oldSAin.open("/dev/shm/dobin/STARgenomeMale_new1/SA");
     oldSAin.read(SAo.charArray,SAo.lengthByte);
     oldSAin.close();
 
@@ -244,13 +287,19 @@ void sjdbBuildIndex (Parameters *P, char *G, PackedArray &SA, PackedArray &SA2, 
                 };
         };
     };    
-    
-    ofstream genomeOut((P->twoPass.dir+("/Genome")).c_str());
-    fstreamWriteBig(genomeOut,G,P->nGenome+nGsj);
-    genomeOut.close(); 
-    genomeOut.open((P->twoPass.dir+("/SA")).c_str());
-    fstreamWriteBig(genomeOut,SA2.charArray,SA2.lengthByte);
-    genomeOut.close();
     */
+    
+    ofstream genomeOut("/home/dobin/Genome");
+    fstreamWriteBig(genomeOut,G,P->nGenome+nGsj,"777","777",P);
+    genomeOut.close(); 
+    genomeOut.open("/home/dobin/SA");
+    fstreamWriteBig(genomeOut,SA2.charArray,SA2.lengthByte,"777","777",P);
+    genomeOut.close();
+    //*/
+    
+    delete [] indArray;
+    delete [] globalG1;
+    delete [] G1c;
+    delete [] oldSJind;       
     
 };

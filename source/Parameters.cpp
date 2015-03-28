@@ -893,13 +893,15 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     sjdbInsert.pass2=false;
     if (sjdbFileChrStartEnd.at(0)!="-" || sjdbGTFfile!="-")
     {//will insert annotated sjdb on the fly
-        if (twoPass.yes) 
-        {
-            sjdbInsert.pass2=true;
-        } else 
-        {//for now, in the twoPass run annotated junctions can be inserted only in the 2nd pass
-            sjdbInsert.pass1=true;
-        };
+       sjdbInsert.pass1=true;
+       sjdbInsert.pass2=true;
+//        if (twoPass.yes) 
+//        {
+//            sjdbInsert.pass2=true;
+//        } else 
+//        {//for now, in the twoPass run annotated junctions can be inserted only in the 2nd pass
+//            sjdbInsert.pass1=true;
+//        };
     };
     
     if (runMode=="alignReads" && (sjdbInsert.pass1 || sjdbInsert.pass2) ) 

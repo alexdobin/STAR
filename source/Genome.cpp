@@ -96,16 +96,24 @@ void Genome::genomeLoad(){//allocate and load Genome
     P->genomeSAindexNbases=P1->genomeSAindexNbases;
     P->genomeChrBinNbits=P1->genomeChrBinNbits;
     P->genomeSAsparseD=P1->genomeSAsparseD;
-    if (P->sjdbOverhang==0) P->sjdbOverhang=P1->sjdbOverhang; //for twopass sjdbOverhang may be defined at the mapping stage
-    //TODO make a more careful check, if the values are different, break!
-
+    if (P->sjdbOverhang==0) 
+    {//sjdbOverhang may be defined at the genome generation step
+        P->sjdbOverhang=P1->sjdbOverhang;
+    } else if (P1->sjdbOverhang>0 && P->sjdbOverhang!=P1->sjdbOverhang) 
+    {//if sjdbOverhang was defined at the genome geneation step,the mapping step value has to agree with it
+        ostringstream errOut;
+        errOut << "EXITING because of fatal PARAMETERS error: present --sjdbOverhang="<<P->sjdbOverhang << " is not equal to the value at the genome generation step ="<< P1->sjdbOverhang << "\n";
+        errOut << "SOLUTION: \n" <<flush;     
+        exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_GENOME_FILES, *P);
+    };
+    
     P->inOut->logMain << "Started loading the genome: " << asctime (localtime ( &rawtime ))<<"\n"<<flush;    
   
     
     ifstream GenomeIn((P->genomeDir+"/Genome").c_str(), ios::binary); 
     if (!GenomeIn.good()) {
         ostringstream errOut;
-        errOut << "EXITING because of FATAL ERROR: could not open genome file "<< P->genomeDir<<"/Genome" <<"\n" << endl;
+        errOut << "EXITING because of FATAL ERROR: could not open genome file "<< P->genomeDir<<"/Genome" <<"\n";
         errOut << "SOLUTION: check that the path to genome files, specified in --genomeDir is correct and the files are present, and have user read permsissions\n" <<flush;     
         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_GENOME_FILES, *P);
     };

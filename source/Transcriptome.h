@@ -15,6 +15,8 @@ public:
     void geneCountsAddAlign(uint nA, Transcript **aAll); //add one alignment to gene counts
     void quantsAllocate(); //allocate quants structure
     
+    string trInfoDir;
+    
     Parameters* Ptr; //transcriptomic parameters (i.e. chrName,...), to be used with RAtr for output
 
     vector <string> trID, geID; //transcript IDs

@@ -4,6 +4,6 @@
 #include "Parameters.h"
 #include "Genome.h"
 
-void sjdbInsertJunctions (Parameters *P, Genome &genome);
+void sjdbInsertJunctions (Parameters *P, Parameters *P1, Genome &genome);
 
 #endif
