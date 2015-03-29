@@ -40,7 +40,7 @@ ReadAlignChunk::ReadAlignChunk(Parameters* Pin, Genome &genomeIn, Transcriptome 
     };
     
     if (P->outBAMunsorted) {
-        chunkOutBAMunsorted = new BAMoutput (P->chunkOutBAMsizeBytes,P->inOut->outBAMfileUnsorted);
+        chunkOutBAMunsorted = new BAMoutput (P->inOut->outBAMfileUnsorted, P);
         RA->outBAMunsorted = chunkOutBAMunsorted;
     } else {
         chunkOutBAMunsorted=NULL;
@@ -48,7 +48,7 @@ ReadAlignChunk::ReadAlignChunk(Parameters* Pin, Genome &genomeIn, Transcriptome 
     };
     
     if (P->outBAMcoord) {
-        chunkOutBAMcoord = new BAMoutput (P->chunkOutBAMsizeBytes, P->outBAMcoordNbins, P->chrStart[P->nChrReal], iChunk, P->outBAMsortTmpDir);
+        chunkOutBAMcoord = new BAMoutput (iChunk, P->outBAMsortTmpDir, P);
         RA->outBAMcoord = chunkOutBAMcoord;
     } else {
         chunkOutBAMcoord=NULL;
@@ -56,7 +56,7 @@ ReadAlignChunk::ReadAlignChunk(Parameters* Pin, Genome &genomeIn, Transcriptome 
     };    
     
     if ( P->quant.trSAM.yes ) {
-        chunkOutBAMquant = new BAMoutput (P->chunkOutBAMsizeBytes,P->inOut->outQuantBAMfile);
+        chunkOutBAMquant = new BAMoutput (P->inOut->outQuantBAMfile,P);
         RA->outBAMquant = chunkOutBAMquant;
     } else {
         chunkOutBAMquant=NULL;

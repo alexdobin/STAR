@@ -1,6 +1,6 @@
 #include "sjdbBuildIndex.h"
-#include "sjdbLoadFromStream.h"
-#include "sjdbPrepare.h"
+// #include "sjdbLoadFromStream.h"
+// #include "sjdbPrepare.h"
 #include "ErrorWarning.h"
 #include "SuffixArrayFuns.h"
 #include "SequenceFuns.h"
@@ -51,22 +51,6 @@ inline int64 funCalcSAi(char* G, uint iL) {
 
 
 void sjdbBuildIndex (Parameters *P, char *G, PackedArray &SA, PackedArray &SA2, PackedArray &SAi) {
-    ifstream sjdbStreamIn ( P->twopassSJpass1file.c_str() );   
-    if (sjdbStreamIn.fail()) {
-        ostringstream errOut;
-        errOut << "FATAL INPUT error, could not open input file with junctions from the 1st pass=" << P->twopassSJpass1file <<"\n";
-        exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
-    };
-    SjdbClass sjdbLoci;
-    sjdbLoadFromStream(sjdbStreamIn, sjdbLoci);
-
-    time_t rawtime;
-    time ( &rawtime );
-    P->inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the 1st pass file: " << P->twopassSJpass1file <<": "<<sjdbLoci.chr.size()<<" junctions\n\n";
-    
-    sjdbPrepare (sjdbLoci, P, G, P->nGenome, P->twopassDir);//P->nGenome - change when replacing junctions
-    time ( &rawtime );
-    P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished preparing junctions" <<endl;
     
     #define SPACER_CHAR 5
 
@@ -107,6 +91,7 @@ void sjdbBuildIndex (Parameters *P, char *G, PackedArray &SA, PackedArray &SA2, 
         };
     };
 
+    time_t rawtime;
     time ( &rawtime );
     P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished SA search" <<endl;
     
@@ -260,10 +245,10 @@ void sjdbBuildIndex (Parameters *P, char *G, PackedArray &SA, PackedArray &SA2, 
         };
     };    
     
-    ofstream genomeOut((P->twopassDir+("/Genome")).c_str());
+    ofstream genomeOut((P->twoPass.dir+("/Genome")).c_str());
     fstreamWriteBig(genomeOut,G,P->nGenome+nGsj);
     genomeOut.close(); 
-    genomeOut.open((P->twopassDir+("/SA")).c_str());
+    genomeOut.open((P->twoPass.dir+("/SA")).c_str());
     fstreamWriteBig(genomeOut,SA2.charArray,SA2.lengthByte);
     genomeOut.close();
     */

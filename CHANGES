@@ -1,3 +1,4 @@
+Fixed a problem with calculating the RAM required for BAM sorting.
 Implemented --chimOutType WithinBAM option for chimeric output merged into main BAM files.
 Implemented --alignEndsType Extend5pOfRead1 option.
 

@@ -8,6 +8,18 @@ template <class T>
         return s;
     };
 
+inline int funCompareUint1 (const void *a, const void *b) {
+    uint va= *((uint*) a);
+    uint vb= *((uint*) b);
+
+    if (va>vb) {
+		return 1;
+	} else if (va==vb) {
+		return 0;        
+	} else {
+		return -1;
+	};
+};
     
 inline int funCompareUint2 (const void *a, const void *b) {
     uint va= *((uint*) a);

@@ -36,7 +36,7 @@ class Parameters {
         
         //genome, SA, ...
         vector <uint> chrStart, chrLength;
-        string genomeDir,genomeLoad;
+        string genomeDir,genomeDirOut,genomeLoad;
         vector <string> genomeFastaFiles; 
         uint genomeSAsparseD;//sparsity=distance between indices
         //binning,windows,anchors
@@ -104,7 +104,7 @@ class Parameters {
         int outSAMmapqUnique;
         struct {bool NH,HI,AS,NM,MD,nM,jM,jI,RG,XS;} outSAMattrPresent, outSAMattrPresentQuant;
         vector <int> outSAMattrOrder, outSAMattrOrderQuant;
-        int outBAMcompression, quantTranscriptomeBAMcompression;
+        int outBAMcompression;
         vector <string> outSAMtype;
         bool outBAMunsorted, outBAMcoord, outSAMbool;
         uint32 outBAMcoordNbins;
@@ -112,6 +112,7 @@ class Parameters {
         string bamRemoveDuplicatesType;
         uint bamRemoveDuplicatesMate2basesN;
         int outBAMsortingThreadN, outBAMsortingThreadNactual;
+        uint64 *outBAMsortingBinStart; //genomic starts for bins for sorting BAM files
         uint16 outSAMflagOR, outSAMflagAND;
         
         string outReadsUnmapped;
@@ -148,8 +149,20 @@ class Parameters {
         } outWigFlags; 
         
         //2-pass
-        uint twopass1readsN, twopassSJlimit;
-        string twopassDir,twopassSJpass1file;
+//         uint twoPass.pass1readsN, twoPass.sjLimit;
+//         string twoPass.dir,twopassSJpass1file;
+        struct {
+            bool yes;
+            uint pass1readsN;
+            string dir;
+            string pass1sjFile;            
+        } twoPass;
+        
+        //inserting junctions on the fly
+        struct {
+            bool pass1;//insert on the 1st pass?
+            bool pass2;//insert on the 2nd pass?
+        } sjdbInsert;
         
         //storage limits
         uint limitGenomeGenerateRAM;
@@ -157,6 +170,7 @@ class Parameters {
         uint limitOutSAMoneReadBytes;
         uint limitOutSJoneRead, limitOutSJcollapsed;
         uint limitBAMsortRAM;
+        uint limitOnTheFlySJ;
         
         // penalties
         intScore scoreGap, scoreGapNoncan, scoreGapGCAG, scoreGapATAC, scoreDelBase, scoreDelOpen, scoreInsBase, scoreInsOpen; 
@@ -192,11 +206,27 @@ class Parameters {
         
         //quantification parameters
             //input
-        vector <string> quantMode; //quantification mode input string
-        struct {
+        
+        struct 
+        {
           bool yes; //if any quantification is done
-          struct {bool yes;} trSAM;
-          struct {bool yes;} geCount;
+          vector <string> mode; //quantification mode input string
+                  
+          struct 
+          {
+              bool yes;
+              bool indel;
+              bool softClip;
+              bool singleEnd;
+              int bamCompression;
+              string ban;
+          } trSAM;
+          
+          struct 
+          {
+              bool yes;
+          } geCount;
+          
         } quant;
         
         //chimeric

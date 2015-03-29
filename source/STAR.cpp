@@ -17,10 +17,15 @@
 #include "BAMfunctions.h"
 #include "Transcriptome.h"
 #include "BAMbinSortByCoordinate.h"
+#include "BAMbinSortUnmapped.h"
 #include "signalFromBAM.h"
-#include "sjdbBuildIndex.h"
+// #include "sjdbBuildIndex.h"
 #include "mapThreadsSpawn.h"
 #include "ErrorWarning.h"
+// #include "sjdbLoadFromStream.h"
+// #include "sjdbPrepare.h"
+#include "sjdbInsertJunctions.h"
+
 
 #include "htslib/htslib/sam.h"
 extern int bam_cat(int nfn, char * const *fn, const bam_hdr_t *h, const char* outbam);
@@ -48,18 +53,19 @@ int main(int argInN, char* argIn[]) {
     
     Genome mainGenome (P);
     mainGenome.genomeLoad();
-
     if (P->genomeLoad=="LoadAndExit" ||
         P->genomeLoad=="Remove")
     return 0;
 
-    //calculate genome-related parameters
-    P->winBinN = P->nGenome/(1LLU << P->winBinNbits)+1;
-    
-    Transcriptome *mainTranscriptome=NULL;
-    if ( P->quant.yes ) {//load transcriptome
-        mainTranscriptome=new Transcriptome(P);
+    if (P->sjdbInsert.pass1) 
+    {//for now, cannot insert junctions on the fly in 2-pass run
+        sjdbInsertJunctions(P, mainGenome);
     };
+
+    //calculate genome-related parameters
+    Transcriptome *mainTranscriptome=NULL;
+    
+    
 /////////////////////////////////////////////////////////////////////////////////////////////////START
     if (P->runThreadN>1) {
         g_threadChunks.threadArray=new pthread_t[P->runThreadN];
@@ -69,11 +75,12 @@ int main(int argInN, char* argIn[]) {
         pthread_mutex_init(&g_threadChunks.mutexOutUnmappedFastx, NULL);
         pthread_mutex_init(&g_threadChunks.mutexOutFilterBySJout, NULL);
         pthread_mutex_init(&g_threadChunks.mutexStats, NULL);
+        pthread_mutex_init(&g_threadChunks.mutexBAMsortBins, NULL);
     };
 
     g_statsAll.progressReportHeader(P->inOut->logProgress);    
     
-    if (P->twopass1readsN>0) {//2-pass
+    if (P->twoPass.pass1readsN>0) {//2-pass
         //re-define P for the pass1
         
         Parameters *P1=new Parameters;
@@ -85,14 +92,18 @@ int main(int argInN, char* argIn[]) {
         P1->outBAMcoord=false;
     
         P1->chimSegmentMin=0;
+        
         P1->quant.yes=false;
+        P1->quant.trSAM.yes=false;
+        P1->quant.geCount.yes=false;
+        
         P1->outFilterBySJoutStage=0;
         
         P1->outReadsUnmapped="None";
         
-        P1->outFileNamePrefix=P->twopassDir;
+        P1->outFileNamePrefix=P->twoPass.dir;
 
-        P1->readMapNumber=P->twopass1readsN;
+        P1->readMapNumber=P->twoPass.pass1readsN;
 //         P1->inOut->logMain.open((P1->outFileNamePrefix + "Log.out").c_str());
 
         g_statsAll.resetN();
@@ -114,16 +125,12 @@ int main(int argInN, char* argIn[]) {
         time_t rawtime; time (&rawtime);
         P->inOut->logProgress << timeMonthDayTime(rawtime) <<"\tFinished 1st pass mapping\n";
         *P->inOut->logStdOut << timeMonthDayTime(rawtime) << " ..... Finished 1st pass mapping\n" <<flush;
-        ofstream logFinal1 ( (P->twopassDir + "/Log.final.out").c_str());
+        ofstream logFinal1 ( (P->twoPass.dir + "/Log.final.out").c_str());
         g_statsAll.reportFinal(logFinal1,P1);
 
-        //re-build genome files
+        P->twoPass.pass1sjFile=P->twoPass.dir+"/SJ.out.tab";
         
-        sjdbBuildIndex (P, mainGenome.G, mainGenome.SA, mainGenome.SA2, mainGenome.SAi);
-        time ( &rawtime ); 
-        *P->inOut->logStdOut  << timeMonthDayTime(rawtime) << " ..... Finished inserting 1st pass junctions into genome" <<endl;
-        //re-calculate genome-related parameters
-        P->winBinN = P->nGenome/(1LLU << P->winBinNbits)+1;
+        sjdbInsertJunctions(P, mainGenome);
         
         //reopen reads files
         P->closeReadsFiles();
@@ -132,6 +139,10 @@ int main(int argInN, char* argIn[]) {
         //nothing for now
     };
 
+    if ( P->quant.yes ) {//load transcriptome
+        mainTranscriptome=new Transcriptome(P);
+    };    
+    
     //initialize Stats
     g_statsAll.resetN();
     time(&g_statsAll.timeStartMap);
@@ -238,7 +249,14 @@ int main(int argInN, char* argIn[]) {
         outputSJ(RAchunk,P);//collapse novel junctions
         P->readFilesIndex=-1;
         
+
         P->outFilterBySJoutStage=2;
+        if (P->outBAMcoord) {
+            for (int it=0; it<P->runThreadN; it++) {//prepare the unmapped bin 
+                RAchunk[it]->chunkOutBAMcoord->coordUnmappedPrepareBySJout();
+            };
+        };
+
         mapThreadsSpawn(P, RAchunk);
     };
     
@@ -269,13 +287,14 @@ int main(int argInN, char* argIn[]) {
     if (P->outBAMcoord) {//sort BAM if needed
         *P->inOut->logStdOut << timeMonthDayTime() << " ..... Started sorting BAM\n" <<flush;
         P->inOut->logMain << timeMonthDayTime() << " ..... Started sorting BAM\n" <<flush;
+        uint32 nBins=P->outBAMcoordNbins;
         
         //check max size needed for sorting
         uint maxMem=0;
-        for (uint32 ibin=0; ibin<RAchunk[0]->chunkOutBAMcoord->nBins; ibin++) {
+        for (uint32 ibin=0; ibin<nBins-1; ibin++) {//check akk bins
             uint binS=0;
             for (int it=0; it<P->runThreadN; it++) {//collect sizes from threads
-                binS += RAchunk[it]->chunkOutBAMcoord->binTotalBytes[ibin];
+                binS += RAchunk[it]->chunkOutBAMcoord->binTotalBytes[ibin]+24*RAchunk[it]->chunkOutBAMcoord->binTotalN[ibin];
             };        
             if (binS>maxMem) maxMem=binS;
         };
@@ -292,7 +311,8 @@ int main(int argInN, char* argIn[]) {
 //         P->inOut->logMain << "Started sorting BAM ..." <<endl;
         #pragma omp parallel num_threads(P->outBAMsortingThreadNactual) 
         #pragma omp for schedule (dynamic,1)
-        for (uint32 ibin=0; ibin<RAchunk[0]->chunkOutBAMcoord->nBins; ibin++) {
+        for (uint32 ibin1=0; ibin1<nBins; ibin1++) {
+            uint32 ibin=nBins-1-ibin1;//reverse order to start with the last bin - unmapped reads
             
             uint binN=0, binS=0;
             for (int it=0; it<P->runThreadN; it++) {//collect sizes from threads
@@ -300,6 +320,11 @@ int main(int argInN, char* argIn[]) {
                 binS += RAchunk[it]->chunkOutBAMcoord->binTotalBytes[ibin];
             };
             
+            if (binS==0) continue; //empty bin
+  
+            if (ibin == nBins-1) {//last bin for unmapped reads
+                BAMbinSortUnmapped(ibin,P->runThreadN,P->outBAMsortTmpDir,P->inOut->outBAMfileCoord, P);
+            } else {
             uint newMem=binS+binN*24;
             bool boolWait=true;
             while (boolWait) {
@@ -314,10 +339,11 @@ int main(int argInN, char* argIn[]) {
             #pragma omp critical
             totalMem-=newMem;//"release" RAM
         };
+        };
         //concatenate all BAM files, using bam_cat
-        char **bamBinNames = new char* [RAchunk[0]->chunkOutBAMcoord->nBins];
+        char **bamBinNames = new char* [nBins];
         vector <string> bamBinNamesV;
-        for (uint32 ibin=0; ibin<RAchunk[0]->chunkOutBAMcoord->nBins; ibin++) {
+        for (uint32 ibin=0; ibin<nBins; ibin++) {
             
             bamBinNamesV.push_back(P->outBAMsortTmpDir+"/b"+to_string((uint) ibin));            
             struct stat buffer;

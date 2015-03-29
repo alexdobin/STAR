@@ -61,6 +61,8 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitOutSJcollapsed", &limitOutSJcollapsed));
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitOutSJoneRead", &limitOutSJoneRead));
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitBAMsortRAM", &limitBAMsortRAM));
+    parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitOnTheFlySJ", &limitOnTheFlySJ));
+
 
     //output
     parArray.push_back(new ParameterInfoScalar <string>     (-1, 2, "outFileNamePrefix", &outFileNamePrefix));
@@ -192,12 +194,12 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <int>    (-1, -1, "sjdbScore", &sjdbScore));
     
     //quant
-    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "quantMode", &quantMode));
-    parArray.push_back(new ParameterInfoScalar <int>     (-1, -1, "quantTranscriptomeBAMcompression", &quantTranscriptomeBAMcompression));
+    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "quantMode", &quant.mode));
+    parArray.push_back(new ParameterInfoScalar <int>     (-1, -1, "quantTranscriptomeBAMcompression", &quant.trSAM.bamCompression));
+    parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "quantTranscriptomeBan", &quant.trSAM.ban));
 
     //2-pass
-    parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "twopass1readsN", &twopass1readsN));
-    parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "twopassSJlimit", &twopassSJlimit));
+    parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "twopass1readsN", &twoPass.pass1readsN));
 
     
 //     //SW parameters
@@ -521,6 +523,9 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                     outBAMsortingThreadNactual=outBAMsortingThreadN;
                 };                
                 outBAMcoordNbins=max(outBAMsortingThreadNactual*3,10);
+                outBAMsortingBinStart= new uint64 [outBAMcoordNbins];
+                outBAMsortingBinStart[0]=1;//this initial value means that the bin sizes have not been determined yet
+                
                 outBAMsortTmpDir=outFileTmp+"/BAMsort/";
                 mkdir(outBAMsortTmpDir.c_str(),S_IRWXU);  
             };                
@@ -819,32 +824,45 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     };
     
     //quantification parameters
-    if (quantMode.at(0) != "-") {
+    if (quant.mode.at(0) != "-") {
         quant.yes=true;
-        for (uint32 ii=0; ii<quantMode.size(); ii++) {
-            if (quantMode.at(ii)=="TranscriptomeSAM") {
+        for (uint32 ii=0; ii<quant.mode.size(); ii++) {
+            if (quant.mode.at(ii)=="TranscriptomeSAM") {
                 quant.trSAM.yes=true;
                 if (outStd=="BAM_Quant") {
                     outFileNamePrefix="-";
                 } else {
                     outQuantBAMfileName=outFileNamePrefix + "Aligned.toTranscriptome.out.bam";
                 };
-                inOut->outQuantBAMfile=bgzf_open(outQuantBAMfileName.c_str(),("w"+to_string((long long) quantTranscriptomeBAMcompression)).c_str());
-            } else if  (quantMode.at(ii)=="GeneCounts") {
+                inOut->outQuantBAMfile=bgzf_open(outQuantBAMfileName.c_str(),("w"+to_string((long long) quant.trSAM.bamCompression)).c_str());
+                if (quant.trSAM.ban=="IndelSoftclipSingleend")
+                {
+                    quant.trSAM.indel=false;
+                    quant.trSAM.softClip=false;
+                    quant.trSAM.singleEnd=false;
+                } else if (quant.trSAM.ban=="Singleend")
+                {
+                    quant.trSAM.indel=true;
+                    quant.trSAM.softClip=true;
+                    quant.trSAM.singleEnd=false;
+                };
+            } else if  (quant.mode.at(ii)=="GeneCounts") {
                 quant.geCount.yes=true;
             } else {
                 ostringstream errOut;
-                errOut << "EXITING because of fatal INPUT error: unrecognized option in --quantMode=" << quantMode.at(ii) << "\n";
-                errOut << "SOLUTION: use one of the allowed values of --quantMode : TranscriptomeSAM or - .\n";     
+                errOut << "EXITING because of fatal INPUT error: unrecognized option in --quant.mode=" << quant.mode.at(ii) << "\n";
+                errOut << "SOLUTION: use one of the allowed values of --quant.mode : TranscriptomeSAM or - .\n";     
                 exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
             };
         };
     } else {
         quant.yes=false; //no quantification
     };
-            
+                    
+    
     //two-pass
-    if (twopass1readsN>0) {//2-pass parameters
+    twoPass.yes=false;
+    if (twoPass.pass1readsN>0) {//2-pass parameters
         if (sjdbOverhang<=0) {
             ostringstream errOut;
             errOut << "EXITING because of fatal PARAMETERS error: sjdbOverhang <=0 in the 2-pass mode\n";
@@ -857,19 +875,55 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             errOut << "SOLUTION: re-run STAR with --genomeLoad NoSharedMemory ; this is the only compatible option at the moment.s";
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };        
-        
-        twopassDir=outFileNamePrefix+"_STARpass1/";
-        sysRemoveDir (twopassDir);                
-        if (mkdir (twopassDir.c_str(),S_IRWXU)!=0) {
+        twoPass.yes=true;
+        twoPass.dir=outFileNamePrefix+"_STARpass1/";
+        sysRemoveDir (twoPass.dir);                
+        if (mkdir (twoPass.dir.c_str(),S_IRWXU)!=0) {
             ostringstream errOut;
-            errOut <<"EXITING because of fatal ERROR: could not make pass1 directory: "<< twopassDir<<"\n";
+            errOut <<"EXITING because of fatal ERROR: could not make pass1 directory: "<< twoPass.dir<<"\n";
             errOut <<"SOLUTION: please check the path and writing permissions \n";
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
-        
-        twopassSJpass1file=twopassDir+"/SJ.out.tab";
         sjdbLength=sjdbOverhang*2+1;
     };
+    
+   //sjdb insert on the fly
+
+    sjdbInsert.pass1=false;
+    sjdbInsert.pass2=false;
+    if (sjdbFileChrStartEnd.at(0)!="-" || sjdbGTFfile!="-")
+    {//will insert annotated sjdb on the fly
+        if (twoPass.yes) 
+        {
+            sjdbInsert.pass2=true;
+        } else 
+        {//for now, in the twoPass run annotated junctions can be inserted only in the 2nd pass
+            sjdbInsert.pass1=true;
+        };
+    };
+    
+    if (runMode=="alignReads" && (sjdbInsert.pass1 || sjdbInsert.pass2) ) 
+    {//run-time genome directory, this is needed for genome files generated on the fly
+        if (sjdbOverhang<=0) {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: sjdbOverhang <=0 while junctions are inserted on the fly with --sjdbFileChrStartEnd or/and --sjdbGTFfile\n";
+            errOut << "SOLUTION: specify sjdbOverhang>0, ideally readmateLength-1";
+            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };        
+        genomeDirOut=outFileNamePrefix+"_STARgenome/";
+        sysRemoveDir (genomeDirOut);  
+        if (mkdir (genomeDirOut.c_str(),S_IRWXU)!=0) {
+            ostringstream errOut;
+            errOut <<"EXITING because of fatal ERROR: could not make run-time genome directory directory: "<< genomeDirOut<<"\n";
+            errOut <<"SOLUTION: please check the path and writing permissions \n";
+            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };    
+    } else         
+    {
+        genomeDirOut=genomeDir;
+    };    
+    
+
     
     if (outBAMcoord && limitBAMsortRAM==0) {//check limitBAMsortRAM
         if (genomeLoad!="NoSharedMemory") {

@@ -11,9 +11,9 @@ OBJECTS = SharedMemory.o PackedArray.o SuffixArrayFuns.o STAR.o Parameters.o InO
         stitchWindowAligns.o extendAlign.o stitchAlignToTranscript.o alignSmithWaterman.o genomeGenerate.o \
 	TimeFunctions.o ErrorWarning.o loadGTF.o streamFuns.o stringSubstituteAll.o \
         Transcriptome.o Transcriptome_quantAlign.o ReadAlign_quantTranscriptome.o Quantifications.o Transcriptome_geneCountsAddAlign.o \
-        sjdbLoadFromFiles.o sjdbLoadFromStream.o sjdbPrepare.o sjdbBuildIndex.o mapThreadsSpawn.o \
+        sjdbLoadFromFiles.o sjdbLoadFromStream.o sjdbPrepare.o sjdbBuildIndex.o sjdbInsertJunctions.o mapThreadsSpawn.o \
         Parameters_openReadsFiles.cpp Parameters_closeReadsFiles.cpp \
-        BAMoutput.o BAMfunctions.o ReadAlign_alignBAM.o BAMbinSortByCoordinate.o signalFromBAM.o bamRemoveDuplicates.o \
+        BAMoutput.o BAMfunctions.o ReadAlign_alignBAM.o BAMbinSortByCoordinate.o signalFromBAM.o bamRemoveDuplicates.o BAMbinSortUnmapped.o \
         bam_cat.o
 SOURCES := $(wildcard *.cpp) $(wildcard *.c)
 
@@ -22,7 +22,7 @@ LDFLAGS_static := -static -static-libgcc -pthread -Lhtslib -lhts -lz
 LDFLAGS_Mac :=-pthread -lz htslib/libhts.a
 LDFLAGS_Mac_static :=-pthread -lz -static-libgcc htslib/libhts.a
 
-LDFLAGS_gdb := $(LDFLAGS)
+LDFLAGS_gdb := $(LDFLAGS_static)
 
 COMPTIMEPLACE := -D'COMPILATION_TIME_PLACE="$(shell echo `date` $(HOSTNAME):`pwd`)"'
 EXTRAFLAGS := 
@@ -31,7 +31,7 @@ CCFLAGS_common := -pipe -std=c++0x -Wall -Wextra -fopenmp $(COMPTIMEPLACE) $(OPT
 CCFLAGS_main := -O3 $(CCFLAGS_common)
 CCFLAGS_gdb :=  -O0 -g $(CCFLAGS_common)
 
-CXX :=g++
+CXX ?=g++
 
 
 %.o : %.cpp
