@@ -46,6 +46,9 @@ main: {
 
         foreach my $exon_segment (@$genome_coords_aref) {
             my ($lend, $rend) = @$exon_segment;
+            
+            unless (abs ($rend - $lend) > 1) { next; } # can only search segments greater than one base in length. 
+            
             my $overlaps_aref = $chr_to_interval_tree{$chr}->fetch($lend, $rend);
             if (@$overlaps_aref) {
                 &add_overlapping_genes(\@read_info, $overlaps_aref, $read_dir);                
