@@ -10,7 +10,7 @@
 #include <semaphore.h>
 #include <unistd.h>
 #include <exception>
-
+#include <iostream>
 
 
 enum ErrorState { 
@@ -26,8 +26,6 @@ ECLOSE,
 EUNLINK,
 ECOUNTERCREATE,
 ECOUNTERREMOVE,
-ECOUNTERINC,
-ECOUNTERDEC,
 ECOUNTERUSE
 };
 
@@ -136,6 +134,11 @@ public:
             ThrowError(error, 0);
         };
 
+        void SetErrorStream(std::ostream * err)
+        {
+            _err = err;
+        };
+
         SharedMemory(key_t key, bool unloadLast);
         ~SharedMemory();
         void Allocate(size_t shmSize);
@@ -145,6 +148,9 @@ private:
         SharedMemoryException _exception;
 
         int _shmID;
+        int _sharedCounterID;
+        void * _counterMem;
+
         void * _mapped;
         size_t * _length;
         sem_t * _sem;
@@ -152,7 +158,9 @@ private:
         bool _needsAllocation;
 
         key_t _key;
+        key_t _counterKey;
         bool _unloadLast;
+        std::ostream * _err;
         
         int SharedObjectsUseCount();
         void OpenIfExists();
@@ -169,7 +177,6 @@ private:
         void RemoveSharedCounter();
         void SharedUseIncrement();
         void SharedUseDecrement();
-
 };
 
 #endif

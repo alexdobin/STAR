@@ -169,6 +169,7 @@ void Genome::genomeLoad(){//allocate and load Genome
         try
         {
             sharedMemory = new SharedMemory(shmKey, unloadLast);
+            sharedMemory->SetErrorStream(P->inOut->logStdOut);
 
             if (!sharedMemory->NeedsAllocation())
                 P->inOut->logMain <<"Found genome in shared memory\n"<<flush;
@@ -185,62 +186,14 @@ void Genome::genomeLoad(){//allocate and load Genome
                 };
             }
 
-            if (sharedMemory->NeedsAllocation())
+            if (sharedMemory->NeedsAllocation()){
+                P->inOut->logMain <<"Allocating shared memory for genome\n"<<flush;
                 sharedMemory->Allocate(shmSize);
+            }
         }
         catch (const SharedMemoryException & exc)
         {
-            ostringstream errOut;
-            errOut << "Shared memory error: " << exc.GetErrorCode() << ", errno: " << strerror(exc.GetErrorDetail()) << "(" << errno << ")" << endl;
-
-            int exitCode = EXIT_CODE_SHM;
-            switch (exc.GetErrorCode())
-            {
-                case EOPENFAILED:            
-                    errOut << "EXITING because of FATAL ERROR: problems with shared memory: error from shmget() or shm_open()." << endl << flush;
-                    errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory" << endl << flush;     
-                    break;
-                case EEXISTS:
-                    errOut << "EXITING: fatal error from shmget() trying to allocate shared memory piece." << endl;
-                    errOut << "Possible cause 1: not enough RAM. Check if you have enough RAM of at least " << shmSize+2000000000 << " bytes" << endl;
-                    errOut << "Possible cause 2: not enough virtual memory allowed with ulimit. SOLUTION: run ulimit -v " <<  shmSize+2000000000 << endl;
-                    errOut << "Possible cause 3: allowed shared memory size is not large enough. SOLUTIONS: (i) consult STAR manual on how to increase shared memory allocation; " \
-                    "(ii) ask your system administrator to increase shared memory allocation; (iii) run STAR with --genomeLoad NoSharedMemory" << endl<<flush;
-                    break;
-                case EFTRUNCATE:
-                    errOut << "EXITING: fatal error from ftruncate() error shared memory."  << endl;
-                    errOut << "Possible cause 1: not enough RAM. Check if you have enough RAM of at least " << shmSize+2000000000 << " bytes" << endl << flush;
-                    exitCode = EXIT_CODE_MEMORY_ALLOCATION;
-                    break;
-                case EMAPFAILED:
-                    errOut << "EXITING because of FATAL ERROR: problems with shared memory: error from shmat() while trying to get address of the shared memory piece." << endl << flush;
-                    errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory" << endl << flush;     
-                    break;
-                case ECLOSE:
-                    errOut << "EXITING because of FATAL ERROR: could not close the shared memory object." << endl << flush;     
-                    break;
-                case EUNLINK:
-                    #ifdef POSIX_SHARED_MEM
-                    errOut << "EXITING because of FATAL ERROR:  could not delete the shared object." << endl << flush;
-                    #else
-                    errOut << "EXITING because of FATAL ERROR: problems with shared memory: error from shmctl() while trying to remove shared memory piece." << endl << flush;
-                    errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory" << endl << flush;     
-                    #endif
-                    break;
-                default:
-                    errOut << "EXITING because of FATAL ERROR: There was an issue with the shared memory allocation. Try running STAR with --genomeLoad NoSharedMemory to avoid using shared memory.";
-                    break;
-            }      
-
-            try 
-            {
-                if (sharedMemory != NULL)
-                    sharedMemory->Clean();
-            }
-            catch(...)
-            {}
-
-            exitWithError(errOut.str(),std::cerr, P->inOut->logMain, exitCode, *P);
+            HandleSharedMemoryException(exc, shmSize);
         }
 
         shmStart = (char*) sharedMemory->GetMapped();
@@ -479,5 +432,61 @@ void Genome::genomeLoad(){//allocate and load Genome
     
     P->winBinChrNbits=P->genomeChrBinNbits-P->winBinNbits;
     
+};
+
+
+void Genome::HandleSharedMemoryException(const SharedMemoryException & exc, uint64 shmSize)
+{
+    ostringstream errOut;
+    errOut << "Shared memory error: " << exc.GetErrorCode() << ", errno: " << strerror(exc.GetErrorDetail()) << "(" << errno << ")" << endl;
+
+    int exitCode = EXIT_CODE_SHM;
+    switch (exc.GetErrorCode())
+    {
+        case EOPENFAILED:            
+            errOut << "EXITING because of FATAL ERROR: problems with shared memory: error from shmget() or shm_open()." << endl << flush;
+            errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory" << endl << flush;     
+            break;
+        case EEXISTS:
+            errOut << "EXITING: fatal error from shmget() trying to allocate shared memory piece." << endl;
+            errOut << "Possible cause 1: not enough RAM. Check if you have enough RAM of at least " << shmSize+2000000000 << " bytes" << endl;
+            errOut << "Possible cause 2: not enough virtual memory allowed with ulimit. SOLUTION: run ulimit -v " <<  shmSize+2000000000 << endl;
+            errOut << "Possible cause 3: allowed shared memory size is not large enough. SOLUTIONS: (i) consult STAR manual on how to increase shared memory allocation; " \
+            "(ii) ask your system administrator to increase shared memory allocation; (iii) run STAR with --genomeLoad NoSharedMemory" << endl<<flush;
+            break;
+        case EFTRUNCATE:
+            errOut << "EXITING: fatal error from ftruncate() error shared memory."  << endl;
+            errOut << "Possible cause 1: not enough RAM. Check if you have enough RAM of at least " << shmSize+2000000000 << " bytes" << endl << flush;
+            exitCode = EXIT_CODE_MEMORY_ALLOCATION;
+            break;
+        case EMAPFAILED:
+            errOut << "EXITING because of FATAL ERROR: problems with shared memory: error from shmat() while trying to get address of the shared memory piece." << endl << flush;
+            errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory" << endl << flush;     
+            break;
+        case ECLOSE:
+            errOut << "EXITING because of FATAL ERROR: could not close the shared memory object." << endl << flush;     
+            break;
+        case EUNLINK:
+            #ifdef POSIX_SHARED_MEM
+            errOut << "EXITING because of FATAL ERROR:  could not delete the shared object." << endl << flush;
+            #else
+            errOut << "EXITING because of FATAL ERROR: problems with shared memory: error from shmctl() while trying to remove shared memory piece." << endl << flush;
+            errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory" << endl << flush;     
+            #endif
+            break;
+        default:
+            errOut << "EXITING because of FATAL ERROR: There was an issue with the shared memory allocation. Try running STAR with --genomeLoad NoSharedMemory to avoid using shared memory.";
+            break;
+    }      
+
+    try 
+    {
+        if (sharedMemory != NULL)
+            sharedMemory->Clean();
+    }
+    catch(...)
+    {}
+
+    exitWithError(errOut.str(),std::cerr, P->inOut->logMain, exitCode, *P);
 };
 
