@@ -1,6 +1,5 @@
-Fixed a problem with calculating the RAM required for BAM sorting.
-Implemented --chimOutType WithinBAM option for chimeric output merged into main BAM files.
-Implemented --alignEndsType Extend5pOfRead1 option.
+2.4.0k 03/30/2015
+Implemented new BAM sorting algorithm that reduces significantly the required RAM.
 
 2.4.0j 02/04/2015
 Fixed a problem with scoring alignments for STARlong. STARlong alignments are slightly modified.
