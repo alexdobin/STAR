@@ -36,7 +36,7 @@ class Parameters {
         
         //genome, SA, ...
         vector <uint> chrStart, chrLength;
-        string genomeDir,genomeDirOut,genomeLoad;
+        string genomeDir,genomeLoad;
         vector <string> genomeFastaFiles; 
         uint genomeSAsparseD;//sparsity=distance between indices
         //binning,windows,anchors
@@ -162,6 +162,8 @@ class Parameters {
         struct {
             bool pass1;//insert on the 1st pass?
             bool pass2;//insert on the 2nd pass?
+            string save;
+            string outDir;
         } sjdbInsert;
         
         //storage limits

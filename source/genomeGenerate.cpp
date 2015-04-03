@@ -176,12 +176,15 @@ void genomeGenerate(Parameters *P) {
     //add the sjdb sequences to the genome
     SjdbClass sjdbLoci;
     sjdbLoadFromFiles(P, sjdbLoci);
+    sjdbLoci.priority.resize(sjdbLoci.chr.size(),10);
+
 
     char *G=NULL, *G1=NULL;        
     uint nGenomeReal=genomeScanFastaFiles(P,G,false);//first scan the fasta file to fins all the sizes  
     P->chrBinFill();
 
     loadGTF(sjdbLoci, P, P->genomeDir);    
+    sjdbLoci.priority.resize(sjdbLoci.chr.size(),20);
 
     uint L=10000;//maximum length of genome suffix    
     uint nG1alloc=(nGenomeReal + sjdbLoci.chr.size()*P->sjdbLength+L)*2;
@@ -211,7 +214,7 @@ void genomeGenerate(Parameters *P) {
 
         
     if (sjdbLoci.chr.size()>0) {//prepare sjdb
-        sjdbPrepare (sjdbLoci, P, G, nGenomeReal, P->genomeDir);
+        sjdbPrepare (sjdbLoci, P, nGenomeReal, P->genomeDir, G, G+P->chrStart[P->nChrReal]);
         time ( &rawTime );
         P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ... finished processing splice junctions database ...\n" <<flush;   
         *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... finished processing splice junctions database ...\n" <<flush;

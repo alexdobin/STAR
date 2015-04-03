@@ -6,7 +6,7 @@
 Transcriptome::Transcriptome (Parameters* Pin) {
     
     P=Pin;
-    trInfoDir = P->sjdbGTFfile=="-" ? P->genomeDir : P->genomeDirOut; //if GTF file is given at the mapping stage, it's always used for transcript info
+    trInfoDir = P->sjdbGTFfile=="-" ? P->genomeDir : P->sjdbInsert.outDir; //if GTF file is given at the mapping stage, it's always used for transcript info
 
 if ( P->quant.trSAM.yes ) {//load exon-transcript structures
     //load tr and ex info

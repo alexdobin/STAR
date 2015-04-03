@@ -4,6 +4,6 @@
 #include "SjdbClass.h"
 #include "Parameters.h"
 
-void sjdbPrepare (SjdbClass &sjdbLoci, Parameters *P, char *G, uint nGenomeReal, string outDir);
+void sjdbPrepare (SjdbClass &sjdbLoci, Parameters *P, uint nGenomeReal, string outDir, char *G, char *Gsj);
 
 #endif

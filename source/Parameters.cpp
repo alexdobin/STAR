@@ -192,6 +192,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "sjdbGTFtagExonParentGene", &sjdbGTFtagExonParentGene)); 
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "sjdbOverhang", &sjdbOverhang));
     parArray.push_back(new ParameterInfoScalar <int>    (-1, -1, "sjdbScore", &sjdbScore));
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "sjdbInsertSave", &sjdbInsert.save)); 
     
     //quant
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "quantMode", &quant.mode));
@@ -912,17 +913,14 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             errOut << "SOLUTION: specify sjdbOverhang>0, ideally readmateLength-1";
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };        
-        genomeDirOut=outFileNamePrefix+"_STARgenome/";
-        sysRemoveDir (genomeDirOut);  
-        if (mkdir (genomeDirOut.c_str(),S_IRWXU)!=0) {
+        sjdbInsert.outDir=outFileNamePrefix+"_STARgenome/";
+        sysRemoveDir (sjdbInsert.outDir);  
+        if (mkdir (sjdbInsert.outDir.c_str(),S_IRWXU)!=0) {
             ostringstream errOut;
-            errOut <<"EXITING because of fatal ERROR: could not make run-time genome directory directory: "<< genomeDirOut<<"\n";
+            errOut <<"EXITING because of fatal ERROR: could not make run-time genome directory directory: "<< sjdbInsert.outDir<<"\n";
             errOut <<"SOLUTION: please check the path and writing permissions \n";
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };    
-    } else         
-    {
-        genomeDirOut=genomeDir;
     };    
     
 

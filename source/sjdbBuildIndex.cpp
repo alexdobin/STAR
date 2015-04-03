@@ -9,7 +9,7 @@
 #include "streamFuns.h"
 #include "binarySearch2.h"
 
-char* globalG1;
+char* globalGsj;
 
 
 inline int funCompareUintAndSuffixes ( const void *a, const void *b){
@@ -21,8 +21,8 @@ inline int funCompareUintAndSuffixes ( const void *a, const void *b){
         } else if (va<vb) {
             return -1;
         } else {//compare suffixes
-            char* ga=globalG1 + *( ((uint*) a)+1);
-            char* gb=globalG1 + *( ((uint*) b)+1);
+            char* ga=globalGsj + *( ((uint*) a)+1);
+            char* gb=globalGsj + *( ((uint*) b)+1);
             int ig=0;
             while (true) {
                 if (ga[ig]>gb[ig]) { // second condition: reached the end of ga, it's >= than any character, but = does not matter
@@ -51,25 +51,23 @@ inline int64 funCalcSAi(char* G, uint iL) {
 };
 
 
-void sjdbBuildIndex (Parameters *P, Parameters *P1, char *G, PackedArray &SA, PackedArray &SA2, PackedArray &SAi) {
+void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedArray &SA, PackedArray &SA2, PackedArray &SAi) {
     
-    #define SPACER_CHAR 5
+    #define SPACER_CHAR GENOME_spacingChar
 
     uint nGsj=P->sjdbLength*P->sjdbN;
-    globalG1=new char[nGsj*2+1];
-    memcpy(globalG1,G+P->chrStart[P->nChrReal],nGsj);
     for (uint ii=1; ii<=P->sjdbN; ii++) 
     {
-        globalG1[ii*P->sjdbLength-1]=SPACER_CHAR; //to make sure this is > than any genome char
+        Gsj[ii*P->sjdbLength-1]=SPACER_CHAR; //to make sure this is > than any genome char
     };
-    globalG1[nGsj*2]=SPACER_CHAR+1;//mark the end of the text
+    Gsj[nGsj*2]=SPACER_CHAR+1;//mark the end of the text
 
     for (uint ii=0; ii<nGsj; ii++) {//reverse complement junction sequences
-        globalG1[nGsj*2-1-ii]=globalG1[ii]<4 ? 3-globalG1[ii] : globalG1[ii]; //reverse complement
+        Gsj[nGsj*2-1-ii]=Gsj[ii]<4 ? 3-Gsj[ii] : Gsj[ii]; //reverse complement
     };
 
     char* G1c=new char[nGsj*2+1];
-    complementSeqNumbers(globalG1, G1c, nGsj*2+1);
+    complementSeqNumbers(Gsj, G1c, nGsj*2+1);
 
     uint32* oldSJind=new uint32[P1->sjdbN];
     
@@ -82,7 +80,7 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *G, PackedArray &SA, Pa
     for (uint isj=0; isj<2*P->sjdbN; isj++) {//find insertion points for each of the sequences
 
         char** seq1=new char*[2];
-        seq1[0]=globalG1+isj*P->sjdbLength;
+        seq1[0]=Gsj+isj*P->sjdbLength;
         seq1[1]=G1c+isj*P->sjdbLength;
         
         uint isj1=isj<P->sjdbN ? isj : 2*P->sjdbN-1-isj;
@@ -107,7 +105,7 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *G, PackedArray &SA, Pa
             };
         };
     };
-
+    //for (int ii=0;ii<P1->sjdbN;ii++) {if ( oldSJind[ii]==0){cout <<ii<<endl;};};
     sjNew = sjNew/2;//novel junctions were double counted on two strands
     
     time_t rawtime;
@@ -123,6 +121,7 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *G, PackedArray &SA, Pa
         };
     };
 
+    globalGsj=Gsj;
     qsort((void*) indArray, nInd, 2*sizeof(uint64), funCompareUintAndSuffixes);
     time ( &rawtime );
     P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished sorting SA indicesL nInd="<<nInd <<endl;
@@ -141,6 +140,12 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *G, PackedArray &SA, Pa
     
     uint isj=0, isa2=0;
     for (uint isa=0;isa<P->nSA;isa++) {
+
+//         if (isa2>4014920)
+//      	{ 
+//           cout <<isa;
+//         };
+
         uint ind1=SA[isa];
         
         if ( (ind1 & N2bit)>0 ) 
@@ -191,10 +196,10 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *G, PackedArray &SA, Pa
             
             if ( (iSA1 &  P->SAiMarkAbsentMaskC)>0 ) {//index missing from the old genome
                 uint iSJ1=iSJ;
-                int64 ind1=funCalcSAi(globalG1+indArray[2*iSJ+1],iL);
+                int64 ind1=funCalcSAi(Gsj+indArray[2*iSJ+1],iL);
                 while (ind1 < (int64)(ii-P->genomeSAindexStart[iL]) && indArray[2*iSJ]<iSA2) {
                     ++iSJ;
-                    ind1=funCalcSAi(globalG1+indArray[2*iSJ+1],iL);
+                    ind1=funCalcSAi(Gsj+indArray[2*iSJ+1],iL);
                 };
                 if (ind1 == (int64)(ii-P->genomeSAindexStart[iL]) ) {
                     SAi.writePacked(ii,indArray[2*iSJ]+iSJ+1);
@@ -211,7 +216,7 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *G, PackedArray &SA, Pa
                     ++iSJ;
                 };
                 while (indArray[2*iSJ]+1==iSA2) {//special case, the index falls right behind SAi
-                    if (funCalcSAi(globalG1+indArray[2*iSJ+1],iL) >= (int64) (ii-P->genomeSAindexStart[iL]) ) {//this belongs to the next index
+                    if (funCalcSAi(Gsj+indArray[2*iSJ+1],iL) >= (int64) (ii-P->genomeSAindexStart[iL]) ) {//this belongs to the next index
                         break;
                     };
                     ++iSJ;
@@ -230,7 +235,7 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *G, PackedArray &SA, Pa
     for (uint isj=0;isj<nInd;isj++) {
         int64 ind1=0;
         for (uint iL=0; iL < P->genomeSAindexNbases; iL++) {
-            uint g=(uint) globalG1[indArray[2*isj+1]+iL];
+            uint g=(uint) Gsj[indArray[2*isj+1]+iL];
             ind1 <<= 2;
             if (g>3) {//this iSA contains N, need to mark the previous
                 for (uint iL1=iL; iL1 < P->genomeSAindexNbases; iL1++) {
@@ -256,12 +261,14 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *G, PackedArray &SA, Pa
     //change parameters, most parameters are already re-defined in sjdbPrepare.cpp
     SA.defineBits(P->GstrandBit+1,P->nSA);//same as SA2
     SA.pointArray(SA2.charArray);
+    P->nSAbyte=SA.lengthByte;
     P->sjGstart=P->chrStart[P->nChrReal];
+    memcpy(G+P->chrStart[P->nChrReal],Gsj, nGsj);
     
     /* testing
     PackedArray SAio=SAi;
     SAio.allocateArray();
-    ifstream oldSAin("/dev/shm/dobin/STARgenomeMale_new1//SAindex");
+    ifstream oldSAin("./DirTrue/SAindex");
     oldSAin.read(SAio.charArray,128);//skip 128 bytes
     oldSAin.read(SAio.charArray,SAio.lengthByte);
     oldSAin.close();  
@@ -269,7 +276,7 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *G, PackedArray &SA, Pa
     PackedArray SAo;
     SAo.defineBits(P->GstrandBit+1,P->nSA+nInd);
     SAo.allocateArray();
-    oldSAin.open("/dev/shm/dobin/STARgenomeMale_new1/SA");
+    oldSAin.open("./DirTrue/SA");
     oldSAin.read(SAo.charArray,SAo.lengthByte);
     oldSAin.close();
 
@@ -289,16 +296,16 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *G, PackedArray &SA, Pa
     };    
     */
     
+    /*
     ofstream genomeOut("/home/dobin/Genome");
     fstreamWriteBig(genomeOut,G,P->nGenome+nGsj,"777","777",P);
     genomeOut.close(); 
     genomeOut.open("/home/dobin/SA");
     fstreamWriteBig(genomeOut,SA2.charArray,SA2.lengthByte,"777","777",P);
     genomeOut.close();
-    //*/
+    */
     
     delete [] indArray;
-    delete [] globalG1;
     delete [] G1c;
     delete [] oldSJind;       
     

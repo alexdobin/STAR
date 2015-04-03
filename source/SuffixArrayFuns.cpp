@@ -168,7 +168,6 @@ uint suffixArraySearch(char** s2, uint S, uint N, char* G, PackedArray& SA, bool
         i3=medianUint2(i1,i2);
         //L3=compareSeqToGenome(s,S,N,L,g,SA,i3,dirR,compRes, P);
 
-        {
         register int64 ii;
 
         uint SAstr=SA[i3];
@@ -176,17 +175,22 @@ uint suffixArraySearch(char** s2, uint S, uint N, char* G, PackedArray& SA, bool
         SAstr &= P->GstrandMask;
 
 
-        if (dirG) {//forward on read, forward on genome
+        if (dirG) 
+        {//forward on read, forward on genome
             char* s = s2[0] + S + L;
             char* g = G + SAstr + L;
             for (ii=0;(uint) ii < N-L; ii++)
+            {
                 if (s[ii]!=g[ii]) break;
+            };
             if (s[ii]>g[ii]) {compRes=true;} else {compRes=false;};
             L3=ii+L;
-        } else {
+        } else 
+        {
             char* s = s2[1] + S + L;
             char* g = G + P->nGenome-1-SAstr - L;
-            for (ii=0; (uint) ii < N-L; ii++) {
+            for (ii=0; (uint) ii < N-L; ii++) 
+            {
                 if (s[ii]!=g[-ii]) break;
             };
 
@@ -196,11 +200,12 @@ uint suffixArraySearch(char** s2, uint S, uint N, char* G, PackedArray& SA, bool
             if (s1>g1) {compRes=true;} else {compRes=false;};
             L3=ii+L;
         };
-        };
 
         if (L3==N) {
-            cout << "L3==N"<<endl;
-            break; //found exact match of the whole read length, exit the binary search        
+            L=N;
+            return i3;
+//             cerr << "Bug L3==N"<<endl;
+//             exit(-1); //found exact match of the whole read length, exit the binary search        
         };
         
         if (compRes) { //move 1 to 3
