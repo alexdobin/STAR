@@ -56,7 +56,7 @@ void sjdbInsertJunctions(Parameters *P, Parameters *P1, Genome &genome) {
         P->inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the generated genome " << P->genomeDir+"/sjdbList.out.tab" <<": "<<sjdbLoci.chr.size()<<" total junctions\n\n";
     };
 
-    char *Gsj=new char [2*P->sjdbLength*P->sjdbN+1];//arry to store junction sequences, will be filled in sjdbPrepare
+    char *Gsj=new char [2*P->sjdbLength*sjdbLoci.chr.size()+1];//arry to store junction sequences, will be filled in sjdbPrepare
     sjdbPrepare (sjdbLoci, P, P->chrStart[P->nChrReal], P->sjdbInsert.outDir, genome.G, Gsj);//P->nGenome - change when replacing junctions
     time ( &rawtime );
     P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished preparing junctions" <<endl;

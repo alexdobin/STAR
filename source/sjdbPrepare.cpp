@@ -129,7 +129,7 @@ void sjdbPrepare (SjdbClass &sjdbLoci, Parameters *P, uint nGenomeReal, string o
     P->sjdbShiftLeft=new uint8 [nsj];
     P->sjdbShiftRight=new uint8 [nsj];    
     P->sjdbStrand=new uint8 [nsj];  
-
+    
     uint nsj1=0;
     for (uint ii=0;ii<nsj;ii++) {
         uint isj=sjdbSort[ii*3+2];
@@ -191,6 +191,7 @@ void sjdbPrepare (SjdbClass &sjdbLoci, Parameters *P, uint nGenomeReal, string o
     //first line is some general useful information
     sjdbInfo << P->sjdbN <<"\t"<< P->sjdbOverhang <<"\n";
     uint sjGstart=0;
+    
     for (uint ii=0;ii<P->sjdbN;ii++) 
     {//add sjdb sequence to genome   
         P->sjDstart[ii]   = P->sjdbStart[ii]  - P->sjdbOverhang; 

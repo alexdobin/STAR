@@ -93,7 +93,9 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
             oldSJind[sjdbInd]=isj1;
         };
         
-        for (uint istart=0; istart<nIndicesSJ1;istart++) {
+        for (uint istart1=0; istart1<nIndicesSJ1;istart1++) {
+            
+            uint istart=istart1;//isj<P->sjdbN ? istart1 : istart1+1; //for rev-compl junction, shift by one base to start with the 1st non-spacer base
             uint ind1=2*(isj*nIndicesSJ1+istart);
             if (sjdbInd>=0 || seq1[0][istart]>3) 
             {//no index for already included junctions, or suffices starting with N
