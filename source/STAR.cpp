@@ -24,6 +24,7 @@
 #include "ErrorWarning.h"
 // #include "sjdbLoadFromStream.h"
 // #include "sjdbPrepare.h"
+#include "SjdbClass.h"
 #include "sjdbInsertJunctions.h"
 
 
@@ -53,11 +54,14 @@ int main(int argInN, char* argIn[]) {
     
     Genome mainGenome (P);
     mainGenome.genomeLoad();
+    
+        
+    SjdbClass sjdbLoci;
     if (P->sjdbInsert.pass1) 
     {//for now, cannot insert junctions on the fly in 2-pass run
         Parameters *P1=new Parameters;
         *P1=*P;
-        sjdbInsertJunctions(P, P1, mainGenome);
+        sjdbInsertJunctions(P, P1, mainGenome, sjdbLoci);
     };
     
     //calculate genome-related parameters
@@ -128,7 +132,7 @@ int main(int argInN, char* argIn[]) {
 
         P->twoPass.pass1sjFile=P->twoPass.dir+"/SJ.out.tab";
         
-        sjdbInsertJunctions(P, P1, mainGenome);
+        sjdbInsertJunctions(P, P1, mainGenome, sjdbLoci);
                 
         //reopen reads files
         P->closeReadsFiles();
@@ -136,7 +140,7 @@ int main(int argInN, char* argIn[]) {
     } else {//not 2-pass
         //nothing for now
     };
-
+    
     if ( P->quant.yes ) {//load transcriptome
         mainTranscriptome=new Transcriptome(P);
     };    

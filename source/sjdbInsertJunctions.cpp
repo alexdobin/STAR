@@ -3,20 +3,32 @@
 #include "sjdbLoadFromFiles.h"
 #include "sjdbPrepare.h"
 #include "ErrorWarning.h"
-// #include "streamFuns.h"
-#include "SjdbClass.h"
 #include "loadGTF.h"
 #include "sjdbBuildIndex.h"
 #include "streamFuns.h"
+#include "genomeParametersWrite.h"
 
-void sjdbInsertJunctions(Parameters *P, Parameters *P1, Genome &genome) {
-        
-    SjdbClass sjdbLoci;        
+void sjdbInsertJunctions(Parameters * P, Parameters * P1, Genome & genome, SjdbClass & sjdbLoci) 
+{
     time_t rawtime;
 
+
+        
+    if (P->sjdbN>0 && sjdbLoci.chr.size()==0)
+    {//load from the saved genome, only if the loading did not happen already (if sjdb insertion happens at the 1st pass, sjdbLoci will be populated
+        ifstream sjdbStreamIn;
+        ifstrOpen(P->genomeDir+"/sjdbList.out.tab", "ERROR_012003", "SOLUTION: re-generate the genome in genomeDir=" + P->genomeDir, P, sjdbStreamIn);
+        sjdbLoadFromStream(sjdbStreamIn, sjdbLoci);
+        sjdbLoci.priority.resize(sjdbLoci.chr.size(),30);
+        time ( &rawtime );
+        P->inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the generated genome " << P->genomeDir+"/sjdbList.out.tab" <<": "<<sjdbLoci.chr.size()<<" total junctions\n\n";
+    };    
+    
+    
     //load 1st pass junctions
-    if (P->twoPass.pass1sjFile.size()>0)
-    {
+    if (P->twoPass.pass1sjFile.size()>0) //non-empty name marks 2nd pass
+    {//load 1st pass new junctions
+     //sjdbLoci already contains the junctions from before 1st pass
         ifstream sjdbStreamIn ( P->twoPass.pass1sjFile.c_str() );   
         if (sjdbStreamIn.fail()) {
             ostringstream errOut;
@@ -27,35 +39,27 @@ void sjdbInsertJunctions(Parameters *P, Parameters *P1, Genome &genome) {
         sjdbLoci.priority.resize(sjdbLoci.chr.size(),0);
         time ( &rawtime );
         P->inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the 1st pass file: " << P->twoPass.pass1sjFile <<": "<<sjdbLoci.chr.size()<<" total junctions\n\n";
-    };
-    
-    //load from junction files
-    if (P->sjdbFileChrStartEnd.at(0)!="-")
-    {
-        sjdbLoadFromFiles(P,sjdbLoci);
-        sjdbLoci.priority.resize(sjdbLoci.chr.size(),10);
-        P->inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the sjdbFileChrStartEnd file(s), " << sjdbLoci.chr.size()<<" total junctions\n\n";        
-    };
-    
-    //load from GTF
-    if (P->sjdbGTFfile!="-")
-    {
-        loadGTF(sjdbLoci, P, P->sjdbInsert.outDir);
-        sjdbLoci.priority.resize(sjdbLoci.chr.size(),20);
-        P->inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the GTF file: " << P->sjdbGTFfile<<": "<<sjdbLoci.chr.size()<<" total junctions\n\n";
-    };
-    
-    //load from the already generated genome
-    if (P->sjdbN>0)
-    {
-        ifstream sjdbStreamIn;
-        ifstrOpen(P->genomeDir+"/sjdbList.out.tab", "ERROR_012003", "SOLUTION: re-generate the genome in genomeDir=" + P->genomeDir, P, sjdbStreamIn);
-        sjdbLoadFromStream(sjdbStreamIn, sjdbLoci);
-        sjdbLoci.priority.resize(sjdbLoci.chr.size(),30);
-        time ( &rawtime );
-        P->inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the generated genome " << P->genomeDir+"/sjdbList.out.tab" <<": "<<sjdbLoci.chr.size()<<" total junctions\n\n";
-    };
+    } else 
+    {//loading junctions from GTF or tab or from the saved genome is only allowed at the 1st pass
+     //at the 2nd pass these are already in the sjdbLoci
+        
+        if (P->sjdbFileChrStartEnd.at(0)!="-")
+        {//load from junction files
+            sjdbLoadFromFiles(P,sjdbLoci);
+            sjdbLoci.priority.resize(sjdbLoci.chr.size(),10);
+            time ( &rawtime );        
+            P->inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the sjdbFileChrStartEnd file(s), " << sjdbLoci.chr.size()<<" total junctions\n\n";        
+        };
 
+        if (P->sjdbGTFfile!="-")
+        {//load from GTF
+            loadGTF(sjdbLoci, P, P->sjdbInsert.outDir);
+            sjdbLoci.priority.resize(sjdbLoci.chr.size(),20);
+            time ( &rawtime );
+            P->inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the GTF file: " << P->sjdbGTFfile<<": "<<sjdbLoci.chr.size()<<" total junctions\n\n";
+        };
+    };
+    
     char *Gsj=new char [2*P->sjdbLength*sjdbLoci.chr.size()+1];//arry to store junction sequences, will be filled in sjdbPrepare
     sjdbPrepare (sjdbLoci, P, P->chrStart[P->nChrReal], P->sjdbInsert.outDir, genome.G, Gsj);//P->nGenome - change when replacing junctions
     time ( &rawtime );
@@ -68,7 +72,15 @@ void sjdbInsertJunctions(Parameters *P, Parameters *P1, Genome &genome) {
     *P->inOut->logStdOut  << timeMonthDayTime(rawtime) << " ..... Finished inserting 1st pass junctions into genome" <<endl;
 
     if (P->sjdbInsert.save=="All")
-    {//save big files
+    {//save and copy all genome files into sjdbInsert.outDir, except those created above
+        copyFile(P->genomeDir+"/chrName.txt", P->sjdbInsert.outDir+"/chrName.txt");
+        copyFile(P->genomeDir+"/chrStart.txt", P->sjdbInsert.outDir+"/chrStart.txt");
+        copyFile(P->genomeDir+"/chrNameLength.txt", P->sjdbInsert.outDir+"/chrNameLength.txt");
+        copyFile(P->genomeDir+"/chrLength.txt", P->sjdbInsert.outDir+"/chrLength.txt");
+        
+        genomeParametersWrite(P->sjdbInsert.outDir+("/genomeParameters.txt"), P, "ERROR_012012");
+
+        
         ofstream genomeOut;
         ofstrOpen(P->sjdbInsert.outDir+"/Genome","ERROR_012004", P, genomeOut);
         fstreamWriteBig(genomeOut,genome.G,P->nGenome,P->sjdbInsert.outDir+"/Genome","ERROR_012005",P);

@@ -9,6 +9,7 @@
 #include "SjdbClass.h"
 #include "sjdbLoadFromFiles.h"
 #include "sjdbPrepare.h"
+#include "genomeParametersWrite.h"
 
 #include "serviceFuns.cpp"
 #include "streamFuns.h"
@@ -146,32 +147,8 @@ void genomeGenerate(Parameters *P) {
     
     //define some parameters from input parameters
     P->genomeChrBinNbases=1LLU << P->genomeChrBinNbits;
-    
-    
     //write genome parameters file
-    ofstream genomePar;
-    ofstrOpen(P->genomeDir+("/genomeParameters.txt"),"ERROR_00102", P, genomePar);   
-    
-    genomePar << "versionGenome\t" << P->versionSTAR <<"\n";
-    genomePar << "genomeFastaFiles\t";
-    for (uint ii=0;ii<P->genomeFastaFiles.size();ii++) genomePar << P->genomeFastaFiles.at(ii) << " ";
-    genomePar << "\n";
-    genomePar << "genomeSAindexNbases\t" << P->genomeSAindexNbases << "\n";
-    genomePar << "genomeChrBinNbits\t" << P->genomeChrBinNbits << "\n";
-    genomePar << "genomeSAsparseD\t" << P->genomeSAsparseD <<"\n";
-    genomePar << "sjdbOverhang\t" << P->sjdbOverhang <<"\n";
-
-    genomePar << "sjdbFileChrStartEnd\t";
-    for (uint ii=0;ii<P->sjdbFileChrStartEnd.size();ii++) genomePar<< P->sjdbFileChrStartEnd.at(ii) << " ";
-    genomePar<<"\n";
-    
-    genomePar << "sjdbGTFfile\t" << P->sjdbGTFfile <<"\n";
-    genomePar << "sjdbGTFchrPrefix\t" << P->sjdbGTFchrPrefix <<"\n";
-    genomePar << "sjdbGTFfeatureExon\t" << P->sjdbGTFfeatureExon <<"\n";
-    genomePar << "sjdbGTFtagExonParentTranscript\t" << P->sjdbGTFtagExonParentTranscript <<"\n";
-    genomePar << "sjdbGTFtagExonParentGene\t" << P->sjdbGTFtagExonParentGene <<"\n";
-    
-    genomePar.close();    
+    genomeParametersWrite(P->genomeDir+("/genomeParameters.txt"), P, "ERROR_00102");
     
     //add the sjdb sequences to the genome
     SjdbClass sjdbLoci;

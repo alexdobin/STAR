@@ -11,4 +11,5 @@ void ofstrOpen (std::string fileName, std::string errorID, Parameters *P, ofstre
 void ifstrOpen (std::string fileName, std::string errorID, std::string solutionString, Parameters *P, ifstream & ofStream);
 void ifstrOpenGenomeFile (std::string fileName, std::string errorID, Parameters *P, ifstream & ifStream);
 
+void copyFile(string fileIn, string fileOut);
 #endif

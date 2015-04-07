@@ -89,3 +89,10 @@ void ifstrOpenGenomeFile (std::string fileName, std::string errorID, Parameters 
      //open one of the genome files
      ifstrOpen(P->genomeDir+"/"+fileName, errorID,  "if this file is missing from the genome directory, you will need to *re-generate the genome*", P, ifStream);
 };
+
+void copyFile(string fileIn, string fileOut)
+{//copy fileIn into FileOut
+    std::ifstream  src(fileIn, std::ios::binary);
+    std::ofstream  dst(fileOut,   std::ios::binary);
+    dst << src.rdbuf();
+};

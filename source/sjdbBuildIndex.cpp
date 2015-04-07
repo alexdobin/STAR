@@ -29,6 +29,8 @@ inline int funCompareUintAndSuffixes ( const void *a, const void *b){
                     return 1;
                 } else if (ga[ig]<gb[ig]) {
                     return -1;
+                } else if (ga[ig]==5) {
+                    return 0;
                 } else {
                     ig++;
                 };
@@ -71,8 +73,8 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
 
     uint32* oldSJind=new uint32[P1->sjdbN];
     
-    uint nIndicesSJ1=P->sjdbOverhang; //use P->sjdbLength-1 to keep all indices
-//     nIndicesSJ1=P->sjdbLength;
+    uint nIndicesSJ1=P->sjdbOverhang; 
+//  uint   nIndicesSJ1=P->sjdbLength;//keep all indices
     uint64* indArray=new uint64[2*P->sjdbN*nIndicesSJ1*2];//8+4 bytes for SA index and index in the genome * nJunction * nIndeices per junction * 2 for reverse compl
     uint64 sjNew=0;
     #pragma omp parallel num_threads(P->runThreadN)
@@ -95,14 +97,15 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
         
         for (uint istart1=0; istart1<nIndicesSJ1;istart1++) {
             
-            uint istart=istart1;//isj<P->sjdbN ? istart1 : istart1+1; //for rev-compl junction, shift by one base to start with the 1st non-spacer base
+            //uint istart=istart1;
+            uint istart=isj<P->sjdbN ? istart1 : istart1+1; //for rev-compl junction, shift by one base to start with the 1st non-spacer base
             uint ind1=2*(isj*nIndicesSJ1+istart);
             if (sjdbInd>=0 || seq1[0][istart]>3) 
             {//no index for already included junctions, or suffices starting with N
                 indArray[ind1]=-1;
             } else 
             {
-                indArray[ind1] =  suffixArraySearch(seq1, istart, 10000, G, SA, true, 0, P->nSA-1, 0, P) ;
+                indArray[ind1] =  suffixArraySearch(seq1, istart, P->sjdbLength-istart1, G, SA, true, 0, P->nSA-1, 0, P) ;
                 indArray[ind1+1] = isj*P->sjdbLength+istart;
             };
         };
@@ -141,7 +144,7 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
     
     
     uint isj=0, isa2=0;
-    for (uint isa=0;isa<P->nSA;isa++) {
+    for (uint isa=0;isa<P1->nSA;isa++) {
 
 //         if (isa2>4014920)
 //      	{ 
