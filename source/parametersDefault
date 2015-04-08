@@ -506,6 +506,11 @@ quantTranscriptomeBan       IndelSoftclipSingleend
                             Singleend               ... prohibit single-end alignments
 
 ### 2-pass Mapping
-twopass1readsN              0
-    int>0: number of reads to process for the 1st step. 0: 1-step only, no 2nd pass; use very large number (or -1) to map all reads in the first step
+twopassMode                 None
+    string: 2-pass mapping mode.
+                            None        ... 1-pass mapping
+                            Basic       ... basic 2-pass mapping, with all 1st pass junctions inserted into the genome indices on the fly
+
+twopass1readsN              -1
+    int>0: number of reads to process for the 1st step. Use very large number (or default -1) to map all reads in the first step.
 

@@ -152,10 +152,13 @@ class Parameters {
 //         uint twoPass.pass1readsN, twoPass.sjLimit;
 //         string twoPass.dir,twopassSJpass1file;
         struct {
-            bool yes;
+            bool yes; //true in 2-pass mode
+            bool pass2; //true if now running the 2nd pass
             uint pass1readsN;
+            int pass1readsN_par;
             string dir;
-            string pass1sjFile;            
+            string pass1sjFile;
+            string mode;
         } twoPass;
         
         //inserting junctions on the fly

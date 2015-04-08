@@ -6,6 +6,8 @@ void genomeParametersWrite(string fileName, Parameters* P, string errorOut)
     ofstream genomePar;
     ofstrOpen(fileName, errorOut, P, genomePar);   
     
+    genomePar << "### "<<P->commandLineFull <<"\n";
+    
     genomePar << "versionGenome\t" << P->versionSTAR <<"\n";
     genomePar << "genomeFastaFiles\t";
     for (uint ii=0;ii<P->genomeFastaFiles.size();ii++) genomePar << P->genomeFastaFiles.at(ii) << " ";
@@ -24,5 +26,7 @@ void genomeParametersWrite(string fileName, Parameters* P, string errorOut)
     genomePar << "sjdbGTFfeatureExon\t" << P->sjdbGTFfeatureExon <<"\n";
     genomePar << "sjdbGTFtagExonParentTranscript\t" << P->sjdbGTFtagExonParentTranscript <<"\n";
     genomePar << "sjdbGTFtagExonParentGene\t" << P->sjdbGTFtagExonParentGene <<"\n";
+    
+    genomePar << "sjdbInsertSave\t" << P->sjdbInsert.save <<"\n";
     genomePar.close();      
 };   

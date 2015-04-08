@@ -7,8 +7,10 @@
 class Genome {
     public:
         char *G, *sigG;
-        PackedArray SA,SA2;
+        PackedArray SA,SApass1,SApass2;
         PackedArray SAi;
+        
+        uint nGenomePass1, nGenomePass2, nSApass1, nSApass2; 
         
         Genome (Parameters* Pin ) : P(Pin) {};
         Genome () {};//empty constructor

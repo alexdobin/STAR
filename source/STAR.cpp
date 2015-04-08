@@ -55,7 +55,8 @@ int main(int argInN, char* argIn[]) {
     Genome mainGenome (P);
     mainGenome.genomeLoad();
     
-        
+    P->twoPass.pass2=false; //this is the 1st pass    
+    
     SjdbClass sjdbLoci;
     if (P->sjdbInsert.pass1) 
     {//for now, cannot insert junctions on the fly in 2-pass run
@@ -130,6 +131,7 @@ int main(int argInN, char* argIn[]) {
         ofstream logFinal1 ( (P->twoPass.dir + "/Log.final.out").c_str());
         g_statsAll.reportFinal(logFinal1,P1);
 
+        P->twoPass.pass2=true;//starting the 2nd pass
         P->twoPass.pass1sjFile=P->twoPass.dir+"/SJ.out.tab";
         
         sjdbInsertJunctions(P, P1, mainGenome, sjdbLoci);

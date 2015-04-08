@@ -43,12 +43,17 @@ void Genome::freeMemory(){//free big chunks of memory used by genome and suffix 
         delete[] G1;
         G1=NULL;
         SA.deallocateArray();
-        SA2.deallocateArray();
+        SApass2.deallocateArray();
         SAi.deallocateArray();
     };
 };
 
 void Genome::genomeLoad(){//allocate and load Genome
+    
+    time_t rawtime;
+    time ( &rawtime );
+    *(P->inOut->logStdOut) << timeMonthDayTime(rawtime) << " ..... Loading genome\n" <<flush;           
+    
     shmID=0;
     bool shmLoad=false;   
     key_t shmKey=ftok(P->genomeDir.c_str(),SHM_projectID);;    
@@ -58,9 +63,6 @@ void Genome::genomeLoad(){//allocate and load Genome
     
     uint L=200,K=6;    
     
-    time_t rawtime;
-    time ( &rawtime );
-
     Parameters *P1 = new Parameters;
     
     ifstream parFile((P->genomeDir+("/genomeParameters.txt")).c_str());
@@ -92,6 +94,14 @@ void Genome::genomeLoad(){//allocate and load Genome
         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_GENOME_FILES, *P);
     };
 
+    if ( (P->sjdbInsert.pass1 || P->sjdbInsert.pass2) && P1->sjdbOverhang>0 && P1->sjdbInsert.save=="") 
+    {//if sjdbInsert, and old genome had junctions, it should be re-generated with new STAR
+        ostringstream errOut;
+        errOut << "EXITING because of FATAL ERROR: old Genome is INCOMPATIBLE with on the fly junction insertion\n";
+        errOut << "SOLUTION: please re-generate genome from scratch with the latest version of STAR\n";
+        exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_GENOME_FILES, *P);
+    };
+    
     //record required genome parameters in P
     P->genomeSAindexNbases=P1->genomeSAindexNbases;
     P->genomeChrBinNbits=P1->genomeChrBinNbits;
@@ -255,15 +265,35 @@ void Genome::genomeLoad(){//allocate and load Genome
     /////////////////////////////////////// allocate arrays
     if (P->genomeLoad=="NoSharedMemory") {// simply allocate memory, do not use shared memory
         try {
-            if (P->twoPass.yes || P->sjdbInsert.pass1)
-            {//2-pass, or annotations: reserve extra memory
-                P->nGenome2=P->nGenome+P->limitOnTheFlySJ*P->sjdbLength;
-                SA2.defineBits(P->GstrandBit+1,P->nSA+2*P->limitOnTheFlySJ*P->sjdbLength);
-                G1=new char[P->nGenome2+L+L];        
-                SA2.allocateArray();
-                SA.pointArray(SA2.charArray+SA2.lengthByte-SA.lengthByte);
+            
+            if (P->sjdbInsert.pass1 || P->sjdbInsert.pass2)
+            {//reserve extra memory for insertion at the 1st and/or 2nd step
+                nGenomePass1=P->nGenome;
+                nSApass1=P->nSA;
+                if (P->sjdbInsert.pass1)
+                {
+                    nGenomePass1+=P->limitOnTheFlySJ*P->sjdbLength;
+                    nSApass1+=2*P->limitOnTheFlySJ*P->sjdbLength;
+                };
+                nGenomePass2=nGenomePass1;
+                nSApass2=nSApass1;
+                if (P->sjdbInsert.pass2)
+                {
+                    nGenomePass2+=P->limitOnTheFlySJ*P->sjdbLength;
+                    nSApass2+=2*P->limitOnTheFlySJ*P->sjdbLength;                    
+                };                
+                
+                G1=new char[nGenomePass2+L+L];        
+                
+                SApass2.defineBits(P->GstrandBit+1,nSApass2);
+                SApass2.allocateArray();
+                
+                SApass1.defineBits(P->GstrandBit+1,nSApass1);
+                SApass1.pointArray(SApass2.charArray+SApass2.lengthByte-SApass1.lengthByte);
+                
+                SA.pointArray(SApass1.charArray+SApass1.lengthByte-SA.lengthByte);
             } else 
-            {//1-pass, no extra memory
+            {//no insertions
                 G1=new char[P->nGenome+L+L];        
                 SA.allocateArray();
                 

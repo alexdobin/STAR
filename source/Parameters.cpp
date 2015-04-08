@@ -201,6 +201,8 @@ Parameters::Parameters() {//initalize parameters info
 
     //2-pass
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "twopass1readsN", &twoPass.pass1readsN));
+    twoPass.pass1readsN_par=parArray.size()-1;
+    parArray.push_back(new ParameterInfoScalar <string>   (-1, -1, "twopassMode", &twoPass.mode));
 
     
 //     //SW parameters
@@ -862,18 +864,42 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                     
     
     //two-pass
+    if (parArray.at(twoPass.pass1readsN_par)->inputLevel>0  && twoPass.mode=="None")
+    {
+        ostringstream errOut;
+        errOut << "EXITING because of fatal PARAMETERS error: --twopass1readsN is defined, but --twoPassMode is not defined\n";
+        errOut << "SOLUTION: to activate the 2-pass mode, use --twoPassMode Basic";
+        exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
+    
     twoPass.yes=false;
-    if (twoPass.pass1readsN>0) {//2-pass parameters
+    if (twoPass.mode!="None") {//2-pass parameters
+        if (twoPass.mode!="Basic")
+        {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: unrecognized value of --twopassMode="<<twoPass.mode<<"\n";
+            errOut << "SOLUTION: for the 2-pass mode, use allowes values --twopassMode: Basic";
+            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };
+        
+        if (twoPass.pass1readsN==0)
+        {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: --twopass1readsN = 0 in the 2-pass mode\n";
+            errOut << "SOLUTION: for the 2-pass mode, specify --twopass1readsN > 0. Use a very large number or -1 to map all reads in the 1st pass.\n";
+            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };
+        
         if (sjdbOverhang<=0) {
             ostringstream errOut;
             errOut << "EXITING because of fatal PARAMETERS error: sjdbOverhang <=0 in the 2-pass mode\n";
-            errOut << "SOLUTION: for the 2-pass mode, specify sjdbOverhang>0, ideally readmateLength-1";
+            errOut << "SOLUTION: for the 2-pass mode, specify sjdbOverhang>0, ideally readMateLength-1\n";
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
         if (genomeLoad!="NoSharedMemory") {
             ostringstream errOut;
             errOut << "EXITING because of fatal PARAMETERS error: 2-pass method is not compatible with genomeLoad<<"<<genomeLoad<<"\n";
-            errOut << "SOLUTION: re-run STAR with --genomeLoad NoSharedMemory ; this is the only compatible option at the moment.s";
+            errOut << "SOLUTION: re-run STAR with --genomeLoad NoSharedMemory ; this is the only compatible option at the moment.s\n";
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };        
         twoPass.yes=true;
@@ -895,15 +921,11 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     if (sjdbFileChrStartEnd.at(0)!="-" || sjdbGTFfile!="-")
     {//will insert annotated sjdb on the fly
        sjdbInsert.pass1=true;
-       sjdbInsert.pass2=true;
-//        if (twoPass.yes) 
-//        {
-//            sjdbInsert.pass2=true;
-//        } else 
-//        {//for now, in the twoPass run annotated junctions can be inserted only in the 2nd pass
-//            sjdbInsert.pass1=true;
-//        };
     };
+    if (twoPass.yes) 
+    {
+       sjdbInsert.pass2=true;
+    };    
     
     if (runMode=="alignReads" && (sjdbInsert.pass1 || sjdbInsert.pass2) ) 
     {//run-time genome directory, this is needed for genome files generated on the fly

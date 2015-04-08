@@ -12,8 +12,6 @@ void sjdbInsertJunctions(Parameters * P, Parameters * P1, Genome & genome, SjdbC
 {
     time_t rawtime;
 
-
-        
     if (P->sjdbN>0 && sjdbLoci.chr.size()==0)
     {//load from the saved genome, only if the loading did not happen already (if sjdb insertion happens at the 1st pass, sjdbLoci will be populated
         ifstream sjdbStreamIn;
@@ -24,9 +22,7 @@ void sjdbInsertJunctions(Parameters * P, Parameters * P1, Genome & genome, SjdbC
         P->inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the generated genome " << P->genomeDir+"/sjdbList.out.tab" <<": "<<sjdbLoci.chr.size()<<" total junctions\n\n";
     };    
     
-    
-    //load 1st pass junctions
-    if (P->twoPass.pass1sjFile.size()>0) //non-empty name marks 2nd pass
+    if (P->twoPass.pass2)
     {//load 1st pass new junctions
      //sjdbLoci already contains the junctions from before 1st pass
         ifstream sjdbStreamIn ( P->twoPass.pass1sjFile.c_str() );   
@@ -66,10 +62,10 @@ void sjdbInsertJunctions(Parameters * P, Parameters * P1, Genome & genome, SjdbC
     P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished preparing junctions" <<endl;
 
     //insert junctions into the genome and SA and SAi
-    sjdbBuildIndex (P, P1, Gsj, genome.G, genome.SA, genome.SA2, genome.SAi);
+    sjdbBuildIndex (P, P1, Gsj, genome.G, genome.SA, (P->twoPass.pass2 ? genome.SApass2 : genome.SApass1), genome.SAi);
     delete [] Gsj; //junction sequences have been added to G
     time ( &rawtime ); 
-    *P->inOut->logStdOut  << timeMonthDayTime(rawtime) << " ..... Finished inserting 1st pass junctions into genome" <<endl;
+    P->inOut->logMain     << timeMonthDayTime(rawtime) << " ..... Finished inserting junctions into genome" <<endl;    
 
     if (P->sjdbInsert.save=="All")
     {//save and copy all genome files into sjdbInsert.outDir, except those created above

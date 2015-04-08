@@ -8,6 +8,8 @@
 #include "IncludeDefine.h"
 #include "streamFuns.h"
 #include "binarySearch2.h"
+#include "ErrorWarning.h"
+#include <cmath>
 
 char* globalGsj;
 
@@ -57,6 +59,11 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
     
     #define SPACER_CHAR GENOME_spacingChar
 
+    time_t rawtime;
+    time ( &rawtime );
+    P->inOut->logMain   << timeMonthDayTime(rawtime) << " ..... Inserting junctions into the genome indices" <<endl;    
+    *P->inOut->logStdOut  << timeMonthDayTime(rawtime) << " ..... Inserting junctions into the genome indices" <<endl;
+    
     uint nGsj=P->sjdbLength*P->sjdbN;
     for (uint ii=1; ii<=P->sjdbN; ii++) 
     {
@@ -73,8 +80,9 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
 
     uint32* oldSJind=new uint32[P1->sjdbN];
     
-    uint nIndicesSJ1=P->sjdbOverhang; 
-//  uint   nIndicesSJ1=P->sjdbLength;//keep all indices
+    uint nIndicesSJ1=P->sjdbOverhang;
+//  uint   nIndicesSJ1=P->sjdbLength;//keep all indices - this is pre-2.4.1 of generating the genome
+    
     uint64* indArray=new uint64[2*P->sjdbN*nIndicesSJ1*2];//8+4 bytes for SA index and index in the genome * nJunction * nIndeices per junction * 2 for reverse compl
     uint64 sjNew=0;
     #pragma omp parallel num_threads(P->runThreadN)
@@ -113,7 +121,6 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
     //for (int ii=0;ii<P1->sjdbN;ii++) {if ( oldSJind[ii]==0){cout <<ii<<endl;};};
     sjNew = sjNew/2;//novel junctions were double counted on two strands
     
-    time_t rawtime;
     time ( &rawtime );
     P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished SA search: number of new junctions=" << sjNew <<", old junctions="<<P->sjdbN-sjNew<<endl;
     
@@ -136,6 +143,17 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
     
     P->nGenome=P->chrStart[P->nChrReal]+nGsj;    
     P->nSA+=nInd;
+    
+    uint GstrandBit1 = (uint) floor(log(P->nGenome)/log(2))+1;
+    if (GstrandBit1<32) GstrandBit1=32; //TODO: use simple access function for SA
+    if ( GstrandBit1 != P->GstrandBit) 
+    {//too many junctions were added - GstrandBit changed
+        ostringstream errOut;
+        errOut << "EXITING because of FATAL ERROR: cannot insert junctions on the fly because of strand GstrandBit problem\n";
+        errOut << "SOLUTION: please contact STAR author at https://groups.google.com/forum/#!forum/rna-star\n";
+        exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_GENOME_FILES, *P);
+    };
+    
     SA2.defineBits(P->GstrandBit+1,P->nSA);
     uint nGsjNew=sjNew*P->sjdbLength; //this is the actual number of bytes added to the genome, while nGsj is the total size of all junctions
     
