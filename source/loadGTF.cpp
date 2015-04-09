@@ -186,7 +186,7 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P, string dirOut) {//load gtf file
             
             uint trex1=0;
             for (uint iex=0; iex<=exonN; iex++) {
-                if (exonLoci[GTF_exonTrID(iex)] != exonLoci[GTF_exonTrID(trex1)] || iex==exonN) {
+                if (iex==exonN || exonLoci[GTF_exonTrID(iex)] != exonLoci[GTF_exonTrID(trex1)]) {
                     for (uint iex1=trex1; iex1<iex; iex1++) {//go back and fill the trend
                         extrLoci[GTF_extrTrEnd(iex1)]=exonLoci[GTF_exonEnd(iex-1)];
                     };

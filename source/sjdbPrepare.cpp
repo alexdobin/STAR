@@ -93,8 +93,13 @@ void sjdbPrepare (SjdbClass &sjdbLoci, Parameters *P, uint nGenomeReal, string o
     uint *I=new uint [sjdbLoci.chr.size()];
     uint nsj=0;
     for (uint ii=0;ii<sjdbLoci.chr.size();ii++) {
-        uint isj=sjdbSort[ii*3+2];//index of the next sorted junction            
-        uint isj0=I[nsj-1]; //index of the last recorded junctions
+        uint isj=sjdbSort[ii*3+2];//index of the next sorted junction    
+        
+        uint isj0;
+        if (nsj>0)
+        {
+            isj0=I[nsj-1]; //index of the last recorded junctions
+        };
 
         if (nsj==0 || sjdbS[isj]!=sjdbS[isj0] || sjdbE[isj]!=sjdbE[isj0]) 
         {//different intron coordinates

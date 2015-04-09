@@ -83,7 +83,7 @@ int main(int argInN, char* argIn[]) {
 
     g_statsAll.progressReportHeader(P->inOut->logProgress);    
     
-    if (P->twoPass.pass1readsN>0) {//2-pass
+    if (P->twoPass.yes) {//2-pass
         //re-define P for the pass1
         
         Parameters *P1=new Parameters;

@@ -23,31 +23,79 @@ uint compareSeqToGenome(char** s2, uint S, uint N, uint L, char* g, PackedArray&
         char* s  = s2[0] + S + L;
         g += SAstr + L;
         for (ii=0;(uint) ii < N-L; ii++)
-            if (s[ii]!=g[ii]) break;
-        if (s[ii]>g[ii]) {compRes=true;} else {compRes=false;};
-        return ii+L;
+        {
+            if (s[ii]!=g[ii]) 
+            {
+                if (s[ii]>g[ii]) 
+                {
+                    compRes=true;
+                    return ii+L;
+                } else 
+                {
+                    compRes=false;
+                    return ii+L;
+                };
+            };
+        };
+//         if (s[ii]>g[ii]) {compRes=true;} else {compRes=false;};        
+        return N; //exact match
     } else if (dirR && !dirG) {
         char* s  = s2[1] + S + L;
         g += P->nGenome-1-SAstr - L;
         for (ii=0; (uint) ii < N-L; ii++)
-            if (s[ii]!=g[-ii]) break;
-        if (s[ii]>g[-ii] || g[-ii]>3) {compRes=false;} else {compRes=true;};
-        return ii+L;
+        {
+            if (s[ii]!=g[-ii]) 
+            {
+                if (s[ii]>g[-ii] || g[-ii]>3) 
+                {
+                    compRes=false;
+                    return ii+L;                    
+                } else 
+                {
+                    compRes=true;
+                    return ii+L;
+                };
+            };
+        };
+        return N;
     } else if (!dirR && dirG) {
         char* s  = s2[1] + S - L;
         g += SAstr + L;
         for (ii=0; (uint) ii < N-L; ii++)
-            if (s[-ii]!=g[ii]) break;
-        if (s[-ii]>g[ii]) {compRes=true;} else {compRes=false;};
-        return ii+L;
+        {
+            if (s[-ii]!=g[ii])
+            {
+                if (s[-ii]>g[ii]) {
+                    compRes=true;
+                    return ii+L;
+
+                } else
+                {
+                    compRes=false;
+                    return ii+L;
+                };
+            };
+        };
+        return N;
     } else {//if (!dirR && !dirG)
         char* s  = s2[0] + S - L;
         g += P->nGenome-1-SAstr - L;  
-        for (ii=0; (uint) ii < N-L; ii++){
-            if (s[-ii]!=g[-ii]) break;
+        for (ii=0; (uint) ii < N-L; ii++)
+        {
+            if (s[-ii]!=g[-ii]) 
+            {
+                if (s[-ii]>g[-ii] || g[-ii]>3)
+                {
+                    compRes=false;
+                    return ii+L;                    
+                } else
+                {
+                    compRes=true;
+                    return ii+L;
+                };
+            };
         };
-        if (s[-ii]>g[-ii] || g[-ii]>3) {compRes=false;} else {compRes=true;};
-        return ii+L;
+        return N;
     };    
 };
 

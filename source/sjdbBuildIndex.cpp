@@ -83,7 +83,7 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
     uint nIndicesSJ1=P->sjdbOverhang;
 //  uint   nIndicesSJ1=P->sjdbLength;//keep all indices - this is pre-2.4.1 of generating the genome
     
-    uint64* indArray=new uint64[2*P->sjdbN*nIndicesSJ1*2];//8+4 bytes for SA index and index in the genome * nJunction * nIndeices per junction * 2 for reverse compl
+    uint64* indArray=new uint64[2*P->sjdbN*(nIndicesSJ1+1)*2];//8+4 bytes for SA index and index in the genome * nJunction * nIndices per junction * 2 for reverse compl
     uint64 sjNew=0;
     #pragma omp parallel num_threads(P->runThreadN)
     #pragma omp for schedule (dynamic,1000) reduction(+:sjNew)
@@ -107,7 +107,7 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
             
             //uint istart=istart1;
             uint istart=isj<P->sjdbN ? istart1 : istart1+1; //for rev-compl junction, shift by one base to start with the 1st non-spacer base
-            uint ind1=2*(isj*nIndicesSJ1+istart);
+            uint ind1=2*(isj*nIndicesSJ1+istart1);
             if (sjdbInd>=0 || seq1[0][istart]>3) 
             {//no index for already included junctions, or suffices starting with N
                 indArray[ind1]=-1;
