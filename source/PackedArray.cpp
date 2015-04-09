@@ -10,7 +10,8 @@ void PackedArray::defineBits(uint Nbits, uint lengthIn){
     wordCompLength=sizeof(uint)*8LLU-wordLength;
     bitRecMask=(~0LLU)>>wordCompLength;
     length=lengthIn;
-    lengthByte=length*Nbits/8LLU+1LLU;
+    lengthByte=length*Nbits/8LLU;
+    lengthByte=((lengthByte+sizeof(uint)-1LLU)/sizeof(uint))*sizeof(uint);
 };
 
 void PackedArray::writePacked( uint jj, uint x) {
@@ -29,6 +30,7 @@ void PackedArray::pointArray(char* pointerCharIn) {
 
 void PackedArray::allocateArray() {
     charArray=new char[lengthByte];
+    memset(charArray+lengthByte-sizeof(uint),0,sizeof(uint));//set the last 8 bytes to zero, since some of them may lnever be written
     arrayAllocated=true;
 };
 

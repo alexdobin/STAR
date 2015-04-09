@@ -371,9 +371,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     //annot scoring
     annotScoreScale=0;
     annotSignalFile="-";
-    //sj-db
-    sjdbLength=sjdbOverhang*2+1;
-
 
     //splitting
     Qsplit=0;
@@ -911,7 +908,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             errOut <<"SOLUTION: please check the path and writing permissions \n";
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
-        sjdbLength=sjdbOverhang*2+1;
     };
     
    //sjdb insert on the fly
@@ -945,7 +941,8 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         };    
     };    
     
-
+    //final sjdbOverhang value has been determined
+    sjdbLength = sjdbOverhang==0 ? 0 : sjdbOverhang*2+1;
     
     if (outBAMcoord && limitBAMsortRAM==0) {//check limitBAMsortRAM
         if (genomeLoad!="NoSharedMemory") {

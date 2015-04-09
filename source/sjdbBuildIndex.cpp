@@ -164,7 +164,7 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
     uint isj=0, isa2=0;
     for (uint isa=0;isa<P1->nSA;isa++) {
 
-//         if (isa2>4014920)
+//         if (isa==69789089)
 //      	{ 
 //           cout <<isa;
 //         };

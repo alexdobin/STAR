@@ -10,6 +10,7 @@
 #include "sjdbLoadFromFiles.h"
 #include "sjdbPrepare.h"
 #include "genomeParametersWrite.h"
+#include "sjdbInsertJunctions.h"
 
 #include "serviceFuns.cpp"
 #include "streamFuns.h"
@@ -150,21 +151,12 @@ void genomeGenerate(Parameters *P) {
     //write genome parameters file
     genomeParametersWrite(P->genomeDir+("/genomeParameters.txt"), P, "ERROR_00102");
     
-    //add the sjdb sequences to the genome
-    SjdbClass sjdbLoci;
-    sjdbLoadFromFiles(P, sjdbLoci);
-    sjdbLoci.priority.resize(sjdbLoci.chr.size(),10);
-
-
     char *G=NULL, *G1=NULL;        
-    uint nGenomeReal=genomeScanFastaFiles(P,G,false);//first scan the fasta file to fins all the sizes  
+    uint nGenomeReal=genomeScanFastaFiles(P,G,false);//first scan the fasta file to find all the sizes  
     P->chrBinFill();
 
-    loadGTF(sjdbLoci, P, P->genomeDir);    
-    sjdbLoci.priority.resize(sjdbLoci.chr.size(),20);
-
     uint L=10000;//maximum length of genome suffix    
-    uint nG1alloc=(nGenomeReal + sjdbLoci.chr.size()*P->sjdbLength+L)*2;
+    uint nG1alloc=(nGenomeReal + L)*2;
     G1=new char[nG1alloc];
     G=G1+L;
     
@@ -189,14 +181,7 @@ void genomeGenerate(Parameters *P) {
         };
     };    
 
-        
-    if (sjdbLoci.chr.size()>0) {//prepare sjdb
-        sjdbPrepare (sjdbLoci, P, nGenomeReal, P->genomeDir, G, G+P->chrStart[P->nChrReal]);
-        time ( &rawTime );
-        P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ... finished processing splice junctions database ...\n" <<flush;   
-        *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... finished processing splice junctions database ...\n" <<flush;
-    };
-    uint N = nGenomeReal + P->sjdbN*P->sjdbLength;
+    uint N = nGenomeReal;
     P->nGenome=N;
     uint N2 = N*2;     
 
@@ -221,17 +206,9 @@ void genomeGenerate(Parameters *P) {
         errOut <<"EXITING because of FATAL PARAMETER ERROR: limitGenomeGenerateRAM="<< (P->limitGenomeGenerateRAM) <<"is too small for your genome\n";
         errOut <<"SOLUTION: please specify limitGenomeGenerateRAM not less than"<< nG1alloc+nG1alloc/3 <<" and make that much RAM available \n";
         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
-    };    
-    
-    //write genome to disk
-    ofstream genomeOut;
-    ofstrOpen(P->genomeDir+"/Genome","ERROR_00104", P, genomeOut);   
-    fstreamWriteBig(genomeOut,G,N,P->genomeDir+"/Genome","ERROR_00120",P);
-    genomeOut.close();    
-      
+    };     
     
     //preparing to generate SA
-    
     for (uint ii=0;ii<N;ii++) {//- strand
         G[N2-1-ii]=G[ii]<4 ? 3-G[ii] : G[ii];
     };      
@@ -248,15 +225,16 @@ void genomeGenerate(Parameters *P) {
     
     P->GstrandMask = ~(1LLU<<P->GstrandBit);
     P->nSAbyte=P->nSA*(P->GstrandBit+1)/8+1;
-    PackedArray SA1;    
+    PackedArray SA1;//SA without sjdb
     SA1.defineBits(P->GstrandBit+1,P->nSA);
+    PackedArray SA2;//SA with sjdb, reserve more space
+    SA2.defineBits(P->GstrandBit+1,P->nSA+2*P->limitOnTheFlySJ*P->sjdbLength);
+
         
     P->inOut->logMain  << "Number of SA indices: "<< P->nSA << "\n"<<flush;    
     P->inOut->logMain  << "SA size in bytes: "<< P->nSAbyte << "\n"<<flush;
-    
 
     //sort SA
-        
     time ( &rawTime );
     P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ... starting to sort  Suffix Array. This may take a long time...\n" <<flush;   
     *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... starting to sort  Suffix Array. This may take a long time...\n" <<flush;
@@ -347,7 +325,8 @@ void genomeGenerate(Parameters *P) {
         *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... loading chunks from disk, packing SA...\n" <<flush;    
 
         //read chunks and pack into full SA1
-        SA1.charArray=new char[P->nSAbyte];
+        SA2.allocateArray();
+        SA1.pointArray(SA2.charArray + SA2.lengthByte-SA1.lengthByte); //SA1 is shifted to have space for junction insertion
         uint N2bit= 1LLU << P->GstrandBit;          
         uint packedInd=0;
 
@@ -389,15 +368,6 @@ void genomeGenerate(Parameters *P) {
             errOut << "SOLUTION: try to re-run suffix array generation, if it still does not work, report this problem to the author\n"<<flush;
             exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
         };
-                    
-        time ( &rawTime );
-        P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ... writing Suffix Array to disk ...\n" <<flush;   
-        *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... writing Suffix Array to disk ...\n" <<flush;   
-        
-        ofstream SAout;
-        ofstrOpen(P->genomeDir+"/SA","ERROR_00106", P, SAout);   
-        fstreamWriteBig(SAout,(char*) SA1.charArray, (streamsize) P->nSAbyte,P->genomeDir+"/SA","ERROR_00122",P);
-        SAout.close();
         
         //DONE with suffix array generation
         
@@ -414,77 +384,7 @@ void genomeGenerate(Parameters *P) {
     timeString.erase(timeString.end()-1,timeString.end());
     P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ... Finished generating suffix array\n" <<flush;  
     *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... Finished generating suffix array\n" <<flush;          
-    
-    //check SA size on disk, must agree with P->nSAbyte
-    ifstream genomeIn;
-    genomeIn.open((P->genomeDir+("/SA")).c_str());
-    genomeIn.seekg (0, ios::end);
-    uint nSAbyte1=genomeIn.tellg();
-    genomeIn.close();
-    if (nSAbyte1>P->nSAbyte) {
-        ostringstream errOut;
-        errOut << "WARNING: in genomeGenerate: the size of the SA file on disk, "<<nSAbyte1<<", is bigger than expected "<<P->nSAbyte<<"\n";
-        errOut << "         Will try to cut the file to a correct size and check the SA\n";
-        errOut << "         Please report this error to dobin@cshl.edu\n";
-        
-        ostringstream sysCom;
-        sysCom << "cd " <<P->genomeDir<<"; mv SA SA.old; head -c " << P->nSAbyte << " SA.old > SA; rm -f SA.old";
-        errOut << "         Executing system command: " <<sysCom.str() <<"\n";
-        system(sysCom.str().c_str());
-        
-        *P->inOut->logStdOut <<errOut.str();
-        P->inOut->logMain <<errOut.str();
 
-        genomeIn.open((P->genomeDir+("/SA")).c_str());
-        genomeIn.seekg (0, ios::end);
-        uint nSAbyte2=genomeIn.tellg();
-        genomeIn.close();    
-        if (nSAbyte2!=P->nSAbyte) {
-                ostringstream errOut;                                            
-                errOut << "EXITING: FATAL ERROR in genomeGenerate: could not write correctly sized SA to disk\n";
-                errOut << "SOLUTION: Please report this error to dobin@cshl.edu\n";
-                exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);            
-        };
-        
-        genomeIn.open((P->genomeDir+("/SA")).c_str());
-        fstreamReadBig(genomeIn,SA1.charArray,P->nSAbyte);
-        genomeIn.close();
-    } else if (nSAbyte1<P->nSAbyte) {
-        ostringstream errOut;                                            
-        errOut << "EXITING: FATAL ERROR in genomeGenerate: the size of the SA file on disk, "<<nSAbyte1<<", is smaller than expected "<<P->nSAbyte<<"\n";
-        errOut << "SOLUTION: Please try to generate the genome files agains in an empty directory. If the error persists, please report it to dobin@cshl.edu\n";
-        exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);            
-    };
-    
-    if (nSAbyte1>P->nSAbyte) {//check SA
-        time(&rawTime);            
-        timeString=asctime(localtime ( &rawTime ));
-        timeString.erase(timeString.end()-1,timeString.end());
-        P->inOut->logMain    << timeString <<" ... starting to check Suffix Array...\n" <<flush;   
-        *P->inOut->logStdOut << timeString <<" ... starting to check Suffix Array...\n" <<flush;   
-          
-        uint* g1=new uint;
-        uint* g2=new uint;        
-        for (uint isa=0;isa<P->nSA-1;isa++) {//check SA      
-            if (isa%100000000==0) P->inOut->logMain  << isa*100/P->nSA << " " << flush;
-
-
-            *g1=funG2strLocus(SA1[isa  ],N,P->GstrandBit,P->GstrandMask);
-            *g2=funG2strLocus(SA1[isa+1],N,P->GstrandBit,P->GstrandMask);        
-            
-            uint jj=0;
-            while (G[*g1+jj]==G[*g2+jj] && jj<L) ++jj;
-
-            if ( jj<L && G[*g1+jj]>G[*g2+jj] ) {
-                ostringstream errOut;                                            
-                errOut << "EXITING: FATAL ERROR in genomeGenerate: Suffix Array is not properly sorted\n";
-                errOut << "SOLUTION: re-run genomeGenerate from scratch, with an empty genomeDir directory\n";
-                exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
-            }
-        };
-        P->inOut->logMain << "  done: all suffixes ordered correctly\n"<<flush;
-        *P->inOut->logStdOut << " done: all suffixes ordered correctly\n"<<flush;
-    };
 ////////////////////////////////////////
 //          SA index
 //
@@ -577,7 +477,41 @@ void genomeGenerate(Parameters *P) {
     
     delete [] indSAlast;
     delete [] ind0;
+
+    {//insert junctions
+        SjdbClass sjdbLoci;
+        Parameters *P1=new Parameters;
+        *P1=*P;
+        Genome mainGenome;
+        mainGenome.G=G;
+        mainGenome.SA=SA1;
+        mainGenome.SApass1=SA2;
+        mainGenome.SAi=SAip;
+        P->sjdbInsert.outDir=P->genomeDir;
+        sjdbInsertJunctions(P, P1, mainGenome, sjdbLoci);
+    };
     
+    //write genome to disk
+    time ( &rawTime );
+    P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ... writing Genome to disk ...\n" <<flush;   
+    *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... writing Genome to disk ...\n" <<flush;   
+    
+    ofstream genomeOut;
+    ofstrOpen(P->genomeDir+"/Genome","ERROR_00104", P, genomeOut);   
+    fstreamWriteBig(genomeOut,G,P->nGenome,P->genomeDir+"/Genome","ERROR_00120",P);
+    genomeOut.close();  
+
+    //write SA                
+    time ( &rawTime );
+    P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ... writing Suffix Array to disk ...\n" <<flush;   
+    *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... writing Suffix Array to disk ...\n" <<flush;   
+
+    ofstream SAout;
+    ofstrOpen(P->genomeDir+"/SA","ERROR_00106", P, SAout);   
+    fstreamWriteBig(SAout,(char*) SA2.charArray, (streamsize) P->nSAbyte,P->genomeDir+"/SA","ERROR_00122",P);
+    SAout.close();    
+    
+    //write SAi
     time(&rawTime);    
     P->inOut->logMain    << timeMonthDayTime(rawTime) <<" ... writing SAindex to disk\n" <<flush;   
     *P->inOut->logStdOut << timeMonthDayTime(rawTime) <<" ... writing SAindex to disk\n" <<flush;   
@@ -591,7 +525,7 @@ void genomeGenerate(Parameters *P) {
     fstreamWriteBig(SAiOut,  SAip.charArray, SAip.lengthByte,P->genomeDir+"/SAindex","ERROR_00125",P);
     SAiOut.close();    
 
-    SA1.deallocateArray();
+    SA2.deallocateArray();
     delete [] SAi;    
 
     time(&rawTime);

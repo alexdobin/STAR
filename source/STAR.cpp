@@ -59,7 +59,7 @@ int main(int argInN, char* argIn[]) {
     
     SjdbClass sjdbLoci;
     if (P->sjdbInsert.pass1) 
-    {//for now, cannot insert junctions on the fly in 2-pass run
+    {
         Parameters *P1=new Parameters;
         *P1=*P;
         sjdbInsertJunctions(P, P1, mainGenome, sjdbLoci);

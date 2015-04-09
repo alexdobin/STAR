@@ -69,13 +69,15 @@ void sjdbInsertJunctions(Parameters * P, Parameters * P1, Genome & genome, SjdbC
 
     if (P->sjdbInsert.save=="All")
     {//save and copy all genome files into sjdbInsert.outDir, except those created above
-        copyFile(P->genomeDir+"/chrName.txt", P->sjdbInsert.outDir+"/chrName.txt");
-        copyFile(P->genomeDir+"/chrStart.txt", P->sjdbInsert.outDir+"/chrStart.txt");
-        copyFile(P->genomeDir+"/chrNameLength.txt", P->sjdbInsert.outDir+"/chrNameLength.txt");
-        copyFile(P->genomeDir+"/chrLength.txt", P->sjdbInsert.outDir+"/chrLength.txt");
+        if (P->genomeDir != P->sjdbInsert.outDir)
+        {
+            copyFile(P->genomeDir+"/chrName.txt", P->sjdbInsert.outDir+"/chrName.txt");
+            copyFile(P->genomeDir+"/chrStart.txt", P->sjdbInsert.outDir+"/chrStart.txt");
+            copyFile(P->genomeDir+"/chrNameLength.txt", P->sjdbInsert.outDir+"/chrNameLength.txt");
+            copyFile(P->genomeDir+"/chrLength.txt", P->sjdbInsert.outDir+"/chrLength.txt");
+        };
         
         genomeParametersWrite(P->sjdbInsert.outDir+("/genomeParameters.txt"), P, "ERROR_012012");
-
         
         ofstream genomeOut;
         ofstrOpen(P->sjdbInsert.outDir+"/Genome","ERROR_012004", P, genomeOut);
@@ -85,7 +87,6 @@ void sjdbInsertJunctions(Parameters * P, Parameters * P1, Genome & genome, SjdbC
         ofstrOpen(P->sjdbInsert.outDir+"/SA","ERROR_012006", P, genomeOut);
         fstreamWriteBig(genomeOut,(char*) genome.SA.charArray, (streamsize) genome.SA.lengthByte, P->sjdbInsert.outDir+"/SA","ERROR_012007",P);
         genomeOut.close();
-
 
         ofstrOpen(P->sjdbInsert.outDir+"/SAindex","ERROR_012008", P, genomeOut);
         fstreamWriteBig(genomeOut, (char*) &P->genomeSAindexNbases, sizeof(P->genomeSAindexNbases),P->sjdbInsert.outDir+"/SAindex","ERROR_012009",P);
