@@ -54,17 +54,22 @@ int main(int argInN, char* argIn[]) {
     
     Genome mainGenome (P);
     mainGenome.genomeLoad();
+    if (P->genomeLoad=="LoadAndExit" || P->genomeLoad=="Remove") 
+    {
+        return 0;
+    };
     
     P->twoPass.pass2=false; //this is the 1st pass    
     
     SjdbClass sjdbLoci;
+
     if (P->sjdbInsert.pass1) 
     {
         Parameters *P1=new Parameters;
         *P1=*P;
         sjdbInsertJunctions(P, P1, mainGenome, sjdbLoci);
     };
-    
+
     //calculate genome-related parameters
     Transcriptome *mainTranscriptome=NULL;
     
@@ -135,7 +140,7 @@ int main(int argInN, char* argIn[]) {
         P->twoPass.pass1sjFile=P->twoPass.dir+"/SJ.out.tab";
         
         sjdbInsertJunctions(P, P1, mainGenome, sjdbLoci);
-                
+
         //reopen reads files
         P->closeReadsFiles();
         P->openReadsFiles();
@@ -323,26 +328,26 @@ int main(int argInN, char* argIn[]) {
                 binN += RAchunk[it]->chunkOutBAMcoord->binTotalN[ibin];
                 binS += RAchunk[it]->chunkOutBAMcoord->binTotalBytes[ibin];
             };
-          
+            
             if (binS==0) continue; //empty bin
   
             if (ibin == nBins-1) {//last bin for unmapped reads
                 BAMbinSortUnmapped(ibin,P->runThreadN,P->outBAMsortTmpDir,P->inOut->outBAMfileCoord, P);
             } else {
-                uint newMem=binS+binN*24;
-                bool boolWait=true;
-                while (boolWait) {
-                    #pragma omp critical
-                    if (totalMem+newMem < P->limitBAMsortRAM) {
-                        boolWait=false;
-                        totalMem+=newMem;
-                    };
-                    sleep(0.1);
-                };
-                BAMbinSortByCoordinate(ibin,binN,binS,P->runThreadN,P->outBAMsortTmpDir,P->inOut->outBAMfileCoord, P);
+            uint newMem=binS+binN*24;
+            bool boolWait=true;
+            while (boolWait) {
                 #pragma omp critical
-                totalMem-=newMem;//"release" RAM
+                if (totalMem+newMem < P->limitBAMsortRAM) {
+                    boolWait=false;
+                    totalMem+=newMem;
+                };
+                sleep(0.1);
             };
+            BAMbinSortByCoordinate(ibin,binN,binS,P->runThreadN,P->outBAMsortTmpDir,P->inOut->outBAMfileCoord, P);
+            #pragma omp critical
+            totalMem-=newMem;//"release" RAM
+        };
         };
         //concatenate all BAM files, using bam_cat
         char **bamBinNames = new char* [nBins];

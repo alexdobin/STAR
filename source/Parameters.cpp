@@ -721,7 +721,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         vAttr1=outSAMattributes;
     };
    
-    for (int ii=0;ii<vAttr1.size();ii++) {
+    for (uint ii=0;ii<vAttr1.size();ii++) {
         if        (vAttr1.at(ii)== "NH") {
             outSAMattrOrder.push_back(ATTR_NH);
             outSAMattrPresent.NH=true;
