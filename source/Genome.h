@@ -4,6 +4,8 @@
 #include "IncludeDefine.h"
 #include "Parameters.h"
 #include "PackedArray.h"
+#include "SharedMemory.h"
+
 class Genome {
     public:
         char *G, *sigG;
@@ -11,16 +13,21 @@ class Genome {
         PackedArray SAi;
         
         uint nGenomePass1, nGenomePass2, nSApass1, nSApass2; 
-        
-        Genome (Parameters* Pin ) : P(Pin) {};
+
+        Genome (Parameters* Pin );
         Genome () {};//empty constructor
-//         ~Genome ();
+        ~Genome();
+        
         void freeMemory();
         void genomeLoad();
 
     private:
-        char *G1; //pointer -200 of G
-        Parameters* P;
-        int shmID;
+    Parameters* P;
+    key_t shmKey;  
+    char *shmStart;
+    char *G1; //pointer -200 of G
+    SharedMemory * sharedMemory;
+    uint OpenStream(string name, ifstream & stream);
+    void HandleSharedMemoryException(const SharedMemoryException & exc, uint64 shmSize);
 };
 #endif

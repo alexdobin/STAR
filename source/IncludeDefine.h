@@ -16,6 +16,8 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <limits>
 #include <stdint.h>
@@ -116,10 +118,11 @@ typedef uint8_t uint8;
 #define EXIT_CODE_INPUT_FILES 104
 #define EXIT_CODE_GENOME_FILES 105
 #define EXIT_CODE_SHM 106
-#define EXIT_CODE_GenomeLoadingWaitedTooLong 107
-#define EXIT_CODE_MemoryAllocation 108
+#define EXIT_CODE_GENOME_LOADING_WAITED_TOO_LONG 107
+#define EXIT_CODE_MEMORY_ALLOCATION 108
 #define EXIT_CODE_FILE_OPEN 109
 #define EXIT_CODE_FILE_WRITE 110
+#define EXIT_CODE_INCONSISTENT_DATA 111
 
 //cleaned-end
 
