@@ -149,7 +149,7 @@ void Genome::genomeLoad(){//allocate and load Genome
     P->genomeSAindexStart = new uint[P->genomeSAindexNbases+1];
     SAiInBytes += fstreamReadBig(SAiIn,(char*) P->genomeSAindexStart, sizeof(P->genomeSAindexStart[0])*(P->genomeSAindexNbases+1));  
     P->nSAi=P->genomeSAindexStart[P->genomeSAindexNbases];
-    P->inOut->logMain << "Read from SAindex: genomeSAindexNbases=" << P->genomeSAindexNbases <<"  nSAi="<< P->nSAi <<endl <<flush;
+    P->inOut->logMain << "Read from SAindex: genomeSAindexNbases=" << P->genomeSAindexNbases <<"  nSAi="<< P->nSAi <<endl;
     
     //search for the genome in shared memory, if found, shmLoad is false, shmID is the ID
     if (P->genomeLoad=="LoadAndKeep" || P->genomeLoad=="LoadAndRemove" || P->genomeLoad=="Remove" || P->genomeLoad=="LoadAndExit") {// find shared memory fragment

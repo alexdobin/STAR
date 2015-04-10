@@ -10,8 +10,8 @@ void PackedArray::defineBits(uint Nbits, uint lengthIn){
     wordCompLength=sizeof(uint)*8LLU-wordLength;
     bitRecMask=(~0LLU)>>wordCompLength;
     length=lengthIn;
-    lengthByte=length*Nbits/8LLU;
-    lengthByte=((lengthByte+sizeof(uint)-1LLU)/sizeof(uint))*sizeof(uint);
+    lengthByte=(length-1)*wordLength/8LLU+sizeof(uint);
+//     lengthByte=((lengthByte+sizeof(uint)-1LLU)/sizeof(uint))*sizeof(uint);
 };
 
 void PackedArray::writePacked( uint jj, uint x) {

@@ -129,8 +129,11 @@ void outputSJ(ReadAlignChunk** RAchunk, Parameters* P) {//collapses junctions fr
         };
         outSJfileStream.close();
     } else {//make sjNovel array in P
-        for (uint ii=0;ii<allSJ.N;ii++) {        
-            if (sjFilter[ii]) {
+        P->sjNovelN=0;
+        for (uint ii=0;ii<allSJ.N;ii++) 
+        {//count novel junctions
+            if (sjFilter[ii]) 
+            {//only those passing filter
                 oneSJ.junctionPointer(allSJ.data,ii);
                 if (*oneSJ.annot==0) P->sjNovelN++;
             };

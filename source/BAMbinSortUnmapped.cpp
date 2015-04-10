@@ -66,7 +66,7 @@ void BAMbinSortUnmapped(uint32 iBin, uint nThreads, string dirBAMsort, BGZF *bgz
     for (uint it=0; it<bamInFile.size(); it++) {//destroy at the end
         bamInStream[it].close();
         remove(bamInFile.at(it).c_str());
-        delete bamIn[it];
+        delete [] bamIn[it];
     };
     delete [] bamIn;
     delete [] bamInStream;

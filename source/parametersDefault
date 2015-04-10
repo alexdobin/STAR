@@ -74,7 +74,7 @@ sjdbGTFtagExonParentTranscript          transcript_id
 sjdbGTFtagExonParentGene                gene_id
     string: tag name to be used as exons' gene-parents (default "gene_id" works for GTF files)
 
-sjdbOverhang                            0
+sjdbOverhang                            100
     int>=0: length of the donor/acceptor sequence on each side of the junctions, ideally = (mate_length - 1)
             if =0, splice junction database is not used
 sjdbScore                               2

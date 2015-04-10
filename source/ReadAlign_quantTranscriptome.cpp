@@ -27,10 +27,13 @@ uint ReadAlign::quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript 
                 } else if (alignG[iag]->canonSJ[iab-1]==-3) {
                     left1=alignG[iag]->exons[iab][EX_R]-readLength[alignG[iag]->exons[iab-1][EX_iFrag]]-1;
                 };
-                if (alignG[iag]->canonSJ[iab]==-3) {
-                    right1=readLength[alignG[iag]->exons[iab][EX_iFrag]]-alignG[iag]->exons[iab][EX_R]-alignG[iag]->exons[iab][EX_L];
-                } else if (iab==alignG[iag]->nExons-1){
+                if (iab==alignG[iag]->nExons-1)                    
+                {//last block of left mates
                     right1=Lread-alignG[iag]->exons[iab][EX_R]-alignG[iag]->exons[iab][EX_L];
+                    
+                } else if (alignG[iag]->canonSJ[iab]==-3)
+                {//last block of the right mate (i.e. whole read)
+                    right1=readLength[alignG[iag]->exons[iab][EX_iFrag]]-alignG[iag]->exons[iab][EX_R]-alignG[iag]->exons[iab][EX_L];
                 };
 
                 for (uint b=1; b<=left1 ; b++) {//extend to the left

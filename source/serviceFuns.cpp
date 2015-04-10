@@ -96,7 +96,7 @@ inline int32 binarySearch1a(argType x, argType *X, int32 N) {
         };
     };
     
-    while (i1<N && x==X[i1+1]) ++i1; //go forward to check for equals
+    while (i1<N-1 && x==X[i1+1]) ++i1; //go forward to check for equals
     return i1;
 };
 

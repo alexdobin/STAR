@@ -48,7 +48,10 @@ void OutSJ::collapseSJ() {//collapse junctions. Simple version now: re-sort ever
         } else {//originate new junction: copy from isj to isj1+1
             isj1++;
             isj1P=data+isj1*oneSJ.dataSize;
-            memcpy(isj1P,isjP,oneSJ.dataSize);
+            if (isj!=isj1)
+            {
+                memcpy(isj1P,isjP,oneSJ.dataSize);
+            };
         };
     };
     N=isj1+1;

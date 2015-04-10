@@ -150,7 +150,7 @@ uint qualitySplit(char* r, char* q, uint L, char Qsplit, uint maxNsplit, uint  m
         iR1=iR;
         
         //find the next bad base
-        while ( ( (q[iR]>=Qsplit) && (r[iR]<=3) ) && (iR<L) ) {
+        while ( iR<L && q[iR]>=Qsplit && r[iR]<=3 ) {
             iR++;
         };        
                

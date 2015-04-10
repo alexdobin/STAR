@@ -824,6 +824,8 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     };
     
     //quantification parameters
+    quant.yes=false;
+    quant.geCount.yes=false;
     if (quant.mode.at(0) != "-") {
         quant.yes=true;
         for (uint32 ii=0; ii<quant.mode.size(); ii++) {
@@ -855,8 +857,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                 exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
             };
         };
-    } else {
-        quant.yes=false; //no quantification
     };
                     
     
