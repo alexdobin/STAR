@@ -51,15 +51,33 @@ Run STAR-Fusion like so, using these two files above in addition to specifiying 
 
 The output from STAR-Fusion is found as a tab-delimited file named 'star-fusion.fusion_candidates.txt', and has the following format:
 
-#fusion_name	JunctionReads	SpanningReads	LeftGene	LeftBreakpoint	RightGene	RightBreakpoint
-RBX1--HAPLN2    135     1385    RBX1    chr22:41363889  HAPLN2  chr1:156593258
-UNC119--PCSK1   132     386     UNC119  chr17:26879355  PCSK1   chr5:95734741
-MICAL1--TMEM198B        131     743     MICAL1  chr6:109767898  TMEM198B        chr12:56227230
+#fusion_name	JunctionReads	SpanningFrags	LeftGene	LeftBreakpoint	LeftDistFromRefExonSplice	RightGene	RightBreakpoint	RightDistFromRefExonSplice
+FGFR3--TACC3	221	54	FGFR3	chr4:1808661:+	0	TACC3	chr4:1729704:+	269
+EWSR1--FLI1	5	0	EWSR1	chr22:29683123:+	0	FLI1	chr11:128677075:+	0
+EWSR1--ATF1	8	2	EWSR1	chr22:29683123:+	0	ATF1	chr12:51208063:+	0
+CD74--ROS1	5	0	CD74	chr5:149784243:-	0	ROS1	chr6:117645578:-	0
+BRD4--NUTM1	7	1	BRD4	chr19:15364963:-	0	NUTM1	chr15:34640170:+	0
+GOPC--ROS1	82	10	GOPC	chr6:117888017:-	0	ROS1	chr6:117642557:-	0
+HOOK3--RET	9	0	HOOK3	chr8:42823357:+	0	RET	chr10:43612032:+	0
+AKAP9--BRAF	4	1	AKAP9	chr7:91632549:+	0	BRAF	chr7:140487384:-	0
+ETV6--NTRK3	8	1	ETV6	chr12:12022903:+	0	NTRK3	chr15:88483984:-	0
 ...
 
 
+Note, these fusion candidates are derived solely on mapping the STAR outputs to the reference annotations.  Paralogous genes are notorious for showing up as false-positive fusion candidates. Additional filtering tools, although not included now, will be made available soon.  Even without additional filtering, STAR-Fusion provides fusion detection accuracy that is on par with the very best available fusion predictors, and is one of the most efficient.
 
-Note, these fusion candidates are derived solely on mapping the STAR outputs to the reference annotations.  No additional filtering is performed.  Paralogous genes are notorious for showing up as false-positive fusion candidates. Additional filtering tools, although not included now, will be made available soon.  Even without additional filtering, STAR-Fusion provides fusion detection accuracy that is on par with the very best available fusion predictors, and is one of the most efficient.
+######################
+## Parameterization ##
+######################
+
+STAR-Fusion will report all candidates having at least 1 junction read where the breakpoints match up precisely with reference exon junctions of two different genes.
+
+For those breakpoints that do not precisely match at reference exon junctions, the breakpoint fusion read support must be at least --min_novel_junction_support (default 10 reads).
+
+In the case where multiple candidate fusion breakpoints are reported, only those breakpoints having at least --min_alt_pct_junction (default 10%) of the dominant isoform junction support will be reported.
+
+Finally, it is worth noting that the counts of spanning fragments are entirely non-overlapping with the counts of the breakpoint junction reads. That is, no spanning fragment (from Chimeric.out.sam) is counted if it contains a read that is reported as evidence in the breakpoint junction candidate data (from Chimeric.out.junction).
+
 
 
 ##############################
@@ -79,4 +97,10 @@ which simply runs:
 and you'll find the output file 'star-fusion.fusion_candidates.txt' containing the fusion candidates in the format described above.
 
 
+
+######################
+## Acknowledgements ##
+######################
+
+This effort was largely inspired by earlier work done by Nicolas Stransky and discussions with Daniel Nicorici.
 

@@ -116,6 +116,12 @@ main: {
     open (my $ofh, ">$fusion_predictions_outfile") or die "Error, cannot write to file: $fusion_predictions_outfile";
     
     print STDERR "-outputting fusiong candidates to file: $fusion_predictions_outfile\n";
+
+    # print header
+    print $ofh join("\t", "#fusion_name", "JunctionReads", "SpanningFrags", 
+                    "LeftGene", "LeftBreakpoint",  "LeftDistFromRefExonSplice",
+                    "RightGene", "RightBreakpoint", "RightDistFromRefExonSplice") . "\n";
+    
     foreach my $fusion_name (keys %junctions) {
         
         my $span_token = join("--", sort split(/--/, $fusion_name));
