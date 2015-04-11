@@ -104,6 +104,10 @@ main: {
     my %spans = &map_spanning_reads_to_genes($chimeric_out_sam, \%chr_to_interval_tree, \%chr_gene_trans_to_exons);
     
     
+    my $fusion_predictions_outfile = "$out_prefix.fusion_candidates.txt";
+    open (my $ofh, ">$fusion_predictions_outfile") or die "Error, cannot write to file: $fusion_predictions_outfile";
+    
+    print STDERR "-outputting fusiong candidates to file: $fusion_predictions_outfile\n";
     foreach my $fusion_name (keys %junctions) {
         
         my $span_token = join("--", sort split(/--/, $fusion_name));
@@ -124,15 +128,19 @@ main: {
                  ($is_first_flag && $breakpoint_count >= $MIN_NOVEL_JUNCTION_SUPPORT) 
                 ) {
                 
-                     print join("\t", $fusion_name, $breakpoint_count, $span_count, 
+                print $ofh join("\t", $fusion_name, $breakpoint_count, $span_count, 
                                 $left_gene, $left_coords, $left_delta, 
                                 $right_gene, $right_coords, $right_delta) . "\n";
-                     
+                
             }
             $is_first_flag = 0;
         }
     }
-        
+    
+    close $ofh;
+    
+    print STDERR "\n\t* process complete.  See output: $fusion_predictions_outfile\n\n";
+    
     exit(0);
 
     
@@ -402,7 +410,7 @@ sub map_junction_reads_to_genes {
     
     print STDERR "-mapping junction reads to genes\n";
 
-    my $junctions_w_gene_info_file = basename($junctions_file) . ".incl_gene_info";
+    my $junctions_w_gene_info_file = "$out_prefix.junction_breakpts_to_genes.txt";
     open (my $ofh, ">$junctions_w_gene_info_file") or die "Error, cannot write to file $junctions_w_gene_info_file";
     
     
@@ -491,7 +499,7 @@ sub map_spanning_reads_to_genes {
     my ($chimeric_out_sam, $chr_to_interval_tree_href, $chr_gene_trans_to_exons_href) = @_;
 
     
-    my $read_to_spans_file = basename($chimeric_out_sam) . ".span_to_genes.txt";
+    my $read_to_spans_file = "$out_prefix.discordant_spans_to_genes.txt";
     open (my $ofh, ">$read_to_spans_file") or die "Error, cannot open file $read_to_spans_file";
     
     my %span_pair_counter;
