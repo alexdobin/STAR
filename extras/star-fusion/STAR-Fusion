@@ -8,10 +8,11 @@ use Carp;
 use Cwd;
 use FindBin;
 use Set::IntervalTree;
-
-use lib ("$FindBin::Bin/lib");
-use Pipeliner;
 use File::Basename;
+use Data::Dumper;
+use lib ("$FindBin::Bin/lib");
+use SAM_reader;
+use SAM_entry;
 
 use Getopt::Long qw(:config posix_default no_ignore_case bundling pass_through);
 
@@ -43,6 +44,8 @@ my $chimeric_junction_file;
 my $chimeric_out_sam;
 my $ref_GTF;
 my $help_flag;
+my $MIN_NOVEL_JUNCTION_SUPPORT = 10;
+
 
 my $usage = <<__EOUSAGE__;
 
@@ -89,32 +92,47 @@ unless ($chimeric_out_sam && $chimeric_junction_file && $ref_GTF) {
 
 main: {
     
-        
-    my $pipeliner = new Pipeliner(-verbose => 1);
-    
-    ##  assign fusion junctions to genes:
-    
-    my $junction_reads_to_genes_file = "$out_prefix.junction_reads_to_genes.txt";
-    my $cmd = "$UTILDIR/STAR_junction_to_genes.pl $chimeric_junction_file $ref_GTF > $junction_reads_to_genes_file";
-    $pipeliner->add_commands(Command->new($cmd, &make_hidden("$junction_reads_to_genes_file.ok")));
-    
-    ## assign spanning reads to genes:
-    
-    my $spanning_reads_to_genes_file = "$out_prefix.spanning_reads_to_genes.txt";
-    $cmd = "$UTILDIR/STAR_spanning_to_genes.pl $chimeric_out_sam $ref_GTF > $spanning_reads_to_genes_file";
-    $pipeliner->add_commands(Command->new($cmd, &make_hidden("$spanning_reads_to_genes_file.ok")));
-    
-    ## make a joint summary file:
-    my $star_fusions_outfile = "$out_prefix.fusion_candidates.txt";
-    $cmd = "set -o pipefail && $UTILDIR/STAR_collate_junction_and_spanning_results.pl "
-        . " $junction_reads_to_genes_file $spanning_reads_to_genes_file "
-        . " | sort -k2,2nr -k3,3nr > $star_fusions_outfile";
-    $pipeliner->add_commands(Command->new($cmd, &make_hidden("$star_fusions_outfile.ok")));
-    
-    $pipeliner->run();
 
-    print STDERR "Done.  See fusion candidates: $star_fusions_outfile\n\n";
+    my %chr_to_interval_tree;
+    my %chr_gene_trans_to_exons;
+
+    &parse_GTF_features($ref_GTF, \%chr_to_interval_tree, \%chr_gene_trans_to_exons);
+
     
+    my %junctions = &map_junction_reads_to_genes($chimeric_junction_file, \%chr_to_interval_tree, \%chr_gene_trans_to_exons);
+
+    my %spans = &map_spanning_reads_to_genes($chimeric_out_sam, \%chr_to_interval_tree, \%chr_gene_trans_to_exons);
+    
+    
+    foreach my $fusion_name (keys %junctions) {
+        
+        my $span_token = join("--", sort split(/--/, $fusion_name));
+        my $span_count = $spans{$span_token};
+        
+        my $breakpoint_info_href = $junctions{$fusion_name};
+                
+        my @fusion_breakpoints = reverse sort {$breakpoint_info_href->{$a}<=>$breakpoint_info_href->{$b}} keys %$breakpoint_info_href;
+
+        
+        my $is_first_flag = 1;
+        while (@fusion_breakpoints) {
+            my $best_breakpoint = shift @fusion_breakpoints;
+            my $breakpoint_count = $breakpoint_info_href->{$best_breakpoint};
+            my ($left_gene, $left_coords, $left_delta, $right_gene, $right_coords, $right_delta, @rest) = split(/;/, $best_breakpoint);
+            if ( ($left_delta == 0 && $right_delta == 0) 
+                 || 
+                 ($is_first_flag && $breakpoint_count >= $MIN_NOVEL_JUNCTION_SUPPORT) 
+                ) {
+                
+                     print join("\t", $fusion_name, $breakpoint_count, $span_count, 
+                                $left_gene, $left_coords, $left_delta, 
+                                $right_gene, $right_coords, $right_delta) . "\n";
+                     
+            }
+            $is_first_flag = 0;
+        }
+    }
+        
     exit(0);
 
     
@@ -130,4 +148,446 @@ sub make_hidden {
     my $h = "$d/.$f";
 
     return($h);
+}
+
+
+####
+sub parse_GTF_features {
+    my ($annot_gtf_file, $chr_to_interval_tree_href, $chr_gene_trans_to_exons_href) = @_;
+    
+    if ($annot_gtf_file =~ /\.gz$/) {
+        $annot_gtf_file = "gunzip -c $annot_gtf_file | ";
+    }
+
+
+    my %chr_to_gene_coords;
+    print STDERR "-parsing $annot_gtf_file\n";
+    open (my $fh, $annot_gtf_file) or die "Error, cannot open file $annot_gtf_file";
+    while (<$fh>) {
+        chomp;
+        unless (/\w/) { next; }
+        if (/^\#/) { next; }
+        s/^>//;
+        my @x = split(/\t/);
+        
+        unless ($x[2] eq "exon") { next; }
+        
+        my $info = $x[8];
+        $info =~ /gene_id \"([^\"]+)/ or die "Error, cannot extract gene_id from $_ [specifically from: $info]";
+        my $gene_id = $1 or die "Error, no gene_id from $_";
+        
+        if ($info =~ /gene_name \"([^\"]+)/) {
+            # use gene name instead
+            $gene_id = $1;
+        }
+        
+        $info =~ /transcript_id \"([^\"]+)/ or die "Error, cannot extract transcript_id from $_";
+        my $transcript_id = $1 or die "Error, no trans id from $_";
+        
+        my ($lend, $rend) = ($x[3], $x[4]);
+        my $chr = $x[0];
+        my $orient = $x[6];
+        
+        
+        my $exon_struct = { 
+            
+            gene => $gene_id,
+            transcript => $transcript_id,
+            chr => $chr,
+            lend => $lend,
+            rend => $rend,
+            orient => $orient,
+        
+        };
+        
+        push (@{$chr_gene_trans_to_exons_href->{$chr}->{$gene_id}->{$transcript_id}}, $exon_struct);
+        
+        push (@{$chr_to_gene_coords{$chr}->{$gene_id}}, $lend, $rend);
+        
+    }
+    close $fh;
+    
+    
+    print STDERR "-building interval tree for fast searching of gene overlaps\n";
+    ## Build interval trees
+    foreach my $chr (keys %chr_to_gene_coords) {
+
+        my $i_tree = $chr_to_interval_tree_href->{$chr} = Set::IntervalTree->new;
+        
+        foreach my $gene_id (keys %{$chr_to_gene_coords{$chr}}) {
+            
+            my @coords = sort {$a<=>$b} @{$chr_to_gene_coords{$chr}->{$gene_id}};
+            my $lend = shift @coords;
+            my $rend = pop @coords;
+
+            $i_tree->insert($gene_id, $lend, $rend);
+        }
+    }
+    
+    return;
+}
+    
+
+####
+sub find_exon_junction_matches {
+    my ($chr, $coord, $orient, $left_or_right, $chr_to_interval_tree_href, $chr_gene_trans_to_exons_href) = @_;
+    
+        
+    # two options, depending on sense or antisense alignment (antisense orientation just an artifiact of DS trans assembly)
+    
+    #          L                               R
+    #        ------> gt...................ag -------->              
+    #
+    #   |=================>              |==================>
+    #         gene A                            gene B
+    #
+    #        <------ ......................<---------
+    #           R                               L
+    # 
+    #  if left:
+    #      can be donor matching sense of geneA
+    #      can be acceptor matching antisense of geneB
+    #  if right:
+    #      can be acceptor for sense geneB
+    #      can be donor matching antisesnse of geneA
+    #
+    
+    my @exon_hits;
+
+    foreach my $gene_id (&get_overlapping_genes($chr_to_interval_tree_href, $chr, $coord - 1, $coord + 1)) {
+        
+        foreach my $transcript_id (keys %{$chr_gene_trans_to_exons_href->{$chr}->{$gene_id}}) {
+            
+            my @exons = @{$chr_gene_trans_to_exons_href->{$chr}->{$gene_id}->{$transcript_id}};
+            
+            @exons = sort {$a->{lend}<=>$b->{lend}} @exons;
+
+            my $trans_lend = $exons[0]->{lend};
+            my $trans_rend = $exons[$#exons]->{rend};
+            
+            unless ($trans_lend <= $coord && $trans_rend >= $coord) { 
+                # no overlap
+                next;
+            }
+            
+            ## exclude first and last exons, only looking at internal boundaries
+            $exons[0]->{terminal} = 1;
+            $exons[$#exons]->{terminal} = 1;
+
+            my $num_exons = scalar(@exons);
+            my $counter= 0;
+            foreach my $exon (@exons) {
+                $counter++;
+                $exon->{exon_num} = "$counter/$num_exons";
+            }
+            
+                        
+            foreach my $exon (@exons) {
+                
+                my $exon_lend = $exon->{lend};
+                my $exon_rend = $exon->{rend};
+                my $exon_orient = $exon->{orient};
+                
+                my ($exon_end5, $exon_end3) = ($exon_orient eq '+') ? ($exon_lend, $exon_rend) : ($exon_rend, $exon_lend);
+                
+
+                if ($exon_lend <= $coord && $exon_rend >= $coord ) {
+                    # annotated exon overlaps transcript
+                    
+                    my $sense_or_antisense;
+                    my $exon_coord;
+                    my $align_coord;
+                    
+                    # sense alignment matching
+                    if ($exon_orient eq $orient) {
+                        
+                        $sense_or_antisense = 'sense';
+                        
+                        if ($left_or_right eq 'left') {
+                            # examine donor sites
+                            $exon_coord = $exon_end3;
+                        }
+                        elsif ($left_or_right eq 'right') {
+                            # examine acceptor sites
+                            $exon_coord = $exon_end5;
+                        }
+                    }
+
+                    else {
+                        # antisense orientation to gene
+                        
+                        $sense_or_antisense = 'antisense';
+                        
+                        if ($left_or_right eq 'left') {
+                            # examine donor sites
+                            $exon_coord = $exon_end5;
+                        }
+                        elsif ($left_or_right eq 'right') {
+                            $exon_coord = $exon_end3;
+                        }    
+                    }
+                    
+                    my $delta = abs($coord - $exon_coord);
+                    
+                    
+                    push (@exon_hits, { delta => $delta,
+                                        exon => $exon,
+                                                                                
+                                        gene_id => $exon->{gene},
+                                        
+                                        # below for debugging
+                                        pt_align => $coord,
+                                        pt_exon => $exon_coord,
+                                        sense_or_antisense => $sense_or_antisense,
+                                        
+                                        chr => $chr,
+                                        
+                          });
+                    
+                }
+            }
+            
+        }
+    }
+    
+    my @hits_ret;
+    
+    if (@exon_hits) {
+
+        #use Data::Dumper;  print Dumper(\@hits); print Dumper($align_struct);
+        
+        @exon_hits = sort {$a->{delta}<=>$b->{delta}} @exon_hits;
+        
+        #use Data::Dumper;
+        #print STDERR Dumper(\@hits);
+        
+        # only best per gene
+        my %seen;
+        
+        foreach my $hit (@exon_hits) {
+            my $gene_id = $hit->{gene_id};
+            if (! $seen{$gene_id}) {
+                push (@hits_ret, $hit);
+                $seen{$gene_id} = 1;
+            }
+        }
+        
+    }
+    
+    return(@hits_ret);
+    
+}
+
+
+####
+sub get_overlapping_genes {
+    my ($chr_to_interval_tree_href, $chr, $lend, $rend) = @_;
+
+    my $interval_tree = $chr_to_interval_tree_href->{$chr};
+
+    unless (ref $interval_tree) {
+        # no genes on that chr?
+        return();
+    }
+
+    my $overlaps = $interval_tree->fetch($lend, $rend);
+
+    return(@$overlaps);
+}
+
+
+####
+sub map_junction_reads_to_genes {
+    my ($junctions_file, $chr_to_interval_tree_href, $chr_gene_trans_to_exons_href) = @_;
+    
+    print STDERR "-mapping junction reads to genes\n";
+
+    my $junctions_w_gene_info_file = basename($junctions_file) . ".incl_gene_info";
+    open (my $ofh, ">$junctions_w_gene_info_file") or die "Error, cannot write to file $junctions_w_gene_info_file";
+    
+    
+    if ($junctions_file =~ /\.gz$/) {
+        $junctions_file = "gunzip -c $junctions_file | ";
+    }
+    
+    my %junction_info;
+    
+    open (my $fh, $junctions_file) or die "Error, cannot open file $junctions_file";
+    while (<$fh>) {
+        chomp;
+        my $line = $_;
+        my @x = split(/\t/);
+        
+        my ($chrA, $coordA, $orientA) = ($x[0], $x[1], $x[2]);
+        $coordA = ($orientA eq '+') ? --$coordA : ++$coordA;
+        
+        my ($chrB, $coordB, $orientB) = ($x[3], $x[4], $x[5]);
+        $coordB = ($orientB eq '+') ? ++$coordB : --$coordB;
+        
+        my @A_hits = &find_exon_junction_matches($chrA, $coordA, $orientA, 'left', $chr_to_interval_tree_href, $chr_gene_trans_to_exons_href);
+
+        my @B_hits = &find_exon_junction_matches($chrB, $coordB, $orientB, 'right', $chr_to_interval_tree_href, $chr_gene_trans_to_exons_href);
+
+        #print STDERR "A: " . Dumper(\@A_hits);
+        #print STDERR "B: " . Dumper(\@B_hits);
+
+        foreach my $left_possibility (@A_hits) {
+
+            foreach my $right_possibility (@B_hits) {
+                        
+                my ($left_entry, $right_entry) = ($left_possibility, $right_possibility);
+                    
+                # ensure consistent orientation
+                unless ($left_entry->{sense_or_antisense} eq $right_entry->{sense_or_antisense}) {
+                    next;
+                }
+
+                if ($left_entry->{gene_id} eq $right_entry->{gene_id}) {
+                    # no selfies
+                    next;
+                }
+
+                if ($left_entry->{sense_or_antisense} eq 'antisense') {
+                    # swap em
+                    ($left_entry, $right_entry) = ($right_entry, $left_entry);
+                }
+                
+
+                my $fusion_name = join("--", $left_entry->{gene_id}, $right_entry->{gene_id});
+                        
+                my @at_exon_junctions = ($left_entry->{gene_id}, 
+                                         $left_entry->{chr} . ":" . $left_entry->{pt_align} . ":" . $left_entry->{exon}->{orient},
+                                         $left_entry->{delta}, 
+
+                                         $right_entry->{gene_id}, 
+                                         $right_entry->{chr} . ":" . $right_entry->{pt_align} . ":" . $right_entry->{exon}->{orient},
+                                         $right_entry->{delta}, 
+                                         
+                                         $fusion_name);
+                                
+                
+                my $junction_text = join(";", @at_exon_junctions);
+                push (@x, $junction_text);
+                
+                # both at exon junctions
+                $junction_info{$fusion_name}->{$junction_text}++;
+                
+            }
+        }
+     
+        print $ofh join("\t", @x) . "\n";
+    }
+    
+    close $ofh;
+    
+    
+    return (%junction_info);
+    
+}
+
+
+####
+sub map_spanning_reads_to_genes {
+    my ($chimeric_out_sam, $chr_to_interval_tree_href, $chr_gene_trans_to_exons_href) = @_;
+
+    
+    my $read_to_spans_file = basename($chimeric_out_sam) . ".span_to_genes.txt";
+    open (my $ofh, ">$read_to_spans_file") or die "Error, cannot open file $read_to_spans_file";
+    
+    my %span_pair_counter;
+    
+
+    my $sam_reader = new SAM_reader($chimeric_out_sam);
+    
+    my @read_info;
+    my $prev_core_read_name = "";
+    
+    while (my $sam_entry = $sam_reader->get_next()) {
+        
+        my $core_read_name = $sam_entry->get_core_read_name();
+        my $full_read_name = $sam_entry->reconstruct_full_read_name();
+        
+        if ($core_read_name ne $prev_core_read_name) {
+            &describe_read_pair_info($core_read_name, \@read_info, $ofh, \%span_pair_counter);
+            @read_info = ();
+        }
+
+
+        $full_read_name =~ m|/([12])$| or die "Error, cannot decipher read name $full_read_name as /1 or /2 ";
+        my $read_dir = $1;
+        
+        my $chr = $sam_entry->get_scaffold_name();
+
+        unless (exists $chr_to_interval_tree_href->{$chr}) { next; } # no annotations to search overlaps of.
+        
+        my ($genome_coords_aref, $read_coords_aref) = $sam_entry->get_alignment_coords();
+
+        foreach my $exon_segment (@$genome_coords_aref) {
+            my ($lend, $rend) = @$exon_segment;
+            my $overlaps_aref = $chr_to_interval_tree_href->{$chr}->fetch($lend, $rend);
+            if (@$overlaps_aref) {
+                &add_overlapping_genes(\@read_info, $overlaps_aref, $read_dir);                
+            }
+        }
+        
+        $prev_core_read_name = $core_read_name;
+    }
+
+    # get last one
+    &describe_read_pair_info($prev_core_read_name, \@read_info, $ofh, \%span_pair_counter);
+
+
+    return(%span_pair_counter);
+    
+}
+
+
+####
+sub describe_read_pair_info {
+    my ($read_name, $read_info_aref, $ofh, $span_pair_counter_href) = @_;
+    
+    my @read_1_genes;
+    my @read_2_genes;
+
+    my $read_1_genes_href = $read_info_aref->[1];
+    if ($read_1_genes_href) {
+        @read_1_genes = sort keys (%$read_1_genes_href);
+    }
+
+    my $read_2_genes_href = $read_info_aref->[2];
+    if ($read_2_genes_href) {
+        @read_2_genes = sort keys (%$read_2_genes_href);
+    }
+    
+    if (@read_1_genes && @read_2_genes) {
+            
+        my %seen;
+        foreach my $read_1_gene (@read_1_genes) {
+            foreach my $read_2_gene (@read_2_genes) {
+                my $fusion_token = join("--", sort ($read_1_gene, $read_2_gene));
+                if ($seen{$fusion_token}) { next; } # just in case, don't overcount
+                $seen{$fusion_token} = 1;
+                
+                print $ofh "$read_name\t$fusion_token\n";
+            
+                $span_pair_counter_href->{$fusion_token}++;
+            }
+        }
+                
+        
+    }
+    
+    return;
+}    
+        
+
+####
+sub add_overlapping_genes {
+    my ($read_info_aref, $overlaps_aref, $read_dir) = @_;
+    
+    foreach my $gene (@$overlaps_aref) {
+        $read_info_aref->[$read_dir]->{$gene} = 1;
+    }
+
+    return;
 }
