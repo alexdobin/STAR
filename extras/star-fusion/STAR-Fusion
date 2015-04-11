@@ -45,7 +45,7 @@ my $chimeric_out_sam;
 my $ref_GTF;
 my $help_flag;
 my $MIN_NOVEL_JUNCTION_SUPPORT = 10;
-
+my $MIN_ALT_PCT_JUNCTION = 10.0;
 
 my $usage = <<__EOUSAGE__;
 
@@ -61,6 +61,11 @@ my $usage = <<__EOUSAGE__;
 #
 # 
 #  Optional:
+#
+#    --min_novel_junction_support <int>    default: 10  (minimum of 10 junction reads required if breakpoint
+#                                                        lacks involvement of only reference junctions)
+#
+#    --min_alt_pct_junction <float>        default: 10.0  (10% of the dominant isoform junction support)
 #
 #    --out_prefix|O <string>         output file prefix (default: $out_prefix)
 #
@@ -78,6 +83,8 @@ __EOUSAGE__
               'chimeric_junction|J=s' => \$chimeric_junction_file,
               'ref_GTF|G=s' => \$ref_GTF,
 
+              'min_novel_junction_support=i' => \$MIN_NOVEL_JUNCTION_SUPPORT,
+              'min_alt_pct_junction=f' => \$MIN_ALT_PCT_JUNCTION,
               'out_prefix|O=s' => \$out_prefix,
     );
 
@@ -118,23 +125,34 @@ main: {
                 
         my @fusion_breakpoints = reverse sort {$breakpoint_info_href->{$a}<=>$breakpoint_info_href->{$b}} keys %$breakpoint_info_href;
 
+        my $top_breakpoint_support = -1;
         
-        my $is_first_flag = 1;
         while (@fusion_breakpoints) {
             my $best_breakpoint = shift @fusion_breakpoints;
             my $breakpoint_count = $breakpoint_info_href->{$best_breakpoint};
             my ($left_gene, $left_coords, $left_delta, $right_gene, $right_coords, $right_delta, @rest) = split(/;/, $best_breakpoint);
             if ( ($left_delta == 0 && $right_delta == 0) 
                  || 
-                 ($is_first_flag && $breakpoint_count >= $MIN_NOVEL_JUNCTION_SUPPORT) 
+                 ($breakpoint_count >= $MIN_NOVEL_JUNCTION_SUPPORT) 
                 ) {
+                
+                if ($top_breakpoint_support < 0) {
+                    $top_breakpoint_support = $breakpoint_count;
+                }
+                else {
+                    my $pct_top_brkpt_support = $breakpoint_count / $top_breakpoint_support * 100;
+                    if ($pct_top_brkpt_support < $MIN_ALT_PCT_JUNCTION) { 
+                        # not enough evidence compared to a dominant junction call.
+                        next;
+                    }
+                }
                 
                 print $ofh join("\t", $fusion_name, $breakpoint_count, $span_count, 
                                 $left_gene, $left_coords, $left_delta, 
                                 $right_gene, $right_coords, $right_delta) . "\n";
                 
             }
-            $is_first_flag = 0;
+
         }
     }
     
