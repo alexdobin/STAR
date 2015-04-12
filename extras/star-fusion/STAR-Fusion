@@ -107,9 +107,11 @@ main: {
 
     
     my %junction_read_names;
-    my %junctions = &map_junction_reads_to_genes($chimeric_junction_file, \%chr_to_interval_tree, \%chr_gene_trans_to_exons, \%junction_read_names);
-
-    my %spans = &map_spanning_reads_to_genes($chimeric_out_sam, \%chr_to_interval_tree, \%chr_gene_trans_to_exons, \%junction_read_names);
+    my %junctions = &map_junction_reads_to_genes($chimeric_junction_file, \%chr_to_interval_tree, \%chr_gene_trans_to_exons, 
+                                                 \%junction_read_names);
+    
+    my %spans = &map_spanning_reads_to_genes($chimeric_out_sam, \%chr_to_interval_tree, \%chr_gene_trans_to_exons, 
+                                             \%junction_read_names);
     
     
     my $fusion_predictions_outfile = "$out_prefix.fusion_candidates.txt";
@@ -122,12 +124,12 @@ main: {
                     "LeftGene", "LeftBreakpoint",  "LeftDistFromRefExonSplice",
                     "RightGene", "RightBreakpoint", "RightDistFromRefExonSplice") . "\n";
     
-    foreach my $fusion_name (keys %junctions) {
+    foreach my $fusion_complex_name (keys %junctions) {
         
-        my $span_token = join("--", sort split(/--/, $fusion_name));
+        my $span_token = join("--", sort split(/--/, $fusion_complex_name));
         my $span_count = $spans{$span_token} || 0;
         
-        my $breakpoint_info_href = $junctions{$fusion_name};
+        my $breakpoint_info_href = $junctions{$fusion_complex_name};
                 
         my @fusion_breakpoints = reverse sort {$breakpoint_info_href->{$a}<=>$breakpoint_info_href->{$b}} keys %$breakpoint_info_href;
 
@@ -136,7 +138,7 @@ main: {
         while (@fusion_breakpoints) {
             my $best_breakpoint = shift @fusion_breakpoints;
             my $breakpoint_count = $breakpoint_info_href->{$best_breakpoint};
-            my ($left_gene, $left_coords, $left_delta, $right_gene, $right_coords, $right_delta, @rest) = split(/;/, $best_breakpoint);
+            my ($left_gene, $left_coords, $left_delta, $right_gene, $right_coords, $right_delta, $complex_name, $fusion_simple_name) = split(/;/, $best_breakpoint);
             if ( ($left_delta == 0 && $right_delta == 0) 
                  || 
                  ($breakpoint_count >= $MIN_NOVEL_JUNCTION_SUPPORT) 
@@ -153,7 +155,7 @@ main: {
                     }
                 }
                 
-                print $ofh join("\t", $fusion_name, $breakpoint_count, $span_count, 
+                print $ofh join("\t", $fusion_simple_name, $breakpoint_count, $span_count, 
                                 $left_gene, $left_coords, $left_delta, 
                                 $right_gene, $right_coords, $right_delta) . "\n";
                 
@@ -209,9 +211,11 @@ sub parse_GTF_features {
         $info =~ /gene_id \"([^\"]+)/ or die "Error, cannot extract gene_id from $_ [specifically from: $info]";
         my $gene_id = $1 or die "Error, no gene_id from $_";
         
+        
         if ($info =~ /gene_name \"([^\"]+)/) {
             # use gene name instead
-            $gene_id = $1;
+            my $gene_name = $1;
+            $gene_id = join("^", $gene_name, $gene_id);
         }
         
         $info =~ /transcript_id \"([^\"]+)/ or die "Error, cannot extract transcript_id from $_";
@@ -431,7 +435,8 @@ sub get_overlapping_genes {
 
 ####
 sub map_junction_reads_to_genes {
-    my ($junctions_file, $chr_to_interval_tree_href, $chr_gene_trans_to_exons_href, $junction_read_names_href) = @_;
+    my ($junctions_file, $chr_to_interval_tree_href, $chr_gene_trans_to_exons_href, 
+        $junction_read_names_href, $gene_id_to_name_href) = @_;
     
     print STDERR "-mapping junction reads to genes\n";
 
@@ -487,26 +492,32 @@ sub map_junction_reads_to_genes {
                     ($left_entry, $right_entry) = ($right_entry, $left_entry);
                 }
                 
-
-                my $fusion_name = join("--", $left_entry->{gene_id}, $right_entry->{gene_id});
-                        
-                my @at_exon_junctions = ($left_entry->{gene_id}, 
+                my $left_gene_id = $left_entry->{gene_id};
+                my ($left_gene_name, $left_id) = split(/\^/, $left_gene_id);
+                
+                my $right_gene_id = $right_entry->{gene_id};
+                my ($right_gene_name, $right_id) = split(/\^/, $right_gene_id);
+                
+                my $fusion_simple_name = join("--", $left_gene_name, $right_gene_name);
+                my $fusion_complex_name = join("--", $left_gene_id, $right_gene_id);
+                
+                my @at_exon_junctions = ($left_gene_id, 
                                          $left_entry->{chr} . ":" . $left_entry->{pt_align} . ":" . $left_entry->{exon}->{orient},
                                          $left_entry->{delta}, 
 
-                                         $right_entry->{gene_id}, 
+                                         $right_gene_id, 
                                          $right_entry->{chr} . ":" . $right_entry->{pt_align} . ":" . $right_entry->{exon}->{orient},
                                          $right_entry->{delta}, 
-                                         
-                                         $fusion_name);
-                                
+                                         $fusion_complex_name,
+                                         $fusion_simple_name);
+                
                 
                 my $junction_text = join(";", @at_exon_junctions);
                 push (@x, $junction_text);
                 
                 # both at exon junctions
-                $junction_info{$fusion_name}->{$junction_text}++;
-        
+                $junction_info{$fusion_complex_name}->{$junction_text}++;
+                
                 $junction_read_names_href->{$junction_read_name}++; # ignore in spanning read set. 
             }
         }
@@ -525,7 +536,7 @@ sub map_junction_reads_to_genes {
 ####
 sub map_spanning_reads_to_genes {
     my ($chimeric_out_sam, $chr_to_interval_tree_href, $chr_gene_trans_to_exons_href, $junction_read_names_href) = @_;
-
+    
     
     my $read_to_spans_file = "$out_prefix.discordant_spans_to_genes.txt";
     open (my $ofh, ">$read_to_spans_file") or die "Error, cannot open file $read_to_spans_file";
@@ -546,8 +557,8 @@ sub map_spanning_reads_to_genes {
 
         my $full_read_name = $sam_entry->reconstruct_full_read_name();
         
-        if ($core_read_name ne $prev_core_read_name) {
-            &describe_read_pair_info($core_read_name, \@read_info, $ofh, \%span_pair_counter);
+        if ($core_read_name ne $prev_core_read_name && @read_info) {
+            &describe_read_pair_info($prev_core_read_name, \@read_info, $ofh, \%span_pair_counter);
             @read_info = ();
         }
 
