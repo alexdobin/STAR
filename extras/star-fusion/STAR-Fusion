@@ -110,10 +110,9 @@ main: {
     my %junctions = &map_junction_reads_to_genes($chimeric_junction_file, \%chr_to_interval_tree, \%chr_gene_trans_to_exons, 
                                                  \%junction_read_names);
     
-    my %spans = &map_spanning_reads_to_genes($chimeric_out_sam, \%chr_to_interval_tree, \%chr_gene_trans_to_exons, 
-                                             \%junction_read_names);
+    my %spans = &map_spanning_reads_to_genes($chimeric_out_sam, \%chr_to_interval_tree, \%chr_gene_trans_to_exons); 
     
-    
+                      
     my $fusion_predictions_outfile = "$out_prefix.fusion_candidates.txt";
     open (my $ofh, ">$fusion_predictions_outfile") or die "Error, cannot write to file: $fusion_predictions_outfile";
     
@@ -124,13 +123,30 @@ main: {
                     "LeftGene", "LeftBreakpoint",  "LeftDistFromRefExonSplice",
                     "RightGene", "RightBreakpoint", "RightDistFromRefExonSplice") . "\n";
     
+    
+    my $junction_read_outfile = "$out_prefix.junction_read_names";
+    open (my $ofh_junc, ">$junction_read_outfile") or die "Error, cannot write to $junction_read_outfile";
+    
+    my $spanning_read_outfile = "$out_prefix.spanning_read_names";
+    open (my $ofh_span, ">$spanning_read_outfile") or die "Error, cannot write to $spanning_read_outfile";
+    
     foreach my $fusion_complex_name (keys %junctions) {
         
         my $span_token = join("--", sort split(/--/, $fusion_complex_name));
-        my $span_count = $spans{$span_token} || 0;
+
+        ## get the span support
+        my $spanning_reads_href = $spans{$fusion_complex_name};
+        my @spanning_reads;
+
+        if (ref $spanning_reads_href) {
+            @spanning_reads = keys %$spanning_reads_href;
+            foreach my $span_read (@spanning_reads) {
+                print $ofh_span "$fusion_complex_name\t$span_read\n";
+            }
+        }
         
         my $breakpoint_info_href = $junctions{$fusion_complex_name};
-                
+        
         my @fusion_breakpoints = reverse sort {$breakpoint_info_href->{$a}<=>$breakpoint_info_href->{$b}} keys %$breakpoint_info_href;
 
         my $top_breakpoint_support = -1;
@@ -155,9 +171,24 @@ main: {
                     }
                 }
                 
+                # prune any junction reads from the span support for this fusion.
+                my %local_spanning_reads = map { + $_ => 1 } @spanning_reads;
+                
+                my $junction_reads_href = $junction_read_names{$best_breakpoint};
+                foreach my $junction_read (keys %$junction_reads_href) {
+                    print $ofh_junc "$fusion_complex_name\t$best_breakpoint\t$junction_read\n";
+                    if (exists $local_spanning_reads{$junction_read}) {
+                        delete $local_spanning_reads{$junction_read};
+                    }
+                }
+                my $span_count = scalar(keys %local_spanning_reads);
+                
                 print $ofh join("\t", $fusion_simple_name, $breakpoint_count, $span_count, 
                                 $left_gene, $left_coords, $left_delta, 
                                 $right_gene, $right_coords, $right_delta) . "\n";
+                
+
+                
                 
             }
 
@@ -165,6 +196,8 @@ main: {
     }
     
     close $ofh;
+    close $ofh_junc;
+    close $ofh_span;
     
     print STDERR "\n\t* process complete.  See output: $fusion_predictions_outfile\n\n";
     
@@ -518,7 +551,9 @@ sub map_junction_reads_to_genes {
                 # both at exon junctions
                 $junction_info{$fusion_complex_name}->{$junction_text}++;
                 
-                $junction_read_names_href->{$junction_read_name}++; # ignore in spanning read set. 
+                $junction_read_names_href->{$junction_text}->{$junction_read_name}++; # track junction read name to fusion name
+                $junction_read_names_href->{$junction_read_name}++; # ignore in spanning read set, working double-duty w/ data structure. 
+            
             }
         }
      
@@ -535,7 +570,7 @@ sub map_junction_reads_to_genes {
 
 ####
 sub map_spanning_reads_to_genes {
-    my ($chimeric_out_sam, $chr_to_interval_tree_href, $chr_gene_trans_to_exons_href, $junction_read_names_href) = @_;
+    my ($chimeric_out_sam, $chr_to_interval_tree_href, $chr_gene_trans_to_exons_href) = @_;
     
     
     my $read_to_spans_file = "$out_prefix.discordant_spans_to_genes.txt";
@@ -549,14 +584,20 @@ sub map_spanning_reads_to_genes {
     my @read_info;
     my $prev_core_read_name = "";
     
+    my $DEBUG_SPAN_FLAG = 1;
+    my $test_ofh;
+    
+    if ($DEBUG_SPAN_FLAG) {
+        open ($test_ofh, ">test.out") or die $!;
+    }
+    
     while (my $sam_entry = $sam_reader->get_next()) {
         
         my $core_read_name = $sam_entry->get_core_read_name();
-
-        if (exists $junction_read_names_href->{$core_read_name}) { next; } # already used as a junction read candidate.
-
         my $full_read_name = $sam_entry->reconstruct_full_read_name();
         
+        print $test_ofh "// read: $full_read_name\n" if $DEBUG_SPAN_FLAG;
+
         if ($core_read_name ne $prev_core_read_name && @read_info) {
             &describe_read_pair_info($prev_core_read_name, \@read_info, $ofh, \%span_pair_counter);
             @read_info = ();
@@ -568,16 +609,27 @@ sub map_spanning_reads_to_genes {
         
         my $chr = $sam_entry->get_scaffold_name();
 
-        unless (exists $chr_to_interval_tree_href->{$chr}) { next; } # no annotations to search overlaps of.
+        unless (exists $chr_to_interval_tree_href->{$chr}) { 
+            
+             # no annotations to search overlaps of.
+            print $test_ofh "-warning: no interval tree features on chr: $chr\n" if $DEBUG_SPAN_FLAG;
+            next; 
+        }
         
         my ($genome_coords_aref, $read_coords_aref) = $sam_entry->get_alignment_coords();
 
+        my $found_overlap = 0;
         foreach my $exon_segment (@$genome_coords_aref) {
             my ($lend, $rend) = @$exon_segment;
             my $overlaps_aref = $chr_to_interval_tree_href->{$chr}->fetch($lend, $rend);
             if (@$overlaps_aref) {
+                print $test_ofh "$full_read_name coords $lend-$rend overlap: " . @$overlaps_aref . "\n" if $DEBUG_SPAN_FLAG;
                 &add_overlapping_genes(\@read_info, $overlaps_aref, $read_dir);                
+                $found_overlap = 1;
             }
+        }
+        unless ($found_overlap) {
+            print $test_ofh "$full_read_name has no feature overlap.\n" if $DEBUG_SPAN_FLAG;
         }
         
         $prev_core_read_name = $core_read_name;
@@ -620,10 +672,10 @@ sub describe_read_pair_info {
                 
                 print $ofh "$read_name\t$fusion_token\n";
             
-                $span_pair_counter_href->{$fusion_token}++;
+                $span_pair_counter_href->{$fusion_token}->{$read_name}++;
             }
         }
-                
+        
         
     }
     
