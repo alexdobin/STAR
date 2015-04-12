@@ -42,7 +42,7 @@ my $UTILDIR = "$FindBin::Bin/util";
 my $out_prefix = "star-fusion";
 my $chimeric_junction_file;
 my $chimeric_out_sam;
-my $ref_GTF;
+my $ref_GTF = "$FindBin::Bin/resources/gencode.v19.annotation.gtf.exons.gz";
 my $help_flag;
 my $MIN_NOVEL_JUNCTION_SUPPORT = 10;
 my $MIN_ALT_PCT_JUNCTION = 10.0;
@@ -57,10 +57,9 @@ my $usage = <<__EOUSAGE__;
 #
 #    --chimeric_junction|J <string>     Chimeric.out.junction file
 #
-#    --ref_GTF|G <string>               reference annotation GTF file (ie. gencode.gtf)
-#
-# 
 #  Optional:
+#
+#    --ref_GTF|G <string>               reference annotation GTF file (ie. gencode.gtf)
 #
 #    --min_novel_junction_support <int>    default: 10  (minimum of 10 junction reads required if breakpoint
 #                                                        lacks involvement of only reference junctions)
@@ -92,10 +91,12 @@ __EOUSAGE__
 if ($help_flag) {
     die $usage;
 }
-unless ($chimeric_out_sam && $chimeric_junction_file && $ref_GTF) {
+unless ($chimeric_out_sam && $chimeric_junction_file) {
     die $usage;
 }
-
+unless (-s $ref_GTF) {
+    die "Error, cannot locate reference annotation file: $ref_GTF";
+}
 
 main: {
     
