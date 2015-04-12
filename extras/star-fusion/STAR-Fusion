@@ -196,12 +196,14 @@ main: {
         }
     }
     
-    close $ofh;
     close $ofh_junc;
     close $ofh_span;
     
     print STDERR "\n\t* process complete.  See output: $fusion_predictions_outfile\n\n";
     
+    close $ofh;
+    
+
     exit(0);
 
     
