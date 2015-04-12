@@ -116,7 +116,7 @@ main: {
     my $fusion_predictions_outfile = "$out_prefix.fusion_candidates.txt";
     open (my $ofh, ">$fusion_predictions_outfile") or die "Error, cannot write to file: $fusion_predictions_outfile";
     
-    print STDERR "-outputting fusiong candidates to file: $fusion_predictions_outfile\n";
+    print STDERR "-outputting fusion candidates to file: $fusion_predictions_outfile\n";
 
     # print header
     print $ofh join("\t", "#fusion_name", "JunctionReads", "SpanningFrags", 
@@ -132,10 +132,10 @@ main: {
     
     foreach my $fusion_complex_name (keys %junctions) {
         
-        my $span_token = join("--", sort split(/--/, $fusion_complex_name));
+        my $span_token = join("--", sort split(/--/, $fusion_complex_name)); # spans are lexically ordered pairs in contrast to juncs
 
         ## get the span support
-        my $spanning_reads_href = $spans{$fusion_complex_name};
+        my $spanning_reads_href = $spans{$span_token};
         my @spanning_reads;
 
         if (ref $spanning_reads_href) {
@@ -623,7 +623,7 @@ sub map_spanning_reads_to_genes {
             my ($lend, $rend) = @$exon_segment;
             my $overlaps_aref = $chr_to_interval_tree_href->{$chr}->fetch($lend, $rend);
             if (@$overlaps_aref) {
-                print $test_ofh "$full_read_name coords $lend-$rend overlap: " . @$overlaps_aref . "\n" if $DEBUG_SPAN_FLAG;
+                print $test_ofh "$full_read_name coords $lend-$rend overlap: " . join(",", @$overlaps_aref) . "\n" if $DEBUG_SPAN_FLAG;
                 &add_overlapping_genes(\@read_info, $overlaps_aref, $read_dir);                
                 $found_overlap = 1;
             }
@@ -638,7 +638,8 @@ sub map_spanning_reads_to_genes {
     # get last one
     &describe_read_pair_info($prev_core_read_name, \@read_info, $ofh, \%span_pair_counter);
 
-
+    #use Data::Dumper; print STDERR Dumper(\%span_pair_counter);
+    
     return(%span_pair_counter);
     
 }
