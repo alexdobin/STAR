@@ -106,6 +106,10 @@ main: {
 
     &parse_GTF_features($ref_GTF, \%chr_to_interval_tree, \%chr_gene_trans_to_exons);
 
+
+    ####################################
+    ## Get the evidence for fusion genes
+    ####################################
     
     my %junction_read_names;
     my %junctions = &map_junction_reads_to_genes($chimeric_junction_file, \%chr_to_interval_tree, \%chr_gene_trans_to_exons, 
@@ -113,23 +117,20 @@ main: {
     
     my %spans = &map_spanning_reads_to_genes($chimeric_out_sam, \%chr_to_interval_tree, \%chr_gene_trans_to_exons); 
     
-                      
-    my $fusion_predictions_outfile = "$out_prefix.fusion_candidates.txt";
-    open (my $ofh, ">$fusion_predictions_outfile") or die "Error, cannot write to file: $fusion_predictions_outfile";
     
-    print STDERR "-outputting fusion candidates to file: $fusion_predictions_outfile\n";
 
-    # print header
-    print $ofh join("\t", "#fusion_name", "JunctionReads", "SpanningFrags", 
-                    "LeftGene", "LeftBreakpoint",  "LeftDistFromRefExonSplice",
-                    "RightGene", "RightBreakpoint", "RightDistFromRefExonSplice") . "\n";
-    
-    
+    ########################################################################
+    ## Examine each fusion gene pair, filter out fusion candidates based on 
+    ## reference gene mappings and use of reference splice junctions.
+    ########################################################################
+                      
     my $junction_read_outfile = "$out_prefix.junction_read_names";
     open (my $ofh_junc, ">$junction_read_outfile") or die "Error, cannot write to $junction_read_outfile";
     
     my $spanning_read_outfile = "$out_prefix.spanning_read_names";
     open (my $ofh_span, ">$spanning_read_outfile") or die "Error, cannot write to $spanning_read_outfile";
+
+    my %breakpoint_to_fusion_candidates;
     
     foreach my $fusion_complex_name (keys %junctions) {
         
@@ -184,13 +185,27 @@ main: {
                 }
                 my $span_count = scalar(keys %local_spanning_reads);
                 
-                print $ofh join("\t", $fusion_simple_name, $breakpoint_count, $span_count, 
-                                $left_gene, $left_coords, $left_delta, 
-                                $right_gene, $right_coords, $right_delta) . "\n";
                 
+                my $fusion_candidate = { fusion_simple_name => $fusion_simple_name,
+                                         fusion_complex_name => $fusion_complex_name,
+                                         
+                                         junction_count => $breakpoint_count,
+                                         spanning_count => $span_count,
 
+                                         left_gene => $left_gene,
+                                         left_coords => $left_coords,
+                                         left_delta => $left_delta, # dist to ref splice junction
+                                         
+                                         right_gene => $right_gene,
+                                         right_coords => $right_coords,
+                                         right_delta => $right_delta, # dist to ref splice junction
+                                         
+                };
                 
-                
+                my $breakpoint_coords_token = join("$;", $left_coords, $right_coords);
+
+                push (@{$breakpoint_to_fusion_candidates{$breakpoint_coords_token}}, $fusion_candidate);
+                                
             }
 
         }
@@ -198,6 +213,43 @@ main: {
     
     close $ofh_junc;
     close $ofh_span;
+
+
+    ####################################################################
+    ## Further filter fusion candidates and generate final predictions.
+    ## Breakpoint-focused
+    ####################################################################
+    
+
+    my $fusion_predictions_outfile = "$out_prefix.fusion_candidates.txt";
+    open (my $ofh, ">$fusion_predictions_outfile") or die "Error, cannot write to file: $fusion_predictions_outfile";
+    
+    print STDERR "-outputting fusion candidates to file: $fusion_predictions_outfile\n";
+
+    # print header
+    print $ofh join("\t", "#fusion_name", "JunctionReads", "SpanningFrags", 
+                    "LeftGene", "LeftBreakpoint",  "LeftDistFromRefExonSplice",
+                    "RightGene", "RightBreakpoint", "RightDistFromRefExonSplice") . "\n";
+    
+    
+    # examining fusions based on the specific junction breakpoint, regardless of genes assigned to.
+    
+    foreach my $fusion_candidates_aref (values %breakpoint_to_fusion_candidates) {
+        
+        ## all have the same junction support,
+        #  so output the one fusion that has the greatest span support.
+
+        my @candidates_at_breakpoint = reverse sort { $a->{spanning_count} <=> $b->{spanning_count}} @$fusion_candidates_aref;
+
+        my $fusion_candidate = shift @candidates_at_breakpoint;
+        
+        print $ofh join("\t", $fusion_candidate->{fusion_simple_name}, 
+                        $fusion_candidate->{junction_count}, $fusion_candidate->{spanning_count},
+                        $fusion_candidate->{left_gene}, $fusion_candidate->{left_coords}, $fusion_candidate->{left_delta}, 
+                        $fusion_candidate->{right_gene}, $fusion_candidate->{right_coords}, $fusion_candidate->{right_delta}) . "\n";
+        
+    }
+    
     
     print STDERR "\n\t* process complete.  See output: $fusion_predictions_outfile\n\n";
     
