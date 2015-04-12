@@ -44,23 +44,25 @@ The output from running star will include two primary output files that contain 
 ## Running STAR-Fusion ##
 #########################
 
-Run STAR-Fusion like so, using these two files above in addition to specifiying the reference genome annotation GTF file:
+Run STAR-Fusion like so, using these two files above.  (Note, specify -G ref_annot.gtf if you choose to use a different annotation set than that included and used by default (gencode.v19 in the resources/ folder)
 
-      STAR-Fusion -S Chimeric.out.sam -J Chimeric.out.junction -G ref_annot.gtf
+      STAR-Fusion -S Chimeric.out.sam -J Chimeric.out.junction
 
 
 The output from STAR-Fusion is found as a tab-delimited file named 'star-fusion.fusion_candidates.txt', and has the following format:
 
-#fusion_name	JunctionReads	SpanningFrags	LeftGene	LeftBreakpoint	LeftDistFromRefExonSplice	RightGene	RightBreakpoint	RightDistFromRefExonSplice
-FGFR3--TACC3	221	54	FGFR3	chr4:1808661:+	0	TACC3	chr4:1729704:+	269
-EWSR1--FLI1	5	0	EWSR1	chr22:29683123:+	0	FLI1	chr11:128677075:+	0
-EWSR1--ATF1	8	2	EWSR1	chr22:29683123:+	0	ATF1	chr12:51208063:+	0
-CD74--ROS1	5	0	CD74	chr5:149784243:-	0	ROS1	chr6:117645578:-	0
-BRD4--NUTM1	7	1	BRD4	chr19:15364963:-	0	NUTM1	chr15:34640170:+	0
-GOPC--ROS1	82	10	GOPC	chr6:117888017:-	0	ROS1	chr6:117642557:-	0
-HOOK3--RET	9	0	HOOK3	chr8:42823357:+	0	RET	chr10:43612032:+	0
-AKAP9--BRAF	4	1	AKAP9	chr7:91632549:+	0	BRAF	chr7:140487384:-	0
-ETV6--NTRK3	8	1	ETV6	chr12:12022903:+	0	NTRK3	chr15:88483984:-	0
+#fusion_name    JunctionReads   SpanningFrags   LeftGene        LeftBreakpoint  LeftDistFromRefExonSplice       RightGene       RightBreakpoint RightDistFromRefExonSplice
+FIP1L1--PDGFRA  98      13      FIP1L1^ENSG00000145216.11       chr4:54292132:+ 0       PDGFRA^ENSG00000134853.7        chr4:55141092:+ 84
+BRD4--NUTM1     7       2       BRD4^ENSG00000141867.13 chr19:15364963:-        0       NUTM1^ENSG00000184507.11        chr15:34640170:+        0
+EWSR1--FLI1     5       2       EWSR1^ENSG00000182944.13        chr22:29683123:+        0       FLI1^ENSG00000151702.12 chr11:128677075:+       0
+GOPC--ROS1      82      36      GOPC^ENSG00000047932.9  chr6:117888017:-        0       ROS1^ENSG00000047936.6  chr6:117642557:-        0
+ETV6--NTRK3     8       3       ETV6^ENSG00000139083.6  chr12:12022903:+        0       NTRK3^ENSG00000140538.12        chr15:88483984:-        0
+FGFR3--TACC3    221     372     FGFR3^ENSG00000068078.13        chr4:1808661:+  0       TACC3^ENSG00000013810.14        chr4:1729704:+  269
+EWSR1--ATF1     8       3       EWSR1^ENSG00000182944.13        chr22:29683123:+        0       ATF1^ENSG00000123268.4  chr12:51208063:+        0
+HOOK3--RET      9       2       HOOK3^ENSG00000168172.4 chr8:42823357:+ 0       RET^ENSG00000165731.13  chr10:43612032:+        0
+CD74--ROS1      5       0       CD74^ENSG00000019582.10 chr5:149784243:-        0       ROS1^ENSG00000047936.6  chr6:117645578:-        0
+TMPRSS2--ETV1   10      3       TMPRSS2^ENSG00000184012.7       chr21:42866302:-        19      ETV1^ENSG00000006468.9  chr7:13975463:- 58
+AKAP9--BRAF     4       4       AKAP9^ENSG00000127914.12        chr7:91632549:+ 0       BRAF^ENSG00000157764.8  chr7:140487384:-        0
 ...
 
 
@@ -92,7 +94,7 @@ In this test/ directory, Run the sample execution like so:
 
 which simply runs:
 
-    ../STAR-Fusion -S data/Chimeric.out.sam.gz -J data/Chimeric.out.junction.gz -G data/gencode.v19.rna_seq_pipeline.gtf.exons.gz
+    ../STAR-Fusion -S Chimeric.out.sam.gz -J Chimeric.out.junction.gz 
 
 and you'll find the output file 'star-fusion.fusion_candidates.txt' containing the fusion candidates in the format described above.
 
