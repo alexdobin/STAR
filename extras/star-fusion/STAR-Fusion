@@ -584,7 +584,7 @@ sub map_spanning_reads_to_genes {
     my @read_info;
     my $prev_core_read_name = "";
     
-    my $DEBUG_SPAN_FLAG = 1;
+    my $DEBUG_SPAN_FLAG = 0;
     my $test_ofh;
     
     if ($DEBUG_SPAN_FLAG) {
