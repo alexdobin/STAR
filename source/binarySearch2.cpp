@@ -3,7 +3,7 @@
 int binarySearch2(uint x, uint y, uint *X, uint *Y, int N) {
     //binary search in the sorted list to find the junction
     //check the boundaries first
-    if (x>X[N-1] || x<X[0]) return -1;
+    if (N==0 || x>X[N-1] || x<X[0]) return -1;
     
     int i1=0, i2=N-1, i3=N/2;
     while (i2>i1+1) {//binary search

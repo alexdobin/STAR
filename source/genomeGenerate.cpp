@@ -480,14 +480,19 @@ void genomeGenerate(Parameters *P) {
 
     {//insert junctions
         SjdbClass sjdbLoci;
-        Parameters *P1=new Parameters;
-        *P1=*P;
+
         Genome mainGenome;
         mainGenome.G=G;
         mainGenome.SA=SA1;
         mainGenome.SApass1=SA2;
         mainGenome.SAi=SAip;
         P->sjdbInsert.outDir=P->genomeDir;
+        P->sjdbN=0;//no junctions are loaded yet
+        P->twoPass.pass2=false;
+        
+        Parameters *P1=new Parameters;
+        *P1=*P;        
+        
         sjdbInsertJunctions(P, P1, mainGenome, sjdbLoci);
     };
     

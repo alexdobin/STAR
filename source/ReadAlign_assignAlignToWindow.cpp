@@ -24,9 +24,17 @@ void ReadAlign::assignAlignToWindow(uint a1, uint aLength, uint aStr, uint aNrep
             if (aLength>WA[iW][iA][WA_Length]) {//replace 
                 
                 uint iA0;//iA0 is where the align has to be inserted
-                for (iA0=0;iA0<nWA[iW];iA0++) {//find the insertion point in case aligns are not sorted by aRstart
-                                            //TODO binary search
-                    if (aRstart<WA[iW][iA0][WA_rStart]) break;
+                for (iA0=0;iA0<nWA[iW];iA0++) 
+                {//find the insertion point TODO binary search
+                    if (iA0!=iA && aRstart<WA[iW][iA0][WA_rStart]) 
+                    {//do not compare with the piece to be removed
+                        break;
+                    };
+                };
+                
+                if (iA0>iA)
+                {//true insertion place since iA will be removed
+                    --iA0;
                 };
                 
                 if (iA0<iA) {//shift aligns down
@@ -41,7 +49,6 @@ void ReadAlign::assignAlignToWindow(uint a1, uint aLength, uint aStr, uint aNrep
                                 WA[iW][iA1][ii]=WA[iW][iA1+1][ii];
                         };
                     };
-                    iA0--;
                 };
                 
                 
