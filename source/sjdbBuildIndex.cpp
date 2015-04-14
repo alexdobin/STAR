@@ -118,7 +118,7 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
             };
         };
     };
-    //for (int ii=0;ii<P1->sjdbN;ii++) {if ( oldSJind[ii]==0){cout <<ii<<endl;};};
+//     for (int ii=0;ii<P1->sjdbN;ii++) {if ( oldSJind[ii]==0){cout <<ii<<endl;};};
     sjNew = sjNew/2;//novel junctions were double counted on two strands
     
     time ( &rawtime );
@@ -245,7 +245,7 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
                     ++iSJ;
                 };                
                 SAi.writePacked(ii,iSA1+iSJ);
-                for (uint ii0=ind0+1; ii0<ii; ii0++) {//fill all the abset indices with this value
+                for (uint ii0=ind0+1; ii0<ii; ii0++) {//fill all the absent indices with this value
                     SAi.writePacked(ii0,(iSA2+iSJ) | P->SAiMarkAbsentMaskC);
                 };
                 ind0=ii;
@@ -292,7 +292,7 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
     PackedArray SAio=SAi;
     SAio.allocateArray();
     ifstream oldSAin("./DirTrue/SAindex");
-    oldSAin.read(SAio.charArray,128);//skip 128 bytes
+    oldSAin.read(SAio.charArray,8*(P->genomeSAindexNbases+2));//skip first bytes
     oldSAin.read(SAio.charArray,SAio.lengthByte);
     oldSAin.close();  
     

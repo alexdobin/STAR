@@ -228,7 +228,7 @@ void genomeGenerate(Parameters *P) {
     PackedArray SA1;//SA without sjdb
     SA1.defineBits(P->GstrandBit+1,P->nSA);
     PackedArray SA2;//SA with sjdb, reserve more space
-    SA2.defineBits(P->GstrandBit+1,P->nSA+2*P->limitOnTheFlySJ*P->sjdbLength);
+    SA2.defineBits(P->GstrandBit+1,P->nSA+2*P->limitOnTheFlySJ*P->sjdbOverhang);//TODO: this allocation is wasteful, get a better estimate of the number of junctions
 
         
     P->inOut->logMain  << "Number of SA indices: "<< P->nSA << "\n"<<flush;    
@@ -494,6 +494,10 @@ void genomeGenerate(Parameters *P) {
         *P1=*P;        
         
         sjdbInsertJunctions(P, P1, mainGenome, sjdbLoci);
+        
+        //write an extra 0 at the end of the array, filling the last bytes that otherwise are not accessible, but will be written to disk
+        //this is - to avoid valgrind complaints. Note that SA2 is allocated with plenty of space to spare.
+        SA2.writePacked(P->nSA,0);
     };
     
     //write genome to disk

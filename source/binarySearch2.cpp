@@ -25,7 +25,7 @@ int binarySearch2(uint x, uint y, uint *X, uint *Y, int N) {
 
     for (int jj=i3;jj>=0;jj--) {//go back
         if (x!=X[jj]) {
-            return -1;
+            break;//next try forward
         } else if (y==Y[jj]) {
             return jj;
         };
@@ -39,5 +39,5 @@ int binarySearch2(uint x, uint y, uint *X, uint *Y, int N) {
         };
     };        
   
-    return -2; //this should not happen!
+    return -2; //this will happen if jj went past N
 };

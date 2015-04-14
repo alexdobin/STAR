@@ -1,0 +1,3 @@
+[submodule "STAR-Fusion"]
+	path = STAR-Fusion
+	url = https://github.com/STAR-Fusion/STAR-Fusion
