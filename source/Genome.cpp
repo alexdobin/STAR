@@ -85,6 +85,7 @@ void Genome::genomeLoad(){//allocate and load Genome
     ifstream parFile((P->genomeDir+("/genomeParameters.txt")).c_str());
     if (parFile.good()) {
         P->inOut->logMain << "Reading genome generation parameters:\n";
+        P1->inOut = P->inOut;
         P1->scanAllLines(parFile,3,-1);
         parFile.close();
     } else {

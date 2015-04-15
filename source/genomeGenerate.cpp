@@ -478,10 +478,11 @@ void genomeGenerate(Parameters *P) {
     delete [] indSAlast;
     delete [] ind0;
 
+    if (P->sjdbFileChrStartEnd.at(0)!="-" || P->sjdbGTFfile!="-")
     {//insert junctions
         SjdbClass sjdbLoci;
 
-        Genome mainGenome;
+        Genome mainGenome(P);
         mainGenome.G=G;
         mainGenome.SA=SA1;
         mainGenome.SApass1=SA2;

@@ -12,7 +12,7 @@ if ( P->quant.trSAM.yes ) {//load exon-transcript structures
     //load tr and ex info
     
     ifstream trinfo;
-    ifstrOpen(trInfoDir+"transcriptInfo.tab", "ERROR_011001", "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step",P, trinfo);
+    ifstrOpen(trInfoDir+"/transcriptInfo.tab", "ERROR_011001", "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step",P, trinfo);
 
     trinfo >> nTr;
     trS=new uint [nTr];
@@ -33,7 +33,7 @@ if ( P->quant.trSAM.yes ) {//load exon-transcript structures
     trinfo.close();
     
     ifstream exinfo;
-    ifstrOpen(trInfoDir+"exonInfo.tab", "ERROR_011002", "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P, exinfo);
+    ifstrOpen(trInfoDir+"/exonInfo.tab", "ERROR_011002", "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P, exinfo);
 
     exinfo >> nEx;
     exSE = new uint32 [2*nEx];
@@ -50,7 +50,7 @@ if ( P->quant.trSAM.yes ) {//load exon-transcript structures
 
 } else if ( P->quant.geCount.yes ) {//load exon-gene structures
     ifstream exinfo;
-    ifstrOpen(trInfoDir+"exonGeTrInfo.tab", "ERROR_011003", "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P, exinfo);
+    ifstrOpen(trInfoDir+"/exonGeTrInfo.tab", "ERROR_011003", "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P, exinfo);
     exinfo >> exG.nEx;
 
     exG.s=new uint64[exG.nEx];
@@ -65,7 +65,7 @@ if ( P->quant.trSAM.yes ) {//load exon-transcript structures
     exinfo.close();
 
     ifstream geStream;
-    ifstrOpen(trInfoDir+"geneInfo.tab", "ERROR_011004", "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P, geStream);
+    ifstrOpen(trInfoDir+"/geneInfo.tab", "ERROR_011004", "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P, geStream);
     geStream >> nGe;
     geID.resize(nGe);
     for (uint ii=0;ii<nGe;ii++) {

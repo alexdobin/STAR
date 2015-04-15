@@ -77,7 +77,7 @@ int ReadAlign::oneRead() {//process one read: load, map, write
     outputAlignments();
     
     //debug
-//     cout <<"READ="<<iRead+1<<endl;
+//     cout <<readName<<endl;
     
     return 0;
     

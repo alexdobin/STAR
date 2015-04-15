@@ -212,12 +212,13 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
     //SAi insertions
     for (uint iL=0; iL < P->genomeSAindexNbases; iL++) {
         uint iSJ=0;
-        uint ind0=P->genomeSAindexStart[iL]-1;
+        uint ind0=P->genomeSAindexStart[iL]-1;//last index that was present in the old genome
         for (uint ii=P->genomeSAindexStart[iL];ii<P->genomeSAindexStart[iL+1]; ii++) {//scan through the longest index
             uint iSA1=SAi[ii];
             uint iSA2=iSA1 & P->SAiMarkNmask & P->SAiMarkAbsentMask;
             
-            if ( (iSA1 &  P->SAiMarkAbsentMaskC)>0 ) {//index missing from the old genome
+            if ( iSJ<nInd && (iSA1 &  P->SAiMarkAbsentMaskC)>0 ) 
+            {//index missing from the old genome
                 uint iSJ1=iSJ;
                 int64 ind1=funCalcSAi(Gsj+indArray[2*iSJ+1],iL);
                 while (ind1 < (int64)(ii-P->genomeSAindexStart[iL]) && indArray[2*iSJ]<iSA2) {
@@ -234,17 +235,21 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
                 } else {
                     iSJ=iSJ1;
                 };
-            } else {
-                while (indArray[2*iSJ]+1<iSA2) {//for this index insert "smaller" junctions
+            } else 
+            {//index was present in the old genome
+                while (iSJ<nInd && indArray[2*iSJ]+1<iSA2) {//for this index insert "smaller" junctions
                     ++iSJ;
                 };
-                while (indArray[2*iSJ]+1==iSA2) {//special case, the index falls right behind SAi
+                
+                while (iSJ<nInd && indArray[2*iSJ]+1==iSA2) {//special case, the index falls right behind SAi
                     if (funCalcSAi(Gsj+indArray[2*iSJ+1],iL) >= (int64) (ii-P->genomeSAindexStart[iL]) ) {//this belongs to the next index
                         break;
                     };
                     ++iSJ;
-                };                
+                };   
+                
                 SAi.writePacked(ii,iSA1+iSJ);
+                
                 for (uint ii0=ind0+1; ii0<ii; ii0++) {//fill all the absent indices with this value
                     SAi.writePacked(ii0,(iSA2+iSJ) | P->SAiMarkAbsentMaskC);
                 };

@@ -140,7 +140,7 @@ uint qualitySplit(char* r, char* q, uint L, char Qsplit, uint maxNsplit, uint  m
     uint iR=0,iS=0,iR1,LgoodMin=0, iFrag=0;
     while ( (iR<L) & (iS<maxNsplit) ) { //main cycle
         //find next good base
-        while ( ( (q[iR]<Qsplit) || (r[iR]>3) ) && (iR<L) ) {
+        while ( (iR<L) && ( (q[iR]<Qsplit) || (r[iR]>3) ) ) {
             if (r[iR]==MARK_FRAG_SPACER_BASE) iFrag++; //count read fragments
             iR++;
         };
