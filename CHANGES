@@ -1,4 +1,4 @@
-STAR 2.4.1a 2015/04/16
+STAR 2.4.1a 2015/04/17
 The annotations can now be included on the fly at the mapping step, without including them at the genome generation step.
 New option to activate on the fly "per sample" 2-pass method: "--twopassMode Basic".
 2-pass mode can now be used with annotations, which can be included either at the run-time, or at the genome generation step.
