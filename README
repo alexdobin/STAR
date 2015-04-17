@@ -9,6 +9,8 @@ https://groups.google.com/d/forum/rna-star
 MANUAL:
 https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf
 
+RELEASEnotes contains detailed information about the latest major release
+
 DIRECTORIES CONTENTS:
 source: all source files required for compilation
 bin: pre-compiled executables for Linux and Mac OS X
