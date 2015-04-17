@@ -188,7 +188,7 @@ uint maxMappableLength(char** s, uint S, uint N, char* g, PackedArray& SA, uint 
     return i2-i1+1;
 };
 
-uint suffixArraySearch(char** s, uint S, uint N, char* g, PackedArray& SA, bool dirR, uint i1, uint i2, uint L, Parameters* P) {
+uint suffixArraySearch(char** s2, uint S, uint N, char* G, PackedArray& SA, bool dirR, uint i1, uint i2, uint L, Parameters* P) {
     // binary search in SA space
     // s[0],s[1] - sequence, complementary sequence
     // S - start offset
@@ -214,40 +214,45 @@ uint suffixArraySearch(char** s, uint S, uint N, char* g, PackedArray& SA, bool 
     uint i3=i1,L3=L1; //in case i1+1>=i2 an not iteration of the loope below is ever made
     while (i1+1<i2) {//main binary search loop
         i3=medianUint2(i1,i2);
-        L3=compareSeqToGenome(s,S,N,L,g,SA,i3,dirR,compRes, P);
+//         L3=compareSeqToGenome(s,S,N,L,g,SA,i3,dirR,compRes, P);//cannot do this because these sj sequences contains spacers=5
 
-//         register int64 ii;
-// 
-//         uint SAstr=SA[i3];
-//         bool dirG = (SAstr>>P->GstrandBit) == 0; //forward or reverse strand of the genome
-//         SAstr &= P->GstrandMask;
-// 
-// 
-//         if (dirG) 
-//         {//forward on read, forward on genome
-//             char* s = s2[0] + S + L;
-//             char* g = G + SAstr + L;
-//             for (ii=0;(uint) ii < N-L; ii++)
-//             {
-//                 if (s[ii]!=g[ii]) break;
-//             };
-//             if (s[ii]>g[ii]) {compRes=true;} else {compRes=false;};
-//             L3=ii+L;
-//         } else 
-//         {
-//             char* s = s2[1] + S + L;
-//             char* g = G + P->nGenome-1-SAstr - L;
-//             for (ii=0; (uint) ii < N-L; ii++) 
-//             {
-//                 if (s[ii]!=g[-ii]) break;
-//             };
-// 
-//             char s1=s[ii],g1=g[-ii];
-//             if (s1<4) s1=3-s1;
-//             if (g1<4) g1=3-g1;
-//             if (s1>g1) {compRes=true;} else {compRes=false;};
-//             L3=ii+L;
-//         };
+        register int64 ii;
+
+        uint SAstr=SA[i3];
+        bool dirG = (SAstr>>P->GstrandBit) == 0; //forward or reverse strand of the genome
+        SAstr &= P->GstrandMask;
+
+
+        if (dirG) 
+        {//forward on read, forward on genome
+            char* s = s2[0] + S + L;
+            char* g = G + SAstr + L;
+            for (ii=0;(uint) ii < N-L; ii++)
+            {
+                if (s[ii]!=g[ii]) 
+                {
+                    if (s[ii]>g[ii]) {compRes=true;} else {compRes=false;};
+                    break;
+                };
+            };
+            L3=ii+L;
+        } else 
+        {
+            char* s = s2[1] + S + L;
+            char* g = G + P->nGenome-1-SAstr - L;
+            for (ii=0; (uint) ii < N-L; ii++) 
+            {
+                if (s[ii]!=g[-ii]) 
+                {
+                    char s1=s[ii],g1=g[-ii];
+                    if (s1<4) s1=3-s1;
+                    if (g1<4) g1=3-g1;
+                    if (s1>g1) {compRes=true;} else {compRes=false;};                    
+                    break;
+                };
+            };
+            L3=ii+L;
+        };
 
         if (L3==N) {
             L=N;

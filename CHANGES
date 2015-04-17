@@ -1,6 +1,15 @@
-Fixed a problem with calculating the RAM required for BAM sorting.
-Implemented --chimOutType WithinBAM option for chimeric output merged into main BAM files.
-Implemented --alignEndsType Extend5pOfRead1 option.
+STAR 2.4.1a 2015/04/16
+The annotations can now be included on the fly at the mapping step, without including them at the genome generation step.
+New option to activate on the fly "per sample" 2-pass method: "--twopassMode Basic".
+2-pass mode can now be used with annotations, which can be included either at the run-time, or at the genome generation step.
+Included link (submodule) to Brian Haas' STAR-Fusion code for detecting fusion transcript from STAR chimeric output:  https://github.com/STAR-Fusion/STAR-Fusion
+Included Gery Vessere's shared memory implementation for POSIX and SysV. To compile STAR with POSIX shared memory, use `make POSIXSHARED`
+New option "--chimOutType WithinBAM" to include chimeric alignments together with normal alignments in the main (sorted or unsorted) BAM file(s).
+New option "--quantTranscriptomeBan Singleend" allows insertions, deletions ans soft-clips in the transcriptomic alignments, which are allowed by some expression quantification software (e.g. eXpress). 
+New option "--alignEndsTypeExtension Extend5pOfRead1" to enforce full extension of the 5p of the read1, while all other ends undergo local alignment and may be soft-clipped.
+
+2.4.0k 03/30/2015
+Implemented new BAM sorting algorithm that reduces significantly the required RAM.
 
 2.4.0j 02/04/2015
 Fixed a problem with scoring alignments for STARlong. STARlong alignments are slightly modified.

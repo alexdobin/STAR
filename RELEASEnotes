@@ -1,0 +1,32 @@
+STAR 2.4.1a 2015/04/16
+
+New features:
+
+1. The annotations can now be included on the fly at the mapping step, without including them at the genome generation step.
+   At the mapping step, specify --sjdbGTFfile /path/to/ann.gtf and/or --sjdbFileChrStartEnd /path/to/sj.tab, as well as --sjdbOverhang, and any other --sjdb* options.
+   The genome indices can be generated with or  without another set of annotations/junctions. In the latter case the new junctions will added to the old ones.
+   STAR will insert the junctions into genome indices on the fly before mapping, which takes 1~2 minutes.
+   The on the fly genome indices can be saved (for reuse) with "--sjdbInsertSave All", into _STARgenome directory inside the current run directory.
+   Default --sjdbOverhang is now set at 100, and does not have to be specified unless you need to change this value.
+
+   The "all-sample" 2-pass method can be simplified using this on the fly junction insertion option: 
+   (i) run the 1st pass for all samples as usual, with or without annotations
+   (ii) run 2nd pass for all samples, listing SJ.out.tab files from all samples in --sjdbFileChrStartEnd /path/to/sj1.tab /path/to/sj2.tab ...
+
+2. New option to activate on the fly "per sample" 2-pass method: "--twopassMode Basic".
+   Default --twopass1readsN is now -1, i.e. using all reads in the 1st pass.
+   2-pass mode can now be used with annotations, which can be included either at the run-time (see #1), or at the genome generation step.
+   Annotated junctions will be included in both the 1st and 2nd passes.
+
+3. Included link (submodule) to Brian Haas' STAR-Fusion code for detecting fusion transcript from STAR chimeric output:
+   https://github.com/STAR-Fusion/STAR-Fusion
+
+4. Included Gery Vessere's shared memory implementation for POSIX and SysV. 
+   To compile STAR with POSIX shared memory, use `make POSIXSHARED`
+
+5. New option "--chimOutType WithinBAM" to include chimeric alignments together with normal alignments in the main (sorted or unsorted) BAM file(s).
+   Formatting of chimeric alignments follows the latest SAM/BAM specifications. Thanks to Felix Schlesinger for thorough testing of this option.
+
+6. New option "--quantTranscriptomeBan Singleend" allows insertions, deletions ans soft-clips in the transcriptomic alignments, which can be used by some expression quantification software (e.g. eXpress). 
+   
+7. New option "--alignEndsTypeExtension Extend5pOfRead1" to enforce full extension of the 5p of the read1, while all other ends undergo local alignment and may be soft-clipped.

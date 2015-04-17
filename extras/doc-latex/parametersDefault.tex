@@ -4,6 +4,15 @@
   \optValue{-}
   \optLine{string: name of a user-defined parameters file, "-": none. Can only be defined on the command line.} 
 \end{optTable}
+\optSection{System}\label{System}
+\begin{optTable}
+\optName{sysShell}
+  \optValue{-}
+  \optLine{string: path to the shell binary, preferrably bash, e.g. /bin/bash. } 
+\begin{optOptTable}
+  \optOpt{-}   \optOptLine{the default shell is executed, typically /bin/sh. This was reported to fail on some Ubuntu systems - then you need to specify path to bash.}
+\end{optOptTable}
+\end{optTable}
 \optSection{Run Parameters}\label{Run_Parameters}
 \begin{optTable}
 \optName{runMode}
@@ -38,7 +47,7 @@
 \begin{optTable}
 \optName{genomeFastaFiles}
   \optValue{-}
-  \optLine{string(s): path(s) to the fasta files with genomic sequences for genome generation, separated by spaces. Only used if runMode==genomeGenerate.} 
+  \optLine{string(s): path(s) to the fasta files with genomic sequences for genome generation, separated by spaces. Only used if runMode==genomeGenerate. These files should be plain text FASTA files, they *cannot* be zipped.} 
 \optName{genomeChrBinNbits}
   \optValue{18}
   \optLine{int: =log2(chrBin), where chrBin is the size of the bins for genome storage: each chromosome will occupy an integer number of bins} 
@@ -53,7 +62,7 @@
 \begin{optTable}
 \optName{sjdbFileChrStartEnd}
   \optValue{-}
-  \optLine{string: path to the file with genomic coordinates (chr {\textless}tab{\textgreater} start {\textless}tab{\textgreater} end {\textless}tab{\textgreater} strand) for the introns} 
+  \optLine{string(s): path to the files with genomic coordinates (chr {\textless}tab{\textgreater} start {\textless}tab{\textgreater} end {\textless}tab{\textgreater} strand) for the splice junction introns. Multiple files can be supplied wand will be concatenated.} 
 \optName{sjdbGTFfile}
   \optValue{-}
   \optLine{string: path to the GTF file with annotations} 
@@ -65,13 +74,23 @@
   \optLine{string: feature type in GTF file to be used as exons for building transcripts} 
 \optName{sjdbGTFtagExonParentTranscript}
   \optValue{transcript{\textunderscore}id}
-  \optLine{string: tag name to be used as exons' parents for building transcripts} 
+  \optLine{string: tag name to be used as exons' transcript-parents (default "transcript{\textunderscore}id" works for GTF files)} 
+\optName{sjdbGTFtagExonParentGene}
+  \optValue{gene{\textunderscore}id}
+  \optLine{string: tag name to be used as exons' gene-parents (default "gene{\textunderscore}id" works for GTF files)} 
 \optName{sjdbOverhang}
-  \optValue{0}
+  \optValue{100}
   \optLine{int{\textgreater}=0: length of the donor/acceptor sequence on each side of the junctions, ideally = (mate{\textunderscore}length - 1)} 
   \optLine{if =0, splice junction database is not used} 
   \optLine{sjdbScore                               2} 
   \optLine{int: extra alignment score for alignmets that cross database junctions} 
+\optName{sjdbInsertSave}
+  \optValue{Basic}
+  \optLine{string: which files to save when sjdb junctions are inserted on the fly at the mapping step} 
+\begin{optOptTable}
+  \optOpt{Basic}   \optOptLine{only small junction / transcript files}
+  \optOpt{All}   \optOptLine{all files including big Genome, SA and SAindex - this will create a complete genome directory}
+\end{optOptTable}
 \end{optTable}
 \optSection{Input Files}\label{Input_Files}
 \begin{optTable}
@@ -130,7 +149,10 @@
   \optLine{int{\textgreater}0: max number of collapsed junctions} 
 \optName{limitBAMsortRAM}
   \optValue{0}
-  \optLine{int{\textgreater}=0: maximum available RAM for sorting BAM. If =0, it will be set to the genome index size} 
+  \optLine{int{\textgreater}=0: maximum available RAM for sorting BAM. If =0, it will be set to the genome index size. 0 value can only be used with --genomeLoad NoSharedMemory option.} 
+\optName{limitSjdbInsertNsj}
+  \optValue{1000000}
+  \optLine{int{\textgreater}=0: maximum number of junction to be inserted to the genome on the fly at the mapping stage, including those from annotations and those detected in the 1st step of the 2-pass run} 
 \end{optTable}
 \optSection{Output: general}\label{Output:_general}
 \begin{optTable}
@@ -176,7 +198,7 @@
   \optLine{2nd, 3rd: } 
 \begin{optOptTable}
   \optOpt{Unsorted}   \optOptLine{standard unsorted}
-  \optOpt{SortedByCoordinate}   \optOptLine{sorted by coordinate}
+  \optOpt{SortedByCoordinate}   \optOptLine{sorted by coordinate. This option will allocate extra memory for sorting which can be specified by --limitBAMsortRAM.}
 \end{optOptTable}
 \optName{outSAMmode}
   \optValue{Full}
@@ -231,11 +253,18 @@
 \optName{outSAMmapqUnique}
   \optValue{255}
   \optLine{int: 0 to 255: the MAPQ value for unique mappers} 
+\optName{outSAMflagOR}
+  \optValue{0}
+  \optLine{int: 0 to 65535: sam FLAG will be bitwise OR'd with this value, i.e. FLAG=FLAG | outSAMflagOR. This is applied after all flags have been set by STAR, and after outSAMflagAND. Can be used to set specific bits that are not set otherwise.} 
+\optName{outSAMflagAND}
+  \optValue{65535}
+  \optLine{int: 0 to 65535: sam FLAG will be bitwise AND'd with this value, i.e. FLAG=FLAG \& outSAMflagOR. This is applied after all flags have been set by STAR, but before outSAMflagOR. Can be used to unset specific bits that are not set otherwise.} 
 \optName{outSAMattrRGline}
   \optValue{-}
   \optLine{string(s): SAM/BAM read group line. The first word contains the read group identifier and must start with "ID:", e.g. --outSAMattrRGline ID:xxx CN:yy "DS:z z z". } 
   \optLine{xxx will be added as RG tag to each output alignment. Any spaces in the tag values have to be double quoted.} 
-  \optLine{Comma separated RG lines correspons to different (comma separated) input files in --readFilesIn.} 
+  \optLine{Comma separated RG lines correspons to different (comma separated) input files in --readFilesIn. Commas have to be surrounded by spaces, e.g.} 
+  \optLine{--outSAMattrRGline ID:xxx , ID:zzz "DS:z z" , ID:yyy DS:yyyy} 
 \optName{outSAMheaderHD}
   \optValue{-}
   \optLine{strings: @HD (header) line of the SAM header} 
@@ -246,8 +275,11 @@
   \optValue{-}
   \optLine{string: path to the file with @CO (comment) lines of the SAM header} 
 \optName{outBAMcompression}
-  \optValue{-1}
-  \optLine{int: -1 to 10  BAM compression level, -1=default compression, 0=no compression, 10=maximum compression} 
+  \optValue{1}
+  \optLine{int: -1 to 10  BAM compression level, -1=default compression (6?), 0=no compression, 10=maximum compression} 
+\optName{outBAMsortingThreadN}
+  \optValue{0}
+  \optLine{int: {\textgreater}=0: number of threads for BAM sorting. 0 will default to min(6,--runThreadN).} 
 \end{optTable}
 \optSection{BAM processing}\label{BAM_processing}
 \begin{optTable}
@@ -266,7 +298,7 @@
 \begin{optTable}
 \optName{outWigType}
   \optValue{None}
-  \optLine{string(s): type of signal output, e.g. "bedGraph" OR "bedGraph read1{\textunderscore}5p"} 
+  \optLine{string(s): type of signal output, e.g. "bedGraph" OR "bedGraph read1{\textunderscore}5p". Requires sorted BAM: --outSAMtype BAM SortedByCoordinate .} 
   \optLine{1st word:} 
 \begin{optOptTable}
   \optOpt{None}   \optOptLine{no signal output}
@@ -462,9 +494,17 @@
   \optValue{Local}
   \optLine{string: type of read ends alignment} 
 \begin{optOptTable}
-  \optOpt{Local}   \optOptLine{tandard local alignment with soft-clipping allowed}
+  \optOpt{Local}   \optOptLine{standard local alignment with soft-clipping allowed}
+  \optOpt{EndToEnd}   \optOptLine{force end-to-end read alignment, do not soft-clip}
+  \optOpt{Extend5pOfRead1}   \optOptLine{fully extend only the 5p of the read1, all other ends: local alignment}
 \end{optOptTable}
-  \optLine{EndToEnd: force end-to-end read alignment, do not soft-clip} 
+\optName{alignSoftClipAtReferenceEnds}
+  \optValue{Yes}
+  \optLine{string: allow the soft-clipping of the alignments past the end of the chromosomes} 
+\begin{optOptTable}
+  \optOpt{Yes}   \optOptLine{allow}
+  \optOpt{No}   \optOptLine{prohibit, useful for compatibility with Cufflinks}
+\end{optOptTable}
 \end{optTable}
 \optSection{Windows, Anchors, Binning}\label{Windows,_Anchors,_Binning}
 \begin{optTable}
@@ -483,6 +523,13 @@
 \end{optTable}
 \optSection{Chimeric Alignments}\label{Chimeric_Alignments}
 \begin{optTable}
+\optName{chimOutType}
+  \optValue{SeparateSAMold}
+  \optLine{string: type of chimeric output} 
+\begin{optOptTable}
+  \optOpt{SeparateSAMold}   \optOptLine{output old SAM into separate Chimeric.out.sam file}
+  \optOpt{WithinBAM}   \optOptLine{output into main aligned BAM files (Aligned.*.bam)}
+\end{optOptTable}
 \optName{chimSegmentMin}
   \optValue{0}
   \optLine{int{\textgreater}=0: minimum length of chimeric segment length, if ==0, no chimeric output} 
@@ -506,18 +553,33 @@
 \begin{optTable}
 \optName{quantMode}
   \optValue{-}
-  \optLine{string(s): types of qunatification requested} 
+  \optLine{string(s): types of quantification requested} 
 \begin{optOptTable}
   \optOpt{-}   \optOptLine{none}
   \optOpt{TranscriptomeSAM}   \optOptLine{output SAM/BAM alignments to transcriptome into a separate file}
+  \optOpt{GeneCounts}   \optOptLine{count reads per gene}
+\end{optOptTable}
+\optName{quantTranscriptomeBAMcompression}
+  \optValue{1 1}
+  \optLine{int: -1 to 10  transcriptome BAM compression level, -1=default compression (6?), 0=no compression, 10=maximum compression} 
+\optName{quantTranscriptomeBan}
+  \optValue{IndelSoftclipSingleend}
+  \optLine{string: prohibit various alignment type} 
+\begin{optOptTable}
+  \optOpt{IndelSoftclipSingleend}   \optOptLine{prohibit indels, soft clipping and single-end alignments - compatible with RSEM}
+  \optOpt{Singleend}   \optOptLine{prohibit single-end alignments}
 \end{optOptTable}
 \end{optTable}
 \optSection{2-pass Mapping}\label{2-pass_Mapping}
 \begin{optTable}
+\optName{twopassMode}
+  \optValue{None}
+  \optLine{string: 2-pass mapping mode.} 
+\begin{optOptTable}
+  \optOpt{None}   \optOptLine{1-pass mapping}
+  \optOpt{Basic}   \optOptLine{basic 2-pass mapping, with all 1st pass junctions inserted into the genome indices on the fly}
+\end{optOptTable}
 \optName{twopass1readsN}
-  \optValue{0}
-  \optLine{int{\textgreater}0: number of reads to process for the 1st step. 0: 1-step only, no 2nd pass; use very large number to map all reads in the first step} 
-\optName{twopassSJlimit}
-  \optValue{1000000}
-  \optLine{int{\textgreater}=0: maximum number of junction detected in the 1st step} 
+  \optValue{-1}
+  \optLine{int: number of reads to process for the 1st step. Use very large number (or default -1) to map all reads in the first step.} 
 \end{optTable}

@@ -278,15 +278,15 @@ void Genome::genomeLoad(){//allocate and load Genome
                 nSApass1=P->nSA;
                 if (P->sjdbInsert.pass1)
                 {
-                    nGenomePass1+=P->limitOnTheFlySJ*P->sjdbLength;
-                    nSApass1+=2*P->limitOnTheFlySJ*P->sjdbLength;
+                    nGenomePass1+=P->limitSjdbInsertNsj*P->sjdbLength;
+                    nSApass1+=2*P->limitSjdbInsertNsj*P->sjdbLength;
                 };
                 nGenomePass2=nGenomePass1;
                 nSApass2=nSApass1;
                 if (P->sjdbInsert.pass2)
                 {
-                    nGenomePass2+=P->limitOnTheFlySJ*P->sjdbLength;
-                    nSApass2+=2*P->limitOnTheFlySJ*P->sjdbLength;                    
+                    nGenomePass2+=P->limitSjdbInsertNsj*P->sjdbLength;
+                    nSApass2+=2*P->limitSjdbInsertNsj*P->sjdbLength;                    
                 };                
                 
                 G1=new char[nGenomePass2+L+L];        

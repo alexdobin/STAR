@@ -175,7 +175,7 @@ class Parameters {
         uint limitOutSAMoneReadBytes;
         uint limitOutSJoneRead, limitOutSJcollapsed;
         uint limitBAMsortRAM;
-        uint limitOnTheFlySJ;
+        uint limitSjdbInsertNsj;
         
         // penalties
         intScore scoreGap, scoreGapNoncan, scoreGapGCAG, scoreGapATAC, scoreDelBase, scoreDelOpen, scoreInsBase, scoreInsOpen; 
