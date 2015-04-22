@@ -127,7 +127,7 @@ void Genome::genomeLoad(){//allocate and load Genome
     if (P->sjdbOverhang==0) 
     {//sjdbOverhang may be defined at the genome generation step
         P->sjdbOverhang=P1->sjdbOverhang;
-    } else if (P1->sjdbOverhang>0 && P->sjdbOverhang!=P1->sjdbOverhang) 
+    } else if (P1->sjdbOverhang>0 && P->parArray.at(P->sjdbOverhang_par)->inputLevel>0 && P->sjdbOverhang!=P1->sjdbOverhang) 
     {//if sjdbOverhang was defined at the genome geneation step,the mapping step value has to agree with it
         ostringstream errOut;
         errOut << "EXITING because of fatal PARAMETERS error: present --sjdbOverhang="<<P->sjdbOverhang << " is not equal to the value at the genome generation step ="<< P1->sjdbOverhang << "\n";

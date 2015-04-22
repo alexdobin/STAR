@@ -1,3 +1,6 @@
+Fixed a bug causing seg-faults with --chimOutType WithinBAM for single-end reads.
+Fixed a bug with required --sjdbOverhang at the mapping step.
+
 STAR 2.4.1a 2015/04/17
 The annotations can now be included on the fly at the mapping step, without including them at the genome generation step.
 New option to activate on the fly "per sample" 2-pass method: "--twopassMode Basic".

@@ -198,6 +198,7 @@ class Parameters {
         vector <string> sjdbFileChrStartEnd;
         string sjdbGTFfile, sjdbGTFchrPrefix, sjdbGTFfeatureExon, sjdbGTFtagExonParentTranscript, sjdbGTFtagExonParentGene;
         uint sjdbOverhang,sjdbLength; //length of the donor/acceptor, length of the sj "chromosome" =2*sjdbOverhang+1 including spacer
+        int sjdbOverhang_par;
         int sjdbScore;        
         
         uint sjChrStart,sjdbN; //first sj-db chr

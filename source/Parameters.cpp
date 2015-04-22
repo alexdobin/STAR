@@ -191,6 +191,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "sjdbGTFtagExonParentTranscript", &sjdbGTFtagExonParentTranscript)); 
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "sjdbGTFtagExonParentGene", &sjdbGTFtagExonParentGene)); 
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "sjdbOverhang", &sjdbOverhang));
+    sjdbOverhang_par=parArray.size()-1;
     parArray.push_back(new ParameterInfoScalar <int>    (-1, -1, "sjdbScore", &sjdbScore));
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "sjdbInsertSave", &sjdbInsert.save)); 
     
