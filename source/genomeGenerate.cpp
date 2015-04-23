@@ -228,8 +228,13 @@ void genomeGenerate(Parameters *P) {
     PackedArray SA1;//SA without sjdb
     SA1.defineBits(P->GstrandBit+1,P->nSA);
     PackedArray SA2;//SA with sjdb, reserve more space
-    SA2.defineBits(P->GstrandBit+1,P->nSA+2*P->limitSjdbInsertNsj*P->sjdbOverhang);//TODO: this allocation is wasteful, get a better estimate of the number of junctions
-
+    if (P->sjdbInsert.yes)
+    {//reserve space for junction insertion
+        SA2.defineBits(P->GstrandBit+1,P->nSA+2*P->limitSjdbInsertNsj*P->sjdbLength);//TODO: this allocation is wasteful, get a better estimate of the number of junctions
+    } else
+    {//same as SA1
+        SA2.defineBits(P->GstrandBit+1,P->nSA);
+    };
         
     P->inOut->logMain  << "Number of SA indices: "<< P->nSA << "\n"<<flush;    
     P->inOut->logMain  << "SA size in bytes: "<< P->nSAbyte << "\n"<<flush;

@@ -163,6 +163,7 @@ class Parameters {
         
         //inserting junctions on the fly
         struct {
+            bool yes; //insert?
             bool pass1;//insert on the 1st pass?
             bool pass2;//insert on the 2nd pass?
             string save;

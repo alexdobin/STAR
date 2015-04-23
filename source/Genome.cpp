@@ -135,6 +135,9 @@ void Genome::genomeLoad(){//allocate and load Genome
         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_GENOME_FILES, *P);
     };
     
+    P->sjdbLength = P->sjdbOverhang==0 ? 0 : P->sjdbOverhang*2+1;
+
+
     P->inOut->logMain << "Started loading the genome: " << asctime (localtime ( &rawtime ))<<"\n"<<flush;    
   
     ifstream GenomeIn, SAin, SAiIn;
@@ -417,7 +420,6 @@ void Genome::genomeLoad(){//allocate and load Genome
     
         
         sjdbInfo >> P->sjdbN >> P->sjdbOverhang;
-        P->sjdbLength=P->sjdbOverhang*2+1;
         P->inOut->logMain << "Processing splice junctions database sjdbN=" <<P->sjdbN<<",   sjdbOverhang=" <<P->sjdbOverhang <<" \n";    
         
         P->sjChrStart=P->nChrReal;

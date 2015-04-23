@@ -56,11 +56,18 @@ void sjdbInsertJunctions(Parameters * P, Parameters * P1, Genome & genome, SjdbC
         };
     };
     
-    char *Gsj=new char [2*P->sjdbLength*sjdbLoci.chr.size()+1];//arry to store junction sequences, will be filled in sjdbPrepare
+    char *Gsj=new char [2*P->sjdbLength*sjdbLoci.chr.size()+1];//array to store junction sequences, will be filled in sjdbPrepare
     sjdbPrepare (sjdbLoci, P, P->chrStart[P->nChrReal], P->sjdbInsert.outDir, genome.G, Gsj);//P->nGenome - change when replacing junctions
     time ( &rawtime );
     P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished preparing junctions" <<endl;
 
+    if (P->sjdbN>P->limitSjdbInsertNsj)
+    {
+        ostringstream errOut;
+        errOut << "Fatal LIMIT error: the number of junctions to be inserted on the fly ="<<P->sjdbN<<" is larger than the limitSjdbInsertNsj="<<P->limitSjdbInsertNsj<<"\n";                errOut << "Fatal LIMIT error: the number of junctions to be inserted on the fly ="<<P->sjdbN<<" is larger than the limitSjdbInsertNsj="<<P->limitSjdbInsertNsj<<"\n";
+        errOut << "SOLUTION: re-run with at least --limitSjdbInsertNsj "<<P->sjdbN<<"\n";
+        exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+    };
     //insert junctions into the genome and SA and SAi
     sjdbBuildIndex (P, P1, Gsj, genome.G, genome.SA, (P->twoPass.pass2 ? genome.SApass2 : genome.SApass1), genome.SAi);
     delete [] Gsj; //junction sequences have been added to G

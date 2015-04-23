@@ -12,6 +12,7 @@ void Parameters::openReadsFiles() {
 
     if (readFilesCommandString=="") {//read from file
         for (uint ii=0;ii<readNmates;ii++) {//open readIn files
+            readFilesCommandPID[ii]=0;//no command process IDs
             if ( inOut->readIn[ii].is_open() ) inOut->readIn[ii].close();
             inOut->readIn[ii].open(readFilesIn.at(ii).c_str()); //try to open the Sequences file right away, exit if failed
             if (inOut->readIn[ii].fail()) {

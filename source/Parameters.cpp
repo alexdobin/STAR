@@ -827,6 +827,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     //quantification parameters
     quant.yes=false;
     quant.geCount.yes=false;
+    quant.trSAM.yes=false;
     if (quant.mode.at(0) != "-") {
         quant.yes=true;
         for (uint32 ii=0; ii<quant.mode.size(); ii++) {
@@ -918,11 +919,16 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     if (sjdbFileChrStartEnd.at(0)!="-" || sjdbGTFfile!="-")
     {//will insert annotated sjdb on the fly
        sjdbInsert.pass1=true;
+       sjdbInsert.yes=true;
     };
     if (twoPass.yes) 
     {
        sjdbInsert.pass2=true;
+       sjdbInsert.yes=true;
     };    
+    
+    
+    
     
     if (runMode=="alignReads" && (sjdbInsert.pass1 || sjdbInsert.pass2) ) 
     {//run-time genome directory, this is needed for genome files generated on the fly

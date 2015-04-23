@@ -204,6 +204,7 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
                             } else {//deletion
                                 Score += Del*P->scoreDelBase + P->scoreDelOpen;
                                 jCan=-1;
+                                trA->sjAnnot[trA->nExons-1]=0;
 //                                 jjR-=jjL;
 //                                 jR-=jjL;
 //                                 jjL=0;
@@ -230,6 +231,7 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
                     } else {
                         Score += Del*P->scoreDelBase + P->scoreDelOpen;       
                         jCan=-1;
+                        trA->sjAnnot[trA->nExons-1]=0;
                     };
                 };
                 
@@ -328,6 +330,7 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
                     trA->exons[trA->nExons][EX_R] = rAend+jR+Ins+1; //new exon r-start
                     trA->exons[trA->nExons][EX_G] = gAend+1+jR; //new exon g-start
                     trA->canonSJ[trA->nExons-1]=-2; //mark insertion
+                    trA->sjAnnot[trA->nExons-1]=0;
                     trA->nExons++;            
                 };
             } else {//stitching was not accepted
@@ -380,6 +383,7 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
             }; //if extendAlign B
 
             trA->canonSJ[trA->nExons-1]=-3; //mark different fragments junction
+            trA->sjAnnot[trA->nExons-1]=0;
 
             trA->nExons++;        
         } else {//no stitching possible
