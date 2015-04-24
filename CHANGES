@@ -1,3 +1,8 @@
+STAR 2.4.1c 2015/04/24
+Fixed some compilation problems introduced in 2.4.1b.
+Added Mac executable.
+
+
 STAR 2.4.1b 2015/04/23
 Fixed a bug introduced in 2.4.1a causing serious problems for genomes generated without annotations.
       If you generated a genome without annotations with 2.4.1a please re-generate it.

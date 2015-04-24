@@ -64,7 +64,8 @@ int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, ui
                 for (uint32 iex=0; iex<aT.nExons; iex++) 
                 {//no junctions in the transcritomic coordinates
                     aT.sjAnnot[iex]=0;
-                    aT.shiftSJ[iex]={0,0};
+                    aT.shiftSJ[iex][0]=0;
+                    aT.shiftSJ[iex][1]=0;
                     aT.sjStr[iex]=0;
                 };
                     

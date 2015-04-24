@@ -11,6 +11,11 @@
 #include <semaphore.h>
 #include <errno.h>
 
+#ifdef COMPILE_FOR_MAC
+  //some Mac's idiosyncrasies: standard SHM libraries are very old and missing some definitions
+  #define SHM_NORESERVE 0
+#endif
+
 using namespace std;
 
 SharedMemory::SharedMemory(key_t key, bool unloadLast): _key(key), _counterKey(key+1), _unloadLast(unloadLast), _err(&cerr)
