@@ -1,4 +1,5 @@
 STAR 2.4.1c 2015/04/24
+Added latest version of STAR-Fusion as a separate directory.
 Fixed some compilation problems introduced in 2.4.1b.
 Added Mac executable.
 
