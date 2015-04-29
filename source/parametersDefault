@@ -24,6 +24,10 @@ runMode                         alignReads
 runThreadN                      1
     int: number of threads to run STAR
 
+runDirPerm                      User_RWX
+    string: permissions for the directories created at the run-time. 
+                                User_RWX ... user-read/write/execute
+                                All_RWX  ... all-read/write/execute (same as chmod 777)
 
 
 ### Genome Parameters

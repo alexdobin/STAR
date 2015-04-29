@@ -39,14 +39,14 @@ ReadAlign::ReadAlign (Parameters* Pin, const Genome &genomeIn, Transcriptome *Tr
 #ifdef COMPILE_FOR_LONG_READS
     swWinCov = new uint[P->alignWindowsPerReadNmax];
 
-    if (P->swMode==1) {
-        swWinGleft = new uint[P->alignWindowsPerReadNmax];
-        swWinGright = new uint[P->alignWindowsPerReadNmax];
-        swWinRleft = new uint[P->alignWindowsPerReadNmax];
-        swWinRright = new uint[P->alignWindowsPerReadNmax];
-        P->swHsize=5000000000LLU;
-        swT = new char [P->swHsize];
-    };
+//     if (P->swMode==1) {
+//         swWinGleft = new uint[P->alignWindowsPerReadNmax];
+//         swWinGright = new uint[P->alignWindowsPerReadNmax];
+//         swWinRleft = new uint[P->alignWindowsPerReadNmax];
+//         swWinRright = new uint[P->alignWindowsPerReadNmax];
+//         P->swHsize=5000000000LLU;
+//         swT = new char [P->swHsize];
+//     };
     
     scoreSeedToSeed = new intScore [P->seedPerWindowNmax*(P->seedPerWindowNmax+1)/2];
     scoreSeedBest = new intScore [P->seedPerWindowNmax];

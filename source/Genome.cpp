@@ -9,6 +9,7 @@
 #include <time.h>
 #include <cmath>
 #include <unistd.h>
+#include <sys/stat.h>
 
 //addresses with respect to shmStart of several genome values
 #define SHM_sizeG 0
@@ -112,8 +113,16 @@ void Genome::genomeLoad(){//allocate and load Genome
         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_GENOME_FILES, *P);
     };
 
-    if ( (P->sjdbInsert.pass1 || P->sjdbInsert.pass2) && P1->sjdbOverhang>0 && P1->sjdbInsert.save=="") 
-    {//if sjdbInsert, and old genome had junctions, it should be re-generated with new STAR
+    //check if sjdbInfo.txt exists => genome was generated with junctions
+    bool sjdbInfoExists=false;
+    struct stat sjdb1;
+    if ( stat( (P->genomeDir+"/sjdbInfo.txt").c_str(), &sjdb1) == 0 )
+    {//file exists
+        sjdbInfoExists=true;
+    };
+    
+    if ( P->sjdbInsert.yes && sjdbInfoExists && P1->sjdbInsert.save=="") 
+    {//if sjdbInsert, and genome had junctions, and genome is old - it should be re-generated with new STAR
         ostringstream errOut;
         errOut << "EXITING because of FATAL ERROR: old Genome is INCOMPATIBLE with on the fly junction insertion\n";
         errOut << "SOLUTION: please re-generate genome from scratch with the latest version of STAR\n";
@@ -127,8 +136,8 @@ void Genome::genomeLoad(){//allocate and load Genome
     if (P->sjdbOverhang==0) 
     {//sjdbOverhang may be defined at the genome generation step
         P->sjdbOverhang=P1->sjdbOverhang;
-    } else if (P1->sjdbOverhang>0 && P->parArray.at(P->sjdbOverhang_par)->inputLevel>0 && P->sjdbOverhang!=P1->sjdbOverhang) 
-    {//if sjdbOverhang was defined at the genome geneation step,the mapping step value has to agree with it
+    } else if (sjdbInfoExists && P->parArray.at(P->sjdbOverhang_par)->inputLevel>0 && P->sjdbOverhang!=P1->sjdbOverhang) 
+    {//if sjdbOverhang was defined at the genome generation step,the mapping step value has to agree with it
         ostringstream errOut;
         errOut << "EXITING because of fatal PARAMETERS error: present --sjdbOverhang="<<P->sjdbOverhang << " is not equal to the value at the genome generation step ="<< P1->sjdbOverhang << "\n";
         errOut << "SOLUTION: \n" <<flush;     

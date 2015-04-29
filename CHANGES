@@ -1,3 +1,10 @@
+STAR 2.4.1d 2015/04/29
+Fixed yet another inconistent error message for --sjdbOverhang .
+Added STAR long pre-compiled executables.
+Fixed some bugs in STARlong mapping algorithm.
+Added --runDirPerm option for permissions of run-time directories.
+
+
 STAR 2.4.1c 2015/04/24
 Added latest version of STAR-Fusion as a separate directory.
 Fixed some compilation problems introduced in 2.4.1b.

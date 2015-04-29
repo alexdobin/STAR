@@ -59,6 +59,11 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
     
     #define SPACER_CHAR GENOME_spacingChar
 
+    if (P->sjdbN==0)
+    {//no junctions to insert
+        return;
+    };
+    
     time_t rawtime;
     time ( &rawtime );
     P->inOut->logMain   << timeMonthDayTime(rawtime) << " ..... Inserting junctions into the genome indices" <<endl;    

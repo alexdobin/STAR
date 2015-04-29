@@ -32,7 +32,8 @@ Parameters::Parameters() {//initalize parameters info
     //run
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "runMode", &runMode));
     parArray.push_back(new ParameterInfoScalar <int> (-1, -1, "runThreadN", &runThreadN));        
-
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "runDirPerm", &runDirPermIn));
+    
     //genome
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "genomeDir", &genomeDir));
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "genomeLoad", &genomeLoad));        
@@ -383,6 +384,22 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     
 ////////////////////////////////////////////////////// Calculate and check parameters   
     iReadAll=0;
+    
+    if (runDirPermIn=="User_RWX")
+    {
+        runDirPerm=S_IRWXU;
+    } else if (runDirPermIn=="All_RWX")
+    {
+//         umask(0); //this should be defined by the user!
+        runDirPerm= S_IRWXU | S_IRWXG | S_IRWXO;
+    } else
+    {
+        ostringstream errOut;
+        errOut << "EXITING because of FATAL INPUT ERROR: unrecognized option in --runDirPerm=" << runDirPerm << "\n";
+        errOut << "SOLUTION: use one of the allowed values of --runDirPerm : 'User_RWX' or 'All_RWX' \n";     
+        exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
+    
     if (outTmpDir=="-") {
         outFileTmp=outFileNamePrefix +"_STARtmp/";
         sysRemoveDir (outFileTmp);        
@@ -390,7 +407,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         outFileTmp=outTmpDir;
     };
     
-    if (mkdir (outFileTmp.c_str(),S_IRWXU)!=0) {
+    if (mkdir (outFileTmp.c_str(),runDirPerm)!=0) {
         ostringstream errOut;
         errOut <<"EXITING because of fatal ERROR: could not make temporary directory: "<< outFileTmp<<"\n";
         errOut <<"SOLUTION: (i) please check the path and writing permissions \n (ii) if you specified --outTmpDir, and this directory exists - please remove it before running STAR\n"<<flush;
@@ -528,7 +545,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                 outBAMsortingBinStart[0]=1;//this initial value means that the bin sizes have not been determined yet
                 
                 outBAMsortTmpDir=outFileTmp+"/BAMsort/";
-                mkdir(outBAMsortTmpDir.c_str(),S_IRWXU);  
+                mkdir(outBAMsortTmpDir.c_str(),runDirPerm);  
             };                
         } else if (outSAMtype.at(0)=="SAM") {
             outSAMbool=true;
@@ -904,7 +921,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         twoPass.yes=true;
         twoPass.dir=outFileNamePrefix+"_STARpass1/";
         sysRemoveDir (twoPass.dir);                
-        if (mkdir (twoPass.dir.c_str(),S_IRWXU)!=0) {
+        if (mkdir (twoPass.dir.c_str(),runDirPerm)!=0) {
             ostringstream errOut;
             errOut <<"EXITING because of fatal ERROR: could not make pass1 directory: "<< twoPass.dir<<"\n";
             errOut <<"SOLUTION: please check the path and writing permissions \n";
@@ -940,7 +957,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         };        
         sjdbInsert.outDir=outFileNamePrefix+"_STARgenome/";
         sysRemoveDir (sjdbInsert.outDir);  
-        if (mkdir (sjdbInsert.outDir.c_str(),S_IRWXU)!=0) {
+        if (mkdir (sjdbInsert.outDir.c_str(),runDirPerm)!=0) {
             ostringstream errOut;
             errOut <<"EXITING because of fatal ERROR: could not make run-time genome directory directory: "<< sjdbInsert.outDir<<"\n";
             errOut <<"SOLUTION: please check the path and writing permissions \n";

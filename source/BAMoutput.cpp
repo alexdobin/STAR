@@ -16,7 +16,7 @@ BAMoutput::BAMoutput (int iChunk, string tmpDir, Parameters *Pin) {//allocate ba
 
     bamDir=tmpDir+to_string((uint) iChunk);//local directory for this thread (iChunk)
 
-    mkdir(bamDir.c_str(),S_IRWXU);    
+    mkdir(bamDir.c_str(),P->runDirPerm);    
     binStart=new char* [nBins];
     binBytes=new uint64 [nBins];    
     binStream=new ofstream* [nBins];

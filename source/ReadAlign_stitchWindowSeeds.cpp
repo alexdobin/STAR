@@ -22,6 +22,7 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* 
                 trA1.exons[0][EX_G] = WA[iW][iS2][WA_gStart];
                 trA1.exons[0][EX_L] = WA[iW][iS2][WA_Length];  
                 trA1.exons[0][EX_iFrag]=WA[iW][iS2][WA_iFrag];
+                trA1.exons[0][EX_sjA]=WA[iW][iS2][WA_sjA];
                 score2=\
                     stitchAlignToTranscript(WA[iW][iS2][WA_rStart]+WA[iW][iS2][WA_Length]-1, WA[iW][iS2][WA_gStart]+WA[iW][iS2][WA_Length]-1,\
                                         WA[iW][iS1][WA_rStart], WA[iW][iS1][WA_gStart], WA[iW][iS1][WA_Length], WA[iW][iS1][WA_iFrag],  WA[iW][iS1][WA_sjA], \
@@ -90,7 +91,8 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* 
             trA.exons[0][EX_G] = trA.gStart = WA[iW][iS1][WA_gStart];
             trA.exons[0][EX_L] = WA[iW][iS1][WA_Length];  
             trA.exons[0][EX_iFrag]=WA[iW][iS1][WA_iFrag];
-
+            trA.exons[0][EX_sjA]=WA[iW][iS1][WA_sjA];
+                
             trA.nExons=1;
             
         };
@@ -188,6 +190,20 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* 
             trA.maxScore += int(ceil( log2( (double) ( trA.exons[trA.nExons-1][EX_G]+trA.exons[trA.nExons-1][EX_L] - trA.exons[0][EX_G]) ) \
                      * P->scoreGenomicLengthLog2scale - 0.5));
             trA.maxScore = max(0,trA.maxScore);
+        };        
+        
+        //filter strand consistency
+        trA.sjMotifStrand=0;
+        uint sjN=0;
+        for (uint iex=0;iex<trA.nExons-1;iex++) {
+            if (trA.canonSJ[iex]>=0) sjN++;
+            if (trA.sjStr[iex]>0) {//only these sjs have defined strand
+                if (trA.sjMotifStrand==0) {
+                    trA.sjMotifStrand=trA.sjStr[iex];
+                } else if (trA.sjMotifStrand != trA.sjStr[iex]) {//inconsistent strand
+                    return; //kill this transcript
+                };  
+            };
         };        
         
 //         if (P->outFilterIntronMotifs=="KeepCanonical" && (trA.intronMotifs[0]>0 || (trA.intronMotifs[1]>0 && trA.intronMotifs[2]>0) ) ) {//keep only conistent canonical introns

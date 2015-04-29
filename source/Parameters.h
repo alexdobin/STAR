@@ -26,7 +26,9 @@ class Parameters {
         
         // run parameters
         string runMode;
-        int   runThreadN;
+        int runThreadN;
+        mode_t runDirPerm;
+        string runDirPermIn; //permission for directores created at run-time
     
         //parameters
         vector <string> parametersFiles;
