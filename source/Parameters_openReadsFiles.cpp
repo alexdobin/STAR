@@ -74,10 +74,13 @@ void Parameters::openReadsFiles() {
             
             readFilesCommandPID[imate]=0;
             
+            ostringstream errOut;
             pid_t PID=fork();
             switch (PID) {
                 case -1:
-                    exitWithError("EXITING: because of fatal EXECUTION error: someting went wrong with forking readFilesCommand", std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+                    errOut << "EXITING: because of fatal EXECUTION error: Failed forking readFilesCommand\n";
+                    errOut << errno << ": " << strerror(errno) << "\n";
+                    exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
                     break;
                 
                 case 0:
