@@ -4,6 +4,7 @@ Fixed problems with occasional non-adjacent output of multiple alignments into t
 Fixed a bug causing seg-faults when shared memory options in --genomeLoad are used with --outStd SAM.
 Fixed a bug causing seg-faults for small values of --limitIObufferSize.
 Added STAR long pre-compiled executables.
+Fixed very minor issues with filtering into SJ.out.tab .
 Fixed some bugs in STARlong mapping algorithm.
 Fixed --outFilter BySJout filtering for STARlong.
 Fixed XS attrbutes in STARlong.
