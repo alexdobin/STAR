@@ -1,7 +1,12 @@
-STAR 2.4.1d 2015/04/29
-Fixed yet another inconistent error message for --sjdbOverhang .
+STAR 2.4.1d 2015/05/19
+
+Fixed problems with --sjdbOverhang default value and value defined at the mapping step.
+Fixed a bug causing seg-faults when shared memory options in --genomeLoad are used with --outStd SAM.
+Fixed a bug causing seg-faults for small values of --limitIObufferSize.
 Added STAR long pre-compiled executables.
 Fixed some bugs in STARlong mapping algorithm.
+Fixed --outFilter BySJout filtering for STARlong.
+Fixed XS attrbutes in STARlong.
 Added --runDirPerm option for permissions of run-time directories.
 
 

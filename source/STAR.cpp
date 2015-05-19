@@ -284,7 +284,6 @@ int main(int argInN, char* argIn[]) {
     };
         
     //no need for genome anymore, free the memory
-//     mainGenome.~Genome(); //need explicit call because of the delete P->inOut below
     mainGenome.freeMemory();
     
     if (P->runThreadN>1 && P->outSAMorder=="PairedKeepInputOrder") {//concatenate Aligned.* files
@@ -387,6 +386,8 @@ int main(int argInN, char* argIn[]) {
     sysRemoveDir (P->outFileTmp);
     
     P->closeReadsFiles();//this will kill the readFilesCommand processes if necessary
+    mainGenome.~Genome(); //need explicit call because of the 'delete P->inOut' below, which will destroy P->inOut->logStdOut
+    
     delete P->inOut; //to close files
     delete P;
     

@@ -181,7 +181,6 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
                     if ( binarySearch2(jS,jE,P->sjNovelStart,P->sjNovelEnd,P->sjNovelN) < 0 ) return;
                 };
             };
-            
         };        
         
         if ( trA.exons[0][EX_iFrag]!=trA.exons[trA.nExons-1][EX_iFrag] ) {//check for correct overlap between mates

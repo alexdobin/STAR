@@ -5,6 +5,7 @@
 #include "stitchAlignToTranscript.h"
 #include "extendAlign.h"
 #include <math.h>
+#include "binarySearch2.h"
 
 void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* G) {//stitches all seeds in one window: iW
 
@@ -27,6 +28,18 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* 
                     stitchAlignToTranscript(WA[iW][iS2][WA_rStart]+WA[iW][iS2][WA_Length]-1, WA[iW][iS2][WA_gStart]+WA[iW][iS2][WA_Length]-1,\
                                         WA[iW][iS1][WA_rStart], WA[iW][iS1][WA_gStart], WA[iW][iS1][WA_Length], WA[iW][iS1][WA_iFrag],  WA[iW][iS1][WA_sjA], \
                                         P, R, Q, G, &trA1, outFilterMismatchNmaxTotal);  
+                
+                if (P->outFilterBySJoutStage==2 && trA1.nExons>1) 
+                {//junctions have to be present in the filtered set P->sjnovel
+                    uint iex=0;
+                    if (trA1.canonSJ[iex]>=0 && trA1.sjAnnot[iex]==0) 
+                    {
+                        uint jS=trA1.exons[iex][EX_G]+trA1.exons[iex][EX_L];
+                        uint jE=trA1.exons[iex+1][EX_G]-1;
+                        if ( binarySearch2(jS,jE,P->sjNovelStart,P->sjNovelEnd,P->sjNovelN) < 0 ) return;
+                    };
+                };                 
+                
                 if (score2>0 && score2+scoreSeedBest[iS2] > scoreSeedBest[iS1] ) {
                     scoreSeedBest[iS1]=score2+scoreSeedBest[iS2];
                     scoreSeedBestMM[iS1]=trA1.nMM;

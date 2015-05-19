@@ -67,7 +67,7 @@ void outputSJ(ReadAlignChunk** RAchunk, Parameters* P) {//collapses junctions fr
                 && *oneSJ.overhangRight >= (uint) P->outSJfilterOverhangMin[(*oneSJ.motif+1)/2] \
                 && ( (*oneSJ.countMultiple+*oneSJ.countUnique)>P->outSJfilterIntronMaxVsReadN.size() || *oneSJ.gap<=(uint) P->outSJfilterIntronMaxVsReadN[*oneSJ.countMultiple+*oneSJ.countUnique-1]) );
 
-        if (sjFilter || P->outFilterBySJoutStage==2) {//record the junction in all SJ
+        if (sjFilter) {//record the junction in all SJ
             memcpy(allSJ.data+allSJ.N*oneSJ.dataSize,sjChunks[icOut],oneSJ.dataSize);
             allSJ.N++;
             if (allSJ.N == P->limitOutSJcollapsed*OUTSJ_limitScale ) {
