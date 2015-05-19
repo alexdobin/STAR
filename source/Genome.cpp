@@ -133,9 +133,10 @@ void Genome::genomeLoad(){//allocate and load Genome
     P->genomeSAindexNbases=P1->genomeSAindexNbases;
     P->genomeChrBinNbits=P1->genomeChrBinNbits;
     P->genomeSAsparseD=P1->genomeSAsparseD;
-    if (P->sjdbOverhang==0) 
-    {//sjdbOverhang may be defined at the genome generation step
+    if (P->sjdbOverhang==0 || P->parArray.at(P->sjdbOverhang_par)->inputLevel==0) 
+    {//if --sjdbOverhang was not defined by user, or = 0, use sjdbOverhang from the genome generation step
         P->sjdbOverhang=P1->sjdbOverhang;
+        P->inOut->logMain << "--sjdbOverhang = " << P->sjdbOverhang << " taken from the generated genome\n";
     } else if (sjdbInfoExists && P->parArray.at(P->sjdbOverhang_par)->inputLevel>0 && P->sjdbOverhang!=P1->sjdbOverhang) 
     {//if sjdbOverhang was defined at the genome generation step,the mapping step value has to agree with it
         ostringstream errOut;

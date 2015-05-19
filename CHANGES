@@ -1,6 +1,6 @@
 STAR 2.4.1d 2015/05/19
-
-Fixed problems with --sjdbOverhang default value and value defined at the mapping step.
+Fixed problems with --sjdbOverhang default and user-defined values.
+Fixed problems with occasional non-adjacent output of multiple alignments into the unsorted BAM file and transcriptome BAM file.
 Fixed a bug causing seg-faults when shared memory options in --genomeLoad are used with --outStd SAM.
 Fixed a bug causing seg-faults for small values of --limitIObufferSize.
 Added STAR long pre-compiled executables.

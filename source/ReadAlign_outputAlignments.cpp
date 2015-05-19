@@ -80,29 +80,20 @@ void ReadAlign::outputAlignments() {
                 exitWithError(errOut.str(), std::cerr, P->inOut->logMain, EXIT_CODE_BUG, *P);                    
             };            
             
-            for (uint iTr=0;iTr<nTr;iTr++) {//write all transcripts
-                     
-                if (P->outBAMunsorted || P->outBAMcoord) {//BAM output
-                    alignBAM(*(trMult[iTr]), nTr, iTr, P->chrStart[trMult[iTr]->Chr], (uint) -1, (uint) -1, 0, -1, NULL, P->outSAMattrOrder,outBAMoneAlign, outBAMoneAlignNbytes);
-                    for (uint imate=0; imate<P->readNmates; imate++) {//output each mate
-                        if (P->outBAMunsorted) outBAMunsorted->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], imate>0 ? 0 : outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1]);
-                        if (P->outBAMcoord)    outBAMcoord->coordOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], (iReadAll<<32) | (iTr<<8) | trMult[iTr]->exons[0][EX_iFrag] );                        
-                    };
-                };
-            
-                if (P->outSAMbool){//SAM output
+            if (P->outSAMbool){//SAM output
+                for (uint iTr=0;iTr<nTr;iTr++) {//write all transcripts
                     outBAMbytes+=outputTranscriptSAM(*(trMult[iTr]), nTr, iTr, (uint) -1, (uint) -1, 0, -1, NULL, outSAMstream);
                 };
-                
-//                 {//debug: check maxScore
-//                     intScore as=trMult[iTr]->maxScore;
-//                     uint nmm=trMult[iTr]->nMM;
-//                     trMult[iTr]->alignScore(Read1, G, P);
-//                     if (as!=trMult[iTr]->maxScore || nmm!=trMult[iTr]->nMM) {
-//                         cout << readName<<"   "<<as<<"   "<<trMult[iTr]->maxScore <<"   "<< nmm<<"   "<<trMult[iTr]->nMM<<endl;
-// //                         exit(-1);
-//                     };
-//                 };                
+            };
+            
+            if (P->outBAMunsorted || P->outBAMcoord) {//BAM output
+                for (uint iTr=0;iTr<nTr;iTr++) {//write all transcripts                     
+                    alignBAM(*(trMult[iTr]), nTr, iTr, P->chrStart[trMult[iTr]->Chr], (uint) -1, (uint) -1, 0, -1, NULL, P->outSAMattrOrder,outBAMoneAlign, outBAMoneAlignNbytes);
+                    for (uint imate=0; imate<P->readNmates; imate++) {//output each mate
+                        if (P->outBAMunsorted) outBAMunsorted->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], (imate>0 || iTr>0) ? 0 : (outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1])*2*nTr);
+                        if (P->outBAMcoord)    outBAMcoord->coordOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], (iReadAll<<32) | (iTr<<8) | trMult[iTr]->exons[0][EX_iFrag] );                        
+                    };
+                };             
             };
                         
             if (P->outSJfilterReads=="All" || nTr==1) {

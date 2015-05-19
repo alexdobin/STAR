@@ -913,13 +913,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             errOut << "SOLUTION: for the 2-pass mode, specify --twopass1readsN > 0. Use a very large number or -1 to map all reads in the 1st pass.\n";
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
-        
-        if (sjdbOverhang<=0) {
-            ostringstream errOut;
-            errOut << "EXITING because of fatal PARAMETERS error: sjdbOverhang <=0 in the 2-pass mode\n";
-            errOut << "SOLUTION: for the 2-pass mode, specify sjdbOverhang>0, ideally readMateLength-1\n";
-            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-        };
+
         if (genomeLoad!="NoSharedMemory") {
             ostringstream errOut;
             errOut << "EXITING because of fatal PARAMETERS error: 2-pass method is not compatible with genomeLoad<<"<<genomeLoad<<"\n";
@@ -952,10 +946,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
        sjdbInsert.yes=true;
     };    
     
-    
-    
-    
-    if (runMode=="alignReads" && (sjdbInsert.pass1 || sjdbInsert.pass2) ) 
+    if (runMode=="alignReads" && sjdbInsert.yes ) 
     {//run-time genome directory, this is needed for genome files generated on the fly
         if (sjdbOverhang<=0) {
             ostringstream errOut;
