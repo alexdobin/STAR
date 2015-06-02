@@ -105,7 +105,7 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
                 int jR1=1; //junction location in R-space        
                 do { // 1. move left, until the score for MM is less than canonical advantage
                     jR1--;
-                    if ( R[rAend+jR1]!=G[gBstart1+jR1] && G[gBstart1+jR1]<4) Score1 -= int(Q[rAend+jR1]);
+                    if ( R[rAend+jR1]!=G[gBstart1+jR1] && G[gBstart1+jR1]<4 && R[rAend+jR1]==G[gAend+jR1]) Score1 -= int(Q[rAend+jR1]);
                 }  while ( Score1+P->scoreStitchSJshift >= 0 && int(trA->exons[trA->nExons-1][EX_L]) + jR1 > 1);//>=P->alignSJoverhangMin); //also check that we are still within the exon
 
                 int maxScore2=-999999;
@@ -211,7 +211,7 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
 //                                 trA->shiftSJ[trA->nExons-1][0]=0;
 //                                 trA->shiftSJ[trA->nExons-1][1]=jjR;                                  
                             };
-                        } else {//anotated
+                        } else {//annotated
                             jCan=P->sjdbMotif[sjdbInd];
                             if (P->sjdbMotif[sjdbInd]==0) {//shift to match annotations
                                 if (L<=P->sjdbShiftLeft[sjdbInd] || trA->exons[trA->nExons-1][EX_L]<=P->sjdbShiftLeft[sjdbInd]) {

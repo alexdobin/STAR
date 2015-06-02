@@ -1,3 +1,5 @@
+Fixed a bug that caused problems with junction motifs in rare cases. Very few alignments affected, <1 per millions.
+
 STAR 2.4.1d 2015/05/19
 Fixed problems with --sjdbOverhang default and user-defined values.
 Fixed problems with occasional non-adjacent output of multiple alignments into the unsorted BAM file and transcriptome BAM file.
