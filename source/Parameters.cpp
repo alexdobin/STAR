@@ -946,6 +946,14 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
        sjdbInsert.yes=true;
     };    
     
+    if (genomeLoad!="NoSharedMemory" && sjdbInsert.yes ) 
+    {
+        ostringstream errOut;
+        errOut << "EXITING because of fatal PARAMETERS error: on the fly junction insertion and 2-pass mappng cannot be used with shared memory genome \n" ;
+        errOut << "SOLUTION: run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;     
+        exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
+    
     if (runMode=="alignReads" && sjdbInsert.yes ) 
     {//run-time genome directory, this is needed for genome files generated on the fly
         if (sjdbOverhang<=0) {

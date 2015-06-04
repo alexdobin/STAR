@@ -1,4 +1,6 @@
-Fixed a bug that caused problems with junction motifs in rare cases. Very few alignments affected, <1 per millions.
+Error message when shared memory and on the fly junction insertion are used together.
+Fixed a bug causing unnecessary 1 base soft-clipping in rare cases with sparse suffix array.
+Fixed a bug that caused problems with junction motifs in rare cases. Very few alignments affected, <1 per million.
 
 STAR 2.4.1d 2015/05/19
 Fixed problems with --sjdbOverhang default and user-defined values.

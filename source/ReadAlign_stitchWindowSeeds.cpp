@@ -149,7 +149,7 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* 
             trA1=*trInit;//initialize trA1        
             uint tR2=WA[iW][iS1][WA_rStart]+WA[iW][iS1][WA_Length];
             uint tG2=WA[iW][iS1][WA_gStart]+WA[iW][iS1][WA_Length];
-            if ( tR2 < Lread-1 \
+            if ( tR2 < Lread \
                 && extendAlign(R, Q, G, tR2, tG2, +1, +1, min(Lread-tR2,P->chrStart[WC[iW][WC_Str]+1]-tG2-1), 100000, scoreSeedBestMM[iS1], outFilterMismatchNmaxTotal, P->outFilterMismatchNoverLmax1, &trA1) ) {//if could extend
                     trA.add(&trA1);                    
                     trA.exons[trA.nExons-1][EX_L] += trA1.extendL;//extend the length of the last exon

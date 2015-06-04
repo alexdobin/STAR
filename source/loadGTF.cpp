@@ -64,6 +64,12 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P, string dirOut) {//load gtf file
             };
             sjdbStreamIn.ignore(1000000000,'\n'); //ignore the rest of the line
         };
+        
+        if (exonN==0)
+        {
+            P->inOut->logMain << "WARNING: found no exons in sjdbGTFfile=" << P->sjdbGTFfile <<endl;
+            return 0;
+        };
         uint* exonLoci=new uint [exonN*GTF_exonLoci_size];
         char* transcriptStrand = new char [exonN];
         vector <string> transcriptID, geneID;
