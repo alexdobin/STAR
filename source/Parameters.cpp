@@ -266,7 +266,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     };
     
 //     need to be careful since runMode and genomeDir are not Command-Line-Initial
-//     if (runMode=="genomeGenerate" && outFileNamePrefix=="./") {// for genome generatio, output into genomeDir
+//     if (runMode=="genomeGenerate" && outFileNamePrefix=="./") {// for genome generation, output into genomeDir
 //         outFileNamePrefix=genomeDir;
 //     };
     
@@ -877,6 +877,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                 };
             } else if  (quant.mode.at(ii)=="GeneCounts") {
                 quant.geCount.yes=true;
+                quant.geCount.outFile=outFileNamePrefix + "ReadsPerGene.out.tab";
             } else {
                 ostringstream errOut;
                 errOut << "EXITING because of fatal INPUT error: unrecognized option in --quant.mode=" << quant.mode.at(ii) << "\n";

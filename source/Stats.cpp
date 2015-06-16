@@ -5,7 +5,7 @@ void Stats::resetN() {//zero all counters
     readN = 0; readBases = 0;
     mappedMismatchesN = 0; mappedInsN = 0; mappedDelN = 0; mappedInsL = 0; mappedDelL = 0; mappedBases = 0;  mappedPortion = 0;
     mappedReadsU = 0; mappedReadsM = 0;
-    unmappedOther = 0; unmappedShort = 0; unmappedMismatch = 0; unmappedMulti = 0;
+    unmappedOther = 0; unmappedShort = 0; unmappedMismatch = 0; unmappedMulti = 0; unmappedAll = 0;
     splicesNsjdb=0;
     for (uint ii=0; ii<SJ_MOTIF_SIZE; ii++) {
         splicesN[ii]=0;
@@ -23,7 +23,7 @@ void Stats::addStats(Stats &S) {//add S to Stats
     mappedMismatchesN += S.mappedMismatchesN; mappedInsN += S.mappedInsN; mappedDelN += S.mappedDelN; 
     mappedInsL += S.mappedInsL; mappedDelL += S.mappedDelL; mappedBases += S.mappedBases;  mappedPortion += S.mappedPortion;
     mappedReadsU += S.mappedReadsU; mappedReadsM += S.mappedReadsM;
-    unmappedOther += S.unmappedOther; unmappedShort += S.unmappedShort; unmappedMismatch += S.unmappedMismatch; unmappedMulti += S.unmappedMulti;
+    unmappedOther += S.unmappedOther; unmappedShort += S.unmappedShort; unmappedMismatch += S.unmappedMismatch; unmappedMulti += S.unmappedMulti; unmappedAll += S.unmappedAll;
     
     splicesNsjdb += S.splicesNsjdb;
     for (uint ii=0; ii<SJ_MOTIF_SIZE; ii++) {

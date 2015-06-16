@@ -286,11 +286,19 @@ int main(int argInN, char* argIn[]) {
     //no need for genome anymore, free the memory
     mainGenome.freeMemory();
     
+    if ( P->quant.geCount.yes )
+    {//output gene quantifications
+        for (int ichunk=1; ichunk<P->runThreadN; ichunk++)
+        {//sum counts from all chunks into 0th chunk
+            RAchunk[0]->chunkTr->quants->addQuants(*(RAchunk[ichunk]->chunkTr->quants));
+        };
+        RAchunk[0]->chunkTr->quantsOutput();
+    };
+    
     if (P->runThreadN>1 && P->outSAMorder=="PairedKeepInputOrder") {//concatenate Aligned.* files
         RAchunk[0]->chunkFilesCat(P->inOut->outSAM, P->outFileTmp + "/Aligned.out.sam.chunk", g_threadChunks.chunkOutN);
     };    
-    
-    
+
     
     if (P->outBAMcoord) {//sort BAM if needed
         *P->inOut->logStdOut << timeMonthDayTime() << " ..... Started sorting BAM\n" <<flush;

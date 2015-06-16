@@ -234,6 +234,7 @@ class Parameters {
           struct 
           {
               bool yes;
+              string outFile;
           } geCount;
           
         } quant;

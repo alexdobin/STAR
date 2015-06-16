@@ -106,13 +106,21 @@ void ReadAlign::outputAlignments() {
             mateMapped[trBest->exons[trBest->nExons-1][EX_iFrag]]=true;        
             if (P->readNmates>1 && !(mateMapped[0] && mateMapped[1]) ) unmapType=4;
             
-            if ( P->quant.trSAM.yes ) {
-                quantTranscriptome(chunkTr, nTr, trMult,  alignTrAll);
-            };
-            if ( P->quant.geCount.yes ) {
+            if ( P->quant.geCount.yes ) 
+            {
                 chunkTr->geneCountsAddAlign(nTr, trMult);
-            };           
+            };       
+            
+            if ( P->quant.trSAM.yes ) 
+            {//NOTE: the transcripts are changed by this function (soft-clipping extended), cannot be reused
+                quantTranscriptome(chunkTr, nTr, trMult,  alignTrAll);
+            };    
         };
+    };
+    
+    if (unmapType>=0)
+    {
+        statsRA.unmappedAll++;
     };
 
     if (unmapType>=0 && P->outSAMunmapped=="Within") {//unmapped read, at least one mate

@@ -75,10 +75,10 @@ void Parameters::openReadsFiles() {
             readFilesCommandPID[imate]=0;
             
             ostringstream errOut;
-            pid_t PID=fork();
+            pid_t PID=vfork();
             switch (PID) {
                 case -1:
-                    errOut << "EXITING: because of fatal EXECUTION error: Failed forking readFilesCommand\n";
+                    errOut << "EXITING: because of fatal EXECUTION error: Failed vforking readFilesCommand\n";
                     errOut << errno << ": " << strerror(errno) << "\n";
                     exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
                     break;

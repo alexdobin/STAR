@@ -14,12 +14,12 @@ public:
     uint32 quantAlign (Transcript &aG, Transcript *aTall);//transform coordinates for all aligns from genomic in RA to transcriptomic in RAtr
     void geneCountsAddAlign(uint nA, Transcript **aAll); //add one alignment to gene counts
     void quantsAllocate(); //allocate quants structure
-    
+    void quantsOutput(); //output quantification files
     string trInfoDir;
     
     Parameters* Ptr; //transcriptomic parameters (i.e. chrName,...), to be used with RAtr for output
 
-    vector <string> trID, geID; //transcript IDs
+    vector <string> trID, geID; //transcript/gene IDs
     uint32 nTr, nGe; //number of transcript/genes
 
     uint *trS, *trE, *trEmax; //transcripts start,end,end-max  
@@ -33,7 +33,7 @@ public:
 
     struct {//exon-gene structure for GeneCounts
        uint64 nEx;//number of exons/genes
-       uint64 *s,*e;  //exon start/end
+       uint64 *s,*e, *eMax;  //exon start/end
        uint8  *str;   //strand
        uint32 *g, *t; //gene/transcript IDs
     } exG;

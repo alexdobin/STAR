@@ -19,7 +19,7 @@ class Stats {
         uint splicesN[SJ_MOTIF_SIZE];//non-can,3*can,annotated
         uint splicesNsjdb;
         
-        uint unmappedOther, unmappedShort, unmappedMismatch, unmappedMulti;
+        uint unmappedOther, unmappedShort, unmappedMismatch, unmappedMulti, unmappedAll;
 
         time_t timeStart, timeStartMap, timeLastReport, timeFinish;     
         
