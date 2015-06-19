@@ -6,6 +6,7 @@
 #include "extendAlign.h"
 #include <math.h>
 #include "binarySearch2.h"
+#include "ErrorWarning.h"
 
 void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* G) {//stitches all seeds in one window: iW
 
@@ -217,6 +218,27 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* 
                     return; //kill this transcript
                 };  
             };
+        };        
+
+        if (sjN>0 && trA.sjMotifStrand==0 && P->outSAMstrandField=="intronMotif") {//strand not defined for a junction
+            return;
+        };        
+        
+        if (P->outFilterIntronMotifs=="None") {//no filtering
+
+        } else if (P->outFilterIntronMotifs=="RemoveNoncanonical") {
+            for (uint iex=0;iex<trA.nExons-1;iex++) {
+                if (trA.canonSJ[iex]==0) return;
+            };
+        } else if (P->outFilterIntronMotifs=="RemoveNoncanonicalUnannotated") {
+            for (uint iex=0;iex<trA.nExons-1;iex++) {
+                if (trA.canonSJ[iex]==0 && trA.sjAnnot[iex]==0) return;
+            };
+        } else {
+            ostringstream errOut;
+            errOut << "EXITING because of FATAL INPUT error: unrecognized value of --outFilterIntronMotifs=" <<P->outFilterIntronMotifs <<"\n";
+            errOut << "SOLUTION: re-run STAR with --outFilterIntronMotifs = None -OR- RemoveNoncanonical -OR- RemoveNoncanonicalUnannotated\n";
+            exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);        
         };        
         
 //         if (P->outFilterIntronMotifs=="KeepCanonical" && (trA.intronMotifs[0]>0 || (trA.intronMotifs[1]>0 && trA.intronMotifs[2]>0) ) ) {//keep only conistent canonical introns

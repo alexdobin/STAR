@@ -1,3 +1,4 @@
+STARlong: fixed --outFilterIntronMotifs and --outSAMstrandField options.
 Implemented --quantMode GeneCounts option for counting number of reads per gene, similar to htseq-count.
 Yet another fix for --sjdbOverhang logic.
 Error message when shared memory and on the fly junction insertion are used together.
