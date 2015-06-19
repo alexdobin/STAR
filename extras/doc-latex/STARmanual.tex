@@ -34,7 +34,7 @@
 
 \newcommand{\sechyperref}[1]{\hyperref[#1]{Section \ref{#1}. \nameref{#1}}}
 
-\title{STAR manual 2.4.1a}
+\title{STAR manual 2.4.2a}
 \author{Alexnder Dobin\\
 dobin@cshl.edu}
 \maketitle
@@ -153,7 +153,7 @@ Note, that the \opt{sjdbFileChrStartEnd} file can contain duplicate (identical) 
 For small genomes, the parameter \opt{genomeSAindexNbases} needs to be scaled down, with a typical value of \code{min(14, log2(GenomeLength)/2 - 1)}. For example, for 1~megaBase genome, this is equal to 9, for 100~kiloBase genome, this is equal to 7.
 
 \subsubsection{Genome with a large number of references.}
-If you are using a genome with a large (\textgreater 5,000) number of references (chrosomes/scaffolds), you may need to reduce the \opt{genomeChrBinNbits} to reduce RAM consumption. The following scaling is recomended: \opt{genomeChrBinNbits} = \code{min(18, log2(GenomeLength/NumberOfReferences))}. For example, for 3~gigaBase genome with 100,000 chromosomes/scaffolds, this is equal to 15.
+If you are using a genome with a large (\textgreater 5,000) number of references (chrosomes/scaffolds), you may need to reduce the \opt{genomeChrBinNbits} to reduce RAM consumption. The following scaling is recommended: \opt{genomeChrBinNbits} = \code{min(18, log2(GenomeLength/NumberOfReferences))}. For example, for 3~gigaBase genome with 100,000 chromosomes/scaffolds, this is equal to 15.
 
 \section{Running mapping jobs.}\label{Running_mapping_jobs}
 \subsection{Basic options.}
@@ -165,7 +165,7 @@ The basic options to run a mapping job are as follows:
 
 \begin{itemize}
 \item[]
-\opt{runThreadN} option defines the number of threads to be used for genome generation, it has to be set to the number of available cores on the server node.
+%\opt{runThreadN} option defines the number of threads to be used for mapping, it has to be set to the number of available cores on the server node.
 
 \opt{genomeDir} specifies path to the genome directory where genome indices where generated (see \sechyperref{Generating_genome_indexes}).
 
@@ -203,7 +203,7 @@ minimum overhang for annotated junctions
 \opt{outFilterMismatchNmax}      999\\
 maximum number of mismatches per pair, large number switches off this filter
 \item[]
-\opt{outFilterMismatchNoverLmax} 0.04\\
+%\opt{outFilterMismatchNoverReadLmax} 0.04\\
 max number of mismatches per pair relative to read length: for 2x100b, max number of mismatches is 0.06*200=8 for the paired read
 \item[]
 \opt{alignIntronMin}             20\\
@@ -367,10 +367,26 @@ Note that line 4 and 6 here are BCR/ABL fusions. You would need to filter these 
 
 
 \section{Output in transcript coordinates.}
-With \opt{quantMode} \optv{TranscriptomeSAM} option STAR will outputs alignments translated into transcript coordinates in the \ofilen{Aligned.toTranscriptome.out.bam} file (in addition to alignments in genomic coordinates in \ofilen{Aligned.*.sam/bam} files). These transcriptomic alignments can be used with various transcript quantification software that require reads to be mapped to transcriptome, such as RSEM or eXpress. For example, RSEM command line would look as follows: \codelines{rsem-calculate-expression ...  --bam Aligned.toTranscriptome.out.bam /path/to/RSEM/reference RSEM}.
+With \opt{quantMode} \optv{TranscriptomeSAM} option STAR will output alignments translated into transcript coordinates in the \ofilen{Aligned.toTranscriptome.out.bam} file (in addition to alignments in genomic coordinates in \ofilen{Aligned.*.sam/bam} files). These transcriptomic alignments can be used with various transcript quantification software that require reads to be mapped to transcriptome, such as RSEM or eXpress. For example, RSEM command line would look as follows: \codelines{rsem-calculate-expression ...  --bam Aligned.toTranscriptome.out.bam /path/to/RSEM/reference RSEM}.
 Note, that STAR first aligns reads to entire genome, and only then searches for concordance between alignments and transcripts. I believe this approach might offer certain advantages compared to the alignment to transcriptome only, by not forcing the alignments to annotated transcripts.
 
 By default, the output satisfies RSEM requirements: soft-clipping or indels are not allowed. Use \opt{quantTranscriptomeBan} \optv{Singleend} to allow insertions, deletions ans soft-clips in the transcriptomic alignments, which can be used by some expression quantification software (e.g. eXpress). 
+
+\section{Counting number of reads per gene.}
+With \opt{quantMode} \optv{GeneCounts} option STAR will count number reads per gene while mapping. 
+A read is counted if it overlaps (1nt or more) one and only one gene. Both ends of the paired-end read are checked for overlaps. 
+The counts coincide with those produced by htseq-count with default parameters.
+This option requires annotations (GTF or GFF with --sjdbGTFfile option) used at the genome generation step, or at the mapping step.
+STAR outputs read counts per gene into ReadsPerGene.out.tab file with 4 columns which correspond to different strandedness options:
+\begin{itemize}[leftmargin=1in]
+\item[column 1:] gene ID
+\item[column 2:] counts for unstranded RNA-seq
+\item[column 3:] counts for the 1st read strand aligned with RNA (htseq-count option -s yes)
+\item[column 4:] counts for the 2nd read strand aligned with RNA (htseq-count option -s reverse)
+\end{itemize}
+Select the output according to the strandedness of your data.
+Note, that if you have stranded data and choose one of the columns 3 or 4, the other column (4 or 3) will give you the count of antisense reads.
+With \opt{quantMode} \optv{TranscriptomeSAM} \optv{GeneCounts}, and get both the \ofilen{Aligned.toTranscriptome.out.bam} and \ofilen{ReadsPerGene.out.tab} outputs.
 
 
 \section{2-pass mapping.}

@@ -112,6 +112,10 @@ STARforMacStatic : CCFLAGS=-D'COMPILE_FOR_MAC' -I ./Mac_Include/ $(CCFLAGS_main)
 STARforMacStatic : parametersDefault.xxd $(OBJECTS)
 	$(CXX) -o STAR $(CCFLAGS) $(LDFLAGS_Mac_static) $(OBJECTS)
 
+STARlongForMacStatic : CCFLAGS=-D'COMPILE_FOR_LONG_READS' -D'COMPILE_FOR_MAC' -I ./Mac_Include/ $(CCFLAGS_main)
+STARlongForMacStatic : parametersDefault.xxd $(OBJECTS)
+	$(CXX) -o STARlong $(CCFLAGS) $(LDFLAGS_Mac_static) $(OBJECTS)
+
 #
 STARforMacGDB : CCFLAGS=-D'COMPILE_FOR_MAC' -I ./Mac_Include/ $(CCFLAGS_gdb)
 STARforMacGDB : parametersDefault.xxd $(OBJECTS)

@@ -8,9 +8,9 @@ class Quantifications {
     public:
         struct {//counting reads per gene, similar to HTseq
             uint32  nGe;      //number of genes    
-            static const int nType=3; //number of count types (columns)
+            int nType; //number of count types (columns)
             uintQ cMulti;     //count multimappers
-            uintQ cAmbig[nType], cNone[nType];//ambigouous, no-feature
+            uintQ *cAmbig, *cNone;//ambigouous, no-feature
             uintQ **gCount;     // array of read counts per gene for two strands
         } geneCounts;
 

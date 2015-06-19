@@ -2,6 +2,10 @@
 
 Quantifications::Quantifications (uint32 nGeIn) {
 
+    geneCounts.nType=3;
+    geneCounts.cAmbig = new uintQ[geneCounts.nType];
+    geneCounts.cNone = new uintQ[geneCounts.nType];
+    
     geneCounts.nGe=nGeIn;
     geneCounts.gCount = new uintQ* [geneCounts.nType];
 

@@ -1,3 +1,26 @@
+STAR 2.4.2a 2015/06/19
+
+New features:
+
+Counting reads per gene while mapping with --quantMode GeneCounts option.
+A read is counted if it overlaps (1nt or more) one and only one gene. Both ends of the paired-end read are checked for overlaps.
+The counts coincide with those produced by htseq-count with default parameters.
+
+Requires annotations (GTF or GFF with --sjdbGTFfile option) used at the genome generation step, or at the mapping step.
+
+Outputs read counts per gene into ReadsPerGene.out.tab file with 4 columns which correspond to different strandedness options:
+column 1: gene ID 
+column 2: counts for unstranded RNA-seq
+column 3: counts for the 1st read strand aligned with RNA (htseq-count option -s yes)
+column 4: counts for the 2nd read strand aligned with RNA (htseq-count option -s reverse)
+Select the output according to the strandedness of your data.
+Note, that if you have stranded data and choose one of the columns 3 or 4, the other column (4 or 3) will give you the count of antisense reads.
+ 
+With --quantMode TranscriptomeSAM GeneCounts, and get both the Aligned.toTranscriptome.out.bam and ReadsPerGene.out.tab outputs.
+
+
+
+################################################################################################################################################################
 STAR 2.4.1a 2015/04/17
 
 New features:

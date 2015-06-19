@@ -3,6 +3,7 @@ function substLatexSymbols() {
  gsub(">","{\\textgreater}");
  gsub("<","{\\textless}");
  gsub("_","{\\textunderscore}");
+ gsub("&","{\\\\&}");
 };
 
 BEGIN {

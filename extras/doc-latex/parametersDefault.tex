@@ -26,6 +26,13 @@
 \optName{runThreadN}
   \optValue{1}
   \optLine{int: number of threads to run STAR} 
+\optName{runDirPerm}
+  \optValue{User{\textunderscore}RWX}
+  \optLine{string: permissions for the directories created at the run-time. } 
+\begin{optOptTable}
+  \optOpt{User{\textunderscore}RWX}   \optOptLine{user-read/write/execute}
+  \optOpt{All{\textunderscore}RWX}   \optOptLine{all-read/write/execute (same as chmod 777)}
+\end{optOptTable}
 \end{optTable}
 \optSection{Genome Parameters}\label{Genome_Parameters}
 \begin{optTable}
@@ -258,7 +265,7 @@
   \optLine{int: 0 to 65535: sam FLAG will be bitwise OR'd with this value, i.e. FLAG=FLAG | outSAMflagOR. This is applied after all flags have been set by STAR, and after outSAMflagAND. Can be used to set specific bits that are not set otherwise.} 
 \optName{outSAMflagAND}
   \optValue{65535}
-  \optLine{int: 0 to 65535: sam FLAG will be bitwise AND'd with this value, i.e. FLAG=FLAG \& outSAMflagOR. This is applied after all flags have been set by STAR, but before outSAMflagOR. Can be used to unset specific bits that are not set otherwise.} 
+  \optLine{int: 0 to 65535: sam FLAG will be bitwise AND'd with this value, i.e. FLAG=FLAG {\&} outSAMflagOR. This is applied after all flags have been set by STAR, but before outSAMflagOR. Can be used to unset specific bits that are not set otherwise.} 
 \optName{outSAMattrRGline}
   \optValue{-}
   \optLine{string(s): SAM/BAM read group line. The first word contains the read group identifier and must start with "ID:", e.g. --outSAMattrRGline ID:xxx CN:yy "DS:z z z". } 
