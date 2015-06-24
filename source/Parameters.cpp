@@ -183,6 +183,8 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "chimScoreJunctionNonGTAG", &chimScoreJunctionNonGTAG));    
     parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "chimJunctionOverhangMin", &chimJunctionOverhangMin));    
     parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "chimOutType", &chimOutType));
+    parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "chimFilter", &chimFilter));
+    parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "chimSegmentReadGapMax", &chimSegmentReadGapMax));
     
     //sjdb
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "sjdbFileChrStartEnd", &sjdbFileChrStartEnd));
@@ -368,8 +370,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     
     ///////////////////////////////////////// Old variables
     outputBED[0]=0; outputBED[1]=0; //controls the format of starBED output. Will be replaced with HDF5 output
-    //chimeric
-    maxChimReadGap=0;
+
     //annot scoring
     annotScoreScale=0;
     annotSignalFile="-";
@@ -991,6 +992,26 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             errOut <<"EXITING because of fatal PARAMETERS error: --chimOutType WithinBAM requires BAM output\n";
             errOut <<"SOLUTION: re-run with --outSAMtype BAM Unsorted/SortedByCoordinate\n";
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
+    
+    //chimeric
+    chimPar.filter.genomicN=false;
+    for (int ii=0; ii<chimFilter.size(); ii++)
+    {
+        if (chimFilter.at(ii)=="banGenomicN")
+        {
+            chimPar.filter.genomicN=true;
+        } 
+        else if (chimFilter.at(ii)=="None")
+        {//nothing to do
+        }
+        else 
+        {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: unrecognized value of --chimFilter="<<chimFilter.at(ii)<<"\n";
+            errOut << "SOLUTION: use allowed values: banGenomicN || None";
+            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };
     };
     
     inOut->logMain << "Finished loading and checking parameters\n" <<flush;

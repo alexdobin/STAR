@@ -1,3 +1,6 @@
+Implemented --chimSegmentReadGapMax parameter which defines the maximum gap in the read sequence between chimeric segments. By default it is set to 0 to replicate the behavior of the previous STAR versions.
+Implemented --chimFilter banGenomicN | None options to prohibit or allow the N characters in the vicinity of the chimeric junctions. By default, they are prohibited - the same behavior as in the previous versions.
+
 STAR 2.4.2a 2015/06/19
 Implemented --quantMode GeneCounts option for counting number of reads per gene, similar to htseq-count.
 STARlong: fixed --outFilterIntronMotifs and --outSAMstrandField options.

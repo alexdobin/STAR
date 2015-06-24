@@ -94,9 +94,8 @@ bool ReadAlign::chimericDetection() {
 
                 //segment lengths && (different mates || small gap between segments)
                 if (roEnd1 > P->chimSegmentMin + roStart1 + chimOverlap && roEnd2> P->chimSegmentMin + roStart2 + chimOverlap  \
-                    && ( diffMates || ( (roEnd1 + P->maxChimReadGap + 1) >= roStart2 && (roEnd2 + P->maxChimReadGap + 1) >= roStart1 ) ) ) {
-                                           //maxChimReadGap=0 in Parameters.cpp
-
+                    && ( diffMates || ( (roEnd1 + P->chimSegmentReadGapMax + 1) >= roStart2 && (roEnd2 + P->chimSegmentReadGapMax + 1) >= roStart1 ) ) ) {
+                    
                     int chimScore=trBest->maxScore + trAll[iW][iWt]->maxScore - (int)chimOverlap; //subtract overlap to avoid double counting
 
                     if (chimScore > chimScoreBest && chimScore >= P->chimScoreMin && chimScore+P->chimScoreDropMax >= (int) (readLength[0]+readLength[1]) ) {
@@ -173,7 +172,7 @@ bool ReadAlign::chimericDetection() {
                             if (b1<4) b1=3-b1;
                         };
 
-                        if (b0>3 || b1>3 || bR>3) {//chimera is not called if there are Ns in the genome or in the read
+                        if ( ( P->chimPar.filter.genomicN && (b0>3 || b1>3) ) || bR>3) {//chimera is not called if there are Ns in the genome or in the read
                             chimN=0;
                             break;
                         };

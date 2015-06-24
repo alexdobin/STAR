@@ -494,6 +494,14 @@ chimScoreJunctionNonGTAG    -1
 chimJunctionOverhangMin     20
     int>=0: minimum overhang for a chimeric junction
 
+chimSegmentReadGapMax       0
+    int>=0: maximum gap in the read sequence between chimeric segments
+
+chimFilter                  banGenomicN
+    string(s): different filters for chimeric alignments
+                            None ... no filtering
+                            banGenomicN ... Ns are not allowed in the genome sequence around the chimeric junction
+
 ### Quantification of Annotations
 quantMode                   -
     string(s): types of quantification requested
