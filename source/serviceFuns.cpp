@@ -1,6 +1,8 @@
 #ifndef DEF_serviceFuns
 #define DEF_serviceFuns
 
+#include "IncludeDefine.h"
+
 template <class T>
     T sum1D(T* a, uint N) {
         T s=0;
