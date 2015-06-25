@@ -1,3 +1,6 @@
+#include "IncludeDefine.h"                                                                                                                                                     
+#include "Parameters.h"
+
 int stitchGapIndel (uint rAend, uint gAend, uint rBstart, uint gBstart, uint L, uint gapStart, uint gapEnd, char* R, char* G, Parameters* P,\
                     uint &iRbest, uint &nMM){//returns stitch score
     
