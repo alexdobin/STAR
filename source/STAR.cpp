@@ -19,13 +19,11 @@
 #include "BAMbinSortByCoordinate.h"
 #include "BAMbinSortUnmapped.h"
 #include "signalFromBAM.h"
-// #include "sjdbBuildIndex.h"
 #include "mapThreadsSpawn.h"
 #include "ErrorWarning.h"
-// #include "sjdbLoadFromStream.h"
-// #include "sjdbPrepare.h"
 #include "SjdbClass.h"
 #include "sjdbInsertJunctions.h"
+#include "bam_cat.c"
 
 
 #include "htslib/htslib/sam.h"
