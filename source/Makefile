@@ -37,10 +37,10 @@ CXX ?=g++
 
 
 %.o : %.cpp
-	$(CXX) -c $(CCFLAGS) $<
+	$(CXX) -c $(CPPFLAGS) $(CCFLAGS) $<
 
 %.o : %.c
-	$(CXX) -c $(CCFLAGS) $<
+	$(CXX) -c $(CPPFLAGS) $(CCFLAGS) $<
 
 all: STAR
 
@@ -85,50 +85,50 @@ parametersDefault.xxd: parametersDefault
 
 STAR : CCFLAGS=$(CCFLAGS_main)
 STAR : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STAR $(CCFLAGS) $(OBJECTS) $(LDFLAGS) $(LDFLAGS_shared)
+	$(CXX) -o STAR $(CPPFLAGS) $(CCFLAGS) $(OBJECTS) $(LDFLAGS) $(LDFLAGS_shared)
 
 POSIXSHARED : CCFLAGS=$(CCFLAGS_main) -DPOSIX_SHARED_MEM
 POSIXSHARED : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STAR $(CCFLAGS) $(OBJECTS) $(LDFLAGS) $(LDFLAGS_shared)
+	$(CXX) -o STAR $(CPPFLAGS) $(CCFLAGS) $(OBJECTS) $(LDFLAGS) $(LDFLAGS_shared)
 
 STARstatic : CCFLAGS=$(CCFLAGS_main)
 STARstatic : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STAR $(OBJECTS) $(CCFLAGS) $(LDFLAGS) $(LDFLAGS_static)
+	$(CXX) -o STAR $(OBJECTS) $(CPPFLAGS) $(CCFLAGS) $(LDFLAGS) $(LDFLAGS_static)
 
 STARlong : CCFLAGS=-D'COMPILE_FOR_LONG_READS' $(CCFLAGS_main)
 STARlong : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STARlong $(CCFLAGS) $(OBJECTS) $(LDFLAGS) $(LDFLAGS_shared)
+	$(CXX) -o STARlong $(CPPFLAGS) $(CCFLAGS) $(OBJECTS) $(LDFLAGS) $(LDFLAGS_shared)
 
 STARlongStatic : CCFLAGS=-D'COMPILE_FOR_LONG_READS' $(CCFLAGS_main)
 STARlongStatic : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STARlong $(OBJECTS) $(CCFLAGS) $(LDFLAGS) $(LDFLAGS_static)
+	$(CXX) -o STARlong $(OBJECTS) $(CPPFLAGS) $(CCFLAGS) $(LDFLAGS) $(LDFLAGS_static)
 
 #not recommended!
 STARforMac : CCFLAGS=-D'COMPILE_FOR_MAC' -I ./Mac_Include/ $(CCFLAGS_main)
 STARforMac : parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STAR $(CCFLAGS) $(LDFLAGS) $(LDFLAGS_Mac) $(OBJECTS)
+	$(CXX) -o STAR $(CPPFLAGS) $(CCFLAGS) $(LDFLAGS) $(LDFLAGS_Mac) $(OBJECTS)
 
 STARforMacStatic : CCFLAGS=-D'COMPILE_FOR_MAC' -I ./Mac_Include/ $(CCFLAGS_main)
 STARforMacStatic : parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STAR $(CCFLAGS) $(LDFLAGS) $(LDFLAGS_Mac_static) $(OBJECTS)
+	$(CXX) -o STAR $(CPPFLAGS) $(CCFLAGS) $(LDFLAGS) $(LDFLAGS_Mac_static) $(OBJECTS)
 
 STARlongForMacStatic : CCFLAGS=-D'COMPILE_FOR_LONG_READS' -D'COMPILE_FOR_MAC' -I ./Mac_Include/ $(CCFLAGS_main)
 STARlongForMacStatic : parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STARlong $(CCFLAGS) $(LDFLAGS) $(LDFLAGS_Mac_static) $(OBJECTS)
+	$(CXX) -o STARlong $(CPPFLAGS) $(CCFLAGS) $(LDFLAGS) $(LDFLAGS_Mac_static) $(OBJECTS)
 
 #
 STARforMacGDB : CCFLAGS=-D'COMPILE_FOR_MAC' -I ./Mac_Include/ $(CCFLAGS_gdb)
 STARforMacGDB : parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STAR $(CCFLAGS_gdb) $(OBJECTS) $(LDFLAGS) $(LDFLAGS_gdb)
+	$(CXX) -o STAR $(CPPFLAGS) $(CCFLAGS_gdb) $(OBJECTS) $(LDFLAGS) $(LDFLAGS_gdb)
 
 gdb : CCFLAGS= $(CCFLAGS_gdb)
 gdb : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STAR $(CCFLAGS_gdb) $(OBJECTS) $(LDFLAGS) $(LDFLAGS_gdb)
+	$(CXX) -o STAR $(CPPFLAGS) $(CCFLAGS_gdb) $(OBJECTS) $(LDFLAGS) $(LDFLAGS_gdb)
 
 gdb-long : CCFLAGS= -D'COMPILE_FOR_LONG_READS' $(CCFLAGS_gdb)
 gdb-long : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STARlong $(CCFLAGS_gdb) $(OBJECTS) $(LDFLAGS) $(LDFLAGS_gdb)
+	$(CXX) -o STARlong $(CPPFLAGS) $(CCFLAGS_gdb) $(OBJECTS) $(LDFLAGS) $(LDFLAGS_gdb)
 
 localChains : CCFLAGS=-D'OUTPUT_localChains' $(CCFLAGS_main)
 localChains : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STAR $(CCFLAGS) $(LDFLAGS) $(LDFLAGS_shared) $(OBJECTS)
+	$(CXX) -o STAR $(CPPFLAGS) $(CCFLAGS) $(LDFLAGS) $(LDFLAGS_shared) $(OBJECTS)
