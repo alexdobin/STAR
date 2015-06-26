@@ -49,8 +49,8 @@ THE SOFTWARE.
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "htslib/htslib/bgzf.h"
-#include "htslib/htslib/sam.h"
+#include <htslib/bgzf.h>
+#include <htslib/sam.h>
 #include <cstring>
 
 #define BUF_SIZE 0x10000

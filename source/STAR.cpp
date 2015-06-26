@@ -28,7 +28,7 @@
 #include "sjdbInsertJunctions.h"
 
 
-#include "htslib/htslib/sam.h"
+#include <htslib/sam.h>
 extern int bam_cat(int nfn, char * const *fn, const bam_hdr_t *h, const char* outbam);
 
 int main(int argInN, char* argIn[]) {
