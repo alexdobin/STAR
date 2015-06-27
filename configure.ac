@@ -11,9 +11,10 @@ AM_INIT_AUTOMAKE([foreign])
 AC_LANG(C++)
 
 # Checks for programs.
-AC_PROG_CXX
 AC_PROG_CC
+AC_PROG_CXX
 AC_PROG_LN_S
+AC_OPENMP
 
 # TODO check for xxd
 

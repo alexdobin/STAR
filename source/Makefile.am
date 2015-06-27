@@ -1,6 +1,6 @@
 COMPTIMEPLACE := -D'COMPILATION_TIME_PLACE="$(shell echo `date` $(HOSTNAME):`pwd`)"'
 
-AM_CXXFLAGS = -std=c++0x -Wall -Wextra -pthread -fopenmp $(COMPTIMEPLACE)
+AM_CXXFLAGS = -std=c++0x -Wall -Wextra -pthread $(OPENMP_CXXFLAGS) $(COMPTIMEPLACE)
 
 bin_PROGRAMS = STAR
 
