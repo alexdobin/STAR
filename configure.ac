@@ -13,10 +13,7 @@ AC_LANG(C++)
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
-AC_PROG_LN_S
 AC_OPENMP
-
-# TODO check for xxd
 
 # Checks for libraries.
 PKG_CHECK_MODULES(HTSLIB, htslib)

@@ -8,14 +8,6 @@ STAR_SOURCES = $(STAR_CXX_FILES)
 STAR_CPPFLAGS = $(HTSLIB_CFLAGS)
 STAR_LDFLAGS = -pthread $(HTSLIB_LIBS)
 
-BUILT_SOURCES = parametersDefault.xxd
-
-parametersDefault.xxd: parametersDefault
-	ln -s $(top_srcdir)/source/parametersDefault
-	xxd -i parametersDefault > parametersDefault.xxd
-
-CLEANFILES = parametersDefault parametersDefault.xxd
-
 STAR_CXX_FILES = \
 	alignSmithWaterman.cpp \
 	BAMbinSortByCoordinate.cpp \

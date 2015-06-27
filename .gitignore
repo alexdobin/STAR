@@ -32,3 +32,4 @@ Makefile
 # make
 
 *.o
+source/STAR
