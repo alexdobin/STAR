@@ -2,8 +2,9 @@
 #define CODE_BAMoutput
 
 #include "IncludeDefine.h"
-#include SAMTOOLS_BGZF_H
 #include "Parameters.h"
+
+#include <htslib/bgzf.h>
 
 class BAMoutput {//
 public:

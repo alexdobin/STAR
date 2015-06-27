@@ -2,7 +2,8 @@
 #define INOUTSTREAMS_DEF
 
 #include "IncludeDefine.h"
-#include SAMTOOLS_BGZF_H
+
+#include <htslib/bgzf.h>
 
 class InOutStreams {
     public:

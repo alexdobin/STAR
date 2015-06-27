@@ -2,7 +2,8 @@
 #include "GlobalVariables.h"
 #include "ThreadControl.h"
 #include "ErrorWarning.h"
-#include SAMTOOLS_BGZF_H
+
+#include <htslib/bgzf.h>
 
 void ReadAlignChunk::mapChunk() {//map one chunk. Input reads stream has to be setup in RA->readInStream[ii]
     RA->statsRA.resetN();       

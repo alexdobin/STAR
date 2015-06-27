@@ -1,4 +1,35 @@
+# http://www.gnu.org/software/autoconf
+
+/autom4te.cache
+/aclocal.m4
+/compile
+/configure
+/depcomp
+/install-sh
+/missing
+/stamp-h1
+/test-driver
+/INSTALL
+
+# http://www.gnu.org/software/automake
+
+Makefile.in
+
+# autoscan
+
+/autoscan.log
+/configure.scan
+/config.h.in
+
+# configure
+
+Makefile
+/config.h
+/config.log
+/config.status
+.deps
+
+# make
+
 *.o
-Depend.list
-parametersDefault.xxd
 
