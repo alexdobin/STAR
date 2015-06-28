@@ -8,6 +8,8 @@ STAR_SOURCES = $(STAR_CXX_FILES) $(STAR_H_FILES)
 STAR_CPPFLAGS = $(HTSLIB_CFLAGS)
 STAR_LDFLAGS = -pthread $(HTSLIB_LIBS)
 
+EXTRA_DIST = parametersDefault parametersDefault.xxd
+
 STAR_CXX_FILES = \
 	alignSmithWaterman.cpp \
 	BAMbinSortByCoordinate.cpp \
