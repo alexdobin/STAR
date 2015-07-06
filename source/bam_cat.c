@@ -16,6 +16,7 @@ Illumina.
 2014-06-27: Alex Dobin modified the code slighlty:
 * to compile with only htslib, no need for samtools package
 * removed the samtools interface function (main)
+* added header file "bam_cat.h"
 
 
 ########## License:
