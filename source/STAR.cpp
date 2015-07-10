@@ -1,3 +1,6 @@
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #include "IncludeDefine.h"
 #include "Parameters.h"
 #include "SequenceFuns.h"
@@ -10,8 +13,6 @@
 #include "ThreadControl.h"
 #include "GlobalVariables.cpp"
 #include "TimeFunctions.h"
-#include <sys/types.h>
-#include <sys/stat.h>
 #include "ErrorWarning.h"
 #include "sysRemoveDir.h"
 #include "BAMfunctions.h"
@@ -19,17 +20,13 @@
 #include "BAMbinSortByCoordinate.h"
 #include "BAMbinSortUnmapped.h"
 #include "signalFromBAM.h"
-// #include "sjdbBuildIndex.h"
 #include "mapThreadsSpawn.h"
 #include "ErrorWarning.h"
-// #include "sjdbLoadFromStream.h"
-// #include "sjdbPrepare.h"
 #include "SjdbClass.h"
 #include "sjdbInsertJunctions.h"
-
+#include "bam_cat.h"
 
 #include "htslib/htslib/sam.h"
-extern int bam_cat(int nfn, char * const *fn, const bam_hdr_t *h, const char* outbam);
 
 int main(int argInN, char* argIn[]) {
    
