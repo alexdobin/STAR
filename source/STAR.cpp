@@ -11,7 +11,7 @@
 #include "genomeGenerate.h"
 #include "outputSJ.h"
 #include "ThreadControl.h"
-#include "GlobalVariables.cpp"
+#include "GlobalVariables.h"
 #include "TimeFunctions.h"
 #include "ErrorWarning.h"
 #include "sysRemoveDir.h"
