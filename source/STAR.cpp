@@ -24,11 +24,9 @@
 #include "ErrorWarning.h"
 #include "SjdbClass.h"
 #include "sjdbInsertJunctions.h"
-
 #include "bam_cat.h"
 
 #include <htslib/sam.h>
-extern int bam_cat(int nfn, char * const *fn, const bam_hdr_t *h, const char* outbam);
 
 int main(int argInN, char* argIn[]) {
    
