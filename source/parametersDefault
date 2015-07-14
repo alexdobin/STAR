@@ -360,16 +360,16 @@ outSJfilterIntronMaxVsReadN        50000 100000 200000
 
 ### Scoring
 scoreGap                     0
-    gap open penalty
+    int: splice junction penalty (independent on intron motif)
 
 scoreGapNoncan               -8
-    non-canonical gap open penalty (in addition to scoreGap)
+    int: non-canonical junction penalty (in addition to scoreGap)
 
 scoreGapGCAG                 -4
-    GC/AG and CT/GC gap open penalty (in addition to scoreGap)
+    GC/AG and CT/GC junction penalty (in addition to scoreGap)
 
 scoreGapATAC                 -8
-    AT/AC  and GT/AT gap open penalty  (in addition to scoreGap)
+    AT/AC  and GT/AT junction penalty  (in addition to scoreGap)
 
 scoreGenomicLengthLog2scale   -0.25
     extra score logarithmically scaled with genomic length of the alignment: scoreGenomicLengthLog2scale*log2(genomicLength)
