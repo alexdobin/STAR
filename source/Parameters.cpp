@@ -894,7 +894,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     {
         ostringstream errOut;
         errOut << "EXITING because of fatal PARAMETERS error: --twopass1readsN is defined, but --twoPassMode is not defined\n";
-        errOut << "SOLUTION: to activate the 2-pass mode, use --twoPassMode Basic";
+        errOut << "SOLUTION: to activate the 2-pass mode, use --twopassMode Basic";
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
     
