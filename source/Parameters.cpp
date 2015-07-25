@@ -253,7 +253,13 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                 exit(0);
             };
             
-            if (oneArg.substr(0,2)=="--") {//parameter name, cut -- 
+            size_t found = oneArg.find("=");
+            if (found!=string::npos && oneArg.substr(0,2)=="--") {// --parameter=value
+                string val = oneArg.substr(found + 1);
+                string key = oneArg.substr(2, found - 2);
+                commandLineFile += '\n' + key + ' ' + val;
+            }
+            else if (oneArg.substr(0,2)=="--") {//parameter name, cut -- 
                 commandLineFile +='\n' + oneArg.substr(2);
             } else {//parameter value
                 if (oneArg.find_first_of(" \t")!=std::string::npos) {//there is white space in the argument, put "" around
