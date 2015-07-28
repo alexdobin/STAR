@@ -1,0 +1,180 @@
+.TH tabix 1 "3 February 2015" "htslib-1.2.1" "Bioinformatics tools"
+.SH NAME
+.PP
+bgzip \- Block compression/decompression utility
+.PP
+tabix \- Generic indexer for TAB-delimited genome position files
+.\"
+.\" Copyright (C) 2009-2011 Broad Institute.
+.\"
+.\" Author: Heng Li <lh3@sanger.ac.uk>
+.\"
+.\" Permission is hereby granted, free of charge, to any person obtaining a
+.\" copy of this software and associated documentation files (the "Software"),
+.\" to deal in the Software without restriction, including without limitation
+.\" the rights to use, copy, modify, merge, publish, distribute, sublicense,
+.\" and/or sell copies of the Software, and to permit persons to whom the
+.\" Software is furnished to do so, subject to the following conditions:
+.\"
+.\" The above copyright notice and this permission notice shall be included in
+.\" all copies or substantial portions of the Software.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+.\" IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+.\" FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+.\" THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+.\" LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+.\" FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+.\" DEALINGS IN THE SOFTWARE.
+.\"
+.SH SYNOPSIS
+.PP
+.B bgzip
+.RB [ -cdhB ]
+.RB [ -b
+.IR virtualOffset ]
+.RB [ -s
+.IR size ]
+.RI [ file ]
+.PP
+.B tabix
+.RB [ -0lf ]
+.RB [ -p
+gff|bed|sam|vcf]
+.RB [ -s
+.IR seqCol ]
+.RB [ -b
+.IR begCol ]
+.RB [ -e
+.IR endCol ]
+.RB [ -S
+.IR lineSkip ]
+.RB [ -c
+.IR metaChar ]
+.I in.tab.bgz
+.RI [ "region1 " [ "region2 " [ ... "]]]"
+
+.SH DESCRIPTION
+.PP
+Tabix indexes a TAB-delimited genome position file
+.I in.tab.bgz
+and creates an index file (
+.I in.tab.bgz.tbi
+or 
+.I in.tab.bgz.csi
+) when
+.I region
+is absent from the command-line. The input data file must be position
+sorted and compressed by
+.B bgzip
+which has a
+.BR gzip (1)
+like interface. After indexing, tabix is able to quickly retrieve data
+lines overlapping
+.I regions
+specified in the format "chr:beginPos-endPos". Fast data retrieval also
+works over network if URI is given as a file name and in this case the
+index file will be downloaded if it is not present locally.
+
+.SH INDEXING OPTIONS
+.TP 10
+.B -0, --zero-based
+Specify that the position in the data file is 0-based (e.g. UCSC files)
+rather than 1-based.
+.TP
+.BI "-b, --begin " INT
+Column of start chromosomal position. [4]
+.TP
+.BI "-c, --comment " CHAR
+Skip lines started with character CHAR. [#]
+.TP
+.BI "-C, --csi"
+Skip lines started with character CHAR. [#]
+.TP
+.BI "-e, --end " INT
+Column of end chromosomal position. The end column can be the same as the
+start column. [5]
+.TP
+.B "-f, --force "
+Force to overwrite the index file if it is present.
+.TP
+.BI "-m, --min-shift" INT
+set minimal interval size for CSI indices to 2^INT [14]
+.TP
+.BI "-p, --preset " STR
+Input format for indexing. Valid values are: gff, bed, sam, vcf.
+This option should not be applied together with any of
+.BR -s ", " -b ", " -e ", " -c " and " -0 ;
+it is not used for data retrieval because this setting is stored in
+the index file. [gff]
+.TP
+.BI "-s, --sequence " INT
+Column of sequence name. Option
+.BR -s ", " -b ", " -e ", " -S ", " -c " and " -0
+are all stored in the index file and thus not used in data retrieval. [1]
+.TP
+.BI "-S, --skip-lines " INT
+Skip first INT lines in the data file. [0]
+
+.SH QUERYING AND OTHER OPTIONS
+.TP
+.B "-h, --print-header "
+Print also the header/meta lines.
+.TP
+.B "-H, --only-header "
+Print only the header/meta lines.
+.TP
+.B "-i, --file-info "
+Print file format info.
+.TP
+.B "-l, --list-chroms "
+List the sequence names stored in the index file.
+.TP
+.B "-r, --reheader " FILE
+Replace the header with the content of FILE
+.TP
+.B "-R, --regions " FILE
+Restrict to regions listed in the FILE. The FILE can be BED file (requires .bed, .bed.gz, .bed.bgz 
+file name extension) or a TAB-delimited file with CHROM, POS, and,  optionally,
+POS_TO columns, where positions are 1-based and inclusive.  When this option is in use, the input
+file may not be sorted. 
+regions.
+.TP
+.B "-T, --targets" FILE
+Similar to 
+.B -R
+but the entire input will be read sequentially and regions not listed in FILE will be skipped.
+.PP
+.SH EXAMPLE
+(grep ^"#" in.gff; grep -v ^"#" in.gff | sort -k1,1 -k4,4n) | bgzip > sorted.gff.gz;
+
+tabix -p gff sorted.gff.gz;
+
+tabix sorted.gff.gz chr1:10,000,000-20,000,000;
+
+.SH NOTES
+It is straightforward to achieve overlap queries using the standard
+B-tree index (with or without binning) implemented in all SQL databases,
+or the R-tree index in PostgreSQL and Oracle. But there are still many
+reasons to use tabix. Firstly, tabix directly works with a lot of widely
+used TAB-delimited formats such as GFF/GTF and BED. We do not need to
+design database schema or specialized binary formats. Data do not need
+to be duplicated in different formats, either. Secondly, tabix works on
+compressed data files while most SQL databases do not. The GenCode
+annotation GTF can be compressed down to 4%.  Thirdly, tabix is
+fast. The same indexing algorithm is known to work efficiently for an
+alignment with a few billion short reads. SQL databases probably cannot
+easily handle data at this scale. Last but not the least, tabix supports
+remote data retrieval. One can put the data file and the index at an FTP
+or HTTP server, and other users or even web services will be able to get
+a slice without downloading the entire file.
+
+.SH AUTHOR
+.PP
+Tabix was written by Heng Li. The BGZF library was originally
+implemented by Bob Handsaker and modified by Heng Li for remote file
+access and in-memory caching.
+
+.SH SEE ALSO
+.PP
+.BR samtools (1)

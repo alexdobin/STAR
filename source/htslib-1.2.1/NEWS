@@ -1,0 +1,50 @@
+Noteworthy changes in release 1.2.1  (3 February 2015)
+
+* Reinstated hts_file_type() and FT_* macros, which were available until 1.1
+  but briefly removed in 1.2.  This function is deprecated and will be removed
+  in a future release -- you should use hts_detect_format() etc instead
+
+
+Noteworthy changes in release 1.2  (2 February 2015)
+
+* HTSlib now has a configure script which checks your build environment
+  and allows for selection of optional extras.  See INSTALL for details
+
+* By default, reference sequences are fetched from the EBI CRAM Reference
+  Registry and cached in your $HOME cache directory.  This behaviour can
+  be controlled by setting REF_PATH and REF_CACHE enviroment variables
+  (see the samtools(1) man page for details)
+
+* Numerous CRAM improvements:
+  - Support for CRAM v3.0, an upcoming revision to CRAM supporting
+    better compression and per-container checksums
+  - EOF checking for v2.1 and v3.0 (similar to checking BAM EOF blocks)
+  - Non-standard values for PNEXT and TLEN fields are now preserved
+  - hts_set_fai_filename() now provides a reference file when encoding
+  - Generated read names are now numbered from 1, rather than being
+    labelled 'slice:record-in-slice'
+  - Multi-threading and speed improvements
+
+* New htsfile command for identifying file formats, and corresponding
+  file format detection APIs
+
+* New tabix --regions FILE, --targets FILE options for filtering via BED files
+
+* Optional iRODS file access, disabled by default.  Configure with --with-irods
+  to enable accessing iRODS data objects directly via 'irods:DATAOBJ'
+
+* All occurences of 2^29 in the source have been eliminated, so indexing
+  and querying against reference sequences larger than 512Mbp works (when
+  using CSI indices)
+
+* Support for plain GZIP compression in various places
+
+* VCF header editing speed improvements
+
+* Added seq_nt16_int[] (equivalent to the samtools API's bam_nt16_nt4_table)
+
+* Reinstated faidx_fetch_nseq(), which was accidentally removed from 1.1.
+  Now faidx_fetch_nseq() and faidx_nseq() are equivalent; eventually
+  faidx_fetch_nseq() will be deprecated and removed [#156]
+
+* Fixed bugs #141, #152, #155, #158, #159, and various memory leaks

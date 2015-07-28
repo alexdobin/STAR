@@ -1,0 +1,79 @@
+Basic Installation
+==================
+
+To build and install HTSlib, 'cd' to the htslib-1.x directory containing
+the package's source and type the following commands:
+
+    ./configure
+    make
+    make install
+
+The './configure' command checks your build environment and allows various
+optional functionality to be enabled (see Configuration below).  If you
+don't want to select any optional functionality, you may wish to omit
+configure and just type 'make; make install' as for previous versions
+of HTSlib.  However if the build fails you should run './configure' as
+it can diagnose the common reasons for build failures.
+
+The 'make' command builds the HTSlib library and and various useful
+utilities: bgzip, htsfile, and tabix.  If compilation fails you should
+run './configure' as it can diagnose problems with your build environment
+that cause build failures.
+
+The 'make install' command installs the libraries, library header files,
+utilities, several manual pages, and a pkgconfig file to /usr/local.
+The installation location can be changed by configuring with --prefix=DIR
+or via 'make prefix=DIR install' (see Installation Locations below).
+
+
+Configuration
+=============
+
+By default, './configure' examines your build environment, checking for
+requirements such as the zlib development files, and arranges for a plain
+HTSlib build.  The following configure options can be used to enable
+various features and specify further optional external requirements:
+
+--with-irods[=DIR]
+    Specifies the location of the iRODS client library to use to enable
+    access to data objects stored in iRODS (<http://irods.org/>) via file
+    paths like 'irods:DATAOBJ'.  DIR is the base of an iRODS source tree
+    such that the library is present as DIR/lib/core/obj/libRodsAPI.* and
+    headers are present under DIR/lib/api/include and so on.  If '=DIR' is
+    omitted, $IRODS_HOME will be used as a base directory.
+
+The configure script also accepts the usual options and environment variables
+for tuning installation locations and compilers: type './configure --help'
+for details.  For example,
+
+    ./configure CC=icc --prefix=/opt/icc-compiled
+
+would specify that HTSlib is to be built with icc and installed into bin,
+lib, etc subdirectories under /opt/icc-compiled.
+
+
+Installation Locations
+======================
+
+By default, 'make install' installs HTSlib libraries under /usr/local/lib,
+HTSlib header files under /usr/local/include, utility programs under
+/usr/local/bin, etc.  (To be precise, the header files are installed within
+a fixed 'htslib' subdirectory under the specified .../include location.)
+
+You can specify a different location to install HTSlib by configuring
+with --prefix=DIR or specify locations for particular parts of HTSlib by
+configuring with --libdir=DIR and so on.  Type './configure --help' for
+the full list of such install directory options.
+
+Alternatively you can specify different locations at install time by
+typing 'make prefix=DIR install' or 'make libdir=DIR install' and so on.
+Consult the list of prefix/exec_prefix/etc variables near the top of the
+Makefile for the full list of such variables that can be overridden.
+
+You can also specify a staging area by typing 'make DESTDIR=DIR install',
+possibly in conjunction with other --prefix or prefix=DIR settings.
+For example,
+
+    make DESTDIR=/tmp/staging prefix=/opt
+
+would install into bin, lib, etc subdirectories under /tmp/staging/opt.
