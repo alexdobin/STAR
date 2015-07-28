@@ -1,5 +1,11 @@
 #include "ReadAlignChunk.h"
+
+#if !defined(_WIN32) && defined(USE_PTHREAD)
 #include <pthread.h>
+#else
+#include <thread>
+#endif
+
 #include "ErrorWarning.h"
 
 ReadAlignChunk::ReadAlignChunk(Parameters* Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk) : P(Pin) {//initialize chunk

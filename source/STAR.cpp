@@ -72,6 +72,7 @@ int main(int argInN, char* argIn[]) {
     
     
 /////////////////////////////////////////////////////////////////////////////////////////////////START
+#ifndef _WIN32
     if (P->runThreadN>1) {
         g_threadChunks.threadArray=new pthread_t[P->runThreadN];
         pthread_mutex_init(&g_threadChunks.mutexInRead, NULL);
@@ -82,7 +83,7 @@ int main(int argInN, char* argIn[]) {
         pthread_mutex_init(&g_threadChunks.mutexStats, NULL);
         pthread_mutex_init(&g_threadChunks.mutexBAMsortBins, NULL);
     };
-
+#endif
     g_statsAll.progressReportHeader(P->inOut->logProgress);    
     
     if (P->twoPass.yes) {//2-pass
@@ -117,9 +118,11 @@ int main(int argInN, char* argIn[]) {
         *P->inOut->logStdOut << timeMonthDayTime(g_statsAll.timeStartMap) << " ..... Started 1st pass mapping\n" <<flush;
 
         //run mapping for Pass1
-        ReadAlignChunk *RAchunk1[P->runThreadN];        
+        //ReadAlignChunk *RAchunk1[P->runThreadN];     
+		std::vector<std::shared_ptr<ReadAlignChunk>> RAchunk1(P->runThreadN); 
+
         for (int ii=0;ii<P1->runThreadN;ii++) {
-            RAchunk1[ii]=new ReadAlignChunk(P1, mainGenome, mainTranscriptome, ii);
+            RAchunk1[ii]= std::make_shared<ReadAlignChunk>(P1, mainGenome, mainTranscriptome, ii);
         };    
         mapThreadsSpawn(P1, RAchunk1);
         outputSJ(RAchunk1,P1); //collapse and output junctions
@@ -236,8 +239,10 @@ int main(int argInN, char* argIn[]) {
         P->inOut->outChimJunction.open((P->outFileNamePrefix + "Chimeric.out.junction").c_str());
         P->inOut->outChimSAM.open((P->outFileNamePrefix + "Chimeric.out.sam").c_str());
         P->inOut->outChimSAM << P->samHeader;
+#ifndef _WIN32
         pthread_mutex_init(&g_threadChunks.mutexOutChimSAM, NULL);   
         pthread_mutex_init(&g_threadChunks.mutexOutChimJunction, NULL);
+#endif
     };
          
     // P->inOut->logMain << "mlock value="<<mlockall(MCL_CURRENT|MCL_FUTURE) <<"\n"<<flush;

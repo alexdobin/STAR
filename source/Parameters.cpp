@@ -281,8 +281,9 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     };
     
     inOut->logMain << "STAR version=" << STAR_VERSION << "\n"<<flush;
+#ifndef _WIN32
     inOut->logMain << "STAR compilation time,server,dir=" << COMPILATION_TIME_PLACE << "\n"<<flush;   
-    
+#endif
     
     
     //define what goes to cout
@@ -388,11 +389,15 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     
     if (runDirPermIn=="User_RWX")
     {
+#ifndef _WIN32
         runDirPerm=S_IRWXU;
+#endif
     } else if (runDirPermIn=="All_RWX")
     {
+#ifndef _WIN32
 //         umask(0); //this should be defined by the user!
         runDirPerm= S_IRWXU | S_IRWXG | S_IRWXO;
+#endif
     } else
     {
         ostringstream errOut;
@@ -407,8 +412,14 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     } else {
         outFileTmp=outTmpDir;
     };
-    
-    if (mkdir (outFileTmp.c_str(),runDirPerm)!=0) {
+	int iRet;
+#ifdef _WIN32
+	iRet = mkdir(outFileTmp.c_str());
+#else
+	iRet = mkdir(outFileTmp.c_str(), runDirPerm);
+#endif
+	
+	if (iRet != 0) {
         ostringstream errOut;
         errOut <<"EXITING because of fatal ERROR: could not make temporary directory: "<< outFileTmp<<"\n";
         errOut <<"SOLUTION: (i) please check the path and writing permissions \n (ii) if you specified --outTmpDir, and this directory exists - please remove it before running STAR\n"<<flush;
@@ -546,7 +557,11 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                 outBAMsortingBinStart[0]=1;//this initial value means that the bin sizes have not been determined yet
                 
                 outBAMsortTmpDir=outFileTmp+"/BAMsort/";
+#ifndef _WIN32
                 mkdir(outBAMsortTmpDir.c_str(),runDirPerm);  
+#else
+				mkdir(outBAMsortTmpDir.c_str());
+#endif
             };                
         } else if (outSAMtype.at(0)=="SAM") {
             outSAMbool=true;
@@ -924,8 +939,13 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         };        
         twoPass.yes=true;
         twoPass.dir=outFileNamePrefix+"_STARpass1/";
-        sysRemoveDir (twoPass.dir);                
-        if (mkdir (twoPass.dir.c_str(),runDirPerm)!=0) {
+        sysRemoveDir (twoPass.dir);    
+#ifndef _WIN32
+		int iRet = mkdir (twoPass.dir.c_str(),runDirPerm);
+#else
+		int iRet = mkdir(twoPass.dir.c_str());
+#endif
+		if (iRet != 0) {
             ostringstream errOut;
             errOut <<"EXITING because of fatal ERROR: could not make pass1 directory: "<< twoPass.dir<<"\n";
             errOut <<"SOLUTION: please check the path and writing permissions \n";
@@ -966,7 +986,12 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         };        
         sjdbInsert.outDir=outFileNamePrefix+"_STARgenome/";
         sysRemoveDir (sjdbInsert.outDir);  
-        if (mkdir (sjdbInsert.outDir.c_str(),runDirPerm)!=0) {
+#ifndef _WIN32
+		int iRet = mkdir (sjdbInsert.outDir.c_str(),runDirPerm);
+#else
+		int iRet = mkdir(sjdbInsert.outDir.c_str());
+#endif
+		if (iRet != 0) {
             ostringstream errOut;
             errOut <<"EXITING because of fatal ERROR: could not make run-time genome directory directory: "<< sjdbInsert.outDir<<"\n";
             errOut <<"SOLUTION: please check the path and writing permissions \n";

@@ -1,12 +1,20 @@
 #include "ReadAlign.h"
 #include "SuffixArrayFuns.h"
 #include "ErrorWarning.h"
+#include <vector> 
 
 uint ReadAlign::maxMappableLength2strands(uint pieceStartIn, uint pieceLengthIn, uint iDir, uint iSA1, uint iSA2, uint& maxLbest, uint iFrag) {
     //returns number of mappings, maxMappedLength=mapped length
     uint Nrep=0, indStartEnd[2], maxL; 
     
-    uint NrepAll[P->genomeSAsparseD], indStartEndAll[P->genomeSAsparseD][2], maxLall[P->genomeSAsparseD];
+    //uint NrepAll[P->genomeSAsparseD], indStartEndAll[P->genomeSAsparseD][2], maxLall[P->genomeSAsparseD];
+
+	std::vector<uint> NrepAll(P->genomeSAsparseD); 
+	std::vector<std::vector<uint>> indStartEndAll(
+		P->genomeSAsparseD, 
+		std::vector<uint>(2));
+	std::vector<uint> maxLall(P->genomeSAsparseD);
+
     maxLbest=0;
     
     bool dirR = iDir==0;

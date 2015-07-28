@@ -1,9 +1,17 @@
 #include <string>
 #include <cstring>
 //#define _XOPEN_SOURCE 500
+#ifndef _WIN32
 #include <ftw.h>
 #include <unistd.h>
+#else
+#include <direct.h>
+#include <io.h>
+#include <process.h>
+#define rmdir(x) _rmdir(x);
+#endif
 
+#ifndef _WIN32
 int removeFileOrDir(const char *fpath,const struct stat *sb, int typeflag, struct FTW *ftwbuf) {
     if (typeflag==FTW_F) {//file
         remove(fpath);
@@ -20,3 +28,4 @@ void sysRemoveDir(std::string dirName) {//remove directory and all its contents
     int nftwFlag=FTW_DEPTH; 
     nftw(dirName.c_str(), removeFileOrDir, 100, nftwFlag);
 };
+#endif

@@ -38,7 +38,13 @@ public:
     void processChunks();
     void mapChunk();
     void chunkFstreamOpen(string filePrefix, int iChunk, fstream &fstreamOut);
-    void chunkFstreamCat (fstream &chunkOut, ofstream &allOut, bool mutexFlag, pthread_mutex_t &mutexVal);
+
+#if !defined(_WIN32) && defined(USE_PTHREAD)
+	void chunkFstreamCat(fstream &chunkOut, ofstream &allOut, bool mutexFlag, pthread_mutex_t &mutexVal);
+#else
+	void chunkFstreamCat(fstream &chunkOut, ofstream &allOut, bool mutexFlag, std::mutex &mutexVal);
+#endif
+
     void chunkFilesCat(ostream *allOut, string filePrefix, uint &iC);
 };
 #endif

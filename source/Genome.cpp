@@ -8,7 +8,12 @@
 
 #include <time.h>
 #include <cmath>
+#ifdef _WIN32
+#include <io.h>
+#include <Windows.h>
+#else
 #include <unistd.h>
+#endif
 #include <sys/stat.h>
 
 //addresses with respect to shmStart of several genome values
@@ -23,6 +28,19 @@
 
 //arbitrary number for ftok function
 #define SHM_projectID 23
+#ifdef _WIN32
+key_t ftok(const char *pathname, int proj_id)
+{
+	struct _stat64 st;
+	key_t key;
+
+	if (_stat64(pathname, &st) < 0)
+		return (key_t)-1;
+	key = ((st.st_ino & 0xffff) | ((st.st_dev & 0xff) << 16)
+		| ((proj_id & 0xff) << 24));
+	return key;
+}
+#endif
 
 Genome::Genome (Parameters* Pin ): P(Pin), shmStart(NULL), sharedMemory(NULL) {
             shmKey=ftok(P->genomeDir.c_str(),SHM_projectID);

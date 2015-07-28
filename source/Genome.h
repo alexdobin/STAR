@@ -5,6 +5,7 @@
 #include "Parameters.h"
 #include "PackedArray.h"
 #include "SharedMemory.h"
+#include "CrossPlatform.h"
 
 class Genome {
     public:

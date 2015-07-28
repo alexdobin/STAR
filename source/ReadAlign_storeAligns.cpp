@@ -6,8 +6,9 @@
 #include "Transcript.h"
 #include "ReadAlign.h"
 #include "ErrorWarning.h"
+#include <vector>
 
-void ReadAlign::storeAligns (uint iDir, uint Shift, uint Nrep, uint L, uint indStartEnd[2], uint iFrag) {//fill in alignment data
+void ReadAlign::storeAligns (uint iDir, uint Shift, uint Nrep, uint L, const std::vector<uint> &indStartEnd, uint iFrag) {//fill in alignment data
 
     #ifdef OFF_BEFORE_STORE
         #warning OFF_BEFORE_STORE

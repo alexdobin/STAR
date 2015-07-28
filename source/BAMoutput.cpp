@@ -1,7 +1,16 @@
 #include "BAMoutput.h"
 #include <sys/stat.h>
 #include "GlobalVariables.h"
+
+#if !defined(_WIN32) && defined(USE_PTHREAD)
 #include <pthread.h>
+#else
+#include <windows.h>
+#include <process.h>
+#include <mutex>
+#include <thread>
+#endif
+
 #include "serviceFuns.cpp"
 #include "ThreadControl.h"
 
@@ -16,7 +25,12 @@ BAMoutput::BAMoutput (int iChunk, string tmpDir, Parameters *Pin) {//allocate ba
 
     bamDir=tmpDir+to_string((uint) iChunk);//local directory for this thread (iChunk)
 
-    mkdir(bamDir.c_str(),P->runDirPerm);    
+#if defined(_WIN32)
+	_mkdir(bamDir.c_str());
+#else 
+	mkdir(bamDir.c_str(), P->runDirPerm);
+#endif
+
     binStart=new char* [nBins];
     binBytes=new uint64 [nBins];    
     binStream=new ofstream* [nBins];
@@ -52,30 +66,63 @@ BAMoutput::BAMoutput (BGZF *bgzfBAMin, Parameters *Pin) {//allocate BAM array wi
     nBins=0;
 };
 
+#if !defined(_WIN32) && defined(USE_PTHREAD)
+
+void BAMoutput::unsortedOneAlign(char *bamIn, uint bamSize, uint bamSize2) {//record one alignment to the buffer, write buffer if needed
+
+	if (bamSize == 0) return; //no output, could happen if one of the mates is not mapped    
+
+	if (binBytes1 + bamSize2 > bamArraySize) {//write out this buffer
+
+		if (g_threadChunks.threadBool) pthread_mutex_lock(&g_threadChunks.mutexOutSAM);
+		bgzf_write(bgzfBAM, bamArray, binBytes1);
+		if (g_threadChunks.threadBool) pthread_mutex_unlock(&g_threadChunks.mutexOutSAM);
+
+		binBytes1 = 0;//rewind the buffer
+	};
+
+	memcpy(bamArray + binBytes1, bamIn, bamSize);
+	binBytes1 += bamSize;
+
+};
+
+void BAMoutput::unsortedFlush() {//flush all alignments
+	if (g_threadChunks.threadBool) pthread_mutex_lock(&g_threadChunks.mutexOutSAM);
+	bgzf_write(bgzfBAM, bamArray, binBytes1);
+	if (g_threadChunks.threadBool) pthread_mutex_unlock(&g_threadChunks.mutexOutSAM);
+	binBytes1 = 0;//rewind the buffer
+};
+
+#else // ~ #if !defined(_WIN32) && defined(USE_PTHREAD)
+
 void BAMoutput::unsortedOneAlign (char *bamIn, uint bamSize, uint bamSize2) {//record one alignment to the buffer, write buffer if needed
-    
-    if (bamSize==0) return; //no output, could happen if one of the mates is not mapped    
-    
-    if (binBytes1+bamSize2 > bamArraySize) {//write out this buffer
 
-        if (g_threadChunks.threadBool) pthread_mutex_lock(&g_threadChunks.mutexOutSAM);  
-        bgzf_write(bgzfBAM,bamArray,binBytes1);
-        if (g_threadChunks.threadBool) pthread_mutex_unlock(&g_threadChunks.mutexOutSAM); 
-        
-        binBytes1=0;//rewind the buffer
-    };
-    
-    memcpy(bamArray+binBytes1, bamIn, bamSize);
-    binBytes1 += bamSize;
-    
+	if (bamSize == 0) return; //no output, could happen if one of the mates is not mapped    
+
+	if (binBytes1 + bamSize2 > bamArraySize) {//write out this buffer
+
+		if (g_threadChunks.threadBool) g_threadChunks.mutexOutSAM.lock();
+		bgzf_write(bgzfBAM, bamArray, binBytes1);
+		if (g_threadChunks.threadBool) g_threadChunks.mutexOutSAM.unlock();
+
+		binBytes1 = 0;//rewind the buffer
+	};
+
+	memcpy(bamArray + binBytes1, bamIn, bamSize);
+	binBytes1 += bamSize;
+
 };
 
-void BAMoutput::unsortedFlush () {//flush all alignments
-    if (g_threadChunks.threadBool) pthread_mutex_lock(&g_threadChunks.mutexOutSAM);  
-    bgzf_write(bgzfBAM,bamArray,binBytes1);
-    if (g_threadChunks.threadBool) pthread_mutex_unlock(&g_threadChunks.mutexOutSAM); 
-    binBytes1=0;//rewind the buffer
+void BAMoutput::unsortedFlush() {//flush all alignments
+	if (g_threadChunks.threadBool) g_threadChunks.mutexOutSAM.lock();
+	bgzf_write(bgzfBAM, bamArray, binBytes1);
+	if (g_threadChunks.threadBool) g_threadChunks.mutexOutSAM.unlock();
+	binBytes1 = 0;//rewind the buffer
 };
+
+#endif // ~ #if !defined(_WIN32) && defined(USE_PTHREAD)
+
+
 
 void BAMoutput::coordOneAlign (char *bamIn, uint bamSize, uint iRead) {
     
@@ -123,6 +170,8 @@ void BAMoutput::coordOneAlign (char *bamIn, uint bamSize, uint iRead) {
     binTotalN[iBin] += 1;
     return;
 };
+
+#if !defined(_WIN32) && defined(USE_PTHREAD)
 
 void BAMoutput::coordBins() {//define genomic starts for bins
     nBins=P->outBAMcoordNbins;//this is the true number of bins
@@ -173,6 +222,60 @@ void BAMoutput::coordBins() {//define genomic starts for bins
     delete [] binStartOld;
     return;
 };
+
+#else // ~ #if !defined(_WIN32) && defined(USE_PTHREAD)
+
+void BAMoutput::coordBins() {//define genomic starts for bins
+	nBins = P->outBAMcoordNbins;//this is the true number of bins
+
+	//mutex here
+	if (P->runThreadN>1) g_threadChunks.mutexBAMsortBins.lock();
+	if (P->outBAMsortingBinStart[0] != 0) {//it's set to 0 only after the bin sizes are determined
+		//extract coordinates and sort
+		uint *startPos = new uint[binTotalN[0]];//array of aligns start positions
+		for (uint ib = 0, ia = 0; ia<binTotalN[0]; ia++) {
+			uint32 *bamIn32 = (uint32*)(binStart[0] + ib);
+			startPos[ia] = (((uint)bamIn32[1]) << 32) | ((uint)bamIn32[2]);
+			ib += bamIn32[0] + sizeof(uint32) + sizeof(uint);//note that size of the BAM record does not include the size record itself
+		};
+		qsort((void*)startPos, binTotalN[0], sizeof(uint), funCompareUint1);
+
+		//determine genomic starts of the bins
+		P->inOut->logMain << "BAM sorting: " << binTotalN[0] << " mapped reads\n";
+		P->inOut->logMain << "BAM sorting bins genomic start loci:\n";
+
+		P->outBAMsortingBinStart[0] = 0;
+		for (uint32 ib = 1; ib<(nBins - 1); ib++) {
+			P->outBAMsortingBinStart[ib] = startPos[binTotalN[0] / (nBins - 1)*ib];
+			P->inOut->logMain << ib << "\t" << (P->outBAMsortingBinStart[ib] >> 32) << "\t" << ((P->outBAMsortingBinStart[ib] << 32) >> 32) << endl;
+			//how to deal with equal boundaries???
+		};
+		delete[] startPos;
+	};
+	//mutex here
+	if (P->runThreadN>1) g_threadChunks.mutexBAMsortBins.unlock();
+
+	//re-allocate binStart
+	uint binTotalNold = binTotalN[0];
+	char *binStartOld = new char[binSize1];
+	memcpy(binStartOld, binStart[0], binBytes[0]);
+
+	binBytes[0] = 0;
+	binTotalN[0] = 0;
+	binTotalBytes[0] = 0;
+
+	//re-bin all aligns
+	for (uint ib = 0, ia = 0; ia<binTotalNold; ia++) {
+		uint32 *bamIn32 = (uint32*)(binStartOld + ib);
+		uint ib1 = ib + bamIn32[0] + sizeof(uint32);//note that size of the BAM record does not include the size record itself
+		coordOneAlign(binStartOld + ib, (uint)(bamIn32[0] + sizeof(uint32)), *((uint*)(binStartOld + ib1)));
+		ib = ib1 + sizeof(uint);//iRead at the end of the BAM record
+	};
+	delete[] binStartOld;
+	return;
+};
+
+#endif // ~ #if !defined(_WIN32) && defined(USE_PTHREAD)
 
 void BAMoutput::coordFlush () {//flush all alignments
     if (nBins==1) {

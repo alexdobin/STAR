@@ -1,0 +1,120 @@
+// -*- mode: c++; indent-tabs-mode: nil; -*-
+//
+// Manta
+// Copyright (c) 2013 Illumina, Inc.
+//
+// This software is provided under the terms and conditions of the
+// Illumina Open Source Software License 1.
+//
+// You should have received a copy of the Illumina Open Source
+// Software License 1 along with this program. If not, see
+// <https://github.com/downloads/sequencing/licenses/>.
+//
+ 
+ ///
+ /// \brief Various system-specific definitions (configured by cmake)
+ ///
+
+#include "configBuildTimeInfo.h"
+
+/* c++/include/config.h.cmake. Manually edited */
+/* c++/include/config.h.in.  Generated from configure.ac by autoheader.  */
+
+/* Helper macros to get the version string */
+/* const std::string version(EXPAND(VERSION));  */
+
+#define STRINGIFY(x) #x
+#define EXPAND(x) STRINGIFY(x)
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#cmakedefine HAVE_INTTYPES_H 1
+
+/* Define to 1 if you have the <malloc.h> header file. */
+#cmakedefine HAVE_MALLOC_H 1
+
+/* Define to 1 if you have the <mcheck.h> header file. */
+#cmakedefine HAVE_MCHECK_H 1
+
+/* Define to 1 if you have the <memory.h> header file. */
+#cmakedefine HAVE_MEMORY_H 1
+
+/* Define to 1 if you have the <signal.h> header file. */
+#cmakedefine HAVE_SIGNAL_H 1
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#cmakedefine HAVE_STDINT_H 1
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#cmakedefine HAVE_STDLIB_H 1
+
+/* Define to 1 if you have the <string.h> header file. */
+#cmakedefine HAVE_STRING_H 1
+
+/* Define to 1 if you have the <strings.h> header file. */
+#cmakedefine HAVE_STRINGS_H 1
+
+/* Define to 1 if you have the <time.h> header file. */
+#cmakedefine HAVE_TIME_H 1
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#cmakedefine HAVE_UNISTD_H 1
+
+/* Define to 1 if you have the `floorf' function. */
+#cmakedefine HAVE_FLOORF 1
+
+/* Define to 1 if you have the `round' function. */
+#cmakedefine HAVE_ROUND 1
+
+/* Define to 1 if you have the `roundf' function. */
+#cmakedefine HAVE_ROUNDF 1
+
+/* Define to 1 if you have the `powf' function. */
+#cmakedefine HAVE_POWF 1
+
+/* Define to 1 if you have the `zlib' library */
+#cmakedefine HAVE_ZLIB 1
+
+/* Define to 1 if you have the `bzip2' library */
+#cmakedefine HAVE_BZIP2 1
+#cmakedefine HAVE_BZLIB 1
+
+/* Define to 1 if you have the `boost_xxx_yyy' library
+   (-lboost_xxx_yyy). */
+#cmakedefine HAVE_LIBBOOST_DATE_TIME 1
+#cmakedefine HAVE_LIBBOOST_FILESYSTEM 1
+#cmakedefine HAVE_LIBBOOST_IOSTREAMS 1
+#cmakedefine HAVE_LIBBOOST_PROGRAM_OPTIONS 1
+#cmakedefine HAVE_LIBBOOST_REGEX 1
+#cmakedefine HAVE_LIBBOOST_SERIALIZATION 1
+#cmakedefine HAVE_LIBBOOST_SYSTEM 1
+
+/* Name of package */
+#cmakedefine PACKAGE @PACKAGE@
+
+/* Top level namespace */
+#cmakedefine NAMESPACE @NAMESPACE@
+
+/* Define to the address where bug reports for this package should be sent. */
+/* #undef PACKAGE_BUGREPORT isaac_bug@illumina.com */
+
+/* Define to the full name of this package. */
+#cmakedefine PACKAGE_NAME @PACKAGE_NAME@
+
+/* Define to the full name and version of this package. */
+#cmakedefine PACKAGE_STRING @PACKAGE_STRING@
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the version of this package. */
+#cmakedefine PACKAGE_VERSION @PACKAGE_VERSION@
+
+/* Version number of package */
+#cmakedefine VERSION @VERSION@
+
+#define CXX_COMPILER_NAME "@CXX_COMPILER_NAME@"
+
+#define COMPILER_VERSION "@COMPILER_VERSION@"
+
+/* Define to empty if `const' does not conform to ANSI C. */
+#undef const
