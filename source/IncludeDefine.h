@@ -52,7 +52,6 @@ typedef uint8_t uint8;
 #define uint32 unsigned int
 #define uint16 unsigned short int
 #define uchar unsigned char
-#define int64 long long
 #define int32 int
 
 #define GENOME_spacingChar 5
