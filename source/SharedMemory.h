@@ -5,7 +5,6 @@
 #ifndef SHAREDMEMORY_H
 #define SHAREDMEMORY_H
 
-
 #include <string>
 #include <semaphore.h>
 #include <unistd.h>

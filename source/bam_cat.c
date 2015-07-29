@@ -46,15 +46,17 @@ THE SOFTWARE.
 
 */
 
-#include "bam_cat.h"
+
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
-#include "htslib/htslib/bgzf.h"
-#include "htslib/htslib/sam.h"
 #include <cstring>
+
+#include "bam_cat.h"
+#include "htslib-1.2.1\htslib\bgzf.h"
+#include "htslib-1.2.1\htslib\sam.h"
+
 
 #define BUF_SIZE 0x10000
 

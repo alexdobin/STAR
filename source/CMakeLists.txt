@@ -42,13 +42,20 @@ endif ()
 # that matches the specified expressions (*.cpp  and *.h) and assigning 
 # the resulting files to the variable SOURCE_LIST 
 
-file (GLOB SOURCE_LIST *.cpp *.h)
+file (GLOB SOURCE_LIST *.cpp *.c)
+foreach (SOURCE_FILE ${SOURCE_LIST})
+    get_filename_component(SOURCE_NAME ${SOURCE_FILE} NAME_WE)
+	if (WIN32)
+		SET_SOURCE_FILES_PROPERTIES( ${SOURCE_FILE} PROPERTIES LANGUAGE CXX )
+	endif()
+endforeach ()
 
 ## Define the target application executable 
 ##
 # exclude SharedMemory.cpp from build in WIN32, new file SharedMemorySegment added for Windows.
 if (WIN32)
 list(REMOVE_ITEM SOURCE_LIST ${CMAKE_CURRENT_SOURCE_DIR}/SharedMemory.cpp)
+list(REMOVE_ITEM SOURCE_LIST ${CMAKE_CURRENT_SOURCE_DIR}/SharedMemory.h)
 endif ()
 
 add_executable(${THIS_PROJECT_NAME} ${SOURCE_LIST})

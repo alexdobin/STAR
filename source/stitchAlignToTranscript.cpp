@@ -5,6 +5,10 @@
 #include "binarySearch2.h"
 // #include "stitchGapIndel.cpp"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBstart, uint L, uint iFragB, uint sjAB, Parameters* P, char* R, char* Q, char* G,  Transcript *trA, const uint outFilterMismatchNmaxTotal) {
     //stitch together A and B, extend in the gap, returns max score
     //Q is assumed modified already
@@ -396,3 +400,7 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
 
     return Score;         
 };
+
+#ifdef __cplusplus
+}
+#endif

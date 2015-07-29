@@ -1,12 +1,6 @@
 #ifndef PARAMETERS_DEF
 #define PARAMETERS_DEF
 
-#include "IncludeDefine.h"
-#include "InOutStreams.h"
-#include "ParameterInfo.h"
-#include <map>
-#include "TimeFunctions.h"
-#include <signal.h>
 #ifdef _WIN32
 #include <io.h>
 #include <process.h>
@@ -15,6 +9,16 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #endif
+
+#include <signal.h>
+#include <ostream>
+#include <map>
+#include <string>
+
+#include "IncludeDefine.h"
+#include "InOutStreams.h"
+#include "ParameterInfo.h"
+#include "TimeFunctions.h"
 
 #ifdef _WIN32
 typedef int mode_t;
