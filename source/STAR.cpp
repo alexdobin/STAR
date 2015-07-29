@@ -1,5 +1,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <memory>
+
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 
 #include "IncludeDefine.h"
 #include "Parameters.h"
@@ -25,8 +30,8 @@
 #include "SjdbClass.h"
 #include "sjdbInsertJunctions.h"
 #include "bam_cat.h"
-
-#include "htslib/htslib/sam.h"
+#include "htslib-1.2.1\htslib/sam.h"
+#include "CrossPlatform.h"
 
 int main(int argInN, char* argIn[]) {
    
@@ -248,9 +253,9 @@ int main(int argInN, char* argIn[]) {
     // P->inOut->logMain << "mlock value="<<mlockall(MCL_CURRENT|MCL_FUTURE) <<"\n"<<flush;
 
     // prepare chunks and spawn mapping threads    
-    ReadAlignChunk *RAchunk[P->runThreadN];
+	std::vector<std::shared_ptr<ReadAlignChunk>> RAchunk(P->runThreadN);
     for (int ii=0;ii<P->runThreadN;ii++) {
-        RAchunk[ii]=new ReadAlignChunk(P, mainGenome, mainTranscriptome, ii);
+        RAchunk[ii] = std::make_shared<ReadAlignChunk>(P, mainGenome, mainTranscriptome, ii);
     };    
     
     mapThreadsSpawn(P, RAchunk);

@@ -12,8 +12,6 @@ add_subdirectory(${HTSLIB_PREFIX})
 include_directories (${CMAKE_CURRENT_SOURCE_DIR})
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/common)
 
-
-
 # required support for gzip compression
 find_package(ZLIB)
 #static_find_library(ZLIB zlib.h z)
@@ -41,6 +39,10 @@ file (GLOB SOURCE_LIST *.cpp *.h)
 
 ## Define the target application executable 
 ##
+# exclude SharedMemory.cpp from build in WIN32, new class added to use Boost SharedMemory.
+if (WIN32)
+list(REMOVE_ITEM SOURCE_LIST ${CMAKE_CURRENT_SOURCE_DIR}/SharedMemory.cpp)
+endif ()
 
 add_executable(${THIS_PROJECT_NAME} ${SOURCE_LIST})
 target_link_libraries (${THIS_PROJECT_NAME} ${HTSLIB_PREFIX} ${THIS_ADDITIONAL_LIB})

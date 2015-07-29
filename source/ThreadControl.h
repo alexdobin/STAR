@@ -34,11 +34,14 @@ public:
     
     static void* threadRAprocessChunks(void *RAchunk) {
         ( (ReadAlignChunk*) RAchunk )->processChunks();
-#ifdef _WIN32
-		ExitThread(0);
-#else
+
+#if !defined(_WIN32) && defined(USE_PTHREAD)
         pthread_exit(0);
+#else
+		// The standard method to exit std::thread is just exit the thread function. 
+		return nullptr; 
 #endif
+
         return NULL;
     };
 };

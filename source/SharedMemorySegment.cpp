@@ -6,7 +6,8 @@
 
 using namespace boost::interprocess;
 
-SharedMemorySegment::SharedMemorySegment(key_t key) : _key(key),
+SharedMemorySegment::SharedMemorySegment(key_t key, bool unloadLast) : _key(key),
+														_unloadLast(unloadLast),
 														_needsAllocation(true),
 														_mapped(nullptr),
 														_size(0),

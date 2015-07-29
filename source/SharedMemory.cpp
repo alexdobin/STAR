@@ -4,11 +4,11 @@
 
 #include "SharedMemory.h"
 #include <sstream>
+
 #ifndef _WIN32
 #include <sys/mman.h>
 #include <sys/shm.h>
 #include <semaphore.h>
-
 #endif
  
 #include <sys/stat.h>        /* For mode constants */

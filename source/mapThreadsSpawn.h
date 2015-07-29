@@ -2,6 +2,7 @@
 #define CODE_mapThreadsSpawn
 #include "Parameters.h"
 #include "ReadAlignChunk.h"
-void mapThreadsSpawn (Parameters *P, ReadAlignChunk** RAchunk);
+
+void mapThreadsSpawn(Parameters *P, const std::vector<shared_ptr<ReadAlignChunk>> &RAchunk);
 
 #endif

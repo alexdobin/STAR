@@ -1,8 +1,9 @@
+#include <memory>
 #include "mapThreadsSpawn.h"
 #include "ThreadControl.h"
 #include "GlobalVariables.h"
 #include "ErrorWarning.h"
-#include <memory>
+
 
 #if !defined(_WIN32) && defined(USE_PTHREAD)
 #include <pthread.h>

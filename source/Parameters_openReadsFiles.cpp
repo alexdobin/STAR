@@ -1,7 +1,14 @@
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
 #include "Parameters.h"
 #include "ErrorWarning.h"
 #include <fstream>
 #include <sys/stat.h>
+
+
+
 void Parameters::openReadsFiles() {
     string readFilesCommandString("");
     if (readFilesCommand.at(0)=="-") {
@@ -31,8 +38,12 @@ void Parameters::openReadsFiles() {
             ostringstream sysCom;
             sysCom << outFileTmp <<"tmp.fifo.read"<<imate+1;
             readFilesInTmp.push_back(sysCom.str());
-            remove(readFilesInTmp.at(imate).c_str());                
+            remove(readFilesInTmp.at(imate).c_str());   
+#ifdef _WIN32
+			// TODO :
+#else
             mkfifo(readFilesInTmp.at(imate).c_str(), S_IRUSR | S_IWUSR );
+#endif
 
             inOut->logMain << "\n   Input read files for mate "<< imate+1 <<", from input string " << readFilesIn.at(imate) <<endl;
 
@@ -75,7 +86,19 @@ void Parameters::openReadsFiles() {
             readFilesCommandPID[imate]=0;
             
             ostringstream errOut;
-            pid_t PID=vfork();
+#ifdef _WIN32
+			STARTUPINFO sinfo;
+			PROCESS_INFORMATION pinfo;
+
+			ZeroMemory(&sinfo, sizeof(sinfo));
+			sinfo.cb = sizeof(sinfo);
+			ZeroMemory(&pinfo, sizeof(pinfo));
+
+			bool PID = CreateProcess("STAR.exe", NULL, NULL, NULL, FALSE, 0, NULL, NULL,
+				&sinfo, &pinfo);
+#else	
+			pid_t PID = vfork();
+#endif
             switch (PID) {
                 case -1:
                     errOut << "EXITING: because of fatal EXECUTION error: Failed vforking readFilesCommand\n";
@@ -90,7 +113,11 @@ void Parameters::openReadsFiles() {
                     
                 default:
                     //this is the father, record PID of the children
-                    readFilesCommandPID[imate]=PID;
+#ifdef _WIN32
+					readFilesCommandPID[imate] = pinfo.dwProcessId;
+#else
+					readFilesCommandPID[imate] = PID;
+#endif
             };
             
 //             system((("\""+readsCommandFileName.at(imate)+"\"") + " & ").c_str());

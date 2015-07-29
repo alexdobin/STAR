@@ -4,7 +4,13 @@
 #include "IncludeDefine.h"
 #include "Parameters.h"
 #include "PackedArray.h"
+
+#ifdef _WIN32
+#include "SharedMemorySegment.h"
+#else
 #include "SharedMemory.h"
+#endif
+
 #include "CrossPlatform.h"
 
 class Genome {
@@ -27,7 +33,13 @@ class Genome {
     key_t shmKey;  
     char *shmStart;
     char *G1; //pointer -200 of G
+
+#if !defined(_WIN32) && defined(USE_UNIX_SHM)
     SharedMemory * sharedMemory;
+#else
+	SharedMemorySegment* sharedMemory; 
+#endif
+
     uint OpenStream(string name, ifstream & stream);
     void HandleSharedMemoryException(const SharedMemoryException & exc, uint64 shmSize);
 };

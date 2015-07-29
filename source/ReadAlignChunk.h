@@ -9,6 +9,12 @@
 #include "BAMoutput.h"
 #include "Quantifications.h"
 
+#if !defined(_WIN32) && defined(USE_PTHREAD)
+#include <pthred>
+#else
+#include <mutex>
+#endif
+
 class ReadAlignChunk {//chunk of reads and alignments
 public:
     Parameters* P;

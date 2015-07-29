@@ -111,6 +111,9 @@ void ReadAlignChunk::chunkFstreamOpen(string filePrefix, int iChunk, fstream &fs
     P->inOut->logMain << "ok" <<endl;
 };
 
+
+#if !defined(_WIN32) && defined(USE_PTHREAD)
+
 void ReadAlignChunk::chunkFstreamCat (fstream &chunkOut, ofstream &allOut, bool mutexFlag, pthread_mutex_t &mutexVal){
     chunkOut.flush();
     chunkOut.seekg(0,ios::beg);
@@ -121,6 +124,21 @@ void ReadAlignChunk::chunkFstreamCat (fstream &chunkOut, ofstream &allOut, bool 
     chunkOut.clear();
     chunkOut.seekp(0,ios::beg); //set put pointer at the beginning
 };
+
+#else
+
+void ReadAlignChunk::chunkFstreamCat(fstream &chunkOut, ofstream &allOut, bool mutexFlag, std::mutex &mutexVal){
+	chunkOut.flush();
+	chunkOut.seekg(0, ios::beg);
+	if (mutexFlag) mutexVal.lock();
+	allOut << chunkOut.rdbuf();
+	allOut.clear();
+	if (mutexFlag) mutexVal.unlock();
+	chunkOut.clear();
+	chunkOut.seekp(0, ios::beg); //set put pointer at the beginning
+};
+
+#endif
 
 
 void ReadAlignChunk::chunkFilesCat(ostream *allOut, string filePrefix, uint &iC) {//concatenates a file into main output
