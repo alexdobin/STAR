@@ -6,12 +6,16 @@ cmake_minimum_required(VERSION 2.8.0)
 set(THIS_PROJECT_NAME "STAR")
 set(CMAKE_C_FLAGS "-Wall -g")
 set(HTSLIB_PREFIX "htslib-1.2.1")
+set(THIS_MODULE_DIR "${CMAKE_SOURCE_DIR}/cmake")
+set(THIS_REDIST_DIR "${CMAKE_SOURCE_DIR}/../redist")
 
 # redist includes
-include ("${THIS_MODULE_DIR}/boost.cmake")
+include("${THIS_MODULE_DIR}/boost.cmake")
 
 add_subdirectory(${HTSLIB_PREFIX})
 add_subdirectory(common)
+
+include_directories (${Boost_INCLUDE_DIRS})
 include_directories (${CMAKE_CURRENT_SOURCE_DIR})
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/common)
 
@@ -42,11 +46,18 @@ file (GLOB SOURCE_LIST *.cpp *.h)
 
 ## Define the target application executable 
 ##
-# exclude SharedMemory.cpp from build in WIN32, new class added to use Boost SharedMemory.
+# exclude SharedMemory.cpp from build in WIN32, new file SharedMemorySegment added for Windows.
 if (WIN32)
 list(REMOVE_ITEM SOURCE_LIST ${CMAKE_CURRENT_SOURCE_DIR}/SharedMemory.cpp)
 endif ()
 
 add_executable(${THIS_PROJECT_NAME} ${SOURCE_LIST})
-target_link_libraries (${THIS_PROJECT_NAME} ${THIS_PROJECT_NAME}_${HTSLIB_PREFIX} ${THIS_PROJECT_NAME}_common ${THIS_ADDITIONAL_LIB})
+set (LIBS_REQUIRED ${THIS_PROJECT_NAME}_${HTSLIB_PREFIX} ${THIS_PROJECT_NAME}_common ${THIS_ADDITIONAL_LIB} ${Boost_LIBRARIES})	  
+
+# add winsock2 lib for Windows.
+if (WIN32)
+set (LIBS_REQUIRED ${LIBS_REQUIRED} ws2_32)	  
+endif ()
+
+target_link_libraries (${THIS_PROJECT_NAME} ${LIBS_REQUIRED})
 
