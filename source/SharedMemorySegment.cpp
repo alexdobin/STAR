@@ -10,9 +10,10 @@ SharedMemorySegment::SharedMemorySegment(key_t key) : _key(key),
 														_needsAllocation(true),
 														_mapped(nullptr),
 														_size(0),
-														_name(std::to_string(_key))
+														_name(std::to_string(_key)),
+														_isAllocator(false)
 {
-
+	OpenIfExists(); 
 }
 
 SharedMemorySegment::~SharedMemorySegment()
@@ -23,6 +24,9 @@ SharedMemorySegment::~SharedMemorySegment()
 void SharedMemorySegment::Allocate(size_t shmSize)
 {
 	CreateAndInitSharedObject(shmSize);
+	OpenIfExists(); 
+	// TODO : Add exception of error check if above methods fails, this should not be set then. 
+	_isAllocator = true; 
 }
 
 void SharedMemorySegment::Clean()
@@ -42,7 +46,6 @@ void SharedMemorySegment::Clean()
 
 void SharedMemorySegment::CreateAndInitSharedObject(size_t shmSize)
 {
-	
 	try
 	{
 		if (!_needsAllocation)
@@ -56,14 +59,14 @@ void SharedMemorySegment::CreateAndInitSharedObject(size_t shmSize)
 			, _name.c_str()					//name
 			, read_write					//read-write mode
 			);
-		// TODO : Check adjustements done in size
-		shm_obj.truncate(shmSize);
+		// TODO : Check why this is done.
+		unsigned long long toReserve = (unsigned long long) shmSize + sizeof(unsigned long long);
+		shm_obj.truncate(toReserve);
 	}
 	catch (interprocess_exception &ex)
 	{
 		//TODO:
 	}
-
 }
 
 void SharedMemorySegment::OpenIfExists()
@@ -78,17 +81,18 @@ void SharedMemorySegment::OpenIfExists()
 			);
 
 		// TODO : Check if exist and Map.
-
 		mapped_region region
 			(shm_obj                      //Memory-mappable object
 			, read_write               //Access mode
 			);
 		_mapped = region.get_address();
+
+		// TODO : _needsAllocation = false;
+		// 
 	}
 	catch (interprocess_exception &ex)
 	{
 		//TODO :
 	}
-
 }
 
