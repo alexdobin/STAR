@@ -77,7 +77,7 @@ int main(int argInN, char* argIn[]) {
     
     
 /////////////////////////////////////////////////////////////////////////////////////////////////START
-#ifndef _WIN32
+#if !defined(_WIN32) && defined(USE_PTHREAD)
     if (P->runThreadN>1) {
         g_threadChunks.threadArray=new pthread_t[P->runThreadN];
         pthread_mutex_init(&g_threadChunks.mutexInRead, NULL);
@@ -124,10 +124,11 @@ int main(int argInN, char* argIn[]) {
 
         //run mapping for Pass1
         //ReadAlignChunk *RAchunk1[P->runThreadN];     
-		std::vector<std::shared_ptr<ReadAlignChunk>> RAchunk1(P->runThreadN); 
+		std::vector<ReadAlignChunk*> RAchunk1(P->runThreadN); 
 
         for (int ii=0;ii<P1->runThreadN;ii++) {
-            RAchunk1[ii]= std::make_shared<ReadAlignChunk>(P1, mainGenome, mainTranscriptome, ii);
+			ReadAlignChunk* p = new ReadAlignChunk(P1, mainGenome, mainTranscriptome, ii);
+			RAchunk1[ii] = p;
         };    
         mapThreadsSpawn(P1, RAchunk1);
         outputSJ(RAchunk1,P1); //collapse and output junctions
@@ -253,9 +254,10 @@ int main(int argInN, char* argIn[]) {
     // P->inOut->logMain << "mlock value="<<mlockall(MCL_CURRENT|MCL_FUTURE) <<"\n"<<flush;
 
     // prepare chunks and spawn mapping threads    
-	std::vector<std::shared_ptr<ReadAlignChunk>> RAchunk(P->runThreadN);
+	std::vector<ReadAlignChunk*> RAchunk(P->runThreadN);
     for (int ii=0;ii<P->runThreadN;ii++) {
-        RAchunk[ii] = std::make_shared<ReadAlignChunk>(P, mainGenome, mainTranscriptome, ii);
+		ReadAlignChunk* p = new ReadAlignChunk(P, mainGenome, mainTranscriptome, ii); 
+		RAchunk[ii] = p;
     };    
     
     mapThreadsSpawn(P, RAchunk);

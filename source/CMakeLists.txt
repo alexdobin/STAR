@@ -4,11 +4,14 @@
 cmake_minimum_required(VERSION 2.8.0)
 
 set(THIS_PROJECT_NAME "STAR")
-
 set(CMAKE_C_FLAGS "-Wall -g")
-
 set(HTSLIB_PREFIX "htslib-1.2.1")
+
+# redist includes
+include ("${THIS_MODULE_DIR}/boost.cmake")
+
 add_subdirectory(${HTSLIB_PREFIX})
+add_subdirectory(common)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR})
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/common)
 
@@ -45,5 +48,5 @@ list(REMOVE_ITEM SOURCE_LIST ${CMAKE_CURRENT_SOURCE_DIR}/SharedMemory.cpp)
 endif ()
 
 add_executable(${THIS_PROJECT_NAME} ${SOURCE_LIST})
-target_link_libraries (${THIS_PROJECT_NAME} ${HTSLIB_PREFIX} ${THIS_ADDITIONAL_LIB})
+target_link_libraries (${THIS_PROJECT_NAME} ${THIS_PROJECT_NAME}_${HTSLIB_PREFIX} ${THIS_PROJECT_NAME}_common ${THIS_ADDITIONAL_LIB})
 

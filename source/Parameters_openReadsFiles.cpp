@@ -7,8 +7,6 @@
 #include <fstream>
 #include <sys/stat.h>
 
-
-
 void Parameters::openReadsFiles() {
     string readFilesCommandString("");
     if (readFilesCommand.at(0)=="-") {

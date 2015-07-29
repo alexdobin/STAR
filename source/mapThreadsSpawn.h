@@ -3,6 +3,6 @@
 #include "Parameters.h"
 #include "ReadAlignChunk.h"
 
-void mapThreadsSpawn(Parameters *P, const std::vector<shared_ptr<ReadAlignChunk>> &RAchunk);
+void mapThreadsSpawn(Parameters *P, const std::vector<ReadAlignChunk*> &RAchunk);
 
 #endif

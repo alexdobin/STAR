@@ -19,7 +19,7 @@ int compareUint(const void* i1, const void* i2) {//compare uint arrays
     };
 };
 
-void outputSJ(const std::vector<shared_ptr<ReadAlignChunk>> &RAchunk, Parameters* P) {//collapses junctions from all therads/chunks; outputs junctions to file
+void outputSJ(const std::vector<ReadAlignChunk*> &RAchunk, Parameters* P) {//collapses junctions from all therads/chunks; outputs junctions to file
     
 //     system("echo `date` ..... Writing splice junctions >> Log.timing.out");
 

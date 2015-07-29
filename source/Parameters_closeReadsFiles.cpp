@@ -10,6 +10,7 @@ void Parameters::closeReadsFiles() {
     for (uint imate=0;imate<readNmates;imate++) {//open readIn files
         if ( inOut->readIn[imate].is_open() ) inOut->readIn[imate].close();
         if (readFilesCommandPID[imate]>0) {
+
 #ifdef _WIN32
 			HANDLE hProcess = OpenProcess(SYNCHRONIZE | PROCESS_TERMINATE, TRUE, readFilesCommandPID[imate]);
 			if (hProcess == NULL)
@@ -19,6 +20,7 @@ void Parameters::closeReadsFiles() {
 #else
 			kill(readFilesCommandPID[imate],SIGKILL);
 #endif
+
         };
     };
 };
