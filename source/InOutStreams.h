@@ -2,7 +2,10 @@
 #define INOUTSTREAMS_DEF
 
 #include "IncludeDefine.h"
+
+#ifdef _WIN32
 #include "IfstreamReadIn.h"
+#endif
 
 #include SAMTOOLS_BGZF_H
 

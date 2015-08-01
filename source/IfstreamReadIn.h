@@ -1,5 +1,8 @@
 #ifndef IFSTREAMREADIN_H
+#define IFSTREAMREADIN_H
 
+#include <io.h>
+#include <fcntl.h>
 #include <fstream>
 #include <string>
 #include <Windows.h>
@@ -8,20 +11,24 @@ class IfstreamReadIn
 {
 private:
 	// private fields
-	std::ifstream* pStream; 
-	HANDLE hPipe; 
+	std::ifstream* _pStream; 
 
 public:
 	// Constructors 
 	IfstreamReadIn(); // default one
-	IfstreamReadIn(std::string file); 
-	IfstreamReadIn(HANDLE hPipe); 
+	IfstreamReadIn(const std::string& file);
+
+	//destructor
+	~IfstreamReadIn();
 
 	// operators 
-	std::ifstream& operator >> (const std::string& st); 
+	std::ifstream& operator >> (char* s); 
+	std::ifstream& operator >> (std::string s);
+	std::ifstream& operator >> (int n);
 
 	// public methods.
-	void open(const char* filename); 
+	void open(const char* filename);
+	bool open_pipe_read(HANDLE hPipeRead); 
 	bool is_open() const; 
 	bool fail() const; 
 	void close(); 
@@ -34,5 +41,4 @@ public:
 };
 
 
-#define IFSTREAMREADIN_H
 #endif // IFSTREAMREADIN_H

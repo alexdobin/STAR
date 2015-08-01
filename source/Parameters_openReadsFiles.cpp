@@ -6,8 +6,102 @@
 #include "ErrorWarning.h"
 #include <fstream>
 #include <sys/stat.h>
+#include <map>
+
+typedef std::map<int ,HANDLE> MapHandles; 
+
+typedef enum 
+{
+	Read = 0,
+	Write = 1
+} HandleType;
 
 #ifdef _WIN32
+
+bool CreateReadWritePipe(MapHandles& handles)
+{
+	SECURITY_ATTRIBUTES saAttr = {0};
+
+	// Set the bInheritHandle flag so pipe handles are inherited. 
+	saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+	saAttr.bInheritHandle = TRUE;
+	saAttr.lpSecurityDescriptor = NULL;
+
+	HANDLE hChildStd_OUT_Rd = NULL;
+	HANDLE hChildStd_OUT_Wr = NULL;
+
+	// Create a pipe for the child process's STDOUT. 
+	if (!CreatePipe(&hChildStd_OUT_Rd, &hChildStd_OUT_Wr, &saAttr, 0))
+	{
+		return false; 
+	}
+
+	// Ensure the read handle to the pipe for STDOUT is not inherited.
+	if (!SetHandleInformation(hChildStd_OUT_Rd, HANDLE_FLAG_INHERIT, 0))
+	{
+		CloseHandle(hChildStd_OUT_Rd); 
+		CloseHandle(hChildStd_OUT_Wr);
+		return false; 
+
+	}
+	handles[HandleType::Read] = hChildStd_OUT_Rd;
+	handles[HandleType::Write] = hChildStd_OUT_Wr;
+	return true; 
+}
+
+DWORD CreateChildProcess(HANDLE hPipeWrite, const std::string& filenames)
+{
+	const int MAX_CMDLINE = 1024;
+
+	std::string cmdLine = "STAR_ReadFile"; 
+	cmdLine.append(" "); 
+	cmdLine.append(filenames); 
+
+	char*  szCmdline = new char[cmdLine.size() + 1]; 
+	strcpy(szCmdline, cmdLine.c_str()); 
+
+	PROCESS_INFORMATION piProcInfo;
+	STARTUPINFO siStartInfo;
+	BOOL bSuccess = FALSE;
+
+	// Set up members of the PROCESS_INFORMATION structure. 
+	ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
+
+	// Set up members of the STARTUPINFO structure. 
+	// This structure specifies the STDIN and STDOUT handles for redirection.
+	ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
+	siStartInfo.cb = sizeof(STARTUPINFO);
+	siStartInfo.hStdError = hPipeWrite;
+	siStartInfo.hStdOutput = hPipeWrite;
+	//siStartInfo.hStdInput = g_hChildStd_IN_Rd;
+	siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
+
+	// Create the child process. 
+	bSuccess = CreateProcess(NULL,
+		szCmdline,     // command line 
+		NULL,          // process security attributes 
+		NULL,          // primary thread security attributes 
+		TRUE,          // handles are inherited 
+		0,             // creation flags 
+		NULL,          // use parent's environment 
+		NULL,          // use parent's current directory 
+		&siStartInfo,  // STARTUPINFO pointer 
+		&piProcInfo);  // receives PROCESS_INFORMATION 
+
+	// If an error occurs, exit the application. 
+	if (!bSuccess)
+		return -1;
+	else
+	{
+		// Close handles to the child process and its primary thread.
+		// Some applications might keep these handles to monitor the status
+		// of the child process, for example. 
+
+		CloseHandle(piProcInfo.hProcess);
+		CloseHandle(piProcInfo.hThread);
+	}
+	return piProcInfo.dwProcessId; 
+}
 
 void Parameters::openReadsFiles() 
 {
@@ -52,29 +146,36 @@ void Parameters::openReadsFiles()
 		for (uint imate = 0; imate < readNmates; imate++) 
 		{
 			//open readIn files
-			ostringstream sysCom;
-			sysCom << outFileTmp << "tmp.fifo.read" << imate + 1;
-			readFilesInTmp.push_back(sysCom.str());
-			remove(readFilesInTmp.at(imate).c_str());
-#ifdef _WIN32
-			// TODO :
-#else
-			mkfifo(readFilesInTmp.at(imate).c_str(), S_IRUSR | S_IWUSR);
-#endif
+			//ostringstream sysCom;
+			//sysCom << outFileTmp << "tmp.fifo.read" << imate + 1;
+			//readFilesInTmp.push_back(sysCom.str());
+			//remove(readFilesInTmp.at(imate).c_str());
+
+			MapHandles handles; 
+			if (!CreateReadWritePipe(handles))
+			{
+				ostringstream errOut;
+				errOut << "EXITING: because of fatal EXECUTION error: Failed CreatePipe\n";
+				errOut << errno << ": " << strerror(errno) << "\n";
+				exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+				break;
+			}
+
+			//mkfifo(readFilesInTmp.at(imate).c_str(), S_IRUSR | S_IWUSR);
 
 			inOut->logMain << "\n   Input read files for mate " << imate + 1 << ", from input string " << readFilesIn.at(imate) << endl;
 
-			readsCommandFileName.push_back(outFileTmp + "/readsCommand_read" + to_string(imate + 1));
-			fstream readsCommandFile(readsCommandFileName.at(imate).c_str(), ios::out);
-			readsCommandFile.close();
-			readsCommandFile.open(readsCommandFileName.at(imate).c_str(), ios::in | ios::out);
-			//first line in the commands file
-			if (sysShell != "-") 
-			{
-				//executed via specified shell
-				readsCommandFile << "#!" << sysShell << "\n";
-			};
-			readsCommandFile << "exec > \"" << readFilesInTmp.at(imate) << "\"\n"; // redirect stdout to temp fifo files
+			//readsCommandFileName.push_back(outFileTmp + "/readsCommand_read" + to_string(imate + 1));
+			//fstream readsCommandFile(readsCommandFileName.at(imate).c_str(), ios::out);
+			//readsCommandFile.close();
+			//readsCommandFile.open(readsCommandFileName.at(imate).c_str(), ios::in | ios::out);
+			////first line in the commands file
+			//if (sysShell != "-") 
+			//{
+			//	//executed via specified shell
+			//	readsCommandFile << "#!" << sysShell << "\n";
+			//};
+			//readsCommandFile << "exec > \"" << readFilesInTmp.at(imate) << "\"\n"; // redirect stdout to temp fifo files
 
 			string readFilesInString(readFilesIn.at(imate));
 			size_t pos = 0;
@@ -87,62 +188,63 @@ void Parameters::openReadsFiles()
 				readFilesInString.erase(0, pos + 1);
 				readFilesNames.at(imate).push_back(file1);
 
-				system(("ls -lL " + file1 + " > " + outFileTmp + "/readFilesIn.info 2>&1").c_str());
+				// TODO : readFilesIn.info file
+				/*system(("ls -lL " + file1 + " > " + outFileTmp + "/readFilesIn.info 2>&1").c_str());
 				ifstream readFilesIn_info((outFileTmp + "/readFilesIn.info").c_str());
-				inOut->logMain << readFilesIn_info.rdbuf();
+				inOut->logMain << readFilesIn_info.rdbuf();*/
 
-				readsCommandFile << "echo FILE " << readFilesN << "\n";
-				readsCommandFile << readFilesCommandString << "   " << ("\"" + file1 + "\"") << "\n";
+				//readsCommandFile << "echo FILE " << readFilesN << "\n";
+				//readsCommandFile << readFilesCommandString << "   " << ("\"" + file1 + "\"") << "\n";
 				++readFilesN;//only increase file count for one mate
 
 			} while (pos != string::npos);
 
-			readsCommandFile.flush();
-			readsCommandFile.seekg(0, ios::beg);
-			inOut->logMain << "\n   readsCommandsFile:\n" << readsCommandFile.rdbuf() << endl;
-			readsCommandFile.close();
+			//readsCommandFile.flush();
+			//readsCommandFile.seekg(0, ios::beg);
+			//inOut->logMain << "\n   readsCommandsFile:\n" << readsCommandFile.rdbuf() << endl;
+			//readsCommandFile.close();
 
-			chmod(readsCommandFileName.at(imate).c_str(), S_IXUSR | S_IRUSR | S_IWUSR);
+			//chmod(readsCommandFileName.at(imate).c_str(), S_IXUSR | S_IRUSR | S_IWUSR);
 
 			readFilesCommandPID[imate] = 0;
 
 			ostringstream errOut;
-#ifdef _WIN32
-			STARTUPINFO sinfo;
-			PROCESS_INFORMATION pinfo;
+			//pid_t PID = vfork();
 
-			ZeroMemory(&sinfo, sizeof(sinfo));
-			sinfo.cb = sizeof(sinfo);
-			ZeroMemory(&pinfo, sizeof(pinfo));
+//			switch (PID) {
+//			case -1:
+//				errOut << "EXITING: because of fatal EXECUTION error: Failed vforking readFilesCommand\n";
+//				errOut << errno << ": " << strerror(errno) << "\n";
+//				exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+//				break;
+//
+//			case 0:
+//				//this is the child
+//				execlp(readsCommandFileName.at(imate).c_str(), readsCommandFileName.at(imate).c_str(), (char*)NULL);
+//				exit(0);
+//
+//			default:
+//				//this is the father, record PID of the children
+//				readFilesCommandPID[imate] = PID;
+//			};
+			DWORD pid = CreateChildProcess(handles[HandleType::Write], readFilesInString); 
+			if (pid > 0)
+			{
+				if (inOut->readIn[imate].open_pipe_read(handles[HandleType::Read]))
+				{
+					readFilesCommandPID[imate] = pid;
+				}
 
-			bool PID = CreateProcess("STAR.exe", NULL, NULL, NULL, FALSE, 0, NULL, NULL,
-				&sinfo, &pinfo);
-#else	
-			pid_t PID = vfork();
-#endif
-			switch (PID) {
-			case -1:
-				errOut << "EXITING: because of fatal EXECUTION error: Failed vforking readFilesCommand\n";
+			}
+			else
+			{
+				errOut << "EXITING: because of fatal EXECUTION error: Failed CreateChildProcess\n";
 				errOut << errno << ": " << strerror(errno) << "\n";
 				exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
 				break;
-
-			case 0:
-				//this is the child
-				execlp(readsCommandFileName.at(imate).c_str(), readsCommandFileName.at(imate).c_str(), (char*)NULL);
-				exit(0);
-
-			default:
-				//this is the father, record PID of the children
-#ifdef _WIN32
-				readFilesCommandPID[imate] = pinfo.dwProcessId;
-#else
-				readFilesCommandPID[imate] = PID;
-#endif
-			};
-
+			}
 			//system((("\""+readsCommandFileName.at(imate)+"\"") + " & ").c_str());
-			inOut->readIn[imate].open(readFilesInTmp.at(imate).c_str());
+			//inOut->readIn[imate].open(readFilesInTmp.at(imate).c_str());
 		};
 		if (readNmates == 2 && readFilesNames.at(0).size() != readFilesNames.at(1).size()) 
 		{

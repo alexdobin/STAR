@@ -1,22 +1,51 @@
+
 #include "IfstreamReadIn.h"
 
-IfstreamReadIn::IfstreamReadIn()
+IfstreamReadIn::IfstreamReadIn() : _pStream(nullptr)
 {
 
 }
-IfstreamReadIn::IfstreamReadIn(std::string file)
-{
-
-}
-IfstreamReadIn::IfstreamReadIn(HANDLE hPipe)
+IfstreamReadIn::IfstreamReadIn(const std::string& file)
 {
 
 }
 
-std::ifstream& IfstreamReadIn::operator >> (const std::string& st)
+IfstreamReadIn::~IfstreamReadIn() 
+{
+	if (_pStream )
+	{
+		if (_pStream->is_open())
+			_pStream->close(); 
+		delete _pStream; 
+	}
+ 
+}
+
+std::ifstream& IfstreamReadIn::operator >> (char* s)
 { 
-	// TODO : validation.
-	return (*pStream);
+	if (_pStream && _pStream->is_open())
+	{
+		(*_pStream) >> s;
+		return *_pStream;
+	}
+}
+
+std::ifstream& IfstreamReadIn::operator >> (std::string s)
+{
+	if (_pStream && _pStream->is_open())
+	{
+		(*_pStream) >> s;
+		return *_pStream;
+	}
+}
+
+std::ifstream& IfstreamReadIn::operator >> (int n)
+{
+	if (_pStream && _pStream->is_open())
+	{
+		(*_pStream) >> n;
+		return *_pStream;
+	}
 }
 
 void IfstreamReadIn::open(const char* filename)
@@ -24,50 +53,83 @@ void IfstreamReadIn::open(const char* filename)
 
 }
 
+bool  IfstreamReadIn::open_pipe_read(HANDLE hPipeRead)
+{
+	if (hPipeRead != INVALID_HANDLE_VALUE) 
+	{
+		int fd = _open_osfhandle((intptr_t)hPipeRead, _O_RDONLY);
+		if (fd != -1)
+		{
+			FILE* f = _fdopen(fd, "r");
+			if (f != 0)
+			{
+				_pStream = new std::ifstream(f);
+			}
+		}
+		else
+		{
+			_close(fd); // Also calls CloseHandle()
+			return false; 
+		}
+	}
+	else
+	{
+		CloseHandle(hPipeRead);
+		return false; 
+	}
+	return true; 
+}
+
 bool IfstreamReadIn::is_open() const
 {
-	//TODO valiation.
-	return pStream->is_open(); 
+	if (_pStream)
+		return _pStream->is_open();
+	else
+		return false; 
 }
 
 bool IfstreamReadIn::fail() const
 {
-	// TODO validation.
-	return pStream->fail(); 
+	if (_pStream && _pStream->is_open())
+		return _pStream->fail();
+	else
+		return false; 
 }
 
 void IfstreamReadIn::close()
 {
-	// TODO validation.
-	pStream->close();
+	if (_pStream && _pStream->is_open())
+		_pStream->close();
 }
 
 int IfstreamReadIn::peek()
 {
-	// TODO : validation.
-	return pStream->peek(); 
+	if (_pStream && _pStream->is_open())
+		return _pStream->peek(); 
 }
 
 bool IfstreamReadIn::good() const
 {
-	// TODO : validation.
-	return pStream->good();
+	if (_pStream && _pStream->is_open())
+		return _pStream->good();
+	else
+		return false; 
 }
 
 std::streamsize IfstreamReadIn::gcount() const
 {
-	// TODO : validation.
-	return pStream->gcount();
+	if (_pStream && _pStream->is_open())
+		return _pStream->gcount();
 }
 
 std::istream& IfstreamReadIn::getline(char* s, std::streamsize n)
 {
-	// TODO : validation.
-	return pStream->getline(s,n);
+	if (_pStream && _pStream->is_open())
+		return _pStream->getline(s,n);
 }
 
 std::istream& IfstreamReadIn::ignore(std::streamsize n, int delim)
 {
-	// TODO : validation.
-	return pStream->ignore(n,delim);
+	if (_pStream && _pStream->is_open())
+		return _pStream->ignore(n,delim);
 }
