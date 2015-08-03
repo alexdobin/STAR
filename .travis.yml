@@ -1,6 +1,10 @@
+sudo: required
+env:
+  global:
+    - PATH: /usr/local/texlive/bin/x86_64-linux:$PATH
 git:
   submodules: false
 before_script:
-  - cd source
+  - cd ./extras/doc-latex/ && sudo -E ./texlive_install.sh && cd ../../
 script:
-  - make STAR
+  - make STAR manual
