@@ -4,7 +4,12 @@
 INPUT_DIR = ./extras/doc-latex
 OUTPUT_DIR = ./doc
 
+all : STAR manual
+
+STAR :
+	cd source && $(MAKE) $@
 manual : $(OUTPUT_DIR)/STARmanual.pdf
+
 
 %.tex : %.raw
 	./raw2tex $< > $@
@@ -16,3 +21,4 @@ $(OUTPUT_DIR)/STARmanual.pdf : $(INPUT_DIR)/STARmanual.tex $(INPUT_DIR)/paramete
 
 clean : $(INPUT_DIR)/STARmanual.tex
 	cd $(INPUT_DIR) && latexmk -C -output-directory=../../$(OUTPUT_DIR) -jobname=STARmanual $(basename $(notdir $<))
+	cd source && $(MAKE) $@
