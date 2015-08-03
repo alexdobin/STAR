@@ -14,33 +14,32 @@ MANUAL
 ======
 https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf
 
-(RELEASEnotes)[RELEASEnotes] contains detailed information about the latest major release
+[RELEASEnotes](RELEASEnotes) contains detailed information about the latest major release
 
 DIRECTORY CONTENTS
 ==================
-source: all source files required for compilation
-bin: pre-compiled executables for Linux and Mac OS X
-doc: documentation
-extras: miscellaneous files and scripts
-
-STAR-Fusion: fusion detection developed by Brian Haas, see https://github.com/STAR-Fusion/STAR-Fusion for details.
+  * source: all source files required for compilation
+  * bin: pre-compiled executables for Linux and Mac OS X
+  * doc: documentation
+  * extras: miscellaneous files and scripts
+  * STAR-Fusion: fusion detection developed by Brian Haas, see https://github.com/STAR-Fusion/STAR-Fusion for details.
              To populate this submodule, clone STAR with `git clone --recursive https://github.com/alexdobin/STAR`
-STAR-Fusion-x.x.x: latest release of the STAR-Fusion
+  * STAR-Fusion-x.x.x: latest release of the STAR-Fusion
 
 
 COMPILING FROM SOURCE
 =====================
-Unzip and "cd" into source/ subdirectory.
-Linux:    run `make STAR`
-Mac OS X: run `make STARforMacStatic`
+  1. Unzip and "cd" into source/ subdirectory.
+  2. Linux:    run `make STAR`
+  3. Mac OS X: run `make STARforMacStatic`
           If g++ compiler (true g++, not Clang sym-link) is not on the path, run `make STARforMacStatic CXX=/path/to/gcc`
 
 
 HARDWARE/SOFTWARE REQUIREMENTS
 ==============================
-x86-64 compatible processors
-64 bit Linux or Mac OS X 
-30GB of RAM for human genome 
+  * x86-64 compatible processors
+  * 64 bit Linux or Mac OS X 
+  * 30GB of RAM for human genome 
 
 
 LIMITATIONS
