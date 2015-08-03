@@ -29,11 +29,57 @@ DIRECTORY CONTENTS
 
 COMPILING FROM SOURCE
 =====================
-  1. Unzip and "cd" into source/ subdirectory.
-  2. Linux:    run `make STAR`
-  3. Mac OS X: run `make STARforMacStatic`
-          If g++ compiler (true g++, not Clang sym-link) is not on the path, run `make STARforMacStatic CXX=/path/to/gcc`
 
+To compile STAR from source, you must first download the latest [release](release) and uncompress it and then build it.
+
+NOTE: The following instructions only work when obtaining the source using `git`. At least until a new
+version is released which incorporates the top-level `Makefile`.
+
+Linux
+-----
+
+```bash
+# Get latest STAR source from releases
+wget https://github.com/alexdobin/STAR/archive/STAR_2.4.2a.tar.gz
+tar -xzf STAR_2.4.2a.tar.gz
+cd STAR_2.4.2a
+
+# Alternatively, get STAR source using git
+git clone https://github.com/alexdobin/STAR.git
+cd STAR
+
+# Build STAR
+make STAR
+
+# If you have a TeX environment, you may like to build the documentation
+make manual
+```
+
+Mac OS X
+--------
+
+```bash
+# Get latest STAR source from releases
+wget https://github.com/alexdobin/STAR/archive/STAR_2.4.2a.tar.gz
+tar -xzf STAR_2.4.2a.tar.gz
+cd STAR_2.4.2a
+
+# Alternatively, get STAR source using git
+git clone https://github.com/alexdobin/STAR.git
+cd STAR
+
+# Build STAR
+cd source
+make STARforMacStatic
+```
+
+If g++ compiler (true g++, not Clang sym-link) is not on the path, you will need to tell `make` where to find it:
+
+```bash
+# Build STAR
+cd source
+make STARforMacStatic CXX=/path/to/gcc
+```
 
 HARDWARE/SOFTWARE REQUIREMENTS
 ==============================
