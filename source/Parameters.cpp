@@ -15,6 +15,18 @@
 
 #define PAR_NAME_PRINT_WIDTH 30
 
+// Get current path 
+void GetExePath(std::string& path)
+{
+	char buffer[MAX_PATH] = {0};
+	GetModuleFileName(NULL, buffer, MAX_PATH);
+	std::string modulepath(buffer);
+	path = modulepath.substr(0, modulepath.find_last_of("\\/"));
+	path.append("\\");
+}
+
+
+
 Parameters::Parameters() {//initalize parameters info
     
     inOut = new InOutStreams;
@@ -332,6 +344,14 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             };
         };
     };
+
+#ifdef WIN32
+	// Somehow ifstream need full absolute path, relative path didn't work.
+	std::string path;
+	GetExePath(path); 
+	genomeDir = path + genomeDir; 
+#endif
+
     
 ///////// Command Line Final
     

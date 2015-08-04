@@ -49,13 +49,15 @@ bool CreateReadWritePipe(MapHandles& handles)
 	return true; 
 }
 
-DWORD CreateChildProcess(HANDLE hPipeWrite, const std::string& filenames)
+DWORD CreateChildProcess(HANDLE hPipeWrite, const std::string& filenames, const std::string& command)
 {
 	const int MAX_CMDLINE = 1024;
 
 	std::string cmdLine = "STAR_ReadFile"; 
 	cmdLine.append(" "); 
-	cmdLine.append(filenames); 
+	cmdLine.append(filenames);
+	cmdLine.append(" ");
+	cmdLine.append(command); 
 
 	char*  szCmdline = new char[cmdLine.size() + 1]; 
 	strcpy(szCmdline, cmdLine.c_str()); 
@@ -227,7 +229,7 @@ void Parameters::openReadsFiles()
 //				//this is the father, record PID of the children
 //				readFilesCommandPID[imate] = PID;
 //			};
-			DWORD pid = CreateChildProcess(handles[HandleType::Write], readFilesInString); 
+			DWORD pid = CreateChildProcess(handles[HandleType::Write], readFilesInString, readFilesCommandString); 
 			if (pid > 0)
 			{
 				if (inOut->readIn[imate].open_pipe_read(handles[HandleType::Read]))

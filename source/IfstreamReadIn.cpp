@@ -28,6 +28,7 @@ std::ifstream& IfstreamReadIn::operator >> (char* s)
 		(*_pStream) >> s;
 		return *_pStream;
 	}
+	
 }
 
 std::ifstream& IfstreamReadIn::operator >> (std::string s)
@@ -50,7 +51,7 @@ std::ifstream& IfstreamReadIn::operator >> (int n)
 
 void IfstreamReadIn::open(const char* filename)
 {
-
+	_pStream = new std::ifstream(filename); 
 }
 
 bool  IfstreamReadIn::open_pipe_read(HANDLE hPipeRead)

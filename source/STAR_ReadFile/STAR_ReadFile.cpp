@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
 	}
 
 	// Get current path 
-	char buffer[MAX_PATH];
+	char buffer[MAX_PATH] = {0};
 	GetModuleFileName(NULL, buffer, MAX_PATH);
 	std::string modulepath(buffer);
 	std::string filedir = modulepath.substr(0, modulepath.find_last_of("\\/"));
