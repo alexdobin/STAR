@@ -1,5 +1,6 @@
 #include "IncludeDefine.h"                                                                                                                                                     
 #include "Parameters.h"
+#include "sjSplitAlign.h"
 
 #ifdef __cplusplus
 extern "C" {

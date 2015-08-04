@@ -4,7 +4,7 @@
 #include "ReadAlign.h"
 #include "SequenceFuns.h"
 #include "stitchWindowAligns.h"
-#include "sjSplitAlign.cpp"
+#include "sjSplitAlign.h"
 #include "PackedArray.h"
 #include "alignSmithWaterman.h"
 #include "GlobalVariables.h"
