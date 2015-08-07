@@ -7,4 +7,4 @@ before_script:
   - sed -i -e "s:/usr/local:${HOME}:" extras/doc-latex/texlive.profile
   - cd ./extras/doc-latex/ && ./texlive_install.sh && cd ../../
 script:
-  - make STAR manual
+  - touch extras/doc-latex/STARmanual.tex; make STAR manual
