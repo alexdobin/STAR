@@ -32,6 +32,7 @@ packages=(
   url
   graphics
   pdftex-def
+  colortbl
   hyperref
   xcolor
   tools
