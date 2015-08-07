@@ -6,4 +6,4 @@ git:
 before_script:
   - cd ./extras/doc-latex/ && sudo -E ./texlive_install.sh && cd ../../
 script:
-  - make STAR manual
+  - ls -1 /usr/local/texlive/bin/x86_64-linux && make STAR manual
