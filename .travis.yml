@@ -1,9 +1,10 @@
 env:
   global:
-    - PATH: /usr/local/texlive/bin/x86_64-linux:$PATH
+    - PATH: ${HOME}/texlive/bin/x86_64-linux:$PATH
 git:
   submodules: false
 before_script:
-  - cd ./extras/doc-latex/ && sudo -E ./texlive_install.sh && cd ../../
+  - sed -i -e "s:/usr/local:${HOME}:" extras/doc-latex/texlive.profile
+  - cd ./extras/doc-latex/ && ./texlive_install.sh && cd ../../
 script:
-  - touch extras/doc-latex/STARmanual.tex; make manual
+  - make manual
