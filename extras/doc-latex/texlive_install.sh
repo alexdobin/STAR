@@ -29,6 +29,7 @@ tar \
 packages=(
   latex-bin
   oberdiek
+  url
   graphics
   hyperref
   xcolor
