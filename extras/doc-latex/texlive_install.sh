@@ -31,6 +31,7 @@ packages=(
   oberdiek
   url
   graphics
+  pdftex-def
   hyperref
   xcolor
   tools
