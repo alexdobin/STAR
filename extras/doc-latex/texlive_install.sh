@@ -28,6 +28,7 @@ tar \
 # Install packages required by the project
 packages=(
   latex-bin
+  oberdiek
   hyperref
   xcolor
   tools
