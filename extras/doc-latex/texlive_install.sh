@@ -27,6 +27,7 @@ tar \
 
 # Install packages required by the project
 packages=(
+  pdftex
   hyperref
   xcolor
   tools
