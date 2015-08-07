@@ -94,6 +94,11 @@ submodule to a specific tag by following these steps:
 ```bash
 git clone --recursive https://github.com/alexdobin/STAR.git
 cd STAR
+# or:
+#
+# git clone //github.com/alexdobin/STAR.git
+# cd STAR
+# git git submodule update --init --recursive
 
 # checkout a specific tag for the submodule
 cd STAR-Fusion
