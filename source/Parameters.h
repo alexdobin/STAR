@@ -80,6 +80,7 @@ class Parameters {
         uint alignIntronMax;//max length to call 
         uint alignMatesGapMax;//max gap between the mates (if paired-end)
         string alignEndsType, alignSoftClipAtReferenceEnds;
+        vector <int32> alignSJstitchMismatchNmax;
         
         //seed parameters
         uint seedMultimapNmax; //max number of multiple alignments per piece          

@@ -299,7 +299,7 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
                 
         #else
             if ( (trA->nMM + nMM)<=outFilterMismatchNmaxTotal  \
-                         && (nMM==0 || jCan<0 || jCan==1 || jCan==2) ) 
+                         && ( jCan<0 || nMM<=P->alignSJstitchMismatchNmax[++jCan/2] ) ) 
         #endif
             {//stitching worked only if there no mis-matches for non-GT/AG junctions
                 trA->nMM += nMM;

@@ -1,3 +1,5 @@
+Implemented --alignSJstitchMismatchNmax option to allow for mismatches around non-canonical junctions.
+Merged pull request from Nathan S. Watson-Haigh: Makefile for manual;Travis-CI automated build; Update STAR-Fusion submodule to v0.3.1
 Merged pull request from Alex Finkel to allow 'parameter=value' option formatting, e.g. --runThreadN=8.
 Implemented --chimSegmentReadGapMax parameter which defines the maximum gap in the read sequence between chimeric segments. By default it is set to 0 to replicate the behavior of the previous STAR versions.
 Implemented --chimFilter banGenomicN | None options to prohibit or allow the N characters in the vicinity of the chimeric junctions. By default, they are prohibited - the same behavior as in the previous versions.

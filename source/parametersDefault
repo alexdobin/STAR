@@ -425,6 +425,10 @@ alignMatesGapMax            0
 alignSJoverhangMin          5
     int>0: minimum overhang (i.e. block size) for spliced alignments
 
+alignSJstitchMismatchNmax   0 -1 0 0
+    4*int>=0: maximum number of mismatches for stitching of the splice junctions (-1: no limit). 
+                            (1) non-canonical motifs, (2) GT/AG and CT/AC motif, (3) GC/AG and CT/GC motif, (4) AT/AC and GT/AT motif.
+
 alignSJDBoverhangMin        3
     int>0: minimum overhang (i.e. block size) for annotated (sjdb) spliced alignments
 
