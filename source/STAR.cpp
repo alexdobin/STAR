@@ -11,7 +11,7 @@
 #include "genomeGenerate.h"
 #include "outputSJ.h"
 #include "ThreadControl.h"
-#include "GlobalVariables.h"
+#include "GlobalVariables.cpp"
 #include "TimeFunctions.h"
 #include "ErrorWarning.h"
 #include "sysRemoveDir.h"
@@ -26,7 +26,7 @@
 #include "sjdbInsertJunctions.h"
 #include "bam_cat.h"
 
-#include "htslib/htslib/sam.h"
+#include <htslib/sam.h>
 
 int main(int argInN, char* argIn[]) {
    

@@ -50,11 +50,11 @@ THE SOFTWARE.
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
-#include "htslib/htslib/bgzf.h"
-#include "htslib/htslib/sam.h"
-#include <cstring>
+#include <htslib/bgzf.h>
+#include <htslib/sam.h>
 
 #define BUF_SIZE 0x10000
 

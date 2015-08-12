@@ -5,10 +5,11 @@
 #include "OutSJ.h"
 #include "sysRemoveDir.h"
 #include "stringSubstituteAll.h"
-#include SAMTOOLS_BGZF_H
 #include "GlobalVariables.h"
 #include "signalFromBAM.h"
 #include "bamRemoveDuplicates.h"
+
+#include <htslib/bgzf.h>
 
 //for mkfifo
 #include <sys/stat.h>

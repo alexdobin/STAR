@@ -1,10 +1,11 @@
 #include <unordered_map>
 #include "bamRemoveDuplicates.h"
 #include <iostream>
-#include "htslib/htslib/sam.h"
 #include "IncludeDefine.h"
-#include SAMTOOLS_BGZF_H
 #include "ErrorWarning.h"
+
+#include <htslib/bgzf.h>
+#include <htslib/sam.h>
 
 #define compareReturn(a,b) if(a>b) {return 1;} else if (a<b) {return -1;}
 

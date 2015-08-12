@@ -9,7 +9,7 @@
 #include <fstream>
 #include <sstream>
 #include <time.h>
-#include <ctime>        
+#include <ctime>
 #include <iomanip>
 #include <vector>
 #include <sys/types.h>
@@ -25,10 +25,6 @@
 
 #include "VERSION"
 
-//external libs
-#define SAMTOOLS_BGZF_H "htslib/htslib/bgzf.h"
-#define SAMTOOLS_SAM_H  "htslib/htslib/sam.h"
-
 using namespace std;
 
 #ifdef COMPILE_FOR_MAC
@@ -37,7 +33,7 @@ using namespace std;
 #endif
 
 typedef int8_t int8;
-typedef uint8_t uint8; 
+typedef uint8_t uint8;
 
 #define uint unsigned long long
 #define sint signed long long

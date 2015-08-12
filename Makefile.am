@@ -1,0 +1,3 @@
+SUBDIRS = source
+
+EXTRA_DIST = doc extras STAR-Fusion-0.1.1 CHANGES LICENSE RELEASEnotes
