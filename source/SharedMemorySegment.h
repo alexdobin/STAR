@@ -97,6 +97,14 @@ public:
 	{
 		_err = err;
 	};
+	void ThrowError(ErrorState error, int detail = 0)
+	{
+		if (!_exception.HasError())
+		{
+			_exception.SetError(error, detail);
+		}
+		throw _exception;
+	};
 
 private :
 
@@ -109,6 +117,7 @@ private :
 	bool _isAllocator;
 	bool _unloadLast;
 	std::ostream* _err;
+	SharedMemoryException _exception;
 
 	// private methods
 	void CreateAndInitSharedObject(size_t shmSize);
