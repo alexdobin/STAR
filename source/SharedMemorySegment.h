@@ -112,12 +112,12 @@ private :
 	key_t _key;
 	bool _needsAllocation; 
 	void* _mapped; 
-	size_t _size;
 	std::string _name;
 	bool _isAllocator;
 	bool _unloadLast;
 	std::ostream* _err;
 	SharedMemoryException _exception;
+	size_t* _length; 
 
 	// private methods
 	void CreateAndInitSharedObject(size_t shmSize);

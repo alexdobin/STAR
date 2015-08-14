@@ -1,6 +1,7 @@
 #include <boost/interprocess/shared_memory_object.hpp>
 #include <boost/interprocess/mapped_region.hpp>
 #include <string>
+#include <malloc.h>
 #include "CrossPlatform.h"
 #include "SharedMemorySegment.h"
 
@@ -10,10 +11,10 @@ SharedMemorySegment::SharedMemorySegment(key_t key, bool unloadLast) : _key(key)
 														_unloadLast(unloadLast),
 														_needsAllocation(true),
 														_mapped(nullptr),
-														_size(0),
-														_name(std::to_string(_key)),
-														_isAllocator(false)
+														_isAllocator(false),
+														_length(nullptr)
 {
+	_name = std::to_string(_key); 
 	OpenIfExists(); 
 }
 
@@ -62,25 +63,37 @@ void SharedMemorySegment::Clean()
 
 void SharedMemorySegment::CreateAndInitSharedObject(size_t shmSize)
 {
+	std::unique_ptr<shared_memory_object> shm_obj_ptr;
 	try
 	{
 		std::string key = std::to_string(_key);
-		shared_memory_object shm_obj
-			(create_only					//only create
+		shm_obj_ptr = std::make_unique<shared_memory_object>(
+			create_only						//only create
 			, _name.c_str()					//name
 			, read_write					//read-write mode
 			);
+	}
+	catch (interprocess_exception &ex)
+	{
+		if (ex.get_error_code() != already_exists_error)
+		{
+			ThrowError(EOPENFAILED, ex.get_error_code());
+		}
+		_exception.SetError(EEXISTS, 0);
+		return;
+	}
 
+	try
+	{
 		// TODO : Check why this size adjustment is done.
 		unsigned long long toReserve = (unsigned long long) shmSize + sizeof(unsigned long long);
 
-		// TODO : Check if this can throw different exception that we need to handle.
-		shm_obj.truncate(toReserve);
+		(*shm_obj_ptr).truncate(toReserve);
 	}
 	catch (interprocess_exception &ex)
 	{
 		// revisit this, can we blindly return this error ? 
-		_exception.SetError(EEXISTS, ex.get_error_code());
+		ThrowError(EFTRUNCATE, ex.get_error_code());
 	}
 	return; 
 }
@@ -88,26 +101,57 @@ void SharedMemorySegment::CreateAndInitSharedObject(size_t shmSize)
 void SharedMemorySegment::OpenIfExists()
 {
 	errno = 0;
+	std::unique_ptr<shared_memory_object> shm_obj_ptr;
+
 	try
 	{
 		std::string key = std::to_string(_key);
-		shared_memory_object shm_obj
-			(open_only						//only create
+		shm_obj_ptr = std::make_unique<shared_memory_object>(
+			open_only						//only create
 			, key.c_str()					//name
 			, read_write					//read-write mode
 			);
-
-		mapped_region region
-			(shm_obj                        //Memory-mappable object
-			, read_write					//Access mode
-			);
-		_mapped = region.get_address();
-
-		_needsAllocation = false;
 	}
 	catch (interprocess_exception &ex)
 	{
-		ThrowError(EOPENFAILED, ex.get_error_code());
+		// TODO : TCD, check if this return same error code in linux too.
+		if (ex.get_error_code() != not_found_error) // Shared Memory does not exist.
+		{
+			ThrowError(EOPENFAILED, ex.get_error_code());
+		}
+		// Shared Memory not found, return. 
+		return; 
+
 	}
+
+	// Shared Memory exist,  map that and get address.
+	try
+	{
+		mapped_region region(
+			*shm_obj_ptr                        //Memory-mappable object
+			, read_write					    //Access mode
+			);
+		
+		_mapped = region.get_address();
+		if (_mapped == nullptr)
+		{
+			ThrowError(EMAPFAILED);
+		}
+
+		_length = (size_t*)_mapped; 
+		*_length = region.get_size(); 
+
+		_needsAllocation = false;
+	}
+
+	catch (interprocess_exception &ex)
+	{
+		// TODO : TCD, check if this return same error code in linux too.
+		int error_code = ex.get_error_code(); 
+		error_code = ex.get_native_error();
+		ThrowError(EMAPFAILED, ex.get_error_code());
+		
+	}
+	
 }
 
