@@ -1,3 +1,4 @@
+Fixed a bug which caused problems in some cases of genome generation without annotations.
 Implemented --alignSJstitchMismatchNmax option to allow for mismatches around non-canonical junctions.
 Merged pull request from Nathan S. Watson-Haigh: Makefile for manual;Travis-CI automated build; Update STAR-Fusion submodule to v0.3.1
 Merged pull request from Alex Finkel to allow 'parameter=value' option formatting, e.g. --runThreadN=8.

@@ -912,13 +912,23 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
     
+    
+    
     twoPass.yes=false;
     if (twoPass.mode!="None") {//2-pass parameters
+        if (runMode!="alignReads")
+        {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: 2-pass mapping option  can only be used with --runMode alignReads\n";
+            errOut << "SOLUTION: remove --twopassMode option";
+            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };
+        
         if (twoPass.mode!="Basic")
         {
             ostringstream errOut;
             errOut << "EXITING because of fatal PARAMETERS error: unrecognized value of --twopassMode="<<twoPass.mode<<"\n";
-            errOut << "SOLUTION: for the 2-pass mode, use allowes values --twopassMode: Basic";
+            errOut << "SOLUTION: for the 2-pass mode, use allowed values --twopassMode: Basic";
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
         
@@ -951,6 +961,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 
     sjdbInsert.pass1=false;
     sjdbInsert.pass2=false;
+    sjdbInsert.yes=false;
     if (sjdbFileChrStartEnd.at(0)!="-" || sjdbGTFfile!="-")
     {//will insert annotated sjdb on the fly
        sjdbInsert.pass1=true;

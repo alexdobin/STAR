@@ -236,7 +236,6 @@ void genomeGenerate(Parameters *P) {
     if (P->GstrandBit<32) P->GstrandBit=32; //TODO: use simple access function for SA
     
     P->GstrandMask = ~(1LLU<<P->GstrandBit);
-    P->nSAbyte=P->nSA*(P->GstrandBit+1)/8+1;
     PackedArray SA1;//SA without sjdb
     SA1.defineBits(P->GstrandBit+1,P->nSA);
     PackedArray SA2;//SA with sjdb, reserve more space
@@ -248,8 +247,9 @@ void genomeGenerate(Parameters *P) {
         SA2.defineBits(P->GstrandBit+1,P->nSA);
     };
         
+    P->nSAbyte=SA2.lengthByte;
+    
     P->inOut->logMain  << "Number of SA indices: "<< P->nSA << "\n"<<flush;    
-    P->inOut->logMain  << "SA size in bytes: "<< P->nSAbyte << "\n"<<flush;
 
     //sort SA
     time ( &rawTime );
@@ -530,6 +530,8 @@ void genomeGenerate(Parameters *P) {
 
     //write SA                
     time ( &rawTime );
+    P->inOut->logMain  << "SA size in bytes: "<< P->nSAbyte << "\n"<<flush;
+
     P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ... writing Suffix Array to disk ...\n" <<flush;   
     *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... writing Suffix Array to disk ...\n" <<flush;   
 
