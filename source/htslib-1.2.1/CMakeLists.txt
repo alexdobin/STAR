@@ -57,7 +57,16 @@ else  ()
     if (WIN32)
         set (TMP_MSG "${TMP_MSG}. On win32 this can be installed as part of GnuWin32: http://gnuwin32.sourceforge.net/downlinks/zlib.php")
     endif ()
-    message(FATAL_ERROR "${TMP_MSG}")
+    #message(FATAL_ERROR "${TMP_MSG}")
+	set (ZLIB_INCLUDE_DIRS "C:/Program Files (x86)/zlib-1.2.5-bin-x64/zlib/include")
+	set (ZLIB_LIBRARIES "C:/Program Files (x86)/zlib-1.2.5-bin-x64/zlib/lib")
+	
+	include_directories(${ZLIB_INCLUDE_DIRS})
+	if (WIN32)
+		set  (THIS_ADDITIONAL_LIB ${THIS_ADDITIONAL_LIB} ${ZLIB_LIBRARIES})
+	else ()
+		set  (THIS_ADDITIONAL_LIB ${THIS_ADDITIONAL_LIB} z)
+	endif()
 endif ()
 
 # The version number.
@@ -91,7 +100,7 @@ if (WIN32)
 endif ()
 
 if (THIS_LIBRARY_SOURCES)
-    set (LIB_TARGET_NAME "${THIS_PROJECT_NAME}_${CURRENT_DIR_NAME}")
+    set (LIB_TARGET_NAME "${CURRENT_DIR_NAME}")
     add_library     (${LIB_TARGET_NAME} STATIC ${THIS_LIBRARY_SOURCES})
     #add_dependencies(${LIB_TARGET_NAME} ${THIS_OPT})
 
