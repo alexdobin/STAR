@@ -9,4 +9,4 @@ before_script:
    - cd source  
 script:
 #  - make STAR manual
-   - make
+   - make STARforMac
