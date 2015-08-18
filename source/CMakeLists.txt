@@ -16,7 +16,8 @@ include("${THIS_MODULE_DIR}/boost.cmake")
 
 add_subdirectory(${HTSLIB_PREFIX})
 add_subdirectory(common)
-add_subdirectory(STAR_ReadFile) 
+add_subdirectory(STAR_ReadFile)
+add_subdirectory(opt) 
 
 include_directories (${Boost_INCLUDE_DIRS})
 include_directories (${CMAKE_CURRENT_SOURCE_DIR})
