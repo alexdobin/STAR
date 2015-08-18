@@ -1,10 +1,10 @@
-os: osx
+env:
+  global:
+    - PATH: ${HOME}/texlive/bin/x86_64-linux:$PATH
 git:
   submodules: false
-language: cpp
 before_script:
-#   - brew update
-   - brew install clang-omp
-   - cd source  
+  - sed -i -e "s:/usr/local:${HOME}:" extras/doc-latex/texlive.profile
+  - cd ./extras/doc-latex/ && ./texlive_install.sh && cd ../../
 script:
-   - make STARforMac
+  - make STAR manual
