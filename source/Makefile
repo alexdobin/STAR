@@ -106,9 +106,9 @@ STARlongStatic : Depend.list parametersDefault.xxd $(OBJECTS)
 	$(CXX) -o STARlong $(OBJECTS) $(CCFLAGS) $(LDFLAGS_static)
 
 #not recommended!
-STARforMac : CCFLAGS=-D'COMPILE_FOR_MAC' -I ./Mac_Include/ $(CCFLAGS_main)
+STARforMac : CCFLAGS=-D'COMPILE_FOR_MAC' -I $(CCFLAGS_main)
 STARforMac : parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STAR $(CCFLAGS) $(LDFLAGS_Mac) $(OBJECTS)
+	$/usr/local/bin/clang-omp -o STAR $(CCFLAGS) $(LDFLAGS_Mac) $(OBJECTS)
 
 STARforMacStatic : CCFLAGS=-D'COMPILE_FOR_MAC' -I ./Mac_Include/ $(CCFLAGS_main)
 STARforMacStatic : parametersDefault.xxd $(OBJECTS)
