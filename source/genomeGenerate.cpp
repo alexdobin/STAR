@@ -308,7 +308,7 @@ void genomeGenerate(Parameters *P) {
         *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... sorting Suffix Array chunks and saving them to disk...\n" <<flush;
 
         #pragma omp parallel for num_threads(P->runThreadN) ordered schedule(dynamic,1)
-        for (int iChunk=0; (uint)iChunk < saChunkN; iChunk++) {//start the chunk cycle: sort each chunk with qsort and write to a file
+        for (int iChunk=0; iChunk < (int) saChunkN; iChunk++) {//start the chunk cycle: sort each chunk with qsort and write to a file
             uint* saChunk=new uint [indPrefChunkCount[iChunk]];//allocate local array for each chunk
             for (uint ii=0,jj=0;ii<N2;ii+=P->genomeSAsparseD) {//fill the chunk with SA indices
                 if (G[ii]<4) {
