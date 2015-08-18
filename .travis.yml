@@ -1,7 +1,6 @@
 os: osx
 git:
   submodules: false
-language: cpp
 before_script:
    - brew update
    - brew install clang-omp
