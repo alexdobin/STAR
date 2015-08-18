@@ -1,6 +1,12 @@
 #ifndef SHAREDMEMORYSEGMENT_H
 #define SHAREDMEMORYSEGMENT_H
 
+#include <boost/interprocess/shared_memory_object.hpp>
+#include <boost/interprocess/mapped_region.hpp>
+#include <iostream>
+#include <string>
+#include <memory>
+
 enum ErrorState 
 {
 	ENONE,
@@ -118,6 +124,8 @@ private :
 	std::ostream* _err;
 	SharedMemoryException _exception;
 	size_t* _length; 
+	std::unique_ptr<boost::interprocess::shared_memory_object> _shm_obj_ptr;
+	std::unique_ptr<boost::interprocess::mapped_region> _mapped_region_ptr;
 
 	// private methods
 	void CreateAndInitSharedObject(size_t shmSize);

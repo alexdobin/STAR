@@ -6,6 +6,7 @@
 #include "streamFuns.h"
 
 #ifdef _WIN32
+#include <memory>
 #include "SharedMemorySegment.h"
 #else
 #include "SharedMemory.h"
