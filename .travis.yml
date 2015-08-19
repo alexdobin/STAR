@@ -6,4 +6,4 @@ before_script:
    - brew install clang-omp
    - cd source  
 script:
-   - make STAR CXX=/usr/local/bin/clang-omp LDFLAGS="-pthread -lz htslib/libhts.a" CXXFLAGSextra="-I ./Mac_Include/"
+   - make STAR CXX=/usr/local/bin/clang-omp LDFLAGS="-pthread -lz htslib/libhts.a" CXXFLAGSextra="-I /usr/local/include/"
