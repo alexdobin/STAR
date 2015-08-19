@@ -85,9 +85,10 @@ if (WIN32)
 	add_custom_command(
         OUTPUT ${HTSLIB_LIBRARY}
 		WORKING_DIRECTORY ${HTSLIB_DIR}
-        COMMAND cmake -G "Visual Studio 12 2013" -A "x64" "${HTSLIB_DIR}"
+        COMMAND cmake -G "Visual Studio 12 2013" -A "x64" "${HTSLIB_DIR}" -DZLIB_DIR:STRING=${ZLIB_DIR}
 		COMMAND msbuild /p:Configuration=${VS_BUILD_CONFIG} /p:Platform=x64 ${HTSLIB_DIR}/htslib.sln
         DEPENDS ${HTSLIB_DIR}
+		DEPENDS ${ZLIB_LIBRARY}
 		COMMENT "Building htslib library")
 		
 	set (HTSLIB_FINAL_TASK ${HTSLIB_LIBRARY})
