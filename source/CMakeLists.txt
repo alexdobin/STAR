@@ -22,6 +22,8 @@ add_subdirectory(opt)
 include_directories (${Boost_INCLUDE_DIRS})
 include_directories (${CMAKE_CURRENT_SOURCE_DIR})
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/common)
+include_directories (${ZLIB_DIR})
+include_directories (${HTSLIB_DIR})
 
 # required support for gzip compression
 # find_package(ZLIB)
@@ -72,12 +74,12 @@ if (WIN32)
 	list(REMOVE_ITEM SOURCE_LIST ${CMAKE_CURRENT_SOURCE_DIR}/SharedMemory.h)
 endif ()
 
-set (LIBS_REQUIRED ${HTSLIB_LIBRARY} ${THIS_ADDITIONAL_LIB} ${Boost_LIBRARIES})	  
+set (LIBS_DEPENDS ${HTSLIB_LIBRARY} ${ZLIB_LIBRARY} ${Boost_LIBRARIES})	  
 # add winsock2 lib for Windows.
 if (WIN32)
-	set (LIBS_REQUIRED ${LIBS_REQUIRED} ws2_32)	  
+	set (LIBS_DEPENDS ${LIBS_DEPENDS} ws2_32)	  
 endif ()
 
 add_executable(${THIS_PROGRAM} ${SOURCE_LIST} $<TARGET_OBJECTS:getopt> $<TARGET_OBJECTS:random>)
 
-target_link_libraries (${THIS_PROGRAM} ${LIBS_REQUIRED})
+target_link_libraries (${THIS_PROGRAM} ${LIBS_DEPENDS})

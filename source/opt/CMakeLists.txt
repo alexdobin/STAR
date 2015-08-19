@@ -44,6 +44,7 @@ if (WIN32)
         COMMAND cmake -G "Visual Studio 12 2013" -A "x64" "${ZLIB_DIR}"
 		COMMAND msbuild /p:Configuration=${VS_BUILD_CONFIG} /p:Platform=x64 ${ZLIB_DIR}/zlib.sln
         WORKING_DIRECTORY ${ZLIB_DIR}
+		DEPENDS ${ZLIB_DIR}
         COMMENT "Building zlib package")
 		
 	set (ZLIB_FINAL_TASK ${ZLIB_LIBRARY})
