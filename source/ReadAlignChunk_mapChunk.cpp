@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include "ReadAlignChunk.h"
 #include "GlobalVariables.h"
 #include "ThreadControl.h"

@@ -29,7 +29,8 @@
 #include <limits>
 #include <stdint.h>
 #include <omp.h>
-
+#include <zlib.h>
+#include <unistd.h>
 #include "VERSION"
 
 //external libs

@@ -52,7 +52,7 @@ THE SOFTWARE.
 #include <stdlib.h>
 #include <unistd.h>
 #include <cstring>
-
+#include <zlib.h>
 #include "bam_cat.h"
 #include "htslib-1.2.1\htslib\bgzf.h"
 #include "htslib-1.2.1\htslib\sam.h"
