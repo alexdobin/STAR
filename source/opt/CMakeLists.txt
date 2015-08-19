@@ -1,6 +1,4 @@
-
 message(STATUS "Creating external tools in subdirectory opt")
-
 # convenience macro to set in both current and parent scope:
 macro(superset symbol value)
     set(${symbol} "${value}")
@@ -9,7 +7,6 @@ endmacro()
 
 # TODO : Get this based on build config 
 set (VS_BUILD_CONFIG "Release")
-set (THIS_REDIST_DIR ${CMAKE_SOURCE_DIR}/redist)
 
 #
 # zlib
@@ -36,8 +33,7 @@ if (NOT WIN32)
         OUTPUT ${ZLIB_LIBRARY}
         COMMAND $(MAKE) >| zlib.build.log
         WORKING_DIRECTORY ${ZLIB_DIR}
-		DEPENDS ${ZLIB_DIR}
-        COMMENT "Building zlib package")
+		COMMENT "Building zlib package")
 		
 	set (ZLIB_FINAL_TASK ${ZLIB_LIBRARY})
 endif ()
@@ -45,16 +41,15 @@ endif ()
 if (WIN32)
 	add_custom_command(
         OUTPUT ${ZLIB_LIBRARY}
-        COMMAND cmake -G "Visual Studio 12 2013" -A "win32" "${ZLIB_DIR}"
-		COMMAND msbuild /p:Configuration=${VS_BUILD_CONFIG} /p:Platform=Win32 ${SAMTOOLS_DIR}/zlib.sln
-        DEPENDS ${ZLIB_DIR}
+        COMMAND cmake -G "Visual Studio 12 2013" -A "x64" "${ZLIB_DIR}"
+		COMMAND msbuild /p:Configuration=${VS_BUILD_CONFIG} /p:Platform=x64 ${ZLIB_DIR}/zlib.sln
         WORKING_DIRECTORY ${ZLIB_DIR}
         COMMENT "Building zlib package")
 		
 	set (ZLIB_FINAL_TASK ${ZLIB_LIBRARY})
 endif()
 
-add_custom_target(${THIS_PROJECT_NAME}_zlib DEPENDS "${ZLIB_FINAL_TASK}")
+add_custom_target(${ZLIB_PREFIX} DEPENDS "${ZLIB_FINAL_TASK}")
 
 #
 # htslib
@@ -80,8 +75,7 @@ if (NOT WIN32)
         OUTPUT ${HTSLIB_LIBRARY}
         COMMAND $(MAKE) -C "${HTSLIB_DIR}" lib-static tabix bgzip 2>| htslib.build.log
         DEPENDS ${HTSLIB_DIR}
-		DEPENDS ${ZLIB_LIBRARY}
-        COMMENT "Building htslib library")
+		COMMENT "Building htslib library")
 		
     set (HTSLIB_FINAL_TASK ${HTSLIB_LIBRARY})
 endif ()
@@ -90,13 +84,12 @@ if (WIN32)
 	add_custom_command(
         OUTPUT ${HTSLIB_LIBRARY}
 		WORKING_DIRECTORY ${HTSLIB_DIR}
-        COMMAND cmake -G "Visual Studio 12 2013" -A "win32" "${HTSLIB_DIR}"
-		COMMAND msbuild /p:Configuration=${VS_BUILD_CONFIG} /p:Platform=Win32 ${HTSLIB_DIR}/htslib.sln
+        COMMAND cmake -G "Visual Studio 12 2013" -A "x64" "${HTSLIB_DIR}"
+		COMMAND msbuild /p:Configuration=${VS_BUILD_CONFIG} /p:Platform=x64 ${HTSLIB_DIR}/htslib.sln
         DEPENDS ${HTSLIB_DIR}
-		DEPENDS ${ZLIB_LIBRARY}
 		COMMENT "Building htslib library")
 		
 	set (HTSLIB_FINAL_TASK ${HTSLIB_LIBRARY})
 endif()
 
-add_custom_target(${THIS_PROJECT_NAME}_htslib DEPENDS "${HTSLIB_FINAL_TASK}")
+add_custom_target(${HTSLIB_PREFIX} DEPENDS "${HTSLIB_FINAL_TASK}")
