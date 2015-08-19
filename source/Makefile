@@ -82,7 +82,7 @@ ifneq ($(MAKECMDGOALS),STARforMacGDB)
 Depend.list: $(SOURCES) parametersDefault.xxd htslib
 	echo $(SOURCES)
 	/bin/rm -f ./Depend.list
-	$(CXX) $(CXXFLAGS_main) -MM $^ >> Depend.list
+	$(CXX) $(CFLAGS_main) -MM $^ >> Depend.list
 include Depend.list
 endif
 endif
