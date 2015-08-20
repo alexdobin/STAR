@@ -3,8 +3,7 @@
 
 void genomeParametersWrite(string fileName, Parameters* P, string errorOut)
 {//write the genome information into the genomePar stream
-    ofstream genomePar;
-    ofstrOpen(fileName, errorOut, P, genomePar);   
+    ofstream & genomePar = ofstrOpen(fileName, errorOut, P);
     
     genomePar << "### "<<P->commandLineFull <<"\n";
     

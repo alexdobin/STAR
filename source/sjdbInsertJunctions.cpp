@@ -85,20 +85,19 @@ void sjdbInsertJunctions(Parameters * P, Parameters * P1, Genome & genome, SjdbC
         
         genomeParametersWrite(P->sjdbInsert.outDir+("/genomeParameters.txt"), P, "ERROR_012012");
         
-        ofstream genomeOut;
-        ofstrOpen(P->sjdbInsert.outDir+"/Genome","ERROR_012004", P, genomeOut);
+        ofstream & genomeOut = ofstrOpen(P->sjdbInsert.outDir+"/Genome","ERROR_012004", P);
         fstreamWriteBig(genomeOut,genome.G,P->nGenome,P->sjdbInsert.outDir+"/Genome","ERROR_012005",P);
         genomeOut.close();
 
-        ofstrOpen(P->sjdbInsert.outDir+"/SA","ERROR_012006", P, genomeOut);
-        fstreamWriteBig(genomeOut,(char*) genome.SA.charArray, (streamsize) genome.SA.lengthByte, P->sjdbInsert.outDir+"/SA","ERROR_012007",P);
-        genomeOut.close();
+        ofstream & saOut = ofstrOpen(P->sjdbInsert.outDir+"/SA","ERROR_012006", P);
+        fstreamWriteBig(saOut,(char*) genome.SA.charArray, (streamsize) genome.SA.lengthByte, P->sjdbInsert.outDir+"/SA","ERROR_012007",P);
+        saOut.close();
 
-        ofstrOpen(P->sjdbInsert.outDir+"/SAindex","ERROR_012008", P, genomeOut);
-        fstreamWriteBig(genomeOut, (char*) &P->genomeSAindexNbases, sizeof(P->genomeSAindexNbases),P->sjdbInsert.outDir+"/SAindex","ERROR_012009",P);
-        fstreamWriteBig(genomeOut, (char*) P->genomeSAindexStart, sizeof(P->genomeSAindexStart[0])*(P->genomeSAindexNbases+1),P->sjdbInsert.outDir+"/SAindex","ERROR_012010",P);
-        fstreamWriteBig(genomeOut,  genome.SAi.charArray, genome.SAi.lengthByte,P->sjdbInsert.outDir+"/SAindex","ERROR_012011",P);
-        genomeOut.close();
+        ofstream & saIndexOut = ofstrOpen(P->sjdbInsert.outDir+"/SAindex","ERROR_012008", P);
+        fstreamWriteBig(saIndexOut, (char*) &P->genomeSAindexNbases, sizeof(P->genomeSAindexNbases),P->sjdbInsert.outDir+"/SAindex","ERROR_012009",P);
+        fstreamWriteBig(saIndexOut, (char*) P->genomeSAindexStart, sizeof(P->genomeSAindexStart[0])*(P->genomeSAindexNbases+1),P->sjdbInsert.outDir+"/SAindex","ERROR_012010",P);
+        fstreamWriteBig(saIndexOut,  genome.SAi.charArray, genome.SAi.lengthByte,P->sjdbInsert.outDir+"/SAindex","ERROR_012011",P);
+        saIndexOut.close();
     };
 
     //re-calculate genome-related parameters

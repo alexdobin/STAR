@@ -196,14 +196,12 @@ void genomeGenerate(Parameters *P) {
     P->nGenome=N;
     uint N2 = N*2;     
 
-    ofstream chrN,chrS,chrL,chrNL;
+    ofstream & chrN = ofstrOpen(P->genomeDir+"/chrName.txt","ERROR_00103", P);
+    ofstream & chrS = ofstrOpen(P->genomeDir+"/chrStart.txt","ERROR_00103", P);
+    ofstream & chrL = ofstrOpen(P->genomeDir+"/chrLength.txt","ERROR_00103", P);
+    ofstream & chrNL = ofstrOpen(P->genomeDir+"/chrNameLength.txt","ERROR_00103", P);
     
-    ofstrOpen(P->genomeDir+"/chrName.txt","ERROR_00103", P, chrN);   
-    ofstrOpen(P->genomeDir+"/chrStart.txt","ERROR_00103", P, chrS);   
-    ofstrOpen(P->genomeDir+"/chrLength.txt","ERROR_00103", P, chrL);   
-    ofstrOpen(P->genomeDir+"/chrNameLength.txt","ERROR_00103", P, chrNL);   
-    
-    for (uint ii=0;ii<P->nChrReal;ii++) {//output names, starts, lengths               
+    for (uint ii=0;ii<P->nChrReal;ii++) {//output names, starts, lengths
         chrN<<P->chrName[ii]<<"\n";
         chrS<<P->chrStart[ii]<<"\n";
         chrL<<P->chrLength.at(ii)<<"\n";
@@ -327,9 +325,8 @@ void genomeGenerate(Parameters *P) {
                 saChunk[ii]=N2-1-saChunk[ii];
             };  
             //write files
-            ofstream saChunkFile;
             string chunkFileName=P->genomeDir+"/SA_"+to_string( (uint) iChunk);
-            ofstrOpen(chunkFileName,"ERROR_00105", P, saChunkFile);   
+            ofstream & saChunkFile = ofstrOpen(chunkFileName,"ERROR_00105", P);   
             fstreamWriteBig(saChunkFile, (char*) saChunk, sizeof(saChunk[0])*indPrefChunkCount[iChunk],chunkFileName,"ERROR_00121",P);
             saChunkFile.close();
             delete [] saChunk;
@@ -522,8 +519,7 @@ void genomeGenerate(Parameters *P) {
     P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ... writing Genome to disk ...\n" <<flush;   
     *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... writing Genome to disk ...\n" <<flush;   
     
-    ofstream genomeOut;
-    ofstrOpen(P->genomeDir+"/Genome","ERROR_00104", P, genomeOut);   
+    ofstream & genomeOut = ofstrOpen(P->genomeDir+"/Genome","ERROR_00104", P);   
     fstreamWriteBig(genomeOut,G,P->nGenome,P->genomeDir+"/Genome","ERROR_00120",P);
     genomeOut.close();  
 
@@ -534,8 +530,7 @@ void genomeGenerate(Parameters *P) {
     P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ... writing Suffix Array to disk ...\n" <<flush;   
     *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... writing Suffix Array to disk ...\n" <<flush;   
 
-    ofstream SAout;
-    ofstrOpen(P->genomeDir+"/SA","ERROR_00106", P, SAout);   
+    ofstream & SAout = ofstrOpen(P->genomeDir+"/SA","ERROR_00106", P);   
     fstreamWriteBig(SAout,(char*) SA2.charArray, (streamsize) P->nSAbyte,P->genomeDir+"/SA","ERROR_00122",P);
     SAout.close();    
     
@@ -545,8 +540,7 @@ void genomeGenerate(Parameters *P) {
     *P->inOut->logStdOut << timeMonthDayTime(rawTime) <<" ... writing SAindex to disk\n" <<flush;   
     
     //write SAi to disk
-    ofstream SAiOut;
-    ofstrOpen(P->genomeDir+"/SAindex","ERROR_00107", P, SAiOut);   
+    ofstream & SAiOut = ofstrOpen(P->genomeDir+"/SAindex","ERROR_00107", P);
 
     fstreamWriteBig(SAiOut, (char*) &P->genomeSAindexNbases, sizeof(P->genomeSAindexNbases),P->genomeDir+"/SAindex","ERROR_00123",P);
     fstreamWriteBig(SAiOut, (char*) P->genomeSAindexStart, sizeof(P->genomeSAindexStart[0])*(P->genomeSAindexNbases+1),P->genomeDir+"/SAindex","ERROR_00124",P);        

@@ -58,8 +58,8 @@ void fstreamWriteBig(std::ofstream &S, char* A, unsigned long long N, std::strin
     P->inOut->logMain << " done\n" <<flush;
 };
 
-void ofstrOpen (std::string fileName, std::string errorID, Parameters *P, ofstream & ofStream) {//open file 'fileName', generate error if cannot open
-    ofStream.open(fileName.c_str(), std::fstream::out | std::fstream::trunc);
+std::ofstream & ofstrOpen (std::string fileName, std::string errorID, Parameters *P) {//open file 'fileName', generate error if cannot open
+    std::ofstream & ofStream = *new std::ofstream(fileName.c_str(), std::fstream::out | std::fstream::trunc);
     if (ofStream.fail()) {//
 //         dir1=fileName.substr(0,fileName.find_last_of("/")+1);
 //         if (dir1=="") dir1="./";
@@ -68,6 +68,7 @@ void ofstrOpen (std::string fileName, std::string errorID, Parameters *P, ofstre
         errOut << "Solution: check that the path exists and you have write permission for this file\n";
         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_FILE_OPEN, *P);
     };    
+    return ofStream;
 };
 
 
