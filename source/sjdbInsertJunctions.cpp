@@ -14,8 +14,7 @@ void sjdbInsertJunctions(Parameters * P, Parameters * P1, Genome & genome, SjdbC
 
     if (P->sjdbN>0 && sjdbLoci.chr.size()==0)
     {//load from the saved genome, only if the loading did not happen already (if sjdb insertion happens at the 1st pass, sjdbLoci will be populated
-        ifstream sjdbStreamIn;
-        ifstrOpen(P->genomeDir+"/sjdbList.out.tab", "ERROR_012003", "SOLUTION: re-generate the genome in genomeDir=" + P->genomeDir, P, sjdbStreamIn);
+        ifstream & sjdbStreamIn = ifstrOpen(P->genomeDir+"/sjdbList.out.tab", "ERROR_012003", "SOLUTION: re-generate the genome in genomeDir=" + P->genomeDir, P);
         sjdbLoadFromStream(sjdbStreamIn, sjdbLoci);
         sjdbLoci.priority.resize(sjdbLoci.chr.size(),30);
         time ( &rawtime );

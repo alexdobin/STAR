@@ -72,9 +72,8 @@ inline uint funG2strLocus (uint SAstr, uint const N, char const GstrandBit, uint
 
 uint genomeScanFastaFiles (Parameters *P, char* G, bool flagRun) {//scans fasta files. flagRun=false: check and find full size, flaRun=true: collect all the data
     uint N=0; //total number of bases in the genome, including chr "spacers"
-    ifstream fileIn;
     for (uint ii=0;ii<P->genomeFastaFiles.size();ii++) {//all the input files
-        fileIn.open(P->genomeFastaFiles.at(ii).c_str());
+        ifstream & fileIn = ifstrOpen(P->genomeFastaFiles.at(ii), "", "SOLUTION: Provide a FASTA file for the reference genome", P);
         if ( !fileIn.good() ) {//
             ostringstream errOut;
             errOut << "EXITING because of INPUT ERROR: could not open genomeFastaFile: " <<P->genomeFastaFiles.at(ii) <<"\n";

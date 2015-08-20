@@ -71,9 +71,9 @@ void ofstrOpen (std::string fileName, std::string errorID, Parameters *P, ofstre
 };
 
 
-void ifstrOpen (std::string fileName, std::string errorID, std::string solutionString, Parameters *P, ifstream & ifStream) {
+std::ifstream & ifstrOpen (std::string fileName, std::string errorID, std::string solutionString, Parameters *P) {
     //open file 'fileName', generate error if cannot open
-    ifStream.open(fileName.c_str());
+    std::ifstream & ifStream = *new std::ifstream(fileName.c_str());
     if (ifStream.fail()) {//
         ostringstream errOut;
         errOut << errorID<<": exiting because of *INPUT FILE* error: could not open input file "<< fileName <<"\n";
@@ -83,11 +83,12 @@ void ifstrOpen (std::string fileName, std::string errorID, std::string solutionS
         };
         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_FILE_OPEN, *P);
     };    
+    return ifStream;
 };
 
-void ifstrOpenGenomeFile (std::string fileName, std::string errorID, Parameters *P, ifstream & ifStream) {
+ifstream & ifstrOpenGenomeFile (std::string fileName, std::string errorID, Parameters *P) {
      //open one of the genome files
-     ifstrOpen(P->genomeDir+"/"+fileName, errorID,  "if this file is missing from the genome directory, you will need to *re-generate the genome*", P, ifStream);
+     return ifstrOpen(P->genomeDir+"/"+fileName, errorID,  "if this file is missing from the genome directory, you will need to *re-generate the genome*", P);
 };
 
 void copyFile(string fileIn, string fileOut)
