@@ -3,7 +3,7 @@ git:
   submodules: false
 before_script:
    - chmod +x .travis.install
-   - ./travis.install
+   - ./.travis.install
    - cd source  
 script:
    -  make STARforMacStatic CXX=/usr/local/Cellar/gcc/4.9.1/bin/g++-4.9
