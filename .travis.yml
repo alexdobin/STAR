@@ -4,8 +4,9 @@ git:
 before_script:
    - brew update
    - brew tap homebrew/versions
+   - brew unlink gcc
    - brew install gcc49
    - brew info gcc49
    - cd source  
 script:
-   - make STAR CXX=/usr/local/Cellar/gcc/4.9.1/bin/g++-4.9
+   - make STAR CXX=/usr/local/bin/g++-4.9
