@@ -5,7 +5,6 @@ before_script:
    - chmod +x .travis.install
    - ./.travis.install
    - cd source  
-   - ls -lR /usr/local/Cellar/gcc/4.9.3/
 script:
-   -  make STARforMacStatic CXX=/usr/local/Cellar/gcc/4.9.3/bin/g++-4.9
+   -  make STARforMacStatic CXX=/usr/local/Cellar/gcc49/4.9.3/bin/g++-4.9
 #   - make STARforMacStatic CXX=/usr/local/bin/g++-4.9
