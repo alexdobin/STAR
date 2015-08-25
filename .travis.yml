@@ -9,4 +9,4 @@ before_script:
    - brew info gcc49
    - cd source  
 script:
-   - make STAR CXX=/usr/local/bin/g++-4.9
+   - make STARforMacStatic CXX=/usr/local/bin/g++-4.9
