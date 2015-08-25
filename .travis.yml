@@ -1,7 +1,10 @@
+os: osx
 git:
   submodules: false
 before_script:
-  - cd source
-before_script
+   - brew update
+   - brew install gcc49
+   - brew info gcc49
+   - cd source  
 script:
-  - make STAR
+   - make STAR CXX=/usr/local/bin/g++-4.9
