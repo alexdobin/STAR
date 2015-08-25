@@ -2,11 +2,8 @@ os: osx
 git:
   submodules: false
 before_script:
-   - brew update
-   - brew tap homebrew/versions
-   - brew unlink gcc
-   - brew install gcc49
-   - brew info gcc49
+   - chmod +x .travis.install
+   - ./travis.install
    - cd source  
 script:
    - make STARforMacStatic CXX=/usr/local/bin/g++-4.9
