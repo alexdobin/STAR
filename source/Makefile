@@ -1,6 +1,7 @@
 # user may define these whole flags
 # LDFLAGS 
 # CXXFLAGS
+# CFLAGS
 
 # or these user-set flags that will be added to standard flags
 LDFLAGSextra ?=
@@ -22,6 +23,7 @@ CXXFLAGS_common := -pipe -std=c++0x -Wall -Wextra -fopenmp $(COMPTIMEPLACE)
 CXXFLAGS_main := -O3 $(CXXFLAGS_common)
 CXXFLAGS_gdb :=  -O0 -g $(CXXFLAGS_common)
 
+CFLAGS ?= -O3 -pipe -Wall -Wextra 
 
 
 ##########################################################################################################
@@ -53,7 +55,7 @@ SOURCES := $(wildcard *.cpp) $(wildcard *.c)
 	$(CXX) -c $(CXXFLAGS) $<
 
 %.o : %.c
-	$(CXX) -c $(CXXFLAGS) $<
+	$(CXX) -c $(CFLAGS) $<
 
 all: STAR
 
@@ -80,7 +82,7 @@ ifneq ($(MAKECMDGOALS),STARforMacGDB)
 Depend.list: $(SOURCES) parametersDefault.xxd htslib
 	echo $(SOURCES)
 	/bin/rm -f ./Depend.list
-	$(CXX) $(CXXFLAGS_main) -MM $^ >> Depend.list
+	$(CXX) $(CXXFLAGS_common) -MM $^ >> Depend.list
 include Depend.list
 endif
 endif

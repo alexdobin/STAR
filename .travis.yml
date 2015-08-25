@@ -1,10 +1,7 @@
-env:
-  global:
-    - PATH: ${HOME}/texlive/bin/x86_64-linux:$PATH
 git:
   submodules: false
 before_script:
-  - sed -i -e "s:/usr/local:${HOME}:" extras/doc-latex/texlive.profile
-  - cd ./extras/doc-latex/ && ./texlive_install.sh && cd ../../
+  - cd source
+before_script
 script:
-  - make STAR manual
+  - make STAR
