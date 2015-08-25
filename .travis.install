@@ -1,1 +1,5 @@
-brew 
+   - brew update
+   - brew tap homebrew/versions
+#   - brew unlink gcc
+   - brew install gcc49
+   - brew info gcc49 
