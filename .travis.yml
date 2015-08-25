@@ -6,5 +6,5 @@ before_script:
    - ./.travis.install
    - cd source  
 script:
-   -  make STARforMacStatic CXX=/usr/local/Cellar/gcc/4.9.1/bin/g++-4.9
+   -  make STARforMacStatic CXX=/usr/local/Cellar/gcc/4.9.3/bin/g++-4.9
 #   - make STARforMacStatic CXX=/usr/local/bin/g++-4.9
