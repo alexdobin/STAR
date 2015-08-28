@@ -43,11 +43,13 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
                 //calculate # of allowed mismatches that has been left
                
                 
-                double pMMmax=(P->alignEndsType=="Extend5pOfRead1" && trA.exons[0][EX_iFrag]==0 && trA.Str==0) ? -1 : P->outFilterMismatchNoverLmax1;
+//                 double pMMmax=(P->alignEndsType=="Extend5pOfRead1" && trA.exons[0][EX_iFrag]==0 && trA.Str==0) ? -1 : P->outFilterMismatchNoverLmax1;
                 
                 trAstep1.reset();
                 //                                                            //avoid extending before Chr start
-                if ( extendAlign(R, Q, G, trA.rStart-1, trA.gStart-1, -1, -1, min(trA.rStart, trA.gStart - P->chrStart[trA.Chr]), tR2-trA.rStart+1, trA.nMM, RA->outFilterMismatchNmaxTotal, pMMmax, &trAstep1) ) {//if could extend
+                if ( extendAlign(R, Q, G, trA.rStart-1, trA.gStart-1, -1, -1, min(trA.rStart, trA.gStart - P->chrStart[trA.Chr]), tR2-trA.rStart+1, \
+                                 trA.nMM, RA->outFilterMismatchNmaxTotal, P->outFilterMismatchNoverLmax, \
+                                 P->alignEndsType.ext[trA.exons[0][EX_iFrag]][trA.Str], &trAstep1) ) {//if could extend
         
                     trA.add(&trAstep1);
                     Score += trAstep1.maxScore;
@@ -67,11 +69,13 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
 
                 //calculate # of allowed mismatches that has been left
                 
-                double pMMmax=(P->alignEndsType=="Extend5pOfRead1" && trA.exons[trA.nExons-1][EX_iFrag]==0 && trA.Str==1) ? -1 : P->outFilterMismatchNoverLmax1;
+//                 double pMMmax=(P->alignEndsType=="Extend5pOfRead1" && trA.exons[trA.nExons-1][EX_iFrag]==0 && trA.Str==1) ? -1 : P->outFilterMismatchNoverLmax1;
                 
                 trAstep1.reset();            
                 //                                              //to prevent extension past the Chr end
-                if ( extendAlign(R, Q, G, tR2+1, tG2+1, +1, +1, min(Lread-tR2-1,P->chrStart[trA.Chr+1]-tG2-2), tR2-trA.rStart+1, trA.nMM, RA->outFilterMismatchNmaxTotal, pMMmax, &trAstep1) ) {//if could extend
+                if ( extendAlign(R, Q, G, tR2+1, tG2+1, +1, +1, min(Lread-tR2-1,P->chrStart[trA.Chr+1]-tG2-2), tR2-trA.rStart+1, \
+                                 trA.nMM, RA->outFilterMismatchNmaxTotal,  P->outFilterMismatchNoverLmax, \
+                                 P->alignEndsType.ext[trA.exons[trA.nExons-1][EX_iFrag]][1-trA.Str], &trAstep1) ) {//if could extend
                     
                     trA.add(&trAstep1);
                     Score += trAstep1.maxScore;
@@ -247,7 +251,7 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
                 //OR within the score range of each mate
                 //OR all transcript if chimeric detection is activated
             
-            if (P->outFilterMismatchNoverLmax1<0) {//check that the alignment is end-to-end
+            if (P->alignEndsType.in=="EndToEnd") {//check that the alignment is end-to-end
                 uint rTotal=trA.rLength+trA.lIns;
 //                 for (uint iex=1;iex<trA.nExons;iex++) {//find the inside exons
 //                     rTotal+=trA.exons[iex][EX_R]-trA.exons[iex-1][EX_R];

@@ -49,7 +49,8 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* 
             } else {//extend to the left
                 score2=WA[iW][iS1][WA_Length];                
                 if ( WA[iW][iS1][WA_rStart]>0 \
-                     && extendAlign(R, Q, G, WA[iW][iS1][WA_rStart]-1, WA[iW][iS1][WA_gStart]-1, -1, -1, min(WA[iW][iS1][WA_rStart], WA[iW][iS1][WA_gStart] - P->chrStart[WC[iW][WC_Str]]), 100000, 0, outFilterMismatchNmaxTotal, P->outFilterMismatchNoverLmax1, &trA1) ) {//if could extend
+                     && extendAlign(R, Q, G, WA[iW][iS1][WA_rStart]-1, WA[iW][iS1][WA_gStart]-1, -1, -1, min(WA[iW][iS1][WA_rStart], WA[iW][iS1][WA_gStart] - P->chrStart[WC[iW][WC_Str]]), 100000, 0, outFilterMismatchNmaxTotal, P->outFilterMismatchNoverLmax, \
+                                    P->alignEndsType.ext[trA1.exons[0][EX_iFrag]][trA.Str], &trA1) ) {//if could extend
                     score2 += trA1.maxScore;
                 };
                 if (score2 > scoreSeedBest[iS1] ) {
@@ -72,7 +73,8 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* 
        uint tR2=WA[iW][iS1][WA_rStart]+WA[iW][iS1][WA_Length];
        uint tG2=WA[iW][iS1][WA_gStart]+WA[iW][iS1][WA_Length];
        if ( tR2 < Lread-1 \
-            && extendAlign(R, Q, G, tR2, tG2, +1, +1, min(Lread-tR2,P->chrStart[WC[iW][WC_Str]+1]-tG2-1), 100000, scoreSeedBestMM[iS1], outFilterMismatchNmaxTotal, P->outFilterMismatchNoverLmax1, &trA1) ) {//if could extend
+            && extendAlign(R, Q, G, tR2, tG2, +1, +1, min(Lread-tR2,P->chrStart[WC[iW][WC_Str]+1]-tG2-1), 100000, scoreSeedBestMM[iS1], outFilterMismatchNmaxTotal, P->outFilterMismatchNoverLmax, \
+                           P->alignEndsType.ext[WA[iW][iS1][WA_iFrag]][1-trA.Str], &trA1) ) {//if could extend
            scoreSeedBest[iS1]+=trA1.maxScore;
        };
        if (scoreSeedBest[iS1]>scoreBest) {//record new best transcript
@@ -130,7 +132,8 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* 
             uint iS1=seedChain[seedN-1];
             trA1=*trInit;
             if ( trA.exons[0][EX_R]>0 \
-                 && extendAlign(R, Q, G, trA.exons[0][EX_R]-1, trA.exons[0][EX_G]-1, -1, -1, min(trA.exons[0][EX_R], trA.exons[0][EX_G] - P->chrStart[WC[iW][WC_Str]]), 100000, 0, outFilterMismatchNmaxTotal, P->outFilterMismatchNoverLmax1, &trA1) ) {//if could extend
+                 && extendAlign(R, Q, G, trA.exons[0][EX_R]-1, trA.exons[0][EX_G]-1, -1, -1, min(trA.exons[0][EX_R], trA.exons[0][EX_G] - P->chrStart[WC[iW][WC_Str]]), 100000, 0, outFilterMismatchNmaxTotal, P->outFilterMismatchNoverLmax, 
+                    P->alignEndsType.ext[trA.exons[0][EX_iFrag]][trA.Str], &trA1) ) {//if could extend
 
                 trA.add(&trA1);
 //                 trA.maxScore += trA1.maxScore + WA[iW][iS1][WA_Length];
@@ -151,7 +154,8 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* 
             uint tR2=WA[iW][iS1][WA_rStart]+WA[iW][iS1][WA_Length];
             uint tG2=WA[iW][iS1][WA_gStart]+WA[iW][iS1][WA_Length];
             if ( tR2 < Lread \
-                && extendAlign(R, Q, G, tR2, tG2, +1, +1, min(Lread-tR2,P->chrStart[WC[iW][WC_Str]+1]-tG2-1), 100000, scoreSeedBestMM[iS1], outFilterMismatchNmaxTotal, P->outFilterMismatchNoverLmax1, &trA1) ) {//if could extend
+                && extendAlign(R, Q, G, tR2, tG2, +1, +1, min(Lread-tR2,P->chrStart[WC[iW][WC_Str]+1]-tG2-1), 100000, scoreSeedBestMM[iS1], outFilterMismatchNmaxTotal, P->outFilterMismatchNoverLmax, \
+                    P->alignEndsType.ext[trA1.exons[trA.nExons-1][EX_iFrag]][1-trA.Str], &trA1) ) {//if could extend
                     trA.add(&trA1);                    
                     trA.exons[trA.nExons-1][EX_L] += trA1.extendL;//extend the length of the last exon
             };

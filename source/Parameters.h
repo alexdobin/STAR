@@ -82,8 +82,15 @@ class Parameters {
         uint alignIntronMin;//min length to call a gap an intron
         uint alignIntronMax;//max length to call 
         uint alignMatesGapMax;//max gap between the mates (if paired-end)
-        string alignEndsType, alignSoftClipAtReferenceEnds;
+        string alignSoftClipAtReferenceEnds;
         vector <int32> alignSJstitchMismatchNmax;
+        
+        struct 
+        {
+            string in;
+            bool ext[2][2];
+        } alignEndsType;
+        
         
         //seed parameters
         uint seedMultimapNmax; //max number of multiple alignments per piece          
@@ -127,7 +134,7 @@ class Parameters {
         
         //output filtering
         uint outFilterMismatchNmax;
-        double outFilterMismatchNoverLmax, outFilterMismatchNoverReadLmax, outFilterMismatchNoverLmax1; //max proportion of all MM within all bases
+        double outFilterMismatchNoverLmax, outFilterMismatchNoverReadLmax; //max proportion of all MM within all bases
         
         uint outFilterMatchNmin,outFilterMultimapNmax;//min number of matches
         double outFilterScoreMinOverLread, outFilterMatchNminOverLread;//normalzied to read length

@@ -358,7 +358,8 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
 
             
             trExtend.reset();
-            if ( extendAlign(R, Q, G, rAend+1, gAend+1, 1, 1, DEF_readSeqLengthMax, trA->nMatch, trA->nMM, outFilterMismatchNmaxTotal, P->outFilterMismatchNoverLmax1, &trExtend) ) {
+            if ( extendAlign(R, Q, G, rAend+1, gAend+1, 1, 1, DEF_readSeqLengthMax, trA->nMatch, trA->nMM, outFilterMismatchNmaxTotal, P->outFilterMismatchNoverLmax, \
+                             P->alignEndsType.ext[trA->exons[trA->nExons-1][EX_iFrag]][1], &trExtend) ) {
 
                 trA->add(&trExtend);
                 Score += trExtend.maxScore;
@@ -372,7 +373,8 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
             trA->nMatch += L;
 
             trExtend.reset();
-            if ( extendAlign(R, Q, G, rBstart-1, gBstart-1, -1, -1, gBstart-trA->exons[0][EX_G]+trA->exons[0][EX_R], trA->nMatch, trA->nMM, outFilterMismatchNmaxTotal, P->outFilterMismatchNoverLmax1, &trExtend) ) {
+            if ( extendAlign(R, Q, G, rBstart-1, gBstart-1, -1, -1, gBstart-trA->exons[0][EX_G]+trA->exons[0][EX_R], trA->nMatch, trA->nMM, outFilterMismatchNmaxTotal, P->outFilterMismatchNoverLmax, \
+                             P->alignEndsType.ext[iFragB][1], &trExtend) ) {
 
                 trA->add(&trExtend);
                 Score += trExtend.maxScore;               

@@ -174,7 +174,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <double>     (-1, -1, "alignSplicedMateMapLminOverLmate", &alignSplicedMateMapLminOverLmate));       
     parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "alignWindowsPerReadNmax", &alignWindowsPerReadNmax));  
     parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "alignTranscriptsPerWindowNmax", &alignTranscriptsPerWindowNmax));  
-    parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "alignEndsType", &alignEndsType));  
+    parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "alignEndsType", &alignEndsType.in));  
     parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "alignSoftClipAtReferenceEnds", &alignSoftClipAtReferenceEnds));  
 
 
@@ -829,16 +829,26 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
        inOut->logMain << "WARNING --chimOutType=WithinBAM, therefore STAR will output NM attribute" <<endl;
     };
 
-    
-    outFilterMismatchNoverLmax1=outFilterMismatchNoverLmax;
-    if (alignEndsType=="EndToEnd") {
-        outFilterMismatchNoverLmax1=-1;
-    } else if (alignEndsType=="Local" || alignEndsType=="Extend5pOfRead1" ) {
+    alignEndsType.ext[0]={false, false};
+    alignEndsType.ext[1]={false, false};
+    if (alignEndsType.in=="EndToEnd") 
+    {
+        alignEndsType.ext[0]={true, true};
+        alignEndsType.ext[1]={true, true};  
+    } else if (alignEndsType.in=="Extend5pOfRead1" ) 
+    {
+        alignEndsType.ext[0][0]=true;
+    } else if (alignEndsType.in=="Extend3pOfRead1" )
+    {
+        alignEndsType.ext[0][1]=true;
+    } else if (alignEndsType.in=="Local")
+    {
         //nothing to do for now
-    } else {
+    } else 
+    {
         ostringstream errOut;
-        errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented value for --alignEndsType: "<<alignEndsType <<"\n";
-        errOut <<"SOLUTION: re-run STAR with --alignEndsType Local OR EndToEnd OR Extend5pOfRead1\n";
+        errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented value for --alignEndsType: "<<alignEndsType.in <<"\n";
+        errOut <<"SOLUTION: re-run STAR with --alignEndsType Local OR EndToEnd OR Extend5pOfRead1 OR Extend3pOfRead1\n";
         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
         
