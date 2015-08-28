@@ -67,7 +67,7 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
 
                 //calculate # of allowed mismatches that has been left
                 
-                double pMMmax=(P->alignEndsType=="Extend5pOfRead1" && trA.exons[trA.nExons-1][EX_iFrag]==0 && trA.Str==0) ? -1 : P->outFilterMismatchNoverLmax1;
+                double pMMmax=(P->alignEndsType=="Extend5pOfRead1" && trA.exons[trA.nExons-1][EX_iFrag]==0 && trA.Str==1) ? -1 : P->outFilterMismatchNoverLmax1;
                 
                 trAstep1.reset();            
                 //                                              //to prevent extension past the Chr end

@@ -47,7 +47,7 @@ void ReadAlign::outputAlignments() {
                 
 //                 if (P->runThreadN>1) pthread_mutex_lock(&g_threadChunks.mutexOutFilterBySJout);
                 for (uint im=0;im<P->readNmates;im++) {
-                   chunkOutFilterBySJoutFiles[im] << readNameMates[im] << "/" <<im+1 <<" "<< iReadAll <<" "<< readFilter <<" "<< readFilesIndex;
+                   chunkOutFilterBySJoutFiles[im] << readNameMates[im] <<" "<< iReadAll <<" "<< readFilter <<" "<< readFilesIndex;
                    chunkOutFilterBySJoutFiles[im] <<"\n";
                    chunkOutFilterBySJoutFiles[im] << Read0[im] <<"\n";
                     if (readFileType==2) {//fastq
@@ -146,7 +146,7 @@ void ReadAlign::outputAlignments() {
     };
     if (unmapType>=0 && P->outReadsUnmapped=="Fastx" ){//output to fasta/q files
            for (uint im=0;im<P->readNmates;im++) {
-               chunkOutUnmappedReadsStream[im] << readNameMates[im] << "/" <<im+1;
+               chunkOutUnmappedReadsStream[im] << readNameMates[im];
                if (P->readNmates>1) chunkOutUnmappedReadsStream[im] <<"\t"<< int(mateMapped[0]) <<  int(mateMapped[1]);
                chunkOutUnmappedReadsStream[im] <<"\n";
                chunkOutUnmappedReadsStream[im] << Read0[im] <<"\n";

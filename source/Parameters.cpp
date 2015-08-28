@@ -46,7 +46,9 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readFilesIn", &readFilesIn));
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readFilesCommand", &readFilesCommand));
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "readMatesLengthsIn", &readMatesLengthsIn));
-    parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "readMapNumber", &readMapNumber));        
+    parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "readMapNumber", &readMapNumber));     
+    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readNameSeparator", &readNameSeparator));
+
     
     //input from BAM
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "inputBAMfile", &inputBAMfile));
@@ -836,7 +838,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     } else {
         ostringstream errOut;
         errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented value for --alignEndsType: "<<alignEndsType <<"\n";
-        errOut <<"SOLUTION: re-run STAR with --alignEndsType Local or EndToEnd\n";
+        errOut <<"SOLUTION: re-run STAR with --alignEndsType Local OR EndToEnd OR Extend5pOfRead1\n";
         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
         
@@ -1037,6 +1039,29 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             errOut << "SOLUTION: use allowed values: banGenomicN || None";
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
+    };
+    
+    for (int ii=0; ii<readNameSeparator.size(); ii++)
+    {
+        if (readNameSeparator.at(ii)=="space")
+        {
+            readNameSeparatorChar.push_back(' ');
+        } 
+        else if (readNameSeparator.at(ii)=="none")
+        {
+            //nothing to do
+        }
+        else if (readNameSeparator.at(ii).size()==1)
+        {
+            readNameSeparatorChar.push_back(readNameSeparator.at(ii).at(0));
+        }
+        else 
+        {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: unrecognized value of --readNameSeparator="<<readNameSeparator.at(ii)<<"\n";
+            errOut << "SOLUTION: use allowed values: space OR single characters";
+            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };    
     };
     
     inOut->logMain << "Finished loading and checking parameters\n" <<flush;

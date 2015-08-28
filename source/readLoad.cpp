@@ -142,10 +142,10 @@ int readLoad(istream& readInStream, Parameters* P, uint iMate, uint& Lread, uint
     
 
     //trim read name
-    char* pSlash=strchr(readName,' '); //trim everything after ' '
-    if (pSlash!=NULL) *pSlash=0;                
-    pSlash=strchr(readName,'/'); //trim everything after /
-    if (pSlash!=NULL) *pSlash=0;    
-    
+    for (uint ii=0; ii<P->readNameSeparatorChar.size(); ii++)
+    {
+        char* pSlash=strchr(readName,P->readNameSeparatorChar.at(ii)); //trim everything after ' '
+        if (pSlash!=NULL) *pSlash=0;                
+    };
     return readFileType;
 };

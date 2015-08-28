@@ -62,6 +62,9 @@ class Parameters {
         vector <string> readFilesCommand;
         pid_t readFilesCommandPID[MAX_N_MATES];
         
+        vector <string> readNameSeparator;
+        vector <char> readNameSeparatorChar;
+        
         string outSAMreadID;
         
         vector <uint> clip5pNbases, clip3pNbases, clip3pAfterAdapterNbases;    

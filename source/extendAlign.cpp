@@ -24,12 +24,12 @@ if (pMMmax<0) {//end to end extension
         iG=dG*iExt;
 
         if (G[iG]==5) {//prohibit extension through chr boundary
-//             trA->extendL=0;
-//             trA->maxScore=-999999999;
-//             trA->nMatch=0;
-//             trA->nMM=nMMmax+1;            
-//             return true; 
-            return false;
+            trA->extendL=0;
+            trA->maxScore=-999999999;
+            trA->nMatch=0;
+            trA->nMM=nMMmax+1;            
+            return true; 
+//             return false;
         };
         if (R[iS]==MARK_FRAG_SPACER_BASE) break; //no extension through the spacer between fragments
 
