@@ -3,15 +3,16 @@
 # in the generated objects and executable files
 cmake_minimum_required(VERSION 2.8.0)
 
+set(THIS_PROJECT "STAR")
 set(THIS_PROGRAM "STAR")
 set(CMAKE_C_FLAGS "-Wall -g")
 set(THIS_MODULE_DIR "${CMAKE_SOURCE_DIR}/cmake")
 set(THIS_REDIST_DIR "${CMAKE_SOURCE_DIR}/../redist")
 
-project(${THIS_PROGRAM} CXX)
+project(${THIS_PROJECT} CXX)
 
 # redist includes
-#include("${THIS_MODULE_DIR}/boost.cmake")
+include("${THIS_MODULE_DIR}/boost.cmake")
 
 add_subdirectory(opt) 
 add_subdirectory(common)
@@ -48,5 +49,5 @@ if (WIN32)
 endif ()
 
 add_executable(${THIS_PROGRAM} ${SOURCE_LIST} $<TARGET_OBJECTS:getopt> $<TARGET_OBJECTS:random>)
-
 target_link_libraries (${THIS_PROGRAM} ${LIBS_DEPENDS})
+add_dependencies(${THIS_PROGRAM} ${THIS_PROGRAM}_opt) 
