@@ -1,3 +1,4 @@
+Implemented --alignEndsType Extend3pOfRead1 option for full extension of the 3' end of read 1.
 Fixed a bug in the --alignEndsType Extend5pOfRead1 option.
 Reworked Makefile for more transparent compilation options.
 Fixed a bug which caused problems in some cases of genome generation without annotations.

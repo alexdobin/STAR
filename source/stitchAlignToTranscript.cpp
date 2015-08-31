@@ -373,7 +373,10 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
             trA->nMatch += L;
 
             trExtend.reset();
-            if ( extendAlign(R, Q, G, rBstart-1, gBstart-1, -1, -1, gBstart-trA->exons[0][EX_G]+trA->exons[0][EX_R], trA->nMatch, trA->nMM, outFilterMismatchNmaxTotal, P->outFilterMismatchNoverLmax, \
+//             if ( extendAlign(R, Q, G, rBstart-1, gBstart-1, -1, -1, gBstart-trA->exons[0][EX_G]+trA->exons[0][EX_R], trA->nMatch, trA->nMM, outFilterMismatchNmaxTotal, P->outFilterMismatchNoverLmax, \
+            //if end extension needs to be forced, use large length. Otherwise, only extend until the beginning of the transcript
+            uint extlen=P->alignEndsType.ext[iFragB][1] ? DEF_readSeqLengthMax : gBstart-trA->exons[0][EX_G]+trA->exons[0][EX_R];
+            if ( extendAlign(R, Q, G, rBstart-1, gBstart-1, -1, -1, extlen, trA->nMatch, trA->nMM, outFilterMismatchNmaxTotal, P->outFilterMismatchNoverLmax, \
                              P->alignEndsType.ext[iFragB][1], &trExtend) ) {
 
                 trA->add(&trExtend);
