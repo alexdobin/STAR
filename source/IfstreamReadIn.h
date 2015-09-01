@@ -23,8 +23,8 @@ public:
 
 	// operators 
 	std::ifstream& operator >> (char* s); 
-	std::ifstream& operator >> (std::string s);
-	std::ifstream& operator >> (int n);
+	std::ifstream& operator >> (std::string& s);
+	std::ifstream& operator >> (int& n);
 
 	// public methods.
 	void open(const char* filename);

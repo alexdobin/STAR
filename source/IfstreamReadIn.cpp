@@ -33,7 +33,7 @@ std::ifstream& IfstreamReadIn::operator >> (char* s)
 	
 }
 
-std::ifstream& IfstreamReadIn::operator >> (std::string s)
+std::ifstream& IfstreamReadIn::operator >> (std::string& s)
 {
 	if (_pStream && _pStream->is_open())
 	{
@@ -43,7 +43,7 @@ std::ifstream& IfstreamReadIn::operator >> (std::string s)
 	throw std::exception("std::ifstream not opened");
 }
 
-std::ifstream& IfstreamReadIn::operator >> (int n)
+std::ifstream& IfstreamReadIn::operator >> (int& n)
 {
 	if (_pStream && _pStream->is_open())
 	{

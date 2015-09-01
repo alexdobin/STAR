@@ -974,7 +974,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     };
     
    //sjdb insert on the fly
-
+	sjdbInsert.yes = false; 
     sjdbInsert.pass1=false;
     sjdbInsert.pass2=false;
     if (sjdbFileChrStartEnd.at(0)!="-" || sjdbGTFfile!="-")
