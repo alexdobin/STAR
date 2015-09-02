@@ -1,4 +1,4 @@
-#include <sys/types.h>
+﻿#include <sys/types.h>
 #include <sys/stat.h>
 #include <memory>
 
@@ -30,7 +30,7 @@
 #include "SjdbClass.h"
 #include "sjdbInsertJunctions.h"
 #include "bam_cat.h"
-#include "htslib-1.2.1\htslib/sam.h"
+#include "htslib-1.2.1/htslib/sam.h"
 #include "CrossPlatform.h"
 
 int main(int argInN, char* argIn[]) {

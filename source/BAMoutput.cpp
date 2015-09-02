@@ -5,8 +5,6 @@
 #if !defined(_WIN32) && defined(USE_PTHREAD)
 #include <pthread.h>
 #else
-#include <windows.h>
-#include <process.h>
 #include <mutex>
 #include <thread>
 #endif

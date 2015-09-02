@@ -1,12 +1,15 @@
 #ifdef _WIN32
 #include <Windows.h>
+#include <map>
 #endif
+
+#include <fstream>
+#include <sys/stat.h>
 
 #include "Parameters.h"
 #include "ErrorWarning.h"
-#include <fstream>
-#include <sys/stat.h>
-#include <map>
+
+#ifdef _WIN32
 
 typedef std::map<int ,HANDLE> MapHandles; 
 
@@ -16,7 +19,7 @@ typedef enum
 	Write = 1
 } HandleType;
 
-#ifdef _WIN32
+
 
 bool CreateReadWritePipe(MapHandles& handles)
 {

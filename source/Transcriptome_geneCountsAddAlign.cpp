@@ -1,6 +1,14 @@
 #include "Transcriptome.h"
 #include "serviceFuns.cpp"
 
+#ifdef _WIN32
+typedef __int64 int64;
+#else
+#include <inttypes.h>
+typedef int64_t int64;
+#endif
+
+
 void Transcriptome::geneCountsAddAlign(uint nA, Transcript **aAll) {//add alignments from one read to gene counts
      if (nA>1) {
          quants->geneCounts.cMulti++;

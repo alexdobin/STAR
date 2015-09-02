@@ -13,7 +13,7 @@ SharedMemorySegment::SharedMemorySegment(key_t key, bool unloadLast) : _key(key)
 														_mapped_region_ptr(nullptr)
 {
 	_name = std::to_string(_key); 
-	shared_memory_object::remove(_name.c_str()); 
+	//shared_memory_object::remove(_name.c_str()); 
 	OpenIfExists(); 
 }
 
