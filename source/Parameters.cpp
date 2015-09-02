@@ -829,8 +829,11 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
        inOut->logMain << "WARNING --chimOutType=WithinBAM, therefore STAR will output NM attribute" <<endl;
     };
 
-    alignEndsType.ext[0]={false, false};
-    alignEndsType.ext[1]={false, false};
+    alignEndsType.ext[0][0]=false;
+    alignEndsType.ext[0][1]=false;
+    alignEndsType.ext[1][0]=false;
+    alignEndsType.ext[1][1]=false;
+
     if (alignEndsType.in=="EndToEnd") 
     {
         alignEndsType.ext[0]={true, true};
