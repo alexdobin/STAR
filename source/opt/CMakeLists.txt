@@ -75,7 +75,7 @@ superset(HTSLIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/${HTSLIB_PREFIX}")
 if (WIN32)
 	superset(HTSLIB_LIBRARY "${HTSLIB_DIR}/${CMAKE_BUILD_TYPE}/libhts.lib")
 else ()
-	superset(HTSLIB_LIBRARY "${HTSLIB_DIR}/libhts.a")
+	superset(HTSLIB_LIBRARY "${HTSLIB_DIR}/liblibhts.a")
 endif ()
 
 add_custom_command(
@@ -89,6 +89,7 @@ set (HTSLIB_FINAL_TASK ${HTSLIB_DIR})
 if (NOT WIN32)
     add_custom_command(
         OUTPUT ${HTSLIB_LIBRARY}
+		WORKING_DIRECTORY ${HTSLIB_DIR}
         COMMAND cmake ${HTSLIB_DIR}
 		COMMAND make
         DEPENDS ${HTSLIB_DIR}

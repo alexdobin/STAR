@@ -60,25 +60,35 @@ void SharedMemorySegment::Clean()
 	{
 		ThrowError(EUNLINK, ex.get_error_code());
 	}
+	delete _shm_obj_ptr; 
+	delete _mapped_region_ptr;
 	_needsAllocation = true; 
 }
 
 void SharedMemorySegment::CreateAndInitSharedObject(size_t shmSize)
 {
-	std::unique_ptr<shared_memory_object> shm_obj_ptr;
+	//std::unique_ptr<shared_memory_object> shm_obj_ptr;
+	shared_memory_object* shm_obj_ptr = nullptr;
+
 	try
 	{
 		std::string key = std::to_string(_key);
-		shm_obj_ptr = std::make_unique<shared_memory_object>(
-			create_only						//only create
-			, _name.c_str()					//name
-			, read_write					//read-write mode
-			);
+		//shm_obj_ptr = std::make_unique<shared_memory_object>(
+		//	create_only						//only create
+		//	, _name.c_str()					//name
+		//	, read_write					//read-write mode
+		//	);
+		shm_obj_ptr = new shared_memory_object(
+				create_only						//only create
+				, _name.c_str()					//name
+				, read_write					//read-write mode
+				);
 	}
 	catch (interprocess_exception &ex)
 	{
 		if (ex.get_error_code() != already_exists_error)
 		{
+			delete shm_obj_ptr; 
 			ThrowError(EOPENFAILED, ex.get_error_code());
 		}
 		_exception.SetError(EEXISTS, 0);
@@ -94,9 +104,11 @@ void SharedMemorySegment::CreateAndInitSharedObject(size_t shmSize)
 	}
 	catch (interprocess_exception &ex)
 	{
+		delete shm_obj_ptr;
 		// revisit this, can we blindly return this error ? 
 		ThrowError(EFTRUNCATE, ex.get_error_code());
 	}
+	delete shm_obj_ptr;
 	return; 
 }
 
@@ -106,11 +118,16 @@ void SharedMemorySegment::OpenIfExists()
 	try
 	{
 		std::string key = std::to_string(_key);
-		_shm_obj_ptr = std::make_unique<shared_memory_object>(
-			open_only						//only create
-			, key.c_str()					//name
-			, read_write					//read-write mode
-			);
+		//_shm_obj_ptr = std::make_unique<shared_memory_object>(
+		//	open_only						//only create
+		//	, key.c_str()					//name
+		//	, read_write					//read-write mode
+		//	);
+		_shm_obj_ptr = new shared_memory_object(
+				open_only						//only create
+				, key.c_str()					//name
+				, read_write					//read-write mode
+				);
 	}
 	catch (interprocess_exception &ex)
 	{
@@ -127,7 +144,11 @@ void SharedMemorySegment::OpenIfExists()
 	// Shared Memory exist,  map that and get address.
 	try
 	{
-		_mapped_region_ptr = std::make_unique<mapped_region> (
+		//_mapped_region_ptr = std::make_unique<mapped_region> (
+		//	*_shm_obj_ptr                        //Memory-mappable object
+		//	, read_write					    //Access mode
+		//	);
+		_mapped_region_ptr = new mapped_region(
 			*_shm_obj_ptr                        //Memory-mappable object
 			, read_write					    //Access mode
 			);

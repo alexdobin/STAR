@@ -15,6 +15,7 @@
 
 #define PAR_NAME_PRINT_WIDTH 30
 
+#ifdef _WIN32
 // Get current path 
 void GetExePath(std::string& path)
 {
@@ -24,7 +25,7 @@ void GetExePath(std::string& path)
 	path = modulepath.substr(0, modulepath.find_last_of("\\/"));
 	path.append("\\");
 }
-
+#endif
 
 
 Parameters::Parameters() {//initalize parameters info
@@ -294,7 +295,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     
     inOut->logMain << "STAR version=" << STAR_VERSION << "\n"<<flush;
 #ifndef _WIN32
-    inOut->logMain << "STAR compilation time,server,dir=" << COMPILATION_TIME_PLACE << "\n"<<flush;   
+    //inOut->logMain << "STAR compilation time,server,dir=" << COMPILATION_TIME_PLACE << "\n"<<flush;   
 #endif
     
     
