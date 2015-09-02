@@ -836,8 +836,10 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 
     if (alignEndsType.in=="EndToEnd") 
     {
-        alignEndsType.ext[0]={true, true};
-        alignEndsType.ext[1]={true, true};  
+        alignEndsType.ext[0][0]=true;
+        alignEndsType.ext[0][1]=true;
+        alignEndsType.ext[1][0]=true;
+        alignEndsType.ext[1][1]=true;
     } else if (alignEndsType.in=="Extend5pOfRead1" ) 
     {
         alignEndsType.ext[0][0]=true;
