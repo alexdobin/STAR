@@ -16,14 +16,15 @@
 class ThreadControl {
 public:
     bool threadBool;
-#ifdef _WIN32
-	std::vector<std::thread> threadArray;
-	std::mutex mutexInRead, mutexOutSAM, mutexOutBAM1, mutexOutChimSAM, mutexOutChimJunction, mutexOutUnmappedFastx, mutexOutFilterBySJout;
-	std::mutex mutexStats, mutexLogMain, mutexBAMsortBins;
-#else
+
+#if !defined(_WIN32) && defined(USE_PTHREAD)
 	pthread_t *threadArray;
 	pthread_mutex_t mutexInRead, mutexOutSAM, mutexOutBAM1, mutexOutChimSAM, mutexOutChimJunction, mutexOutUnmappedFastx, mutexOutFilterBySJout;
 	pthread_mutex_t mutexStats, mutexLogMain, mutexBAMsortBins;
+#else
+	std::vector<std::thread> threadArray;
+	std::mutex mutexInRead, mutexOutSAM, mutexOutBAM1, mutexOutChimSAM, mutexOutChimJunction, mutexOutUnmappedFastx, mutexOutFilterBySJout;
+	std::mutex mutexStats, mutexLogMain, mutexBAMsortBins;
 #endif
 
    

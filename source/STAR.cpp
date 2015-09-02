@@ -245,7 +245,8 @@ int main(int argInN, char* argIn[]) {
         P->inOut->outChimJunction.open((P->outFileNamePrefix + "Chimeric.out.junction").c_str());
         P->inOut->outChimSAM.open((P->outFileNamePrefix + "Chimeric.out.sam").c_str());
         P->inOut->outChimSAM << P->samHeader;
-#ifndef _WIN32
+
+#if !defined(_WIN32) && defined(USE_PTHREAD)
         pthread_mutex_init(&g_threadChunks.mutexOutChimSAM, NULL);   
         pthread_mutex_init(&g_threadChunks.mutexOutChimJunction, NULL);
 #endif

@@ -1,26 +1,22 @@
+#include <time.h>
+#include <cmath>
+#include <sys/stat.h>
+
+#ifdef _WIN32
+#include <memory>
+#include <io.h>
+#include <Windows.h>
+#else
+#include <unistd.h>
+#endif
+
 #include "Genome.h"
 #include "Parameters.h"
 #include "SuffixArrayFuns.h"
 #include "PackedArray.h"
 #include "ErrorWarning.h"
 #include "streamFuns.h"
-
-#ifdef _WIN32
-#include <memory>
 #include "SharedMemorySegment.h"
-#else
-#include "SharedMemory.h"
-#endif
-
-#include <time.h>
-#include <cmath>
-#ifdef _WIN32
-#include <io.h>
-#include <Windows.h>
-#else
-#include <unistd.h>
-#endif
-#include <sys/stat.h>
 
 //addresses with respect to shmStart of several genome values
 #define SHM_sizeG 0

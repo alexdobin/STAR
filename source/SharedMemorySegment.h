@@ -129,7 +129,7 @@ private :
 
 	// private methods
 	void CreateAndInitSharedObject(size_t shmSize);
-	void SharedMemorySegment::OpenIfExists();
+	void OpenIfExists();
 	void MapSharedObjectToMemory(); 
 };
 

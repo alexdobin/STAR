@@ -5,23 +5,33 @@ cmake_minimum_required(VERSION 2.8.0)
 
 set(THIS_PROJECT "STAR")
 set(THIS_PROGRAM "STAR")
-set(CMAKE_C_FLAGS "-Wall -g")
 set(THIS_MODULE_DIR "${CMAKE_SOURCE_DIR}/cmake")
 set(THIS_REDIST_DIR "${CMAKE_SOURCE_DIR}/../redist")
 
-project(${THIS_PROJECT} CXX)
+if (NOT WIN32)
+	set(CMAKE_CXX_COMPILER "g++")
+	#set(CMAKE_C_COMPILER "g++")
+	set(CMAKE_CXX_FLAGS "-Wall -g -pipe -std=c++11")
+	set(CMAKE_C_FLAGS "-Wall -g -pipe -std=c++11")
+endif()
+
+#project(${THIS_PROJECT} CXX)
 
 # redist includes
 include("${THIS_MODULE_DIR}/boost.cmake")
 
-add_subdirectory(opt) 
-add_subdirectory(common)
-add_subdirectory(STAR_ReadFile)
+add_subdirectory(opt)
+
+if (WIN32) 
+	add_subdirectory(common)
+	add_subdirectory(STAR_ReadFile)
+	include_directories (${CMAKE_CURRENT_SOURCE_DIR}/common)
+endif()
 
 
 include_directories (${Boost_INCLUDE_DIRS})
 include_directories (${CMAKE_CURRENT_SOURCE_DIR})
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/common)
+
 include_directories (${ZLIB_DIR})
 include_directories (${HTSLIB_DIR})
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/opt)
@@ -36,10 +46,12 @@ endforeach ()
 
 ## Define the target application executable 
 ##
-# exclude SharedMemory.cpp from build in WIN32, new file SharedMemorySegment added for Windows.
-if (WIN32)
-	list(REMOVE_ITEM SOURCE_LIST ${CMAKE_CURRENT_SOURCE_DIR}/SharedMemory.cpp)
-	list(REMOVE_ITEM SOURCE_LIST ${CMAKE_CURRENT_SOURCE_DIR}/SharedMemory.h)
+# exclude SharedMemory.cpp, we have SharedMemorySegment.cpp that implement Boost Shared Memory.
+list(REMOVE_ITEM SOURCE_LIST ${CMAKE_CURRENT_SOURCE_DIR}/SharedMemory.cpp)
+
+# exclude IfstreamReadIn.cpp if NOT WIN32, this file implement pipe and ifstream wrapper over that in Windows.  
+if (NOT WIN32)
+	list(REMOVE_ITEM SOURCE_LIST ${CMAKE_CURRENT_SOURCE_DIR}/IfstreamReadIn.cpp)
 endif ()
 
 set (LIBS_DEPENDS ${HTSLIB_LIBRARY} ${ZLIB_LIBRARY} ${Boost_LIBRARIES})	  
@@ -47,7 +59,10 @@ set (LIBS_DEPENDS ${HTSLIB_LIBRARY} ${ZLIB_LIBRARY} ${Boost_LIBRARIES})
 if (WIN32)
 	set (LIBS_DEPENDS ${LIBS_DEPENDS} ws2_32)	  
 endif ()
-
-add_executable(${THIS_PROGRAM} ${SOURCE_LIST} $<TARGET_OBJECTS:getopt> $<TARGET_OBJECTS:random>)
+if (WIN32)
+	add_executable(${THIS_PROGRAM} ${SOURCE_LIST} $<TARGET_OBJECTS:getopt> $<TARGET_OBJECTS:random>)
+else()
+	add_executable(${THIS_PROGRAM} ${SOURCE_LIST})
+endif()
 target_link_libraries (${THIS_PROGRAM} ${LIBS_DEPENDS})
 add_dependencies(${THIS_PROGRAM} ${THIS_PROGRAM}_opt) 

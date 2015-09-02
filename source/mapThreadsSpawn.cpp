@@ -48,7 +48,7 @@ void mapThreadsSpawn (Parameters *P, const std::vector<ReadAlignChunk*> &RAchunk
 void mapThreadsSpawn(Parameters *P, const std::vector<ReadAlignChunk*> &RAchunk) {
 	for (int ithread = 1; ithread<P->runThreadN; ithread++) {//spawn threads
 		try{
-			std::thread tempThread(g_threadChunks.threadRAprocessChunks, RAchunk[ithread]);
+			std::thread tempThread(&g_threadChunks.threadRAprocessChunks, RAchunk[ithread]);
 			g_threadChunks.threadArray.push_back(std::move(tempThread));
 		} 
 		catch(std::exception &e){

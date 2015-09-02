@@ -89,7 +89,8 @@ set (HTSLIB_FINAL_TASK ${HTSLIB_DIR})
 if (NOT WIN32)
     add_custom_command(
         OUTPUT ${HTSLIB_LIBRARY}
-        COMMAND $(MAKE) -C "${HTSLIB_DIR}" lib-static tabix bgzip 2>| htslib.build.log
+        COMMAND cmake ${HTSLIB_DIR}
+		COMMAND make
         DEPENDS ${HTSLIB_DIR}
         COMMENT "Building htslib library")
 		

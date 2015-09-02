@@ -4,13 +4,7 @@
 #include "IncludeDefine.h"
 #include "Parameters.h"
 #include "PackedArray.h"
-
-#ifdef _WIN32
 #include "SharedMemorySegment.h"
-#else
-#include "SharedMemory.h"
-#endif
-
 #include "CrossPlatform.h"
 
 class Genome {
