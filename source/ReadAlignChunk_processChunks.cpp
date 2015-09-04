@@ -177,7 +177,8 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
 void ReadAlignChunk::processChunks()  //read-map-write chunks  
 {
 	noReadsLeft = false; //true if there no more reads left in the file
-	bool foundEnd = false; 
+	foundEnd = false; 
+
 	while (!noReadsLeft) //continue until the input EOF
 	{
 		//////////////read a chunk from input files and store in memory

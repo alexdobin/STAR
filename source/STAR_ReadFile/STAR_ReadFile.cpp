@@ -6,8 +6,8 @@
 #include <Windows.h>
 #include <fstream>
 
-#define BUFSIZE 1024
 
+#define BUFSIZE 1024
 
 int extractAndOutputFile(const std::string& filepath); 
 int outputFile(const std::string& filepath); 
@@ -23,11 +23,11 @@ int main(int argc, char* argv[])
 {
 	if (argc < 3)
 	{
-		// no file name, return error.
+		// no file name and/or command , return error.
 		return 1;
 	}
 
-	// Get current path 
+	// Get current path to create full path of file(s)
 	char buffer[MAX_PATH] = {0};
 	GetModuleFileName(NULL, buffer, MAX_PATH);
 	std::string modulepath(buffer);
@@ -58,17 +58,19 @@ int main(int argc, char* argv[])
 	std::string command = argv[2]; 
 	for (auto& f : files)
 	{
+		// write file marker.
 		std::cout<< "FILE " << i++ << std::endl;
 
 		if (command == "cat")
 		{
-			outputFile(f); 
+			return outputFile(f); 
 		}
 		else if (command == "zcat")
 		{
-			extractAndOutputFile(f); 
+			return extractAndOutputFile(f); 
 		}
 	}
+	// something went wrong that we reached here, return failure code 1 
 	return 1;
 }
 
@@ -82,7 +84,6 @@ int extractAndOutputFile(const std::string& filepath)
 	}
 	
 	unsigned int unzippedBytes = 0;
-	int i = 0; 
 	while (true)
 	{
 		unsigned char unzipBuffer[BUFSIZE + 1] = { 0 };
@@ -96,7 +97,7 @@ int extractAndOutputFile(const std::string& filepath)
 		else
 		{
 			// Write End Marker
-			std::cout << "--END--" << std::endl;
+			std::cout << "--END--";
 			break;
 		}
 	}
@@ -111,15 +112,15 @@ int outputFile(const std::string& filepath)
 		// failed to open file, retrurn failed code 1
 		return 1;
 	}
-	char buffer[BUFSIZE] = {0};
 	while (!file.eof())
 	{
+		char buffer[BUFSIZE] = { 0 };
 		file.read(buffer, BUFSIZE);
 		// write to stdout.
-		printf(buffer);
+		std::cout<< buffer;
 	}
 	// Write End Marker
-	printf("%s","--END--");
+	std::cout << "--END--";
 	file.close();
 	// return success code 0
 	return 0;
