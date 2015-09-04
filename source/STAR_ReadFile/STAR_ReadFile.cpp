@@ -6,7 +6,7 @@
 #include <Windows.h>
 #include <fstream>
 
-#define BUFSIZE 1024 
+#define BUFSIZE 1024
 
 
 int extractAndOutputFile(const std::string& filepath); 
@@ -58,14 +58,15 @@ int main(int argc, char* argv[])
 	std::string command = argv[2]; 
 	for (auto& f : files)
 	{
-		printf("FILE %d\n", i++);
+		std::cout<< "FILE " << i++ << std::endl;
+
 		if (command == "cat")
 		{
-			return outputFile(f); 
+			outputFile(f); 
 		}
 		else if (command == "zcat")
 		{
-			return extractAndOutputFile(f); 
+			extractAndOutputFile(f); 
 		}
 	}
 	return 1;
@@ -79,21 +80,23 @@ int extractAndOutputFile(const std::string& filepath)
 		// failed to open gz file, return failed code 1
 		return 1;
 	}
-	unsigned char unzipBuffer[BUFSIZE] = {0};
+	
 	unsigned int unzippedBytes = 0;
+	int i = 0; 
 	while (true)
 	{
+		unsigned char unzipBuffer[BUFSIZE + 1] = { 0 };
 		unzippedBytes = gzread(inFileZ, unzipBuffer, BUFSIZE);
 		if (unzippedBytes > 0)
 		{
-			for (unsigned int i = 0; i < unzippedBytes; i++)
-			{
-				// write bytes to stdout
-				printf("%s", unzipBuffer);
-			}
+			// write bytes to stdout
+			unzipBuffer[BUFSIZE] = '\0'; 
+			std::cout<< unzipBuffer;
 		}
 		else
 		{
+			// Write End Marker
+			std::cout << "--END--" << std::endl;
 			break;
 		}
 	}
@@ -115,6 +118,8 @@ int outputFile(const std::string& filepath)
 		// write to stdout.
 		printf(buffer);
 	}
+	// Write End Marker
+	printf("%s","--END--");
 	file.close();
 	// return success code 0
 	return 0;

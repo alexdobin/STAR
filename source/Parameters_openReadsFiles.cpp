@@ -54,8 +54,6 @@ bool CreateReadWritePipe(MapHandles& handles)
 
 DWORD CreateChildProcess(HANDLE hPipeWrite, const std::string& filenames, const std::string& command)
 {
-	const int MAX_CMDLINE = 1024;
-
 	std::string cmdLine = "STAR_ReadFile"; 
 	cmdLine.append(" "); 
 	cmdLine.append(filenames);

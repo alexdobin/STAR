@@ -72,7 +72,6 @@ void SharedMemorySegment::CreateAndInitSharedObject(size_t shmSize)
 
 	try
 	{
-		std::string key = std::to_string(_key);
 		//shm_obj_ptr = std::make_unique<shared_memory_object>(
 		//	create_only						//only create
 		//	, _name.c_str()					//name
@@ -117,7 +116,6 @@ void SharedMemorySegment::OpenIfExists()
 	errno = 0;
 	try
 	{
-		std::string key = std::to_string(_key);
 		//_shm_obj_ptr = std::make_unique<shared_memory_object>(
 		//	open_only						//only create
 		//	, key.c_str()					//name
@@ -125,7 +123,7 @@ void SharedMemorySegment::OpenIfExists()
 		//	);
 		_shm_obj_ptr = new shared_memory_object(
 				open_only						//only create
-				, key.c_str()					//name
+				, _name.c_str()					//name
 				, read_write					//read-write mode
 				);
 	}

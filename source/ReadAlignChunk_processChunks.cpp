@@ -177,7 +177,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
 void ReadAlignChunk::processChunks()  //read-map-write chunks  
 {
 	noReadsLeft = false; //true if there no more reads left in the file
-
+	bool foundEnd = false; 
 	while (!noReadsLeft) //continue until the input EOF
 	{
 		//////////////read a chunk from input files and store in memory
@@ -187,11 +187,12 @@ void ReadAlignChunk::processChunks()  //read-map-write chunks
 				g_threadChunks.mutexInRead.lock();
 
 			uint chunkInSizeBytesTotal[2] = { 0, 0 };
-
+			 
 			while (chunkInSizeBytesTotal[0] < P->chunkInSizeBytes 
 				&& chunkInSizeBytesTotal[1] < P->chunkInSizeBytes 
 				&& P->inOut->readIn[0].good() 
-				&& P->inOut->readIn[1].good()) 
+				&& P->inOut->readIn[1].good() 
+				&& !foundEnd) 
 			{
 				char nextChar = P->inOut->readIn[0].peek();
 				if (P->iReadAll == P->readMapNumber) //do nto read any more reads
@@ -316,6 +317,12 @@ void ReadAlignChunk::processChunks()  //read-map-write chunks
 						//                             getline(P->inOut->readIn[1],word1);
 						//                         };
 					}
+					else if (word1 == "--END--")
+					{
+						// we found of end of strem, break
+						foundEnd = true; 
+						break; 
+					}
 					else //error
 					{
 						ostringstream errOut;
@@ -342,7 +349,7 @@ void ReadAlignChunk::processChunks()  //read-map-write chunks
 			for (uint imate = 0; imate < P->readNmates; imate++) 
 				chunkIn[imate][chunkInSizeBytesTotal[imate]] = '\n';//extra empty line at the end of the chunks
 
-			if (P->runThreadN>1) 
+			if (P->runThreadN > 1) 
 				g_threadChunks.mutexInRead.unlock();
 
 		}
