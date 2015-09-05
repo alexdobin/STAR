@@ -103,6 +103,9 @@ DWORD CreateChildProcess(HANDLE hPipeWrite, const std::string& filenames, const 
 		CloseHandle(piProcInfo.hProcess);
 		CloseHandle(piProcInfo.hThread);
 	}
+	// This will make sure the read on pipe not block when 
+	// writting to pipe finished by child process and it already exited.
+	CloseHandle(hPipeWrite); 
 	return piProcInfo.dwProcessId; 
 }
 

@@ -3,6 +3,6 @@
 
 #include <string>
 
-void sysRemoveDir(std::string dirName);
+void sysRemoveDir(const std::string& dirName);
 
 #endif

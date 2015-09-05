@@ -45,15 +45,22 @@ void mapThreadsSpawn (Parameters *P, const std::vector<ReadAlignChunk*> &RAchunk
 
 #else // ~ #if !defined(_WIN32) && defined(USE_PTHREAD)
 
-void mapThreadsSpawn(Parameters *P, const std::vector<ReadAlignChunk*> &RAchunk) {
-	for (int ithread = 1; ithread<P->runThreadN; ithread++) {//spawn threads
-		try{
+void mapThreadsSpawn(Parameters *P, const std::vector<ReadAlignChunk*> &RAchunk) 
+{
+	// clear threads vector, this method may be called multiple times 
+	g_threadChunks.threads.clear();
+
+	for (int ithread = 0; ithread < P->runThreadN; ithread++) //spawn threads
+	{
+		try
+		{
 			std::thread tempThread(&g_threadChunks.threadRAprocessChunks, RAchunk[ithread]);
-			g_threadChunks.threadArray.push_back(std::move(tempThread));
+			g_threadChunks.threads.push_back(std::move(tempThread));
 		} 
-		catch(std::exception &e){
+		catch(std::exception &e)
+		{
 			ostringstream errOut;
-			errOut << "EXITING because of FATAL ERROR: phtread error while creating thread # " << e.what();
+			errOut << "EXITING because of FATAL ERROR: phtread error while creating std::thread # " << e.what();
 			exitWithError(errOut.str(), std::cerr, P->inOut->logMain, 1, *P);
 		}
 		g_threadChunks.mutexLogMain.lock();
@@ -61,20 +68,25 @@ void mapThreadsSpawn(Parameters *P, const std::vector<ReadAlignChunk*> &RAchunk)
 		g_threadChunks.mutexLogMain.unlock();
 	};
 
-	RAchunk[0]->processChunks(); //start main thread
 
-	for (int ithread = 1; ithread<P->runThreadN; ithread++) {//wait for all threads to complete
-		try{
-			g_threadChunks.threadArray[ithread].join();
+	unsigned int threadId = 0; 
+	for (auto &th : g_threadChunks.threads)
+	{	
+		//wait for all threads to complete
+		try
+		{
+			th.join();
 		}
-		catch (std::exception &e){
+		catch (std::exception &e)
+		{
 			ostringstream errOut;
-			errOut << "EXITING because of FATAL ERROR: phtread error while joining thread # " << ithread << ", error code: " << e.what();
+			errOut << "EXITING because of FATAL ERROR: std::thread error while joining thread # " << threadId << ", error code: " << e.what();
 			exitWithError(errOut.str(), std::cerr, P->inOut->logMain, 1, *P);
 		}
 		g_threadChunks.mutexLogMain.lock();
-		P->inOut->logMain << "Joined thread # " << ithread << "\n" << flush;
+		P->inOut->logMain << "Joined thread # " << threadId << "\n" << flush;
 		g_threadChunks.mutexLogMain.unlock();
+		threadId++;
 	};
 };
 

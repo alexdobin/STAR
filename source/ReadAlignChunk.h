@@ -35,8 +35,7 @@ public:
     string chunkOutBAMfileName;
     
     bool noReadsLeft;
-	bool foundEnd; 
-    uint iChunkIn; //current chunk # as read from .fastq
+	uint iChunkIn; //current chunk # as read from .fastq
     uint iChunkOutSAM; //current chunk # writtedn to Aligned.out.sam
     int iThread; //current thread
     uint chunkOutBAMtotal, chunkOutBAMtotal1; //total number of bytes in the write buffer

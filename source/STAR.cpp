@@ -126,11 +126,13 @@ int main(int argInN, char* argIn[]) {
         //ReadAlignChunk *RAchunk1[P->runThreadN];     
 		std::vector<ReadAlignChunk*> RAchunk1(P->runThreadN); 
 
-        for (int ii=0;ii<P1->runThreadN;ii++) {
+        for (int ii=0; ii < P1->runThreadN; ii++) 
+		{
 			ReadAlignChunk* p = new ReadAlignChunk(P1, mainGenome, mainTranscriptome, ii);
 			RAchunk1[ii] = p;
         };    
         mapThreadsSpawn(P1, RAchunk1);
+
         outputSJ(RAchunk1,P1); //collapse and output junctions
 //         for (int ii=0;ii<P1->runThreadN;ii++) {
 //             delete [] RAchunk[ii];
@@ -401,7 +403,7 @@ int main(int argInN, char* argIn[]) {
     *P->inOut->logStdOut << timeMonthDayTime(g_statsAll.timeFinish) << " ..... Finished successfully\n" <<flush;
     
     P->inOut->logMain  << "ALL DONE!\n"<<flush;
-    sysRemoveDir (P->outFileTmp);
+    sysRemoveDir(P->outFileTmp);
     
     P->closeReadsFiles();//this will kill the readFilesCommand processes if necessary
     mainGenome.~Genome(); //need explicit call because of the 'delete P->inOut' below, which will destroy P->inOut->logStdOut

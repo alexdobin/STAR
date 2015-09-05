@@ -177,8 +177,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
 void ReadAlignChunk::processChunks()  //read-map-write chunks  
 {
 	noReadsLeft = false; //true if there no more reads left in the file
-	foundEnd = false; 
-
+	
 	while (!noReadsLeft) //continue until the input EOF
 	{
 		//////////////read a chunk from input files and store in memory
@@ -192,8 +191,7 @@ void ReadAlignChunk::processChunks()  //read-map-write chunks
 			while (chunkInSizeBytesTotal[0] < P->chunkInSizeBytes 
 				&& chunkInSizeBytesTotal[1] < P->chunkInSizeBytes 
 				&& P->inOut->readIn[0].good() 
-				&& P->inOut->readIn[1].good() 
-				&& !foundEnd) 
+				&& P->inOut->readIn[1].good()) 
 			{
 				char nextChar = P->inOut->readIn[0].peek();
 				if (P->iReadAll == P->readMapNumber) //do nto read any more reads
@@ -317,12 +315,6 @@ void ReadAlignChunk::processChunks()  //read-map-write chunks
 						//                         if (P->readNmates==2) {//skip the FILE line for the second read
 						//                             getline(P->inOut->readIn[1],word1);
 						//                         };
-					}
-					else if (word1 == "--END--")
-					{
-						// we found of end of strem, break
-						foundEnd = true; 
-						break; 
 					}
 					else //error
 					{

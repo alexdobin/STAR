@@ -10,23 +10,14 @@
 #include "signalFromBAM.h"
 #include "bamRemoveDuplicates.h"
 
+#ifdef _WIN32
+#include "DirFunctions.h"
+#endif
+
 //for mkfifo
 #include <sys/stat.h>
 
 #define PAR_NAME_PRINT_WIDTH 30
-
-#ifdef _WIN32
-// Get current path 
-void GetExePath(std::string& path)
-{
-	char buffer[MAX_PATH] = {0};
-	GetModuleFileName(NULL, buffer, MAX_PATH);
-	std::string modulepath(buffer);
-	path = modulepath.substr(0, modulepath.find_last_of("\\/"));
-	path.append("\\");
-}
-#endif
-
 
 Parameters::Parameters() {//initalize parameters info
     
@@ -349,7 +340,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 #ifdef WIN32
 	// Somehow ifstream need full absolute path, relative path didn't work.
 	std::string path;
-	GetExePath(path); 
+	GetCurrentPath(path); 
 	genomeDir = path + genomeDir; 
 #endif
 
@@ -435,7 +426,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     };
 	int iRet;
 #ifdef _WIN32
-	iRet = mkdir(outFileTmp.c_str());
+	iRet = createDir(outFileTmp.c_str()) ? 0: -1;
 #else
 	iRet = mkdir(outFileTmp.c_str(), runDirPerm);
 #endif
@@ -581,7 +572,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 #ifndef _WIN32
                 mkdir(outBAMsortTmpDir.c_str(),runDirPerm);  
 #else
-				mkdir(outBAMsortTmpDir.c_str());
+				createDir(outBAMsortTmpDir.c_str());
 #endif
             };                
         } else if (outSAMtype.at(0)=="SAM") {
@@ -964,7 +955,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 #ifndef _WIN32
 		int iRet = mkdir (twoPass.dir.c_str(),runDirPerm);
 #else
-		int iRet = mkdir(twoPass.dir.c_str());
+		int iRet = createDir(twoPass.dir.c_str()) ? 0 : -1;
 #endif
 		if (iRet != 0) {
             ostringstream errOut;
@@ -1010,7 +1001,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 #ifndef _WIN32
 		int iRet = mkdir (sjdbInsert.outDir.c_str(),runDirPerm);
 #else
-		int iRet = mkdir(sjdbInsert.outDir.c_str());
+		int iRet = createDir(sjdbInsert.outDir.c_str()) ? 0 : -1;
 #endif
 		if (iRet != 0) {
             ostringstream errOut;

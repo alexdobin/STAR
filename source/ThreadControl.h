@@ -22,7 +22,7 @@ public:
 	pthread_mutex_t mutexInRead, mutexOutSAM, mutexOutBAM1, mutexOutChimSAM, mutexOutChimJunction, mutexOutUnmappedFastx, mutexOutFilterBySJout;
 	pthread_mutex_t mutexStats, mutexLogMain, mutexBAMsortBins;
 #else
-	std::vector<std::thread> threadArray;
+	std::vector<std::thread> threads;
 	std::mutex mutexInRead, mutexOutSAM, mutexOutBAM1, mutexOutChimSAM, mutexOutChimJunction, mutexOutUnmappedFastx, mutexOutFilterBySJout;
 	std::mutex mutexStats, mutexLogMain, mutexBAMsortBins;
 #endif

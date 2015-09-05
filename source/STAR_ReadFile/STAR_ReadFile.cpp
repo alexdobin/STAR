@@ -96,8 +96,6 @@ int extractAndOutputFile(const std::string& filepath)
 		}
 		else
 		{
-			// Write End Marker
-			std::cout << "--END--";
 			break;
 		}
 	}
@@ -119,8 +117,6 @@ int outputFile(const std::string& filepath)
 		// write to stdout.
 		std::cout<< buffer;
 	}
-	// Write End Marker
-	std::cout << "--END--";
 	file.close();
 	// return success code 0
 	return 0;

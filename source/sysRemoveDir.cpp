@@ -8,14 +8,15 @@
 #include <direct.h>
 #include <io.h>
 #include <process.h>
-#define rmdir(x) _rmdir(x);
+#include "DirFunctions.h"
+
 #endif
-#include <boost/filesystem/operations.hpp>
 
 #ifdef _WIN32
-void sysRemoveDir(std::string dirName)
+
+void sysRemoveDir(const std::string& dirName)
 {
-	boost::filesystem::remove_all(dirName); 
+	removeDir(dirName); 
 }
 #else
 int removeFileOrDir(const char *fpath,const struct stat *sb, int typeflag, struct FTW *ftwbuf) {
@@ -30,7 +31,7 @@ int removeFileOrDir(const char *fpath,const struct stat *sb, int typeflag, struc
 };
 
 
-void sysRemoveDir(std::string dirName) {//remove directory and all its contents
+void sysRemoveDir(const std::string& dirName) {//remove directory and all its contents
     int nftwFlag=FTW_DEPTH; 
     nftw(dirName.c_str(), removeFileOrDir, 100, nftwFlag);
 };

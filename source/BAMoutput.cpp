@@ -1,12 +1,17 @@
 #include "BAMoutput.h"
 #include <sys/stat.h>
 #include "GlobalVariables.h"
+#include "sysRemoveDir.h"
 
 #if !defined(_WIN32) && defined(USE_PTHREAD)
 #include <pthread.h>
 #else
 #include <mutex>
 #include <thread>
+#endif
+
+#ifdef _WIN32
+#include "DirFunctions.h"
 #endif
 
 #include "serviceFuns.cpp"
@@ -24,7 +29,7 @@ BAMoutput::BAMoutput (int iChunk, string tmpDir, Parameters *Pin) {//allocate ba
     bamDir=tmpDir+to_string((uint) iChunk);//local directory for this thread (iChunk)
 
 #if defined(_WIN32)
-	_mkdir(bamDir.c_str());
+	createDir(bamDir.c_str());
 #else 
 	mkdir(bamDir.c_str(), P->runDirPerm);
 #endif
