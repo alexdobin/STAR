@@ -403,9 +403,10 @@ int main(int argInN, char* argIn[]) {
     *P->inOut->logStdOut << timeMonthDayTime(g_statsAll.timeFinish) << " ..... Finished successfully\n" <<flush;
     
     P->inOut->logMain  << "ALL DONE!\n"<<flush;
-    sysRemoveDir(P->outFileTmp);
-    
-    P->closeReadsFiles();//this will kill the readFilesCommand processes if necessary
+
+	sysRemoveDir(P->outFileTmp);
+
+	P->closeReadsFiles();//this will kill the readFilesCommand processes if necessary
     mainGenome.~Genome(); //need explicit call because of the 'delete P->inOut' below, which will destroy P->inOut->logStdOut
     
     delete P->inOut; //to close files

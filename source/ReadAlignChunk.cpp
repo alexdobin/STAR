@@ -99,14 +99,6 @@ void ReadAlignChunk::chunkFstreamOpen(string filePrefix, int iChunk, fstream &fs
     string fName1=fNameStream1.str();
     P->inOut->logMain << "Opening the file: " << fName1 << " ... " <<flush;
     
-#ifdef WIN32
-	// Somehow ifstream need full absolute path, relative path didn't work.
-	std::string path;
-	GetCurrentPath(path);
-	fName1 = path + fName1;
-#endif
-
-
     remove(fName1.c_str()); //remove the file
     fstreamOut.open(fName1.c_str(),ios::out); //create empty file
     fstreamOut.close();

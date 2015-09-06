@@ -13,7 +13,6 @@ SharedMemorySegment::SharedMemorySegment(key_t key, bool unloadLast) : _key(key)
 														_mapped_region_ptr(nullptr)
 {
 	_name = std::to_string(_key); 
-	//shared_memory_object::remove(_name.c_str()); 
 	OpenIfExists(); 
 }
 
@@ -28,9 +27,6 @@ void SharedMemorySegment::Allocate(size_t shmSize)
 	
 	if (!_needsAllocation)
 		ThrowError(EALREADYALLOCATED);
-
-	// TODO : remove this. for testing. 
-	//shmSize = 1610612736; // 1 GB 
 
 	CreateAndInitSharedObject(shmSize);
 

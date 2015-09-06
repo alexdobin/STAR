@@ -17,21 +17,11 @@ void GetCurrentPath(std::string& path)
 // Remove directory recursively.
 void removeDir(const std::string& dirName)
 {
-	// Get current path and create full path
-	std::string fullPath;
-	GetCurrentPath(fullPath);
-	fullPath.append(dirName);
-	boost::filesystem::path path(fullPath); 
-	boost::filesystem::remove_all(path);
+	boost::filesystem::remove_all(dirName);
 }
 
 // Create Directory
 bool createDir(const std::string& dirName)
 {
-	// Get current path and create full path
-	std::string fullPath;
-	GetCurrentPath(fullPath);
-	fullPath.append(dirName);
-
-	return boost::filesystem::create_directory(fullPath);
+	return boost::filesystem::create_directory(dirName);
 }

@@ -337,14 +337,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         };
     };
 
-#ifdef WIN32
-	// Somehow ifstream need full absolute path, relative path didn't work.
-	std::string path;
-	GetCurrentPath(path); 
-	genomeDir = path + genomeDir; 
-#endif
-
-    
+  
 ///////// Command Line Final
     
     if (argInN>1) {//scan all parameters from command line and override previuos values
