@@ -389,6 +389,10 @@ void ReadAlignChunk::processChunks()  //read-map-write chunks
 			};
 		};
 	};
+	
+	// newly added to avoid crash when calling sysRemoveDir on ./_STARtmp/ 
+	closeReadAlignFiles(); 
+
 	if (P->runThreadN > 1) 
 		g_threadChunks.mutexLogMain.lock();
 	P->inOut->logMain << "Completed: thread #" << iThread << endl;

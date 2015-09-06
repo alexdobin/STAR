@@ -19,8 +19,6 @@ typedef enum
 	Write = 1
 } HandleType;
 
-
-
 bool CreateReadWritePipe(MapHandles& handles)
 {
 	SECURITY_ATTRIBUTES saAttr = {0};
@@ -145,43 +143,23 @@ void Parameters::openReadsFiles()
 	}
 	else 
 	{
-		//create fifo files, execute pre-processing command
 		vector<string> readsCommandFileName;
 		readFilesNames.resize(readNmates);
 
 		for (uint imate = 0; imate < readNmates; imate++) 
 		{
-			//open readIn files
-			//ostringstream sysCom;
-			//sysCom << outFileTmp << "tmp.fifo.read" << imate + 1;
-			//readFilesInTmp.push_back(sysCom.str());
-			//remove(readFilesInTmp.at(imate).c_str());
-
 			MapHandles handles; 
 			if (!CreateReadWritePipe(handles))
 			{
 				ostringstream errOut;
 				errOut << "EXITING: because of fatal EXECUTION error: Failed CreatePipe\n";
 				errOut << errno << ": " << strerror(errno) << "\n";
+				errOut << "GetLastError()" << ": " << GetLastError() << "\n";
 				exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
 				break;
 			}
 
-			//mkfifo(readFilesInTmp.at(imate).c_str(), S_IRUSR | S_IWUSR);
-
 			inOut->logMain << "\n   Input read files for mate " << imate + 1 << ", from input string " << readFilesIn.at(imate) << endl;
-
-			//readsCommandFileName.push_back(outFileTmp + "/readsCommand_read" + to_string(imate + 1));
-			//fstream readsCommandFile(readsCommandFileName.at(imate).c_str(), ios::out);
-			//readsCommandFile.close();
-			//readsCommandFile.open(readsCommandFileName.at(imate).c_str(), ios::in | ios::out);
-			////first line in the commands file
-			//if (sysShell != "-") 
-			//{
-			//	//executed via specified shell
-			//	readsCommandFile << "#!" << sysShell << "\n";
-			//};
-			//readsCommandFile << "exec > \"" << readFilesInTmp.at(imate) << "\"\n"; // redirect stdout to temp fifo files
 
 			string readFilesInString(readFilesIn.at(imate));
 			size_t pos = 0;
@@ -194,45 +172,14 @@ void Parameters::openReadsFiles()
 				readFilesInString.erase(0, pos + 1);
 				readFilesNames.at(imate).push_back(file1);
 
-				// TODO : readFilesIn.info file
-				/*system(("ls -lL " + file1 + " > " + outFileTmp + "/readFilesIn.info 2>&1").c_str());
-				ifstream readFilesIn_info((outFileTmp + "/readFilesIn.info").c_str());
-				inOut->logMain << readFilesIn_info.rdbuf();*/
-
-				//readsCommandFile << "echo FILE " << readFilesN << "\n";
-				//readsCommandFile << readFilesCommandString << "   " << ("\"" + file1 + "\"") << "\n";
 				++readFilesN;//only increase file count for one mate
 
 			} while (pos != string::npos);
 
-			//readsCommandFile.flush();
-			//readsCommandFile.seekg(0, ios::beg);
-			//inOut->logMain << "\n   readsCommandsFile:\n" << readsCommandFile.rdbuf() << endl;
-			//readsCommandFile.close();
-
-			//chmod(readsCommandFileName.at(imate).c_str(), S_IXUSR | S_IRUSR | S_IWUSR);
-
 			readFilesCommandPID[imate] = 0;
 
 			ostringstream errOut;
-			//pid_t PID = vfork();
-
-//			switch (PID) {
-//			case -1:
-//				errOut << "EXITING: because of fatal EXECUTION error: Failed vforking readFilesCommand\n";
-//				errOut << errno << ": " << strerror(errno) << "\n";
-//				exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-//				break;
-//
-//			case 0:
-//				//this is the child
-//				execlp(readsCommandFileName.at(imate).c_str(), readsCommandFileName.at(imate).c_str(), (char*)NULL);
-//				exit(0);
-//
-//			default:
-//				//this is the father, record PID of the children
-//				readFilesCommandPID[imate] = PID;
-//			};
+			
 			DWORD pid = CreateChildProcess(handles[HandleType::Write], readFilesInString, readFilesCommandString); 
 			if (pid > 0)
 			{
@@ -240,17 +187,23 @@ void Parameters::openReadsFiles()
 				{
 					readFilesCommandPID[imate] = pid;
 				}
+				else
+				{
+					errOut << "EXITING: because of fatal EXECUTION error: Failed open_pipe_read\n";
+					errOut << errno << ": " << strerror(errno) << "\n";
+					exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+					break;
+				}
 
 			}
 			else
 			{
 				errOut << "EXITING: because of fatal EXECUTION error: Failed CreateChildProcess\n";
 				errOut << errno << ": " << strerror(errno) << "\n";
+				errOut << "GetLastError()" << ": " << GetLastError() << "\n";
 				exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
 				break;
 			}
-			//system((("\""+readsCommandFileName.at(imate)+"\"") + " & ").c_str());
-			//inOut->readIn[imate].open(readFilesInTmp.at(imate).c_str());
 		};
 		if (readNmates == 2 && readFilesNames.at(0).size() != readFilesNames.at(1).size()) 
 		{

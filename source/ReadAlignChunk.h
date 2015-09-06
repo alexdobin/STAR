@@ -52,5 +52,6 @@ public:
 #endif
 
     void chunkFilesCat(ostream *allOut, string filePrefix, uint &iC);
+	void closeReadAlignFiles(); 
 };
 #endif

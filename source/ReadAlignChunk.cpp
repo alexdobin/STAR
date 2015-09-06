@@ -26,15 +26,15 @@ ReadAlignChunk::ReadAlignChunk(Parameters* Pin, Genome &genomeIn, Transcriptome 
    
     RA->iRead=0;
     
-    chunkIn=new char* [P->readNmates];
-    readInStream=new istringstream* [P->readNmates];
+    chunkIn = new char*[P->readNmates];
+    readInStream = new istringstream* [P->readNmates];
 //     readInStream=new istringstream* [P->readNmates];
-    for (uint ii=0;ii<P->readNmates;ii++) {
-       chunkIn[ii]=new char[P->chunkInSizeBytesArray];//reserve more space to finish loading one read
+    for (uint ii = 0;ii < P->readNmates; ii++) {
+       chunkIn[ii] = new char[P->chunkInSizeBytesArray];//reserve more space to finish loading one read
        memset(chunkIn[ii],'\n',P->chunkInSizeBytesArray);
        readInStream[ii] = new istringstream;
        readInStream[ii]->rdbuf()->pubsetbuf(chunkIn[ii],P->chunkInSizeBytesArray);
-       RA->readInStream[ii]=readInStream[ii];
+       RA->readInStream[ii] = readInStream[ii];
     };
     
     
@@ -111,7 +111,6 @@ void ReadAlignChunk::chunkFstreamOpen(string filePrefix, int iChunk, fstream &fs
     fstreamOut.open(fName1.c_str(),ios::out); //create empty file
     fstreamOut.close();
     fstreamOut.open(fName1.c_str(), ios::in | ios::out); //re-open the file in in/out mode
-
     if (fstreamOut.fail()) {
         P->inOut->logMain << "failed!\n";
         ostringstream errOut;
@@ -172,3 +171,26 @@ void ReadAlignChunk::chunkFilesCat(ostream *allOut, string filePrefix, uint &iC)
             };
 };
 
+void ReadAlignChunk::closeReadAlignFiles()
+{
+	if (!RA)
+		return; 
+
+	if (RA->chunkOutChimSAM.is_open())
+		RA->chunkOutChimSAM.close(); 
+
+	if (RA->chunkOutChimJunction.is_open())
+		RA->chunkOutChimJunction.close();
+	
+	for (unsigned int i = 0; i < MAX_N_MATES; i++)
+	{
+		if (RA->chunkOutUnmappedReadsStream[i].is_open())
+			RA->chunkOutUnmappedReadsStream[i].close();
+	}
+
+	for (unsigned int i = 0; i < MAX_N_MATES; i++)
+	{
+		if (RA->chunkOutFilterBySJoutFiles[i].is_open())
+			RA->chunkOutFilterBySJoutFiles[i].close();
+	}
+}
