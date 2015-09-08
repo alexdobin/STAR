@@ -73,9 +73,9 @@ endif ()
 set(HTSLIB_PREFIX "htslib-1.2.1")
 superset(HTSLIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/${HTSLIB_PREFIX}")
 if (WIN32)
-	superset(HTSLIB_LIBRARY "${HTSLIB_DIR}/${CMAKE_BUILD_TYPE}/libhts.lib")
+	superset(HTSLIB_LIBRARY "${HTSLIB_DIR}/${CMAKE_BUILD_TYPE}/hts.lib")
 else ()
-	superset(HTSLIB_LIBRARY "${HTSLIB_DIR}/liblibhts.a")
+	superset(HTSLIB_LIBRARY "${HTSLIB_DIR}/libhts.a")
 endif ()
 
 add_custom_command(

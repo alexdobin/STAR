@@ -18,7 +18,12 @@ SharedMemorySegment::SharedMemorySegment(key_t key, bool unloadLast) : _key(key)
 
 SharedMemorySegment::~SharedMemorySegment()
 {
-	Clean(); 
+	if (_unloadLast)
+	{
+		Clean();
+	}
+	delete _shm_obj_ptr;
+	delete _mapped_region_ptr;
 }
 
 void SharedMemorySegment::Allocate(size_t shmSize)
@@ -50,29 +55,21 @@ void SharedMemorySegment::Clean()
 			{
 				ThrowError(EUNLINK, errno);
 			}
+			_mapped = nullptr; 
 		}
 	}
 	catch (interprocess_exception &ex)
 	{
 		ThrowError(EUNLINK, ex.get_error_code());
 	}
-	delete _shm_obj_ptr; 
-	delete _mapped_region_ptr;
 	_needsAllocation = true; 
 }
 
 void SharedMemorySegment::CreateAndInitSharedObject(size_t shmSize)
 {
-	//std::unique_ptr<shared_memory_object> shm_obj_ptr;
 	shared_memory_object* shm_obj_ptr = nullptr;
-
 	try
 	{
-		//shm_obj_ptr = std::make_unique<shared_memory_object>(
-		//	create_only						//only create
-		//	, _name.c_str()					//name
-		//	, read_write					//read-write mode
-		//	);
 		shm_obj_ptr = new shared_memory_object(
 				create_only						//only create
 				, _name.c_str()					//name
@@ -92,7 +89,6 @@ void SharedMemorySegment::CreateAndInitSharedObject(size_t shmSize)
 
 	try
 	{
-		// TODO : Check why this size adjustment is done.
 		unsigned long long toReserve = (unsigned long long) shmSize + sizeof(unsigned long long);
 
 		shm_obj_ptr->truncate(toReserve);
@@ -112,13 +108,8 @@ void SharedMemorySegment::OpenIfExists()
 	errno = 0;
 	try
 	{
-		//_shm_obj_ptr = std::make_unique<shared_memory_object>(
-		//	open_only						//only create
-		//	, key.c_str()					//name
-		//	, read_write					//read-write mode
-		//	);
 		_shm_obj_ptr = new shared_memory_object(
-				open_only						//only create
+				open_only						//only open
 				, _name.c_str()					//name
 				, read_write					//read-write mode
 				);
@@ -138,13 +129,9 @@ void SharedMemorySegment::OpenIfExists()
 	// Shared Memory exist,  map that and get address.
 	try
 	{
-		//_mapped_region_ptr = std::make_unique<mapped_region> (
-		//	*_shm_obj_ptr                        //Memory-mappable object
-		//	, read_write					    //Access mode
-		//	);
 		_mapped_region_ptr = new mapped_region(
 			*_shm_obj_ptr                        //Memory-mappable object
-			, read_write					    //Access mode
+			, read_write					     //read-write mode
 			);
 		
 		_mapped = _mapped_region_ptr->get_address();
