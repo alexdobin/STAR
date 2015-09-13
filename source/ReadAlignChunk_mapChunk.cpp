@@ -118,6 +118,17 @@ void ReadAlignChunk::mapChunk() //map one chunk. Input reads stream has to be se
 
 	for (uint ii = 0; ii < P->readNmates; ii++) 
 	{
+		// delete if not null 
+		if (readInStream[ii])
+			delete readInStream[ii]; 
+
+		// hack to get current chunkIn loaded in readInStream as the following code is not working in MSVC
+		// readInStream[ii]->rdbuf()->pubsetbuf(chunkIn[ii],P->chunkInSizeBytesArray);
+
+		readInStream[ii] = new istringstream(std::string(chunkIn[ii], P->chunkInSizeBytesArray), std::stringstream::in | std::stringstream::out);
+		
+		RA->readInStream[ii] = readInStream[ii];
+
 		//clear eof and rewind the input streams
 		RA->readInStream[ii]->clear();
 		RA->readInStream[ii]->seekg(0, ios::beg);

@@ -163,8 +163,7 @@ if (NOT Boost_FOUND)
         endif ()
 
         message(STATUS "Configuring boost library")
-		message(${BOOST_BOOTSTRAP})
-        execute_process(
+		execute_process(
             COMMAND ${BOOST_BOOTSTRAP}
             WORKING_DIRECTORY "${BOOST_SRC_DIR}"
             RESULT_VARIABLE TMP_RESULT

@@ -11,15 +11,21 @@
 #include "DirFunctions.h"
 #endif
 
+#ifdef _WIN32
+
 ReadAlignChunk::ReadAlignChunk(Parameters* Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk) : P(Pin) {//initialize chunk
     
     iThread=iChunk;
 
-    if ( P->quant.yes ) {//allocate transcriptome structures
+    if ( P->quant.yes ) 
+	{
+		//allocate transcriptome structures
         chunkTr=new Transcriptome(*TrIn);
         chunkTr->quantsAllocate();
-    } else {
-        chunkTr=NULL;
+    }
+	else 
+	{
+        chunkTr = NULL;
     };   
     
     RA = new ReadAlign(P, genomeIn, chunkTr);//new local copy of RA for each chunk
@@ -28,46 +34,61 @@ ReadAlignChunk::ReadAlignChunk(Parameters* Pin, Genome &genomeIn, Transcriptome 
     
     chunkIn = new char*[P->readNmates];
     readInStream = new istringstream* [P->readNmates];
-//     readInStream=new istringstream* [P->readNmates];
-    for (uint ii = 0;ii < P->readNmates; ii++) {
+    for (uint ii = 0;ii < P->readNmates; ii++) 
+	{
        chunkIn[ii] = new char[P->chunkInSizeBytesArray];//reserve more space to finish loading one read
        memset(chunkIn[ii],'\n',P->chunkInSizeBytesArray);
-       readInStream[ii] = new istringstream;
+
+	   // initialize to nullptr so that we can delete it safely by checking that 
+	   readInStream[ii] = nullptr; 
+
+	   //The following commented code moved to  ReadAlignChunk::mapChunk() as a workaround 
+	   //to fix issues when pubsetbuf is not working with MSVC
+       /*readInStream[ii] = new istringstream;
        readInStream[ii]->rdbuf()->pubsetbuf(chunkIn[ii],P->chunkInSizeBytesArray);
-       RA->readInStream[ii] = readInStream[ii];
+	   RA->readInStream[ii] = readInStream[ii]; */
     };
-    
-    
-    if (P->outSAMbool) {
-        chunkOutBAM=new char [P->chunkOutBAMsizeBytes];
-        RA->outBAMarray=chunkOutBAM;
-        chunkOutBAMstream=new ostringstream;
-        chunkOutBAMstream->rdbuf()->pubsetbuf(chunkOutBAM,P->chunkOutBAMsizeBytes);
-        RA->outSAMstream=chunkOutBAMstream;
+        
+    if (P->outSAMbool) 
+	{
+        chunkOutBAM = new char[P->chunkOutBAMsizeBytes];
+        RA->outBAMarray = chunkOutBAM;
+		chunkOutBAMstream = new ostringstream(std::string(chunkOutBAM, P->chunkOutBAMsizeBytes), std::stringstream::in | std::stringstream::out);
+        //chunkOutBAMstream->rdbuf()->pubsetbuf(chunkOutBAM,P->chunkOutBAMsizeBytes);
+        RA->outSAMstream = chunkOutBAMstream;
         RA->outSAMstream->seekp(0,ios::beg);
         chunkOutBAMtotal=0;
     };
     
-    if (P->outBAMunsorted) {
+    if (P->outBAMunsorted) 
+	{
         chunkOutBAMunsorted = new BAMoutput (P->inOut->outBAMfileUnsorted, P);
         RA->outBAMunsorted = chunkOutBAMunsorted;
-    } else {
+    } 
+	else 
+	{
         chunkOutBAMunsorted=NULL;
         RA->outBAMunsorted=NULL;
     };
     
-    if (P->outBAMcoord) {
+    if (P->outBAMcoord) 
+	{
         chunkOutBAMcoord = new BAMoutput (iChunk, P->outBAMsortTmpDir, P);
         RA->outBAMcoord = chunkOutBAMcoord;
-    } else {
+    } 
+	else 
+	{
         chunkOutBAMcoord=NULL;
         RA->outBAMcoord=NULL;
     };    
     
-    if ( P->quant.trSAM.yes ) {
+    if ( P->quant.trSAM.yes ) 
+	{
         chunkOutBAMquant = new BAMoutput (P->inOut->outQuantBAMfile,P);
         RA->outBAMquant = chunkOutBAMquant;
-    } else {
+    }
+	else 
+	{
         chunkOutBAMquant=NULL;
         RA->outBAMquant=NULL;
     };         
@@ -78,19 +99,113 @@ ReadAlignChunk::ReadAlignChunk(Parameters* Pin, Genome &genomeIn, Transcriptome 
     RA->chunkOutSJ=chunkOutSJ;
     RA->chunkOutSJ1=chunkOutSJ1;
     
-    if (P->chimSegmentMin>0) {
+    if (P->chimSegmentMin>0) 
+	{
         chunkFstreamOpen(P->outFileTmp + "/Chimeric.out.sam.thread", iChunk, RA->chunkOutChimSAM);
         chunkFstreamOpen(P->outFileTmp + "/Chimeric.out.junction.thread", iChunk, RA->chunkOutChimJunction);   
     };
-    if (P->outReadsUnmapped=="Fastx" ) {    
+    if (P->outReadsUnmapped=="Fastx" ) 
+	{    
         chunkFstreamOpen(P->outFileTmp + "/Unmapped.out.mate1.thread",iChunk, RA->chunkOutUnmappedReadsStream[0]);
         if (P->readNmates==2) chunkFstreamOpen(P->outFileTmp + "/Unmapped.out.mate2.thread",iChunk, RA->chunkOutUnmappedReadsStream[1]);
     };
-    if (P->outFilterType=="BySJout") {
+    if (P->outFilterType=="BySJout") 
+	{
         chunkFstreamOpen(P->outFileTmp + "/FilterBySJoutFiles.mate1.thread",iChunk, RA->chunkOutFilterBySJoutFiles[0]);
         if (P->readNmates==2) chunkFstreamOpen(P->outFileTmp + "/FilterBySJoutFiles.mate2.thread",iChunk, RA->chunkOutFilterBySJoutFiles[1]);
     };
 };
+
+#else
+
+ReadAlignChunk::ReadAlignChunk(Parameters* Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk) : P(Pin) {//initialize chunk
+
+	iThread = iChunk;
+
+	if (P->quant.yes) {//allocate transcriptome structures
+		chunkTr = new Transcriptome(*TrIn);
+		chunkTr->quantsAllocate();
+	}
+	else {
+		chunkTr = NULL;
+	};
+
+	RA = new ReadAlign(P, genomeIn, chunkTr);//new local copy of RA for each chunk
+
+	RA->iRead = 0;
+
+	chunkIn = new char*[P->readNmates];
+	readInStream = new istringstream*[P->readNmates];
+	for (uint ii = 0; ii < P->readNmates; ii++) {
+		chunkIn[ii] = new char[P->chunkInSizeBytesArray];//reserve more space to finish loading one read
+		memset(chunkIn[ii], '\n', P->chunkInSizeBytesArray);
+		readInStream[ii] = new istringstream;
+		readInStream[ii]->rdbuf()->pubsetbuf(chunkIn[ii],P->chunkInSizeBytesArray);
+		RA->readInStream[ii] = readInStream[ii];
+	};
+
+
+	if (P->outSAMbool) {
+		chunkOutBAM = new char[P->chunkOutBAMsizeBytes];
+		RA->outBAMarray = chunkOutBAM;
+		chunkOutBAMstream = new ostringstream;
+		chunkOutBAMstream->rdbuf()->pubsetbuf(chunkOutBAM, P->chunkOutBAMsizeBytes);
+		RA->outSAMstream = chunkOutBAMstream;
+		RA->outSAMstream->seekp(0, ios::beg);
+		chunkOutBAMtotal = 0;
+	};
+
+	if (P->outBAMunsorted) {
+		chunkOutBAMunsorted = new BAMoutput(P->inOut->outBAMfileUnsorted, P);
+		RA->outBAMunsorted = chunkOutBAMunsorted;
+	}
+	else {
+		chunkOutBAMunsorted = NULL;
+		RA->outBAMunsorted = NULL;
+	};
+
+	if (P->outBAMcoord) {
+		chunkOutBAMcoord = new BAMoutput(iChunk, P->outBAMsortTmpDir, P);
+		RA->outBAMcoord = chunkOutBAMcoord;
+	}
+	else {
+		chunkOutBAMcoord = NULL;
+		RA->outBAMcoord = NULL;
+	};
+
+	if (P->quant.trSAM.yes) {
+		chunkOutBAMquant = new BAMoutput(P->inOut->outQuantBAMfile, P);
+		RA->outBAMquant = chunkOutBAMquant;
+	}
+	else {
+		chunkOutBAMquant = NULL;
+		RA->outBAMquant = NULL;
+	};
+
+	chunkOutSJ = new OutSJ(P->limitOutSJcollapsed, P);
+	chunkOutSJ1 = new OutSJ(P->limitOutSJcollapsed, P);
+
+	RA->chunkOutSJ = chunkOutSJ;
+	RA->chunkOutSJ1 = chunkOutSJ1;
+
+	if (P->chimSegmentMin>0) {
+		chunkFstreamOpen(P->outFileTmp + "/Chimeric.out.sam.thread", iChunk, RA->chunkOutChimSAM);
+		chunkFstreamOpen(P->outFileTmp + "/Chimeric.out.junction.thread", iChunk, RA->chunkOutChimJunction);
+	};
+	if (P->outReadsUnmapped == "Fastx") {
+		chunkFstreamOpen(P->outFileTmp + "/Unmapped.out.mate1.thread", iChunk, RA->chunkOutUnmappedReadsStream[0]);
+		if (P->readNmates == 2) chunkFstreamOpen(P->outFileTmp + "/Unmapped.out.mate2.thread", iChunk, RA->chunkOutUnmappedReadsStream[1]);
+	};
+	if (P->outFilterType == "BySJout") {
+		chunkFstreamOpen(P->outFileTmp + "/FilterBySJoutFiles.mate1.thread", iChunk, RA->chunkOutFilterBySJoutFiles[0]);
+		if (P->readNmates == 2) chunkFstreamOpen(P->outFileTmp + "/FilterBySJoutFiles.mate2.thread", iChunk, RA->chunkOutFilterBySJoutFiles[1]);
+	};
+};
+
+#endif // #ifdef _WIN32
+
+
+
 
 ///////////////
 void ReadAlignChunk::chunkFstreamOpen(string filePrefix, int iChunk, fstream &fstreamOut) {//open fstreams for chunks

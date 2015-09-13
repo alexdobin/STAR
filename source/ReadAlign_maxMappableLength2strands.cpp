@@ -52,7 +52,7 @@ uint ReadAlign::maxMappableLength2strands(uint pieceStartIn, uint pieceLengthIn,
             };
         };
 
-        if (P->genomeSAindexStart[Lind-1]+ind1+1 < P->genomeSAindexStart[Lind]) {//we are not at the end of the SA
+        if ((P->genomeSAindexStart[Lind-1]+ind1+1) < P->genomeSAindexStart[Lind]) {//we are not at the end of the SA
             iSA2=((SAi[P->genomeSAindexStart[Lind-1]+ind1+1] & P->SAiMarkNmask) & P->SAiMarkAbsentMask) - 1;    
         } else {
             iSA2=P->nSA-1;

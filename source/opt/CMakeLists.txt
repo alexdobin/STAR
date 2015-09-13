@@ -33,7 +33,7 @@ else ()
 		endif ()
 	else ()
 		# TODO : Check this library name
-		superset(ZLIB_LIBRARY "${ZLIB_DIR}/z.a")
+		superset(ZLIB_LIBRARY "${ZLIB_DIR}/libz.a")
 	endif ()
 
 	add_custom_command(
@@ -47,8 +47,11 @@ else ()
 	if (NOT WIN32)
 		add_custom_command(
 			OUTPUT ${ZLIB_LIBRARY}
+			COMMAND ./configure
+			COMMAND make
 			COMMAND $(MAKE) >| zlib.build.log
 			WORKING_DIRECTORY ${ZLIB_DIR}
+			DEPENDS ${ZLIB_DIR}
 			COMMENT "Building zlib package")
 			
 		set (ZLIB_FINAL_TASK ${ZLIB_LIBRARY})
@@ -92,6 +95,7 @@ if (NOT WIN32)
 		WORKING_DIRECTORY ${HTSLIB_DIR}
         COMMAND cmake ${HTSLIB_DIR}
 		COMMAND make
+		DEPENDS ${ZLIB_LIBRARY}
         DEPENDS ${HTSLIB_DIR}
         COMMENT "Building htslib library")
 		

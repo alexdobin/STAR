@@ -16,7 +16,6 @@ private:
 public:
 	// Constructors 
 	IfstreamReadIn(); // default one
-	IfstreamReadIn(const std::string& file);
 
 	//destructor
 	~IfstreamReadIn();

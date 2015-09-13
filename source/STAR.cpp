@@ -56,7 +56,8 @@ int main(int argInN, char* argIn[]) {
     
     Genome mainGenome (P);
     mainGenome.genomeLoad();
-    if (P->genomeLoad=="LoadAndExit" || P->genomeLoad=="Remove") 
+    
+	if (P->genomeLoad=="LoadAndExit" || P->genomeLoad=="Remove") 
     {
         return 0;
     };

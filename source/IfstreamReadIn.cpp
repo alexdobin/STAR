@@ -5,10 +5,6 @@ IfstreamReadIn::IfstreamReadIn() : _pStream(nullptr)
 {
 
 }
-IfstreamReadIn::IfstreamReadIn(const std::string& file)
-{
-
-}
 
 IfstreamReadIn::~IfstreamReadIn() 
 {
@@ -28,8 +24,9 @@ std::ifstream& IfstreamReadIn::operator >> (char* s)
 		(*_pStream) >> s;
 		return *_pStream;
 	}
-
-	throw std::exception("std::ifstream not opened");
+	
+	// something went wrong that we reached here, throw exception.
+	throw std::ios_base::failure("_pStream empty or it is not opened");
 	
 }
 
@@ -40,7 +37,9 @@ std::ifstream& IfstreamReadIn::operator >> (std::string& s)
 		(*_pStream) >> s;
 		return *_pStream;
 	}
-	throw std::exception("std::ifstream not opened");
+
+	// something went wrong that we reached here, throw exception.
+	throw std::ios_base::failure("_pStream empty or it is not opened");
 }
 
 std::ifstream& IfstreamReadIn::operator >> (int& n)
@@ -50,7 +49,8 @@ std::ifstream& IfstreamReadIn::operator >> (int& n)
 		(*_pStream) >> n;
 		return *_pStream;
 	}
-	throw std::exception("std::ifstream not opened");
+	// something went wrong that we reached here, throw exception.
+	throw std::ios_base::failure("_pStream empty or it is not opened");
 }
 
 void IfstreamReadIn::open(const char* filename)
@@ -112,7 +112,8 @@ int IfstreamReadIn::peek()
 	if (_pStream && _pStream->is_open())
 		return _pStream->peek(); 
 
-	throw std::exception("std::ifstream not opened");
+	// something went wrong that we reached here, throw exception.
+	throw std::ios_base::failure("_pStream empty or it is not opened");
 }
 
 bool IfstreamReadIn::good() const
@@ -128,7 +129,8 @@ std::streamsize IfstreamReadIn::gcount() const
 	if (_pStream && _pStream->is_open())
 		return _pStream->gcount();
 
-	throw std::exception("std::ifstream not opened");
+	// something went wrong that we reached here, throw exception.
+	throw std::ios_base::failure("_pStream empty or it is not opened");
 }
 
 std::istream& IfstreamReadIn::getline(char* s, std::streamsize n)
@@ -136,7 +138,8 @@ std::istream& IfstreamReadIn::getline(char* s, std::streamsize n)
 	if (_pStream && _pStream->is_open())
 		return _pStream->getline(s,n);
 
-	throw std::exception("std::ifstream not opened");
+	// something went wrong that we reached here, throw exception.
+	throw std::ios_base::failure("_pStream empty or it is not opened");
 }
 
 std::istream& IfstreamReadIn::ignore(std::streamsize n, int delim)
@@ -144,5 +147,6 @@ std::istream& IfstreamReadIn::ignore(std::streamsize n, int delim)
 	if (_pStream && _pStream->is_open())
 		return _pStream->ignore(n,delim);
 
-	throw std::exception("std::ifstream not opened");
+	// something went wrong that we reached here, throw exception.
+	throw std::ios_base::failure("_pStream empty or it is not opened");
 }

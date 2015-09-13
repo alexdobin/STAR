@@ -96,7 +96,6 @@ void SharedMemorySegment::CreateAndInitSharedObject(size_t shmSize)
 	catch (interprocess_exception &ex)
 	{
 		delete shm_obj_ptr;
-		// revisit this, can we blindly return this error ? 
 		ThrowError(EFTRUNCATE, ex.get_error_code());
 	}
 	delete shm_obj_ptr;
@@ -105,7 +104,6 @@ void SharedMemorySegment::CreateAndInitSharedObject(size_t shmSize)
 
 void SharedMemorySegment::OpenIfExists()
 {
-	errno = 0;
 	try
 	{
 		_shm_obj_ptr = new shared_memory_object(
@@ -116,7 +114,6 @@ void SharedMemorySegment::OpenIfExists()
 	}
 	catch (interprocess_exception &ex)
 	{
-		// TODO : TCD, check if this return same error code in linux too.
 		if (ex.get_error_code() != not_found_error) // Shared Memory does not exist.
 		{
 			ThrowError(EOPENFAILED, ex.get_error_code());
@@ -148,9 +145,6 @@ void SharedMemorySegment::OpenIfExists()
 
 	catch (interprocess_exception &ex)
 	{
-		// TODO : TCD, check if this return same error code in linux too.
-		int error_code = ex.get_error_code(); 
-		error_code = ex.get_native_error();
 		ThrowError(EMAPFAILED, ex.get_error_code());
 		
 	}

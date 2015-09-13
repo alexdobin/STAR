@@ -5,6 +5,8 @@
 #include <iostream>
 #include <Windows.h>
 #include <fstream>
+#include <fcntl.h>
+#include <io.h>
 
 
 #define BUFSIZE 1024
@@ -54,6 +56,9 @@ int main(int argc, char* argv[])
 		start = ((end > (std::string::npos - delimiter.size()))	? std::string::npos : end + delimiter.size());
 	}
 
+	// set binary mode for stdout.
+	_setmode(_fileno(stdout), O_BINARY);
+
 	int i = 0; 
 	std::string command = argv[2]; 
 	for (auto& f : files)
@@ -76,6 +81,7 @@ int main(int argc, char* argv[])
 
 int extractAndOutputFile(const std::string& filepath)
 {
+
 	// Read gz file and write to stdout using printf 
 	gzFile inFileZ = gzopen(filepath.c_str(), "rb");
 	if (inFileZ == NULL) {
