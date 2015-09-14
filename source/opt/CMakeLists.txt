@@ -48,8 +48,7 @@ else ()
 		add_custom_command(
 			OUTPUT ${ZLIB_LIBRARY}
 			COMMAND ./configure
-			COMMAND make
-			COMMAND $(MAKE) >| zlib.build.log
+			COMMAND make >| zlib.build.log
 			WORKING_DIRECTORY ${ZLIB_DIR}
 			DEPENDS ${ZLIB_DIR}
 			COMMENT "Building zlib package")

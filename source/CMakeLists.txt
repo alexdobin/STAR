@@ -50,6 +50,7 @@ list(REMOVE_ITEM SOURCE_LIST ${CMAKE_CURRENT_SOURCE_DIR}/SharedMemory.cpp)
 # exclude IfstreamReadIn.cpp if NOT WIN32, this file implement pipe and ifstream wrapper over that in Windows.  
 if (NOT WIN32)
 	list(REMOVE_ITEM SOURCE_LIST ${CMAKE_CURRENT_SOURCE_DIR}/IfstreamReadIn.cpp)
+	list(REMOVE_ITEM SOURCE_LIST ${CMAKE_CURRENT_SOURCE_DIR}/DirFunctions.cpp)
 endif ()
 
 set (LIBS_DEPENDS ${HTSLIB_LIBRARY} ${ZLIB_LIBRARY} ${Boost_LIBRARIES})	  

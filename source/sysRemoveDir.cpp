@@ -9,7 +9,6 @@
 #include <io.h>
 #include <process.h>
 #include "DirFunctions.h"
-
 #endif
 
 #ifdef _WIN32
