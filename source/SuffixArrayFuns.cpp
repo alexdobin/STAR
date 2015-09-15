@@ -1,6 +1,13 @@
 #include "SuffixArrayFuns.h"
 #include "PackedArray.h"
 
+#ifdef _WIN32
+typedef __int64 int64;
+#else
+#include <inttypes.h>
+typedef int64_t int64;
+#endif
+
 inline uint medianUint2(uint a, uint b) {
     // returns (a+b)/2 
     return a/2 + b/2 + (a%2 + b%2)/2;

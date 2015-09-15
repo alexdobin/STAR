@@ -1,6 +1,6 @@
 #ifndef CODE_signalFromBAM
 #define CODE_signalFromBAM
-#include "htslib/htslib/sam.h"
+#include "htslib-1.2.1/htslib/sam.h"
 #include  <fstream>
 #include <string>
 #include "Stats.h"

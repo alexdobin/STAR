@@ -4,7 +4,8 @@
 #include "IncludeDefine.h"
 #include "Parameters.h"
 #include "PackedArray.h"
-#include "SharedMemory.h"
+#include "SharedMemorySegment.h"
+#include "CrossPlatform.h"
 
 class Genome {
     public:
@@ -26,7 +27,13 @@ class Genome {
     key_t shmKey;  
     char *shmStart;
     char *G1; //pointer -200 of G
+
+#if !defined(_WIN32) && defined(USE_UNIX_SHM)
     SharedMemory * sharedMemory;
+#else
+	SharedMemorySegment* sharedMemory; 
+#endif
+
     uint OpenStream(string name, ifstream & stream);
     void HandleSharedMemoryException(const SharedMemoryException & exc, uint64 shmSize);
 };

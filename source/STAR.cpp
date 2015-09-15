@@ -1,5 +1,10 @@
-#include <sys/types.h>
+﻿#include <sys/types.h>
 #include <sys/stat.h>
+#include <memory>
+
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 
 #include "IncludeDefine.h"
 #include "Parameters.h"
@@ -25,8 +30,8 @@
 #include "SjdbClass.h"
 #include "sjdbInsertJunctions.h"
 #include "bam_cat.h"
-
-#include "htslib/htslib/sam.h"
+#include "htslib-1.2.1/htslib/sam.h"
+#include "CrossPlatform.h"
 
 int main(int argInN, char* argIn[]) {
    
@@ -51,7 +56,8 @@ int main(int argInN, char* argIn[]) {
     
     Genome mainGenome (P);
     mainGenome.genomeLoad();
-    if (P->genomeLoad=="LoadAndExit" || P->genomeLoad=="Remove") 
+    
+	if (P->genomeLoad=="LoadAndExit" || P->genomeLoad=="Remove") 
     {
         return 0;
     };
@@ -72,6 +78,7 @@ int main(int argInN, char* argIn[]) {
     
     
 /////////////////////////////////////////////////////////////////////////////////////////////////START
+#if !defined(_WIN32) && defined(USE_PTHREAD)
     if (P->runThreadN>1) {
         g_threadChunks.threadArray=new pthread_t[P->runThreadN];
         pthread_mutex_init(&g_threadChunks.mutexInRead, NULL);
@@ -82,7 +89,7 @@ int main(int argInN, char* argIn[]) {
         pthread_mutex_init(&g_threadChunks.mutexStats, NULL);
         pthread_mutex_init(&g_threadChunks.mutexBAMsortBins, NULL);
     };
-
+#endif
     g_statsAll.progressReportHeader(P->inOut->logProgress);    
     
     if (P->twoPass.yes) {//2-pass
@@ -117,11 +124,16 @@ int main(int argInN, char* argIn[]) {
         *P->inOut->logStdOut << timeMonthDayTime(g_statsAll.timeStartMap) << " ..... Started 1st pass mapping\n" <<flush;
 
         //run mapping for Pass1
-        ReadAlignChunk *RAchunk1[P->runThreadN];        
-        for (int ii=0;ii<P1->runThreadN;ii++) {
-            RAchunk1[ii]=new ReadAlignChunk(P1, mainGenome, mainTranscriptome, ii);
+        //ReadAlignChunk *RAchunk1[P->runThreadN];     
+		std::vector<ReadAlignChunk*> RAchunk1(P->runThreadN); 
+
+        for (int ii=0; ii < P1->runThreadN; ii++) 
+		{
+			ReadAlignChunk* p = new ReadAlignChunk(P1, mainGenome, mainTranscriptome, ii);
+			RAchunk1[ii] = p;
         };    
         mapThreadsSpawn(P1, RAchunk1);
+
         outputSJ(RAchunk1,P1); //collapse and output junctions
 //         for (int ii=0;ii<P1->runThreadN;ii++) {
 //             delete [] RAchunk[ii];
@@ -236,16 +248,20 @@ int main(int argInN, char* argIn[]) {
         P->inOut->outChimJunction.open((P->outFileNamePrefix + "Chimeric.out.junction").c_str());
         P->inOut->outChimSAM.open((P->outFileNamePrefix + "Chimeric.out.sam").c_str());
         P->inOut->outChimSAM << P->samHeader;
+
+#if !defined(_WIN32) && defined(USE_PTHREAD)
         pthread_mutex_init(&g_threadChunks.mutexOutChimSAM, NULL);   
         pthread_mutex_init(&g_threadChunks.mutexOutChimJunction, NULL);
+#endif
     };
          
     // P->inOut->logMain << "mlock value="<<mlockall(MCL_CURRENT|MCL_FUTURE) <<"\n"<<flush;
 
     // prepare chunks and spawn mapping threads    
-    ReadAlignChunk *RAchunk[P->runThreadN];
+	std::vector<ReadAlignChunk*> RAchunk(P->runThreadN);
     for (int ii=0;ii<P->runThreadN;ii++) {
-        RAchunk[ii]=new ReadAlignChunk(P, mainGenome, mainTranscriptome, ii);
+		ReadAlignChunk* p = new ReadAlignChunk(P, mainGenome, mainTranscriptome, ii); 
+		RAchunk[ii] = p;
     };    
     
     mapThreadsSpawn(P, RAchunk);
@@ -388,9 +404,10 @@ int main(int argInN, char* argIn[]) {
     *P->inOut->logStdOut << timeMonthDayTime(g_statsAll.timeFinish) << " ..... Finished successfully\n" <<flush;
     
     P->inOut->logMain  << "ALL DONE!\n"<<flush;
-    sysRemoveDir (P->outFileTmp);
-    
-    P->closeReadsFiles();//this will kill the readFilesCommand processes if necessary
+
+	sysRemoveDir(P->outFileTmp);
+
+	P->closeReadsFiles();//this will kill the readFilesCommand processes if necessary
     mainGenome.~Genome(); //need explicit call because of the 'delete P->inOut' below, which will destroy P->inOut->logStdOut
     
     delete P->inOut; //to close files

@@ -1,9 +1,21 @@
+#include <memory>
 #include "mapThreadsSpawn.h"
 #include "ThreadControl.h"
 #include "GlobalVariables.h"
 #include "ErrorWarning.h"
 
-void mapThreadsSpawn (Parameters *P, ReadAlignChunk** RAchunk) {
+
+#if !defined(_WIN32) && defined(USE_PTHREAD)
+#include <pthread.h>
+#else
+#include <mutex>
+#include <thread>
+#endif
+
+
+#if !defined(_WIN32) && defined(USE_PTHREAD)
+
+void mapThreadsSpawn (Parameters *P, const std::vector<ReadAlignChunk*> &RAchunk)) {
     for (int ithread=1;ithread<P->runThreadN;ithread++) {//spawn threads
         int threadStatus=pthread_create(&g_threadChunks.threadArray[ithread], NULL, &g_threadChunks.threadRAprocessChunks, (void *) RAchunk[ithread]);
         if (threadStatus>0) {//something went wrong with one of threads
@@ -30,4 +42,52 @@ void mapThreadsSpawn (Parameters *P, ReadAlignChunk** RAchunk) {
         pthread_mutex_unlock(&g_threadChunks.mutexLogMain);
     };
 };
-    
+
+#else // ~ #if !defined(_WIN32) && defined(USE_PTHREAD)
+
+void mapThreadsSpawn(Parameters *P, const std::vector<ReadAlignChunk*> &RAchunk) 
+{
+	// clear threads vector, this method may be called multiple times 
+	g_threadChunks.threads.clear();
+
+	for (int ithread = 0; ithread < P->runThreadN; ithread++) //spawn threads
+	{
+		try
+		{
+			std::thread tempThread(&g_threadChunks.threadRAprocessChunks, RAchunk[ithread]);
+			g_threadChunks.threads.push_back(std::move(tempThread));
+		} 
+		catch(std::exception &e)
+		{
+			ostringstream errOut;
+			errOut << "EXITING because of FATAL ERROR: phtread error while creating std::thread # " << e.what();
+			exitWithError(errOut.str(), std::cerr, P->inOut->logMain, 1, *P);
+		}
+		g_threadChunks.mutexLogMain.lock();
+		P->inOut->logMain << "Created thread # " << ithread << "\n" << flush;
+		g_threadChunks.mutexLogMain.unlock();
+	};
+
+
+	unsigned int threadId = 0; 
+	for (auto &th : g_threadChunks.threads)
+	{	
+		//wait for all threads to complete
+		try
+		{
+			th.join();
+		}
+		catch (std::exception &e)
+		{
+			ostringstream errOut;
+			errOut << "EXITING because of FATAL ERROR: std::thread error while joining thread # " << threadId << ", error code: " << e.what();
+			exitWithError(errOut.str(), std::cerr, P->inOut->logMain, 1, *P);
+		}
+		g_threadChunks.mutexLogMain.lock();
+		P->inOut->logMain << "Joined thread # " << threadId << "\n" << flush;
+		g_threadChunks.mutexLogMain.unlock();
+		threadId++;
+	};
+};
+
+#endif // ~ #if !defined(_WIN32) && defined(USE_PTHREAD)

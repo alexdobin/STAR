@@ -1,13 +1,33 @@
 #ifndef PARAMETERS_DEF
 #define PARAMETERS_DEF
 
+#ifdef _WIN32
+#include <io.h>
+#include <process.h>
+#include <sys\stat.h>
+#else
+#include <unistd.h>
+#include <sys/stat.h>
+#endif
+
+#include <signal.h>
+#include <ostream>
+#include <map>
+#include <string>
+
 #include "IncludeDefine.h"
 #include "InOutStreams.h"
 #include "ParameterInfo.h"
-#include <map>
 #include "TimeFunctions.h"
-#include <unistd.h>
-#include <signal.h>
+
+#ifdef _WIN32
+typedef int mode_t;
+typedef int pid_t;
+static const mode_t S_IXUSR = 0x00400000;
+static const mode_t S_IRUSR = mode_t(_S_IREAD);     ///< read by user
+static const mode_t S_IWUSR = mode_t(_S_IWRITE);    ///< write by user
+#endif
+
 
 class Parameters {
     

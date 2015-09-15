@@ -46,15 +46,17 @@ THE SOFTWARE.
 
 */
 
-#include "bam_cat.h"
+
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <zlib.h>
+#include <string.h>
+#include "bam_cat.h"
+#include "htslib-1.2.1/htslib/bgzf.h"
+#include "htslib-1.2.1/htslib/sam.h"
 
-#include "htslib/htslib/bgzf.h"
-#include "htslib/htslib/sam.h"
-#include <cstring>
 
 #define BUF_SIZE 0x10000
 
@@ -63,81 +65,88 @@ THE SOFTWARE.
 
 #define BGZF_EMPTY_BLOCK_SIZE 28
 
-
-int bam_cat(int nfn, char * const *fn, const bam_hdr_t *h, const char* outbam)
+#ifdef __cplusplus
+extern "C"
 {
-    BGZF *fp;
-    uint8_t *buf;
-    uint8_t ebuf[BGZF_EMPTY_BLOCK_SIZE];
-    const int es=BGZF_EMPTY_BLOCK_SIZE;
-    int i;
+#endif
 
-    fp = strcmp(outbam, "-")? bgzf_open(outbam, "w") : bgzf_fdopen(fileno(stdout), "w");
-    if (fp == 0) {
-        fprintf(stderr, "[%s] ERROR: fail to open output file '%s'.\n", __func__, outbam);
-        return 1;
-    }
-    if (h) bam_hdr_write(fp, h);
+	int bam_cat(int nfn, char * const *fn, const bam_hdr_t *h, const char* outbam)
+	{
+		BGZF *fp;
+		uint8_t *buf;
+		uint8_t ebuf[BGZF_EMPTY_BLOCK_SIZE];
+		const int es = BGZF_EMPTY_BLOCK_SIZE;
+		int i;
 
-    buf = (uint8_t*) malloc(BUF_SIZE);
-    for(i = 0; i < nfn; ++i){
-        BGZF *in;
-        bam_hdr_t *old;
-        int len,j;
+		fp = strcmp(outbam, "-") ? bgzf_open(outbam, "w") : bgzf_fdopen(fileno(stdout), "w");
+		if (fp == 0) {
+			fprintf(stderr, "[%s] ERROR: fail to open output file '%s'.\n", __func__, outbam);
+			return 1;
+		}
+		if (h) bam_hdr_write(fp, h);
 
-        in = strcmp(fn[i], "-")? bgzf_open(fn[i], "r") : bgzf_fdopen(fileno(stdin), "r");
-        if (in == 0) {
-            fprintf(stderr, "[%s] ERROR: fail to open file '%s'.\n", __func__, fn[i]);
-            return -1;
-        }
-        if (in->is_write) return -1;
+		buf = (uint8_t*)malloc(BUF_SIZE);
+		for (i = 0; i < nfn; ++i){
+			BGZF *in;
+			bam_hdr_t *old;
+			int len, j;
 
-        old = bam_hdr_read(in);
-        if (h == 0 && i == 0) bam_hdr_write(fp, old);
+			in = strcmp(fn[i], "-") ? bgzf_open(fn[i], "r") : bgzf_fdopen(fileno(stdin), "r");
+			if (in == 0) {
+				fprintf(stderr, "[%s] ERROR: fail to open file '%s'.\n", __func__, fn[i]);
+				return -1;
+			}
+			if (in->is_write) return -1;
 
-        if (in->block_offset < in->block_length) {
-            bgzf_write(fp, (void*)((char*)in->uncompressed_block + in->block_offset), in->block_length - in->block_offset);
-            bgzf_flush(fp);
-        }
+			old = bam_hdr_read(in);
+			if (h == 0 && i == 0) bam_hdr_write(fp, old);
 
-        j=0;
-        while ((len = bgzf_raw_read(in, buf, BUF_SIZE)) > 0) {
-            if(len<es){
-                int diff=es-len;
-                if(j==0) {
-                    fprintf(stderr, "[%s] ERROR: truncated file?: '%s'.\n", __func__, fn[i]);
-                    return -1;
-                }
-                bgzf_raw_write(fp, ebuf, len);
-                memcpy(ebuf,ebuf+len,diff);
-                memcpy(ebuf+diff,buf,len);
-            } else {
-                if(j!=0) bgzf_raw_write(fp, ebuf, es);
-                len-= es;
-                memcpy(ebuf,buf+len,es);
-                bgzf_raw_write(fp, buf, len);
-            }
-            j=1;
-        }
+			if (in->block_offset < in->block_length) {
+				bgzf_write(fp, (void*)((char*)in->uncompressed_block + in->block_offset), in->block_length - in->block_offset);
+				bgzf_flush(fp);
+			}
 
-        /* check final gzip block */
-        {
-            const uint8_t gzip1=ebuf[0];
-            const uint8_t gzip2=ebuf[1];
-            const uint32_t isize=*((uint32_t*)(ebuf+es-4));
-            if(((gzip1!=GZIPID1) || (gzip2!=GZIPID2)) || (isize!=0)) {
-                fprintf(stderr, "[%s] WARNING: Unexpected block structure in file '%s'.", __func__, fn[i]);
-                fprintf(stderr, " Possible output corruption.\n");
-                bgzf_raw_write(fp, ebuf, es);
-            }
-        }
-        bam_hdr_destroy(old);
-        bgzf_close(in);
-    }
-    free(buf);
-    bgzf_close(fp);
-    return 0;
+			j = 0;
+			while ((len = bgzf_raw_read(in, buf, BUF_SIZE)) > 0) {
+				if (len < es){
+					int diff = es - len;
+					if (j == 0) {
+						fprintf(stderr, "[%s] ERROR: truncated file?: '%s'.\n", __func__, fn[i]);
+						return -1;
+					}
+					bgzf_raw_write(fp, ebuf, len);
+					memcpy(ebuf, ebuf + len, diff);
+					memcpy(ebuf + diff, buf, len);
+				}
+				else {
+					if (j != 0) bgzf_raw_write(fp, ebuf, es);
+					len -= es;
+					memcpy(ebuf, buf + len, es);
+					bgzf_raw_write(fp, buf, len);
+				}
+				j = 1;
+			}
+
+			/* check final gzip block */
+		{
+			const uint8_t gzip1 = ebuf[0];
+			const uint8_t gzip2 = ebuf[1];
+			const uint32_t isize = *((uint32_t*)(ebuf + es - 4));
+			if (((gzip1 != GZIPID1) || (gzip2 != GZIPID2)) || (isize != 0)) {
+				fprintf(stderr, "[%s] WARNING: Unexpected block structure in file '%s'.", __func__, fn[i]);
+				fprintf(stderr, " Possible output corruption.\n");
+				bgzf_raw_write(fp, ebuf, es);
+			}
+		}
+		bam_hdr_destroy(old);
+		bgzf_close(in);
+		}
+		free(buf);
+		bgzf_close(fp);
+		return 0;
+	}
+
+#ifdef __cplusplus
 }
-
-
+#endif
 

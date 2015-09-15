@@ -1,6 +1,8 @@
 #ifndef INCLUDEDEFINE_DEF
 #define INCLUDEDEFINE_DEF
-
+#ifdef _WIN32
+#define NOMINMAX
+#endif
 //standard libs
 #include <algorithm>
 #include <cstring>
@@ -13,21 +15,27 @@
 #include <iomanip>
 #include <vector>
 #include <sys/types.h>
+#ifdef _WIN32
+#include <direct.h>
+#else
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/mman.h>
+#endif
 #include <sys/stat.h>
+#include "CrossPlatform.h"
 #include <fcntl.h>
 #include <errno.h>
 #include <limits>
 #include <stdint.h>
 #include <omp.h>
-
+#include <zlib.h>
+#include <unistd.h>
 #include "VERSION"
 
 //external libs
-#define SAMTOOLS_BGZF_H "htslib/htslib/bgzf.h"
-#define SAMTOOLS_SAM_H  "htslib/htslib/sam.h"
+#define SAMTOOLS_BGZF_H "htslib-1.2.1/htslib/bgzf.h"
+#define SAMTOOLS_SAM_H  "htslib-1.2.1/htslib/sam.h"
 
 using namespace std;
 
@@ -45,7 +53,6 @@ typedef uint8_t uint8;
 #define uint32 unsigned int
 #define uint16 unsigned short int
 #define uchar unsigned char
-#define int64 long long
 #define int32 int
 
 #define GENOME_spacingChar 5

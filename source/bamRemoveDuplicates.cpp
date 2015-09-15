@@ -1,7 +1,7 @@
 #include <unordered_map>
 #include "bamRemoveDuplicates.h"
 #include <iostream>
-#include "htslib/htslib/sam.h"
+#include "htslib-1.2.1/htslib/sam.h"
 #include "IncludeDefine.h"
 #include SAMTOOLS_BGZF_H
 #include "ErrorWarning.h"
