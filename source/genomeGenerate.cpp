@@ -11,6 +11,7 @@
 #include "sjdbPrepare.h"
 #include "genomeParametersWrite.h"
 #include "sjdbInsertJunctions.h"
+#include "genomeScanFastaFiles.h"
 
 #include "serviceFuns.cpp"
 #include "streamFuns.h"
@@ -20,47 +21,56 @@ uint globalL;
 
 
 inline int funCompareSuffixes ( const void *a, const void *b){
-	uint jj=0LLU;
         
 	uint *ga=(uint*)((globalG-7LLU)+(*((uint*)a)));
 	uint *gb=(uint*)((globalG-7LLU)+(*((uint*)b)));
-    uint va=0,vb=0;
 
-	while (va==vb && jj<globalL) {
+    uint jj=0LLU;
+    uint va=0,vb=0;
+	while (va==vb && va!=361700864190383365LLU) {
 		va=*(ga-jj);
 		vb=*(gb-jj);
 		jj++;
 	};
 
-	if (va>vb) {
+	if (va>vb) 
+    {
 		return 1;
-	} else if (va==vb) {
-		return 0;
-	} else {
+	} else if (va<vb) 
+    {
 		return -1;
+	} else 
+    {//va=vb at the end of chr
+        if ( *((uint*)a) > *((uint*)b) )
+        {//anti-stable order,since indexes are sorted in the reverse order 
+            return  -1;
+        } else
+        {//a cannot be equal to b
+            return 1;
+        };
 	};
 };
 
-inline bool funCompareSuffixesBool ( const void *a, const void *b) 
-{
-	uint jj=0LLU;
-        
-	uint *ga=(uint*)((globalG-7LLU)+(*((uint*)a)));
-	uint *gb=(uint*)((globalG-7LLU)+(*((uint*)b)));
-    uint va=0,vb=0;
-
-	while (va==vb && jj<globalL) {
-		va=*(ga-jj);
-		vb=*(gb-jj);
-		jj++;
-	};
-
-	if (va<vb) {
-        return true;
-	} else {
-		return false;
-	};
-};
+// inline bool funCompareSuffixesBool ( const void *a, const void *b) 
+// {
+// 	uint jj=0LLU;
+//         
+// 	uint *ga=(uint*)((globalG-7LLU)+(*((uint*)a)));
+// 	uint *gb=(uint*)((globalG-7LLU)+(*((uint*)b)));
+//     uint va=0,vb=0;
+// 
+// 	while (va==vb && jj<globalL) {
+// 		va=*(ga-jj);
+// 		vb=*(gb-jj);
+// 		jj++;
+// 	};
+// 
+// 	if (va<vb) {
+//         return true;
+// 	} else {
+// 		return false;
+// 	};
+// };
 
 
 inline uint funG2strLocus (uint SAstr, uint const N, char const GstrandBit, uint const GstrandMask) {
@@ -69,62 +79,6 @@ inline uint funG2strLocus (uint SAstr, uint const N, char const GstrandBit, uint
     if ( !strandG ) SAstr += N;
     return SAstr;
 };
-
-uint genomeScanFastaFiles (Parameters *P, char* G, bool flagRun) {//scans fasta files. flagRun=false: check and find full size, flaRun=true: collect all the data
-    uint N=0; //total number of bases in the genome, including chr "spacers"
-    ifstream fileIn;
-    for (uint ii=0;ii<P->genomeFastaFiles.size();ii++) {//all the input files
-        fileIn.open(P->genomeFastaFiles.at(ii).c_str());
-        if ( !fileIn.good() ) {//
-            ostringstream errOut;
-            errOut << "EXITING because of INPUT ERROR: could not open genomeFastaFile: " <<P->genomeFastaFiles.at(ii) <<"\n";
-            exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);            
-        };
-        while(!fileIn.eof()) {//read each file until eof
-            string lineIn (4096,'.');
-            getline(fileIn,lineIn);
-            if (lineIn[0]=='>') {//new chromosome
-                if (!flagRun) {
-                    istringstream lineInStream (lineIn);
-                    lineInStream.ignore(1,' ');
-                    string chrName1;
-                    lineInStream >> chrName1;
-                    P->chrName.push_back(chrName1);
-                };
-                
-                if (!flagRun && P->chrStart.size()>0) P->chrLength.push_back(N-P->chrStart.at(P->chrStart.size()-1)); //true length of the chr  
-                
-                if (N>0) {//pad the chromosomes to bins boudnaries
-                    N = ( (N+1)/P->genomeChrBinNbases+1 )*P->genomeChrBinNbases;
-                };
-
-                if (!flagRun) {
-                    P->chrStart.push_back(N);    
-                    P->inOut->logMain << P->genomeFastaFiles.at(ii)<<" : chr # " << P->chrStart.size()-1 << "  \""<<P->chrName.at(P->chrStart.size()-1)<<"\" chrStart: "<<N<<"\n"<<flush;
-                };
-            } else {//char lines
-                if (flagRun) lineIn.copy(G+N,lineIn.size(),0);
-                N += lineIn.size();
-            };
-        };
-        fileIn.close();        
-    };
-    
-   
-    if (!flagRun) P->chrLength.push_back(N-P->chrStart.at(P->chrStart.size()-1)); //true length of the chr  
-
-    N = ( (N+1)/P->genomeChrBinNbases+1)*P->genomeChrBinNbases;
-        
-    if (!flagRun) { 
-        P->nChrReal=P->chrStart.size();
-        P->chrStart.push_back(N); //last chromosome end
-        for (uint ii=0;ii<P->nChrReal;ii++) {
-            P->chrNameIndex[P->chrName[ii]]=ii;
-        };
-    };
-    
-    return N;
-};        
 
 void genomeGenerate(Parameters *P) {
     
@@ -174,24 +128,7 @@ void genomeGenerate(Parameters *P) {
     
     memset(G1,GENOME_spacingChar,nG1alloc);//initialize to K-1 all bytes
  
-    genomeScanFastaFiles(P,G,true);    //load the genome sequence
-     
-    //convert the genome to 0,1,2,3,4
-    for (uint jj=0;jj<nGenomeReal;jj++) {
-        switch (int(G[jj])){
-            case(65): case(97):  G[jj]=char(0);break;//A
-            case(67): case(99):  G[jj]=char(1);break;//C           
-            case(71): case(103): G[jj]=char(2);break;//G                       
-            case(84): case(116): G[jj]=char(3);break;//T                                
-            case(78): case(110): G[jj]=char(4);break;//N
-            case(48):            G[jj]=GENOME_spacingChar;break;//chromosomal breaks within the sequences
-            default:              //anything else
-                if (G[jj]!=GENOME_spacingChar) {
-//                     P->inOut->logMain << "Unexpected character: char="<< G[jj] << "   int="<<int(G[jj])<<"   at " << jj << " , replacing with N\n";
-                     G[jj]=char(4);                                 
-                };
-        };
-    };    
+    genomeScanFastaFiles(P,G,true);    //load the genome sequence   
 
     uint N = nGenomeReal;
     P->nGenome=N;

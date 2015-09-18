@@ -12,5 +12,7 @@ uint maxMappableLength(char** s, uint S, uint N, char* g, PackedArray& SA, uint 
 void writePacked( char* a, uint jj, uint x);
 uint readPacked(char* a, uint jj);
 uint suffixArraySearch(char** s, uint S, uint N, char* g, PackedArray& SA, bool dirR, uint i1, uint i2, uint L, Parameters* P);
+uint suffixArraySearch1(char** s2, uint S, uint N, char* G, uint64 gInsert, PackedArray& SA, bool dirR, uint i1, uint i2, uint L, Parameters* P);
+int64 funCalcSAi(char* G, uint iL);
 
 #endif

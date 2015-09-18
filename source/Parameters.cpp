@@ -1078,6 +1078,10 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };    
     };
+
+
+    //genome parameters
+    genomeChrBinNbases=1LLU<<genomeChrBinNbits;
     
     inOut->logMain << "Finished loading and checking parameters\n" <<flush;
 };
@@ -1222,7 +1226,6 @@ void Parameters::chrInfoLoad() {//find chrStart,Length,nChr from Genome G
 
 //////////////////////////////////////////////////////////
 void Parameters::chrBinFill() {
-    genomeChrBinNbases=1LLU<<genomeChrBinNbits;
     chrBinN = chrStart[nChrReal]/genomeChrBinNbases+1;    
     chrBin = new uint [chrBinN];
     for (uint ii=0, ichr=1; ii<chrBinN; ++ii) {

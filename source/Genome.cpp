@@ -5,6 +5,7 @@
 #include "ErrorWarning.h"
 #include "streamFuns.h"
 #include "SharedMemory.h"
+#include "genomeScanFastaFiles.h"
 
 #include <time.h>
 #include <cmath>
@@ -112,6 +113,9 @@ void Genome::genomeLoad(){//allocate and load Genome
         errOut << "SOLUTION: please re-generate genome from scratch with the latest version of STAR\n";
         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_GENOME_FILES, *P);
     };
+
+    //find chr starts from files
+    P->chrInfoLoad();
 
     //check if sjdbInfo.txt exists => genome was generated with junctions
     bool sjdbInfoExists=false;
@@ -283,6 +287,13 @@ void Genome::genomeLoad(){//allocate and load Genome
     }
     else if (P->genomeLoad=="NoSharedMemory") // simply allocate memory, do not use shared memory
     {
+        P->genomeInsertL=0;
+        if (P->genomeFastaFiles.at(0)!="-")
+        {//will insert sequences in the genome, now estimate the extra size
+           uint oldlen=P->chrStart.back();//record the old length
+           P->genomeInsertL=genomeScanFastaFiles(P,G,false)-oldlen; 
+        };
+        
         try {
             
             if (P->sjdbInsert.pass1 || P->sjdbInsert.pass2)
@@ -291,8 +302,8 @@ void Genome::genomeLoad(){//allocate and load Genome
                 nSApass1=P->nSA;
                 if (P->sjdbInsert.pass1)
                 {
-                    nGenomePass1+=P->limitSjdbInsertNsj*P->sjdbLength;
-                    nSApass1+=2*P->limitSjdbInsertNsj*P->sjdbLength;
+                    nGenomePass1+=P->limitSjdbInsertNsj*P->sjdbLength+P->genomeInsertL;
+                    nSApass1+=2*P->limitSjdbInsertNsj*P->sjdbLength+2*P->genomeInsertL;
                 };
                 nGenomePass2=nGenomePass1;
                 nSApass2=nSApass1;
@@ -313,9 +324,18 @@ void Genome::genomeLoad(){//allocate and load Genome
                 SA.pointArray(SApass1.charArray+SApass1.lengthByte-SA.lengthByte);
             } else 
             {//no insertions
-                G1=new char[P->nGenome+L+L];        
-                SA.allocateArray();
-                
+                if (P->genomeInsertL==0)
+                {// no sequence insertion, simple allocation
+                    G1=new char[P->nGenome+L+L];        
+                    SA.allocateArray();
+                } else 
+                {
+                    G1=new char[P->nGenome+L+L+P->genomeInsertL];        
+                    SApass1.defineBits(P->GstrandBit+1,P->nSA+2*P->genomeInsertL);//TODO: re-define GstrandBit if necessary
+                    SApass1.allocateArray();
+                    SA.pointArray(SApass1.charArray+SApass1.lengthByte-SA.lengthByte);
+                };
+
             };            
             SAi.allocateArray();
             P->inOut->logMain <<"Shared memory is not used for genomes. Allocated a private copy of the genome.\n"<<flush;                
@@ -406,12 +426,10 @@ void Genome::genomeLoad(){//allocate and load Genome
 	uint shmSum=0;
 	for (uint ii=0;ii<shmSize;ii++) shmSum+=shmStart[ii];
         P->inOut->logMain << "genomeLoad=LoadAndExit: completed, the genome is loaded and kept in RAM, EXITING now.\n"<<flush;
-//         system("echo `date` ..... Finished genome loading >> Log.timing.out");
         return;
     };
     
-    //find chr starts from files
-    P->chrInfoLoad();
+    insertSequences();
 
     P->chrBinFill();
  

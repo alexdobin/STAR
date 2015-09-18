@@ -11,49 +11,7 @@
 #include "ErrorWarning.h"
 #include <cmath>
 
-char* globalGsj;
-
-
-inline int funCompareUintAndSuffixes ( const void *a, const void *b){
-    uint va= *((uint*) a);
-    uint vb= *((uint*) b);
-
-    if (va>vb) {
-            return 1;
-        } else if (va<vb) {
-            return -1;
-        } else {//compare suffixes
-            char* ga=globalGsj + *( ((uint*) a)+1);
-            char* gb=globalGsj + *( ((uint*) b)+1);
-            int ig=0;
-            while (true) {
-                if (ga[ig]>gb[ig]) { // second condition: reached the end of ga, it's >= than any character, but = does not matter
-                    return 1;
-                } else if (ga[ig]<gb[ig]) {
-                    return -1;
-//                 } else if (ga[ig]==5) {
-//                     return 0;
-                } else {
-                    ig++;
-                };
-            };
-        };
-};
-
-inline int64 funCalcSAi(char* G, uint iL) {
-    int64 ind1=0;
-    for (uint iL1=0;iL1<=iL;iL1++) {
-        uint g=(uint) G[iL1];
-        if (g>3) {
-            return -ind1;
-        } else {
-            ind1 <<= 2;
-            ind1 += g;
-        };
-   };
-   return ind1;
-};
-
+#include "funCompareUintAndSuffixes.h"
 
 void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedArray &SA, PackedArray &SA2, PackedArray &SAi) {
     
@@ -139,7 +97,7 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
         };
     };
 
-    globalGsj=Gsj;
+    globalGenomeArray=Gsj;
     qsort((void*) indArray, nInd, 2*sizeof(uint64), funCompareUintAndSuffixes);
     time ( &rawtime );
     P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished sorting SA indicesL nInd="<<nInd <<endl;

@@ -21,6 +21,9 @@ class Genome {
         void freeMemory();
         void genomeLoad();
 
+        void insertSequences();
+
+
     private:
     Parameters* P;
     key_t shmKey;  
@@ -29,5 +32,6 @@ class Genome {
     SharedMemory * sharedMemory;
     uint OpenStream(string name, ifstream & stream);
     void HandleSharedMemoryException(const SharedMemoryException & exc, uint64 shmSize);
+
 };
 #endif

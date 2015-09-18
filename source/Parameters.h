@@ -41,6 +41,7 @@ class Parameters {
         string genomeDir,genomeLoad;
         vector <string> genomeFastaFiles; 
         uint genomeSAsparseD;//sparsity=distance between indices
+        uint genomeInsertL; //total length of the sequence to be inserted on the fly
         //binning,windows,anchors
         uint genomeChrBinNbits, genomeChrBinNbases, chrBinN, *chrBin;
         uint winBinChrNbits, winBinNbits, winAnchorDistNbins, winFlankNbins, winBinN;

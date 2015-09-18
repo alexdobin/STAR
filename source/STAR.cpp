@@ -57,6 +57,11 @@ int main(int argInN, char* argIn[]) {
     };
     
     P->twoPass.pass2=false; //this is the 1st pass    
+
+    if (P->genomeFastaFiles.at(0)!="-")
+    {//insert sequences in the genome
+        
+    };
     
     SjdbClass sjdbLoci;
 
@@ -66,6 +71,9 @@ int main(int argInN, char* argIn[]) {
         *P1=*P;
         sjdbInsertJunctions(P, P1, mainGenome, sjdbLoci);
     };
+
+
+
 
     //calculate genome-related parameters
     Transcriptome *mainTranscriptome=NULL;
