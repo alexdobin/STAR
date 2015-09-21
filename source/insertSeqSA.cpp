@@ -32,14 +32,14 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
         uint64 ind1=SA[isa];
         if ( (ind1 & N2bit)>0 ) 
         {//- strand
-            if ( (ind1 & strandMask)>nG2 )
+            if ( (ind1 & strandMask)>=nG2 )
             {//the first nG bases
                 ind1+=nG1; //reverse complementary indices are all shifted by the length of the sequence
                 SA.writePacked(isa,ind1);
             };
         } else
-        {
-            if ( ind1>nG )
+        {//+ strand
+            if ( ind1>=nG )
             {//the last nG2 bases
                 ind1+=nG1; //reverse complementary indices are all shifted by the length of the sequence
                 SA.writePacked(isa,ind1);
@@ -78,7 +78,7 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
             indArray[ii*2]=-1;
         } else
         {
-            indArray[ii*2] =  suffixArraySearch1(seq1, ii, 10000, G, nG, SA, true, 0, SA.length-1, 0, P) ;
+            indArray[ii*2] =  suffixArraySearch1(seq1, ii, 10000, G, nG, SA, (ii<nG1 ? true:false), 0, SA.length-1, 0, P) ;
             indArray[ii*2+1] = ii;
         };
     };
@@ -141,15 +141,23 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
             };
             //*/                 
         };
+
+        if (SA[isa]==53217188)
+           cout << isa <<endl;
+        
     };
     time ( &rawtime );
-    P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished inserting junction indices" <<endl;   
+    cout << timeMonthDayTime(rawtime) << "   Finished inserting SA indices" <<endl;
+    P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished inserting SA indices" <<endl;   
     
     //SAi insertions
     for (uint iL=0; iL < P->genomeSAindexNbases; iL++) {
         uint iSeq=0;
         uint ind0=P->genomeSAindexStart[iL]-1;//last index that was present in the old genome
         for (uint ii=P->genomeSAindexStart[iL];ii<P->genomeSAindexStart[iL+1]; ii++) {//scan through the longest index
+            if (ii==798466)
+                cout <<ii;
+            
             uint iSA1=SAi[ii];
             uint iSA2=iSA1 & P->SAiMarkNmask & P->SAiMarkAbsentMask;
             
@@ -233,7 +241,7 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
     for (uint iL=0; iL < P->genomeSAindexNbases; iL++) {
         for (uint ii=P->genomeSAindexStart[iL];ii<P->genomeSAindexStart[iL+1]; ii++) {//scan through the longets index
                 if ( SAio[ii]!=SAi[ii] ) {
-                    cout <<ii<<" "<<SAio[ii]<<" "<<SAi[ii]<<endl;
+                    cout <<iL<<" "<<ii<<" "<<SAio[ii]<<" "<<SAi[ii]<<endl;
                 };
         };
     };    

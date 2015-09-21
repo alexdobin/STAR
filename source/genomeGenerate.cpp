@@ -22,24 +22,38 @@ uint globalL;
 
 inline int funCompareSuffixes ( const void *a, const void *b){
         
-	uint *ga=(uint*)((globalG-7LLU)+(*((uint*)a)));
-	uint *gb=(uint*)((globalG-7LLU)+(*((uint*)b)));
+    uint *ga=(uint*)((globalG-7LLU)+(*((uint*)a)));
+    uint *gb=(uint*)((globalG-7LLU)+(*((uint*)b)));
 
-    uint jj=0LLU;
+    uint jj=0;
+    int  ii=0;
     uint va=0,vb=0;
-	while (va==vb && va!=361700864190383365LLU) {
-		va=*(ga-jj);
-		vb=*(gb-jj);
-		jj++;
-	};
+    uint8 *va1, *vb1;
 
-	if (va>vb) 
+    bool aeqb=true;
+    while (aeqb) {
+        va=*(ga-jj);
+        vb=*(gb-jj);
+        va1=(uint8*) &va;
+        vb1=(uint8*) &vb;
+        for (ii=7;ii>=0;ii--)
+        {
+            if (va1[ii]!=vb1[ii] || va1[ii]==5)
+            {
+                aeqb=false;
+                break;
+            };
+        };
+        jj++;
+    };
+
+    if (va1[ii]>vb1[ii]) 
     {
-		return 1;
-	} else if (va<vb) 
+        return 1;
+    } else if (va1[ii]<vb1[ii]) 
     {
-		return -1;
-	} else 
+        return -1;
+    } else 
     {//va=vb at the end of chr
         if ( *((uint*)a) > *((uint*)b) )
         {//anti-stable order,since indexes are sorted in the reverse order 
@@ -48,7 +62,7 @@ inline int funCompareSuffixes ( const void *a, const void *b){
         {//a cannot be equal to b
             return 1;
         };
-	};
+    };
 };
 
 // inline bool funCompareSuffixesBool ( const void *a, const void *b) 

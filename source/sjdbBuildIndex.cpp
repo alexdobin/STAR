@@ -32,7 +32,7 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
     {
         Gsj[ii*P->sjdbLength-1]=SPACER_CHAR; //to make sure this is > than any genome char
     };
-    Gsj[nGsj*2]=SPACER_CHAR+1;//mark the end of the text
+    Gsj[nGsj*2]=SPACER_CHAR;//mark the end of the text
 
     for (uint ii=0; ii<nGsj; ii++) {//reverse complement junction sequences
         Gsj[nGsj*2-1-ii]=Gsj[ii]<4 ? 3-Gsj[ii] : Gsj[ii]; //reverse complement
@@ -77,7 +77,7 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
             } else 
             {
                 //indArray[ind1] =  suffixArraySearch(seq1, istart, P->sjdbLength-istart1, G, SA, true, 0, P->nSA-1, 0, P) ;
-                indArray[ind1] =  suffixArraySearch(seq1, istart, 10000, G, SA, true, 0, P->nSA-1, 0, P) ;
+                indArray[ind1] =  suffixArraySearch1(seq1, istart, 10000, G, -1LLU, SA, true, 0, P->nSA-1, 0, P) ;
                 indArray[ind1+1] = isj*P->sjdbLength+istart;
             };
         };

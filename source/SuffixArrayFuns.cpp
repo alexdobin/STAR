@@ -272,11 +272,24 @@ uint suffixArraySearch(char** s2, uint S, uint N, char* G, PackedArray& SA, bool
     return i1;
 };
 
-uint compareSeqToGenome1(char** s2, uint S, uint N, uint L, char* g, PackedArray& SA, uint iSA, bool dirR, int & compRes, Parameters* P) {
+int compareRefEnds (uint64 SAstr,  uint64 gInsert, bool strG, bool strR, Parameters* P)
+{
+    if ( strG)
+    {// + strand g
+       return strR ? (SAstr < gInsert ? 1:-1) : 1;
+    } else
+    {// - strand g
+       return strR ? -1 : ( gInsert==-1LLU ? -1 : ( SAstr < P->nGenome-gInsert ? 1:-1) );
+    };
+};
+
+
+
+uint compareSeqToGenome1(char** s2, uint S, uint N, uint L, char* g, PackedArray& SA, uint iSA, bool dirR, uint64 gInsert, int & compRes, Parameters* P) {
     // compare s to g, find the maximum identity length
     // s2[0] read sequence; s2[1] complementary sequence
     // S position to start search from in s2[0],s2[1]
-    //dirR forward or reverse direction search on read sequence!!!!!NOT CHECKED
+    // dirR: strand of the s
     
     //different treatment of 5 (spacer) in the sequence and genome
     // 5 is allowed in the sequence
@@ -291,7 +304,7 @@ uint compareSeqToGenome1(char** s2, uint S, uint N, uint L, char* g, PackedArray
     SAstr &= P->GstrandMask;
     
     
-    if (dirR && dirG) {//forward on read, forward on genome
+    if (dirG) {//forward on read, forward on genome
         char* s  = s2[0] + S + L;
         g += SAstr + L;
         for (ii=0;(uint) ii < N-L; ii++)
@@ -309,28 +322,19 @@ uint compareSeqToGenome1(char** s2, uint S, uint N, uint L, char* g, PackedArray
                 };
             } else if (s[ii]==GENOME_spacingChar)
             {//this already implies the s[ii]==g[ii]
-                compRes=5;//5 in the genome is < 5 in the sequence
+                compRes=compareRefEnds (SAstr, gInsert, dirG, dirR, P);
                 return ii+L;
             };
         };
 //         if (s[ii]>g[ii]) {compRes=true;} else {compRes=false;};        
         return N; //exact match
-    } else if (dirR && !dirG) {
+    } else if (!dirG) {
         char* s  = s2[1] + S + L;
         g += P->nGenome-1-SAstr - L;
         for (ii=0; (uint) ii < N-L; ii++)
         {
             if (s[ii]!=g[-ii]) 
             {
-//                 if (s[ii]>g[-ii] || g[-ii]>3) //not sure ehy this does not work
-//                 {
-//                     compRes=false;
-//                     return ii+L;                    
-//                 } else 
-//                 {
-//                     compRes=true;
-//                     return ii+L;
-//                 };
                 char s1=s[ii],g1=g[-ii];
                 if (s1<4) s1=3-s1;
                 if (g1<4) g1=3-g1;
@@ -345,83 +349,39 @@ uint compareSeqToGenome1(char** s2, uint S, uint N, uint L, char* g, PackedArray
                 break;
             } else if (s[ii]==GENOME_spacingChar)
             {//this already implies the s[ii]==g[ii]
-                compRes=5;//5 in the genome is < 5 in the sequence
+                compRes=compareRefEnds (SAstr, gInsert, dirG, dirR, P);
                 return ii+L;
             };
         };
         return N;
-//     } else if (!dirR && dirG) {
-//         char* s  = s2[1] + S - L;
-//         g += SAstr + L;
-//         for (ii=0; (uint) ii < N-L; ii++)
-//         {
-//             if (s[-ii]!=g[ii])
-//             {
-//                 if (s[-ii]>g[ii]) {
-//                     compRes=true;
-//                     return ii+L;
-// 
-//                 } else
-//                 {
-//                     compRes=false;
-//                     return ii+L;
-//                 };
-//             } else if (g[ii]==GENOME_spacingChar)
-//             {//this already implies the s[ii]==g[ii]
-//                 compRes=true;//5 in the genome is < 5 in the sequence
-//                 return ii+L;
-//             };
-//         };
-//         return N;
-//     } else {//if (!dirR && !dirG)
-//         char* s  = s2[0] + S - L;
-//         g += P->nGenome-1-SAstr - L;  
-//         for (ii=0; (uint) ii < N-L; ii++)
-//         {
-//             if (s[-ii]!=g[-ii]) 
-//             {
-//                 if (s[-ii]>g[-ii] || g[-ii]>3)
-//                 {
-//                     compRes=false;
-//                     return ii+L;                    
-//                 } else
-//                 {
-//                     compRes=true;
-//                     return ii+L;
-//                 };
-//             } else if (g[ii]==GENOME_spacingChar)
-//             {//this already implies the s[ii]==g[ii]
-//                 compRes=false;//5 in the genome is < 5 in the sequence
-//                 return ii+L;
-//             };
-//         };
-//         return N;
     };    
 };
 
-uint suffixArraySearch1(char** s, uint S, uint N, char* g, uint64 gInsert, PackedArray& SA, bool dirR, uint i1, uint i2, uint L, Parameters* P) 
+
+uint suffixArraySearch1(char** s, uint S, uint N, char* g, uint64 gInsert, PackedArray& SA, bool strR, uint i1, uint i2, uint L, Parameters* P) 
 {
     // binary search in SA space
-    // s[0],s[1] - sequence, complementary sequence
+    // s[0],s[1] - query sequence, complementary sequence
     // S - start offset
     // N - sequence length
     // g - genome sequence
     // gInsert - index where the sequence insertion happened
     // SA - suffix array
-    // dirR - direction, true=froward, false=reverse!!!!!!!NOT checked
+    // strR - strand of the query sequence
     // i1,i2 = starting indices in SA    
     // L - starting length
     // output: SA index < searched string, i.e. g[SA[index]]<s<g[SA[index+1]]
     
     int compRes;
     
-    uint L1=compareSeqToGenome1(s,S,N,L,g,SA,i1,dirR,compRes, P);
+    uint L1=compareSeqToGenome1(s,S,N,L,g,SA,i1,strR,gInsert,compRes, P);
     if (compRes<0)
     {// the sequence is smaller than the first index of the SA, cannot proceed
         cerr << "BUG: in suffixArraySearch1: the sequence is smaller than the first index of the SA, cannot proceed"<<endl;
         exit(-1);
     };
-    uint L2=compareSeqToGenome1(s,S,N,L,g,SA,i2,dirR,compRes, P);    
+
+    uint L2=compareSeqToGenome1(s,S,N,L,g,SA,i2,strR,gInsert,compRes, P);    
     if (compRes>0)
     {//the sequence is bigger than the last SA index, return it 
         L=L2;
@@ -433,26 +393,13 @@ uint suffixArraySearch1(char** s, uint S, uint N, char* g, uint64 gInsert, Packe
     uint i3=i1,L3=L1; //in case i1+1>=i2 an not iteration of the loope below is ever made
     while (i1+1<i2) {//main binary search loop
         i3=medianUint2(i1,i2);
-        L3=compareSeqToGenome1(s,S,N,L,g,SA,i3,dirR,compRes, P);//cannot do this because these sj sequences contains spacers=5
+        L3=compareSeqToGenome1(s,S,N,L,g,SA,i3,strR,gInsert,compRes, P);//cannot do this because these sj sequences contains spacers=5
         if (L3==N) {
             L=N;
             return i3;
 //             cerr << "Bug L3==N"<<endl;
 //             exit(-1); //found exact match of the whole read length, exit the binary search        
         };
-        
-        if (compRes==5)
-        {
-            uint64 i3g=SA[i3];
-            
-            if ( (i3g & P->GstrandBit)>0)
-            {
-                i3g=P->nGenome-1-i3g;
-            };
-            
-            compRes=i3g < gInsert ? 1:-1;
-
-        };          
         
         if (compRes>0) 
         { //move 1 to 3
