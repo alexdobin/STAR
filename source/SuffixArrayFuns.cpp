@@ -413,6 +413,52 @@ uint suffixArraySearch1(char** s, uint S, uint N, char* g, uint64 gInsert, Packe
     return i1;
 };
 
+uint funCalcSAiFromSA(char* G, PackedArray& SA, uint iSA, int L, Parameters* P, int & iL4)
+{
+    uint SAstr=SA[iSA];
+    bool dirG = (SAstr>>P->GstrandBit) == 0; //forward or reverse strand of the genome
+    SAstr &= P->GstrandMask;
+    iL4=-1;
+    register uint saind=0;
+    if (dirG) 
+    {
+        register uint128 g1=*( (uint128*) (G+SAstr) );
+        for (int ii=0; ii<L; ii++)
+        {
+            register char g2=(char) g1;
+            if (g2>3)
+            {
+                iL4=ii;
+                saind <<= 2*(L-ii);
+                return saind;
+            };
+            saind=saind<<2;
+            saind+=g2;
+            g1=g1>>8;
+        };
+        return saind;
+    } else
+    {
+        register uint128 g1=*( (uint128*) (G+P->nGenome-SAstr-16) );
+        for (int ii=0; ii<L; ii++)
+        {
+            register char g2=(char) (g1>>(8*(15-ii)));
+            if (g2>3)
+            {
+                iL4=ii;
+                saind <<= 2*(L-ii);
+                return saind;
+            };
+            saind=saind<<2;
+            saind+=3-g2;
+        };
+        return saind;
+    };
+    
+};
+         
+
+
 
 int64 funCalcSAi(char* G, uint iL) {
     int64 ind1=0;

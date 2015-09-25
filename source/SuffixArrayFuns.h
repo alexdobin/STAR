@@ -14,5 +14,5 @@ uint readPacked(char* a, uint jj);
 uint suffixArraySearch(char** s, uint S, uint N, char* g, PackedArray& SA, bool dirR, uint i1, uint i2, uint L, Parameters* P);
 uint suffixArraySearch1(char** s2, uint S, uint N, char* G, uint64 gInsert, PackedArray& SA, bool dirR, uint i1, uint i2, uint L, Parameters* P);
 int64 funCalcSAi(char* G, uint iL);
-
+uint funCalcSAiFromSA(char* G, PackedArray& SA, uint iSA, int L, Parameters* P, int & iL4);
 #endif

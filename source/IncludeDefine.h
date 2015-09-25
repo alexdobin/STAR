@@ -48,6 +48,9 @@ typedef uint8_t uint8;
 #define int64 long long
 #define int32 int
 
+// this is gcc extension, may need to redefine for other compilers
+#define uint128 __uint128_t
+
 #define GENOME_spacingChar 5
 
 #define uintWinBin unsigned short
