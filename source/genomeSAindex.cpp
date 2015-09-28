@@ -43,51 +43,11 @@ void genomeSAindex(char * G, PackedArray & SA, Parameters * P, PackedArray & SAi
     P->inOut->logMain    << timeMonthDayTime(rawTime) <<" ... Generating Suffix Array index\n" <<flush;   
     *P->inOut->logStdOut << timeMonthDayTime(rawTime) <<" ... Generating Suffix Array index\n" <<flush; 
     
-    uint iSAfirst=0;//the first index of the unprocessed part. Critical-shared between all threads
-    
-    uint minChunkLength=1000000;
-    uint isaStep=P->nSA/(1llu<<(2*P->genomeSAindexNbases))+1;
-//     isaStep=8;
-    
-    while (iSAfirst<SA.length)
-    {
-        uint iSA1=iSAfirst,iSA2=iSA1+minChunkLength;
-        uint indFull, indFullNext, iSA2next;
-        int iL4=1;
-        {//find the first index for the next chunk, iSA2
-         //OMP critical section, updates the iSAfirst
-            while (iL4>0)
-            {
-                while (iL4>0)
-                {//shift iSA2 by 1 until non-N index found
-                    iSA2++;
-                    indFull=funCalcSAiFromSA(G,SA,iSA2,P->genomeSAindexNbases,P,iL4);//define indFull and iL4 for the first time
-                };
-
-                indFullNext=indFull;
-                iSA2next=iSA2;
-
-                funSAiFindNextIndex(P, G, SA, isaStep, iSA2next, indFullNext, iL4);
-            };
-
-            iSAfirst=iSA2next;
-            //fill SAi for iSA2 and infFull
-            for (uint iL=0; iL < P->genomeSAindexNbases; iL++) 
-            {
-                SAi.writePacked(P->genomeSAindexStart[iL]+(indFull >> (2*(P->genomeSAindexNbases-1-iL))), iSA2);
-            };            
-            
-        };
-
-        genomeSAindexChunk(G, SA, P, SAi, iSA1, iSA2-1);
-        
-    };
-    
-
+    genomeSAindexChunk(G, SA, P, SAi, 0, SA.length-1);    
     
     time(&rawTime);    
-    P->inOut->logMain    << timeMonthDayTime(rawTime) <<" ... Packing Suffix Array index\n" <<flush;   
-    *P->inOut->logStdOut << timeMonthDayTime(rawTime) <<" ... Packing Suffix Array index\n" <<flush; 
+    P->inOut->logMain    << timeMonthDayTime(rawTime) <<" ... Completed Suffix Array index\n" <<flush;   
+    *P->inOut->logStdOut << timeMonthDayTime(rawTime) <<" ... Completed Suffix Array index\n" <<flush; 
       
     for (uint ii=1;ii<=P->genomeSAindexNbases-1;ii++) {//L-mer indices starts
         cout <<ii<<endl;
@@ -118,7 +78,7 @@ void genomeSAindex(char * G, PackedArray & SA, Parameters * P, PackedArray & SAi
     };   
     
     uint isaStep=P->nSA/(1llu<<(2*P->genomeSAindexNbases))+1;
-//     isaStep=8;
+    isaStep=8;
     
     uint isa=iSA1;
     int iL4;
@@ -192,7 +152,7 @@ void genomeSAindex(char * G, PackedArray & SA, Parameters * P, PackedArray & SAi
                 };
                 ind0[iL]=indPref;
 
-            } else if ( indPref < ind0[iL] && ind0[iL] != -1llu ) {
+            } else if ( indPref < ind0[iL] ) {
                 ostringstream errOut;
                 errOut << "BUG: next index is smaller than previous, EXITING\n" <<flush;
                 exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
@@ -214,17 +174,17 @@ void funSAiFindNextIndex(Parameters * P, char * G, PackedArray & SA, uint isaSte
     uint indFullPrev=indFull;
     int iL4prev=iL4;
     isa+=isaStep;
-    while (isa<SA.length && (indFull=funCalcSAiFromSA(G,SA,isa,P->genomeSAindexNbases,P,iL4))==indFullPrev && iL4==iL4prev)
+    while (isa<P->nSA && (indFull=funCalcSAiFromSA(G,SA,isa,P->genomeSAindexNbases,P,iL4))==indFullPrev && iL4==iL4prev)
     {
         isa+=isaStep;
     };
-    if (isa>=SA.length)
+    if (isa>=P->nSA)
     {
-        isa=SA.length-1;
+        isa=P->nSA-1;
         indFull=funCalcSAiFromSA(G,SA,isa,P->genomeSAindexNbases,P,iL4);
         if (indFull==indFullPrev)
         {
-            isa=SA.length;//no more indices, the last one is equal to the previous
+            isa=P->nSA;//no more indices, the last one is equal to the previous
             return;
         };
     };
