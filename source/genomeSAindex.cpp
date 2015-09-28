@@ -43,7 +43,46 @@ void genomeSAindex(char * G, PackedArray & SA, Parameters * P, PackedArray & SAi
     P->inOut->logMain    << timeMonthDayTime(rawTime) <<" ... Generating Suffix Array index\n" <<flush;   
     *P->inOut->logStdOut << timeMonthDayTime(rawTime) <<" ... Generating Suffix Array index\n" <<flush; 
     
-    genomeSAindexChunk(G, SA, P, SAi, 0, P->nSA-1);
+    uint iSAfirst=0;//the first index of the unprocessed part. Critical-shared between all threads
+    
+    uint minChunkLength=1000000;
+    uint isaStep=P->nSA/(1llu<<(2*P->genomeSAindexNbases))+1;
+//     isaStep=8;
+    
+    while (iSAfirst<SA.length)
+    {
+        uint iSA1=iSAfirst,iSA2=iSA1+minChunkLength;
+        uint indFull, indFullNext, iSA2next;
+        int iL4=1;
+        {//find the first index for the next chunk, iSA2
+         //OMP critical section, updates the iSAfirst
+            while (iL4>0)
+            {
+                while (iL4>0)
+                {//shift iSA2 by 1 until non-N index found
+                    iSA2++;
+                    indFull=funCalcSAiFromSA(G,SA,iSA2,P->genomeSAindexNbases,P,iL4);//define indFull and iL4 for the first time
+                };
+
+                indFullNext=indFull;
+                iSA2next=iSA2;
+
+                funSAiFindNextIndex(P, G, SA, isaStep, iSA2next, indFullNext, iL4);
+            };
+
+            iSAfirst=iSA2next;
+            //fill SAi for iSA2 and infFull
+            for (uint iL=0; iL < P->genomeSAindexNbases; iL++) 
+            {
+                SAi.writePacked(P->genomeSAindexStart[iL]+(indFull >> (2*(P->genomeSAindexNbases-1-iL))), iSA2);
+            };            
+            
+        };
+
+        genomeSAindexChunk(G, SA, P, SAi, iSA1, iSA2-1);
+        
+    };
+    
 
     
     time(&rawTime);    
@@ -76,60 +115,16 @@ void genomeSAindex(char * G, PackedArray & SA, Parameters * P, PackedArray & SAi
     for (uint ii=0; ii<P->genomeSAindexNbases; ii++) {
         ind0[ii]=-1;//this is needed in case "AAA...AAA",i.e. indPref=0 is not present in the genome for some lengths
 //         ind0a[ii]=-1;//this is needed in case "AAA...AAA",i.e. indPref=0 is not present in the genome for some lengths
-    };    
-    uint isaStep=P->nSA/(1llu<<(2*P->genomeSAindexNbases));
-//     uint isareport=0;
-    for (uint isa=iSA1; isa<=iSA2; isa++) {//for all suffixes
+    };   
+    
+    uint isaStep=P->nSA/(1llu<<(2*P->genomeSAindexNbases))+1;
+//     isaStep=8;
+    
+    uint isa=iSA1;
+    int iL4;
+    uint indFull=funCalcSAiFromSA(G,SA,isa,P->genomeSAindexNbases,P,iL4);
+    while (isa<=iSA2) {//for all suffixes
 
-//         if (isareport+100000000<isa) 
-//         {
-//             P->inOut->logMain  << isa*100/P->nSA << "% " << flush;         
-//             cout << isa*100/P->nSA << "% " << flush; 
-//         };
-        uint indFull, indFullPrev;
-        int iL4, iL4prev;
-
-        if (isaStep>4 && isa>0)
-        {//skip indices with the same prefix
-
-            isa+=isaStep-1;//-1 since +1 was added in the cycle
-            while (isa<P->nSA && funCalcSAiFromSA(G,SA,isa,P->genomeSAindexNbases,P,iL4)==indFullPrev && iL4==iL4prev)
-            {
-                isa+=isaStep;
-            };
-            if (isa>=P->nSA)
-            {
-                isa=P->nSA-1;
-                indFull=funCalcSAiFromSA(G,SA,isa,P->genomeSAindexNbases,P,iL4);
-            } else
-            {//binary search
-                uint i1=isa-isaStep;
-                uint i2=isa;
-                while (i1+1<i2)
-                {
-                    isa=i1/2 + i2/2 + (i1%2 + i2%2)/2;
-                    if ((indFull=funCalcSAiFromSA(G,SA,isa,P->genomeSAindexNbases,P,iL4))==indFullPrev && iL4==iL4prev)
-                    {
-                        i1=isa;
-                    } else
-                    {
-                        i2=isa;
-                    };
-                };
-                if (isa==i1)
-                {
-                    isa=i2;                    
-                    indFull=funCalcSAiFromSA(G,SA,isa,P->genomeSAindexNbases,P,iL4);
-                };
-            };
-        } else
-        {
-            indFull=funCalcSAiFromSA(G,SA,isa,P->genomeSAindexNbases,P,iL4);
-        };
-        
-        indFullPrev=indFull;
-        iL4prev=iL4;
-        
         /* testing
         uint SAstr=SA[isa];
         bool dirG = (SAstr>>P->GstrandBit) == 0; //forward or reverse strand of the genome
@@ -197,7 +192,7 @@ void genomeSAindex(char * G, PackedArray & SA, Parameters * P, PackedArray & SAi
                 };
                 ind0[iL]=indPref;
 
-            } else if ( indPref < ind0[iL] ) {
+            } else if ( indPref < ind0[iL] && ind0[iL] != -1llu ) {
                 ostringstream errOut;
                 errOut << "BUG: next index is smaller than previous, EXITING\n" <<flush;
                 exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
@@ -205,7 +200,53 @@ void genomeSAindex(char * G, PackedArray & SA, Parameters * P, PackedArray & SAi
             
             
         };
-    };//for (uint isa=0; isa<P->nSA; isa++)
+        
+        //find next index not equal to the current one
+        funSAiFindNextIndex(P, G, SA, isaStep, isa, indFull, iL4);//indFull and iL4 have been already defined at the previous step
+
+    };//isa cycle
     delete [] ind0;
 
  };
+ 
+void funSAiFindNextIndex(Parameters * P, char * G, PackedArray & SA, uint isaStep, uint & isa, uint & indFull, int & iL4)
+ {
+    uint indFullPrev=indFull;
+    int iL4prev=iL4;
+    isa+=isaStep;
+    while (isa<SA.length && (indFull=funCalcSAiFromSA(G,SA,isa,P->genomeSAindexNbases,P,iL4))==indFullPrev && iL4==iL4prev)
+    {
+        isa+=isaStep;
+    };
+    if (isa>=SA.length)
+    {
+        isa=SA.length-1;
+        indFull=funCalcSAiFromSA(G,SA,isa,P->genomeSAindexNbases,P,iL4);
+        if (indFull==indFullPrev)
+        {
+            isa=SA.length;//no more indices, the last one is equal to the previous
+            return;
+        };
+    };
+
+    {//binary search
+        uint i1=isa-isaStep;
+        uint i2=isa;
+        while (i1+1<i2)
+        {
+            isa=i1/2 + i2/2 + (i1%2 + i2%2)/2;
+            if ((indFull=funCalcSAiFromSA(G,SA,isa,P->genomeSAindexNbases,P,iL4))==indFullPrev && iL4==iL4prev)
+            {
+                i1=isa;
+            } else
+            {
+                i2=isa;
+            };
+        };
+        if (isa==i1)
+        {
+            isa=i2;                    
+            indFull=funCalcSAiFromSA(G,SA,isa,P->genomeSAindexNbases,P,iL4);
+        };
+    };
+};
