@@ -11,6 +11,7 @@
 #include "binarySearch2.h"
 #include "funCompareUintAndSuffixes.h"
 #include <cmath>
+#include "genomeSAindex.h" 
 
 uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * G, char * G1, uint64 nG, uint64 nG1, uint64 nG2, Parameters * P)
 {//insert new sequences into the SA
@@ -106,27 +107,18 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
 
     SA1.defineBits(SA.wordLength,SA.length+nInd);
     
-    ///*testing
+    /*testing
     PackedArray SAo;
     SAo.defineBits(P->GstrandBit+1,P->nSA+nInd);
     SAo.allocateArray();
     ifstream oldSAin("./DirTrue/SA");
     oldSAin.read(SAo.charArray,SAo.lengthByte);
     oldSAin.close();
-    //*/
+    */
     
     uint isa1=0, isa2=0;
     for (uint isa=0;isa<SA.length;isa++) {
-        ///*testing
-        if (isa2>0 && SA1[isa2-1]!=SAo[isa2-1]) {
-            cout <<isa2 <<" "<< SA1[isa2-1]<<" "<<SAo[isa2-1]<<endl;
-        };        
-        //*/
-
-        SA1.writePacked(isa2,SA[isa]); //TODO make sure that the first sj index is not before the first array index
-        ++isa2;
-        
-        while (isa==indArray[isa1*2]) {//insert new index after the existing index
+        while (isa==indArray[isa1*2]) {//insert new index before the existing index
             uint ind1=indArray[isa1*2+1];
             if (ind1<nG1) {
                 ind1+=nG;
@@ -134,122 +126,152 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
                 ind1=(ind1-nG1+nG2) | N2bit;
             };
             SA1.writePacked(isa2,ind1);
-            ++isa2; ++isa1;
-            ///*testing
-            if (isa2>0 && SA1[isa2-1]!=SAo[isa2-1]) {
-                cout <<isa2 <<" "<< SA1[isa2-1]<<" "<<SAo[isa2-1]<<endl;
+            /*testing
+            if (SA1[isa2]!=SAo[isa2]) {
+               cout <<isa2 <<" "<< SA1[isa2]<<" "<<SAo[isa2]<<endl;
+               //sleep(100);
             };
-            //*/                 
-        };
+            */              
+            ++isa2; ++isa1;
+               
+        };        
 
-        if (SA[isa]==53217188)
-           cout << isa <<endl;
-        
+        SA1.writePacked(isa2,SA[isa]); //TODO make sure that the first sj index is not before the first array index
+            /*testing
+            if (SA1[isa2]!=SAo[isa2]) {
+               cout <<isa2 <<" "<< SA1[isa2]<<" "<<SAo[isa2]<<endl;
+               //sleep(100);
+            };
+            */           
+        ++isa2;
     };
+    for (;isa1<nInd;isa1++)
+    {//insert the last indices
+        uint ind1=indArray[isa1*2+1];
+        if (ind1<nG1)
+        {
+            ind1+=nG;
+        } else 
+        {//reverse strand
+            ind1=(ind1-nG1+nG2) | N2bit;
+        };
+        SA1.writePacked(isa2,ind1);
+        ++isa2;
+    };
+        
     time ( &rawtime );
-    cout << timeMonthDayTime(rawtime) << "   Finished inserting SA indices" <<endl;
     P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished inserting SA indices" <<endl;   
     
-    //SAi insertions
-    for (uint iL=0; iL < P->genomeSAindexNbases; iL++) {
-        uint iSeq=0;
-        uint ind0=P->genomeSAindexStart[iL]-1;//last index that was present in the old genome
-        for (uint ii=P->genomeSAindexStart[iL];ii<P->genomeSAindexStart[iL+1]; ii++) {//scan through the longest index
-            if (ii==798466)
-                cout <<ii;
-            
-            uint iSA1=SAi[ii];
-            uint iSA2=iSA1 & P->SAiMarkNmask & P->SAiMarkAbsentMask;
-            
-            if ( iSeq<nInd && (iSA1 &  P->SAiMarkAbsentMaskC)>0 ) 
-            {//index missing from the old genome
-                uint iSeq1=iSeq;
-                int64 ind1=funCalcSAi(seq1[0]+indArray[2*iSeq+1],iL);
-                while (ind1 < (int64)(ii-P->genomeSAindexStart[iL]) && indArray[2*iSeq]<iSA2) {
-                    ++iSeq;
-                    ind1=funCalcSAi(seq1[0]+indArray[2*iSeq+1],iL);
-                };
-                if (ind1 == (int64)(ii-P->genomeSAindexStart[iL]) ) {
-                    SAi.writePacked(ii,indArray[2*iSeq]+iSeq+1);
-                    for (uint ii0=ind0+1; ii0<ii; ii0++) {//fill all the absent indices with this value
-                        SAi.writePacked(ii0,(indArray[2*iSeq]+iSeq+1) | P->SAiMarkAbsentMaskC);
-                    };
-                    ++iSeq;
-                    ind0=ii;
-                } else {
-                    iSeq=iSeq1;
-                };
-            } else 
-            {//index was present in the old genome
-                while (iSeq<nInd && indArray[2*iSeq]+1<iSA2) {//for this index insert "smaller" junctions
-                    ++iSeq;
-                };
-                
-                while (iSeq<nInd && indArray[2*iSeq]+1==iSA2) {//special case, the index falls right behind SAi
-                    if (funCalcSAi(seq1[0]+indArray[2*iSeq+1],iL) >= (int64) (ii-P->genomeSAindexStart[iL]) ) {//this belongs to the next index
-                        break;
-                    };
-                    ++iSeq;
-                };   
-                
-                SAi.writePacked(ii,iSA1+iSeq);
-                
-                for (uint ii0=ind0+1; ii0<ii; ii0++) {//fill all the absent indices with this value
-                    SAi.writePacked(ii0,(iSA2+iSeq) | P->SAiMarkAbsentMaskC);
-                };
-                ind0=ii;
-            };
-        };
-
-    };
-//     time ( &rawtime );    cout << timeMonthDayTime(rawtime) << "SAi first" <<endl;
-
-    for (uint isj=0;isj<nInd;isj++) {
-        int64 ind1=0;
-        for (uint iL=0; iL < P->genomeSAindexNbases; iL++) {
-            uint g=(uint) seq1[0][indArray[2*isj+1]+iL];
-            ind1 <<= 2;
-            if (g>3) {//this iSA contains N, need to mark the previous
-                for (uint iL1=iL; iL1 < P->genomeSAindexNbases; iL1++) {
-                    ind1+=3;
-                    int64 ind2=P->genomeSAindexStart[iL1]+ind1;
-                    for (; ind2>=0; ind2--) {//find previous index that is not absent
-                        if ( (SAi[ind2] & P->SAiMarkAbsentMaskC)==0 ) {
-                            break;
-                        };
-                    };
-                    SAi.writePacked(ind2,SAi[ind2] | P->SAiMarkNmaskC);
-                    ind1 <<= 2;
-                };
-                break;
-            } else {
-                ind1 += g;
-            };
-        };
-    };
-    time ( &rawtime );
-    P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished SAi" <<endl;
-
-    ///* testing
-    PackedArray SAio=SAi;
-    SAio.allocateArray();
-    ifstream oldSAiin("./DirTrue/SAindex");
-    oldSAiin.read(SAio.charArray,8*(P->genomeSAindexNbases+2));//skip first bytes
-    oldSAiin.read(SAio.charArray,SAio.lengthByte);
-    oldSAiin.close();  
-
-    for (uint iL=0; iL < P->genomeSAindexNbases; iL++) {
-        for (uint ii=P->genomeSAindexStart[iL];ii<P->genomeSAindexStart[iL+1]; ii++) {//scan through the longets index
-                if ( SAio[ii]!=SAi[ii] ) {
-                    cout <<iL<<" "<<ii<<" "<<SAio[ii]<<" "<<SAi[ii]<<endl;
-                };
-        };
-    };    
-    //*/    
+//     //SAi insertions
+//     for (uint iL=0; iL < P->genomeSAindexNbases; iL++) {
+//         uint iSeq=0;
+//         uint ind0=P->genomeSAindexStart[iL]-1;//last index that was present in the old genome
+//         for (uint ii=P->genomeSAindexStart[iL];ii<P->genomeSAindexStart[iL+1]; ii++) {//scan through the longest index
+//             if (ii==798466)
+//                 cout <<ii;
+//             
+//             uint iSA1=SAi[ii];
+//             uint iSA2=iSA1 & P->SAiMarkNmask & P->SAiMarkAbsentMask;
+//             
+//             if ( iSeq<nInd && (iSA1 &  P->SAiMarkAbsentMaskC)>0 ) 
+//             {//index missing from the old genome
+//                 uint iSeq1=iSeq;
+//                 int64 ind1=funCalcSAi(seq1[0]+indArray[2*iSeq+1],iL);
+//                 while (ind1 < (int64)(ii-P->genomeSAindexStart[iL]) && indArray[2*iSeq]<iSA2) {
+//                     ++iSeq;
+//                     ind1=funCalcSAi(seq1[0]+indArray[2*iSeq+1],iL);
+//                 };
+//                 if (ind1 == (int64)(ii-P->genomeSAindexStart[iL]) ) {
+//                     SAi.writePacked(ii,indArray[2*iSeq]+iSeq+1);
+//                     for (uint ii0=ind0+1; ii0<ii; ii0++) {//fill all the absent indices with this value
+//                         SAi.writePacked(ii0,(indArray[2*iSeq]+iSeq+1) | P->SAiMarkAbsentMaskC);
+//                     };
+//                     ++iSeq;
+//                     ind0=ii;
+//                 } else {
+//                     iSeq=iSeq1;
+//                 };
+//             } else 
+//             {//index was present in the old genome
+//                 while (iSeq<nInd && indArray[2*iSeq]+1<iSA2) {//for this index insert "smaller" junctions
+//                     ++iSeq;
+//                 };
+//                 
+//                 while (iSeq<nInd && indArray[2*iSeq]+1==iSA2) {//special case, the index falls right behind SAi
+//                     if (funCalcSAi(seq1[0]+indArray[2*iSeq+1],iL) >= (int64) (ii-P->genomeSAindexStart[iL]) ) {//this belongs to the next index
+//                         break;
+//                     };
+//                     ++iSeq;
+//                 };   
+//                 
+//                 SAi.writePacked(ii,iSA1+iSeq);
+//                 
+//                 for (uint ii0=ind0+1; ii0<ii; ii0++) {//fill all the absent indices with this value
+//                     SAi.writePacked(ii0,(iSA2+iSeq) | P->SAiMarkAbsentMaskC);
+//                 };
+//                 ind0=ii;
+//             };
+//         };
+// 
+//     };
+// //     time ( &rawtime );    cout << timeMonthDayTime(rawtime) << "SAi first" <<endl;
+// 
+//     for (uint isj=0;isj<nInd;isj++) {
+//         int64 ind1=0;
+//         for (uint iL=0; iL < P->genomeSAindexNbases; iL++) {
+//             uint g=(uint) seq1[0][indArray[2*isj+1]+iL];
+//             ind1 <<= 2;
+//             if (g>3) {//this iSA contains N, need to mark the previous
+//                 for (uint iL1=iL; iL1 < P->genomeSAindexNbases; iL1++) {
+//                     ind1+=3;
+//                     int64 ind2=P->genomeSAindexStart[iL1]+ind1;
+//                     for (; ind2>=0; ind2--) {//find previous index that is not absent
+//                         if ( (SAi[ind2] & P->SAiMarkAbsentMaskC)==0 ) {
+//                             break;
+//                         };
+//                     };
+//                     SAi.writePacked(ind2,SAi[ind2] | P->SAiMarkNmaskC);
+//                     ind1 <<= 2;
+//                 };
+//                 break;
+//             } else {
+//                 ind1 += g;
+//             };
+//         };
+//     };
+//     time ( &rawtime );
+//     P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished SAi" <<endl;
+// 
+//     /* testing
+//     PackedArray SAio=SAi;
+//     SAio.allocateArray();
+//     ifstream oldSAiin("./DirTrue/SAindex");
+//     oldSAiin.read(SAio.charArray,8*(P->genomeSAindexNbases+2));//skip first bytes
+//     oldSAiin.read(SAio.charArray,SAio.lengthByte);
+//     oldSAiin.close();  
+// 
+//     for (uint iL=0; iL < P->genomeSAindexNbases; iL++) {
+//         for (uint ii=P->genomeSAindexStart[iL];ii<P->genomeSAindexStart[iL+1]; ii++) {//scan through the longets index
+//                 if ( SAio[ii]!=SAi[ii] ) {
+//                     cout <<iL<<" "<<ii<<" "<<SAio[ii]<<" "<<SAi[ii]<<endl;
+//                 };
+//         };
+//     };    
+//     */    
     
     //change parameters, most parameters are already re-defined in sjdbPrepare.cpp
     SA.defineBits(P->GstrandBit+1,SA.length+nInd);//same as SA2
     SA.pointArray(SA1.charArray);
+    P->nSA=SA.length;
+    P->nSAbyte=SA.lengthByte;
+    
+    //generate SAi
+    genomeSAindex(G,SA,P,SAi);
+    
+    time ( &rawtime );
+    P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished SAi" <<endl;
+
+    
 //     P->sjGstart=P->chrStart[P->nChrReal];
 //     memcpy(G+P->chrStart[P->nChrReal],seq1[0], nseq1[0]);
     

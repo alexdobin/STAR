@@ -4,11 +4,15 @@
 #include "Genome.h"
 #include "genomeScanFastaFiles.h"
 #include "insertSeqSA.h"
+#include "TimeFunctions.h"
 
 void Genome::insertSequences()
 {
 if (P->genomeFastaFiles.at(0)!="-")
 {
+    time_t rawtime;
+    time ( &rawtime );
+    P->inOut->logMain  << timeMonthDayTime(rawtime) << " ..... Inserting extra sequences into genome indexes" <<endl;       
     //move the junctions to free up space for seqs
     // chrStart/Name/Length nChrReal include the extra sequences
     // nGenome is the old, small genome size
@@ -21,10 +25,6 @@ if (P->genomeFastaFiles.at(0)!="-")
 
     //insert new sequences into the SA
     insertSeqSA(SA, SApass1, SAi, G, G+P->chrStart.back()-P->genomeInsertL, nGenomeOld-sjdblen, P->genomeInsertL, sjdblen, P);
-    P->nSA=SA.length;
-    P->nSAbyte=SA.lengthByte;
-
-
 
     //insert new sequences into the SAi
     //update P

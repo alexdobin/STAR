@@ -145,6 +145,17 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
 //           cout <<isa;
 //         };
 
+        while (isa==indArray[isj*2]) {//insert sj index before the existing index
+            uint ind1=indArray[isj*2+1];
+            if (ind1<nGsj) {
+                ind1+=P->chrStart[P->nChrReal];
+            } else {//reverse strand
+                ind1=(ind1-nGsj) | N2bit;
+            };
+            SA2.writePacked(isa2,ind1);
+            ++isa2; ++isj;
+        };
+        
         uint ind1=SA[isa];
         
         if ( (ind1 & N2bit)>0 ) 
@@ -168,20 +179,21 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
             };
         };
         
-        SA2.writePacked(isa2,ind1); //TODO make sure that the first sj index is not before the first array index
+        SA2.writePacked(isa2,ind1);
         ++isa2;
-        
-        while (isa==indArray[isj*2]) {//insert sj index after the existing index
-            uint ind1=indArray[isj*2+1];
-            if (ind1<nGsj) {
-                ind1+=P->chrStart[P->nChrReal];
-            } else {//reverse strand
-                ind1=(ind1-nGsj) | N2bit;
-            };
-            SA2.writePacked(isa2,ind1);
-            ++isa2; ++isj;
-        };
     };
+    
+    for (;isj<nInd;isj++) {//insert last new indices after the last old index
+        uint ind1=indArray[isj*2+1];
+        if (ind1<nGsj) {
+            ind1+=P->chrStart[P->nChrReal];
+        } else {//reverse strand
+            ind1=(ind1-nGsj) | N2bit;
+        };
+        SA2.writePacked(isa2,ind1);
+        ++isa2;
+    };    
+
     time ( &rawtime );
     P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished inserting junction indices" <<endl;
     

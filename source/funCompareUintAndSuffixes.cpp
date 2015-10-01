@@ -4,12 +4,12 @@
 char* globalGenomeArray;
 
 int funCompareUintAndSuffixes ( const void *a, const void *b){
-    uint64 va= *((uint64*) a);
-    uint64 vb= *((uint64*) b);
+    uint64* va= ((uint64*) a);
+    uint64* vb= ((uint64*) b);
 
-    if (va>vb) {
+    if (va[0]>vb[0]) {
             return 1;
-        } else if (va<vb) {
+        } else if (va[0]<vb[0]) {
             return -1;
         } else {//compare suffixes
             char* ga=globalGenomeArray + *( ((uint64*) a)+1);
@@ -24,7 +24,7 @@ int funCompareUintAndSuffixes ( const void *a, const void *b){
                     return -1;
                 } else if (ga[ig]==5) 
                 {//reached the end of chr, now simply compare the indexes for stable search
-                    if (va>vb)
+                    if (va[1]>vb[1])
                     {
                         return 1;
                     } else

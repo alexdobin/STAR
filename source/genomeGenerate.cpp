@@ -209,7 +209,7 @@ void genomeGenerate(Parameters *P) {
     *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... starting to sort  Suffix Array. This may take a long time...\n" <<flush;
    
 
-    if (false)
+//     if (false)
     {//sort SA chunks
         
         for (uint ii=0;ii<N;ii++) {//re-fill the array backwards for sorting
@@ -359,28 +359,28 @@ void genomeGenerate(Parameters *P) {
 ////////////////////////////////////////
 //          SA index
 //
-    PackedArray SAold;
-
-    if (true)
-    {//testing: load SA from disk
-            //read chunks and pack into full SA1
-        
-        ifstream oldSAin("./DirTrue/SA");
-        oldSAin.seekg (0, ios::end);
-        P->nSAbyte=(uint) oldSAin.tellg();
-        oldSAin.clear();        
-        oldSAin.seekg (0, ios::beg);
-
-        P->nSA=(P->nSAbyte*8)/(P->GstrandBit+1);
-        SAold.defineBits(P->GstrandBit+1,P->nSA);  
-        SAold.allocateArray();
-        
-        oldSAin.read(SAold.charArray,SAold.lengthByte);
-        oldSAin.close();
-        
-        SA1=SAold;
-        SA2=SAold;
-    };
+//     PackedArray SAold;
+// 
+//     if (true)
+//     {//testing: load SA from disk
+//             //read chunks and pack into full SA1
+//         
+//         ifstream oldSAin("./DirTrue/SA");
+//         oldSAin.seekg (0, ios::end);
+//         P->nSAbyte=(uint) oldSAin.tellg();
+//         oldSAin.clear();        
+//         oldSAin.seekg (0, ios::beg);
+// 
+//         P->nSA=(P->nSAbyte*8)/(P->GstrandBit+1);
+//         SAold.defineBits(P->GstrandBit+1,P->nSA);  
+//         SAold.allocateArray();
+//         
+//         oldSAin.read(SAold.charArray,SAold.lengthByte);
+//         oldSAin.close();
+//         
+//         SA1=SAold;
+//         SA2=SAold;
+//     };
     
     PackedArray SAip;
     genomeSAindex(G,SA1,P,SAip);

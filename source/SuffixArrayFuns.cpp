@@ -370,22 +370,22 @@ uint suffixArraySearch1(char** s, uint S, uint N, char* g, uint64 gInsert, Packe
     // strR - strand of the query sequence
     // i1,i2 = starting indices in SA    
     // L - starting length
-    // output: SA index < searched string, i.e. g[SA[index]]<s<g[SA[index+1]]
+    // output: first SA index > searched string, i.e. g[SA[index-1]]<s<g[SA[index]]
     
     int compRes;
     
     uint L1=compareSeqToGenome1(s,S,N,L,g,SA,i1,strR,gInsert,compRes, P);
     if (compRes<0)
     {// the sequence is smaller than the first index of the SA, cannot proceed
-        cerr << "BUG: in suffixArraySearch1: the sequence is smaller than the first index of the SA, cannot proceed"<<endl;
-        exit(-1);
+        L=L1;
+        return 0;
     };
 
     uint L2=compareSeqToGenome1(s,S,N,L,g,SA,i2,strR,gInsert,compRes, P);    
     if (compRes>0)
-    {//the sequence is bigger than the last SA index, return it 
+    {//the sequence is bigger than the last SA index, return a huge number
         L=L2;
-        return i2;
+        return -2llu;
     };
     
     L=min(L1,L2);
@@ -394,7 +394,7 @@ uint suffixArraySearch1(char** s, uint S, uint N, char* g, uint64 gInsert, Packe
     while (i1+1<i2) {//main binary search loop
         i3=medianUint2(i1,i2);
         L3=compareSeqToGenome1(s,S,N,L,g,SA,i3,strR,gInsert,compRes, P);//cannot do this because these sj sequences contains spacers=5
-        if (L3==N) {
+        if (L3==N) {//this should not really happen
             L=N;
             return i3;
 //             cerr << "Bug L3==N"<<endl;
@@ -410,7 +410,7 @@ uint suffixArraySearch1(char** s, uint S, uint N, char* g, uint64 gInsert, Packe
         }  
         L= min(L1,L2);
     };
-    return i1;
+    return i2; //index at i2 is always bigger than the sequence
 };
 
 uint funCalcSAiFromSA(char* G, PackedArray& SA, uint iSA, int L, Parameters* P, int & iL4)
