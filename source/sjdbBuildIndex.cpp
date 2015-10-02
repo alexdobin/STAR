@@ -82,7 +82,6 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
             };
         };
     };
-//     for (int ii=0;ii<P1->sjdbN;ii++) {if ( oldSJind[ii]==0){cout <<ii<<endl;};};
     sjNew = sjNew/2;//novel junctions were double counted on two strands
     
     time ( &rawtime );
@@ -124,27 +123,17 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
     uint N2bit= 1LLU << P->GstrandBit;
     uint strandMask=~N2bit;
     
-    //testing
-//     PackedArray SAo;
-//     SAo.defineBits(P->GstrandBit+1,P->nSA);
-//     SAo.allocateArray();
-//     ifstream oldSAin("./DirTrue/SA");
-//     oldSAin.read(SAo.charArray,SAo.lengthByte);
-//     oldSAin.close();
-    
+    /*testing
+    PackedArray SAo;
+    SAo.defineBits(P->GstrandBit+1,P->nSA);
+    SAo.allocateArray();
+    ifstream oldSAin("./DirTrue/SA");
+    oldSAin.read(SAo.charArray,SAo.lengthByte);
+    oldSAin.close();
+    */
     
     uint isj=0, isa2=0;
-    for (uint isa=0;isa<P1->nSA;isa++) {
-        //testing
-//         if (isa2>0 && SA2[isa2-1]!=SAo[isa2-1]) {
-//             cout <<isa2 <<" "<< SA2[isa2-1]<<" "<<SAo[isa2-1]<<endl;
-//         };        
-
-//         if (isa==69789089)
-//      	{ 
-//           cout <<isa;
-//         };
-
+    for (uint isa=0;isa<P1->nSA;isa++) {   
         while (isa==indArray[isj*2]) {//insert sj index before the existing index
             uint ind1=indArray[isj*2+1];
             if (ind1<nGsj) {
@@ -153,11 +142,16 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
                 ind1=(ind1-nGsj) | N2bit;
             };
             SA2.writePacked(isa2,ind1);
+            /*testing
+            if (SA2[isa2]!=SAo[isa2]) {
+               cout <<isa2 <<" "<< SA2[isa2]<<" "<<SAo[isa2]<<endl;
+               //sleep(100);
+            };
+            */                  
             ++isa2; ++isj;
         };
         
-        uint ind1=SA[isa];
-        
+        uint ind1=SA[isa];       
         if ( (ind1 & N2bit)>0 ) 
         {//- strand
             uint ind1s = P1->nGenome - (ind1 & strandMask);
@@ -180,6 +174,12 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
         };
         
         SA2.writePacked(isa2,ind1);
+            /*testing
+            if (SA2[isa2]!=SAo[isa2]) {
+               cout <<isa2 <<" "<< SA2[isa2]<<" "<<SAo[isa2]<<endl;
+               //sleep(100);
+            };
+            */         
         ++isa2;
     };
     
@@ -191,6 +191,12 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
             ind1=(ind1-nGsj) | N2bit;
         };
         SA2.writePacked(isa2,ind1);
+            /*testing
+            if (SA2[isa2]!=SAo[isa2]) {
+               cout <<isa2 <<" "<< SA2[isa2]<<" "<<SAo[isa2]<<endl;
+               //sleep(100);
+            };
+            */          
         ++isa2;
     };    
 
@@ -209,14 +215,14 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
             {//index missing from the old genome
                 uint iSJ1=iSJ;
                 int64 ind1=funCalcSAi(Gsj+indArray[2*iSJ+1],iL);
-                while (ind1 < (int64)(ii-P->genomeSAindexStart[iL]) && indArray[2*iSJ]<iSA2) {
+                while (ind1 < (int64)(ii-P->genomeSAindexStart[iL]) && indArray[2*iSJ]-1<iSA2) {
                     ++iSJ;
                     ind1=funCalcSAi(Gsj+indArray[2*iSJ+1],iL);
                 };
                 if (ind1 == (int64)(ii-P->genomeSAindexStart[iL]) ) {
-                    SAi.writePacked(ii,indArray[2*iSJ]+iSJ+1);
+                    SAi.writePacked(ii,indArray[2*iSJ]-1+iSJ+1);
                     for (uint ii0=ind0+1; ii0<ii; ii0++) {//fill all the absent indices with this value
-                        SAi.writePacked(ii0,(indArray[2*iSJ]+iSJ+1) | P->SAiMarkAbsentMaskC);
+                        SAi.writePacked(ii0,(indArray[2*iSJ]-1+iSJ+1) | P->SAiMarkAbsentMaskC);
                     };
                     ++iSJ;
                     ind0=ii;
@@ -225,11 +231,11 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
                 };
             } else 
             {//index was present in the old genome
-                while (iSJ<nInd && indArray[2*iSJ]+1<iSA2) {//for this index insert "smaller" junctions
+                while (iSJ<nInd && indArray[2*iSJ]-1+1<iSA2) {//for this index insert "smaller" junctions
                     ++iSJ;
                 };
                 
-                while (iSJ<nInd && indArray[2*iSJ]+1==iSA2) {//special case, the index falls right behind SAi
+                while (iSJ<nInd && indArray[2*iSJ]-1+1==iSA2) {//special case, the index falls right behind SAi
                     if (funCalcSAi(Gsj+indArray[2*iSJ+1],iL) >= (int64) (ii-P->genomeSAindexStart[iL]) ) {//this belongs to the next index
                         break;
                     };
@@ -246,7 +252,6 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
         };
 
     };
-//     time ( &rawtime );    cout << timeMonthDayTime(rawtime) << "SAi first" <<endl;
 
     for (uint isj=0;isj<nInd;isj++) {
         int64 ind1=0;
@@ -285,16 +290,16 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
     PackedArray SAio=SAi;
     SAio.allocateArray();
     ifstream oldSAiin("./DirTrue/SAindex");
-//     oldSAin.read(SAio.charArray,8*(P->genomeSAindexNbases+2));//skip first bytes
+    oldSAiin.read(SAio.charArray,8*(P->genomeSAindexNbases+2));//skip first bytes
     oldSAiin.read(SAio.charArray,SAio.lengthByte);
     oldSAiin.close();  
     
 
-//     for (uint ii=0;ii<P->nSA;ii++) {
-//         if (SA2[ii]!=SAo[ii]) {
-//             cout <<ii <<" "<< SA2[ii]<<" "<<SAo[ii]<<endl;
-//         };
-//     };
+    for (uint ii=0;ii<P->nSA;ii++) {
+        if (SA2[ii]!=SAo[ii]) {
+            cout <<ii <<" "<< SA2[ii]<<" "<<SAo[ii]<<endl;
+        };
+    };
 
 
     for (uint iL=0; iL < P->genomeSAindexNbases; iL++) {

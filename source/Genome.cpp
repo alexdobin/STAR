@@ -298,12 +298,12 @@ void Genome::genomeLoad(){//allocate and load Genome
             
             if (P->sjdbInsert.pass1 || P->sjdbInsert.pass2)
             {//reserve extra memory for insertion at the 1st and/or 2nd step
-                nGenomePass1=P->nGenome;
-                nSApass1=P->nSA;
+                nGenomePass1=P->nGenome+P->genomeInsertL;
+                nSApass1=P->nSA+2*P->genomeInsertL;
                 if (P->sjdbInsert.pass1)
                 {
-                    nGenomePass1+=P->limitSjdbInsertNsj*P->sjdbLength+P->genomeInsertL;
-                    nSApass1+=2*P->limitSjdbInsertNsj*P->sjdbLength+2*P->genomeInsertL;
+                    nGenomePass1+=P->limitSjdbInsertNsj*P->sjdbLength;
+                    nSApass1+=2*P->limitSjdbInsertNsj*P->sjdbLength;
                 };
                 nGenomePass2=nGenomePass1;
                 nSApass2=nSApass1;
@@ -323,7 +323,7 @@ void Genome::genomeLoad(){//allocate and load Genome
                 
                 SA.pointArray(SApass1.charArray+SApass1.lengthByte-SA.lengthByte);
             } else 
-            {//no insertions
+            {//no sjdb insertions
                 if (P->genomeInsertL==0)
                 {// no sequence insertion, simple allocation
                     G1=new char[P->nGenome+L+L];        
