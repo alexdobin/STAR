@@ -1,6 +1,6 @@
 #include "sjdbPrepare.h"
 #include "ErrorWarning.h"
-#include "serviceFuns.cpp"
+#include "serviceFuns.h"
 
 void sjdbPrepare (SjdbClass &sjdbLoci, Parameters *P, uint nGenomeReal, string outDir, char *G, char *Gsj) {
     uint *sjdbS=new uint [sjdbLoci.chr.size()];

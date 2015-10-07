@@ -206,6 +206,9 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <int>    (-1, -1, "sjdbScore", &sjdbScore));
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "sjdbInsertSave", &sjdbInsert.save)); 
     
+    //variation
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "varVCFfile", &var.vcfFile)); 
+
     //quant
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "quantMode", &quant.mode));
     parArray.push_back(new ParameterInfoScalar <int>     (-1, -1, "quantTranscriptomeBAMcompression", &quant.trSAM.bamCompression));
@@ -1117,6 +1120,13 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     //genome parameters
     genomeChrBinNbases=1LLU<<genomeChrBinNbits;
     
+    //variation
+    var.yes=false;
+    if (var.vcfFile!="-")
+    {
+        var.yes=true;
+    };     
+    
     inOut->logMain << "Finished loading and checking parameters\n" <<flush;
 };
 
@@ -1255,6 +1265,7 @@ void Parameters::chrInfoLoad() {//find chrStart,Length,nChr from Genome G
     //log
     for (uint ii=0; ii<nChrReal;ii++) {
         inOut->logMain << ii+1 <<"\t"<< chrName[ii] <<"\t"<<chrLength[ii]<<"\t"<<chrStart[ii]<<"\n"<<flush;
+        chrNameIndex[chrName[ii]]=ii;
     };
 };
 

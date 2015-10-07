@@ -24,6 +24,7 @@
 #include "ErrorWarning.h"
 #include "SjdbClass.h"
 #include "sjdbInsertJunctions.h"
+#include "Variation.h"
 #include "bam_cat.h"
 
 #include "htslib/htslib/sam.h"
@@ -97,8 +98,12 @@ int main(int argInN, char* argIn[]) {
 
     //calculate genome-related parameters
     Transcriptome *mainTranscriptome=NULL;
+    Variation *mainVar=NULL;
     
-    
+    if (P->var.yes)
+    {
+        mainVar=new Variation(P);
+    };
 /////////////////////////////////////////////////////////////////////////////////////////////////START
     if (P->runThreadN>1) {
         g_threadChunks.threadArray=new pthread_t[P->runThreadN];

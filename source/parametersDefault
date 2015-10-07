@@ -91,6 +91,10 @@ sjdbInsertSave                          Basic
 					Basic ... only small junction / transcript files
 					All   ... all files including big Genome, SA and SAindex - this will create a complete genome directory
 
+### Variation parameters
+varVCFfile                              -
+    string: path to the VCF file that contains variation data.
+
 ### Input Files
 inputBAMfile                -
     string: path to BAM input file, to be used with --runMode inputAlignmentsFromBAM

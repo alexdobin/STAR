@@ -1,6 +1,6 @@
 #include "Transcriptome.h"
 #include "ReadAlign.h"
-#include "serviceFuns.cpp"
+#include "serviceFuns.h"
 
 
 int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, uint32 *exLenCum1, uint16 exN1, Transcript &aT) {

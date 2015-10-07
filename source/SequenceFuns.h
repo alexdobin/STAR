@@ -16,7 +16,10 @@ void convertNucleotidesToNumbers(const char*, char*, uint);
 void revComplementNucleotides(char* ReadsIn, char* ReadsOut, uint Lread); //complement the numeric sequences
 char nuclToNumBAM(char cc);
 void nuclPackBAM(char* ReadsIn, char* ReadsOut, uint Lread);
+char convertNt01234(const char R0);//transform sequence  from ACGT into 0-1-2-3-4 code    
+
 uint chrFind(uint, uint, uint*); // find chromosome from global locus
 uint localSearch(const char*, uint, const char*, uint, double); //local search to clip adapter
 uint qualitySplit(char*, char*, uint, char, uint, uint, uint**);
+
 #endif

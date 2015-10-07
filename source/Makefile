@@ -48,6 +48,7 @@ OBJECTS = SharedMemory.o PackedArray.o SuffixArrayFuns.o STAR.o Parameters.o InO
         Parameters_openReadsFiles.cpp Parameters_closeReadsFiles.cpp \
         BAMoutput.o BAMfunctions.o ReadAlign_alignBAM.o BAMbinSortByCoordinate.o signalFromBAM.o bamRemoveDuplicates.o BAMbinSortUnmapped.o \
         bam_cat.o \
+        Variation.o serviceFuns.o \
         GlobalVariables.cpp
 
 SOURCES := $(wildcard *.cpp) $(wildcard *.c)

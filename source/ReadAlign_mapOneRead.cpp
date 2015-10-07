@@ -1,7 +1,7 @@
 #include "ReadAlign.h"
 #include "SequenceFuns.h"
 #include "Stats.h"
-#include "serviceFuns.cpp"
+#include "serviceFuns.h"
 
 int ReadAlign::mapOneRead() {   
     

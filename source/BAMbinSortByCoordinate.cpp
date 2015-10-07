@@ -1,6 +1,6 @@
 #include "BAMbinSortByCoordinate.h"
 #include "ErrorWarning.h"
-#include "serviceFuns.cpp"
+#include "serviceFuns.h"
 #include "BAMfunctions.h"
 
 void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, string dirBAMsort, BGZF *bgzfBAM, Parameters *P) {

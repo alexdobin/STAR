@@ -6,7 +6,7 @@
 #include "ErrorWarning.h"
 #include "SuffixArrayFuns.h"
 #include "SequenceFuns.h"
-#include "serviceFuns.cpp"
+#include "serviceFuns.h"
 #include "streamFuns.h"
 #include "binarySearch2.h"
 #include "funCompareUintAndSuffixes.h"

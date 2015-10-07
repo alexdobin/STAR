@@ -1,7 +1,7 @@
 #include "IncludeDefine.h"
 #include "Parameters.h"
 #include "ErrorWarning.h"
-#include "serviceFuns.cpp"
+#include "serviceFuns.h"
 #include "SjdbClass.h"
 #include "streamFuns.h"
 #include "TimeFunctions.h"
@@ -47,12 +47,6 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P, string dirOut) {//load gtf file
             exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
         };    
         
-        if (P->chrNameIndex.size()==0) 
-        {
-            for (uint ii=0;ii<P->nChrReal;ii++) {
-                P->chrNameIndex[P->chrName[ii]]=ii;
-            };        
-        };
         std::map <string,uint> transcriptIDnumber, geneIDnumber;
 
         uint exonN=0;

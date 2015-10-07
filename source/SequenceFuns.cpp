@@ -97,6 +97,30 @@ void convertNucleotidesToNumbers(const char* R0, char* R1, uint Lread) {//transf
                 };
 };
 
+char convertNt01234(const char R0) {//transform sequence  from ACGT into 0-1-2-3 code    
+    switch(R0)
+    {
+        case('a'): 
+        case('A'):
+            return 0;
+            break;
+        case('c'): 
+        case('C'):
+            return 1;
+            break;
+        case('g'): 
+        case('G'):
+            return 2;
+            break;
+        case('t'): 
+        case('T'):
+            return 3;
+            break;  
+        default:
+            return 4;
+    };
+};
+
 uint chrFind(uint Start, uint i2, uint* chrStart) {// find chromosome from global locus
     uint i1=0, i3;
     while (i1+1<i2) {

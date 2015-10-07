@@ -268,6 +268,13 @@ class Parameters {
           
         } quant;
         
+        //variation parameters
+        struct
+        {
+            bool yes;
+            string vcfFile;
+        } var;
+        
         //chimeric
         uint chimSegmentMin, chimJunctionOverhangMin; //min chimeric donor/acceptor length
         uint chimSegmentReadGapMax; //max read gap for stitching chimeric windows

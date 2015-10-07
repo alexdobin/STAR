@@ -1,5 +1,5 @@
 #include "Transcriptome.h"
-#include "serviceFuns.cpp"
+#include "serviceFuns.h"
 
 void Transcriptome::geneCountsAddAlign(uint nA, Transcript **aAll) {//add alignments from one read to gene counts
      if (nA>1) {

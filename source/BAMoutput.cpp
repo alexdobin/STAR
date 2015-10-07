@@ -2,7 +2,7 @@
 #include <sys/stat.h>
 #include "GlobalVariables.h"
 #include <pthread.h>
-#include "serviceFuns.cpp"
+#include "serviceFuns.h"
 #include "ThreadControl.h"
 
 BAMoutput::BAMoutput (int iChunk, string tmpDir, Parameters *Pin) {//allocate bam array

@@ -1,7 +1,7 @@
 #include "Transcriptome.h"
 #include "ReadAlign.h"
 #include "Transcript.h"
-#include "serviceFuns.cpp"
+#include "serviceFuns.h"
 
 uint ReadAlign::quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT) {
     uint nAlignT=0;    
