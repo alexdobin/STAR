@@ -783,11 +783,13 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     outSAMattrPresent.jI=false;
     outSAMattrPresent.RG=false;    
     outSAMattrPresent.XS=false;
+    outSAMattrPresent.vT=false;
+    outSAMattrPresent.vL=false;
     
     //for quant SAM output only NH and HI flags
     outSAMattrPresentQuant=outSAMattrPresent;
-    outSAMattrPresent.NH=true;
-    outSAMattrPresent.NH=true;
+    outSAMattrPresentQuant.NH=true;
+    outSAMattrPresentQuant.HI=true;
     outSAMattrOrderQuant.push_back(ATTR_NH);
     outSAMattrOrderQuant.push_back(ATTR_HI);
             
@@ -826,6 +828,12 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         } else if (vAttr1.at(ii)== "jI") {
             outSAMattrOrder.push_back(ATTR_jI);
             outSAMattrPresent.jI=true;
+        } else if (vAttr1.at(ii)== "vT") {
+            outSAMattrOrder.push_back(ATTR_vT);
+            outSAMattrPresent.jI=true;
+        } else if (vAttr1.at(ii)== "vL") {
+            outSAMattrOrder.push_back(ATTR_vL);
+            outSAMattrPresent.jI=true;            
         } else if (vAttr1.at(ii)== "RG") {
             outSAMattrOrder.push_back(ATTR_RG);
             outSAMattrOrderQuant.push_back(ATTR_RG);
@@ -843,6 +851,14 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             errOut <<"SOLUTION: re-run STAR with --outSAMattributes that contains only implemented attributes\n";
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
+    };
+    
+    if  (!var.yes && (outSAMattrPresent.vT | outSAMattrPresent.vL))
+    {
+        ostringstream errOut;
+        errOut <<"EXITING because of fatal PARAMETER error: --outSAMattributes contains vT and/or vL tag(s), but --varVCFfile is not set\n";
+        errOut <<"SOLUTION: re-run STAR with a --varVCFfile option, or without vT/vL tags in --outSAMattributes\n";
+        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);        
     };
     
     if (outSAMattrRG.size()>0 && !outSAMattrPresent.RG) {

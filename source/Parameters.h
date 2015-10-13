@@ -120,7 +120,7 @@ class Parameters {
         uint outSAMmultNmax,outSAMattrIHstart;
         string outSAMheaderCommentFile;
         int outSAMmapqUnique;
-        struct {bool NH,HI,AS,NM,MD,nM,jM,jI,RG,XS;} outSAMattrPresent, outSAMattrPresentQuant;
+        struct {bool NH,HI,AS,NM,MD,nM,jM,jI,RG,XS,vL,vT;} outSAMattrPresent, outSAMattrPresentQuant;
         vector <int> outSAMattrOrder, outSAMattrOrderQuant;
         int outBAMcompression;
         vector <string> outSAMtype;
@@ -274,6 +274,7 @@ class Parameters {
             bool yes;
             string vcfFile;
         } var;
+        
         
         //chimeric
         uint chimSegmentMin, chimJunctionOverhangMin; //min chimeric donor/acceptor length

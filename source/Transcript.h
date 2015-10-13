@@ -3,6 +3,7 @@
 
 #include "IncludeDefine.h"
 #include "Parameters.h"
+#include "Variation.h"
 
 class Transcript {
     public:
@@ -50,12 +51,17 @@ class Transcript {
         
         uint nUnique, nAnchor; //number of unique pieces in the alignment, number of anchor pieces in the alignment   
         
+        vector <int32> snpInd;
+        vector <int32> snpLoci;
+        vector <char> snpGt;
+        
         Transcript(); //resets to 0
         void reset(); //reset to 0
         void resetMapG(); // reset map to 0
         void resetMapG(uint); // reset map to 0 for Lread bases
         void add(Transcript*); // add
         void alignScore(char **Read1, char *G, Parameters *P);
+        int variationAdjust(Variation &Var, char *R);
 };
 
 #endif

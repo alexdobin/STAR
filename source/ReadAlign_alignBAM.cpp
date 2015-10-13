@@ -342,6 +342,18 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                     case ATTR_RG:
                         attrN+=bamAttrArrayWrite(P->outSAMattrRG.at(readFilesIndex),"RG",attrOutArray+attrN);                    
                         break;                    
+                    case ATTR_vL:
+                    {
+                        vector <int32> v1=trOut.snpLoci;
+                        attrN+=bamAttrArrayWrite(v1,"vL",attrOutArray+attrN);                                        
+                        break;
+                    };
+                    case ATTR_vT:
+                    {
+                        vector <char> v1=trOut.snpGt;
+                        attrN+=bamAttrArrayWrite(v1,"vT",attrOutArray+attrN);                                        
+                        break;
+                    };
                     default:
                         ostringstream errOut;
                         errOut <<"EXITING because of FATAL BUG: unknown/unimplemented SAM atrribute (tag): "<<outSAMattrOrder[ii] <<"\n";

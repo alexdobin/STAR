@@ -222,7 +222,6 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
         
         //calculate some final values for the transcript
         trA.roStart = (trA.roStr == 0) ? trA.rStart : Lread - trA.rStart - trA.rLength;     
-        trA.maxScore=Score;
         
         if (trA.exons[0][EX_iFrag]==trA.exons[trA.nExons-1][EX_iFrag]) {//mark single fragment transcripts
             trA.iFrag=trA.exons[0][EX_iFrag];
@@ -231,6 +230,12 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
             trA.iFrag=-1;
         };
 
+        //Variation
+        Score+=trA.variationAdjust(*RA->Var, R);
+        
+        trA.maxScore=Score;
+        
+        // transcript has been finalized, compare the score and record
         if (       Score+P->outFilterMultimapScoreRange >= wTr[0]->maxScore \
                 || ( trA.iFrag>=0 && Score+P->outFilterMultimapScoreRange >= RA->maxScoreMate[trA.iFrag] ) \
                 || P->chimSegmentMin>0) {

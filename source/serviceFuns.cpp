@@ -45,7 +45,7 @@ int splitString(const std::string &s, char delim, std::vector<std::string> &elem
     std::stringstream ss(s);
     std::string item;
     int maxL=0;
-    elems.empty();
+    elems.clear();
     while (std::getline(ss, item, delim)) {
         maxL=max(maxL, (int)item.size());
         elems.push_back(item);

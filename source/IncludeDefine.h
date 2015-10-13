@@ -79,6 +79,8 @@ typedef uint8_t uint8;
 #define ATTR_jI 8
 #define ATTR_XS 9
 #define ATTR_RG 10
+#define ATTR_vL 11
+#define ATTR_vT 12
 
 
 //BAM definitions

@@ -78,11 +78,6 @@ int main(int argInN, char* argIn[]) {
     };
     
     P->twoPass.pass2=false; //this is the 1st pass    
-
-    if (P->genomeFastaFiles.at(0)!="-")
-    {//insert sequences in the genome
-        
-    };
     
     SjdbClass sjdbLoci;
 
@@ -93,17 +88,10 @@ int main(int argInN, char* argIn[]) {
         sjdbInsertJunctions(P, P1, mainGenome, sjdbLoci);
     };
 
-
-
-
     //calculate genome-related parameters
     Transcriptome *mainTranscriptome=NULL;
-    Variation *mainVar=NULL;
-    
-    if (P->var.yes)
-    {
-        mainVar=new Variation(P);
-    };
+    mainGenome.Var=new Variation(P);
+
 /////////////////////////////////////////////////////////////////////////////////////////////////START
     if (P->runThreadN>1) {
         g_threadChunks.threadArray=new pthread_t[P->runThreadN];

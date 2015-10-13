@@ -9,6 +9,7 @@ ReadAlign::ReadAlign (Parameters* Pin, const Genome &genomeIn, Transcriptome *Tr
     SA=genomeIn.SA;
     SAi=genomeIn.SAi;
     sigG=genomeIn.sigG;
+    Var=genomeIn.Var;
     
     winBin = new uintWinBin* [2];  
     winBin[0] = new uintWinBin [P->winBinN];
