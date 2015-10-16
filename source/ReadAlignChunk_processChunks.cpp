@@ -61,6 +61,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                         };
                     };
                 } else if (nextChar=='>') {//fasta, can be multiline, which is converted to single line
+                    P->iReadAll++; //increment read number
                     for (uint imate=0; imate<P->readNmates; imate++) {
                         if (P->outFilterBySJoutStage!=2) {//not the 2nd stage of the 2-stage mapping                        
 

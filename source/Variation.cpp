@@ -41,21 +41,23 @@ void scanVCF(ifstream& vcf, bool load, Parameters* P, SNP& snp)
         
         if (chr.at(0)!='#')
         {
-            vcf >> pos >> id >> ref >> alt >> dummy >> dummy >> dummy >> dummy >> dummy >> sample;
+            vcf >> pos >> id >> ref >> alt >> dummy >> dummy >> dummy >> dummy >> sample;
             
             vector <string> altV(3);
             
             if (ref.size()==1 && splitString(alt,',',altV)==1)
             {
+                altV.insert(altV.begin(),ref);//add ref to the beginning
+                
                 if (P->chrNameIndex.count(chr)==0) {//chr not in Genome
                     if (!load)
                     {
                         P->inOut->logMain << "WARNING: while processing varVCFfile file=" << P->var.vcfFile <<": chromosome '"<<chr<<"' not found in Genome fasta file\n";
                     };
-                } else if (sample.size()<4)
+                } else if (sample.size()<3)
                 {
                     //undefined genotype
-                } else if (sample.at(3)!=':')
+                } else if (sample.size()>3 && sample.at(3)!=':')
                 {
                     if (!load)
                     {
@@ -63,6 +65,9 @@ void scanVCF(ifstream& vcf, bool load, Parameters* P, SNP& snp)
                     };
                 } else if (sample.at(0)=='0' && sample.at(2)=='0')
                 {    
+                    //both alleles are reference, no need to do anything                    
+                } else if (altV.at( atoi(&sample.at(0)) ).at(0)==ref.at(0) && altV.at( atoi(&sample.at(2)) ).at(0)==ref.at(0))
+                {
                     //both alleles are reference, no need to do anything
                 } else
                 {
@@ -70,12 +75,11 @@ void scanVCF(ifstream& vcf, bool load, Parameters* P, SNP& snp)
                     {
                         snp.loci[snp.N]=pos-1+P->chrStart[P->chrNameIndex[chr]];
                         snp.nt[snp.N][0]=convertNt01234( ref.at(0) );
-                        altV.insert(altV.begin(),ref);
                         snp.nt[snp.N][1]=convertNt01234( altV.at( atoi(&sample.at(0)) ).at(0) );
                         snp.nt[snp.N][2]=convertNt01234( altV.at( atoi(&sample.at(2)) ).at(0) );
                         
-//                         snp.nt[snp.N].ref=convertNt01234(ref.at(0));
-//                         snp.nt[snp.N].=convertNt01234(ref.at(0));
+                        //cout << chr <<"\t"<< pos <<"\t"<< ref.at(0) <<"\t"<< altV.at( atoi(&sample.at(0)) ).at(0) <<"\t"<< altV.at( atoi(&sample.at(2)) ).at(0) <<"\n";
+
                     };
                     snp.N++;
                 };
