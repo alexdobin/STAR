@@ -21,6 +21,9 @@ public:
 //     char **nt; //reference and alternative bases
 //     char *nt1; //1D array to store nt
     vector<array<char,3>> nt;//reference and alternative bases
+    
+    //methods
+    void snpOnBlocks(uint blockStart, uint blockL, vector<vector<array<int,2>>> &snpV);
 };
 
 class Variation
@@ -29,6 +32,7 @@ public:
     //methods
     Variation (Parameters* Pin); //create transcriptome structure, load and initialize parameters
     void loadVCF(string fileIn); //load VCF file
+    vector<vector<array<int,2>>> sjdbSnp(uint sjStart, uint sjEnd, uint sjdbOverhang); //calculates snp loci in sjdb sequences
     
     //variables
     bool yes;    

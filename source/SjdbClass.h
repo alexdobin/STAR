@@ -2,7 +2,6 @@
 #define DEF_SjdbClass
 
 #include "IncludeDefine.h"
-#include "Parameters.h"
 
 class SjdbClass {
 public:

@@ -769,10 +769,15 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             //inOut->fastaOutSeqs.open("Seqs.out.fasta");
         };
     };
+    
+    //variation
+    var.yes=false;
+    if (var.vcfFile!="-")
+    {
+        var.yes=true;
+    };         
         
     //outSAMattributes
-    
-    
     outSAMattrPresent.NH=false;//TODO re-write as class with constructor?
     outSAMattrPresent.HI=false;
     outSAMattrPresent.AS=false;
@@ -1135,13 +1140,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 
     //genome parameters
     genomeChrBinNbases=1LLU<<genomeChrBinNbits;
-    
-    //variation
-    var.yes=false;
-    if (var.vcfFile!="-")
-    {
-        var.yes=true;
-    };     
     
     inOut->logMain << "Finished loading and checking parameters\n" <<flush;
 };

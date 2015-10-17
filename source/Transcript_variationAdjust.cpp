@@ -17,7 +17,7 @@ int Transcript::variationAdjust(Variation &Var, char *R)
         int32 isnp=binarySearch1b <uint> (exons[ie][EX_G], Var.snp.loci, Var.snp.N);
         if (isnp>0)
         {
-            while (exons[ie][EX_G]+exons[ie][EX_L]>Var.snp.loci[isnp])
+            while (isnp<Var.snp.N && exons[ie][EX_G]+exons[ie][EX_L]>Var.snp.loci[isnp])
             {//these SNPs overlap the block
                 snpInd.push_back(isnp); //record snp index
                 snpLoci.push_back(Var.snp.loci[isnp]-Var.P->chrStart[Chr]);

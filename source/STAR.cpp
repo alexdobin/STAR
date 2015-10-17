@@ -79,6 +79,11 @@ int main(int argInN, char* argIn[]) {
     
     P->twoPass.pass2=false; //this is the 1st pass    
     
+
+    //calculate genome-related parameters
+    Transcriptome *mainTranscriptome=NULL;
+    mainGenome.Var=new Variation(P);
+    
     SjdbClass sjdbLoci;
 
     if (P->sjdbInsert.pass1) 
@@ -88,9 +93,6 @@ int main(int argInN, char* argIn[]) {
         sjdbInsertJunctions(P, P1, mainGenome, sjdbLoci);
     };
 
-    //calculate genome-related parameters
-    Transcriptome *mainTranscriptome=NULL;
-    mainGenome.Var=new Variation(P);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////START
     if (P->runThreadN>1) {
