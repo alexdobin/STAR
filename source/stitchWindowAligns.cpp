@@ -231,7 +231,7 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
         };
 
         //Variation
-        Score+=trA.variationAdjust(*RA->Var, R);
+        Score+=trA.variationAdjust(*RA->Var, R, RA->Read1, G, P);
         
         trA.maxScore=Score;
         

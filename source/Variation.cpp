@@ -136,17 +136,17 @@ void Variation::loadVCF(string fileIn)
     P->inOut->logMain << timeMonthDayTime(rawTime) <<" ..... Finished sorting VCF data"<<endl;
 };
 
-void SNP::snpOnBlocks(uint blockStart, uint blockL, vector<vector<array<int,2>>> &snpV)
+void SNP::snpOnBlocks(uint blockStart, uint blockL, int blockShift, vector<vector<array<int,2>>> &snpV)
 {
     int32 isnp=binarySearch1b <uint> (blockStart, loci, N);
     while (isnp<N && loci[isnp]<(blockStart+blockL))
     {
         for (int ii=0;ii<2;ii++)
         {
-            if (nt[isnp][ii+1]!=nt[isnp][0] && nt[isnp][ii+1]!=nt[isnp][ii])
+            if (nt[isnp][ii+1]!=nt[isnp][0])
             {//allele different from reference
                 array<int,2> snp1;
-                snp1[0]=(int) (loci[isnp]-blockStart);
+                snp1[0]=(int) (loci[isnp]-blockStart)+blockShift;
                 snp1[1]=(int) nt[isnp][ii+1];
                 snpV[ii].push_back(snp1);
             };
@@ -157,22 +157,23 @@ void SNP::snpOnBlocks(uint blockStart, uint blockL, vector<vector<array<int,2>>>
 
 vector<vector<array<int,2>>> Variation::sjdbSnp(uint sjStart, uint sjEnd, uint sjdbOverhang)
 {          
-    vector<vector<array<int,2>>> snpV(2), snpVout;
+    vector<vector<array<int,2>>> snpV(2);
     
     if (!yes)
     {//no variation
         return snpV;
     };
 
-    snp.snpOnBlocks(sjStart-sjdbOverhang,sjdbOverhang, snpV);
-    snp.snpOnBlocks(sjEnd+1,sjdbOverhang, snpV);
-    for (int ii=0; ii<2; ii++)
+    snp.snpOnBlocks(sjStart-sjdbOverhang, sjdbOverhang, 0,            snpV);
+    snp.snpOnBlocks(sjEnd+1,              sjdbOverhang, sjdbOverhang, snpV);
+
+    if (snpV.at(0).empty() && snpV.at(1).empty())
     {
-        if (!snpV.at(ii).empty())
-        {
-            snpVout.push_back(snpV.at(ii));
-        };
+        snpV.pop_back();
+    } else if (snpV.at(0) == snpV.at(1))
+    {
+        snpV.pop_back();
     };
      
-    return snpVout;
+    return snpV;
 };

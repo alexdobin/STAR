@@ -23,7 +23,7 @@ public:
     vector<array<char,3>> nt;//reference and alternative bases
     
     //methods
-    void snpOnBlocks(uint blockStart, uint blockL, vector<vector<array<int,2>>> &snpV);
+    void snpOnBlocks(uint blockStart, uint blockL, int blockShift, vector<vector<array<int,2>>> &snpV);
 };
 
 class Variation

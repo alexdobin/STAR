@@ -139,7 +139,7 @@ void sjdbPrepare (SjdbClass &sjdbLoci, Parameters *P, uint nGenomeReal, string o
     P->sjdbShiftRight=new uint8 [nsj1];    
     P->sjdbStrand=new uint8 [nsj1];  
     
-    vector<vector<vector<array<int,2>>>> sjdbSnp;
+    vector<vector<array<int,2>>> sjdbSnp;
     
     nsj1=0;
     for (uint ii=0;ii<nsj;ii++) {
@@ -174,9 +174,9 @@ void sjdbPrepare (SjdbClass &sjdbLoci, Parameters *P, uint nGenomeReal, string o
         };
         
         vector<vector<array<int,2>>> sjdbSnp1=genome.Var->sjdbSnp(sjdbSort[ii*3],sjdbSort[ii*3+1],P->sjdbOverhang);
-        for (int ii=0; ii<sjdbSnp1.size()+1; ii++)
+        for (int ia=0; ia<sjdbSnp1.size(); ia++)
         {
-            sjdbSnp.push_back(sjdbSnp1);
+            sjdbSnp.push_back(sjdbSnp1.at(ia));
 
             //record junction
             P->sjdbStart[nsj1]=sjdbSort[ii*3];
@@ -219,6 +219,12 @@ void sjdbPrepare (SjdbClass &sjdbLoci, Parameters *P, uint nGenomeReal, string o
         };            
         memcpy(Gsj+sjGstart,G+P->sjDstart[ii],P->sjdbOverhang);//sjdbStart contains 1-based intron loci
         memcpy(Gsj+sjGstart+P->sjdbOverhang,G+P->sjAstart[ii],P->sjdbOverhang);//sjdbStart contains 1-based intron loci
+
+        for (int ia=0; ia<sjdbSnp.at(ii).size(); ia++)
+        {//replace with SNPs
+            Gsj[sjGstart+sjdbSnp.at(ii).at(ia).at(0)]=sjdbSnp.at(ii).at(ia).at(1);
+        };
+
         sjGstart += P->sjdbLength;     
         Gsj[sjGstart-1]=GENOME_spacingChar;//spacing char between the sjdb seqs
         sjdbInfo << P->sjdbStart[ii] <<"\t"<< P->sjdbEnd[ii] <<"\t"<<(int) P->sjdbMotif[ii] <<"\t"<<(int) P->sjdbShiftLeft[ii] <<"\t"<<(int) P->sjdbShiftRight[ii]<<"\t"<<(int) P->sjdbStrand[ii] <<"\n";

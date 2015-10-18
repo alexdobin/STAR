@@ -1,14 +1,15 @@
 #include "Transcript.h"
 #include "serviceFuns.h"
 
-int Transcript::variationAdjust(Variation &Var, char *R)
+int Transcript::variationAdjust(Variation &Var, char *R, char **Read1, char *G, Parameters *P)
 {
     if (!Var.yes)
     {//no variation
         return 0;
     };
     
-    int dScore=0;//chnage in the score
+    int dScore=0;//change in the score
+    uint nMM1=0;
     
     //for each block, check whether it overlaps one or more SNPs
     for (uint ie=0; ie<nExons; ie++)
@@ -39,14 +40,22 @@ int Transcript::variationAdjust(Variation &Var, char *R)
                 
                 if (igt<3 && ntR != Var.snp.nt[isnp][0])
                 {//non-reference allele, correct nMM and score
-                    dScore+=2;
-                    nMM--;
-                    nMatch++;
+                    ++nMM1;
                 };
 
-                isnp++;
+                ++isnp;
             };
         };
     };
+
+    if (nMM1>0)
+    {//one or more mismtaches need to be corrected
+        uint nMMold=nMM;       
+        alignScore(Read1, G, P);
+        nMM-=nMM1;
+        nMatch+=nMM1;
+        dScore=2*(nMMold-nMM);//score only changes if the number of mismatches is reduced after SNP adjustment
+    };
+
     return dScore;
 };
