@@ -95,7 +95,7 @@ typedef uint8_t uint8;
 #define BAM_ATTR_MaxSize 1000
 
 #if defined COMPILE_FOR_LONG_READS
-    #define MAX_N_EXONS 200
+    #define MAX_N_EXONS 1000
 #else
     #define MAX_N_EXONS 20
 #endif     
