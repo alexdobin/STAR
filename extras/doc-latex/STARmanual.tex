@@ -173,9 +173,9 @@ The basic options to run a mapping job are as follows:
 \opt{readFilesIn} name(s) (with path) of the files containing the sequences to be mapped (e.g. RNA-seq FASTQ files). If using Illumina paired-end reads, the \optvr{read1} and \optv{read2} files have to be supplied. STAR can process both FASTA and FASTQ files. Multi-line (i.e. sequence split in multiple lines) FASTA file are supported. If the read files are compressed, use the \opt{readFilesCommand} \optvr{UncompressionCommand} option, where \optvr{UncompressionCommand} is the un-compression command that takes the file name as input parameter, and sends the uncompressed output to stdout. For example, for gzipped files (*.gz) use
 \code{\opt{readFilesCommand} \optv{zcat}}
 OR
-\code{\opt{readFilesCommand} \optv{gzip -c}}.
+\code{\opt{readFilesCommand} \optv{gunzip -c}}.
 For bzip2-compressed files, use
-\code{\opt{readFilesCommand} \optv{bzip2 -c}}.
+\code{\opt{readFilesCommand} \optv{bunzip2 -c}}.
 \end{itemize}
 
 \subsection{Advanced options.}
