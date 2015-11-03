@@ -1,3 +1,5 @@
+Fixed a bug with genome generation for annotations without spliece junctions.
+For STARlong, increased compilation-time max read length to 500000 and max number of exons to 1000
 Implemented on the fly insertion of the extra sequences into the genome indexes.
 Implemented --alignEndsType Extend3pOfRead1 option for full extension of the 3' end of read 1.
 Fixed a bug in the --alignEndsType Extend5pOfRead1 option.

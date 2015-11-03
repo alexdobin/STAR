@@ -405,6 +405,7 @@ void genomeGenerate(Parameters *P) {
         
         //write an extra 0 at the end of the array, filling the last bytes that otherwise are not accessible, but will be written to disk
         //this is - to avoid valgrind complaints. Note that SA2 is allocated with plenty of space to spare.
+        P->nSAbyte=mainGenome.SA.lengthByte;
         SA2.writePacked(P->nSA,0);
     };
     
