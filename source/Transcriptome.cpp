@@ -2,8 +2,6 @@
 #include "streamFuns.h"
 #include "GlobalVariables.h"
 
-//"ERROR_011000"
-
 Transcriptome::Transcriptome (Parameters* Pin) {
     
     P=Pin;
@@ -12,7 +10,7 @@ Transcriptome::Transcriptome (Parameters* Pin) {
     if ( P->quant.trSAM.yes ) {//load exon-transcript structures
         //load tr and ex info
 
-        ifstream & trinfo = ifstrOpen(trInfoDir+"/transcriptInfo.tab", "ERROR_011001", "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step",P);
+        ifstream & trinfo = ifstrOpen(trInfoDir+"/transcriptInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step",P);
 
         trinfo >> nTr;
         trS=new uint [nTr];
@@ -32,7 +30,7 @@ Transcriptome::Transcriptome (Parameters* Pin) {
 
         trinfo.close();
 
-        ifstream & exinfo = ifstrOpen(trInfoDir+"/exonInfo.tab", "ERROR_011002", "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
+        ifstream & exinfo = ifstrOpen(trInfoDir+"/exonInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
 
         exinfo >> nEx;
         exSE = new uint32 [2*nEx];
@@ -50,7 +48,7 @@ Transcriptome::Transcriptome (Parameters* Pin) {
     };
     
     if ( P->quant.geCount.yes ) {//load exon-gene structures
-        ifstream & exinfo = ifstrOpen(trInfoDir+"/exonGeTrInfo.tab", "ERROR_011003", "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
+        ifstream & exinfo = ifstrOpen(trInfoDir+"/exonGeTrInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
         exinfo >> exG.nEx;
 
         exG.s=new uint64[exG.nEx];
@@ -74,7 +72,7 @@ Transcriptome::Transcriptome (Parameters* Pin) {
             exG.eMax[iex]=max(exG.eMax[iex-1],exG.e[iex]);
         };        
         
-        ifstream & geStream = ifstrOpen(trInfoDir+"/geneInfo.tab", "ERROR_011004", "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
+        ifstream & geStream = ifstrOpen(trInfoDir+"/geneInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
         geStream >> nGe;
         geID.resize(nGe);
         for (uint ii=0;ii<nGe;ii++) {

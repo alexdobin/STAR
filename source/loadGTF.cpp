@@ -167,7 +167,7 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P, string dirOut) {//load gtf file
 
             qsort((void*) exgeLoci, exonN, sizeof(uint)*GTF_exgeLoci_size, funCompareArrays<uint,5>);
 
-            ofstream & exgeOut = ofstrOpen(dirOut+"/exonGeTrInfo.tab","ERROR_00201",P);
+            ofstream & exgeOut = ofstrOpen(dirOut+"/exonGeTrInfo.tab",ERROR_OUT,P);
             exgeOut<<exonN<<"\n";
             for (uint iex=0; iex<exonN; iex++) {
                  exgeOut<<exgeLoci[GTF_exgeExStart(iex)] <<"\t"<<  exgeLoci[GTF_exgeExEnd(iex)] <<"\t"<< exgeLoci[GTF_exgeExStrand(iex)] \
@@ -175,7 +175,7 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P, string dirOut) {//load gtf file
             };
             exgeOut.close();
 
-            ofstream & geOut = ofstrOpen(dirOut+"/geneInfo.tab","ERROR_00202",P);
+            ofstream & geOut = ofstrOpen(dirOut+"/geneInfo.tab",ERROR_OUT,P);
             geOut << geneID.size() << "\n";
             for (uint ig=0; ig<geneID.size(); ig++) {//just geneID for now
                 geOut << geneID.at(ig) <<"\n";

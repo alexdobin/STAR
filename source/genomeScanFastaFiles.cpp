@@ -19,6 +19,12 @@ uint genomeScanFastaFiles (Parameters *P, char* G, bool flagRun) {//scans fasta 
             errOut << "EXITING because of INPUT ERROR: could not open genomeFastaFile: " <<P->genomeFastaFiles.at(ii) <<"\n";
             exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);            
         };
+        fileIn.peek();
+        if ( !fileIn.good() ) {//
+            ostringstream errOut;
+            errOut << "EXITING because of INPUT ERROR: could not read from genomeFastaFile: " <<P->genomeFastaFiles.at(ii) <<"\n";
+            exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);            
+        };        
         while(!fileIn.eof()) {//read each file until eof
             string lineIn (4096,'.');
             getline(fileIn,lineIn);
