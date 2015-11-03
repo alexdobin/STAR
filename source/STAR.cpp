@@ -27,13 +27,33 @@
 #include "bam_cat.h"
 
 #include "htslib/htslib/sam.h"
+#include "parametersDefault.xxd"
+
+
+
+void usage() {
+    printf("Usage: STAR  [options]... --genomeDir REFERENCE   --readFilesIn R1.fq R2.fq\n");
+    printf("Spliced Transcripts Alignment to a Reference (c) Alexander Dobin, 2009-2015\n\n");
+    
+    std::cout << parametersDefault;
+    
+    printf("For more details see:\n");
+    printf("<https://github.com/alexdobin/STAR>\n");
+    printf("<https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf>\n");
+    
+    exit(0);
+}
+
 
 int main(int argInN, char* argIn[]) {
-   
+    // If no argument is given, or the first argument is either '-h' or '--help', run usage()
+    if((argInN == 1) || (argInN == 2 && (strcmp("-h",argIn[1]) == 0 || strcmp ("--help",argIn[1]) == 0 ))) {
+        usage();
+    }
+
     time(&g_statsAll.timeStart);
-   
+
     Parameters *P = new Parameters; //all parameters
-       
     P->inputParameters(argInN, argIn);
     
     *(P->inOut->logStdOut) << timeMonthDayTime(g_statsAll.timeStart) << " ..... Started STAR run\n" <<flush;           
