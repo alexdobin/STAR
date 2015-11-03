@@ -58,8 +58,8 @@ void fstreamWriteBig(std::ofstream &S, char* A, unsigned long long N, std::strin
     P->inOut->logMain << " done\n" <<flush;
 };
 
-void ofstrOpen (std::string fileName, std::string errorID, Parameters *P, ofstream & ofStream) {//open file 'fileName', generate error if cannot open
-    ofStream.open(fileName.c_str(), std::fstream::out | std::fstream::trunc);
+std::ofstream & ofstrOpen (std::string fileName, std::string errorID, Parameters *P) {//open file 'fileName', generate error if cannot open
+    std::ofstream & ofStream = *new std::ofstream(fileName.c_str(), std::fstream::out | std::fstream::trunc);
     if (ofStream.fail()) {//
 //         dir1=fileName.substr(0,fileName.find_last_of("/")+1);
 //         if (dir1=="") dir1="./";
@@ -68,12 +68,13 @@ void ofstrOpen (std::string fileName, std::string errorID, Parameters *P, ofstre
         errOut << "Solution: check that the path exists and you have write permission for this file\n";
         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_FILE_OPEN, *P);
     };    
+    return ofStream;
 };
 
 
-void ifstrOpen (std::string fileName, std::string errorID, std::string solutionString, Parameters *P, ifstream & ifStream) {
+std::ifstream & ifstrOpen (std::string fileName, std::string errorID, std::string solutionString, Parameters *P) {
     //open file 'fileName', generate error if cannot open
-    ifStream.open(fileName.c_str());
+    std::ifstream & ifStream = *new std::ifstream(fileName.c_str());
     if (ifStream.fail()) {//
         ostringstream errOut;
         errOut << errorID<<": exiting because of *INPUT FILE* error: could not open input file "<< fileName <<"\n";
@@ -83,11 +84,12 @@ void ifstrOpen (std::string fileName, std::string errorID, std::string solutionS
         };
         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_FILE_OPEN, *P);
     };    
+    return ifStream;
 };
 
-void ifstrOpenGenomeFile (std::string fileName, std::string errorID, Parameters *P, ifstream & ifStream) {
+ifstream & ifstrOpenGenomeFile (std::string fileName, std::string errorID, Parameters *P) {
      //open one of the genome files
-     ifstrOpen(P->genomeDir+"/"+fileName, errorID,  "if this file is missing from the genome directory, you will need to *re-generate the genome*", P, ifStream);
+     return ifstrOpen(P->genomeDir+"/"+fileName, errorID,  "if this file is missing from the genome directory, you will need to *re-generate the genome*", P);
 };
 
 void copyFile(string fileIn, string fileOut)
