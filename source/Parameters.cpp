@@ -92,6 +92,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "outSAMheaderCommentFile", &outSAMheaderCommentFile));
     parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "outBAMcompression", &outBAMcompression));
     parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "outBAMsortingThreadN", &outBAMsortingThreadN));
+    parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "outSAMfilter", &outSAMfilter.mode));
 
 
    //output SJ filtering
@@ -648,6 +649,21 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             };
         };    
     };
+    
+    outSAMfilter.yes=false;    
+    outSAMfilter.KeepOnlyAddedReferences=false;
+    if (outSAMfilter.mode.at(0)=="KeepOnlyAddedReferences")
+    {
+        outSAMfilter.yes=true;
+        outSAMfilter.KeepOnlyAddedReferences=true;
+    } else if (outSAMfilter.mode.at(0)!="None")
+    {
+        ostringstream errOut;
+        errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented value for --outSAMfilter: "<<outSAMfilter.mode.at(0) <<"\n";
+        errOut <<"SOLUTION: specify one of the allowed values: KeepOnlyAddedReferences or None\n";
+        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);                
+    };
+    
     
     readNmates=readFilesIn.size(); //for now the number of mates is defined by the number of input files
     

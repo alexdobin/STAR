@@ -291,6 +291,7 @@ void Genome::genomeLoad(){//allocate and load Genome
         if (P->genomeFastaFiles.at(0)!="-")
         {//will insert sequences in the genome, now estimate the extra size
            uint oldlen=P->chrStart.back();//record the old length
+           P->genomeInsertChrIndFirst=P->nChrReal+1;
            P->genomeInsertL=genomeScanFastaFiles(P,G,false)-oldlen; 
         };
         

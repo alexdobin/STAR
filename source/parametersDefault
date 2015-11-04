@@ -250,6 +250,10 @@ outSAMheaderPG          -
 outSAMheaderCommentFile -
     string: path to the file with @CO (comment) lines of the SAM header
 
+outSAMfilter            None
+    string(s): filter the output into main SAM/BAM files
+                        KeepOnlyAddedReferences ... only keep the reads for which all alignments are to the extra reference sequences added with --genomeFastaFiles at the mapping stage.
+
 outBAMcompression       1
     int: -1 to 10  BAM compression level, -1=default compression (6?), 0=no compression, 10=maximum compression
 

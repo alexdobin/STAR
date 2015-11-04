@@ -1,3 +1,4 @@
+Implemented --outSAMfilter KeepOnlyAddedReferences option.
 Implemented --help option - thanks to @yhoogstrate for the code.
 Improved treatment of the streams and files - thanks to Alex Finkel for the code.
 Streamlined Makefile - thanks to Christian Krause for helpful suggestions.

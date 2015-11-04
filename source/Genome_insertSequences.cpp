@@ -19,10 +19,10 @@ if (P->genomeFastaFiles.at(0)!="-")
     uint sjdblen=P->nGenome-(P->chrStart.back()-P->genomeInsertL);//length of sjdb sequences
     memmove(G+P->chrStart.back(),G+P->chrStart.back()-P->genomeInsertL,sjdblen);
     memset(G+P->chrStart.back()-P->genomeInsertL, GENOME_spacingChar, P->genomeInsertL);//fill empty space with spacing characters
+        
     genomeScanFastaFiles(P, G+P->chrStart.back()-P->genomeInsertL, true); //read the seqs from file(s) into the free space
     uint64 nGenomeOld=P->nGenome;
     P->nGenome=P->chrStart.back()+sjdblen; 
-
     //insert new sequences into the SA
     insertSeqSA(SA, SApass1, SAi, G, G+P->chrStart.back()-P->genomeInsertL, nGenomeOld-sjdblen, P->genomeInsertL, sjdblen, P);
 

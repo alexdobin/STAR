@@ -67,9 +67,13 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P, string dirOut) {//load gtf file
         
         if (exonN==0)
         {
-            P->inOut->logMain << "WARNING: found no exons in sjdbGTFfile=" << P->sjdbGTFfile <<endl;
-            return 0;
+            ostringstream errOut;
+            errOut << "Fatal INPUT FILE error, no ""exon"" lines in the GTF file: " << P->sjdbGTFfile <<"\n";
+            errOut << "Solution: check the formatting of the GTF file, it must contain some lines woth ""exon"" in the 3rd column. ";
+            errOut << "If exons are marked with a different word, use --sjdbGTFfeatureExon .\n";
+            exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
         };
+        
         uint* exonLoci=new uint [exonN*GTF_exonLoci_size];
         char* transcriptStrand = new char [exonN];
         vector <string> transcriptID, geneID;
@@ -150,6 +154,13 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P, string dirOut) {//load gtf file
             };//if (chr1.substr(0,1)!="#" && featureType=="exon")
         };//
         
+        if (exonN==0)
+        {
+            ostringstream errOut;
+            errOut << "Fatal INPUT FILE error, no valid ""exon"" lines in the GTF file: " << P->sjdbGTFfile <<"\n";
+            errOut << "Solution: check the formatting of the GTF file. Most likely cause is the difference in chromosome naming between GTF and FASTA file.\n";
+            exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+        };        
         //sort exonLoci by transcript ID and exon coordinates
         qsort((void*) exonLoci, exonN, sizeof(uint)*GTF_exonLoci_size, funCompareUint2);
 

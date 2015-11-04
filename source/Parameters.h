@@ -42,6 +42,8 @@ class Parameters {
         vector <string> genomeFastaFiles; 
         uint genomeSAsparseD;//sparsity=distance between indices
         uint genomeInsertL; //total length of the sequence to be inserted on the fly
+        uint genomeInsertChrIndFirst; //index of the first inserted chromosome
+        
         //binning,windows,anchors
         uint genomeChrBinNbits, genomeChrBinNbases, chrBinN, *chrBin;
         uint winBinChrNbits, winBinNbits, winAnchorDistNbins, winFlankNbins, winBinN;
@@ -128,6 +130,13 @@ class Parameters {
         int outBAMsortingThreadN, outBAMsortingThreadNactual;
         uint64 *outBAMsortingBinStart; //genomic starts for bins for sorting BAM files
         uint16 outSAMflagOR, outSAMflagAND;
+        
+        struct
+        {
+            vector <string> mode;
+            bool yes;
+            bool KeepOnlyAddedReferences;
+        } outSAMfilter;
         
         string outReadsUnmapped;
         int outQSconversionAdd;

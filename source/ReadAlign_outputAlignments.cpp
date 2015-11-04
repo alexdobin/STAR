@@ -30,6 +30,7 @@ void ReadAlign::outputAlignments() {
     } else {//output transcripts
 
         outFilterPassed=true;
+        
         if (P->outFilterBySJoutStage==1) {//filtering by SJout
             for (uint iTr=0;iTr<nTr;iTr++) {//check transcript for unannotated junctions
                 for (uint iex=0;iex<trMult[iTr]->nExons-1;iex++) {//check all junctions
@@ -67,6 +68,21 @@ void ReadAlign::outputAlignments() {
         };        
 
         if (outFilterPassed) {
+            bool outSAMfilterYes=true;
+            if (P->outSAMfilter.yes)
+            {
+                if (P->outSAMfilter.KeepOnlyAddedReferences)
+                {
+                     for (uint itr=0;itr<nTr;itr++) 
+                     {//check if transcripts map to chr other than added references
+                         if (trMult[itr]->Chr<P->genomeInsertChrIndFirst)
+                         {
+                             outSAMfilterYes=false;
+                             break;
+                         };
+                     };
+                };
+            };            
             if (nTr>1) {//multimappers
                 statsRA.mappedReadsM++;
                 unmapType=-1;
@@ -80,13 +96,13 @@ void ReadAlign::outputAlignments() {
                 exitWithError(errOut.str(), std::cerr, P->inOut->logMain, EXIT_CODE_BUG, *P);                    
             };            
             
-            if (P->outSAMbool){//SAM output
+            if (P->outSAMbool && outSAMfilterYes){//SAM output
                 for (uint iTr=0;iTr<nTr;iTr++) {//write all transcripts
                     outBAMbytes+=outputTranscriptSAM(*(trMult[iTr]), nTr, iTr, (uint) -1, (uint) -1, 0, -1, NULL, outSAMstream);
                 };
             };
             
-            if (P->outBAMunsorted || P->outBAMcoord) {//BAM output
+            if ((P->outBAMunsorted || P->outBAMcoord) && outSAMfilterYes) {//BAM output
                 for (uint iTr=0;iTr<nTr;iTr++) {//write all transcripts                     
                     alignBAM(*(trMult[iTr]), nTr, iTr, P->chrStart[trMult[iTr]->Chr], (uint) -1, (uint) -1, 0, -1, NULL, P->outSAMattrOrder,outBAMoneAlign, outBAMoneAlignNbytes);
                     for (uint imate=0; imate<P->readNmates; imate++) {//output each mate
