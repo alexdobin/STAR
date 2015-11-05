@@ -4,14 +4,14 @@
 #
 #    Author: John Marshall <jm18@sanger.ac.uk>
 
-CC     = gcc
+CC     ?= gcc
 AR     = ar
 RANLIB = ranlib
 
 # TODO: edit cram code to remove need for -DSAMTOOLS
-CPPFLAGS = -I. -DSAMTOOLS=1
+CPPFLAGS += -I. -DSAMTOOLS=1
 # TODO: probably update cram code to make it compile cleanly with -Wc++-compat
-CFLAGS   = -g -Wall -O2
+CFLAGS   := -g -Wall -O2 $(CFLAGS)
 EXTRA_CFLAGS_PIC = -fpic
 LDFLAGS  =
 LDLIBS   =
