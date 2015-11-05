@@ -1,5 +1,6 @@
 # user may define these whole flags
-# LDFLAGS 
+# LDFLAGS
+# CPPFLAGS
 # CXXFLAGS
 # CFLAGS
 
@@ -8,7 +9,7 @@ LDFLAGSextra ?=
 CXXFLAGSextra ?=
 
 # user may define the compiler
-CXX ?=g++
+CXX ?= g++
 
 # pre-defined flags
 LDFLAGS_shared := -pthread -Lhtslib -Bstatic -lhts -Bdynamic -lz -lrt
@@ -23,7 +24,7 @@ CXXFLAGS_common := -pipe -std=c++0x -Wall -Wextra -fopenmp $(COMPTIMEPLACE)
 CXXFLAGS_main := -O3 $(CXXFLAGS_common)
 CXXFLAGS_gdb :=  -O0 -g $(CXXFLAGS_common)
 
-CFLAGS ?= -O3 -pipe -Wall -Wextra 
+CFLAGS := -O3 -pipe -Wall -Wextra $(CFLAGS)
 
 
 ##########################################################################################################
@@ -53,10 +54,10 @@ SOURCES := $(wildcard *.cpp) $(wildcard *.c)
 
 
 %.o : %.cpp
-	$(CXX) -c $(CXXFLAGS) $<
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<
 
 %.o : %.c
-	$(CXX) -c $(CFLAGS) $<
+	$(CXX) -c $(CPPFLAGS) $(CFLAGS) $<
 
 all: STAR
 
@@ -99,63 +100,63 @@ htslib/libhts.a :
 parametersDefault.xxd: parametersDefault
 	xxd -i parametersDefault > parametersDefault.xxd
 
-STAR : CXXFLAGS ?= $(CXXFLAGSextra) $(CXXFLAGS_main)
-STAR : LDFLAGS ?= $(LDFLAGSextra) $(LDFLAGS_shared)
+STAR : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_main) $(CXXFLAGS)
+STAR : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_shared) $(LDFLAGS)
 STAR : Depend.list parametersDefault.xxd $(OBJECTS)
 	$(CXX) -o STAR $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
 
-POSIXSHARED : CXXFLAGS ?= $(CXXFLAGSextra) $(CXXFLAGS_main) -DPOSIX_SHARED_MEM
-POSIXSHARED : LDFLAGS ?= $(LDFLAGSextra) $(LDFLAGS_shared)
+POSIXSHARED : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_main) -DPOSIX_SHARED_MEM $(CXXFLAGS)
+POSIXSHARED : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_shared) $(LDFLAGS)
 POSIXSHARED : Depend.list parametersDefault.xxd $(OBJECTS)
 	$(CXX) -o STAR $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
 
-STARstatic : CXXFLAGS ?= $(CXXFLAGSextra) $(CXXFLAGS_main)
-STARstatic : LDFLAGS ?= $(LDFLAGSextra) $(LDFLAGS_static)
+STARstatic : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_main) $(CXXFLAGS)
+STARstatic : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_static) $(LDFLAGS)
 STARstatic : Depend.list parametersDefault.xxd $(OBJECTS)
 	$(CXX) -o STAR $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
 
-STARlong : CXXFLAGS ?= $(CXXFLAGSextra) $(CXXFLAGS_main) -D'COMPILE_FOR_LONG_READS'
-STARlong : LDFLAGS ?= $(LDFLAGSextra) $(LDFLAGS_shared)
+STARlong : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_main) -D'COMPILE_FOR_LONG_READS' $(CXXFLAGS)
+STARlong : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_shared) $(LDFLAGS)
 STARlong : Depend.list parametersDefault.xxd $(OBJECTS)
 	$(CXX) -o STARlong $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
 
-STARlongStatic : CXXFLAGS ?= $(CXXFLAGSextra) $(CXXFLAGS_main) -D'COMPILE_FOR_LONG_READS'
-STARlongStatic : LDFLAGS ?= $(LDFLAGSextra) $(LDFLAGS_static)
+STARlongStatic : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_main) -D'COMPILE_FOR_LONG_READS' $(CXXFLAGS)
+STARlongStatic : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_static) $(LDFLAGS)
 STARlongStatic : Depend.list parametersDefault.xxd $(OBJECTS)
 	$(CXX) -o STARlong $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
 
-gdb : CXXFLAGS ?= $(CXXFLAGSextra) $(CXXFLAGS_gdb)
-gdb : LDFLAGS ?= $(LDFLAGSextra) $(LDFLAGS_gdb)
+gdb : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_gdb) $(CXXFLAGS)
+gdb : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_gdb) $(LDFLAGS)
 gdb : Depend.list parametersDefault.xxd $(OBJECTS)
 	$(CXX) -o STAR $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
 
-gdb-long : CXXFLAGS ?= $(CXXFLAGSextra) $(CXXFLAGS_gdb) -D'COMPILE_FOR_LONG_READS'
-gdb-long : LDFLAGS ?= $(LDFLAGSextra) $(LDFLAGS_gdb)
+gdb-long : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_gdb) -D'COMPILE_FOR_LONG_READS' $(CXXFLAGS)
+gdb-long : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_gdb) $(LDFLAGS)
 gdb-long : Depend.list parametersDefault.xxd $(OBJECTS)
 	$(CXX) -o STARlong $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
 
-STARforMacStatic : CXXFLAGS ?= $(CXXFLAGSextra) $(CXXFLAGS_main) -D'COMPILE_FOR_MAC'
-STARforMacStatic : LDFLAGS ?= $(LDFLAGSextra) $(LDFLAGS_Mac_static)
+STARforMacStatic : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_main) -D'COMPILE_FOR_MAC' $(CXXFLAGS)
+STARforMacStatic : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_Mac_static) $(LDFLAGS)
 STARforMacStatic : Depend.list parametersDefault.xxd $(OBJECTS)
 	$(CXX) -o STAR $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
 
 ######################################################### all trargets below are not supported and not recommended!
 
-STARforMac : CXXFLAGS=-D'COMPILE_FOR_MAC' -I ./Mac_Include/ $(CXXFLAGS_main)
+STARforMac : CXXFLAGS := -D'COMPILE_FOR_MAC' -I ./Mac_Include/ $(CXXFLAGS_main) $(CXXFLAGS)
 STARforMac : parametersDefault.xxd $(OBJECTS)
 	$(CXX) -o STAR $(CXXFLAGS) $(LDFLAGS_Mac) $(OBJECTS)
 
 
-STARlongForMacStatic : CXXFLAGS=-D'COMPILE_FOR_LONG_READS' -D'COMPILE_FOR_MAC' -I ./Mac_Include/ $(CXXFLAGS_main)
+STARlongForMacStatic : CXXFLAGS := -D'COMPILE_FOR_LONG_READS' -D'COMPILE_FOR_MAC' -I ./Mac_Include/ $(CXXFLAGS_main) $(CXXFLAGS)
 STARlongForMacStatic : parametersDefault.xxd $(OBJECTS)
 	$(CXX) -o STARlong $(CXXFLAGS) $(LDFLAGS_Mac_static) $(OBJECTS)
 
 #
-STARforMacGDB : CXXFLAGS=-D'COMPILE_FOR_MAC' -I ./Mac_Include/ $(CXXFLAGS_gdb)
+STARforMacGDB : CXXFLAGS := -D'COMPILE_FOR_MAC' -I ./Mac_Include/ $(CXXFLAGS_gdb) $(CXXFLAGS)
 STARforMacGDB : parametersDefault.xxd $(OBJECTS)
 	$(CXX) -o STAR $(CXXFLAGS_gdb) $(OBJECTS) $(LDFLAGS_gdb)
 
-localChains : CXXFLAGS=-D'OUTPUT_localChains' $(CXXFLAGS_main)
+localChains : CXXFLAGS := -D'OUTPUT_localChains' $(CXXFLAGS_main) $(CXXFLAGS)
 localChains : Depend.list parametersDefault.xxd $(OBJECTS)
 	$(CXX) -o STAR $(CXXFLAGS) $(LDFLAGS) $(OBJECTS)
 
