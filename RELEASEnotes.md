@@ -1,4 +1,26 @@
+STAR 2.4.5a 2015/11/06
+======================
+
+**STAR now uses essential c++11 features. Compiling from sources requires gcc 4.7.0 or later.**
+
+Major new features:
+-------------------
+1. It is now possible to add extra sequences to the reference genome ont the fly (without re-generating the genome) by specifying 
+_--genomeFastaFiles /path/to/genome/fasta1 /path/to/genome/fasta2_ at the mapping stage. 
+
+2. By default, the order of the multi-mapping alignments for each read is not truly random.
+The _--outMultimapperOrder Random_ option outputs multiple alignments for each read in random order, 
+and also also randomizes the choice of the primary alignment from the highest scoring alignments. 
+Parameter _--runRNGseed_ can be used to set the random generator seed. 
+With this option, the ordering of multi-mapping alignments of each read, 
+and the choice of the primary alignment will vary from run to run, unless only one thread is used and the seed is kept constant.
+
+3. The --outSAMmultNmax parameter limits the number of output alignments (SAM lines) for multimappers. 
+For instance, _--outSAMmultNmax 1_ will output exactly one SAM line for each mapped read.
+
+
 STAR 2.4.2a 2015/06/19
+======================
 
 New features:
 
@@ -20,8 +42,8 @@ With --quantMode TranscriptomeSAM GeneCounts, and get both the Aligned.toTranscr
 
 
 
-################################################################################################################################################################
 STAR 2.4.1a 2015/04/17
+======================
 
 New features:
 

@@ -1,8 +1,10 @@
 STAR 2.4.5a 2015/11/06
 ======================
 
-Major new feature:
------------------
+**STAR now uses essential c++11 features and requires gcc 4.7.0 or later.**
+
+Major new features:
+-------------------
 * Implemented on the fly insertion of the extra sequences into the genome indexes.
 * Implemented --outSAMmultNmax parameter to limit the number of output alignments for multimappers.
 * Implemented --outMultimapperOrder Random option to output multiple alignments in random order. 
