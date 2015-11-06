@@ -33,6 +33,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "runMode", &runMode));
     parArray.push_back(new ParameterInfoScalar <int> (-1, -1, "runThreadN", &runThreadN));        
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "runDirPerm", &runDirPermIn));
+    parArray.push_back(new ParameterInfoScalar <int> (-1, -1, "runRNGseed", &runRNGseed));        
     
     //genome
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "genomeDir", &genomeDir));
@@ -73,6 +74,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <string>     (-1, 2, "outStd", &outStd));        
     parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "outReadsUnmapped", &outReadsUnmapped));
     parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "outQSconversionAdd", &outQSconversionAdd));
+    parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "outMultimapperOrder", &outMultimapperOrder.mode));
     
     //outSAM
     parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "outSAMtype", &outSAMtype));    
@@ -93,6 +95,8 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "outBAMcompression", &outBAMcompression));
     parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "outBAMsortingThreadN", &outBAMsortingThreadN));
     parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "outSAMfilter", &outSAMfilter.mode));
+    parArray.push_back(new ParameterInfoScalar <uint>     (-1, -1, "outSAMmultNmax", &outSAMmultNmax));
+    parArray.push_back(new ParameterInfoScalar <uint>     (-1, -1, "outSAMattrIHstart", &outSAMattrIHstart));
 
 
    //output SJ filtering
@@ -663,7 +667,21 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         errOut <<"SOLUTION: specify one of the allowed values: KeepOnlyAddedReferences or None\n";
         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);                
     };
-    
+        
+    if (outMultimapperOrder.mode=="Old_2.4")
+    {
+        outMultimapperOrder.random=false;      
+    } else if (outMultimapperOrder.mode=="Random")
+    {
+        outMultimapperOrder.random=true;
+    } else
+    {
+        ostringstream errOut;
+        errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented value for --outMultimapperOrder: "<<outMultimapperOrder.mode <<"\n";
+        errOut <<"SOLUTION: specify one of the allowed values: Old_2.4 or SortedByCoordinate or Random\n";
+        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);                
+    };
+        
     
     readNmates=readFilesIn.size(); //for now the number of mates is defined by the number of input files
     

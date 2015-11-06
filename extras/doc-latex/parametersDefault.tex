@@ -33,6 +33,9 @@
   \optOpt{User{\textunderscore}RWX}   \optOptLine{user-read/write/execute}
   \optOpt{All{\textunderscore}RWX}   \optOptLine{all-read/write/execute (same as chmod 777)}
 \end{optOptTable}
+\optName{runRNGseed}
+  \optValue{777}
+  \optLine{int: random number generator seed.} 
 \end{optTable}
 \optSection{Genome Parameters}\label{Genome_Parameters}
 \begin{optTable}
@@ -87,9 +90,9 @@
   \optLine{string: tag name to be used as exons' gene-parents (default "gene{\textunderscore}id" works for GTF files)} 
 \optName{sjdbOverhang}
   \optValue{100}
-  \optLine{int{\textgreater}=0: length of the donor/acceptor sequence on each side of the junctions, ideally = (mate{\textunderscore}length - 1)} 
-  \optLine{if =0, splice junction database is not used} 
-  \optLine{sjdbScore                               2} 
+  \optLine{int{\textgreater}0: length of the donor/acceptor sequence on each side of the junctions, ideally = (mate{\textunderscore}length - 1)} 
+\optName{sjdbScore}
+  \optValue{2}
   \optLine{int: extra alignment score for alignmets that cross database junctions} 
 \optName{sjdbInsertSave}
   \optValue{Basic}
@@ -121,6 +124,9 @@
 \optName{readMatesLengthsIn}
   \optValue{NotEqual}
   \optLine{string: Equal/NotEqual - lengths of names,sequences,qualities for both mates are the same  / not the same. NotEqual is safe in all situations.} 
+\optName{readNameSeparator}
+  \optValue{/}
+  \optLine{string(s): character(s) separating the part of the read names that will be trimmed in output (read name after space is always trimmed)} 
 \optName{clip3pNbases}
   \optValue{0}
   \optLine{int(s): number(s) of bases to clip from 3p of each mate. If one value is given, it will be assumed the same for both mates.} 
@@ -190,6 +196,13 @@
 \optName{outQSconversionAdd}
   \optValue{0}
   \optLine{int: add this number to the quality score (e.g. to convert from Illumina to Sanger, use -31)} 
+\optName{outMultimapperOrder}
+  \optValue{Old{\textunderscore}2.4}
+  \optLine{string: order of multimapping alignments in the output files} 
+\begin{optOptTable}
+  \optOpt{Old{\textunderscore}2.4}   \optOptLine{quasi-random order used before 2.5.0}
+  \optOpt{Random}   \optOptLine{random order of alignments for each multi-mapper. Read mates (pairs) are always adjacent, all alignment for each read stay together. This option will become default in the future releases.}
+\end{optOptTable}
 \end{optTable}
 \optSection{Output: SAM and BAM}\label{Output:_SAM_and_BAM}
 \begin{optTable}
@@ -231,6 +244,9 @@
   \optOpt{All}   \optOptLine{NH HI AS nM NM MD jM jI}
   \optOpt{None}   \optOptLine{no attributes}
 \end{optOptTable}
+\optName{outSAMattrIHstart}
+  \optValue{1}
+  \optLine{int{\textgreater}=0:                     start value for the IH attribute. 0 may be required by some downstream software, such as Cufflinks or StringTie.} 
 \optName{outSAMunmapped}
   \optValue{None}
   \optLine{string: output of unmapped reads in the SAM format} 
@@ -281,6 +297,18 @@
 \optName{outSAMheaderCommentFile}
   \optValue{-}
   \optLine{string: path to the file with @CO (comment) lines of the SAM header} 
+\optName{outSAMfilter}
+  \optValue{None}
+  \optLine{string(s): filter the output into main SAM/BAM files} 
+\begin{optOptTable}
+  \optOpt{KeepOnlyAddedReferences}   \optOptLine{only keep the reads for which all alignments are to the extra reference sequences added with --genomeFastaFiles at the mapping stage.}
+\end{optOptTable}
+\optName{outSAMmultNmax}
+  \optValue{-1}
+  \optLine{int: max number of multiple alignments for a read that will be output to the SAM/BAM files.} 
+\begin{optOptTable}
+  \optOpt{-1}   \optOptLine{all alignments (up to --outFilterMultimapNmax) will be output}
+\end{optOptTable}
 \optName{outBAMcompression}
   \optValue{1}
   \optLine{int: -1 to 10  BAM compression level, -1=default compression (6?), 0=no compression, 10=maximum compression} 
@@ -415,16 +443,16 @@
 \begin{optTable}
 \optName{scoreGap}
   \optValue{0}
-  \optLine{gap open penalty} 
+  \optLine{int: splice junction penalty (independent on intron motif)} 
 \optName{scoreGapNoncan}
   \optValue{-8}
-  \optLine{non-canonical gap open penalty (in addition to scoreGap)} 
+  \optLine{int: non-canonical junction penalty (in addition to scoreGap)} 
 \optName{scoreGapGCAG}
   \optValue{-4}
-  \optLine{GC/AG and CT/GC gap open penalty (in addition to scoreGap)} 
+  \optLine{GC/AG and CT/GC junction penalty (in addition to scoreGap)} 
 \optName{scoreGapATAC}
   \optValue{-8}
-  \optLine{AT/AC  and GT/AT gap open penalty  (in addition to scoreGap)} 
+  \optLine{AT/AC  and GT/AT junction penalty  (in addition to scoreGap)} 
 \optName{scoreGenomicLengthLog2scale}
   \optValue{-0.25}
   \optLine{extra score logarithmically scaled with genomic length of the alignment: scoreGenomicLengthLog2scale*log2(genomicLength)} 
@@ -479,6 +507,10 @@
 \optName{alignSJoverhangMin}
   \optValue{5}
   \optLine{int{\textgreater}0: minimum overhang (i.e. block size) for spliced alignments} 
+\optName{alignSJstitchMismatchNmax}
+  \optValue{0 -1 0 0}
+  \optLine{4*int{\textgreater}=0: maximum number of mismatches for stitching of the splice junctions (-1: no limit). } 
+  \optLine{(1) non-canonical motifs, (2) GT/AG and CT/AC motif, (3) GC/AG and CT/GC motif, (4) AT/AC and GT/AT motif.} 
 \optName{alignSJDBoverhangMin}
   \optValue{3}
   \optLine{int{\textgreater}0: minimum overhang (i.e. block size) for annotated (sjdb) spliced alignments} 
@@ -555,6 +587,16 @@
 \optName{chimJunctionOverhangMin}
   \optValue{20}
   \optLine{int{\textgreater}=0: minimum overhang for a chimeric junction} 
+\optName{chimSegmentReadGapMax}
+  \optValue{0}
+  \optLine{int{\textgreater}=0: maximum gap in the read sequence between chimeric segments} 
+\optName{chimFilter}
+  \optValue{banGenomicN}
+  \optLine{string(s): different filters for chimeric alignments} 
+\begin{optOptTable}
+  \optOpt{None}   \optOptLine{no filtering}
+  \optOpt{banGenomicN}   \optOptLine{Ns are not allowed in the genome sequence around the chimeric junction}
+\end{optOptTable}
 \end{optTable}
 \optSection{Quantification of Annotations}\label{Quantification_of_Annotations}
 \begin{optTable}

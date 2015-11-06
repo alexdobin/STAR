@@ -310,7 +310,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                         attrN+=bamAttrArrayWriteInt(nTrOut,"NH",attrOutArray+attrN,P);
                         break;
                     case ATTR_HI:
-                        attrN+=bamAttrArrayWriteInt(iTrOut+1,"HI",attrOutArray+attrN,P);
+                        attrN+=bamAttrArrayWriteInt(iTrOut+P->outSAMattrIHstart,"HI",attrOutArray+attrN,P);
                         break;
                     case ATTR_AS:
                         attrN+=bamAttrArrayWriteInt(trOut.maxScore,"AS",attrOutArray+attrN,P);

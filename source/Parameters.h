@@ -29,6 +29,7 @@ class Parameters {
         int runThreadN;
         mode_t runDirPerm;
         string runDirPermIn; //permission for directores created at run-time
+        int runRNGseed; //random number generator seed
     
         //parameters
         vector <string> parametersFiles;
@@ -116,6 +117,7 @@ class Parameters {
         string outSAMmode, outSAMstrandField,  outSAMunmapped, outSAMorder, outSAMprimaryFlag;
         vector<string> outSAMattributes, outSAMheaderHD, outSAMheaderPG;
         vector<string> outSAMattrRGline,outSAMattrRGlineSplit,outSAMattrRG;
+        uint outSAMmultNmax,outSAMattrIHstart;
         string outSAMheaderCommentFile;
         int outSAMmapqUnique;
         struct {bool NH,HI,AS,NM,MD,nM,jM,jI,RG,XS;} outSAMattrPresent, outSAMattrPresentQuant;
@@ -137,6 +139,12 @@ class Parameters {
             bool yes;
             bool KeepOnlyAddedReferences;
         } outSAMfilter;
+        
+        struct
+        {
+            string mode;
+            bool random;
+        } outMultimapperOrder;
         
         string outReadsUnmapped;
         int outQSconversionAdd;

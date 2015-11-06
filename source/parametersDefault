@@ -29,6 +29,8 @@ runDirPerm                      User_RWX
                                 User_RWX ... user-read/write/execute
                                 All_RWX  ... all-read/write/execute (same as chmod 777)
 
+runRNGseed                      777
+    int: random number generator seed.
 
 ### Genome Parameters
 
@@ -176,6 +178,10 @@ outReadsUnmapped                None
 outQSconversionAdd              0
    int: add this number to the quality score (e.g. to convert from Illumina to Sanger, use -31)
 
+outMultimapperOrder             Old_2.4
+    string: order of multimapping alignments in the output files
+                                Old_2.4             ... quasi-random order used before 2.5.0
+                                Random              ... random order of alignments for each multi-mapper. Read mates (pairs) are always adjacent, all alignment for each read stay together. This option will become default in the future releases.
 
 ### Output: SAM and BAM
 outSAMtype                      SAM
@@ -205,6 +211,9 @@ outSAMattributes                Standard
                                 Standard   ... NH HI AS nM 
                                 All        ... NH HI AS nM NM MD jM jI
                                 None       ... no attributes
+
+outSAMattrIHstart               1
+    int>=0:                     start value for the IH attribute. 0 may be required by some downstream software, such as Cufflinks or StringTie.
 
 outSAMunmapped                  None
     string: output of unmapped reads in the SAM format
@@ -253,6 +262,10 @@ outSAMheaderCommentFile -
 outSAMfilter            None
     string(s): filter the output into main SAM/BAM files
                         KeepOnlyAddedReferences ... only keep the reads for which all alignments are to the extra reference sequences added with --genomeFastaFiles at the mapping stage.
+
+outSAMmultNmax          -1
+    int: max number of multiple alignments for a read that will be output to the SAM/BAM files.
+                        -1 ... all alignments (up to --outFilterMultimapNmax) will be output
 
 outBAMcompression       1
     int: -1 to 10  BAM compression level, -1=default compression (6?), 0=no compression, 10=maximum compression

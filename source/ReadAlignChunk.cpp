@@ -13,7 +13,7 @@ ReadAlignChunk::ReadAlignChunk(Parameters* Pin, Genome &genomeIn, Transcriptome 
         chunkTr=NULL;
     };   
     
-    RA = new ReadAlign(P, genomeIn, chunkTr);//new local copy of RA for each chunk
+    RA = new ReadAlign(P, genomeIn, chunkTr, iChunk);//new local copy of RA for each chunk
    
     RA->iRead=0;
     

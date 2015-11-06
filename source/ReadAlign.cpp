@@ -3,7 +3,7 @@
 #include "Transcript.h"
 #include "ReadAlign.h"
 
-ReadAlign::ReadAlign (Parameters* Pin, const Genome &genomeIn, Transcriptome *TrIn) : P(Pin), chunkTr(TrIn) {//allocate arrays
+ReadAlign::ReadAlign (Parameters* Pin, const Genome &genomeIn, Transcriptome *TrIn, int iChunk) : P(Pin), chunkTr(TrIn) {//allocate arrays
 
     G=genomeIn.G;
     SA=genomeIn.SA;
@@ -15,6 +15,10 @@ ReadAlign::ReadAlign (Parameters* Pin, const Genome &genomeIn, Transcriptome *Tr
     winBin[1] = new uintWinBin [P->winBinN];      
     memset(winBin[0],255,sizeof(winBin[0][0])*P->winBinN);
     memset(winBin[1],255,sizeof(winBin[0][0])*P->winBinN);
+    
+    //RNGs
+    rngMultOrder.seed(P->runRNGseed*(iChunk+1));
+    rngUniformReal0to1=std::uniform_real_distribution<double> (0.0, 1.0);    
     
     //transcriptome
     if ( P->quant.trSAM.yes ) {

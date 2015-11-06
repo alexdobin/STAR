@@ -1,4 +1,4 @@
-STAR 2.4
+STAR 2.5
 ========
 Spliced Transcripts Alignment to a Reference
 © Alexander Dobin, 2009-2015

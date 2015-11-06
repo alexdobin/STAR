@@ -1,3 +1,8 @@
+Implemented --outSAMmultNmax parameter to limit the number of output alignments for multimappers.
+Implemented --outMultimapperOrder Random option to output multiple alignments in random order. 
+   This also randomizes the choice of the primary alignment. Parameter --runRNGseed can be used to set the random generator seed.
+   With this option, the ordering of multi-mapping alignments of each read, and the choice of the primary alignment will vary from run to run, unless only one thread is used and the seed is kept constant.
+Implemented --outSAMattrIHstart parameter. Setting it to 0 may be required for compatibility with downstream software such as Cufflinks or StringTie.
 Improved compilation flags handling in Makefile - thanks to Christian Krause for the code.
 Implemented --outSAMfilter KeepOnlyAddedReferences option.
 Implemented --help option - thanks to @yhoogstrate for the code.

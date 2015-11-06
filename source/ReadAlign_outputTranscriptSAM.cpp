@@ -249,7 +249,7 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
                     *outStream <<"\tNH:i:" << nTrOut;
                     break;
                 case ATTR_HI:
-                    *outStream <<"\tHI:i:"<<iTrOut+1;
+                    *outStream <<"\tHI:i:"<<iTrOut+P->outSAMattrIHstart;
                     break;
                 case ATTR_AS:
                     *outStream<<"\tAS:i:"<<trOut.maxScore;

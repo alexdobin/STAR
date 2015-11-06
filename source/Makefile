@@ -20,7 +20,7 @@ LDFLAGS_gdb := $(LDFLAGS_shared)
 
 COMPTIMEPLACE := -D'COMPILATION_TIME_PLACE="$(shell echo `date` $(HOSTNAME):`pwd`)"'
 
-CXXFLAGS_common := -pipe -std=c++0x -Wall -Wextra -fopenmp $(COMPTIMEPLACE)
+CXXFLAGS_common := -pipe -std=c++11 -Wall -Wextra -fopenmp $(COMPTIMEPLACE)
 CXXFLAGS_main := -O3 $(CXXFLAGS_common)
 CXXFLAGS_gdb :=  -O0 -g $(CXXFLAGS_common)
 

@@ -11,8 +11,10 @@
 #include "Transcriptome.h"
 #include "BAMoutput.h"
 #include "Quantifications.h"
+#include <random>
 
-class ReadAlign : public Genome {
+class ReadAlign : public Genome 
+{
     public:
         Parameters* P; //pointer to the parameters, will be initialized on construction
           
@@ -25,6 +27,9 @@ class ReadAlign : public Genome {
         //mapping time
         time_t timeStart, timeFinish;
         
+        //random number generators
+        std::mt19937 rngMultOrder;//initialize in ReadAlign.cpp
+        std::uniform_real_distribution<double> rngUniformReal0to1;//initialize in ReadAlign.cpp
         
         //input,output
         istream* readInStream[MAX_N_MATES];
@@ -107,11 +112,10 @@ class ReadAlign : public Genome {
         
         Transcript *alignC, *extendC, *polyAtailC; //alignment rules/conditions
         
-        intScore trMultScores[MAX_N_MULTMAP];//scores for the multiple mappers
         Transcript* trMult[MAX_N_MULTMAP];//multimapping transcripts
         Transcript *alignTrAll;//alignments to transcriptome       
         
-        ReadAlign (Parameters* Pin, const Genome &genomeIn, Transcriptome *TrIn);//allocate arrays
+        ReadAlign (Parameters* Pin, const Genome &genomeIn, Transcriptome *TrIn, int iChunk);//allocate arrays
         void resetN();//resets the counters to 0
         void multMapSelect();
         int mapOneRead();

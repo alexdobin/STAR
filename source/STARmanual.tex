@@ -17,24 +17,24 @@
 
 %%%%%% global commands
 % option name, no reference
-\newcommand{\optn}[1]{\sloppy\textcolor{violet}{\texttt{--#1}}}
+\newcommand{\optn}[1]{\textcolor{violet}{\texttt{--#1}}}
 % option name
-\newcommand{\opt}[1]{\sloppy\hyperlink{#1}{\optn{#1}}}
+\newcommand{\opt}[1]{\hyperlink{#1}{\optn{#1}}}
 %option value, to be replaces with user value
-\newcommand{\optv}[1]{\sloppy\texttt{#1}}
-\newcommand{\optvr}[1]{\sloppy\textit{\texttt{#1}}}
+\newcommand{\optv}[1]{\texttt{#1}}
+\newcommand{\optvr}[1]{\textit{\texttt{#1}}}
 
-\newcommand{\code}[1]{\sloppy\texttt{#1}}
+\newcommand{\code}[1]{\texttt{#1}}
 	
 \newcommand{\codelines}[1]{\begin{adjustwidth}{0.5in}{0in}
 	\raggedright\texttt{#1}
 	\end{adjustwidth}}
 
-\newcommand{\ofilen}[1]{\sloppy\texttt{#1}}
+\newcommand{\ofilen}[1]{\texttt{#1}}
 
 \newcommand{\sechyperref}[1]{\hyperref[#1]{Section \ref{#1}. \nameref{#1}}}
 
-\title{STAR manual 2.5.0a}
+\title{STAR manual 2.4.2a}
 \author{Alexnder Dobin\\
 dobin@cshl.edu}
 \maketitle
@@ -173,9 +173,9 @@ The basic options to run a mapping job are as follows:
 \opt{readFilesIn} name(s) (with path) of the files containing the sequences to be mapped (e.g. RNA-seq FASTQ files). If using Illumina paired-end reads, the \optvr{read1} and \optv{read2} files have to be supplied. STAR can process both FASTA and FASTQ files. Multi-line (i.e. sequence split in multiple lines) FASTA file are supported. If the read files are compressed, use the \opt{readFilesCommand} \optvr{UncompressionCommand} option, where \optvr{UncompressionCommand} is the un-compression command that takes the file name as input parameter, and sends the uncompressed output to stdout. For example, for gzipped files (*.gz) use
 \code{\opt{readFilesCommand} \optv{zcat}}
 OR
-\code{\opt{readFilesCommand} \optv{gunzip -c}}.
+\code{\opt{readFilesCommand} \optv{gzip -c}}.
 For bzip2-compressed files, use
-\code{\opt{readFilesCommand} \optv{bunzip2 -c}}.
+\code{\opt{readFilesCommand} \optv{bzip2 -c}}.
 \end{itemize}
 
 \subsection{Advanced options.}
@@ -231,17 +231,11 @@ STAR produces multiple output files. All files have standard name, however, you 
 \subsection{SAM.}
 \ofilen{Aligned.out.sam} - alignments in standard SAM format.
 \subsubsection{Multimappers.}
-The number of loci Nmap a read maps to is given by \code{NH:i:}  field. Value of 1 corresponds to unique mappers, while values \textgreater1 corresponds to multi-mappers. \code{HI} attrbiutes enumerates multiple alignments of a read starting with 1 (this can be changed with the \opt{outSAMattrIHstart} - setting it to 0 may be required for compatibility with downstream software such as Cufflinks or StringTie).
+The number of loci Nmap a read maps to is given by \code{NH:i:}  field. Value of 1 corresponds to unique mappers, while values \textgreater1 corresponds to multi-mappers. \code{HI} attrbiutes enumerates multiple alignments of a read starting with 1.
 
 The mapping quality MAPQ (column 5) is 255 for uniquely mapping reads, and int(-10*log10(1-1/Nmap))  for multi-mapping reads. This scheme is same as the one used by TopHat and is compatible with Cufflinks. The default MAPQ=255 for the unique mappers maybe changed with \opt{outSAMmapqUnique} \optvr{Integer0to255} option to ensure compatibility with downstream tools such as GATK.
 
-For multi-mappers, all alignments except one are marked with 0x100 (secondary alignment) in the FLAG (column 2 of the SAM). The unmarked alignment is selected from the best ones (i.e. highest scoring). This default behavior can be changed with \opt{outSAMprimaryFlag} \optv{AllBestScore} option, that will output all alignments with the best score as primary alignments (i.e. 0x100 bit in the FLAG unset).
-
-By default, the order of the multi-mapping alignments for each read is not truly random.
-The \opt{outMultimapperOrder} \optv{Random} option outputs multiple alignments for each read in random order, and also also randomizes the choice of the primary alignment from the highest scoring alignments. Parameter \opt{runRNGseed} can be used to set the random generator seed. With this option, the ordering of multi-mapping alignments of each read, and the choice of the primary alignment will vary from run to run, unless only one thread is used and the seed is kept constant.
-
-The \opt{outSAMmultNmax} parameter limits the number of output alignments (SAM lines) for multimappers. For instance, \opt{outSAMmultNmax} \optv{1} will output exactly one SAM line for each mapped read.
-
+For multi-mappers, all alignments except one are marked with 0x100 (secondary alignment) in the FLAG (column 2 of the SAM). The unmarked alignment is either the best one (i.e. highest scoring), or is randomly selected from the alignments of equal quality. This default behavior can be changed with \opt{outSAMprimaryFlag} \optv{AllBestScore} option, that will output all alignments with the best score as primary alignments (i.e. 0x100 bit in the FLAG unset).
 
 \subsubsection{SAM attributes.}
 The SAM attributes can be specified by the user using \opt{outSAMattributes} \optvr{A1 A2 A3 ...} option which accept a list of 2-character SAM attrbiutes. The implemented attrbutes are: \optv{NH HI NM MD AS nM jM jI XS}. By default, STAR outputs \optv{NH HI AS nM} attributes.
@@ -283,9 +277,7 @@ output both unsorted and sorted files.
 \end{itemize}
 
 \subsection{Splice junctions.}
-\ofilen{SJ.out.tab} contains high confidence collapsed splice junctions in tab-delimited format. 
-Note that STAR defines the junction start/end as intronic bases, while many other software define them as exonic bases.
-The columns have the following meaning:
+\ofilen{SJ.out.tab} contains high confidence collapsed splice junctions in tab-delimited format. Note that STAR defines the junction start/end as intronic bases, while many other software define them as exonic bases. The columns have the following meaning:
 %\begin{enumerate}[label=\bfseries Exercise \arabic*:]
 \begin{itemize}[leftmargin=1in]
 \item[column 1:] chromosome
