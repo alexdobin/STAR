@@ -37,120 +37,153 @@ Code improvements:
 
 
 STAR 2.4.2a 2015/06/19
-Implemented --quantMode GeneCounts option for counting number of reads per gene, similar to htseq-count.
-STARlong: fixed --outFilterIntronMotifs and --outSAMstrandField options.
-Yet another fix for --sjdbOverhang logic.
-Error message when shared memory and on the fly junction insertion are used together.
-Fixed a bug causing unnecessary 1 base soft-clipping in rare cases with sparse suffix array.
-Fixed a bug that caused problems with junction motifs in rare cases. Very few alignments affected, <1 per million.
+======================
+
+* Implemented --quantMode GeneCounts option for counting number of reads per gene, similar to htseq-count.
+* STARlong: fixed --outFilterIntronMotifs and --outSAMstrandField options.
+* Yet another fix for --sjdbOverhang logic.
+* Error message when shared memory and on the fly junction insertion are used together.
+* Fixed a bug causing unnecessary 1 base soft-clipping in rare cases with sparse suffix array.
+* Fixed a bug that caused problems with junction motifs in rare cases. Very few alignments affected, <1 per million.
 
 STAR 2.4.1d 2015/05/19
-Fixed problems with --sjdbOverhang default and user-defined values.
-Fixed problems with occasional non-adjacent output of multiple alignments into the unsorted BAM file and transcriptome BAM file.
-Fixed a bug causing seg-faults when shared memory options in --genomeLoad are used with --outStd SAM.
-Fixed a bug causing seg-faults for small values of --limitIObufferSize.
-Added STAR long pre-compiled executables.
-Fixed very minor issues with filtering into SJ.out.tab .
-Fixed some bugs in STARlong mapping algorithm.
-Fixed --outFilter BySJout filtering for STARlong.
-Fixed XS attrbutes in STARlong.
-Added --runDirPerm option for permissions of run-time directories.
+======================
+
+* Fixed problems with --sjdbOverhang default and user-defined values.
+* Fixed problems with occasional non-adjacent output of multiple alignments into the unsorted BAM file and transcriptome BAM file.
+* Fixed a bug causing seg-faults when shared memory options in --genomeLoad are used with --outStd SAM.
+* Fixed a bug causing seg-faults for small values of --limitIObufferSize.
+* Added STAR long pre-compiled executables.
+* Fixed very minor issues with filtering into SJ.out.tab .
+* Fixed some bugs in STARlong mapping algorithm.
+* Fixed --outFilter BySJout filtering for STARlong.
+* Fixed XS attrbutes in STARlong.
+* Added --runDirPerm option for permissions of run-time directories.
 
 
 STAR 2.4.1c 2015/04/24
-Added latest version of STAR-Fusion as a separate directory.
-Fixed some compilation problems introduced in 2.4.1b.
-Added Mac executable.
+======================
+
+* Added latest version of STAR-Fusion as a separate directory.
+* Fixed some compilation problems introduced in 2.4.1b.
+* Added Mac executable.
 
 
 STAR 2.4.1b 2015/04/23
-Fixed a bug introduced in 2.4.1a causing serious problems for genomes generated without annotations.
+======================
+
+* Fixed a bug introduced in 2.4.1a causing serious problems for genomes generated without annotations.
       If you generated a genome without annotations with 2.4.1a please re-generate it.
-Fixed a bug causing seg-faults when generating genomes with a large (>500k) number of junctions.
-Fixed a bug causing seg-faults with --chimOutType WithinBAM for single-end reads.
-Fixed a bug with required --sjdbOverhang at the mapping step.
+* Fixed a bug causing seg-faults when generating genomes with a large (>500k) number of junctions.
+* Fixed a bug causing seg-faults with --chimOutType WithinBAM for single-end reads.
+* Fixed a bug with required --sjdbOverhang at the mapping step.
 
 STAR 2.4.1a 2015/04/17
-The annotations can now be included on the fly at the mapping step, without including them at the genome generation step.
-New option to activate on the fly "per sample" 2-pass method: "--twopassMode Basic".
-2-pass mode can now be used with annotations, which can be included either at the run-time, or at the genome generation step.
-Included link (submodule) to Brian Haas' STAR-Fusion code for detecting fusion transcript from STAR chimeric output:  https://github.com/STAR-Fusion/STAR-Fusion
-Included Gery Vessere's shared memory implementation for POSIX and SysV. To compile STAR with POSIX shared memory, use `make POSIXSHARED`
-New option "--chimOutType WithinBAM" to include chimeric alignments together with normal alignments in the main (sorted or unsorted) BAM file(s).
-New option "--quantTranscriptomeBan Singleend" allows insertions, deletions ans soft-clips in the transcriptomic alignments, which are allowed by some expression quantification software (e.g. eXpress). 
-New option "--alignEndsTypeExtension Extend5pOfRead1" to enforce full extension of the 5p of the read1, while all other ends undergo local alignment and may be soft-clipped.
+======================
+
+* The annotations can now be included on the fly at the mapping step, without including them at the genome generation step.
+* New option to activate on the fly "per sample" 2-pass method: "--twopassMode Basic".
+* 2-pass mode can now be used with annotations, which can be included either at the run-time, or at the genome generation step.
+* Included link (submodule) to Brian Haas' STAR-Fusion code for detecting fusion transcript from STAR chimeric output:  https://github.com/STAR-Fusion/STAR-Fusion
+* Included Gery Vessere's shared memory implementation for POSIX and SysV. To compile STAR with POSIX shared memory, use `make POSIXSHARED`
+* New option "--chimOutType WithinBAM" to include chimeric alignments together with normal alignments in the main (sorted or unsorted) BAM file(s).
+* New option "--quantTranscriptomeBan Singleend" allows insertions, deletions ans soft-clips in the transcriptomic alignments, which are allowed by some expression quantification software (e.g. eXpress). 
+* New option "--alignEndsTypeExtension Extend5pOfRead1" to enforce full extension of the 5p of the read1, while all other ends undergo local alignment and may be soft-clipped.
 
 2.4.0k 03/30/2015
-Implemented new BAM sorting algorithm that reduces significantly the required RAM.
+=================
+
+* Implemented new BAM sorting algorithm that reduces significantly the required RAM.
 
 2.4.0j 02/04/2015
-Fixed a problem with scoring alignments for STARlong. STARlong alignments are slightly modified.
-Fixed a bug introduced in 2.4.0i that dropped a large number of aligmnents for --quantMode TranscriptomeSAM.
+=================
+
+* Fixed a problem with scoring alignments for STARlong. STARlong alignments are slightly modified.
+* Fixed a bug introduced in 2.4.0i that dropped a large number of aligmnents for --quantMode TranscriptomeSAM.
 	Transcriptome alignments are now the same as in version 2.4.0h.
-Fixed a problem with lower case read sequences for --outSAMtype BAM options.
-Fixed a bug preventing parameter value to be "-".
-Fixed --genomeLoad LoadAndRemove option.
+* Fixed a problem with lower case read sequences for --outSAMtype BAM options.
+* Fixed a bug preventing parameter value to be "-".
+* Fixed --genomeLoad LoadAndRemove option.
 
 2.4.0i 01/14/2015
-Fixed a bug with the _STARtmp temporary directory name for the 2-pass runs.
-Fixed a bug causing seg-faults for genome generation.
-Fixed a bug causing seg-faults for --quantMode TranscriptomeSAM
+=================
+
+* Fixed a bug with the _STARtmp temporary directory name for the 2-pass runs.
+* Fixed a bug causing seg-faults for genome generation.
+* Fixed a bug causing seg-faults for --quantMode TranscriptomeSAM
 
 2.4.0h 12/09/2014
-Fixed the problem causing Ubuntu error: "sh: 1: Syntax error: Bad fd number".
-Added --quantTranscriptomeBAMcompression option.
-Add newline at the end of STAR_VERSION string (contributed by Daniel Nicorici).
-Fixed a bug with parsing the last line of paired FASTA files (contributed by Alex Rolfe).
+=================
+
+* Fixed the problem causing Ubuntu error: "sh: 1: Syntax error: Bad fd number".
+* Added --quantTranscriptomeBAMcompression option.
+* Add newline at the end of STAR_VERSION string (contributed by Daniel Nicorici).
+* Fixed a bug with parsing the last line of paired FASTA files (contributed by Alex Rolfe).
 
 2.4.0g 11/26/2014
-Fixed a bug with output score (AS attribute) of some chimeric alignments.
-Added --alignSoftClipAtReferenceEnds No option which prevents soft clipping of alignments at the reference (chromosome) ends, for compatibility with Cufflinks/Cuffmerge.
-Fixed wrong output of chimeric junctions boundaries in the Chimeric.out.junction file.
-Added --outSAMflagOR, --outSAMflagAND options to set specific bits of the SAM FLAG.
---sjdbFileChrStartEnd can now accept multiple files which will be concatenated.
-Fixed the header of the Log.progress.out .
-Fixed a bug that prevented output of transcriptomic alignments (--quantMode TranscriptomeSAM)  with 1 base junction overhangs.
-Added --sysShell option to specify path to bash, in cases where bash is not the default shell.
---outBAMcompression default changed to 1, which apparently does not change deflation ratio, but is much faster.
-Added --outBAMsortingThreadN option to specify number of threads for BAM sorting. By default (0) it's equal to min(6,runThreadN).
+=================
+
+* Fixed a bug with output score (AS attribute) of some chimeric alignments.
+* Added --alignSoftClipAtReferenceEnds No option which prevents soft clipping of alignments at the reference (chromosome) ends, for compatibility with Cufflinks/Cuffmerge.
+* Fixed wrong output of chimeric junctions boundaries in the Chimeric.out.junction file.
+* Added --outSAMflagOR, --outSAMflagAND options to set specific bits of the SAM FLAG.
+* --sjdbFileChrStartEnd can now accept multiple files which will be concatenated.
+* Fixed the header of the Log.progress.out .
+* Fixed a bug that prevented output of transcriptomic alignments (--quantMode TranscriptomeSAM)  with 1 base junction overhangs.
+* Added --sysShell option to specify path to bash, in cases where bash is not the default shell.
+* --outBAMcompression default changed to 1, which apparently does not change deflation ratio, but is much faster.
+* Added --outBAMsortingThreadN option to specify number of threads for BAM sorting. By default (0) it's equal to min(6,runThreadN).
 
 2.4.0f1 10/30/2014
-Added read group (RG) BAM attributes to transcriptome BAM (contributed by https://github.com/godotgildor).
-Fixed a bug with double ID field in the RG header line (contributed by https://github.com/godotgildor).
-Fixed a bug in the 2-pass method (--twopass1readsN).
-Fixed a problem with RAM allocation for BAM sorting.
+==================
+
+* Added read group (RG) BAM attributes to transcriptome BAM (contributed by https://github.com/godotgildor).
+* Fixed a bug with double ID field in the RG header line (contributed by https://github.com/godotgildor).
+* Fixed a bug in the 2-pass method (--twopass1readsN).
+* Fixed a problem with RAM allocation for BAM sorting.
 
 2.4.0e 10/24/2014
-Added manual in PDF.
-New sub-directories: source, bin, doc.
-Output more information about read files into Log.out.
-Fixed some issues that may have caused dropping of multiple reads files.
-Added more thorough error checking for genome generation.
-Fixed a bug causing seg-faults with single-mate alignments for BAM sorting.
-Fixed some compilation issues on Mac OS X. Note that the default Clang lacks openMP support which is required for STAR compilation.
-Added Mac OS X executable.
+=================
+
+* Added manual in PDF.
+* New sub-directories: source, bin, doc.
+* Output more information about read files into Log.out.
+* Fixed some issues that may have caused dropping of multiple reads files.
+* Added more thorough error checking for genome generation.
+* Fixed a bug causing seg-faults with single-mate alignments for BAM sorting.
+* Fixed some compilation issues on Mac OS X. Note that the default Clang lacks openMP support which is required for STAR compilation.
+* Added Mac OS X executable.
 
 2.4.0d 09/25/2014
-Added .gitignore.
-Fixed the problem with 2nd field in the read name shorter than 3 bases (non-Illumina fastq).
-Added --outBAMcompression option.
-Added --bamRemoveDuplicatesType and --bamRemoveDuplicatesMate2basesN options.
-Added --outWigType wiggle read1_5p read2 options.
-Added --outWigNorm option.
+=================
+
+* Added .gitignore.
+* Fixed the problem with 2nd field in the read name shorter than 3 bases (non-Illumina fastq).
+* Added --outBAMcompression option.
+* Added --bamRemoveDuplicatesType and --bamRemoveDuplicatesMate2basesN options.
+* Added --outWigType wiggle read1_5p read2 options.
+* Added --outWigNorm option.
 
 2.4.0c 09/07/2014
-Automated git version.
-Fixed a problem with overflowing SJ buffer.
-Implemented options --twopass1readsN, --twopassSJlimit, --readMapNumber.
+=================
+
+* Automated git version.
+* Fixed a problem with overflowing SJ buffer.
+* Implemented options --twopass1readsN, --twopassSJlimit, --readMapNumber.
 
 2.4.0b 08/29/2014
-Fixed problems with spaces in --outFilePrefixName.
-Fixed version information.
+=================
+
+* Fixed problems with spaces in --outFilePrefixName.
+* Fixed version information.
 
 2.4.0a 08/11/2014
-Implemented --outFilterMismatchNoverReadLmax option for a more consistent control of mismatches.
+=================
+
+* Implemented --outFilterMismatchNoverReadLmax option for a more consistent control of mismatches.
 
 2.3.1z16 08/05/2014
+
 Implemented --outWigReferencesPrefix option to filter references in the signal output.
 Implemented --runMode inputAlignmentsFromBAM --inputBAMfile
 
