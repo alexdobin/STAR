@@ -140,24 +140,9 @@ STARforMacStatic : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_Mac_static) $(LDFLAGS)
 STARforMacStatic : Depend.list parametersDefault.xxd $(OBJECTS)
 	$(CXX) -o STAR $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
 
-######################################################### all trargets below are not supported and not recommended!
-
-STARforMac : CXXFLAGS := -D'COMPILE_FOR_MAC' -I ./Mac_Include/ $(CXXFLAGS_main) $(CXXFLAGS)
-STARforMac : parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STAR $(CXXFLAGS) $(LDFLAGS_Mac) $(OBJECTS)
-
-
-STARlongForMacStatic : CXXFLAGS := -D'COMPILE_FOR_LONG_READS' -D'COMPILE_FOR_MAC' -I ./Mac_Include/ $(CXXFLAGS_main) $(CXXFLAGS)
-STARlongForMacStatic : parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STARlong $(CXXFLAGS) $(LDFLAGS_Mac_static) $(OBJECTS)
-
-#
-STARforMacGDB : CXXFLAGS := -D'COMPILE_FOR_MAC' -I ./Mac_Include/ $(CXXFLAGS_gdb) $(CXXFLAGS)
-STARforMacGDB : parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STAR $(CXXFLAGS_gdb) $(OBJECTS) $(LDFLAGS_gdb)
-
-localChains : CXXFLAGS := -D'OUTPUT_localChains' $(CXXFLAGS_main) $(CXXFLAGS)
-localChains : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STAR $(CXXFLAGS) $(LDFLAGS) $(OBJECTS)
+STARlongForMacStatic : CXXFLAGS := -D'COMPILE_FOR_LONG_READS' $(CXXFLAGSextra) $(CXXFLAGS_main) -D'COMPILE_FOR_MAC' $(CXXFLAGS)
+STARlongForMacStatic : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_Mac_static) $(LDFLAGS)
+STARlongForMacStatic : Depend.list parametersDefault.xxd $(OBJECTS)
+	$(CXX) -o STARlong $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
 
 
