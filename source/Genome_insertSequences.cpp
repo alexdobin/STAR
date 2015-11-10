@@ -24,7 +24,7 @@ if (P->genomeFastaFiles.at(0)!="-")
     uint64 nGenomeOld=P->nGenome;
     P->nGenome=P->chrStart.back()+sjdblen; 
     //insert new sequences into the SA
-    insertSeqSA(SA, SApass1, SAi, G, G+P->chrStart.back()-P->genomeInsertL, nGenomeOld-sjdblen, P->genomeInsertL, sjdblen, P);
+    insertSeqSA(SA, SAinsert, SAi, G, G+P->chrStart.back()-P->genomeInsertL, nGenomeOld-sjdblen, P->genomeInsertL, sjdblen, P);
 
     //insert new sequences into the SAi
     //update P

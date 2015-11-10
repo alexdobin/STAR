@@ -299,13 +299,17 @@ void Genome::genomeLoad(){//allocate and load Genome
             
             if (P->sjdbInsert.pass1 || P->sjdbInsert.pass2)
             {//reserve extra memory for insertion at the 1st and/or 2nd step
-                nGenomePass1=P->nGenome+P->genomeInsertL;
-                nSApass1=P->nSA+2*P->genomeInsertL;
+                nGenomeInsert=P->nGenome+P->genomeInsertL;
+                nSAinsert=P->nSA+2*P->genomeInsertL;
+                
+                nGenomePass1=nGenomeInsert;
+                nSApass1=nSAinsert;
                 if (P->sjdbInsert.pass1)
                 {
                     nGenomePass1+=P->limitSjdbInsertNsj*P->sjdbLength;
                     nSApass1+=2*P->limitSjdbInsertNsj*P->sjdbLength;
                 };
+                
                 nGenomePass2=nGenomePass1;
                 nSApass2=nSApass1;
                 if (P->sjdbInsert.pass2)
@@ -322,7 +326,10 @@ void Genome::genomeLoad(){//allocate and load Genome
                 SApass1.defineBits(P->GstrandBit+1,nSApass1);
                 SApass1.pointArray(SApass2.charArray+SApass2.lengthByte-SApass1.lengthByte);
                 
-                SA.pointArray(SApass1.charArray+SApass1.lengthByte-SA.lengthByte);
+                SAinsert.defineBits(P->GstrandBit+1,nSAinsert);
+                SAinsert.pointArray(SApass1.charArray+SApass1.lengthByte-SAinsert.lengthByte);
+                
+                SA.pointArray(SAinsert.charArray+SAinsert.lengthByte-SA.lengthByte);
             } else 
             {//no sjdb insertions
                 if (P->genomeInsertL==0)
@@ -332,11 +339,10 @@ void Genome::genomeLoad(){//allocate and load Genome
                 } else 
                 {
                     G1=new char[P->nGenome+L+L+P->genomeInsertL];        
-                    SApass1.defineBits(P->GstrandBit+1,P->nSA+2*P->genomeInsertL);//TODO: re-define GstrandBit if necessary
-                    SApass1.allocateArray();
-                    SA.pointArray(SApass1.charArray+SApass1.lengthByte-SA.lengthByte);
+                    SAinsert.defineBits(P->GstrandBit+1,P->nSA+2*P->genomeInsertL);//TODO: re-define GstrandBit if necessary
+                    SAinsert.allocateArray();
+                    SA.pointArray(SAinsert.charArray+SAinsert.lengthByte-SA.lengthByte);
                 };
-
             };            
             SAi.allocateArray();
             P->inOut->logMain <<"Shared memory is not used for genomes. Allocated a private copy of the genome.\n"<<flush;                

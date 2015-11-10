@@ -9,10 +9,10 @@
 class Genome {
     public:
         char *G, *sigG;
-        PackedArray SA,SApass1,SApass2;
+        PackedArray SA,SAinsert,SApass1,SApass2;
         PackedArray SAi;
         
-        uint nGenomePass1, nGenomePass2, nSApass1, nSApass2; 
+        uint nGenomeInsert, nGenomePass1, nGenomePass2, nSAinsert, nSApass1, nSApass2; 
 
         Genome (Parameters* Pin );
         Genome () {};//empty constructor

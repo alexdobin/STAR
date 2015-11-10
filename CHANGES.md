@@ -1,3 +1,6 @@
+Fixed a seg-fault that occurred when junctions where inserted after inserting reference sequences.
+
+
 STAR 2.4.5a 2015/11/06
 ======================
 
