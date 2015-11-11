@@ -136,6 +136,7 @@ void Genome::genomeLoad(){//allocate and load Genome
     //record required genome parameters in P
     P->genomeSAindexNbases=P1->genomeSAindexNbases;
     P->genomeChrBinNbits=P1->genomeChrBinNbits;
+    P->genomeChrBinNbases=1LLU<<P->genomeChrBinNbits;
     P->genomeSAsparseD=P1->genomeSAsparseD;
     if (P->parArray.at(P->sjdbOverhang_par)->inputLevel==0 && P1->sjdbOverhang>0) 
     {//if --sjdbOverhang was not defined by user and it was defined >0 at the genome generation step, then use sjdbOverhang from the genome generation step

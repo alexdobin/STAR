@@ -1,3 +1,4 @@
+Fixed a seg-fault that occurred when non-default value of --genomeChrBinNbits was used.
 Fixed a seg-fault that occurred when junctions where inserted after inserting reference sequences.
 
 
