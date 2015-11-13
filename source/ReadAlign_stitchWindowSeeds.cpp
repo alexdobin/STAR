@@ -50,7 +50,7 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* 
                 score2=WA[iW][iS1][WA_Length];                
                 if ( WA[iW][iS1][WA_rStart]>0 \
                      && extendAlign(R, Q, G, WA[iW][iS1][WA_rStart]-1, WA[iW][iS1][WA_gStart]-1, -1, -1, WA[iW][iS1][WA_rStart], 100000, 0, outFilterMismatchNmaxTotal, P->outFilterMismatchNoverLmax, \
-                                    P->alignEndsType.ext[trA1.exons[0][EX_iFrag]][trA.Str], &trA1) ) {//if could extend
+                                    P->alignEndsType.ext[WA[iW][iS1][WA_iFrag]][trA.Str], &trA1) ) {//if could extend
                     score2 += trA1.maxScore;
                 };
                 if (score2 > scoreSeedBest[iS1] ) {
@@ -74,7 +74,8 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* 
        uint tG2=WA[iW][iS1][WA_gStart]+WA[iW][iS1][WA_Length];
        if ( tR2 < Lread-1 \
             && extendAlign(R, Q, G, tR2, tG2, +1, +1, Lread-tR2, 100000, scoreSeedBestMM[iS1], outFilterMismatchNmaxTotal, P->outFilterMismatchNoverLmax, \
-                           P->alignEndsType.ext[WA[iW][iS1][WA_iFrag]][1-trA.Str], &trA1) ) {//if could extend
+                           P->alignEndsType.ext[WA[iW][iS1][WA_iFrag]][1-trA.Str], &trA1) ) 
+       {//extend to the right
            scoreSeedBest[iS1]+=trA1.maxScore;
        };
        if (scoreSeedBest[iS1]>scoreBest) {//record new best transcript
@@ -155,7 +156,7 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* 
             uint tG2=WA[iW][iS1][WA_gStart]+WA[iW][iS1][WA_Length];
             if ( tR2 < Lread \
                 && extendAlign(R, Q, G, tR2, tG2, +1, +1, Lread-tR2, 100000, scoreSeedBestMM[iS1], outFilterMismatchNmaxTotal, P->outFilterMismatchNoverLmax, \
-                    P->alignEndsType.ext[trA1.exons[trA.nExons-1][EX_iFrag]][1-trA.Str], &trA1) ) {//if could extend
+                    P->alignEndsType.ext[trA.exons[trA.nExons-1][EX_iFrag]][1-trA.Str], &trA1) ) {//if could extend
                     trA.add(&trA1);                    
                     trA.exons[trA.nExons-1][EX_L] += trA1.extendL;//extend the length of the last exon
             };
