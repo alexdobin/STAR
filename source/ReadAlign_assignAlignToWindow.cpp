@@ -9,6 +9,7 @@ void ReadAlign::assignAlignToWindow(uint a1, uint aLength, uint aStr, uint aNrep
 
     if (iW==uintWinBinMax || (!aAnchor && aLength < WALrec[iW]) ) return; //alignment does not belong to any window, or it's shorter than rec-length
 
+    
     //check if this alignment overlaps with any other alignment in the window, record the longest of the two
     {//do not check for overlap if this is an sj-align
         uint iA;
@@ -65,7 +66,7 @@ void ReadAlign::assignAlignToWindow(uint a1, uint aLength, uint aStr, uint aNrep
         };
     };          
 
-    if (nWA[iW]==P->seedPerWindowNmax) {//too many aligns per window,  re-calcualte min-length, remove the shortest one,
+    if (nWA[iW]==P->seedPerWindowNmax) {//too many aligns per window,  re-calculate min-length, remove the shortest one,
 
         WALrec[iW]=Lread+1; 
         for (uint iA=0; iA<nWA[iW]; iA++) {//find the new min-length    
@@ -151,11 +152,11 @@ void ReadAlign::assignAlignToWindow(uint a1, uint aLength, uint aStr, uint aNrep
 //No symbol table info available.
 //#8  0x00002aaaabdca90d in clone () from /lib64/libc.so.6
 //No symbol table info available.
-        try {
-            WA[iW][iA][WA_rStart]=aRstart;
-        } catch (...) {
+        if (iW >=P->seedPerWindowNmax ) {
             throw "AssignError";
         }
+        
+        WA[iW][iA][WA_rStart]=aRstart;
         WA[iW][iA][WA_Length]=aLength;
         WA[iW][iA][WA_gStart]=a1;
         WA[iW][iA][WA_Nrep]=aNrep;                
