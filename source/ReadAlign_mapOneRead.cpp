@@ -104,7 +104,6 @@ int ReadAlign::mapOneRead() {
         		multMapSelect();
         	 //check all the windows and transcripts for multiple mappers
             }
-
         } catch (char* e) {
             nW = 0;
         }
