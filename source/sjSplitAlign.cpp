@@ -5,8 +5,8 @@ bool sjAlignSplit(uint a1,uint aLength,Parameters* P, uint &a1D, uint &aLengthD,
     uint sj1=(a1-P->sjGstart) % P->sjdbLength;
     if ( sj1 > P->sjdbLength) {
         // this is clearly an underflow error
-        return false
-    }
+        return false;
+    };
     if (sj1<P->sjdbOverhang && sj1+aLength>P->sjdbOverhang) {//align crosses the junctions
         isj=(a1-P->sjGstart)/P->sjdbLength;
         aLengthD=P->sjdbOverhang-sj1;
