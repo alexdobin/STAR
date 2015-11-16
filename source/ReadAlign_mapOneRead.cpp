@@ -100,17 +100,13 @@ int ReadAlign::mapOneRead() {
 //         qsort((void*) PC, nP, sizeof(uint)*PC_SIZE, funCompareUint2);//sort PC by rStart and length
         try {
               stitchPieces(Read1, Qual1, G, SA,  Lread);
+              if (nW>0) {
+        		multMapSelect();
+        	 //check all the windows and transcripts for multiple mappers
+            }
+
         } catch (char* e) {
             nW = 0;
-        }
-        if (nW>0) {
-        	try {
-        		multMapSelect();
-        	}
-        	catch (char* e) {
-
-        	}
-        	 //check all the windows and transcripts for multiple mappers
         }
     };
     
