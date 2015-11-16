@@ -155,7 +155,7 @@ void ReadAlign::assignAlignToWindow(uint a1, uint aLength, uint aStr, uint aNrep
         if (iW >=P->seedPerWindowNmax ) {
             exitWithError("BUG: iW>=P->seedPerWindowNmax in stitchPieces, exiting",std::cerr, P->inOut->logMain, EXIT_CODE_BUG, *P);
         }
-        exitWithError("BUG: iW >=P->seedPerWindowNmax in assignAlignToWindow, exiting",std::cerr, P->inOut->logMain, EXIT_CODE_BUG, *P);
+        
         WA[iW][iA][WA_rStart]=aRstart;
         WA[iW][iA][WA_Length]=aLength;
         WA[iW][iA][WA_gStart]=a1;
