@@ -104,7 +104,7 @@ void ReadAlign::assignAlignToWindow(uint a1, uint aLength, uint aStr, uint aNrep
         };
      
         uint iA;                                      
-        for (iA=0;iA<nWA[iW];iA++) {//find the insertion point in case aligns are not sorted by aRstart
+        for (iA=0; iA<nWA[iW]; iA++) {//find the insertion point in case aligns are not sorted by aRstart
                                     //TODO binary search
             if (aRstart<WA[iW][iA][WA_rStart]) break;
         };
@@ -151,8 +151,11 @@ void ReadAlign::assignAlignToWindow(uint a1, uint aLength, uint aStr, uint aNrep
 //No symbol table info available.
 //#8  0x00002aaaabdca90d in clone () from /lib64/libc.so.6
 //No symbol table info available.
-
-        WA[iW][iA][WA_rStart]=aRstart;
+        try {
+            WA[iW][iA][WA_rStart]=aRstart;
+        } catch (...) {
+            throw "AssignError";
+        }
         WA[iW][iA][WA_Length]=aLength;
         WA[iW][iA][WA_gStart]=a1;
         WA[iW][iA][WA_Nrep]=aNrep;                
@@ -162,6 +165,8 @@ void ReadAlign::assignAlignToWindow(uint a1, uint aLength, uint aStr, uint aNrep
 
         nWA[iW]++;
         nWAP[iW]++;
-        if (aAnchor && WlastAnchor[iW]<iA) WlastAnchor[iW]=iA; //record the index of the last anchor
+        if (aAnchor && WlastAnchor[iW]<iA) {
+            WlastAnchor[iW]=iA; //record the index of the last anchor
+        }
     };
 };
