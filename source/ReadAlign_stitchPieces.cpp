@@ -9,6 +9,7 @@
 #include "alignSmithWaterman.h"
 #include "GlobalVariables.h"
 #include <time.h>
+#include "ErrorWarning.h"
 
 void ReadAlign::stitchPieces(char **R, char **Q, char *G, PackedArray& SA, uint Lread) {
     

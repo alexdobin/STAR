@@ -1,5 +1,6 @@
 #include "IncludeDefine.h"                                                                                                                                                     
 #include "Parameters.h"
+#include "ErrorWarning.h"
 
 bool sjAlignSplit(uint a1,uint aLength,Parameters* P, uint &a1D, uint &aLengthD, uint &a1A, uint &aLengthA, uint &isj) {
     uint sj1=(a1-P->sjGstart) % P->sjdbLength;
