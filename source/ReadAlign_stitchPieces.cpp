@@ -166,23 +166,14 @@ void ReadAlign::stitchPieces(char **R, char **Q, char *G, PackedArray& SA, uint 
             if (a1>=P->sjGstart) {//this is sj read
                 uint a1D, aLengthD, a1A, aLengthA, isj1;              
                 if (sjAlignSplit(a1, aLength, P, a1D, aLengthD, a1A, aLengthA, isj1)) {//align crosses the junction
-                    try {
                         assignAlignToWindow(a1D, aLengthD, aStr, aNrep, aFrag, aRstart, aAnchor, isj1);
                         assignAlignToWindow(a1A, aLengthA, aStr, aNrep, aFrag, aRstart+aLengthD, aAnchor, isj1);
-                    } catch (...) {
-                        throw "AssignError";
-                    }
                     } else {//align does not cross the junction
                         continue; //do not check this align, continue to the next one
                     };
                     
                 } else {//this is a normal genomic read
-                   try {
-                       assignAlignToWindow(a1, aLength, aStr, aNrep, aFrag, aRstart, aAnchor, -1);
-                    } catch (...) {
-                        throw "AssignError";
-                    }
-                    
+                       assignAlignToWindow(a1, aLength, aStr, aNrep, aFrag, aRstart, aAnchor, -1);                 
                 };
         };
         
