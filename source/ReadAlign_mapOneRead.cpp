@@ -105,6 +105,7 @@ int ReadAlign::mapOneRead() {
         	 //check all the windows and transcripts for multiple mappers
             }
         } catch (std::bad_alloc& exc) {
+            P->inOut->logMain << "WARNING: Read " << readName << "caused a crash;" <<endl;
             return 0;
         } 
     };
