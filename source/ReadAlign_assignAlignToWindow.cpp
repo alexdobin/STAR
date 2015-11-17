@@ -152,8 +152,11 @@ void ReadAlign::assignAlignToWindow(uint a1, uint aLength, uint aStr, uint aNrep
 //No symbol table info available.
 //#8  0x00002aaaabdca90d in clone () from /lib64/libc.so.6
 //No symbol table info available.
-        if (iW >=P->seedPerWindowNmax ) {
-            throw "AssignError";
+        
+        // This is a stupid patch just to verify whether this
+        // is really the problem that is plagiung us
+        if (iW >=P->seedPerWindowNmax || iW < 0 ) {
+            iW = 0;
         }
         
         WA[iW][iA][WA_rStart]=aRstart;
