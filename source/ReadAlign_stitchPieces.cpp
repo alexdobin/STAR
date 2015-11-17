@@ -288,7 +288,7 @@ std::time(&timeStart);
         trA.maxScore=0;
         
         trAll[iW1]=trArrayPointer+trNtotal;
-        if (trNtotal+P->alignTranscriptsPerWindowNmax > P->alignTranscriptsPerReadNmax) {
+        if (trNtotal+P->alignTranscriptsPerWindowNmax >= P->alignTranscriptsPerReadNmax) {
             P->inOut->logMain << "WARNING: not enough space allocated for transcript. Did not process all windows for read "<< readName+1 <<endl;
             P->inOut->logMain <<"   SOLUTION: increase alignTranscriptsPerReadNmax and re-run\n" << flush;
             break;
