@@ -55,7 +55,7 @@ void ReadAlign::multMapSelect() {//select multiple mappers from all transcripts 
     {              
         trMult[iTr]->roStart = trMult[iTr]->roStr==0 ? trMult[iTr]->rStart : Lread - trMult[iTr]->rStart - trMult[iTr]->rLength;
         if (size <= trMult[iTr]->Chr || trMult[iTr]->Chr < 0) {
-        	throw "IndexError";
+        	throw std::bad_alloc();
         }
         trMult[iTr]->cStart=trMult[iTr]->gStart - P->chrStart[trMult[iTr]->Chr];                        
     };

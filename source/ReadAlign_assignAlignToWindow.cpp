@@ -156,7 +156,7 @@ void ReadAlign::assignAlignToWindow(uint a1, uint aLength, uint aStr, uint aNrep
         // This is a stupid patch just to verify whether this
         // is really the problem that is plagiung us
         if (iW >=P->seedPerWindowNmax || iW < 0 ) {
-            iW = 0;
+            throw std::bad_alloc();;
         }
         
         WA[iW][iA][WA_rStart]=aRstart;
