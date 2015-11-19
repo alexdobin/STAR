@@ -97,8 +97,7 @@ void Variation::loadVCF(string fileIn)
     P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ..... Loading variations VCF GTF\n" <<flush;
     *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ..... Loading variations VCF GTF\n" <<flush;
         
-    ifstream vcf;
-    ifstrOpen(fileIn, "ERROR_000000", "SOLUTION: check the path and permissions of the VCF file: "+fileIn, P, vcf);
+    ifstream & vcf = ifstrOpen(fileIn, ERROR_OUT, "SOLUTION: check the path and permissions of the VCF file: "+fileIn, P);
     scanVCF(vcf, false, P, snp);
     
     snp.loci=new uint[snp.N];
