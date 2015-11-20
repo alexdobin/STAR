@@ -1,3 +1,4 @@
+Added counting of chimeric reads into Log.final.out .
 Fixed a bug in --outSAMfilter KeepOnlyAddedReferences.
 Fixed a minor bug that caused rare seg-faults.
 Fixed a minor bug in STARlong extension at the ends of the read.

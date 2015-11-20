@@ -20,6 +20,8 @@ class Stats {
         uint splicesNsjdb;
         
         uint unmappedOther, unmappedShort, unmappedMismatch, unmappedMulti, unmappedAll;
+        
+        uint chimericAll;
 
         time_t timeStart, timeStartMap, timeLastReport, timeFinish;     
         

@@ -10,8 +10,15 @@ void ReadAlign::outputAlignments() {
     bool mateMapped[2]={false,false};
     
     if (P->outFilterBySJoutStage<=1) {//no chimeric output for stage=2
-        if ( chimericDetection() && P->chimOutType=="WithinBAM" ) return; 
-        //if chimeric alignment was recorded in main BAM files, it contains the representative portion, so non-chimeric aligmnent is not output
+        if ( chimericDetection() )
+        {
+            statsRA.chimericAll++;
+            if ( P->chimOutType=="WithinBAM" ) 
+            {
+                //if chimeric alignment was recorded in main BAM files, it contains the representative portion, so non-chimeric aligmnent is not output
+                return; 
+            };
+        };
     };
     
     if ( nW==0 ) {//no good windows

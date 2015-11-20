@@ -6,6 +6,7 @@ void Stats::resetN() {//zero all counters
     mappedMismatchesN = 0; mappedInsN = 0; mappedDelN = 0; mappedInsL = 0; mappedDelL = 0; mappedBases = 0;  mappedPortion = 0;
     mappedReadsU = 0; mappedReadsM = 0;
     unmappedOther = 0; unmappedShort = 0; unmappedMismatch = 0; unmappedMulti = 0; unmappedAll = 0;
+    chimericAll = 0;
     splicesNsjdb=0;
     for (uint ii=0; ii<SJ_MOTIF_SIZE; ii++) {
         splicesN[ii]=0;
@@ -24,7 +25,8 @@ void Stats::addStats(Stats &S) {//add S to Stats
     mappedInsL += S.mappedInsL; mappedDelL += S.mappedDelL; mappedBases += S.mappedBases;  mappedPortion += S.mappedPortion;
     mappedReadsU += S.mappedReadsU; mappedReadsM += S.mappedReadsM;
     unmappedOther += S.unmappedOther; unmappedShort += S.unmappedShort; unmappedMismatch += S.unmappedMismatch; unmappedMulti += S.unmappedMulti; unmappedAll += S.unmappedAll;
-    
+    chimericAll += S.chimericAll;
+            
     splicesNsjdb += S.splicesNsjdb;
     for (uint ii=0; ii<SJ_MOTIF_SIZE; ii++) {
         splicesN[ii] +=S.splicesN[ii];
@@ -130,7 +132,11 @@ void Stats::reportFinal(ofstream &streamOut, Parameters *P) {
                <<setw(w1)<< "UNMAPPED READS:\n" \
                <<setw(w1)<< "% of reads unmapped: too many mismatches |\t"     << (readN>0 ? double(unmappedMismatch)/double(readN)*100 : 0) <<'%' <<"\n" \
                <<setw(w1)<< "% of reads unmapped: too short |\t"               << (readN>0 ? double(unmappedShort)/double(readN)*100 : 0) <<'%' <<"\n" \
-               <<setw(w1)<< "% of reads unmapped: other |\t"                   << (readN>0 ? double(unmappedOther)/double(readN)*100 :0) <<'%'<<"\n" <<flush;
+               <<setw(w1)<< "% of reads unmapped: other |\t"                   << (readN>0 ? double(unmappedOther)/double(readN)*100 :0) <<'%'<<"\n" \
+               <<setw(w1)<< "CHIMERIC READS:\n" \
+               <<setw(w1)<< "Number of chimeric reads |\t"                     << chimericAll <<"\n" \
+               <<setw(w1)<< "% of chimeric reads |\t"                          << (readN>0 ? double(chimericAll)/double(readN)*100 :0) <<'%'<<"\n" <<flush;
+
 };
 
 
