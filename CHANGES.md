@@ -1,3 +1,9 @@
+STAR 2.4.5b 2015/11/30
+======================
+
+Bug-fix release:
+
+Fixed a problem with non-primary alignment flags with --outSAMmultNmax option.
 Added counting of chimeric reads into Log.final.out .
 Fixed a bug in --outSAMfilter KeepOnlyAddedReferences.
 Fixed a minor bug that caused rare seg-faults.

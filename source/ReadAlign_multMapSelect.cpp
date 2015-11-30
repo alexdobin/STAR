@@ -73,46 +73,55 @@ void ReadAlign::multMapSelect() {//select multiple mappers from all transcripts 
 //         delete [] s;        
 //     };
     
-    if (P->outMultimapperOrder.random && nTr>1)
-    {//randomize order of the alignments
+    if (nTr==1)
+    {//unique mappers
+        trMult[0]->primaryFlag=true;
+    } else
+    {//multimappers
         int nbest=0;
-        for (uint itr=0; itr<nTr; itr++)
-        {//move the best aligns to the top of the list
-            if ( trMult[itr]->maxScore == maxScore ) 
-            {
-                swap(trMult[itr],trMult[nbest]);
-                ++nbest;
+        if (P->outMultimapperOrder.random || P->outSAMmultNmax != (uint) -1 )
+        {//bring the best alignment to the top of the list. TODO sort alignments by the score?
+            for (uint itr=0; itr<nTr; itr++)
+            {//move the best aligns to the top of the list
+                if ( trMult[itr]->maxScore == maxScore ) 
+                {
+                    swap(trMult[itr],trMult[nbest]);
+                    ++nbest;
+                };
             };
         };
-        //shuffle separately the best aligns, and the rest
-        for (int itr=nbest-1; itr>=1; itr--)
-        {//Fisher-Yates-Durstenfeld-Knuth shuffle
-            int rand1=int (rngUniformReal0to1(rngMultOrder)*itr+0.5);
-            swap(trMult[itr],trMult[rand1]);
+        if (P->outMultimapperOrder.random)
+        {//shuffle separately the best aligns, and the rest
+            for (int itr=nbest-1; itr>=1; itr--)
+            {//Fisher-Yates-Durstenfeld-Knuth shuffle
+                int rand1=int (rngUniformReal0to1(rngMultOrder)*itr+0.5);
+                swap(trMult[itr],trMult[rand1]);
+            };
+            for (int itr=nTr-nbest-1; itr>=1; itr--)
+            {//Fisher-Yates-Durstenfeld-Knuth shuffle
+                int rand1=int (rngUniformReal0to1(rngMultOrder)*itr+0.5);
+                swap(trMult[nbest+itr],trMult[nbest+rand1]);
+            };
+        };    
+
+        if ( P->outSAMprimaryFlag=="AllBestScore" )
+        {
+            for (uint itr=0; itr<nTr; itr++)
+            {//mark all best score aligns as primary
+                if ( trMult[itr]->maxScore == maxScore ) trMult[itr]->primaryFlag=true; 
+            };
+        } else if (P->outMultimapperOrder.random || P->outSAMmultNmax != (uint) -1) 
+        {
+            trMult[0]->primaryFlag=true;//mark as primary the first one in the random ordered list: best scoring aligns are already in front of the list
+    //         for (uint itr=0; itr<nTr; itr++)
+    //         {
+    //             if ( trMult[itr]->maxScore == maxScore ) trMult[itr]->primaryFlag=true;
+    //             break;
+    //         };
+        } else
+        {//old way
+            trBest->primaryFlag=true;    
         };
-        for (int itr=nTr-nbest-1; itr>=1; itr--)
-        {//Fisher-Yates-Durstenfeld-Knuth shuffle
-            int rand1=int (rngUniformReal0to1(rngMultOrder)*itr+0.5);
-            swap(trMult[nbest+itr],trMult[nbest+rand1]);
-        };
-    };    
-    
-    if ( P->outSAMprimaryFlag=="AllBestScore" )
-    {
-        for (uint itr=0; itr<nTr; itr++)
-        {//mark all best score aligns as primary
-            if ( trMult[itr]->maxScore == maxScore ) trMult[itr]->primaryFlag=true; 
-        };
-    } else if (P->outMultimapperOrder.random) 
-    {
-        for (uint itr=0; itr<nTr; itr++)
-        {//mark as primary the first one in the random ordered list
-            if ( trMult[itr]->maxScore == maxScore ) trMult[itr]->primaryFlag=true;
-            break;
-        };
-    } else
-    {//old way
-        trBest->primaryFlag=true;    
     };
 };
 
