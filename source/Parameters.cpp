@@ -566,6 +566,13 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                 mkdir(outBAMsortTmpDir.c_str(),runDirPerm);  
             };                
         } else if (outSAMtype.at(0)=="SAM") {
+            if (outSAMtype.size()>1)
+            {
+                ostringstream errOut;
+                errOut <<"EXITING because of fatal PARAMETER error: --outSAMtype SAM can cannot be combined with "<<outSAMtype.at(1)<<" or any other options\n";
+                errOut <<"SOLUTION: re-run STAR with with '--outSAMtype SAM' only, or with --outSAMtype BAM Unsorted|SortedByCoordinate\n";
+                exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);                
+            };
             outSAMbool=true;
             if (outStd=="SAM") {
                 inOut->outSAM = & std::cout;
@@ -574,7 +581,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                 inOut->outSAM = & inOut->outSAMfile;
             };
         } else if (outSAMtype.at(0)=="None") {
-            //nothin to do, all flags are already false                
+            //nothing to do, all flags are already false                
         } else {
             ostringstream errOut;
             errOut <<"EXITING because of fatal input ERROR: unknown value for the first word of outSAMtype: "<< outSAMtype.at(0) <<"\n";

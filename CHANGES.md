@@ -1,15 +1,15 @@
 STAR 2.4.5b 2015/11/30
 ======================
 
-Bug-fix release:
+**Bug-fix release:**
 
-Fixed a problem with non-primary alignment flags with --outSAMmultNmax option.
-Added counting of chimeric reads into Log.final.out .
-Fixed a bug in --outSAMfilter KeepOnlyAddedReferences.
-Fixed a minor bug that caused rare seg-faults.
-Fixed a minor bug in STARlong extension at the ends of the read.
-Fixed a seg-fault that occurred when non-default value of --genomeChrBinNbits was used.
-Fixed a seg-fault that occurred when junctions where inserted after inserting reference sequences.
+* Fixed a problem with non-primary alignment flags with --outSAMmultNmax option.
+* Added counting of chimeric reads into Log.final.out .
+* Fixed a bug in --outSAMfilter KeepOnlyAddedReferences.
+* Fixed a minor bug that caused rare seg-faults.
+* Fixed a minor bug in STARlong extension at the ends of the read.
+* Fixed a seg-fault that occurred when non-default value of --genomeChrBinNbits was used.
+* Fixed a seg-fault that occurred when junctions where inserted after inserting reference sequences.
 
 
 STAR 2.4.5a 2015/11/06
