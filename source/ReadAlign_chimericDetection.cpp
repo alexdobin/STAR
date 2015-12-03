@@ -35,7 +35,7 @@ bool ReadAlign::chimericDetection() {
     //stich only the best window with one of the lower score ones for now - do not stich 2 lower score windows
     //stitch only one window on each end of the read
 
-    if (P->chimSegmentMin>0 && nW>1 && trBest->rLength >= P->chimSegmentMin \
+    if (P->chimSegmentMin>0 && trBest->rLength >= P->chimSegmentMin \
             && ( trBest->exons[trBest->nExons-1][EX_R] + trBest->exons[trBest->nExons-1][EX_L] + P->chimSegmentMin <= Lread \
               || trBest->exons[0][EX_R] >= P->chimSegmentMin ) \
              && trBest->nextTrScore+P->outFilterMultimapScoreRange < trBest->maxScore \

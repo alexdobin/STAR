@@ -78,6 +78,8 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
             {
                 //indArray[ind1] =  suffixArraySearch(seq1, istart, P->sjdbLength-istart1, G, SA, true, 0, P->nSA-1, 0, P) ;
                 indArray[ind1] =  suffixArraySearch1(seq1, istart, 10000, G, -1LLU, SA, true, 0, P->nSA-1, 0, P) ;
+                //-1LLU results in suffixes for the new junctions to be always included in SA *after* the suffixes of the old junctions
+                //for identical suffixes, this may result in unstable ordering
                 indArray[ind1+1] = isj*P->sjdbLength+istart;
             };
         };
