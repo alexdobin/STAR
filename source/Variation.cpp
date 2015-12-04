@@ -159,8 +159,9 @@ vector<vector<array<int,2>>> Variation::sjdbSnp(uint sjStart, uint sjEnd, uint s
     vector<vector<array<int,2>>> snpV(2);
     
     if (!yes)
-    {//no variation
-        return snpV;
+    {//no variation, return 1 empty element 
+        vector<vector<array<int,2>>> snpV1(1);
+        return snpV1;
     };
 
     snp.snpOnBlocks(sjStart-sjdbOverhang, sjdbOverhang, 0,            snpV);
