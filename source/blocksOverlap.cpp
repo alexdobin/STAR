@@ -1,6 +1,6 @@
 #include "blocksOverlap.h"
 
-uint blocksOverlap(Transcript &t1, Transcript &t2) {//calculate overlap between blocak of two transcripts
+uint blocksOverlap(Transcript &t1, Transcript &t2) {//calculate overlap between blocks of two transcripts
     
     uint i1=0, i2=0, nOverlap=0;
     while (i1<t1.nExons && i2<t2.nExons) {//scan through all exons

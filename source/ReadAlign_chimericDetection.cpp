@@ -3,6 +3,8 @@
 #include "Transcript.h"
 #include "ReadAlign.h"
 #include "BAMfunctions.h"
+#include "blocksOverlap.h"
+
 //#include "SequenceFuns.h"
 //#include "stitchWindowAligns.h"
 //#include "sjSplitAlign.cpp"
@@ -38,12 +40,12 @@ bool ReadAlign::chimericDetection() {
     if (P->chimSegmentMin>0 && trBest->rLength >= P->chimSegmentMin \
             && ( trBest->exons[trBest->nExons-1][EX_R] + trBest->exons[trBest->nExons-1][EX_L] + P->chimSegmentMin <= Lread \
               || trBest->exons[0][EX_R] >= P->chimSegmentMin ) \
-             && trBest->nextTrScore+P->outFilterMultimapScoreRange < trBest->maxScore \
              && trBest->intronMotifs[0]==0 && (trBest->intronMotifs[1]==0 || trBest->intronMotifs[2]==0) ) { 
             //there is unmapped space at the start/end, and the main window is not a multimapping window, and non non-canonical junctions, and consistend junction motif
         int chimScoreBest=0,chimScoreNext=0;
         trChim[0]=*trBest;
 
+        
         uint roStart1=trBest->Str==0 ? trBest->exons[0][EX_R] : Lread - trBest->exons[trBest->nExons-1][EX_R] - trBest->exons[trBest->nExons-1][EX_L];
         uint roEnd1=trBest->Str==0 ? trBest->exons[trBest->nExons-1][EX_R] + trBest->exons[trBest->nExons-1][EX_L] - 1 : Lread - trBest->exons[0][EX_R] - 1;
         if (roStart1>readLength[0]) roStart1--;
@@ -97,15 +99,24 @@ bool ReadAlign::chimericDetection() {
                     && ( diffMates || ( (roEnd1 + P->chimSegmentReadGapMax + 1) >= roStart2 && (roEnd2 + P->chimSegmentReadGapMax + 1) >= roStart1 ) ) ) {
                     
                     int chimScore=trBest->maxScore + trAll[iW][iWt]->maxScore - (int)chimOverlap; //subtract overlap to avoid double counting
+                    
+                    uint overlap1=0;
+                    if (iWt>0 && chimScoreBest>0) 
+                    {//overlap between chimeric candidate segment and the best chimeric segment so far. Maybe non-zero only if both are in the same window.
+                        overlap1=blocksOverlap(trChim[1],*trAll[iW][iWt]);
+                    };
 
                     if (chimScore > chimScoreBest && chimScore >= P->chimScoreMin && chimScore+P->chimScoreDropMax >= (int) (readLength[0]+readLength[1]) ) {
                         trChim[1]=*trAll[iW][iWt];                                      
-                        chimScoreNext=chimScoreBest;
+                        if (overlap1==0)
+                        {
+                            chimScoreNext=chimScoreBest;
+                        };
                         chimScoreBest=chimScore;
                         trChim[1].roStart = trChim[1].roStr ==0 ? trChim[1].rStart : Lread - trChim[1].rStart - trChim[1].rLength;
                         trChim[1].cStart  = trChim[1].gStart - P->chrStart[trChim[1].Chr];      
                         chimStrBest=chimStr1;
-                    } else if (chimScore>chimScoreNext) {//replace the nextscore if it's not the best one and is higher than the previous one
+                    } else if (chimScore>chimScoreNext && overlap1==0) {//replace the nextscore if it's not the best one and is higher than the previous one
                         chimScoreNext=chimScore;              
                     };
                 };
@@ -289,14 +300,18 @@ bool ReadAlign::chimericDetection() {
     //             cout << readName <<"\t"<< (trChim[0].Str==0 ? chimJ1-chimJ0 : chimJ0-chimJ1) << "\t"<< (chimMotif>=0 ? P->alignIntronMax :  P->alignMatesGapMax)<<"\n";
     //             cout <<  chimRepeat0 <<"\t"<<trChim[0].exons[e0][EX_L]<<"\n";
             //chimeric alignments output
-            if ( chimN==2 && trChim[0].exons[e0][EX_L]>=P->chimJunctionOverhangMin+chimRepeat0 \
-                    && trChim[1].exons[e1][EX_L]>=P->chimJunctionOverhangMin+chimRepeat1 \
+            if ( chimN==2 \
                     && ( trChim[0].Str!=trChim[1].Str ||  trChim[0].Chr!=trChim[1].Chr \
                     || (trChim[0].Str==0 ? chimJ1-chimJ0+1LLU : chimJ0-chimJ1+1LLU) > (chimMotif>=0 ? P->alignIntronMax :  P->alignMatesGapMax) ) )
-            {//unique chimeras only && minOverhang1 
-             //&& minOverhang2
+            {//
              //&& (diff str || diff chr || 
              //|| gap > (alignIntronMax,alignMatesGapMax) ) negative gap = very large # because of uint
+                
+                if (chimMotif>=0 && \
+                     (trChim[0].exons[e0][EX_L]<P->chimJunctionOverhangMin+chimRepeat0 || trChim[1].exons[e1][EX_L]<P->chimJunctionOverhangMin+chimRepeat1) )
+                {//filter out linear junctions that are very close to chimeric junction
+                    return false;
+                };
                         
                 chimRecord=true; //chimeric alignment was recorded
 

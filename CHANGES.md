@@ -1,3 +1,4 @@
+Fixed a bug that filtered out some chimeric junctions.
 Fixed a bug that prevented chimeric output for some of the "circular" configurations.
 
 STAR 2.4.5b 2015/11/30
