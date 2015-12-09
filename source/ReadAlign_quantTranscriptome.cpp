@@ -2,6 +2,7 @@
 #include "ReadAlign.h"
 #include "Transcript.h"
 #include "serviceFuns.cpp"
+#include <random>
 
 uint ReadAlign::quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT) {
     uint nAlignT=0;    
@@ -61,6 +62,8 @@ uint ReadAlign::quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript 
         nAlignT += Tr->quantAlign(*alignG[iag],alignT+nAlignT);
 //         };
     };
+    
+    alignT[int(rngUniformReal0to1(rngMultOrder)*nAlignT)].primaryFlag=true;
     
     for (uint iatr=0;iatr<nAlignT;iatr++) {//write all transcripts
 //         alignBAM(alignT[iatr], nAlignT, iatr, 0, (uint) -1, (uint) -1, 0, -1, NULL, outBAMoneAlign, outBAMoneAlignNbytes);

@@ -20,6 +20,7 @@ int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, ui
     ex1=ex1/2; //this is the first exon of the alignment
     
     aT.nExons=0;
+    aT.primaryFlag=false;
     
     aG.canonSJ[aG.nExons-1]=-999; //marks the last exons
     for (uint32 iab=0; iab<aG.nExons; iab++) {//scan through all blocks of the align

@@ -1,3 +1,4 @@
+In Aligned.toTranscriptome.out.bam (--quantMode TranscriptomeSAM), non-primary SAM flag is assigned to all but one randomly selected alignment in Aligned.toTranscriptome.out.bam .
 Fixed a bug that filtered out some chimeric junctions.
 Fixed a bug that prevented chimeric output for some of the "circular" configurations.
 
