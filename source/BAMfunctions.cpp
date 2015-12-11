@@ -1,11 +1,16 @@
 #include "BAMfunctions.h"
 #include "htslib/htslib/kstring.h"
 
+
+///@todo string bam_cigarString (bam1_t *b,  bam1_core_t *c)   will save unnecessairy casts
 string bam_cigarString (bam1_t *b) {//output CIGAR string
 //    kstring_t strK;
 //    kstring_t *str=&strK;
+    
+    const bam1_core_t *c = &b->core;
+
     string cigarString("");
-    if ( b->core->n_cigar > 0 ) {
+    if ( c->n_cigar > 0 ) {
       uint32_t *cigar = bam_get_cigar(b);
       for (int i = 0; i < c->n_cigar; ++i) {
         cigarString+=to_string((uint)bam_cigar_oplen(cigar[i]))+bam_cigar_opchr(cigar[i]);
@@ -24,10 +29,11 @@ string bam_cigarString (bam1_t *b) {//output CIGAR string
     return cigarString;
 };
 
+///@todo int bam_read1_fromArray(bam1_t *b,  &b->core, bam1_core_t *c)   will save unnecessairy casts
 int bam_read1_fromArray(char *bamChar, bam1_t *b) //modified from samtools bam_read1 to assign BAM record in mmemry to bam structure
 {
 	bam1_core_t *c = &b->core;
-	int32_t block_len, ret, i;
+	int32_t block_len;
 // // 	uint32_t x[8];
 // // 	if ((ret = bgzf_read(fp, &block_len, 4)) != 4) {
 // // 		if (ret == 0) return -1; // normal end-of-file

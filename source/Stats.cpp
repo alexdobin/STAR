@@ -94,7 +94,7 @@ void Stats::progressReport(ofstream &progressStream) {
     };
 };
 
-void Stats::reportFinal(ofstream &streamOut, Parameters *P) {    
+void Stats::reportFinal(ofstream &streamOut) {    
     int w1=50;
     time( &timeFinish);    
     

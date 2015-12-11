@@ -4,6 +4,7 @@
 #include <ftw.h>
 #include <unistd.h>
 
+
 int removeFileOrDir(const char *fpath,const struct stat *sb, int typeflag, struct FTW *ftwbuf) {
     if (typeflag==FTW_F) {//file
         remove(fpath);

@@ -188,14 +188,15 @@ uint maxMappableLength(char** s, uint S, uint N, char* g, PackedArray& SA, uint 
     return i2-i1+1;
 };
 
-uint suffixArraySearch(char** s2, uint S, uint N, char* G, PackedArray& SA, bool dirR, uint i1, uint i2, uint L, Parameters* P) {
+/*
+uint suffixArraySearch(char** s2, uint S, uint N, char* G, PackedArray& SA, uint i1, uint i2, uint L, Parameters* P) {
     // binary search in SA space
     // s[0],s[1] - sequence, complementary sequence
     // S - start offset
     // N - sequence length
     // g - genome sequence
     // SA - suffix array
-    // dirR - direction, true=froward, false=reverse!!!!!!!NOT WORKING
+    ///@todo dirR - direction, true=froward, false=reverse!!!!!!!NOT WORKING
     // i1,i2 = starting indices in SA    
     // L - starting length
     // output: SA index < searched string, i.e. g[SA[index]]<s<g[SA[index+1]]
@@ -271,6 +272,7 @@ uint suffixArraySearch(char** s2, uint S, uint N, char* G, PackedArray& SA, bool
     };
     return i1;
 };
+*/
 
 int compareRefEnds (uint64 SAstr,  uint64 gInsert, bool strG, bool strR, Parameters* P)
 {
@@ -328,7 +330,9 @@ uint compareSeqToGenome1(char** s2, uint S, uint N, uint L, char* g, PackedArray
         };
 //         if (s[ii]>g[ii]) {compRes=true;} else {compRes=false;};        
         return N; //exact match
-    } else if (!dirG) {
+    }
+    else
+    {
         char* s  = s2[1] + S + L;
         g += P->nGenome-1-SAstr - L;
         for (ii=0; (uint) ii < N-L; ii++)
