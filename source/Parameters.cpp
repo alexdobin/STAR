@@ -1079,7 +1079,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     
     //chimeric
     chimPar.filter.genomicN=false;
-    for (int ii=0; ii<chimFilter.size(); ii++)
+    for (unsigned int ii=0; ii<chimFilter.size(); ii++)
     {
         if (chimFilter.at(ii)=="banGenomicN")
         {
@@ -1097,7 +1097,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         };
     };
     
-    for (int ii=0; ii<readNameSeparator.size(); ii++)
+    for (unsigned int ii=0; ii<readNameSeparator.size(); ii++)
     {
         if (readNameSeparator.at(ii)=="space")
         {
@@ -1218,7 +1218,7 @@ void Parameters::chrInfoLoad() {//find chrStart,Length,nChr from Genome G
     
     while (chrStreamIn.good()) {
         string chrIn;
-        char chrInChar[1000];
+        char chrInChar[1000];///@todo figure out whether this declaration must not be out of the loop (should save mem allocs)
         chrStreamIn.getline(chrInChar,1000);
         chrIn=chrInChar;
         if (chrIn=="") break;

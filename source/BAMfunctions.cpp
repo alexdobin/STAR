@@ -4,10 +4,8 @@
 string bam_cigarString (bam1_t *b) {//output CIGAR string
 //    kstring_t strK;
 //    kstring_t *str=&strK;
-    const bam1_core_t *c = &b->core;
-
     string cigarString("");
-    if ( c->n_cigar > 0 ) {
+    if ( b->core->n_cigar > 0 ) {
       uint32_t *cigar = bam_get_cigar(b);
       for (int i = 0; i < c->n_cigar; ++i) {
         cigarString+=to_string((uint)bam_cigar_oplen(cigar[i]))+bam_cigar_opchr(cigar[i]);
