@@ -61,6 +61,9 @@ genomeSAindexNbases         14
 genomeSAsparseD             1
     int>0: suffux array sparsity, i.e. distance between indices: use bigger numbers to decrease needed RAM at the cost of mapping speed reduction
 
+genomeSuffixLengthMax       -1
+    int: maximum length of the suffixes, has to be longer than read length. -1 = infinite.
+
 ### Splice Junctions Database
 sjdbFileChrStartEnd                     -
     string(s): path to the files with genomic coordinates (chr <tab> start <tab> end <tab> strand) for the splice junction introns. Multiple files can be supplied wand will be concatenated.

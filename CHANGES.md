@@ -1,8 +1,10 @@
-In Aligned.toTranscriptome.out.bam (--quantMode TranscriptomeSAM), non-primary SAM flag is assigned to all but one randomly selected alignment in Aligned.toTranscriptome.out.bam .
-Fixed a bug that filtered out some chimeric junctions.
-Fixed a bug that prevented chimeric output for some of the "circular" configurations.
+* Implemented --genomeSuffixLengthMax option to control max siffix length at the genome generation step.
+* Fixed a bug that caused genome generation stalling in some cases.
+* In Aligned.toTranscriptome.out.bam (--quantMode TranscriptomeSAM), non-primary SAM flag is assigned to all but one randomly selected alignment in Aligned.toTranscriptome.out.bam .
+* Fixed a bug that filtered out some chimeric junctions.
+* Fixed a bug that prevented chimeric output for some of the "circular" configurations.
 
-STAR 2.4.5b 2015/11/30
+STAR 2.5.0b 2015/11/30
 ======================
 
 **Bug-fix release:**
@@ -16,7 +18,7 @@ STAR 2.4.5b 2015/11/30
 * Fixed a seg-fault that occurred when junctions where inserted after inserting reference sequences.
 
 
-STAR 2.4.5a 2015/11/06
+STAR 2.5.0a 2015/11/06
 ======================
 
 **STAR now uses essential c++11 features and requires gcc 4.7.0 or later.**
