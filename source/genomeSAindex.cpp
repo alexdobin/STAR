@@ -228,14 +228,13 @@ void funSAiFindNextIndex(Parameters * P, char * G, PackedArray & SA, uint isaSte
     int iL4prev=iL4;
     isa+=isaStep;
     while (isa<P->nSA && (indFull=funCalcSAiFromSA(G,SA,isa,P->genomeSAindexNbases,P,iL4))==indFullPrev && iL4==iL4prev)
-    {
+    {//make large step in isa while the indFull/iL4 are still the same
         isa+=isaStep;
     };
     if (isa>=P->nSA)
-    {
-        isa=P->nSA-1;
-        indFull=funCalcSAiFromSA(G,SA,isa,P->genomeSAindexNbases,P,iL4);
-        if (indFull==indFullPrev)
+    {//reached the end of the SA
+        indFull=funCalcSAiFromSA(G,SA,P->nSA-1,P->genomeSAindexNbases,P,iL4);
+        if (indFull==indFullPrev && iL4==iL4prev)
         {
             isa=P->nSA;//no more indices, the last one is equal to the previous
             return;
@@ -244,7 +243,7 @@ void funSAiFindNextIndex(Parameters * P, char * G, PackedArray & SA, uint isaSte
 
     {//binary search
         uint i1=isa-isaStep;
-        uint i2=isa;
+        uint i2=min(isa,P->nSA-1);
         while (i1+1<i2)
         {
             isa=i1/2 + i2/2 + (i1%2 + i2%2)/2;
