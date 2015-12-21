@@ -1,4 +1,4 @@
-* Implemented --genomeSuffixLengthMax option to control max siffix length at the genome generation step.
+* Implemented --genomeSuffixLengthMax option to control max suffix length at the genome generation step.
 * Fixed a bug that caused genome generation stalling in some cases.
 * In Aligned.toTranscriptome.out.bam (--quantMode TranscriptomeSAM), non-primary SAM flag is assigned to all but one randomly selected alignment in Aligned.toTranscriptome.out.bam .
 * Fixed a bug that filtered out some chimeric junctions.

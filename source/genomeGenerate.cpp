@@ -31,38 +31,46 @@ inline int funCompareSuffixes ( const void *a, const void *b){
     uint va=0,vb=0;
     uint8 *va1, *vb1;
 
-    bool aeqb=true;
-    while (aeqb) {
+    while (jj < globalL) {
         va=*(ga-jj);
         vb=*(gb-jj);
-        va1=(uint8*) &va;
-        vb1=(uint8*) &vb;
-        for (ii=7;ii>=0;ii--)
-        {
-            if (va1[ii]!=vb1[ii] || va1[ii]==5)
+        
+        #define has5(v) ((((v)^0x0505050505050505) - 0x0101010101010101) & ~((v)^0x0505050505050505) & 0x8080808080808080) 
+        
+        if (has5(va) && has5(vb))
+        {//there is 5 in the sequence - only compare bytes before 5
+            va1=(uint8*) &va;
+            vb1=(uint8*) &vb;
+            for (ii=7;ii>=0;ii--)
             {
-                aeqb=false;
-                break;
+                if (va1[ii]>vb1[ii]) 
+                {
+                    return 1;
+                } else if (va1[ii]<vb1[ii]) 
+                {
+                    return -1;
+                } else if (va1[ii]==5)
+                {//va=vb at the end of chr
+                    if ( *((uint*)a) > *((uint*)b) )
+                    {//anti-stable order,since indexes are sorted in the reverse order 
+                        return  -1;
+                    } else
+                    {//a cannot be equal to b
+                        return 1;
+                    };
+                };
+            };
+        } else
+        {//no 5, simple comparison
+            if (va>vb) 
+            {
+                return 1;
+            } else if (va<vb) 
+            {
+                return -1;
             };
         };
         jj++;
-    };
-
-    if (va1[ii]>vb1[ii]) 
-    {
-        return 1;
-    } else if (va1[ii]<vb1[ii]) 
-    {
-        return -1;
-    } else 
-    {//va=vb at the end of chr
-        if ( *((uint*)a) > *((uint*)b) )
-        {//anti-stable order,since indexes are sorted in the reverse order 
-            return  -1;
-        } else
-        {//a cannot be equal to b
-            return 1;
-        };
     };
 };
 
@@ -212,7 +220,7 @@ void genomeGenerate(Parameters *P) {
             swap(G[N2-1-ii],G[ii]);
         };          
         globalG=G;
-        globalL=L/sizeof(uint);
+        globalL=P->genomeSuffixLengthMax/sizeof(uint);
         //count the number of indices with 4nt prefix
         uint indPrefN=1LLU << 16;
         uint* indPrefCount = new uint [indPrefN];
