@@ -1,3 +1,6 @@
+STAR 2.5.0c 2015/12/23
+======================
+
 * Implemented --genomeSuffixLengthMax option to control max suffix length at the genome generation step.
 * Fixed a bug that caused genome generation stalling in some cases.
 * In Aligned.toTranscriptome.out.bam (--quantMode TranscriptomeSAM), non-primary SAM flag is assigned to all but one randomly selected alignment in Aligned.toTranscriptome.out.bam .
