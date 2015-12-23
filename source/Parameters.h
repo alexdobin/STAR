@@ -115,7 +115,7 @@ class Parameters {
         //SAM output
         string outBAMfileCoordName, outBAMfileUnsortedName, outQuantBAMfileName;        
         string samHeader, samHeaderHD, samHeaderSortedCoord;
-        string outSAMmode, outSAMstrandField,  outSAMunmapped, outSAMorder, outSAMprimaryFlag;
+        string outSAMmode, outSAMstrandField,  outSAMorder, outSAMprimaryFlag;
         vector<string> outSAMattributes, outSAMheaderHD, outSAMheaderPG;
         vector<string> outSAMattrRGline,outSAMattrRGlineSplit,outSAMattrRG;
         uint outSAMmultNmax,outSAMattrIHstart;
@@ -133,6 +133,14 @@ class Parameters {
         int outBAMsortingThreadN, outBAMsortingThreadNactual;
         uint64 *outBAMsortingBinStart; //genomic starts for bins for sorting BAM files
         uint16 outSAMflagOR, outSAMflagAND;
+        
+        struct
+        {
+            vector <string> mode;
+            bool yes;
+            bool within;//output unmapped reads within SAM/BAM files
+            bool keepPairs;//keep mates together
+        } outSAMunmapped;
         
         struct
         {

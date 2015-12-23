@@ -82,7 +82,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "outSAMmode", &outSAMmode));
     parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "outSAMstrandField", &outSAMstrandField));
     parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "outSAMattributes", &outSAMattributes));
-    parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "outSAMunmapped", &outSAMunmapped));
+    parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "outSAMunmapped", &outSAMunmapped.mode));
     parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "outSAMorder", &outSAMorder));
     parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "outSAMprimaryFlag", &outSAMprimaryFlag));
     parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "outSAMreadID", &outSAMreadID));
@@ -1125,6 +1125,39 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     //genome parameters
     genomeChrBinNbases=1LLU<<genomeChrBinNbits;
     
+    //outSAMunmapped
+    outSAMunmapped.yes=false;
+    outSAMunmapped.within=false;    
+    outSAMunmapped.keepPairs=false;
+    if (outSAMunmapped.mode.at(0)=="None")
+    {//nothing to do
+    } else if (outSAMunmapped.mode.at(0)=="Within")
+    {
+        outSAMunmapped.yes=true;
+        outSAMunmapped.within=true;
+    } else 
+    {
+        ostringstream errOut;
+        errOut << "EXITING because of fatal PARAMETERS error: unrecognized first word of --outSAMunmapped="<<outSAMunmapped.mode.at(0)<<"\n";
+        errOut << "SOLUTION: use allowed options: None OR Within";
+        exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
+    
+    for (uint ii=1;ii<outSAMunmapped.mode.size();ii++)
+    {
+        if (outSAMunmapped.mode.at(0)=="Within")
+        {
+            outSAMunmapped.keepPairs=true;
+        } else 
+        {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in of --outSAMunmapped="<<outSAMunmapped.mode.at(ii)<<"\n";
+            errOut << "SOLUTION: use allowed option: KeepPairs";
+            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };    
+    };
+    
+    ////////////////////////////////////////////////
     inOut->logMain << "Finished loading and checking parameters\n" <<flush;
 };
 

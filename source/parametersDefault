@@ -219,9 +219,13 @@ outSAMattrIHstart               1
     int>=0:                     start value for the IH attribute. 0 may be required by some downstream software, such as Cufflinks or StringTie.
 
 outSAMunmapped                  None
-    string: output of unmapped reads in the SAM format
+    string(s): output of unmapped reads in the SAM format
+                                1st word:
                                 None   ... no output
                                 Within ... output unmapped reads within the main SAM file (i.e. Aligned.out.sam)
+                                2nd word:
+                                KeepPairs ... record unmapped mate for each alignment, and, in case of unsroted output, keep it adjacent to its mapped mate.
+                                              Only affects multi-mapping reads
 
 outSAMorder                     Paired
     string: type of sorting for the SAM output

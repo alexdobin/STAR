@@ -148,7 +148,7 @@ void ReadAlign::outputAlignments() {
         statsRA.unmappedAll++;
     };
 
-    if (unmapType>=0 && P->outSAMunmapped=="Within") {//unmapped read, at least one mate
+    if (unmapType>=0 && P->outSAMunmapped.within) {//unmapped read, at least one mate
         if (P->outBAMunsorted || P->outBAMcoord || P->quant.trSAM.yes) {//BAM output
             uint mateChr=(uint) -1, mateStart=(uint) -1;
             uint8_t mateStr=0;
