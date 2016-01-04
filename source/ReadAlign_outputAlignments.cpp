@@ -103,33 +103,96 @@ void ReadAlign::outputAlignments() {
                 exitWithError(errOut.str(), std::cerr, P->inOut->logMain, EXIT_CODE_BUG, *P);                    
             };            
             
-            uint nTrOut=min(P->outSAMmultNmax,nTr); //number of to write to SAM/BAM files
+            uint nTrOut=min(P->outSAMmultNmax,nTr); //number of to write to SAM/BAM files       
             
-            if (P->outSAMbool && outSAMfilterYes){//SAM output
-                for (uint iTr=0;iTr<nTrOut;iTr++) {//write all transcripts
+            for (uint iTr=0;iTr<nTrOut;iTr++) 
+            {//write all transcripts         
+                //mate mapped = true if a mate was present in one of the trancsripts
+                mateMapped[trMult[iTr]->exons[0][EX_iFrag]]=true;
+                mateMapped[trMult[iTr]->exons[trBest->nExons-1][EX_iFrag]]=true; 
+                
+                //mateMapped1 = true if a mate is present in this transcript
+                bool mateMapped1[2]={false,false};
+                mateMapped1[trMult[iTr]->exons[0][EX_iFrag]]=true;
+                mateMapped1[trMult[iTr]->exons[trMult[iTr]->nExons-1][EX_iFrag]]=true; 
+                
+                if (P->outSAMbool && outSAMfilterYes)
+                {//SAM output
                     outBAMbytes+=outputTranscriptSAM(*(trMult[iTr]), nTr, iTr, (uint) -1, (uint) -1, 0, -1, NULL, outSAMstream);
+                    if (P->outSAMunmapped.keepPairs && P->readNmates>1 && ( !mateMapped1[0] || !mateMapped1[1] ) )
+                    {//keep pairs && paired reads && one of the mates not mapped in this transcript  
+                        outBAMbytes+= outputTranscriptSAM(*(trMult[iTr]), 0, 0, (uint) -1, (uint) -1, 0, 4, mateMapped1, outSAMstream);        
+                    };
+                };
+            
+                if ((P->outBAMunsorted || P->outBAMcoord) && outSAMfilterYes) 
+                {//BAM output
+                    alignBAM(*(trMult[iTr]), nTr, iTr, P->chrStart[trMult[iTr]->Chr], (uint) -1, (uint) -1, 0, -1, NULL, P->outSAMattrOrder,outBAMoneAlign, outBAMoneAlignNbytes);
+                    
+                    if (P->outBAMunsorted)
+                    {//unsorted
+                        for (uint imate=0; imate<P->readNmates; imate++) 
+                        {//output each mate
+                            outBAMunsorted->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], (imate>0 || iTr>0) ? 0 : (outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1])*2*nTrOut);
+                        };
+                        if (P->outSAMunmapped.keepPairs && P->readNmates>1 && ( !mateMapped1[0] || !mateMapped1[1] ) )                        
+                        {//keep pairs && paired reads && one of the mates not mapped in this transcript  
+                            alignBAM(*trMult[iTr], 0, 0, P->chrStart[trMult[iTr]->Chr], (uint) -1, (uint) -1, 0, 4, mateMapped1, P->outSAMattrOrder, outBAMoneAlign, outBAMoneAlignNbytes);
+                            for (uint imate=0; imate<P->readNmates; imate++) 
+                            {//output each mate
+                                outBAMunsorted->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], (imate>0 || iTr>0) ? 0 : (outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1])*2*nTrOut);
+                            };                            
+                        };
+                    };
+                    
+                    if (P->outBAMcoord)
+                    {//coordinate sorted
+                        for (uint imate=0; imate<P->readNmates; imate++) 
+                        {//output each mate
+                            outBAMcoord->coordOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], (iReadAll<<32) | (iTr<<8) | trMult[iTr]->exons[0][EX_iFrag] );                        
+                        };
+                    };
+                    
+                };
+            };
+                        
+            if (P->readNmates>1 && !(mateMapped[0] && mateMapped[1]) ) 
+            {
+                unmapType=4;
+            };
+            
+            if (unmapType==4)
+            {//output unmapped end for single-end alignments
+                if (P->outSAMbool && !P->outSAMunmapped.keepPairs && outSAMfilterYes)
+                {
+                    outBAMbytes+= outputTranscriptSAM(*trBest, 0, 0, (uint) -1, (uint) -1, 0, unmapType, mateMapped, outSAMstream);        
+                };
+                
+                if ( (P->outBAMcoord || (P->outBAMunsorted && !P->outSAMunmapped.keepPairs) ) && outSAMfilterYes) 
+                {//BAM output
+                    alignBAM(*trBest, 0, 0, P->chrStart[trBest->Chr], (uint) -1, (uint) -1, 0, unmapType, mateMapped, P->outSAMattrOrder, outBAMoneAlign, outBAMoneAlignNbytes);
+                    for (uint imate=0; imate<P->readNmates; imate++) 
+                    {//alignBAM output is empty for mapped mate, but still need to scan through it
+                        if (P->outBAMunsorted && !P->outSAMunmapped.keepPairs)
+                        {
+                            outBAMunsorted->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], imate>0 ? 0 : outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1]);
+                        };
+                        if (P->outBAMcoord)
+                        {//KeepPairs option does not affect for sorted BAM since we do not want multiple entries for the same unmapped read
+                            outBAMcoord->coordOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], iReadAll);                                        
+                        };
+                    };
                 };
             };
             
-            if ((P->outBAMunsorted || P->outBAMcoord) && outSAMfilterYes) {//BAM output
-                for (uint iTr=0;iTr<nTrOut;iTr++) {//write all transcripts                     
-                    alignBAM(*(trMult[iTr]), nTr, iTr, P->chrStart[trMult[iTr]->Chr], (uint) -1, (uint) -1, 0, -1, NULL, P->outSAMattrOrder,outBAMoneAlign, outBAMoneAlignNbytes);
-                    for (uint imate=0; imate<P->readNmates; imate++) {//output each mate
-                        if (P->outBAMunsorted) outBAMunsorted->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], (imate>0 || iTr>0) ? 0 : (outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1])*2*nTrOut);
-                        if (P->outBAMcoord)    outBAMcoord->coordOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], (iReadAll<<32) | (iTr<<8) | trMult[iTr]->exons[0][EX_iFrag] );                        
-                    };
-                };             
-            };
-                        
-            if (P->outSJfilterReads=="All" || nTr==1) {
+            if (P->outSJfilterReads=="All" || nTr==1) 
+            {
                 uint sjReadStartN=chunkOutSJ->N;        
-                for (uint iTr=0;iTr<nTr;iTr++) {//write all transcripts
+                for (uint iTr=0;iTr<nTr;iTr++) 
+                {//write all transcripts
                     outputTranscriptSJ (*(trMult[iTr]), nTr, chunkOutSJ, sjReadStartN);            
                 };
             };
-            mateMapped[trBest->exons[0][EX_iFrag]]=true;
-            mateMapped[trBest->exons[trBest->nExons-1][EX_iFrag]]=true;        
-            if (P->readNmates>1 && !(mateMapped[0] && mateMapped[1]) ) unmapType=4;
             
             if ( P->quant.geCount.yes ) 
             {
@@ -148,24 +211,29 @@ void ReadAlign::outputAlignments() {
         statsRA.unmappedAll++;
     };
 
-    if (unmapType>=0 && P->outSAMunmapped.within) {//unmapped read, at least one mate
-        if (P->outBAMunsorted || P->outBAMcoord || P->quant.trSAM.yes) {//BAM output
-            uint mateChr=(uint) -1, mateStart=(uint) -1;
-            uint8_t mateStr=0;
-            if (unmapType==4) {//other mate is mapped, record its position
-                mateChr=trBest->Chr;
-                mateStart=trBest->exons[0][EX_G];
-                mateStr=(uint8_t) (trBest->Str!=trBest->exons[0][EX_iFrag]);
-            };
-            alignBAM(*trBest, 0, 0, P->chrStart[trBest->Chr], mateChr, mateStart, mateStr, unmapType, mateMapped, P->outSAMattrOrder, outBAMoneAlign, outBAMoneAlignNbytes);
-            for (uint imate=0; imate<P->readNmates; imate++) {//output each mate
-                if (P->outBAMunsorted) outBAMunsorted->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], imate>0 ? 0 : outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1]);
-                //TODO clean for single-end alignments of PE reads
-                if ( P->quant.trSAM.yes && unmapType!=4) outBAMquant->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], imate>0 ? 0 : outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1]);
-                if (P->outBAMcoord)    outBAMcoord->coordOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], iReadAll);                                        
+    if ( P->outSAMunmapped.within && unmapType>=0 && unmapType<4 ) {//output unmapped within && unmapped read && both mates unmapped
+        if (P->outBAMcoord || P->outBAMunsorted || P->quant.trSAM.yes) 
+        {//BAM output
+            alignBAM(*trBest, 0, 0, P->chrStart[trBest->Chr], (uint) -1, (uint) -1, 0, unmapType, mateMapped, P->outSAMattrOrder, outBAMoneAlign, outBAMoneAlignNbytes);
+            for (uint imate=0; imate<P->readNmates; imate++) 
+            {//output each mate
+                if (P->outBAMunsorted)
+                {
+                    outBAMunsorted->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], imate>0 ? 0 : outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1]);
+                };
+                if (P->quant.trSAM.yes)
+                {
+                    outBAMquant->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], imate>0 ? 0 : outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1]);
+                };
+                if (P->outBAMcoord)
+                {
+                    outBAMcoord->coordOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], iReadAll);                                        
+                };
             };
         };
-        if (P->outSAMbool) {
+        
+        if (P->outSAMbool) 
+        {//output SAM
             outBAMbytes+= outputTranscriptSAM(*trBest, 0, 0, (uint) -1, (uint) -1, 0, unmapType, mateMapped, outSAMstream);        
         };        
     };

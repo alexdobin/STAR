@@ -8,32 +8,46 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
     
     uint outStreamPos0=(uint)outStream->tellp();
     
-    if (unmapType>=0) {//unmapped reads: SAM
-        for (uint imate=0;imate<P->readNmates;imate++) {//cycle over mates
-            if (!mateMapped[imate]) {
+    if (unmapType>=0) 
+    {//unmapped reads: SAM
+        for (uint imate=0;imate<P->readNmates;imate++)
+        {//cycle over mates
+            if (!mateMapped[imate])
+            {
                 uint16 samFLAG=0x4;
-                if (P->readNmates==2) {//paired read
+                if (P->readNmates==2) 
+                {//paired read
                     samFLAG+=0x1 + (imate==0 ? 0x40 : 0x80);
-                    if (mateMapped[1-imate]) {//mate mapped
-                        if (trBest->Str!=1-imate) samFLAG+=0x20;//mate strand reverted
-                    } else {//mate unmapped
+                    if (mateMapped[1-imate]) 
+                    {//mate mapped
+                        if ( trOut.Str != (1-imate) ) 
+                        {
+                            samFLAG+=0x20;//mate strand reverted
+                        };
+                    } else 
+                    {//mate unmapped
                         samFLAG+=0x8;
                     };
                 };
 
                 if (readFilter=='Y') samFLAG+=0x200; //not passing quality control
                 
+                if (mateMapped[1-imate] && !trOut.primaryFlag) 
+                {//mapped mate is not primary
+                    samFLAG+=0x100;
+                };
+                
                 *outStream << readName+1 <<"\t"<< samFLAG \
                         <<"\t"<< '*' <<"\t"<< '0' <<"\t"<< '0' <<"\t"<< '*';
 
                 if (mateMapped[1-imate]) {//mate is mapped
-                    *outStream <<"\t"<< P->chrName[trBest->Chr] <<"\t"<< trBest->exons[0][EX_G] + 1 - P->chrStart[trBest->Chr];
+                    *outStream <<"\t"<< P->chrName[trOut.Chr] <<"\t"<< trOut.exons[0][EX_G] + 1 - P->chrStart[trOut.Chr];
                 } else {
                     *outStream <<"\t"<< '*' <<"\t"<< '0';
                 };
 
                 *outStream <<"\t"<< '0' <<"\t"<< Read0[imate] <<"\t"<< (readFileType==2 ? Qual0[imate]:"*") \
-                        <<"\tNH:i:0" <<"\tHI:i:0" <<"\tAS:i:"<<trBest->maxScore <<"\tnM:i:"<<trBest->nMM<<"\tuT:A:" <<unmapType;
+                        <<"\tNH:i:0" <<"\tHI:i:0" <<"\tAS:i:"<<trOut.maxScore <<"\tnM:i:"<<trOut.nMM<<"\tuT:A:" <<unmapType;
                 if (!P->outSAMattrRG.empty()) *outStream<< "\tRG:Z:" <<P->outSAMattrRG.at(readFilesIndex); 
                 *outStream <<"\n";
                 

@@ -171,18 +171,36 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
         uint trimL1, trimR1;
 
         if (alignType>=0) {//this mate is unmapped
-            if (mateMapped!=NULL && mateMapped[imate]) continue; //this mate was mapped, do not record it aws unmapped
+            if (mateMapped!=NULL && mateMapped[imate]) continue; //this mate was mapped, do not record it as unmapped
             samFLAG=0x4;
             if (P->readNmates==2) {//paired read
                 samFLAG+=0x1 + (imate==0 ? 0x40 : 0x80);
                 if (mateMapped[1-imate]) {//mate mapped
-                    if (trBest->Str!=1-imate) samFLAG+=0x20;//mate strand reverted
+                    if (trOut.Str!=(1-imate))
+                    {//mate strand reverted
+                       samFLAG+=0x20;
+                    };
+                    mateChr=trOut.Chr;
+                    trChrStart=P->chrStart[mateChr];
+                    mateStart=trOut.exons[0][EX_G] - trChrStart;
+                    mateStrand= trOut.Str == (1-imate) ? 0 : 1;
+
+                    if (!trOut.primaryFlag) 
+                    {//mapped mate is not primary
+                        samFLAG+=0x100;
+                    };                      
+      
                 } else {//mate unmapped
                     samFLAG+=0x8;
                 };
             };
 
             if (readFilter=='Y') samFLAG+=0x200; //not passing quality control
+            
+            if (mateMapped[1-imate])
+            {//mate is mapped, fill the infromation from trOut
+          
+            };
                             
             Mate=imate;
             Str=Mate;
@@ -190,12 +208,12 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
             attrN=0;
             attrN+=bamAttrArrayWriteInt(0,"NH",attrOutArray+attrN,P);
             attrN+=bamAttrArrayWriteInt(0,"HI",attrOutArray+attrN,P);
-            attrN+=bamAttrArrayWriteInt(trBest->maxScore,"AS",attrOutArray+attrN,P);
-            attrN+=bamAttrArrayWriteInt(trBest->nMM,"nM",attrOutArray+attrN,P);
+            attrN+=bamAttrArrayWriteInt(trOut.maxScore,"AS",attrOutArray+attrN,P);
+            attrN+=bamAttrArrayWriteInt(trOut.nMM,"nM",attrOutArray+attrN,P);
             attrN+=bamAttrArrayWrite((to_string((uint) alignType)).at(0), "uT",attrOutArray+attrN); //cast to uint is only necessary for old compilers
             if (!P->outSAMattrRG.empty()) attrN+=bamAttrArrayWrite(P->outSAMattrRG.at(readFilesIndex),"RG",attrOutArray+attrN);                        
 
-        } else {            
+        } else {//this mate is mapped
             if (flagPaired) {//paired reads
                 samFLAG=0x0001;
                 if (iExMate==trOut.nExons-1) {//single mate

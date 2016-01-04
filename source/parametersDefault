@@ -174,7 +174,7 @@ outStd                          Log
                                 BAM_Quant              ... alignments to transcriptome in BAM format, unsorted. Requires --quantMode TranscriptomeSAM
 
 outReadsUnmapped                None
-   string: output of unmapped reads (besides SAM)
+   string: output of unmapped and partially mapped (i.e. mapped only one mate of a paired end read) reads in separate file(s).
                                 None    ... no output
                                 Fastx   ... output in separate fasta/fastq files, Unmapped.out.mate1/2
 
@@ -324,29 +324,30 @@ outFilterMultimapScoreRange     1
     int: the score range below the maximum score for multimapping alignments
 
 outFilterMultimapNmax           10
-    int: read alignments will be output only if the read maps fewer than this value, otherwise no alignments will be output
+    int: maximum number of loci the read is allowed to map to. Alignments (all of them) will be output only if the read maps to no more loci than this value. 
+         Otherwise no alignments will be output, and the read will be counted as "mapped to too many loci" in the Log.final.out .
 
 outFilterMismatchNmax           10
-    int: alignment will be output only if it has fewer mismatches than this value
+    int: alignment will be output only if it has no more mismatches than this value.
 
 outFilterMismatchNoverLmax      0.3
-    int: alignment will be output only if its ratio of mismatches to *mapped* length is less than this value
+    int: alignment will be output only if its ratio of mismatches to *mapped* length is less than or equal to this value.
 
 outFilterMismatchNoverReadLmax  1
-    int: alignment will be output only if its ratio of mismatches to *read* length is less than this value
+    int: alignment will be output only if its ratio of mismatches to *read* length is less than or equal to this value.
 
 
 outFilterScoreMin               0
-    int: alignment will be output only if its score is higher than this value
+    int: alignment will be output only if its score is higher than or equal to this value.
 
 outFilterScoreMinOverLread      0.66
-        float: outFilterScoreMin normalized to read length (sum of mates' lengths for paired-end reads)
+        float: same as outFilterScoreMin, but  normalized to read length (sum of mates' lengths for paired-end reads)
 
 outFilterMatchNmin              0
-    int: alignment will be output only if the number of matched bases is higher than this value
+    int: alignment will be output only if the number of matched bases is higher than or equal to this value.
 
 outFilterMatchNminOverLread     0.66
-    float: outFilterMatchNmin normalized to read length (sum of mates' lengths for paired-end reads)
+    float: sam as outFilterMatchNmin, but normalized to the read length (sum of mates' lengths for paired-end reads).
 
 outFilterIntronMotifs           None
     string: filter alignment using their motifs
