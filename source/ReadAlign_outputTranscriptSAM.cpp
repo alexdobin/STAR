@@ -257,7 +257,7 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
             };      
             tagMD+=to_string(matchN);
         };
-        for (int ii=0;ii<P->outSAMattrOrder.size();ii++) {
+        for (uint ii=0;ii<P->outSAMattrOrder.size();ii++) {
             switch (P->outSAMattrOrder[ii]) {
                 case ATTR_NH:
                     *outStream <<"\tNH:i:" << nTrOut;

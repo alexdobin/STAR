@@ -20,7 +20,7 @@ int funCompareNames(const void *a, const void *b) {//compare read names
     compareReturn(la,lb) else {
         char* ca=(char*) (pa+9);
         char* cb=(char*) (pb+9);
-        for (int ii=0;ii<la;ii++) {
+        for (uint32 ii=0;ii<la;ii++) {
             compareReturn(ca[ii],cb[ii]);
         };
         uint32 fa=pa[4]>>16;

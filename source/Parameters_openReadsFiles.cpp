@@ -45,7 +45,7 @@ void Parameters::openReadsFiles() {
                 readsCommandFile << "#!" <<sysShell <<"\n";
             };
             readsCommandFile << "exec > \""<<readFilesInTmp.at(imate)<<"\"\n" ; // redirect stdout to temp fifo files
-                        
+            
             string readFilesInString(readFilesIn.at(imate));
             size_t pos=0;
             readFilesN=0;

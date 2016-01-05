@@ -357,9 +357,9 @@ bool ReadAlign::chimericDetection() {
                             mateChr=-1;mateStart=-1;mateStrand=0;//no need fot mate info unless this is the supplementary alignment
                             if (chimRepresent==itr) {
                                 alignType=-1; //this is representative part of chimeric alignment, record is as normal; if encompassing chimeric junction, both are recorded as normal
-                                bamIrepr=( (itr%2)==(trChim[itr].Str) && chimType!=3) ? bamN+1 : bamN;//this is the mate that is chimerically split
+                                bamIrepr=( (uint) (itr%2)==(trChim[itr].Str) && chimType!=3) ? bamN+1 : bamN;//this is the mate that is chimerically split
                             } else {//"supplementary" chimeric segment
-                                alignType=( (itr%2)==(trChim[itr].Str) ) ? -12 : -11; //right:left chimeric junction
+                                alignType=( (uint) (itr%2)==(trChim[itr].Str) ) ? -12 : -11; //right:left chimeric junction
                                 bamIsuppl=bamN;
                                 if (chimType==1) {//PE alignment, need mate info for the suppl
                                     uint iex=0;
