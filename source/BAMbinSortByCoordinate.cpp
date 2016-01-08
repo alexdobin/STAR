@@ -3,7 +3,7 @@
 #include "serviceFuns.cpp"
 #include "BAMfunctions.h"
 
-void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, string dirBAMsort, BGZF *bgzfBAM, Parameters *P) {
+void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, string dirBAMsort, Parameters *P) {
       
     if (binS==0) return; //nothing to do for empty bins
     //allocate arrays

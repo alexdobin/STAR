@@ -180,7 +180,7 @@ void genomeSAindexChunk(char * G, PackedArray & SA, Parameters * P, PackedArray 
 //                 cout<< iL <<" "<< isa <<" "<< indPref <<" "<<indPref1<<endl;
             
 
-            if ( iL==iL4 ) {//this suffix contains N and does not belong in SAi
+            if ( (int)iL==iL4 ) {//this suffix contains N and does not belong in SAi
                 for (uint iL1=iL; iL1 < P->genomeSAindexNbases; iL1++) {
                     SAi.writePacked(P->genomeSAindexStart[iL1]+ind0[iL1],SAi[P->genomeSAindexStart[iL1]+ind0[iL1]] | P->SAiMarkNmaskC);
 //                     if (SAi[P->genomeSAindexStart[iL]+ind0[iL1]] != SAi1[P->genomeSAindexStart[iL]+ind0[iL1]])

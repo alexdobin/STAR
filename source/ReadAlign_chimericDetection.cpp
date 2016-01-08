@@ -347,7 +347,7 @@ bool ReadAlign::chimericDetection() {
                     uint bamBytesTotal=0;//estimate of the total size of all bam records, for output buffering
                     uint mateChr,mateStart;
                     uint8_t mateStrand;
-                    for (int itr=0;itr<(int)chimN;itr++) {//generate bam for all chimeric pieces
+                    for (uint itr=0;itr<chimN;itr++) {//generate bam for all chimeric pieces
                         if (chimType==2) {//PE, encompassing
                             mateChr=trChim[1-itr].Chr;
                             mateStart=trChim[1-itr].exons[0][EX_G];
@@ -355,7 +355,7 @@ bool ReadAlign::chimericDetection() {
                             alignType=-1;
                         } else {//spanning chimeric alignment, could be PE or SE
                             mateChr=-1;mateStart=-1;mateStrand=0;//no need fot mate info unless this is the supplementary alignment
-                            if (chimRepresent==itr) {
+                            if (chimRepresent==(int)itr) {
                                 alignType=-1; //this is representative part of chimeric alignment, record is as normal; if encompassing chimeric junction, both are recorded as normal
                                 bamIrepr=( (itr%2)==(trChim[itr].Str) && chimType!=3) ? bamN+1 : bamN;//this is the mate that is chimerically split
                             } else {//"supplementary" chimeric segment

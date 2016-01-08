@@ -72,6 +72,15 @@ inline int funCompareSuffixes ( const void *a, const void *b){
         };
         jj++;
     };
+    
+    //suffixes are equal up to globalL, no simply compare the indexes
+    if ( *((uint*)a) > *((uint*)b) )
+    {//anti-stable order,since indexes are sorted in the reverse order 
+        return  -1;
+    } else
+    {//a cannot be equal to b
+        return 1;
+    };
 };
 
 // inline bool funCompareSuffixesBool ( const void *a, const void *b) 

@@ -1,3 +1,4 @@
+* Cleaned up the code to remove compilation warnings.
 * Implemented --outSAMunmapped Within KeepPairs option to record unmapped mate adjacent to the mapped one, in case single-end alignments are allowed.
   For multi-mappers, the unmapped mate will be recored mulitple times adjacent to the mappet mate of each alignment.
 

@@ -1080,7 +1080,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     
     //chimeric
     chimPar.filter.genomicN=false;
-    for (int ii=0; ii<chimFilter.size(); ii++)
+    for (uint ii=0; ii<chimFilter.size(); ii++)
     {
         if (chimFilter.at(ii)=="banGenomicN")
         {
@@ -1098,7 +1098,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         };
     };
     
-    for (int ii=0; ii<readNameSeparator.size(); ii++)
+    for (uint ii=0; ii<readNameSeparator.size(); ii++)
     {
         if (readNameSeparator.at(ii)=="space")
         {
@@ -1250,9 +1250,10 @@ void Parameters::chrInfoLoad() {//find chrStart,Length,nChr from Genome G
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_INPUT_FILES, *this);
     };
     
+    char chrInChar[1000];
+    
     while (chrStreamIn.good()) {
         string chrIn;
-        char chrInChar[1000];
         chrStreamIn.getline(chrInChar,1000);
         chrIn=chrInChar;
         if (chrIn=="") break;

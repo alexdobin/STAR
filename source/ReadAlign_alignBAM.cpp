@@ -168,7 +168,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
         int MAPQ=0;
         uint32 attrN=0;
         char attrOutArray[BAM_ATTR_MaxSize];
-        uint trimL1, trimR1;
+        uint trimL1=0, trimR1=0;
 
         if (alignType>=0) {//this mate is unmapped
             if (mateMapped!=NULL && mateMapped[imate]) continue; //this mate was mapped, do not record it as unmapped

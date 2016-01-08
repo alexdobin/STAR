@@ -49,15 +49,14 @@ int ReadAlign::mapOneRead() {
 //               #else
                 if (flagDirMap || istart>0) {//check if the 1st piece in reveree direction does not need to be remapped
                     Lmapped=0;
-                    uint Nrep2=0;
                     while ( istart*Lstart + Lmapped + P->minLmap < splitR[1][ip] ) {//map until unmapped portion is <=minLmap
 
                         uint Shift = iDir==0 ? ( splitR[0][ip] + istart*Lstart + Lmapped ) : \
                                    ( splitR[0][ip] + splitR[1][ip] - istart*Lstart-1-Lmapped); //choose Shift for forward or reverse
 
-//                         uint seedLength=min(splitR[1][ip] - Lmapped - istart*Lstart, P->seedSearchLmax);
+                        //uint seedLength=min(splitR[1][ip] - Lmapped - istart*Lstart, P->seedSearchLmax);
                         uint seedLength=splitR[1][ip] - Lmapped - istart*Lstart;
-                        Nrep2=maxMappableLength2strands(Shift, seedLength, iDir, 0, P->nSA-1, L, splitR[2][ip]);//L=max mappable length, unique or multiple
+                        maxMappableLength2strands(Shift, seedLength, iDir, 0, P->nSA-1, L, splitR[2][ip]);//L=max mappable length, unique or multiple
                         if (iDir==0 && istart==0 && Lmapped==0 && Shift+L == splitR[1][ip] ) {//this piece maps full length and does not need to be mapped from the opposite direction
                             flagDirMap=false;
                         };

@@ -29,7 +29,7 @@ string bam_cigarString (bam1_t *b) {//output CIGAR string
 int bam_read1_fromArray(char *bamChar, bam1_t *b) //modified from samtools bam_read1 to assign BAM record in mmemry to bam structure
 {
 	bam1_core_t *c = &b->core;
-	int32_t block_len, ret, i;
+	int32_t block_len; //, ret, i;
 // // 	uint32_t x[8];
 // // 	if ((ret = bgzf_read(fp, &block_len, 4)) != 4) {
 // // 		if (ret == 0) return -1; // normal end-of-file

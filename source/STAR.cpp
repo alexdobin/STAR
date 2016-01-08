@@ -159,7 +159,7 @@ int main(int argInN, char* argIn[]) {
         P->inOut->logProgress << timeMonthDayTime(rawtime) <<"\tFinished 1st pass mapping\n";
         *P->inOut->logStdOut << timeMonthDayTime(rawtime) << " ..... Finished 1st pass mapping\n" <<flush;
         ofstream logFinal1 ( (P->twoPass.dir + "/Log.final.out").c_str());
-        g_statsAll.reportFinal(logFinal1,P1);
+        g_statsAll.reportFinal(logFinal1);
 
         P->twoPass.pass2=true;//starting the 2nd pass
         P->twoPass.pass1sjFile=P->twoPass.dir+"/SJ.out.tab";
@@ -376,7 +376,7 @@ int main(int argInN, char* argIn[]) {
                 };
                 sleep(0.1);
             };
-            BAMbinSortByCoordinate(ibin,binN,binS,P->runThreadN,P->outBAMsortTmpDir,P->inOut->outBAMfileCoord, P);
+            BAMbinSortByCoordinate(ibin,binN,binS,P->runThreadN,P->outBAMsortTmpDir, P);
             #pragma omp critical
             totalMem-=newMem;//"release" RAM
         };
@@ -412,7 +412,7 @@ int main(int argInN, char* argIn[]) {
     g_statsAll.progressReport(P->inOut->logProgress);
     P->inOut->logProgress  << "ALL DONE!\n"<<flush;
     P->inOut->logFinal.open((P->outFileNamePrefix + "Log.final.out").c_str());
-    g_statsAll.reportFinal(P->inOut->logFinal,P);
+    g_statsAll.reportFinal(P->inOut->logFinal);
     *P->inOut->logStdOut << timeMonthDayTime(g_statsAll.timeFinish) << " ..... Finished successfully\n" <<flush;
     
     P->inOut->logMain  << "ALL DONE!\n"<<flush;
@@ -421,6 +421,7 @@ int main(int argInN, char* argIn[]) {
     P->closeReadsFiles();//this will kill the readFilesCommand processes if necessary
     mainGenome.~Genome(); //need explicit call because of the 'delete P->inOut' below, which will destroy P->inOut->logStdOut
     
+    ///@todo create Destructor to destroy P->inOut
     delete P->inOut; //to close files
     delete P;
     

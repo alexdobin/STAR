@@ -44,7 +44,7 @@ void Transcriptome::geneCountsAddAlign(uint nA, Transcript **aAll) {//add alignm
                          } else if (gene1.at(itype)==-2) 
                          {
                              continue;//this align was already founf to be ambig for this strand
-                         } else if (gene1.at(itype)!=exG.g[e1]) {//another gene overlaps this read
+                         } else if (gene1.at(itype)!=(int32)exG.g[e1]) {//another gene overlaps this read
                              gene1[itype]=-2;//mark ambiguous
                          };//otherwise it's the same gene
                      };

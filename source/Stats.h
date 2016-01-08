@@ -32,6 +32,6 @@ class Stats {
         void addStats(Stats &S);
         void progressReportHeader(ofstream &progressStream);
         void progressReport(ofstream &progressStream) ;
-        void reportFinal(ofstream &streamOut, Parameters *P);
+        void reportFinal(ofstream &streamOut);
 };
 #endif

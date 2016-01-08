@@ -20,7 +20,7 @@ int funCompareNames(const void *a, const void *b) {//compare read names
     compareReturn(la,lb) else {
         char* ca=(char*) (pa+9);
         char* cb=(char*) (pb+9);
-        for (int ii=0;ii<la;ii++) {
+        for (uint32 ii=0;ii<la;ii++) {
             compareReturn(ca[ii],cb[ii]);
         };
         uint32 fa=pa[4]>>16;
@@ -98,7 +98,7 @@ int funCompareCoordFlagCigarSeq(const void *a, const void *b) {
             compareReturn((sa[ii/2]>>4),(sb[ii/2]>>4));
         };
     } else {
-        int ii=pa2[5]-g_bamRemoveDuplicatesMate2basesN;
+        uint32 ii=pa2[5]-g_bamRemoveDuplicatesMate2basesN;
         if (ii%2>0) {
             compareReturn((sa[ii/2]&15),(sb[ii/2]&15));
             ++ii;

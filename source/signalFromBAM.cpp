@@ -60,7 +60,7 @@ void signalFromBAM(const string bamFileName, const string sigFileName, Parameter
     } else if (P.outWigFlags.norm==1) {//normlaized
         normFactor[0]=1.0e6 / nUniq;
         normFactor[1]=1.0e6 / (nUniq+nMult);   
-        for (uint32_t is=0;is<sigN;is++) {//formatting double output
+        for (int is=0;is<sigN;is++) {//formatting double output
             *sigOutAll[is]<<setiosflags(ios::fixed) << setprecision(5);
         };        
     };
@@ -74,11 +74,11 @@ void signalFromBAM(const string bamFileName, const string sigFileName, Parameter
     double *sigAll=NULL;
     while ( true ) {//until the end of file
         int bamBytes1=bam_read1(bamIn, bamA);
-        uint32_t chrLen;
+        uint32_t chrLen=0;
         if (bamA->core.tid!=iChr || bamBytes1<0) {
             //output to file
             if (iChr!=-999) {//iChr=-999 marks chromosomes that are not output, including unmapped reads
-                for (uint32_t is=0;is<sigN;is++) {
+                for (int is=0;is<sigN;is++) {
                     if (P.outWigFlags.format==1) {
                         *sigOutAll[is] <<"variableStep chrom="<<bamHeader->target_name[iChr] <<"\n";
                     };

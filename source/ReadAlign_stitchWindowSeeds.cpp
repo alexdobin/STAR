@@ -130,16 +130,12 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* 
         trA.maxScore=Score;
         
         {//extend to the left
-            uint iS1=seedChain[seedN-1];
             trA1=*trInit;
             if ( trA.exons[0][EX_R]>0 \
                  && extendAlign(R, Q, G, trA.exons[0][EX_R]-1, trA.exons[0][EX_G]-1, -1, -1, trA.exons[0][EX_R], 100000, 0, outFilterMismatchNmaxTotal, P->outFilterMismatchNoverLmax, 
                     P->alignEndsType.ext[trA.exons[0][EX_iFrag]][trA.Str], &trA1) ) {//if could extend
 
                 trA.add(&trA1);
-//                 trA.maxScore += trA1.maxScore + WA[iW][iS1][WA_Length];
-//                 trA.nMatch += trA1.nMatch + WA[iW][iS1][WA_Length]; //# of matches
-//                 trA.nMM += trA1.nMM;
 
                 trA.exons[0][EX_R] -=  trA1.extendL;
                 trA.exons[0][EX_G] -=  trA1.extendL;
@@ -254,7 +250,7 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* 
         //check exons lenghts including repeats, do not report a transcript with short exons
 //        for (uint isj=0;isj<trA.nExons-1;isj++) {//check exons for min length, if they precede a junction
 //            if ( trA.canonSJ[isj]>=0 && \
-//               ( trA.exons[isj][EX_L] < P->alignSJoverhangMin + trA.shiftSJ[isj][0] \
+//               ( trA.exons[isj][EX_L] < P->alignSJoverhangMin + trA.shiftSJ[isj][0] 
 //              || trA.exons[isj+1][EX_L] < P->alignSJoverhangMin + trA.shiftSJ[isj][1]) ) {                  
 //                return;//do not record this transcript in wTr
 //            };
