@@ -14,7 +14,7 @@ void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, st
     //load all aligns
     for (uint it=0; it<nThreads; it++) {
         string bamInFile=dirBAMsort+to_string(it)+"/"+to_string((uint) iBin);
-        ifstream bamInStream (bamInFile.c_str());
+		ifstream bamInStream(bamInFile.c_str(), ios_base::in | ios_base::binary);
         bamInStream.read(bamIn+bamInBytes,binS);//read the whole file
         bamInBytes += bamInStream.gcount();
         bamInStream.close();

@@ -1,6 +1,8 @@
 #ifndef INCLUDEDEFINE_DEF
 #define INCLUDEDEFINE_DEF
-
+#ifdef _WIN32
+#define NOMINMAX
+#endif
 //standard libs
 #include <algorithm>
 #include <cstring>
@@ -13,17 +15,24 @@
 #include <iomanip>
 #include <vector>
 #include <sys/types.h>
+#ifdef _WIN32
+#include <direct.h>
+#else
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/mman.h>
+#endif
 #include <sys/stat.h>
+#include "CrossPlatform.h"
 #include <fcntl.h>
 #include <errno.h>
 #include <limits>
 #include <stdint.h>
 #include <omp.h>
-
+#include <zlib.h>
+#include <unistd.h>
 #include "VERSION"
+#include <boost/multiprecision/cpp_int.hpp>
 
 #define ERROR_OUT string ( __FILE__ ) +":"+ to_string ( (uint) __LINE__ ) +":"+ string ( __FUNCTION__ )
 
@@ -47,11 +56,14 @@ typedef uint8_t uint8;
 #define uint32 unsigned int
 #define uint16 unsigned short int
 #define uchar unsigned char
-#define int64 long long
 #define int32 int
 
 // this is gcc extension, may need to redefine for other compilers
+#ifdef _WIN32
+#define uint128 boost::multiprecision::uint128_t 
+#else
 #define uint128 __uint128_t
+#endif
 
 #define GENOME_spacingChar 5
 

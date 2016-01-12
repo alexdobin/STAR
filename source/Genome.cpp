@@ -1,16 +1,28 @@
+#include <time.h>
+#include <cmath>
+#include <sys/stat.h>
+
+#ifdef _WIN32
+#include <memory>
+#include <io.h>
+#include <Windows.h>
+#else
+#include <unistd.h>
+#endif
+
 #include "Genome.h"
 #include "Parameters.h"
 #include "SuffixArrayFuns.h"
 #include "PackedArray.h"
 #include "ErrorWarning.h"
 #include "streamFuns.h"
-#include "SharedMemory.h"
 #include "genomeScanFastaFiles.h"
 
-#include <time.h>
-#include <cmath>
-#include <unistd.h>
-#include <sys/stat.h>
+#if !defined(_WIN32) && defined(USE_UNIX_SHM)
+#include "SharedMemory.h"
+#else
+#include "SharedMemorySegment.h"
+#endif
 
 //addresses with respect to shmStart of several genome values
 #define SHM_sizeG 0
@@ -24,6 +36,19 @@
 
 //arbitrary number for ftok function
 #define SHM_projectID 23
+#ifdef _WIN32
+key_t ftok(const char *pathname, int proj_id)
+{
+	struct _stat64 st;
+	key_t key;
+
+	if (_stat64(pathname, &st) < 0)
+		return (key_t)-1;
+	key = ((st.st_ino & 0xffff) | ((st.st_dev & 0xff) << 16)
+		| ((proj_id & 0xff) << 24));
+	return key;
+}
+#endif
 
 Genome::Genome (Parameters* Pin ): P(Pin), shmStart(NULL), sharedMemory(NULL) {
             shmKey=ftok(P->genomeDir.c_str(),SHM_projectID);
@@ -49,7 +74,7 @@ void Genome::freeMemory(){//free big chunks of memory used by genome and suffix 
 
 uint Genome::OpenStream(string name, ifstream & stream)
 {
-    stream.open((P->genomeDir+ "/" +name).c_str(), ios::binary); 
+	stream.open((P->genomeDir + "/" + name).c_str(), ios_base::in | ios_base::binary);
     if (!stream.good()) {
         ostringstream errOut;
         errOut << "EXITING because of FATAL ERROR: could not open genome file "<< P->genomeDir << "/" << name <<"\n" << endl;
@@ -70,7 +95,6 @@ uint Genome::OpenStream(string name, ifstream & stream)
     return size;
 }
 
-
 void Genome::genomeLoad(){//allocate and load Genome
     
     time_t rawtime;
@@ -84,7 +108,7 @@ void Genome::genomeLoad(){//allocate and load Genome
     
     Parameters *P1 = new Parameters;
     
-    ifstream parFile((P->genomeDir+("/genomeParameters.txt")).c_str());
+	ifstream parFile((P->genomeDir + ("/genomeParameters.txt")).c_str(), ios_base::in | ios_base::binary);
     if (parFile.good()) {
         P->inOut->logMain << "Reading genome generation parameters:\n";
         P1->inOut = P->inOut;
@@ -203,7 +227,11 @@ void Genome::genomeLoad(){//allocate and load Genome
         bool unloadLast = P->genomeLoad=="LoadAndRemove";
         try
         {
+#if !defined(_WIN32) && defined(USE_UNIX_SHM)
             sharedMemory = new SharedMemory(shmKey, unloadLast);
+#else
+			sharedMemory = new SharedMemorySegment(shmKey, unloadLast);
+#endif
             sharedMemory->SetErrorStream(P->inOut->logStdOut);
 
             if (!sharedMemory->NeedsAllocation())
@@ -261,8 +289,11 @@ void Genome::genomeLoad(){//allocate and load Genome
                 errOut << "SOLUTION: remove the shared memory chunk by running STAR with --genomeLoad Remove, and restart STAR" << flush;     
                 exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INCONSISTENT_DATA, *P);  
             }
-        
+#if !defined(_WIN32) && defined(USE_UNIX_SHM)
             P->inOut->logMain << "Using shared memory for genome. key=0x" <<hex<<shmKey<<dec<< ";   shmid="<< sharedMemory->GetId() <<endl<<flush;
+#else
+			P->inOut->logMain << "Using shared memory for genome. key=0x" << hex << shmKey << dec << endl << flush;
+#endif
         }
 
         G1=shmStart+SHM_startG;
@@ -446,7 +477,7 @@ void Genome::genomeLoad(){//allocate and load Genome
         P->sjdbN=0;
         P->sjGstart=P->chrStart[P->nChrReal]+1; //not sure why I need that
     } else {//there are sjdb chromosomes
-        ifstream sjdbInfo((P->genomeDir+"/sjdbInfo.txt").c_str());
+		ifstream sjdbInfo((P->genomeDir + "/sjdbInfo.txt").c_str(), ios_base::in | ios_base::binary);
         if (sjdbInfo.fail()) {
             ostringstream errOut;                            
             errOut << "EXITING because of FATAL error, could not open file " << (P->genomeDir+"/sjdbInfo.txt") <<"\n";
@@ -520,7 +551,6 @@ void Genome::genomeLoad(){//allocate and load Genome
     P->winBinChrNbits=P->genomeChrBinNbits-P->winBinNbits;
     P->winBinN = P->nGenome/(1LLU << P->winBinNbits)+1;//this may be chenaged later
 };
-
 
 void Genome::HandleSharedMemoryException(const SharedMemoryException & exc, uint64 shmSize)
 {

@@ -190,8 +190,8 @@ void sjdbPrepare (SjdbClass &sjdbLoci, Parameters *P, uint nGenomeReal, string o
     P->sjDstart = new uint [P->sjdbN];
     P->sjAstart = new uint [P->sjdbN];
 
-    ofstream sjdbInfo((outDir+"/sjdbInfo.txt").c_str());
-    ofstream sjdbList ((outDir+"/sjdbList.out.tab").c_str());
+	ofstream sjdbInfo((outDir + "/sjdbInfo.txt").c_str(), std::ios::binary);
+	ofstream sjdbList((outDir + "/sjdbList.out.tab").c_str(), std::ios::binary);
     char strandChar[3]={'.','+','-'}; 
     //first line is some general useful information
     sjdbInfo << P->sjdbN <<"\t"<< P->sjdbOverhang <<"\n";

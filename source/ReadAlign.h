@@ -120,7 +120,7 @@ class ReadAlign : public Genome
         void multMapSelect();
         int mapOneRead();
         uint maxMappableLength2strands(uint pieceStart, uint pieceLength, uint iDir, uint iSA1, uint iSA2, uint& maxL, uint iFrag);
-        void storeAligns (uint iDir, uint Shift, uint Nrep, uint L, uint indStartEnd[2], uint iFrag);
+		void storeAligns(uint iDir, uint Shift, uint Nrep, uint L, const std::vector<uint> &indStartEnd, uint iFrag);
         
         bool outputTranscript(Transcript *trOut, uint nTrOut, ofstream *outBED);
         uint outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint mateChr, uint mateStart, char mateStrand, int unmapType, bool *mateMapped, ostream *outStream);

@@ -1,13 +1,24 @@
 #ifndef PARAMETERS_DEF
 #define PARAMETERS_DEF
 
+#ifdef _WIN32
+#include <io.h>
+#include <process.h>
+#include <sys\stat.h>
+#else
+#include <unistd.h>
+#include <sys/stat.h>
+#endif
+
+#include <signal.h>
+#include <ostream>
+#include <map>
+#include <string>
+
 #include "IncludeDefine.h"
 #include "InOutStreams.h"
 #include "ParameterInfo.h"
-#include <map>
 #include "TimeFunctions.h"
-#include <unistd.h>
-#include <signal.h>
 
 class Parameters {
     
@@ -64,7 +75,11 @@ class Parameters {
         uint readNmates;
         string readMatesLengthsIn;
         vector <string> readFilesCommand;
+#ifndef _WIN32
         pid_t readFilesCommandPID[MAX_N_MATES];
+#else
+		DWORD readFilesCommandPID[MAX_N_MATES];
+#endif
         
         vector <string> readNameSeparator;
         vector <char> readNameSeparatorChar;

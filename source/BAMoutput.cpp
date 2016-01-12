@@ -1,7 +1,19 @@
 #include "BAMoutput.h"
 #include <sys/stat.h>
 #include "GlobalVariables.h"
+#include "sysRemoveDir.h"
+
+#if !defined(_WIN32) && defined(USE_PTHREAD)
 #include <pthread.h>
+#else
+#include <mutex>
+#include <thread>
+#endif
+
+#ifdef _WIN32
+#include "DirFunctions.h"
+#endif
+
 #include "serviceFuns.cpp"
 #include "ThreadControl.h"
 
@@ -16,7 +28,8 @@ BAMoutput::BAMoutput (int iChunk, string tmpDir, Parameters *Pin) {//allocate ba
 
     bamDir=tmpDir+to_string((uint) iChunk);//local directory for this thread (iChunk)
 
-    mkdir(bamDir.c_str(),P->runDirPerm);    
+	mkdir(bamDir.c_str(), P->runDirPerm);
+
     binStart=new char* [nBins];
     binBytes=new uint64 [nBins];    
     binStream=new ofstream* [nBins];
@@ -25,7 +38,7 @@ BAMoutput::BAMoutput (int iChunk, string tmpDir, Parameters *Pin) {//allocate ba
     for (uint ii=0;ii<nBins;ii++) {
         binStart[ii]=bamArray+bamArraySize/nBins*ii;
         binBytes[ii]=0;
-        binStream[ii]=new ofstream((bamDir +"/"+to_string(ii)).c_str());    //open temporary files
+		binStream[ii] = new ofstream((bamDir + "/" + to_string(ii)).c_str(), std::ios_base::out | std::ios_base::binary);    //open temporary files
         binTotalN[ii]=0;
         binTotalBytes[ii]=0;
     };
@@ -52,29 +65,29 @@ BAMoutput::BAMoutput (BGZF *bgzfBAMin, Parameters *Pin) {//allocate BAM array wi
     nBins=0;
 };
 
-void BAMoutput::unsortedOneAlign (char *bamIn, uint bamSize, uint bamSize2) {//record one alignment to the buffer, write buffer if needed
-    
-    if (bamSize==0) return; //no output, could happen if one of the mates is not mapped    
-    
-    if (binBytes1+bamSize2 > bamArraySize) {//write out this buffer
+void BAMoutput::unsortedOneAlign(char *bamIn, uint bamSize, uint bamSize2) {//record one alignment to the buffer, write buffer if needed
 
-        if (g_threadChunks.threadBool) pthread_mutex_lock(&g_threadChunks.mutexOutSAM);  
-        bgzf_write(bgzfBAM,bamArray,binBytes1);
-        if (g_threadChunks.threadBool) pthread_mutex_unlock(&g_threadChunks.mutexOutSAM); 
-        
-        binBytes1=0;//rewind the buffer
-    };
-    
-    memcpy(bamArray+binBytes1, bamIn, bamSize);
-    binBytes1 += bamSize;
-    
+	if (bamSize == 0) return; //no output, could happen if one of the mates is not mapped    
+
+	if (binBytes1 + bamSize2 > bamArraySize) {//write out this buffer
+
+		if (g_threadChunks.threadBool) LockMutexOutSAM();
+		bgzf_write(bgzfBAM, bamArray, binBytes1);
+		if (g_threadChunks.threadBool) UnlockMutexOutSAM();
+
+		binBytes1 = 0;//rewind the buffer
+	};
+
+	memcpy(bamArray + binBytes1, bamIn, bamSize);
+	binBytes1 += bamSize;
+
 };
 
-void BAMoutput::unsortedFlush () {//flush all alignments
-    if (g_threadChunks.threadBool) pthread_mutex_lock(&g_threadChunks.mutexOutSAM);  
-    bgzf_write(bgzfBAM,bamArray,binBytes1);
-    if (g_threadChunks.threadBool) pthread_mutex_unlock(&g_threadChunks.mutexOutSAM); 
-    binBytes1=0;//rewind the buffer
+void BAMoutput::unsortedFlush() {//flush all alignments
+	if (g_threadChunks.threadBool) LockMutexOutSAM();
+	bgzf_write(bgzfBAM, bamArray, binBytes1);
+	if (g_threadChunks.threadBool) UnlockMutexOutSAM();
+	binBytes1 = 0;//rewind the buffer
 };
 
 void BAMoutput::coordOneAlign (char *bamIn, uint bamSize, uint iRead) {
@@ -128,7 +141,7 @@ void BAMoutput::coordBins() {//define genomic starts for bins
     nBins=P->outBAMcoordNbins;//this is the true number of bins
 
     //mutex here
-    if (P->runThreadN>1) pthread_mutex_lock(&g_threadChunks.mutexBAMsortBins);
+    if (P->runThreadN>1) LockMutexBAMsortBins();
     if (P->outBAMsortingBinStart[0]!=0) {//it's set to 0 only after the bin sizes are determined
         //extract coordinates and sort
         uint *startPos = new uint [binTotalN[0]];//array of aligns start positions
@@ -152,7 +165,7 @@ void BAMoutput::coordBins() {//define genomic starts for bins
         delete [] startPos;
     };
     //mutex here
-    if (P->runThreadN>1) pthread_mutex_unlock(&g_threadChunks.mutexBAMsortBins);
+    if (P->runThreadN>1) UnlockMutexBAMsortBins();
 
     //re-allocate binStart
     uint binTotalNold=binTotalN[0];
@@ -191,5 +204,16 @@ void BAMoutput::coordUnmappedPrepareBySJout () {//flush all alignments
     binStream[iBin]->flush();
     binBytes[iBin]=0;//rewind the buffer
     binStream[iBin]->close();
-    binStream[iBin]->open((bamDir +"/"+to_string(iBin)+".BySJout").c_str());
+    binStream[iBin]->open((bamDir +"/"+to_string(iBin)+".BySJout").c_str(), std::ios_base::out | std::ios_base::binary);
 };
+
+void BAMoutput::closeBinTempFiles()
+{
+	for (uint ii = 0; ii < nBins; ii++) {
+		if (binStream[ii]){
+			if (binStream[ii]->is_open()){
+				binStream[ii]->close();
+			}
+		}
+	}
+}

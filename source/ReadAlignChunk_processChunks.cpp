@@ -10,7 +10,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
             //////////////read a chunk from input files and store in memory
         if (P->outFilterBySJoutStage<2) {//read chunks from input file
 
-            if (P->runThreadN>1) pthread_mutex_lock(&g_threadChunks.mutexInRead);
+            if (P->runThreadN>1) LockMutexInRead();
 
             uint chunkInSizeBytesTotal[2]={0,0};
             while (chunkInSizeBytesTotal[0] < P->chunkInSizeBytes && chunkInSizeBytesTotal[1] < P->chunkInSizeBytes && P->inOut->readIn[0].good() && P->inOut->readIn[1].good()) {
@@ -99,14 +99,14 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                     P->inOut->readIn[0] >> word1;
                     if (word1=="FILE") {//new file marker
                         P->inOut->readIn[0] >> P->readFilesIndex;
-                        pthread_mutex_lock(&g_threadChunks.mutexLogMain);
+						LockMutexLogMain();
                         P->inOut->logMain << "Starting to map file # " << P->readFilesIndex<<"\n";
                         for (uint imate=0; imate<P->readNmates; imate++) {
                             P->inOut->logMain << "mate " <<imate+1 <<":   "<<P->readFilesNames.at(imate).at(P->readFilesIndex) <<"\n";
                             P->inOut->readIn[imate].ignore(numeric_limits<streamsize>::max(),'\n');
                         };
                         P->inOut->logMain<<flush;
-                        pthread_mutex_unlock(&g_threadChunks.mutexLogMain);                        
+						UnlockMutexLogMain();
 //                         if (P->readNmates==2) {//skip the FILE line for the second read
 //                             getline(P->inOut->readIn[1],word1);
 //                         };
@@ -130,7 +130,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
 
             for (uint imate=0; imate<P->readNmates; imate++) chunkIn[imate][chunkInSizeBytesTotal[imate]]='\n';//extra empty line at the end of the chunks
 
-            if (P->runThreadN>1) pthread_mutex_unlock(&g_threadChunks.mutexInRead);
+            if (P->runThreadN>1) UnlockMutexInRead();
             
         } else {//read from one file per thread
             noReadsLeft=true;
@@ -165,8 +165,8 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
             };
         };
     };
-    if (P->runThreadN>1) pthread_mutex_lock(&g_threadChunks.mutexLogMain);
-    P->inOut->logMain << "Completed: thread #" <<iThread <<endl;
-    if (P->runThreadN>1) pthread_mutex_unlock(&g_threadChunks.mutexLogMain);
-};
 
+    if (P->runThreadN>1) LockMutexLogMain();
+    P->inOut->logMain << "Completed: thread #" <<iThread <<endl;
+    if (P->runThreadN>1) UnlockMutexLogMain();
+};

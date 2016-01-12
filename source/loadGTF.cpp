@@ -40,7 +40,7 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P, string dirOut) {//load gtf file
         P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ..... Processing annotations GTF\n" <<flush;
         *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ..... Processing annotations GTF\n" <<flush;           
         
-        ifstream sjdbStreamIn ( P->sjdbGTFfile.c_str() );   
+		ifstream sjdbStreamIn(P->sjdbGTFfile.c_str(), ios_base::in | ios_base::binary);
         if (sjdbStreamIn.fail()) {
             ostringstream errOut;
             errOut << "FATAL error, could not open file sjdbGTFfile=" << P->sjdbGTFfile <<"\n";
@@ -162,8 +162,11 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P, string dirOut) {//load gtf file
             errOut << "Solution: check the formatting of the GTF file. Most likely cause is the difference in chromosome naming between GTF and FASTA file.\n";
             exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
         };        
-        //sort exonLoci by transcript ID and exon coordinates
-        qsort((void*) exonLoci, exonN, sizeof(uint)*GTF_exonLoci_size, funCompareUint2);
+        
+		//Note: Fix to make the qsort result consistent in linux and windows, funCompareUnint2 changed with funCompareArrays<uint, 3>
+		//qsort based on first 2 fields gives mismatch in sort order of equal elements and that caused mismatches in genome files and alignment results. 
+		//sort exonLoci by transcript ID and exon coordinates
+        qsort((void*) exonLoci, exonN, sizeof(uint)*GTF_exonLoci_size, funCompareArrays<uint, 3>);
 
         {//exon-gene data structures: exon start/end/strand/gene/transcript
             //re-sort exons by exons loci
@@ -217,9 +220,9 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P, string dirOut) {//load gtf file
             
             qsort((void*) extrLoci, exonN, sizeof(uint)*GTF_extrLoci_size, funCompareArrays<uint,5>);
             
-            ofstream trOut ((dirOut+"/transcriptInfo.tab").c_str());
+            ofstream trOut ((dirOut+"/transcriptInfo.tab").c_str(), std::ios::binary);
             trOut<<transcriptID.size() << "\n";
-            ofstream exOut ((dirOut+"/exonInfo.tab").c_str());
+			ofstream exOut((dirOut + "/exonInfo.tab").c_str(), std::ios::binary);
             exOut<<exonN<<"\n";
             
             uint trid=extrLoci[GTF_extrTrID(0)];
@@ -283,7 +286,7 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P, string dirOut) {//load gtf file
             };
         };
         
-        ofstream sjdbList ((dirOut+"/sjdbList.fromGTF.out.tab").c_str());
+		ofstream sjdbList((dirOut + "/sjdbList.fromGTF.out.tab").c_str(), std::ios::binary);
         for (uint ii=sjdbN1;ii<sjdbLoci.chr.size(); ii++) {
             sjdbList << sjdbLoci.chr.at(ii)<<"\t"<< sjdbLoci.start.at(ii) << "\t"<< sjdbLoci.end.at(ii)  <<"\t"<< sjdbLoci.str.at(ii)<<"\n";
         };

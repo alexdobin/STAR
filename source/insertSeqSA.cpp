@@ -72,7 +72,8 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
 
     #pragma omp parallel num_threads(P->runThreadN)
     #pragma omp for schedule (dynamic,1000)
-    for (uint ii=0; ii<2*nG1; ii++) {//find insertion points for each of the sequences
+	// Note: index variable ii was uint, changed to int because MSVC with VS2013 does not support unsigned index for OpenMP for loop.
+    for (int ii=0; ii<2*nG1; ii++) {//find insertion points for each of the sequences
 
         if (seq1[0][ii]>3)
         {//no index for suffices starting with N

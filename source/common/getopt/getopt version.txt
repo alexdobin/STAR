@@ -1,0 +1,5 @@
+This version of getopt comes from glibc-2.2.4.tar.gz
+
+The getopt files can be found in the posix subdirectory.
+
+// Michael

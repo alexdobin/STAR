@@ -1,9 +1,23 @@
 #include <string>
 #include <cstring>
 //#define _XOPEN_SOURCE 500
+#ifndef _WIN32
 #include <ftw.h>
 #include <unistd.h>
+#else
+#include <direct.h>
+#include <io.h>
+#include <process.h>
+#include "DirFunctions.h"
+#endif
 
+#ifdef _WIN32
+
+void sysRemoveDir(const std::string& dirName)
+{
+	removeDir(dirName); 
+}
+#else
 int removeFileOrDir(const char *fpath,const struct stat *sb, int typeflag, struct FTW *ftwbuf) {
     if (typeflag==FTW_F) {//file
         remove(fpath);
@@ -16,7 +30,9 @@ int removeFileOrDir(const char *fpath,const struct stat *sb, int typeflag, struc
 };
 
 
-void sysRemoveDir(std::string dirName) {//remove directory and all its contents
+void sysRemoveDir(const std::string& dirName) {//remove directory and all its contents
     int nftwFlag=FTW_DEPTH; 
     nftw(dirName.c_str(), removeFileOrDir, 100, nftwFlag);
 };
+#endif
+

@@ -10,6 +10,10 @@
 #include "signalFromBAM.h"
 #include "bamRemoveDuplicates.h"
 
+#ifdef _WIN32
+#include "DirFunctions.h"
+#endif
+
 //for mkfifo
 #include <sys/stat.h>
 
@@ -298,8 +302,9 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     };
     
     inOut->logMain << "STAR version=" << STAR_VERSION << "\n"<<flush;
-    inOut->logMain << "STAR compilation time,server,dir=" << COMPILATION_TIME_PLACE << "\n"<<flush;   
-    
+
+	// TODO : Get time, host name and current dir and set COMPILATION_TIME_PLACE
+	//inOut->logMain << "STAR compilation time,server,dir=" << COMPILATION_TIME_PLACE << "\n"<<flush;   
     
     
     //define what goes to cout
@@ -336,7 +341,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     if (parametersFiles.at(0) != "-") {//read parameters from a user-defined file
         for (uint ii=0; ii<parametersFiles.size(); ii++) {
             parameterInputName.push_back(parametersFiles.at(ii));
-            ifstream parFile(parametersFiles.at(ii).c_str());
+			ifstream parFile(parametersFiles.at(ii).c_str(), ios_base::in | ios_base::binary);
             if (parFile.good()) {
                 inOut->logMain << "##### USER parameters from user-defined parameters file " <<parametersFiles.at(ii)<< ":\n" <<flush;        
                 scanAllLines(parFile, parameterInputName.size()-1, -1);
@@ -348,7 +353,8 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             };
         };
     };
-    
+
+  
 ///////// Command Line Final
     
     if (argInN>1) {//scan all parameters from command line and override previuos values
@@ -402,7 +408,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     
 ////////////////////////////////////////////////////// Calculate and check parameters   
     iReadAll=0;
-    
+#ifndef _WIN32    
     if (runDirPermIn=="User_RWX")
     {
         runDirPerm=S_IRWXU;
@@ -417,15 +423,17 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         errOut << "SOLUTION: use one of the allowed values of --runDirPerm : 'User_RWX' or 'All_RWX' \n";     
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
-    
+#endif   
+
     if (outTmpDir=="-") {
         outFileTmp=outFileNamePrefix +"_STARtmp/";
         sysRemoveDir (outFileTmp);        
     } else {
         outFileTmp=outTmpDir;
     };
-    
-    if (mkdir (outFileTmp.c_str(),runDirPerm)!=0) {
+	
+	int iRet = mkdir(outFileTmp.c_str(), runDirPerm);
+	if (iRet != 0) {
         ostringstream errOut;
         errOut <<"EXITING because of fatal ERROR: could not make temporary directory: "<< outFileTmp<<"\n";
         errOut <<"SOLUTION: (i) please check the path and writing permissions \n (ii) if you specified --outTmpDir, and this directory exists - please remove it before running STAR\n"<<flush;
@@ -563,6 +571,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                 outBAMsortingBinStart[0]=1;//this initial value means that the bin sizes have not been determined yet
                 
                 outBAMsortTmpDir=outFileTmp+"/BAMsort/";
+
                 mkdir(outBAMsortTmpDir.c_str(),runDirPerm);  
             };                
         } else if (outSAMtype.at(0)=="SAM") {
@@ -570,7 +579,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             if (outStd=="SAM") {
                 inOut->outSAM = & std::cout;
             } else {
-                inOut->outSAMfile.open((outFileNamePrefix + "Aligned.out.sam").c_str());
+				inOut->outSAMfile.open((outFileNamePrefix + "Aligned.out.sam").c_str(), std::ios::binary);
                 inOut->outSAM = & inOut->outSAMfile;
             };
         } else if (outSAMtype.at(0)=="None") {
@@ -711,7 +720,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             for (uint imate=0;imate<readNmates;imate++) {
                 ostringstream ff;
                 ff << outFileNamePrefix << "Unmapped.out.mate" << imate+1;
-                inOut->outUnmappedReadsStream[imate].open(ff.str().c_str());
+				inOut->outUnmappedReadsStream[imate].open(ff.str().c_str(), std::ios::binary);
             };
         };        
         
@@ -999,8 +1008,11 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         };        
         twoPass.yes=true;
         twoPass.dir=outFileNamePrefix+"_STARpass1/";
-        sysRemoveDir (twoPass.dir);                
-        if (mkdir (twoPass.dir.c_str(),runDirPerm)!=0) {
+        sysRemoveDir (twoPass.dir);    
+
+		int iRet = mkdir (twoPass.dir.c_str(),runDirPerm);
+
+		if (iRet != 0) {
             ostringstream errOut;
             errOut <<"EXITING because of fatal ERROR: could not make pass1 directory: "<< twoPass.dir<<"\n";
             errOut <<"SOLUTION: please check the path and writing permissions \n";
@@ -1009,7 +1021,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     };
     
    //sjdb insert on the fly
-
+	//sjdbInsert.yes = false; 
     sjdbInsert.pass1=false;
     sjdbInsert.pass2=false;
     sjdbInsert.yes=false;
@@ -1042,7 +1054,9 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         };        
         sjdbInsert.outDir=outFileNamePrefix+"_STARgenome/";
         sysRemoveDir (sjdbInsert.outDir);  
-        if (mkdir (sjdbInsert.outDir.c_str(),runDirPerm)!=0) {
+
+		int iRet = mkdir (sjdbInsert.outDir.c_str(),runDirPerm);
+		if (iRet != 0) {
             ostringstream errOut;
             errOut <<"EXITING because of fatal ERROR: could not make run-time genome directory directory: "<< sjdbInsert.outDir<<"\n";
             errOut <<"SOLUTION: please check the path and writing permissions \n";
@@ -1201,7 +1215,7 @@ int Parameters::scanOneLine (string &lineIn, int inputLevel, int inputLevelReque
 void Parameters::chrInfoLoad() {//find chrStart,Length,nChr from Genome G
     
     //load chr names
-    ifstream chrStreamIn ( (genomeDir+"/chrName.txt").c_str() );   
+	ifstream chrStreamIn((genomeDir + "/chrName.txt").c_str(), ios_base::in | ios_base::binary);
     if (chrStreamIn.fail()) {
         ostringstream errOut;                            
         errOut << "EXITING because of FATAL error, could not open file " << (genomeDir+"/chrName.txt") <<"\n";
@@ -1225,7 +1239,7 @@ void Parameters::chrInfoLoad() {//find chrStart,Length,nChr from Genome G
     chrLength.resize(nChrReal);
   
     //load chr lengths
-    chrStreamIn.open( (genomeDir+"/chrLength.txt").c_str() );   
+	chrStreamIn.open((genomeDir + "/chrLength.txt").c_str(), std::ios::binary);
     if (chrStreamIn.fail()) {
         ostringstream errOut;                            
         errOut << "EXITING because of FATAL error, could not open file " << (genomeDir+"/chrLength.txt") <<"\n";
@@ -1239,7 +1253,7 @@ void Parameters::chrInfoLoad() {//find chrStart,Length,nChr from Genome G
     chrStreamIn.close();    
     
     //load chr starts
-    chrStreamIn.open( (genomeDir+"/chrStart.txt").c_str() );   
+	chrStreamIn.open((genomeDir + "/chrStart.txt").c_str(), std::ios::binary);
     if (chrStreamIn.fail()) {
         ostringstream errOut;                            
         errOut << "EXITING because of FATAL error, could not open file " << (genomeDir+"/chrStart.txt") <<"\n";

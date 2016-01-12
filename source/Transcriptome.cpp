@@ -91,7 +91,7 @@ void Transcriptome::quantsAllocate() {
 };
 
 void Transcriptome::quantsOutput() {
-    ofstream qOut(P->quant.geCount.outFile);
+    ofstream qOut(P->quant.geCount.outFile, std::ios::binary);
     
     qOut << "N_unmapped";
     for (int itype=0; itype<quants->geneCounts.nType; itype++)

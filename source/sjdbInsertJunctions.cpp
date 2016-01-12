@@ -24,7 +24,7 @@ void sjdbInsertJunctions(Parameters * P, Parameters * P1, Genome & genome, SjdbC
     if (P->twoPass.pass2)
     {//load 1st pass new junctions
      //sjdbLoci already contains the junctions from before 1st pass
-        ifstream sjdbStreamIn ( P->twoPass.pass1sjFile.c_str() );   
+		ifstream sjdbStreamIn(P->twoPass.pass1sjFile.c_str(), ios_base::in | ios_base::binary);
         if (sjdbStreamIn.fail()) {
             ostringstream errOut;
             errOut << "FATAL INPUT error, could not open input file with junctions from the 1st pass=" << P->twoPass.pass1sjFile <<"\n";

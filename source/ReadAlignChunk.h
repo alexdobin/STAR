@@ -9,6 +9,12 @@
 #include "BAMoutput.h"
 #include "Quantifications.h"
 
+#if !defined(_WIN32) && defined(USE_PTHREAD)
+#include <pthred>
+#else
+#include <mutex>
+#endif
+
 class ReadAlignChunk {//chunk of reads and alignments
 public:
     Parameters* P;
@@ -29,7 +35,7 @@ public:
     string chunkOutBAMfileName;
     
     bool noReadsLeft;
-    uint iChunkIn; //current chunk # as read from .fastq
+	uint iChunkIn; //current chunk # as read from .fastq
     uint iChunkOutSAM; //current chunk # writtedn to Aligned.out.sam
     int iThread; //current thread
     uint chunkOutBAMtotal, chunkOutBAMtotal1; //total number of bytes in the write buffer
@@ -38,7 +44,14 @@ public:
     void processChunks();
     void mapChunk();
     void chunkFstreamOpen(string filePrefix, int iChunk, fstream &fstreamOut);
-    void chunkFstreamCat (fstream &chunkOut, ofstream &allOut, bool mutexFlag, pthread_mutex_t &mutexVal);
+
+#if !defined(_WIN32) && defined(USE_PTHREAD)
+	void chunkFstreamCat(fstream &chunkOut, ofstream &allOut, bool mutexFlag, pthread_mutex_t &mutexVal);
+#else
+	void chunkFstreamCat(fstream &chunkOut, ofstream &allOut, bool mutexFlag, std::mutex &mutexVal);
+#endif
+
     void chunkFilesCat(ostream *allOut, string filePrefix, uint &iC);
+	void closeReadAlignFiles(); 
 };
 #endif

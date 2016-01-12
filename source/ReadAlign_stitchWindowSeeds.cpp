@@ -1,12 +1,12 @@
+#include <math.h>
 #include "IncludeDefine.h"
 #include "Parameters.h"
 #include "Transcript.h"
 #include "ReadAlign.h"
-#include "stitchAlignToTranscript.h"
 #include "extendAlign.h"
-#include <math.h>
 #include "binarySearch2.h"
 #include "ErrorWarning.h"
+#include "stitchAlignToTranscript.h"
 
 void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* G) {//stitches all seeds in one window: iW
 

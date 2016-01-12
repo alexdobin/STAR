@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include "ReadAlignChunk.h"
 #include "GlobalVariables.h"
 #include "ThreadControl.h"
@@ -5,9 +6,23 @@
 #include SAMTOOLS_BGZF_H
 
 void ReadAlignChunk::mapChunk() {//map one chunk. Input reads stream has to be setup in RA->readInStream[ii]
-    RA->statsRA.resetN();       
-    
+    RA->statsRA.resetN();
+
     for (uint ii=0;ii<P->readNmates;ii++) {//clear eof and rewind the input streams
+
+		// If windows, this workaround need to set chunk explicitly in istringstream only if it is first stage mapping. 
+		// In second stage mapping readInStream is already set from processChunks(). 
+#ifdef _WIN32
+		if (P->outFilterBySJoutStage < 2)
+		{
+			if (readInStream[ii])
+				delete readInStream[ii];
+			// workaround to get buffer set in istringstream, as pubsetbuf does nothing in VS
+			readInStream[ii] = new istringstream(std::string(chunkIn[ii], P->chunkInSizeBytesArray), std::stringstream::in | std::stringstream::out);
+			RA->readInStream[ii] = readInStream[ii];
+		}
+#endif
+
         RA->readInStream[ii]->clear();
         RA->readInStream[ii]->seekg(0,ios::beg);
     };
@@ -16,7 +31,7 @@ void ReadAlignChunk::mapChunk() {//map one chunk. Input reads stream has to be s
         ostringstream name1("");
         name1 << P->outFileTmp + "/Aligned.tmp.sam.chunk"<<iChunkIn;
         chunkOutBAMfileName = name1.str();
-        chunkOutBAMfile.open(chunkOutBAMfileName.c_str());
+		chunkOutBAMfile.open(chunkOutBAMfileName.c_str(), std::ios::binary);
     };    
     
     int readStatus=0;
@@ -45,10 +60,10 @@ void ReadAlignChunk::mapChunk() {//map one chunk. Input reads stream has to be s
                     chunkOutBAMfile.clear(); //in case 0 bytes were written which could set fail bit
                 } else {//standard way, directly into Aligned.out.sam file
                     //SAM output
-                    if (P->runThreadN>1) pthread_mutex_lock(&g_threadChunks.mutexOutSAM);    
+                    if (P->runThreadN>1) LockMutexOutSAM();    
                     P->inOut->outSAM->write(chunkOutBAM,chunkOutBAMtotal);
                     P->inOut->outSAM->clear();//in case 0 bytes were written which could set fail bit
-                    if (P->runThreadN>1) pthread_mutex_unlock(&g_threadChunks.mutexOutSAM);
+                    if (P->runThreadN>1) UnlockMutexOutSAM();
                 };
                 RA->outSAMstream->seekp(0,ios::beg); //rewind the chunk storage
                 chunkOutBAMtotal=0;
@@ -89,20 +104,20 @@ void ReadAlignChunk::mapChunk() {//map one chunk. Input reads stream has to be s
 
     }; //reads cycle
 
-    if ( P->outSAMorder == "PairedKeepInputOrder" && P->runThreadN>1 ) {//write the remaining part of the buffer, close and rename chunk files
-        chunkOutBAMfile.write(chunkOutBAM,chunkOutBAMtotal);
-        chunkOutBAMfile.clear(); //in case 0 bytes were written which could set fail bit
-        chunkOutBAMfile.close();
-        RA->outSAMstream->seekp(0,ios::beg); //rewind the chunk storage
-        chunkOutBAMtotal=0;
-        ostringstream name2("");
-        name2 << P->outFileTmp + "/Aligned.out.sam.chunk"<<iChunkIn;                
-        rename(chunkOutBAMfileName.c_str(),name2.str().c_str());//marks files as completedly written
-    };    
-    
-    //add stats, write progress if needed
-    if (P->runThreadN>1) pthread_mutex_lock(&g_threadChunks.mutexStats);
-    g_statsAll.addStats(RA->statsRA);
-    g_statsAll.progressReport(P->inOut->logProgress);
-    if (P->runThreadN>1) pthread_mutex_unlock(&g_threadChunks.mutexStats); 
-};            
+	if (P->outSAMorder == "PairedKeepInputOrder" && P->runThreadN>1) {//write the remaining part of the buffer, close and rename chunk files
+		chunkOutBAMfile.write(chunkOutBAM, chunkOutBAMtotal);
+		chunkOutBAMfile.clear(); //in case 0 bytes were written which could set fail bit
+		chunkOutBAMfile.close();
+		RA->outSAMstream->seekp(0, ios::beg); //rewind the chunk storage
+		chunkOutBAMtotal = 0;
+		ostringstream name2("");
+		name2 << P->outFileTmp + "/Aligned.out.sam.chunk" << iChunkIn;
+		rename(chunkOutBAMfileName.c_str(), name2.str().c_str());//marks files as completedly written
+	};
+
+	//add stats, write progress if needed
+	if (P->runThreadN>1) LockMutexStats();
+	g_statsAll.addStats(RA->statsRA);
+	g_statsAll.progressReport(P->inOut->logProgress);
+	if (P->runThreadN>1) UnlockMutexStats();
+};

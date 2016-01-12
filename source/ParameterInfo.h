@@ -1,6 +1,13 @@
 #ifndef PARAMETERSINFO_DEF
 #define PARAMETERSINFO_DEF
 
+#include <string>
+#include <iostream>
+#include <sstream>
+#include <vector>
+
+using namespace std; 
+
 class ParameterInfoBase {
 public:
     string nameString; //string that identifies parameter

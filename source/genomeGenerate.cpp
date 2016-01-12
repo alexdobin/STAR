@@ -306,7 +306,7 @@ void genomeGenerate(Parameters *P) {
         for (uint iChunk=0;iChunk<saChunkN;iChunk++) {//load files one by one and convert to packed
             ostringstream saChunkFileNameStream("");
             saChunkFileNameStream<< P->genomeDir << "/SA_" << iChunk;
-            ifstream saChunkFile(saChunkFileNameStream.str().c_str());
+			ifstream saChunkFile(saChunkFileNameStream.str().c_str(), ios_base::in | ios_base::binary);
             while (! saChunkFile.eof()) {//read blocks from each file
                 uint chunkBytesN=fstreamReadBig(saChunkFile,(char*) saIn,SA_CHUNK_BLOCK_SIZE*sizeof(saIn[0]));
                 for (uint ii=0;ii<chunkBytesN/sizeof(saIn[0]);ii++) {

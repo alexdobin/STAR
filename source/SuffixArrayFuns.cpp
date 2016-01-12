@@ -420,9 +420,32 @@ uint funCalcSAiFromSA(char* G, PackedArray& SA, uint iSA, int L, Parameters* P, 
     SAstr &= P->GstrandMask;
     iL4=-1;
     register uint saind=0;
+
     if (dirG) 
     {
-        register uint128 g1=*( (uint128*) (G+SAstr) );
+#ifdef _WIN32
+		// Fix for windows while using Boost 128 bit integer.
+		// directly initializing boost 128 bit integer class from values in memory will not work, instead 
+		// we will take it as 32 bit values and create a proper 128 bit integer.
+		uint128 g1 = 0x0;
+		uint32_t* addr = (uint32_t*)(G + SAstr);
+		for (unsigned int i = 0; i < 4; i++)
+		{
+			// take it as 32 bit integer
+			uint32_t* addr_part = addr + i;
+
+			// initilize a temporary 128 bit integer from it  
+			uint128 g1_part = *addr_part;
+
+			// shift properly to place in 128 bit integer.
+			g1_part = g1_part << (i * sizeof(uint32_t) * 8);
+
+			// place this part in 128 bit integer
+			g1 |= g1_part;
+		}
+#else
+		register uint128 g1=*( (uint128*) (G+SAstr) );
+#endif
         for (int ii=0; ii<L; ii++)
         {
             register char g2=(char) g1;
@@ -439,7 +462,30 @@ uint funCalcSAiFromSA(char* G, PackedArray& SA, uint iSA, int L, Parameters* P, 
         return saind;
     } else
     {
-        register uint128 g1=*( (uint128*) (G+P->nGenome-SAstr-16) );
+#ifdef _WIN32
+		// Fix for windows while using Boost 128 bit integer.
+		// directly initializing boost 128 bit integer class from values in memory will not work, instead 
+		// we will take it as 32 bit values and create a proper 128 bit integer.
+		uint128 g1 = 0x0;
+		uint32_t* addr = (uint32_t*)(G + P->nGenome - SAstr - 16);
+		for (unsigned int i = 0; i < 4; i++)
+		{
+			// take it as 32 bit integer
+			uint32_t* addr_part = addr + i;
+
+			// initilize a temporary 128 bit integer from it  
+			uint128 g1_part = *addr_part;
+
+			// shift properly to place in 128 bit integer.
+			g1_part = g1_part << (i * sizeof(uint32_t) * 8);
+
+			// place this part in 128 bit integer
+			g1 |= g1_part;
+		}
+
+#else
+		register uint128 g1 = *((uint128*)(G + P->nGenome - SAstr - 16));
+#endif
         for (int ii=0; ii<L; ii++)
         {
             register char g2=(char) (g1>>(8*(15-ii)));
@@ -456,8 +502,6 @@ uint funCalcSAiFromSA(char* G, PackedArray& SA, uint iSA, int L, Parameters* P, 
     };
     
 };
-         
-
 
 
 int64 funCalcSAi(char* G, uint iL) {

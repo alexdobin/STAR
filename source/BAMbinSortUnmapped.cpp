@@ -25,7 +25,7 @@ void BAMbinSortUnmapped(uint32 iBin, uint nThreads, string dirBAMsort, BGZF *bgz
     for (uint it=0; it<bamInFile.size(); it++) {//initialize
         bamIn[it] = new char [BAMoutput_oneAlignMaxBytes];
 
-        bamInStream[it].open(bamInFile.at(it).c_str());
+        bamInStream[it].open(bamInFile.at(it).c_str(), std::ios::binary);
 
         bamInStream[it].read(bamIn[it],sizeof(int32));//read record size
         if (bamInStream[it].good()) {

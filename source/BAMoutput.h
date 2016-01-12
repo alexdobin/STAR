@@ -17,6 +17,9 @@ public:
     void unsortedOneAlign (char *bamIn, uint bamSize, uint bamSize2);
     void unsortedFlush ();
     void coordUnmappedPrepareBySJout();
+
+	// newly added to close temp files, to avoid crash when deleting _STARtmp folder
+	void closeBinTempFiles(); 
     
     uint32 nBins; //number of bins to split genome into
     uint* binTotalN; //total number of aligns in each bin

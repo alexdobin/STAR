@@ -10,7 +10,6 @@
 #include "binarySearch2.h"
 #include "ErrorWarning.h"
 #include <cmath>
-
 #include "funCompareUintAndSuffixes.h"
 
 void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedArray &SA, PackedArray &SA2, PackedArray &SAi) {
@@ -50,7 +49,9 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
     uint64 sjNew=0;
     #pragma omp parallel num_threads(P->runThreadN)
     #pragma omp for schedule (dynamic,1000) reduction(+:sjNew)
-    for (uint isj=0; isj<2*P->sjdbN; isj++) {//find insertion points for each of the sequences
+
+	// Note: index variable isj was uint, changed to int because MSVC with VS2013 does not support unsigned index for OpenMP for loop.
+    for (int isj=0; isj<2*P->sjdbN; isj++) {//find insertion points for each of the sequences
 
         char** seq1=new char*[2];
         seq1[0]=Gsj+isj*P->sjdbLength;

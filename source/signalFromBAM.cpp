@@ -51,7 +51,7 @@ void signalFromBAM(const string bamFileName, const string sigFileName, Parameter
     
     for (int ii=0; ii<sigN; ii++) {
         sigOutFileName[ii]+= (P.outWigFlags.format==0 ? ".bg" : ".wig");
-        sigOutAll[ii]=new ofstream ( sigOutFileName[ii].c_str() );
+		sigOutAll[ii] = new ofstream(sigOutFileName[ii].c_str(), std::ios::binary);
     };
     
     if (P.outWigFlags.norm==0) {//raw counts

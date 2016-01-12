@@ -1,5 +1,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <memory>
+
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 
 #include "IncludeDefine.h"
 #include "Parameters.h"
@@ -25,10 +30,9 @@
 #include "SjdbClass.h"
 #include "sjdbInsertJunctions.h"
 #include "bam_cat.h"
-
 #include "htslib/htslib/sam.h"
 #include "parametersDefault.xxd"
-
+#include "CrossPlatform.h"
 
 
 void usage() {
@@ -43,7 +47,6 @@ void usage() {
     
     exit(0);
 }
-
 
 int main(int argInN, char* argIn[]) {
     // If no argument is given, or the first argument is either '-h' or '--help', run usage()
@@ -71,7 +74,8 @@ int main(int argInN, char* argIn[]) {
     
     Genome mainGenome (P);
     mainGenome.genomeLoad();
-    if (P->genomeLoad=="LoadAndExit" || P->genomeLoad=="Remove") 
+    
+	if (P->genomeLoad=="LoadAndExit" || P->genomeLoad=="Remove") 
     {
         return 0;
     };
@@ -100,6 +104,7 @@ int main(int argInN, char* argIn[]) {
     
     
 /////////////////////////////////////////////////////////////////////////////////////////////////START
+#if !defined(_WIN32) && defined(USE_PTHREAD)
     if (P->runThreadN>1) {
         g_threadChunks.threadArray=new pthread_t[P->runThreadN];
         pthread_mutex_init(&g_threadChunks.mutexInRead, NULL);
@@ -110,7 +115,7 @@ int main(int argInN, char* argIn[]) {
         pthread_mutex_init(&g_threadChunks.mutexStats, NULL);
         pthread_mutex_init(&g_threadChunks.mutexBAMsortBins, NULL);
     };
-
+#endif
     g_statsAll.progressReportHeader(P->inOut->logProgress);    
     
     if (P->twoPass.yes) {//2-pass
@@ -145,11 +150,15 @@ int main(int argInN, char* argIn[]) {
         *P->inOut->logStdOut << timeMonthDayTime(g_statsAll.timeStartMap) << " ..... Started 1st pass mapping\n" <<flush;
 
         //run mapping for Pass1
-        ReadAlignChunk *RAchunk1[P->runThreadN];        
-        for (int ii=0;ii<P1->runThreadN;ii++) {
-            RAchunk1[ii]=new ReadAlignChunk(P1, mainGenome, mainTranscriptome, ii);
+		std::vector<ReadAlignChunk*> RAchunk1(P->runThreadN); 
+
+        for (int ii=0; ii < P1->runThreadN; ii++) 
+		{
+			ReadAlignChunk* p = new ReadAlignChunk(P1, mainGenome, mainTranscriptome, ii);
+			RAchunk1[ii] = p;
         };    
         mapThreadsSpawn(P1, RAchunk1);
+
         outputSJ(RAchunk1,P1); //collapse and output junctions
 //         for (int ii=0;ii<P1->runThreadN;ii++) {
 //             delete [] RAchunk[ii];
@@ -158,7 +167,7 @@ int main(int argInN, char* argIn[]) {
         time_t rawtime; time (&rawtime);
         P->inOut->logProgress << timeMonthDayTime(rawtime) <<"\tFinished 1st pass mapping\n";
         *P->inOut->logStdOut << timeMonthDayTime(rawtime) << " ..... Finished 1st pass mapping\n" <<flush;
-        ofstream logFinal1 ( (P->twoPass.dir + "/Log.final.out").c_str());
+        ofstream logFinal1 ( (P->twoPass.dir + "/Log.final.out").c_str(), std::ios::binary);
         g_statsAll.reportFinal(logFinal1,P1);
 
         P->twoPass.pass2=true;//starting the 2nd pass
@@ -169,6 +178,20 @@ int main(int argInN, char* argIn[]) {
         //reopen reads files
         P->closeReadsFiles();
         P->openReadsFiles();
+		
+		// to close all temp files and avoid crash when deleting _STARtmp 
+		for (auto& ra1 : RAchunk1)
+		{
+			ra1->closeReadAlignFiles(); 
+
+			if (ra1->chunkOutBAMcoord)
+				ra1->chunkOutBAMcoord->closeBinTempFiles();
+			if (ra1->chunkOutBAMunsorted)
+				ra1->chunkOutBAMunsorted->closeBinTempFiles();
+			if (ra1->chunkOutBAMquant)
+				ra1->chunkOutBAMquant->closeBinTempFiles();
+		}
+		// 
     } else {//not 2-pass
         //nothing for now
     };
@@ -203,7 +226,7 @@ int main(int argInN, char* argIn[]) {
         samHeaderStream << "@PG\tID:STAR\tPN:STAR\tVN:" << STAR_VERSION <<"\tCL:" << P->commandLineFull <<"\n";
         
         if (P->outSAMheaderCommentFile!="-") {
-            ifstream comstream (P->outSAMheaderCommentFile);
+			ifstream comstream(P->outSAMheaderCommentFile, ios_base::in | ios_base::binary);
             while (comstream.good()) {
                 string line1;
                 getline(comstream,line1);
@@ -261,19 +284,23 @@ int main(int argInN, char* argIn[]) {
     };
     
     if (P->chimSegmentMin>0) {
-        P->inOut->outChimJunction.open((P->outFileNamePrefix + "Chimeric.out.junction").c_str());
-        P->inOut->outChimSAM.open((P->outFileNamePrefix + "Chimeric.out.sam").c_str());
+		P->inOut->outChimJunction.open((P->outFileNamePrefix + "Chimeric.out.junction").c_str(), std::ios::binary);
+		P->inOut->outChimSAM.open((P->outFileNamePrefix + "Chimeric.out.sam").c_str(), std::ios::binary);
         P->inOut->outChimSAM << P->samHeader;
+
+#if !defined(_WIN32) && defined(USE_PTHREAD)
         pthread_mutex_init(&g_threadChunks.mutexOutChimSAM, NULL);   
         pthread_mutex_init(&g_threadChunks.mutexOutChimJunction, NULL);
+#endif
     };
          
     // P->inOut->logMain << "mlock value="<<mlockall(MCL_CURRENT|MCL_FUTURE) <<"\n"<<flush;
 
     // prepare chunks and spawn mapping threads    
-    ReadAlignChunk *RAchunk[P->runThreadN];
+	std::vector<ReadAlignChunk*> RAchunk(P->runThreadN);
     for (int ii=0;ii<P->runThreadN;ii++) {
-        RAchunk[ii]=new ReadAlignChunk(P, mainGenome, mainTranscriptome, ii);
+		ReadAlignChunk* p = new ReadAlignChunk(P, mainGenome, mainTranscriptome, ii); 
+		RAchunk[ii] = p;
     };    
     
     mapThreadsSpawn(P, RAchunk);
@@ -352,34 +379,39 @@ int main(int argInN, char* argIn[]) {
 //         P->inOut->logMain << "Started sorting BAM ..." <<endl;
         #pragma omp parallel num_threads(P->outBAMsortingThreadNactual) 
         #pragma omp for schedule (dynamic,1)
-        for (uint32 ibin1=0; ibin1<nBins; ibin1++) {
-            uint32 ibin=nBins-1-ibin1;//reverse order to start with the last bin - unmapped reads
-            
-            uint binN=0, binS=0;
-            for (int it=0; it<P->runThreadN; it++) {//collect sizes from threads
-                binN += RAchunk[it]->chunkOutBAMcoord->binTotalN[ibin];
-                binS += RAchunk[it]->chunkOutBAMcoord->binTotalBytes[ibin];
-            };
-            
-            if (binS==0) continue; //empty bin
-  
-            if (ibin == nBins-1) {//last bin for unmapped reads
-                BAMbinSortUnmapped(ibin,P->runThreadN,P->outBAMsortTmpDir,P->inOut->outBAMfileCoord, P);
-            } else {
-            uint newMem=binS+binN*24;
-            bool boolWait=true;
-            while (boolWait) {
-                #pragma omp critical
-                if (totalMem+newMem < P->limitBAMsortRAM) {
-                    boolWait=false;
-                    totalMem+=newMem;
-                };
-                sleep(0.1);
-            };
-            BAMbinSortByCoordinate(ibin,binN,binS,P->runThreadN,P->outBAMsortTmpDir,P->inOut->outBAMfileCoord, P);
-            #pragma omp critical
-            totalMem-=newMem;//"release" RAM
-        };
+
+		// Note: index variable ibin1 was uint32, changed to int because MSVC with VS2013 does not support unsigned index for OpenMP for loop. 
+		for (int ibin1 = 0; ibin1 < nBins; ibin1++) {
+			uint32 ibin = nBins - 1 - ibin1;//reverse order to start with the last bin - unmapped reads
+
+			uint binN = 0, binS = 0;
+			for (int it = 0; it < P->runThreadN; it++) {//collect sizes from threads
+				binN += RAchunk[it]->chunkOutBAMcoord->binTotalN[ibin];
+				binS += RAchunk[it]->chunkOutBAMcoord->binTotalBytes[ibin];
+			};
+
+			// Note: the following line was if (binS==0) continue; changed it becoz continue is not allowed in OpenMP for loop with MSVC. 
+			if (binS != 0) { //bin not empty
+
+				if (ibin == nBins - 1) {//last bin for unmapped reads
+					BAMbinSortUnmapped(ibin, P->runThreadN, P->outBAMsortTmpDir, P->inOut->outBAMfileCoord, P);
+				}
+				else {
+					uint newMem = binS + binN * 24;
+					bool boolWait = true;
+					while (boolWait) {
+					#pragma omp critical
+						if (totalMem + newMem < P->limitBAMsortRAM) {
+							boolWait = false;
+							totalMem += newMem;
+						};
+						sleep(0.1);
+					};
+					BAMbinSortByCoordinate(ibin, binN, binS, P->runThreadN, P->outBAMsortTmpDir, P->inOut->outBAMfileCoord, P);
+					#pragma omp critical
+					totalMem -= newMem;//"release" RAM
+				};
+			};
         };
         //concatenate all BAM files, using bam_cat
         char **bamBinNames = new char* [nBins];
@@ -416,9 +448,24 @@ int main(int argInN, char* argIn[]) {
     *P->inOut->logStdOut << timeMonthDayTime(g_statsAll.timeFinish) << " ..... Finished successfully\n" <<flush;
     
     P->inOut->logMain  << "ALL DONE!\n"<<flush;
-    sysRemoveDir (P->outFileTmp);
-    
-    P->closeReadsFiles();//this will kill the readFilesCommand processes if necessary
+	
+	// to close all temp files and avoid crash when deleting _STARtmp 
+	for (auto& ra : RAchunk)
+	{
+		ra->closeReadAlignFiles(); 
+
+		if (ra->chunkOutBAMcoord)
+			ra->chunkOutBAMcoord->closeBinTempFiles();
+		if (ra->chunkOutBAMunsorted)
+			ra->chunkOutBAMunsorted->closeBinTempFiles();
+		if (ra->chunkOutBAMquant)
+			ra->chunkOutBAMquant->closeBinTempFiles();
+	}
+	// 
+
+	sysRemoveDir(P->outFileTmp);
+	
+	P->closeReadsFiles();//this will kill the readFilesCommand processes if necessary
     mainGenome.~Genome(); //need explicit call because of the 'delete P->inOut' below, which will destroy P->inOut->logStdOut
     
     delete P->inOut; //to close files

@@ -6,7 +6,7 @@ void sjdbLoadFromFiles(Parameters *P, SjdbClass &sjdbLoci) {
    
     if (P->sjdbFileChrStartEnd.at(0)!="-") {       
         for (uint ifile=0;ifile<P->sjdbFileChrStartEnd.size(); ifile++) {
-            ifstream sjdbStreamIn ( P->sjdbFileChrStartEnd.at(ifile).c_str() );   
+			ifstream sjdbStreamIn(P->sjdbFileChrStartEnd.at(ifile).c_str(), ios_base::in | ios_base::binary);
             if (sjdbStreamIn.fail()) {
                 ostringstream errOut;
                 errOut << "FATAL INPUT error, could not open input file sjdbFileChrStartEnd=" << P->sjdbFileChrStartEnd.at(ifile) <<"\n";

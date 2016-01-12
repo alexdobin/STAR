@@ -3,6 +3,8 @@
 #include "OutSJ.h"
 #include <limits.h>
 #include "ErrorWarning.h"
+#include <vector>
+#include <memory>
 
 int compareUint(const void* i1, const void* i2) {//compare uint arrays
     uint s1=*( (uint*)i1 );
@@ -17,7 +19,7 @@ int compareUint(const void* i1, const void* i2) {//compare uint arrays
     };
 };
 
-void outputSJ(ReadAlignChunk** RAchunk, Parameters* P) {//collapses junctions from all therads/chunks; outputs junctions to file
+void outputSJ(const std::vector<ReadAlignChunk*> &RAchunk, Parameters* P) {//collapses junctions from all therads/chunks; outputs junctions to file
     
 //     system("echo `date` ..... Writing splice junctions >> Log.timing.out");
 
@@ -120,7 +122,7 @@ void outputSJ(ReadAlignChunk** RAchunk, Parameters* P) {//collapses junctions fr
     
     //output junctions
     if (P->outFilterBySJoutStage!=1) {//output file
-        ofstream outSJfileStream((P->outFileNamePrefix+"SJ.out.tab").c_str());
+		ofstream outSJfileStream((P->outFileNamePrefix + "SJ.out.tab").c_str(), std::ios::binary);
         for (uint ii=0;ii<allSJ.N;ii++) {//write to file
             if ( P->outFilterBySJoutStage==2 || sjFilter[ii]  ) {
                 oneSJ.junctionPointer(allSJ.data,ii);
