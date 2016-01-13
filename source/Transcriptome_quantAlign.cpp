@@ -100,7 +100,7 @@ uint32 Transcriptome::quantAlign (Transcript &aG, Transcript *aTall) {
     uint32 nAtr=0; //number of alignments to the transcriptome
     
     //binary search through transcript starts
-    uint32 tr1=binarySearch1<uint>(aG.exons[0][EX_G], trS, nTr);
+    uint32 tr1=binarySearch1a<uint>(aG.exons[0][EX_G], trS, nTr);
     if (tr1==(uint32) -1) return 0; //alignment outside of range of all transcripts
     
     uint aGend=aG.exons[aG.nExons-1][EX_G];
