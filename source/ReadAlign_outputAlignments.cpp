@@ -109,7 +109,7 @@ void ReadAlign::outputAlignments() {
             {//write all transcripts         
                 //mate mapped = true if a mate was present in one of the trancsripts
                 mateMapped[trMult[iTr]->exons[0][EX_iFrag]]=true;
-                mateMapped[trMult[iTr]->exons[trBest->nExons-1][EX_iFrag]]=true; 
+                mateMapped[trMult[iTr]->exons[trMult[iTr]->nExons-1][EX_iFrag]]=true; 
                 
                 //mateMapped1 = true if a mate is present in this transcript
                 bool mateMapped1[2]={false,false};

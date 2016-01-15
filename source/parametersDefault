@@ -331,17 +331,17 @@ outFilterMismatchNmax           10
     int: alignment will be output only if it has no more mismatches than this value.
 
 outFilterMismatchNoverLmax      0.3
-    int: alignment will be output only if its ratio of mismatches to *mapped* length is less than or equal to this value.
+    float: alignment will be output only if its ratio of mismatches to *mapped* length is less than or equal to this value.
 
-outFilterMismatchNoverReadLmax  1
-    int: alignment will be output only if its ratio of mismatches to *read* length is less than or equal to this value.
+outFilterMismatchNoverReadLmax  1.0
+    float: alignment will be output only if its ratio of mismatches to *read* length is less than or equal to this value.
 
 
 outFilterScoreMin               0
     int: alignment will be output only if its score is higher than or equal to this value.
 
 outFilterScoreMinOverLread      0.66
-        float: same as outFilterScoreMin, but  normalized to read length (sum of mates' lengths for paired-end reads)
+    float: same as outFilterScoreMin, but  normalized to read length (sum of mates' lengths for paired-end reads)
 
 outFilterMatchNmin              0
     int: alignment will be output only if the number of matched bases is higher than or equal to this value.
