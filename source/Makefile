@@ -75,6 +75,9 @@ cleanRelease:
 	rm -f *.o Depend.list
 	$(MAKE) -C htslib clean
 
+.PHONY: install
+install:
+	'mv' STAR STARlong ../bin
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),cleanRelease)
