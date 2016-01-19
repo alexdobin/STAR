@@ -1,5 +1,5 @@
 * Fixed a bug in --quantMode TranscriptomeSAM that prevented output to Aligned.toTranscriptome.out.bam of the reads mapped to the very last annotated transcript.
-* Cleaned up the code to remove compilation warnings.
+* Cleaned up the code to remove compilation warnings (thanks to github.com/yhoogstrate).
 * Implemented --outSAMunmapped Within KeepPairs option to record unmapped mate adjacent to the mapped one, in case single-end alignments are allowed.
   For multi-mappers, the unmapped mate will be recored mulitple times adjacent to the mappet mate of each alignment.
 

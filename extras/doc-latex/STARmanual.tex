@@ -34,8 +34,8 @@
 
 \newcommand{\sechyperref}[1]{\hyperref[#1]{Section \ref{#1}. \nameref{#1}}}
 
-\title{STAR manual 2.5.0a}
-\author{Alexnder Dobin\\
+\title{STAR manual 2.5.1a}
+\author{Alexander Dobin\\
 dobin@cshl.edu}
 \maketitle
 \tableofcontents
@@ -150,7 +150,7 @@ This file can be used in addition to the \opt{sjdbGTFfile}, in which case STAR w
 Note, that the \opt{sjdbFileChrStartEnd} file can contain duplicate (identical) junctions, STAR will collapse (remove) duplicate junctions.
 
 \subsubsection{Very small genome.}
-For small genomes, the parameter \opt{genomeSAindexNbases} needs to be scaled down, with a typical value of \code{min(14, log2(GenomeLength)/2 - 1)}. For example, for 1~megaBase genome, this is equal to 9, for 100~kiloBase genome, this is equal to 7.
+For small genomes, the parameter \opt{genomeSAindexNbases} \textbf{must} to be scaled down, with a typical value of \code{min(14, log2(GenomeLength)/2 - 1)}. For example, for 1~megaBase genome, this is equal to 9, for 100~kiloBase genome, this is equal to 7.
 
 \subsubsection{Genome with a large number of references.}
 If you are using a genome with a large (\textgreater 5,000) number of references (chrosomes/scaffolds), you may need to reduce the \opt{genomeChrBinNbits} to reduce RAM consumption. The following scaling is recommended: \opt{genomeChrBinNbits} = \code{min(18, log2(GenomeLength/NumberOfReferences))}. For example, for 3~gigaBase genome with 100,000 chromosomes/scaffolds, this is equal to 15.
@@ -303,8 +303,9 @@ The filtering for this output file is controlled by the \optn{outSJfilter*} para
 
 \section{Chimeric and circular alignments.}
 To switch on detection of chimeric (fusion) alignments (in addition to normal mapping), \opt{chimSegmentMin} should be set to a positive value. Each chimeric alignment consists of two "segments". Each segment is non-chimeric on its own, but the segments are chimeric to each other (i.e. the segments belong to different chromosomes, or different strands, or are far from each other). Both segments may contain splice junctions, and one of the segments may contain portions of both mates. \opt{chimSegmentMin} parameter controls the minimum mapped length of the two segments that is allowed. For example, if you have 2x75 reads and used \opt{chimSegmentMin} 20, a chimeric alignment with 130b on one chromosome and 20b on the other will be output, while 135 + 15 won't be.
+
 \subsection{STAR-Fusion.}
-STAR-Fusion is a software package for detecting fusion transcript from STAR chimeric output. It is developed and maintained by Brian Haas. Please visit its GitHub page for instructions and documentation: \url{https://github.com/STAR-Fusion/STAR-Fusion}.
+STAR-Fusion is a software package for detecting fusion transcript from STAR chimeric output. It is developed and maintained by Brian Haas (@Broad Institute), whose effort was  inspired by earlier work done by Nicolas Stransky in the landmark publication "The landscape of kinase fusions in cancer" by Stransky et al., Nat Commun 2014, in addition to very nice work done by Daniel Nicorici with his FusionCatcher software. Please visit its GitHub page for instructions and documentation: \url{https://github.com/STAR-Fusion/STAR-Fusion}.
 
 \subsection{Chimeric alignments in the main BAM files.}
 Chimeric alignments can be included together with normal alignments in the main (sorted or unsorted) BAM file(s) using \opt{chimOutType} \optv{WithinBAM}. In these files, formatting of chimeric alignments follows the latest SAM/BAM specifications.
