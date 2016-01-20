@@ -42,7 +42,7 @@ BAMoutput::BAMoutput (int iChunk, string tmpDir, Parameters *Pin) {//allocate ba
         binTotalN[ii]=0;
         binTotalBytes[ii]=0;
     };
-    
+	nBinsTempFiles = nBins; 
     binSize1=binStart[nBins-1]-binStart[0];
     nBins=1;//start with one bin to estimate genomic bin sizes
 };
@@ -63,6 +63,7 @@ BAMoutput::BAMoutput (BGZF *bgzfBAMin, Parameters *Pin) {//allocate BAM array wi
     binTotalBytes=NULL;
     binTotalN=NULL;
     nBins=0;
+	nBinsTempFiles = 0; 
 };
 
 void BAMoutput::unsortedOneAlign(char *bamIn, uint bamSize, uint bamSize2) {//record one alignment to the buffer, write buffer if needed
@@ -209,7 +210,7 @@ void BAMoutput::coordUnmappedPrepareBySJout () {//flush all alignments
 
 void BAMoutput::closeBinTempFiles()
 {
-	for (uint ii = 0; ii < nBins; ii++) {
+	for (uint ii = 0; ii < nBinsTempFiles; ii++) {
 		if (binStream[ii]){
 			if (binStream[ii]->is_open()){
 				binStream[ii]->close();

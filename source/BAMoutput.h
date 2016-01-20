@@ -22,6 +22,7 @@ public:
 	void closeBinTempFiles(); 
     
     uint32 nBins; //number of bins to split genome into
+	uint32 nBinsTempFiles; //newly added field to store number of temp files created, used to close them properly at the end. 
     uint* binTotalN; //total number of aligns in each bin
     uint* binTotalBytes;//total size of aligns in each bin
 private:
