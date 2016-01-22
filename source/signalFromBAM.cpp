@@ -72,9 +72,9 @@ void signalFromBAM(const string bamFileName, const string sigFileName, Parameter
     
     int iChr=-999;
     double *sigAll=NULL;
+    uint32_t chrLen=0;    
     while ( true ) {//until the end of file
-        int bamBytes1=bam_read1(bamIn, bamA);
-        uint32_t chrLen=0;
+        int bamBytes1=bam_read1(bamIn, bamA);    
         if (bamA->core.tid!=iChr || bamBytes1<0) {
             //output to file
             if (iChr!=-999) {//iChr=-999 marks chromosomes that are not output, including unmapped reads

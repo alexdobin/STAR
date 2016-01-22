@@ -249,7 +249,7 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* 
         
         //check exons lenghts including repeats, do not report a transcript with short exons
 //        for (uint isj=0;isj<trA.nExons-1;isj++) {//check exons for min length, if they precede a junction
-//            if ( trA.canonSJ[isj]>=0 && \
+//            if ( trA.canonSJ[isj]>=0 &&
 //               ( trA.exons[isj][EX_L] < P->alignSJoverhangMin + trA.shiftSJ[isj][0] 
 //              || trA.exons[isj+1][EX_L] < P->alignSJoverhangMin + trA.shiftSJ[isj][1]) ) {                  
 //                return;//do not record this transcript in wTr

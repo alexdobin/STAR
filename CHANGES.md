@@ -1,3 +1,9 @@
+STAR 2.5.1b 2016/01/22
+======================
+
+* Fixed a bug in signal generation with --outWigType introduced in 2.5.1a
+
+
 STAR 2.5.1a 2016/01/19
 ======================
 
