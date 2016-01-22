@@ -12,7 +12,7 @@ MANUAL
 ======
 https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf
 
-[RELEASEnotes](RELEASEnotes) contains detailed information about the latest major release
+[RELEASEnotes](RELEASEnotes.md) contains detailed information about the latest major release
 
 DIRECTORY CONTENTS
 ==================
