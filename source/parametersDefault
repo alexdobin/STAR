@@ -72,7 +72,7 @@ sjdbGTFfile                             -
     string: path to the GTF file with annotations
 
 sjdbGTFchrPrefix                        -
-    string: prefix for chromosome names in a GTF file (e.g. 'chr' for using ENSMEBL annotations with UCSC geneomes)
+    string: prefix for chromosome names in a GTF file (e.g. 'chr' for using ENSMEBL annotations with UCSC genomes)
 
 sjdbGTFfeatureExon                      exon
     string: feature type in GTF file to be used as exons for building transcripts
