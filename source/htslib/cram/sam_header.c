@@ -2,23 +2,23 @@
 Copyright (c) 2013 Genome Research Ltd.
 Author: James Bonfield <jkb@sanger.ac.uk>
 
-Redistribution and use in source and binary forms, with or without 
+Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
-   1. Redistributions of source code must retain the above copyright notice, 
+   1. Redistributions of source code must retain the above copyright notice,
 this list of conditions and the following disclaimer.
 
-   2. Redistributions in binary form must reproduce the above copyright notice, 
-this list of conditions and the following disclaimer in the documentation 
+   2. Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation
 and/or other materials provided with the distribution.
 
    3. Neither the names Genome Research Ltd and Wellcome Trust Sanger
 Institute nor the names of its contributors may be used to endorse or promote
 products derived from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY GENOME RESEARCH LTD AND CONTRIBUTORS "AS IS" AND 
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+THIS SOFTWARE IS PROVIDED BY GENOME RESEARCH LTD AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 DISCLAIMED. IN NO EVENT SHALL GENOME RESEARCH LTD OR CONTRIBUTORS BE LIABLE
 FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
 DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 static void sam_hdr_error(char *msg, char *line, int len, int lno) {
     int j;
-    
+
     for (j = 0; j < len && line[j] != '\n'; j++)
 	;
     fprintf(stderr, "%s at line %d: \"%.*s\"\n", msg, lno, j, line);
@@ -85,7 +85,7 @@ void sam_hdr_dump(SAM_hdr *hdr) {
 	int j;
 	printf("  %d:", i);
 	for (j = hdr->pg_end[i]; j != -1; j = hdr->pg[j].prev_id) {
-	    printf("%s%d(%.*s)", 
+	    printf("%s%d(%.*s)",
 		   j == hdr->pg_end[i] ? " " : "->",
 		   j, hdr->pg[j].name_len, hdr->pg[j].name);
 	}
@@ -324,7 +324,7 @@ int sam_hdr_add_lines(SAM_hdr *sh, const char *lines, int len) {
 	if (!new) {
 	    SAM_hdr_type *t = kh_val(sh->h, k), *p;
 	    p = t->prev;
-	    
+
 	    assert(p->next = t);
 	    p->next = h_type;
 	    h_type->prev = p;
@@ -372,7 +372,7 @@ int sam_hdr_add_lines(SAM_hdr *sh, const char *lines, int len) {
 
 		for (j = ++i; j < len && hdr[j] != '\n' && hdr[j] != '\t'; j++)
 		    ;
-	    
+
 		if (!(h_tag = pool_alloc(sh->tag_pool)))
 		    return -1;
 		h_tag->str = string_ndup(sh->str_pool, &hdr[i], j-i);
@@ -386,7 +386,7 @@ int sam_hdr_add_lines(SAM_hdr *sh, const char *lines, int len) {
 				  &hdr[l_start], len - l_start, lno);
 		    return -1;
 		}
-	    
+
 		if (last)
 		    last->next = h_tag;
 		else
@@ -445,7 +445,7 @@ int sam_hdr_vadd(SAM_hdr *sh, const char *type, va_list ap, ...) {
     if (!new) {
 	SAM_hdr_type *t = kh_val(sh->h, k), *p;
 	p = t->prev;
-	    
+
 	assert(p->next = t);
 	p->next = h_type;
 	h_type->prev = p;
@@ -465,7 +465,7 @@ int sam_hdr_vadd(SAM_hdr *sh, const char *type, va_list ap, ...) {
     for (;;) {
 	char *k, *v;
 	int idx;
-	
+
 	if (!(k = (char *)va_arg(args, char *)))
 	    break;
 	v = va_arg(args, char *);
@@ -476,7 +476,7 @@ int sam_hdr_vadd(SAM_hdr *sh, const char *type, va_list ap, ...) {
 	if (!(h_tag = pool_alloc(sh->tag_pool)))
 	    return -1;
 	idx = ks_len(&sh->text);
-	
+
 	if (EOF == kputs(k, &sh->text))
 	    return -1;
 	if (EOF == kputc_(':', &sh->text))
@@ -496,7 +496,7 @@ int sam_hdr_vadd(SAM_hdr *sh, const char *type, va_list ap, ...) {
 	    last->next = h_tag;
 	else
 	    h_type->tag = h_tag;
-	
+
 	last = h_tag;
     }
     va_end(args);
@@ -510,7 +510,7 @@ int sam_hdr_vadd(SAM_hdr *sh, const char *type, va_list ap, ...) {
     for (;;) {
 	char *k, *v;
 	int idx;
-	
+
 	if (!(k = (char *)va_arg(ap, char *)))
 	    break;
 	v = va_arg(ap, char *);
@@ -521,7 +521,7 @@ int sam_hdr_vadd(SAM_hdr *sh, const char *type, va_list ap, ...) {
 	if (!(h_tag = pool_alloc(sh->tag_pool)))
 	    return -1;
 	idx = ks_len(&sh->text);
-	
+
 	if (EOF == kputs(k, &sh->text))
 	    return -1;
 	if (EOF == kputc_(':', &sh->text))
@@ -541,7 +541,7 @@ int sam_hdr_vadd(SAM_hdr *sh, const char *type, va_list ap, ...) {
 	    last->next = h_tag;
 	else
 	    h_type->tag = h_tag;
-	
+
 	last = h_tag;
     }
     va_end(ap);
@@ -598,7 +598,7 @@ SAM_hdr_type *sam_hdr_find(SAM_hdr *hdr, char *type,
     k = kh_get(sam_hdr, hdr->h, itype);
     if (k == kh_end(hdr->h))
 	return NULL;
-    
+
     if (!ID_key)
 	return kh_val(hdr->h, k);
 
@@ -705,7 +705,7 @@ int sam_hdr_update(SAM_hdr *hdr, SAM_hdr_type *type, ...) {
     va_list ap;
 
     va_start(ap, type);
-    
+
     for (;;) {
 	char *k, *v;
 	int idx;
@@ -815,7 +815,7 @@ int sam_hdr_rebuild(SAM_hdr *hdr) {
 
 /*
  * Creates an empty SAM header, ready to be populated.
- * 
+ *
  * Returns a SAM_hdr struct on success (free with sam_hdr_free())
  *         NULL on failure
  */
@@ -824,7 +824,7 @@ SAM_hdr *sam_hdr_new() {
 
     if (!sh)
 	return NULL;
-    
+
     sh->h = kh_init(sam_hdr);
     if (!sh->h)
 	goto err;
@@ -891,7 +891,7 @@ SAM_hdr *sam_hdr_new() {
 SAM_hdr *sam_hdr_parse(const char *hdr, int len) {
     /* Make an empty SAM_hdr */
     SAM_hdr *sh;
-    
+
     sh = sam_hdr_new();
     if (NULL == sh) return NULL;
 
@@ -951,7 +951,7 @@ void sam_hdr_decr_ref(SAM_hdr *hdr) {
 
 /*! Deallocates all storage used by a SAM_hdr struct.
  *
- * This also decrements the header reference count. If after decrementing 
+ * This also decrements the header reference count. If after decrementing
  * it is still non-zero then the header is assumed to be in use by another
  * caller and the free is not done.
  *
@@ -1187,7 +1187,7 @@ int sam_hdr_add_PG(SAM_hdr *sh, const char *name, ...) {
  * A function to help with construction of CL tags in @PG records.
  * Takes an argc, argv pair and returns a single space-separated string.
  * This string should be deallocated by the calling function.
- * 
+ *
  * Returns malloced char * on success
  *         NULL on failure
  */

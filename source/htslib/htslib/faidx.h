@@ -85,7 +85,7 @@ extern "C" {
 	char *fai_fetch(const faidx_t *fai, const char *reg, int *len);
 
 	/*!
-	  @abstract	   Fetch the number of sequences. 
+	  @abstract	   Fetch the number of sequences.
 	  @param  fai  Pointer to the faidx_t struct
 	  @return	   The number of sequences
 	 */

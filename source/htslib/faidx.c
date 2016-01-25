@@ -373,7 +373,7 @@ char *fai_fetch(const faidx_t *fai, const char *str, int *len)
 	return s;
 }
 
-int faidx_fetch_nseq(const faidx_t *fai) 
+int faidx_fetch_nseq(const faidx_t *fai)
 {
 	return fai->n;
 }
@@ -388,7 +388,7 @@ char *faidx_fetch_seq(const faidx_t *fai, const char *c_name, int p_beg_i, int p
 
     // Adjust position
     iter = kh_get(s, fai->hash, c_name);
-    if (iter == kh_end(fai->hash)) 
+    if (iter == kh_end(fai->hash))
     {
         *len = -2;
         fprintf(stderr, "[fai_fetch_seq] The sequence \"%s\" not found\n", c_name);
@@ -401,7 +401,7 @@ char *faidx_fetch_seq(const faidx_t *fai, const char *c_name, int p_beg_i, int p
     if(p_end_i < 0) p_end_i = 0;
     else if(val.len <= p_end_i) p_end_i = val.len - 1;
 
-    // Now retrieve the sequence 
+    // Now retrieve the sequence
 	int ret = bgzf_useek(fai->bgzf, val.offset + p_beg_i / val.line_blen * val.line_len + p_beg_i % val.line_blen, SEEK_SET);
     if ( ret<0 )
     {

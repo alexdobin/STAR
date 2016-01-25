@@ -2,23 +2,23 @@
 Copyright (c) 2012-2013 Genome Research Ltd.
 Author: James Bonfield <jkb@sanger.ac.uk>
 
-Redistribution and use in source and binary forms, with or without 
+Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
-   1. Redistributions of source code must retain the above copyright notice, 
+   1. Redistributions of source code must retain the above copyright notice,
 this list of conditions and the following disclaimer.
 
-   2. Redistributions in binary form must reproduce the above copyright notice, 
-this list of conditions and the following disclaimer in the documentation 
+   2. Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation
 and/or other materials provided with the distribution.
 
    3. Neither the names Genome Research Ltd and Wellcome Trust Sanger
 Institute nor the names of its contributors may be used to endorse or promote
 products derived from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY GENOME RESEARCH LTD AND CONTRIBUTORS "AS IS" AND 
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+THIS SOFTWARE IS PROVIDED BY GENOME RESEARCH LTD AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 DISCLAIMED. IN NO EVENT SHALL GENOME RESEARCH LTD OR CONTRIBUTORS BE LIABLE
 FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
 DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
@@ -271,8 +271,8 @@ static int store_bits_MSB(cram_block *block, unsigned int val, int nbits) {
 	}
     }
 
-    
-    
+
+
     if (nbits <= block->bit+1) {
 	block->data[block->byte] |= (val << (block->bit+1-nbits));
 	if ((block->bit-=nbits) == -1) {
@@ -287,7 +287,7 @@ static int store_bits_MSB(cram_block *block, unsigned int val, int nbits) {
     block->bit = 7;
     block->byte++;
     block->data[block->byte] = 0;
-				 
+
     mask = 1<<(nbits-1);
     do {
 	if (val & mask)
@@ -436,7 +436,7 @@ cram_codec *cram_external_decode_init(char *data, int size,
     else
 	c->decode = cram_external_decode_block;
     c->free   = cram_external_decode_free;
-    
+
     cp += itf8_get(cp, &c->external.content_id);
 
     if (cp - data != size) {
@@ -558,7 +558,7 @@ cram_codec *cram_beta_decode_init(char *data, int size,
     else
 	abort();
     c->free   = cram_beta_decode_free;
-    
+
     cp += itf8_get(cp, &c->beta.offset);
     cp += itf8_get(cp, &c->beta.nbits);
 
@@ -654,7 +654,7 @@ cram_codec *cram_beta_encode_init(cram_stats *st,
 	    for (k = kh_begin(st->h); k != kh_end(st->h); k++) {
 		if (!kh_exist(st->h, k))
 		    continue;
-	    
+
 		i = kh_key(st->h, k);
 		if (min_val > i)
 		    min_val = i;
@@ -740,7 +740,7 @@ cram_codec *cram_subexp_decode_init(char *data, int size,
     c->codec  = E_SUBEXP;
     c->decode = cram_subexp_decode;
     c->free   = cram_subexp_decode_free;
-    
+
     cp += itf8_get(cp, &c->subexp.offset);
     cp += itf8_get(cp, &c->subexp.k);
 
@@ -796,7 +796,7 @@ cram_codec *cram_gamma_decode_init(char *data, int size,
     c->codec  = E_GAMMA;
     c->decode = cram_gamma_decode;
     c->free   = cram_gamma_decode_free;
-    
+
     cp += itf8_get(cp, &c->gamma.offset);
 
     if (cp - data != size) {
@@ -906,7 +906,7 @@ int cram_huffman_decode_int(cram_slice *slice, cram_codec *c,
 	    int dlen = codes[idx].len - last_len;
 	    if (dlen <= 0 || (in->alloc - in->byte)*8 + in->bit + 7 < dlen)
 		return -1;
-	    
+
 	    //val <<= dlen;
 	    //val  |= get_bits_MSB(in, dlen);
 	    //last_len = (len  += dlen);
@@ -939,7 +939,7 @@ cram_codec *cram_huffman_decode_init(char *data, int size,
     cram_codec *h;
     cram_huffman_code *codes;
     int32_t val, last_len, max_len = 0;
-    
+
     cp += itf8_get(cp, &ncodes);
     h = calloc(1, sizeof(*h));
     if (!h)
@@ -1019,7 +1019,7 @@ cram_codec *cram_huffman_decode_init(char *data, int size,
 
 //    puts("==HUFF LEN==");
 //    for (i = 0; i <= last_len+1; i++) {
-//	printf("len %d=%d prefix %d\n", i, h->huffman.lengths[i], h->huffman.prefix[i]); 
+//	printf("len %d=%d prefix %d\n", i, h->huffman.lengths[i], h->huffman.prefix[i]);
 //    }
 //    puts("===HUFFMAN CODES===");
 //    for (i = 0; i < ncodes; i++) {
@@ -1075,7 +1075,7 @@ int cram_huffman_encode_char(cram_slice *slice, cram_codec *c,
 	    }
 	    if (i == c->e_huffman.nvals)
 		return -1;
-    
+
 	    code = c->e_huffman.codes[i].code;
 	    len  = c->e_huffman.codes[i].len;
 	}
@@ -1112,7 +1112,7 @@ int cram_huffman_encode_int(cram_slice *slice, cram_codec *c,
 	    }
 	    if (i == c->e_huffman.nvals)
 		return -1;
-    
+
 	    code = c->e_huffman.codes[i].code;
 	    len  = c->e_huffman.codes[i].len;
 	}
@@ -1257,7 +1257,7 @@ cram_codec *cram_huffman_encode_init(cram_stats *st,
 	for (i = 0; i < nvals; i++) {
 	    if (freqs[i] < 0)
 		continue;
-	    if (low1 > freqs[i]) 
+	    if (low1 > freqs[i])
 		low2 = low1, ind2 = ind1, low1 = freqs[i], ind1 = i;
 	    else if (low2 > freqs[i])
 		low2 = freqs[i], ind2 = i;
@@ -1306,13 +1306,13 @@ cram_codec *cram_huffman_encode_init(cram_stats *st,
      * /\/\
      * bcd/\
      *    ef
-     * 
+     *
      * a 1  0
      * b 3  4 (0+1)<<2
      * c 3  5
      * d 3  6
      * e 4  14  (6+1)<<1
-     * f 5  15     
+     * f 5  15
      */
     code = 0; len = codes[0].len;
     for (i = 0; i < nvals; i++) {
@@ -1405,7 +1405,7 @@ cram_codec *cram_byte_array_len_decode_init(char *data, int size,
     c->codec  = E_BYTE_ARRAY_LEN;
     c->decode = cram_byte_array_len_decode;
     c->free   = cram_byte_array_len_decode_free;
-    
+
     cp += itf8_get(cp, &encoding);
     cp += itf8_get(cp, &sub_size);
     c->byte_array_len.len_codec = cram_decoder_init(encoding, cp, sub_size,
@@ -1601,7 +1601,7 @@ cram_codec *cram_byte_array_stop_decode_init(char *data, int size,
 	? cram_byte_array_stop_decode_block
 	: cram_byte_array_stop_decode_char;
     c->free   = cram_byte_array_stop_decode_free;
-    
+
     c->byte_array_stop.stop = *cp++;
     if (version == CRAM_1_VERS) {
 	c->byte_array_stop.content_id = cp[0] + (cp[1]<<8) + (cp[2]<<16)

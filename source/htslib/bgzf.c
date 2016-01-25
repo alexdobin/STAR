@@ -47,7 +47,7 @@
  | 31|139|  8|  4|              0|  0|255|      6| 66| 67|      2|BLK_LEN|
  +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
   BGZF extension:
-                ^                              ^   ^   ^ 
+                ^                              ^   ^   ^
                 |                              |   |   |
                FLG.EXTRA                     XLEN  B   C
 
@@ -68,7 +68,7 @@ typedef struct {
 KHASH_MAP_INIT_INT64(cache, cache_t)
 #endif
 
-typedef struct 
+typedef struct
 {
     uint64_t uaddr;  // offset w.r.t. uncompressed data
     uint64_t caddr;  // offset w.r.t. compressed data
@@ -77,7 +77,7 @@ bgzidx1_t;
 
 struct __bgzidx_t
 {
-    int noffs, moffs;       // the size of the index, n:used, m:allocated 
+    int noffs, moffs;       // the size of the index, n:used, m:allocated
     bgzidx1_t *offs;        // offsets
     uint64_t ublock_addr;   // offset of the current block (uncompressed data)
 };
@@ -281,7 +281,7 @@ static int inflate_block(BGZF* fp, int block_length)
 static int inflate_gzip_block(BGZF *fp, int cached)
 {
     int ret = Z_OK;
-    do 
+    do
     {
         if ( !cached && fp->gz_stream->avail_out!=0 )
         {
@@ -298,7 +298,7 @@ static int inflate_gzip_block(BGZF *fp, int cached)
             ret = inflate(fp->gz_stream, Z_NO_FLUSH);
             if ( ret<0 ) return -1;
             unsigned int have = BGZF_MAX_BLOCK_SIZE - fp->gz_stream->avail_out;
-            if ( have ) return have; 
+            if ( have ) return have;
         }
         while ( fp->gz_stream->avail_out == 0 );
     }
@@ -339,7 +339,7 @@ static int load_block_from_cache(BGZF *fp, int64_t block_address)
 	fp->block_address = block_address;
 	fp->block_length = p->size;
 	memcpy(fp->uncompressed_block, p->block, BGZF_MAX_BLOCK_SIZE);
-	if ( hseek(fp->fp, p->end_offset, SEEK_SET) < 0 ) 
+	if ( hseek(fp->fp, p->end_offset, SEEK_SET) < 0 )
     {
         // todo: move the error up
         fprintf(stderr,"Could not hseek to %"PRId64"\n", p->end_offset);
@@ -389,7 +389,7 @@ int bgzf_read_block(BGZF *fp)
     if ( !fp->is_compressed )
     {
         count = hread(fp->fp, fp->uncompressed_block, BGZF_MAX_BLOCK_SIZE);
-        if ( count==0 ) 
+        if ( count==0 )
         {
             fp->block_length = 0;
             return 0;
@@ -422,7 +422,7 @@ int bgzf_read_block(BGZF *fp)
         return 0;
     }
     int ret;
-    if ( count != sizeof(header) || (ret=check_header(header))==-2 ) 
+    if ( count != sizeof(header) || (ret=check_header(header))==-2 )
     {
         fp->errcode |= BGZF_ERR_HEADER;
         return -1;
@@ -444,7 +444,7 @@ int bgzf_read_block(BGZF *fp)
         if ( header[3] & 0x8 ) // FLG.FNAME
         {
             while ( nskip<BGZF_BLOCK_SIZE && cblock[nskip] ) nskip++;
-            if ( nskip==BGZF_BLOCK_SIZE ) 
+            if ( nskip==BGZF_BLOCK_SIZE )
             {
                 fp->errcode |= BGZF_ERR_HEADER;
                 return -1;
@@ -454,7 +454,7 @@ int bgzf_read_block(BGZF *fp)
         if ( header[3] & 0x10 ) // FLG.FCOMMENT
         {
             while ( nskip<BGZF_BLOCK_SIZE && cblock[nskip] ) nskip++;
-            if ( nskip==BGZF_BLOCK_SIZE ) 
+            if ( nskip==BGZF_BLOCK_SIZE )
             {
                 fp->errcode |= BGZF_ERR_HEADER;
                 return -1;
@@ -466,7 +466,7 @@ int bgzf_read_block(BGZF *fp)
         fp->is_gzip = 1;
         fp->gz_stream = (z_stream*) calloc(1,sizeof(z_stream));
         int ret = inflateInit2(fp->gz_stream, -15);
-        if (ret != Z_OK) 
+        if (ret != Z_OK)
         {
             fp->errcode |= BGZF_ERR_ZLIB;
             return -1;
@@ -498,7 +498,7 @@ int bgzf_read_block(BGZF *fp)
 	if (fp->block_length != 0) fp->block_offset = 0; // Do not reset offset if this read follows a seek.
 	fp->block_address = block_address;
 	fp->block_length = count;
-    if ( fp->idx_build_otf ) 
+    if ( fp->idx_build_otf )
     {
         bgzf_index_add_block(fp);
         fp->idx->ublock_addr += count;
@@ -706,7 +706,7 @@ int bgzf_flush(BGZF *fp)
 	}
 #endif
 	while (fp->block_offset > 0) {
-        if ( fp->idx_build_otf ) 
+        if ( fp->idx_build_otf )
         {
             bgzf_index_add_block(fp);
             fp->idx->ublock_addr += fp->block_offset;
@@ -885,7 +885,7 @@ int bgzf_getline(BGZF *fp, int delim, kstring_t *str)
 			fp->block_address = htell(fp->fp);
 			fp->block_offset = 0;
 			fp->block_length = 0;
-		} 
+		}
 	} while (state == 0);
 	if (str->l == 0 && state < 0) return state;
     fp->uncompressed_address += str->l;

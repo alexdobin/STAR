@@ -1,5 +1,5 @@
 # You want latexmk to *always* run, because make does not have all the info.
-.PHONY: 
+.PHONY:
 
 INPUT_DIR = ./extras/doc-latex
 OUTPUT_DIR = ./doc

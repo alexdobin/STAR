@@ -213,7 +213,7 @@ extern "C" {
 	void bgzf_set_cache_size(BGZF *fp, int size);
 
 	/**
-	 * Flush the file if the remaining buffer size is smaller than _size_ 
+	 * Flush the file if the remaining buffer size is smaller than _size_
 	 * @return      0 if flushing succeeded or was not needed; negative on error
 	 */
 	int bgzf_flush_try(BGZF *fp, ssize_t size);
@@ -256,7 +256,7 @@ extern "C" {
 	 *******************/
 
 	/**
-     *  Position BGZF at the uncompressed offset 
+     *  Position BGZF at the uncompressed offset
      *
      *  @param fp           BGZF file handler; must be opened for reading
      *  @param uoffset      file offset in the uncompressed data

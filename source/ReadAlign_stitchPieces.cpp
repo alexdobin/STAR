@@ -11,12 +11,12 @@
 #include <time.h>
 
 void ReadAlign::stitchPieces(char **R, char **Q, char *G, PackedArray& SA, uint Lread) {
-    
+
        //zero-out winBin
     memset(winBin[0],255,sizeof(winBin[0][0])*P->winBinN);
     memset(winBin[1],255,sizeof(winBin[0][0])*P->winBinN);
 
-    
+
 //     for (uint iWin=0;iWin<nWall;iWin++) {//zero out winBin
 //         if (WC[iWin][WC_gStart]<=WC[iWin][WC_gEnd]) {//otherwise the window is dead
 //             memset(&(winBin[WC[iWin][WC_Str]][WC[iWin][WC_gStart]]),255,sizeof(winBin[0][0])*(WC[iWin][WC_gEnd]-WC[iWin][WC_gStart]+1));
@@ -25,7 +25,7 @@ void ReadAlign::stitchPieces(char **R, char **Q, char *G, PackedArray& SA, uint 
 // //             winBin[WC[WC_Str]
 // //         };
 //     };
-    
+
 //     //debug
 //     for (uint ii=0;ii<P->winBinN;ii++){
 //         if (winBin[0][ii]!=uintWinBinMax || winBin[1][ii]!=uintWinBinMax) {
@@ -36,21 +36,21 @@ void ReadAlign::stitchPieces(char **R, char **Q, char *G, PackedArray& SA, uint 
 //             exit(1);
 //         };
 //     };
-    
-    
+
+
     nW=0; //number of windows
     for (uint iP=0; iP<nP; iP++) {//scan through all anchor pieces, create alignment windows
 
 //          if (PC[iP][PC_Nrep]<=P->winAnchorMultimapNmax || PC[iP][PC_Length]>=readLength[PC[iP][PC_iFrag]] ) {//proceed if piece is an anchor, i.e. maps few times or is long enough
        if (PC[iP][PC_Nrep]<=P->winAnchorMultimapNmax ) {//proceed if piece is an anchor, i.e. maps few times
-            
-            uint aDir   = PC[iP][PC_Dir];     
-            uint aLength= PC[iP][PC_Length];            
+
+            uint aDir   = PC[iP][PC_Dir];
+            uint aLength= PC[iP][PC_Length];
 
             for (uint iSA=PC[iP][PC_SAstart]; iSA<=PC[iP][PC_SAend]; iSA++) {//scan through all alignments of this piece
 
                 uint a1 = SA[iSA];
-                uint aStr = a1 >> P->GstrandBit;           
+                uint aStr = a1 >> P->GstrandBit;
                 a1 &= P->GstrandMask; //remove strand bit
 
                 //convert to positive strand
@@ -60,129 +60,129 @@ void ReadAlign::stitchPieces(char **R, char **Q, char *G, PackedArray& SA, uint 
                     a1 = P->nGenome - (aLength+a1);
                 } else if (aDir==1 && aStr==1) {
                     aStr=0;
-                    a1 = P->nGenome - (aLength+a1);         
+                    a1 = P->nGenome - (aLength+a1);
                 };
 
-                //final strand            
+                //final strand
                 if (revertStrand) { //modified strand according to user input CHECK!!!!
                     aStr=1-aStr;
-                };   
+                };
 
                 if (a1>=P->sjGstart) {//this is sj align
-                    uint a1D, aLengthD, a1A, aLengthA, sj1;              
+                    uint a1D, aLengthD, a1A, aLengthA, sj1;
                     if (sjAlignSplit(a1, aLength, P, a1D, aLengthD, a1A, aLengthA, sj1)) {//align crosses the junction
 
                         int addStatus=createExtendWindowsWithAlign(a1D, aStr);//add donor piece
                         if (addStatus==EXIT_createExtendWindowsWithAlign_TOO_MANY_WINDOWS) {//too many windows
                             break;
-                        };         
+                        };
                         addStatus=createExtendWindowsWithAlign(a1A, aStr);//add acceptor piece
                         if (addStatus==EXIT_createExtendWindowsWithAlign_TOO_MANY_WINDOWS) {//too many windows
                             break;
-                        };                       
+                        };
                     };
                 } else {//this is a normal genomic read
                     int addStatus=createExtendWindowsWithAlign(a1, aStr);
                     if (addStatus==EXIT_createExtendWindowsWithAlign_TOO_MANY_WINDOWS) {//too many windows
                         break;
-                    };                
-                };           
+                    };
+                };
             }; //for (uint iSA=PC[iP][PC_SAstart]; iSA<=PC[iP][PC_SAend]; iSA++) //scan through all alignments of this piece
         };//if (PC[iP][PC_Nrep]<=P->winAnchorMultimapNmax) //proceed if anchor
     };//for (uint iP=0; iP<nP; iP++) //scan through all anchor pieces, create alignment windows
-    
-    
+
+
     for (uint iWin=0;iWin<nW;iWin++) {//extend windows with flanks
         if (WC[iWin][WC_gStart]<=WC[iWin][WC_gEnd]) {//otherwise the window is dead
-                       
+
             uint wb=WC[iWin][WC_gStart];
             for (uint ii=0; ii<P->winFlankNbins && wb>0 && P->chrBin[(wb-1) >> P->winBinChrNbits]==WC[iWin][WC_Chr];ii++) {
                 wb--;
                 winBin[ WC[iWin][WC_Str] ][ wb ]=(uintWinBin) iWin;
             };
             WC[iWin][WC_gStart] = wb;
-            
+
             wb=WC[iWin][WC_gEnd];
             for (uint ii=0; ii<P->winFlankNbins && wb+1<P->winBinN && P->chrBin[(wb+1) >> P->winBinChrNbits]==WC[iWin][WC_Chr];ii++) {
                 wb++;
                 winBin[ WC[iWin][WC_Str] ][ wb ]=(uintWinBin) iWin;
             };
             WC[iWin][WC_gEnd] = wb;
-            
-          
+
+
         };
         nWA[iWin]=0; //initialize nWA
-        WALrec[iWin]=0; //initialize rec-length        
+        WALrec[iWin]=0; //initialize rec-length
         WlastAnchor[iWin]=-1;
     };
-    
+
     nWall=nW;
-    
+
     #ifdef OFF_BEFORE_SEEDdistribution
         #warning OFF_BEFORE_SEEDdistribution
         nW=0;
         nTr=0;
         return;
     #endif
-        
+
     for (uint iP=0; iP<nP; iP++) {//scan through all pieces/aligns, add them to alignment windows, create alignment coordinates
         uint aNrep=PC[iP][PC_Nrep];
-        uint aFrag=PC[iP][PC_iFrag];  
-        uint aLength=PC[iP][PC_Length];      
-        uint aDir=PC[iP][PC_Dir];     
-        
-        bool aAnchor=(aNrep<=P->winAnchorMultimapNmax); //this align is an anchor or not            
+        uint aFrag=PC[iP][PC_iFrag];
+        uint aLength=PC[iP][PC_Length];
+        uint aDir=PC[iP][PC_Dir];
+
+        bool aAnchor=(aNrep<=P->winAnchorMultimapNmax); //this align is an anchor or not
 
         for (uint ii=0;ii<nW;ii++) {//initialize nWAP
             nWAP[ii]=0;
         };
-        
+
         for (uint iSA=PC[iP][PC_SAstart]; iSA<=PC[iP][PC_SAend]; iSA++) {//scan through all alignments
 
             uint a1 = SA[iSA];
-            uint aStr = a1 >> P->GstrandBit;           
+            uint aStr = a1 >> P->GstrandBit;
             a1 &= P->GstrandMask; //remove strand bit
             uint aRstart=PC[iP][PC_rStart];
 
             //convert to positive strand
             if (aDir==1 && aStr==0) {
                 aStr=1;
-                aRstart = Lread - (aLength+aRstart);                
+                aRstart = Lread - (aLength+aRstart);
             } else if (aDir==0 && aStr==1) {
-                aRstart = Lread - (aLength+aRstart);                                
+                aRstart = Lread - (aLength+aRstart);
                 a1 = P->nGenome - (aLength+a1);
             } else if (aDir==1 && aStr==1) {
                 aStr=0;
-                a1 = P->nGenome - (aLength+a1);         
+                a1 = P->nGenome - (aLength+a1);
             };
-     
-            //final strand            
+
+            //final strand
             if (revertStrand) { //modified strand according to user input CHECK!!!!
                 aStr=1-aStr;
-            };             
+            };
 
-            
+
             if (a1>=P->sjGstart) {//this is sj read
-                uint a1D, aLengthD, a1A, aLengthA, isj1;              
+                uint a1D, aLengthD, a1A, aLengthA, isj1;
                 if (sjAlignSplit(a1, aLength, P, a1D, aLengthD, a1A, aLengthA, isj1)) {//align crosses the junction
 
                         assignAlignToWindow(a1D, aLengthD, aStr, aNrep, aFrag, aRstart, aAnchor, isj1);
                         assignAlignToWindow(a1A, aLengthA, aStr, aNrep, aFrag, aRstart+aLengthD, aAnchor, isj1);
-                        
+
                     } else {//align does not cross the junction
                         continue; //do not check this align, continue to the next one
                     };
-                    
+
                 } else {//this is a normal genomic read
                     assignAlignToWindow(a1, aLength, aStr, aNrep, aFrag, aRstart, aAnchor, -1);
                 };
         };
-        
+
 //         for (uint ii=0;ii<nW;ii++) {//check of some pieces created too many aligns in some windows, and remove those from WA (ie shift nWA indices
 //             if (nWAP[ii]>P->seedNoneLociPerWindow) nWA[ii] -= nWAP[ii];
 //         };
     };
-    
+
     //TODO remove windows that have too many alignments
     //aligns are still sorted by original read coordinates, change direction for negative strand
     // DOES NOT HELP!!!
@@ -217,7 +217,7 @@ for (uint iW=0;iW<nW;iW++) {//check each window
                     swWinCov[iW] += r1+L1-(rLast+1);
                 };
                 rLast=r1+L1-1;
-            };                    
+            };
         };//for (uint ia=0; ia<nWA[iW]; ia++)
 
         if (swWinCov[iW]>swWinCovMax) swWinCovMax=swWinCov[iW];
@@ -232,11 +232,11 @@ for (uint iW=0;iW<nW;iW++) {
             if ( WA[iW][ia][WA_rStart] == (WA[iW][ia1][WA_rStart]+WA[iW][ia1][WA_Length]) \
               && WA[iW][ia][WA_gStart] == (WA[iW][ia1][WA_gStart]+WA[iW][ia1][WA_Length]) \
               && WA[iW][ia][WA_iFrag]  ==  WA[iW][ia1][WA_iFrag]     ) {//merge
-                
+
                 WA[iW][ia1][WA_Length] += WA[iW][ia][WA_Length];
                 WA[iW][ia1][WA_Anchor]=max(WA[iW][ia1][WA_Anchor],WA[iW][ia][WA_Anchor]);
                 //NOTE: I am not updating sjA and Nrep fields - this could cause trouble in some cases
-                
+
             } else {//do not merge
                 ia1++;
                 if (ia1!=ia) {//move from ia to ia1
@@ -253,7 +253,7 @@ for (uint iW=0;iW<nW;iW++) {
 //mapping time initialize
 std::time(&timeStart);
 #endif
-    
+
     #ifdef OFF_BEFORE_STITCH
         #warning OFF_BEFORE_STITCH
         nW=0;
@@ -265,28 +265,28 @@ std::time(&timeStart);
     trBest = trNext = trInit; //initialize next/best
     uint iW1=0;//index of non-empty windows
     uint trNtotal=0; //total number of recorded transcripts
-   
+
     for (uint iW=0; iW<nW; iW++) {//transcripts for all windows
 
-        if (nWA[iW]==0) continue; //the window does not contain any aligns because it was merged with other windows        
-        
+        if (nWA[iW]==0) continue; //the window does not contain any aligns because it was merged with other windows
+
 //         {//debug
 //             if ( WA[iW][0][WA_iFrag]==WA[iW][nWA[iW]-1][WA_iFrag] ) continue;
 //         };
-//         
+//
         if (WlastAnchor[iW]<nWA[iW]) {
             WA[ iW ][ WlastAnchor[iW] ][ WA_Anchor]=2; //mark the last anchor
         };
-        
+
         for (uint ii=0;ii<nWA[iW];ii++) WAincl[ii]=false; //initialize mask
-        
-        trInit->nWAmax=max(nWA[iW],trInit->nWAmax);        
+
+        trInit->nWAmax=max(nWA[iW],trInit->nWAmax);
         trA=*trInit; //that one is initialized
         trA.Chr = WC[iW][WC_Chr];
         trA.Str = WC[iW][WC_Str];
         trA.roStr = revertStrand ? 1-trA.Str : trA.Str; //original strand of the read
         trA.maxScore=0;
-        
+
         trAll[iW1]=trArrayPointer+trNtotal;
         if (trNtotal+P->alignTranscriptsPerWindowNmax >= P->alignTranscriptsPerReadNmax) {
             P->inOut->logMain << "WARNING: not enough space allocated for transcript. Did not process all windows for read "<< readName+1 <<endl;
@@ -295,40 +295,40 @@ std::time(&timeStart);
         };
         *(trAll[iW1][0])=trA;
         nWinTr[iW1]=0; //initialize number of transcripts per window
-        
-        
+
+
     #ifdef COMPILE_FOR_LONG_READS
         stitchWindowSeeds(iW, iW1, R[trA.roStr==0 ? 0:2], Q[trA.roStr], G);
     #else
         stitchWindowAligns(0, nWA[iW], 0, WAincl, 0, 0, trA, Lread, WA[iW], R[trA.roStr==0 ? 0:2], Q[trA.roStr], G, sigG, P, trAll[iW1], nWinTr+iW1, this);
     #endif
-        trAll[iW1][0]->nextTrScore= nWinTr[iW1]==1 ? 0 : trAll[iW1][1]->maxScore;        
-        
+        trAll[iW1][0]->nextTrScore= nWinTr[iW1]==1 ? 0 : trAll[iW1][1]->maxScore;
+
         if (trAll[iW1][0]->maxScore > trBest->maxScore || (trAll[iW1][0]->maxScore == trBest->maxScore && trAll[iW1][0]->gLength < trBest->gLength ) ) {
             trNext=trBest;
             trBest=trAll[iW1][0];
         };
 
-        trNtotal += nWinTr[iW1];        
+        trNtotal += nWinTr[iW1];
         iW1++;
     };
-    
+
     nW=iW1;//only count windows that had alignments
-    
+
 //     {//debug
 //         std::time(&timeFinish);
 //         double timeDiff=difftime(timeFinish,timeStart);
 //         cout << "     "<< timeDiff << "     "<<trBest->maxScore*100/Lread<<"   "<<iRead<<endl;;
 //     };
-    
+
     if (trBest->maxScore==0) {//no window was aligned (could happen if for all windows too many reads are multiples)
         mapMarker = MARKER_NO_GOOD_WINDOW;
         nW=0;
         nTr=0;
         return;
     };
-            
+
     nextWinScore=trNext->maxScore;
-   
+
 };//end of function
 

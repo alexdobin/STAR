@@ -10,7 +10,7 @@ void exitWithError(string messageOut, ostream &streamOut1, ostream &streamOut2, 
     if (streamOut1.good()) {
         streamOut1 << "\n" << messageOut << endl << timeMonthDayTime(timeCurrent) <<" ...... FATAL ERROR, exiting\n"  <<flush;
     };
-    if (streamOut2.good()) {    
+    if (streamOut2.good()) {
         streamOut2 << "\n" << messageOut << endl << timeMonthDayTime(timeCurrent) <<" ...... FATAL ERROR, exiting\n"  <<flush;
     };
     delete P.inOut; //to close files

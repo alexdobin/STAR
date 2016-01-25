@@ -27,7 +27,7 @@ if ($1=="###") {# new group/subsection of parameters
       ++nSection;
   };
 } else if ($0!="" && substr($0,1,1)!=" " && substr($1,1,1)!="#" && substr($1,1,7)!="version") {//option name has a letter as the first character
-  optV=$2; 
+  optV=$2;
   for (ii=3;ii<=NF;ii++) optV=optV " " $ii;
   print "\\optName{" $1 "}";
   print "  \\optValue{" optV "}";

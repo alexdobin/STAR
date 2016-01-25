@@ -307,7 +307,7 @@ char **hts_readlist(const char *string, int is_file, int *_n)
         kstring_t str;
         str.s = 0; str.l = str.m = 0;
         ks = ks_init(fp);
-        while (ks_getuntil(ks, KS_SEP_LINE, &str, &dret) >= 0) 
+        while (ks_getuntil(ks, KS_SEP_LINE, &str, &dret) >= 0)
         {
             if (str.l == 0) continue;
             n++;
@@ -320,14 +320,14 @@ char **hts_readlist(const char *string, int is_file, int *_n)
 #else
         gzclose(fp);
 #endif
-        free(str.s);        
+        free(str.s);
     }
     else
     {
         const char *q = string, *p = string;
         while ( 1 )
         {
-            if (*p == ',' || *p == 0) 
+            if (*p == ',' || *p == 0)
             {
                 n++;
                 hts_expand(char*,n,m,s);

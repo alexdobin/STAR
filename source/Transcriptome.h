@@ -16,13 +16,13 @@ public:
     void quantsAllocate(); //allocate quants structure
     void quantsOutput(); //output quantification files
     string trInfoDir;
-    
+
     Parameters* Ptr; //transcriptomic parameters (i.e. chrName,...), to be used with RAtr for output
 
     vector <string> trID, geID; //transcript/gene IDs
     uint32 nTr, nGe; //number of transcript/genes
 
-    uint *trS, *trE, *trEmax; //transcripts start,end,end-max  
+    uint *trS, *trE, *trEmax; //transcripts start,end,end-max
 
     uint32 nEx; //number of exons
     uint16 *trExN; //number of exons per transcript
@@ -42,7 +42,7 @@ public:
 
 private:
     Parameters* P; //normal "genomic" parameters
-    
+
 };
 
 #endif

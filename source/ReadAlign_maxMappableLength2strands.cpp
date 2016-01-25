@@ -4,17 +4,17 @@
 
 uint ReadAlign::maxMappableLength2strands(uint pieceStartIn, uint pieceLengthIn, uint iDir, uint iSA1, uint iSA2, uint& maxLbest, uint iFrag) {
     //returns number of mappings, maxMappedLength=mapped length
-    uint Nrep=0, indStartEnd[2], maxL; 
-    
+    uint Nrep=0, indStartEnd[2], maxL;
+
     uint NrepAll[P->genomeSAsparseD], indStartEndAll[P->genomeSAsparseD][2], maxLall[P->genomeSAsparseD];
     maxLbest=0;
-    
+
     bool dirR = iDir==0;
-    
+
     for (uint iDist=0; iDist<min(pieceLengthIn,P->genomeSAsparseD); iDist++) {//cycle through different distances
-        uint pieceStart;        
+        uint pieceStart;
         uint pieceLength=pieceLengthIn-iDist;
-        
+
         //calculate full index
         uint Lmax=min(P->genomeSAindexNbases,pieceLength);
         uint ind1=0;
@@ -40,12 +40,12 @@ uint ReadAlign::maxMappableLength2strands(uint pieceStartIn, uint pieceLengthIn,
                 break;
             } else {//this prefix does not exist, reduce Lind
                 --Lind;
-                ind1 = ind1 >> 2; 
+                ind1 = ind1 >> 2;
             };
         };
 
         if (P->genomeSAindexStart[Lind-1]+ind1+1 < P->genomeSAindexStart[Lind]) {//we are not at the end of the SA
-            iSA2=((SAi[P->genomeSAindexStart[Lind-1]+ind1+1] & P->SAiMarkNmask) & P->SAiMarkAbsentMask) - 1;    
+            iSA2=((SAi[P->genomeSAindexStart[Lind-1]+ind1+1] & P->SAiMarkNmask) & P->SAiMarkAbsentMask) - 1;
         } else {
             iSA2=P->nSA-1;
         };
@@ -56,7 +56,7 @@ uint ReadAlign::maxMappableLength2strands(uint pieceStartIn, uint pieceLengthIn,
     #ifdef SA_SEARCH_FULL
         //full search of the array even if the index search gave maxL
         maxL=0;
-        Nrep = maxMappableLength(Read1, pieceStart, pieceLength, G, SA, iSA1 & P->SAiMarkNmask, iSA2, dirR, maxL, indStartEnd, P);     
+        Nrep = maxMappableLength(Read1, pieceStart, pieceLength, G, SA, iSA1 & P->SAiMarkNmask, iSA2, dirR, maxL, indStartEnd, P);
     #else
         if (Lind < P->genomeSAindexNbases && (iSA1 & P->SAiMarkNmaskC)==0 ) {//no need for SA search
             indStartEnd[0]=iSA1;
@@ -79,10 +79,10 @@ uint ReadAlign::maxMappableLength2strands(uint pieceStartIn, uint pieceLengthIn,
             } else {
                 maxL=0;
             };
-            Nrep = maxMappableLength(Read1, pieceStart, pieceLength, G, SA, iSA1 & P->SAiMarkNmask, iSA2, dirR, maxL, indStartEnd, P);     
+            Nrep = maxMappableLength(Read1, pieceStart, pieceLength, G, SA, iSA1 & P->SAiMarkNmask, iSA2, dirR, maxL, indStartEnd, P);
         };
     #endif
-                
+
         if (maxL+iDist > maxLbest) {//this idist is better
             maxLbest=maxL+iDist;
         };
@@ -91,11 +91,11 @@ uint ReadAlign::maxMappableLength2strands(uint pieceStartIn, uint pieceLengthIn,
         indStartEndAll[iDist][1]=indStartEnd[1];
         maxLall[iDist]=maxL;
     };
-    
+
     for (uint iDist=0; iDist<min(pieceLengthIn,P->genomeSAsparseD); iDist++) {//cycle through different distances, store the ones with largest maxL
         if ( (maxLall[iDist]+iDist) == maxLbest) {
-            storeAligns(iDir, (dirR ? pieceStartIn+iDist : pieceStartIn-iDist), NrepAll[iDist], maxLall[iDist], indStartEndAll[iDist], iFrag);    
+            storeAligns(iDir, (dirR ? pieceStartIn+iDist : pieceStartIn-iDist), NrepAll[iDist], maxLall[iDist], indStartEndAll[iDist], iFrag);
         };
     };
-    return Nrep;    
+    return Nrep;
 };

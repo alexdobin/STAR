@@ -117,8 +117,8 @@ git push
 HARDWARE/SOFTWARE REQUIREMENTS
 ==============================
   * x86-64 compatible processors
-  * 64 bit Linux or Mac OS X 
-  * 30GB of RAM for human genome 
+  * 64 bit Linux or Mac OS X
+  * 30GB of RAM for human genome
 
 
 LIMITATIONS

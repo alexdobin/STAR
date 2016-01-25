@@ -30,19 +30,19 @@ void Transcript::alignScore(char **Read1, char *G, Parameters *P) {//re-calculat
                     break;
                 case -1: //deletion
                     maxScore += (exons[iex+1][EX_G]-exons[iex][EX_G]-exons[iex][EX_L])*P->scoreDelBase + P->scoreDelOpen;
-                    break;        
+                    break;
                 case 0: //non-canonical
                     maxScore += P->scoreGapNoncan+P->scoreGap;
                     break;
                 case 1: case 2: //GTAG
                     maxScore += P->scoreGap;
-                    break;        
+                    break;
                 case 3: case 4: //GCAG
                     maxScore += P->scoreGapGCAG+P->scoreGap;
-                    break;        
+                    break;
                 case 5: case 6: //ATAC
                     maxScore += P->scoreGapATAC+P->scoreGap;
-                    break;                  
+                    break;
             };
         };
     };
