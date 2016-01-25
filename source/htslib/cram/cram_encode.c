@@ -2,23 +2,23 @@
 Copyright (c) 2012-2013 Genome Research Ltd.
 Author: James Bonfield <jkb@sanger.ac.uk>
 
-Redistribution and use in source and binary forms, with or without 
+Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
-   1. Redistributions of source code must retain the above copyright notice, 
+   1. Redistributions of source code must retain the above copyright notice,
 this list of conditions and the following disclaimer.
 
-   2. Redistributions in binary form must reproduce the above copyright notice, 
-this list of conditions and the following disclaimer in the documentation 
+   2. Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation
 and/or other materials provided with the distribution.
 
    3. Neither the names Genome Research Ltd and Wellcome Trust Sanger
 Institute nor the names of its contributors may be used to endorse or promote
 products derived from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY GENOME RESEARCH LTD AND CONTRIBUTORS "AS IS" AND 
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+THIS SOFTWARE IS PROVIDED BY GENOME RESEARCH LTD AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 DISCLAIMED. IN NO EVENT SHALL GENOME RESEARCH LTD OR CONTRIBUTORS BE LIABLE
 FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
 DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
@@ -263,9 +263,9 @@ cram_block *cram_encode_compression_header(cram_fd *fd, cram_container *c,
         }
     }
     itf8_put_blk(cb, BLOCK_SIZE(map) + itf8_size(mc));
-    itf8_put_blk(cb, mc);    
+    itf8_put_blk(cb, mc);
     BLOCK_APPEND(cb, BLOCK_DATA(map), BLOCK_SIZE(map));
-    
+
     /* rec encoding map */
     mc = 0;
     BLOCK_SIZE(map) = 0;
@@ -427,7 +427,7 @@ cram_block *cram_encode_compression_header(cram_fd *fd, cram_container *c,
 	mc++;
     }
     itf8_put_blk(cb, BLOCK_SIZE(map) + itf8_size(mc));
-    itf8_put_blk(cb, mc);    
+    itf8_put_blk(cb, mc);
     BLOCK_APPEND(cb, BLOCK_DATA(map), BLOCK_SIZE(map));
 
     /* tag encoding map */
@@ -564,7 +564,7 @@ cram_block *cram_encode_compression_header(cram_fd *fd, cram_container *c,
     }
 #endif
     itf8_put_blk(cb, BLOCK_SIZE(map) + itf8_size(mc));
-    itf8_put_blk(cb, mc);    
+    itf8_put_blk(cb, mc);
     BLOCK_APPEND(cb, BLOCK_DATA(map), BLOCK_SIZE(map));
 
     if (fd->verbose)
@@ -580,7 +580,7 @@ cram_block *cram_encode_compression_header(cram_fd *fd, cram_container *c,
 
 
 /*
- * Encodes a slice compression header. 
+ * Encodes a slice compression header.
  *
  * Returns cram_block on success
  *         NULL on failure
@@ -616,7 +616,7 @@ cram_block *cram_encode_slice_header(cram_fd *fd, cram_slice *s) {
     if (fd->version != CRAM_1_VERS) {
 	memcpy(cp, s->hdr->md5, 16); cp += 16;
     }
-    
+
     assert(cp-buf <= 16+5*(8+s->hdr->num_blocks));
 
     b->data = (unsigned char *)buf;
@@ -723,7 +723,7 @@ static int cram_encode_slice(cram_fd *fd, cram_container *c,
     }
 
     core = s->block[0];
-		 
+
     /* Create a formal method for stealing from dstrings! */
     s->block[4]->data = calloc(10, s->hdr->num_records); // NP TS
     if (!s->block[4]->data)
@@ -860,7 +860,7 @@ static int cram_encode_slice(cram_fd *fd, cram_container *c,
 
 		case 'X':
 		    //fprintf(stderr, "    FC=%c FP=%d base=%d\n", f->X.code, i32, f->X.base);
-		
+
 		    uc = f->X.base;
 		    r |= h->BS_codec->encode(s, h->BS_codec, core,
 					     (char *)&uc, 1);
@@ -923,19 +923,19 @@ static int cram_encode_slice(cram_fd *fd, cram_container *c,
 		    r |= h->RS_codec->encode(s, h->RS_codec, core,
 					     (char *)&i32, 1);
 		    break;
-		    
+
 		case 'P':
 		    i32 = f->P.len;
 		    r |= h->PD_codec->encode(s, h->PD_codec, core,
 					     (char *)&i32, 1);
 		    break;
-		    
+
 		case 'H':
 		    i32 = f->H.len;
 		    r |= h->HC_codec->encode(s, h->HC_codec, core,
 					     (char *)&i32, 1);
 		    break;
-		    
+
 
 		default:
 		    fprintf(stderr, "unhandled feature code %c\n",
@@ -989,7 +989,7 @@ static int cram_encode_slice(cram_fd *fd, cram_container *c,
 #endif
 
     s->block[4]->comp_size = s->block[4]->uncomp_size;
-    
+
 #ifdef BA_external
     s->block[s->ba_id]->comp_size = s->block[s->ba_id]->uncomp_size;
 #endif
@@ -1034,7 +1034,7 @@ static int cram_encode_slice(cram_fd *fd, cram_container *c,
 	    return -1;
     } else {
 	if (cram_compress_block(fd, s->block[2], fd->m[1], //qual
-				fd->level, Z_CRAM_STRAT, 
+				fd->level, Z_CRAM_STRAT,
 				LEVEL2, STRAT2))
 	    return -1;
 	if (cram_compress_block(fd, s->block[5], fd->m[4], //Tags
@@ -1098,7 +1098,7 @@ int cram_encode_container(cram_fd *fd, cram_container *c) {
 
     if (c->refs_used) {
 	for (i = 0; i < nref; i++) {
-	    if (c->refs_used[i]) {	
+	    if (c->refs_used[i]) {
 		cram_get_ref(fd, i, 1, 0);
 	    }
 	}
@@ -1208,7 +1208,7 @@ int cram_encode_container(cram_fd *fd, cram_container *c) {
     /* Compute MD5s */
     for (i = 0; i < c->curr_slice; i++) {
 	cram_slice *s = c->slices[i];
-	
+
 	if (fd->version != CRAM_1_VERS) {
 	    if (s->hdr->ref_seq_id >= 0 && c->multi_seq == 0 && !fd->no_ref) {
 		MD5_CTX md5;
@@ -1401,7 +1401,7 @@ int cram_encode_container(cram_fd *fd, cram_container *c) {
 					E_BYTE_ARRAY, (void *)i2,
 					fd->version);
     }
-    
+
     //fprintf(stderr, "=== IN ===\n");
     {
 	int i2[2] = {0, CRAM_EXT_IN};
@@ -1440,7 +1440,7 @@ int cram_encode_container(cram_fd *fd, cram_container *c) {
 	h->ref_seq_start = c->ref_seq_start;
 	h->ref_seq_span  = c->ref_seq_span;
 	h->num_records   = c->num_records;
-	
+
 	h->mapped_qs_included = 0;   // fixme
 	h->unmapped_qs_included = 0; // fixme
 	// h->...  fixme
@@ -1476,7 +1476,7 @@ int cram_encode_container(cram_fd *fd, cram_container *c) {
     c->ref_seq_span  = c->slices[0]->hdr->ref_seq_span;
     for (i = 0; i < c->curr_slice; i++) {
 	cram_slice *s = c->slices[i];
-	
+
 	c->num_blocks += s->hdr->num_blocks + 2;
 	c->landmark[i] = slice_offset;
 
@@ -1485,18 +1485,18 @@ int cram_encode_container(cram_fd *fd, cram_container *c) {
 	    c->ref_seq_span = s->hdr->ref_seq_start + s->hdr->ref_seq_span
 		- c->ref_seq_start;
 	}
-	
+
 	slice_offset += s->hdr_block->method == RAW
 	    ? s->hdr_block->uncomp_size
 	    : s->hdr_block->comp_size;
 
-	slice_offset += 2 + 
+	slice_offset += 2 +
 	    itf8_size(s->hdr_block->content_id) +
 	    itf8_size(s->hdr_block->comp_size) +
 	    itf8_size(s->hdr_block->uncomp_size);
 
 	for (j = 0; j < s->hdr->num_blocks; j++) {
-	    slice_offset += 2 + 
+	    slice_offset += 2 +
 		itf8_size(s->block[j]->content_id) +
 		itf8_size(s->block[j]->comp_size) +
 		itf8_size(s->block[j]->uncomp_size);
@@ -1714,7 +1714,7 @@ static char *cram_encode_aux_1_0(cram_fd *fd, bam_seq_t *b, cram_container *c,
     char *aux, *tmp, *rg = NULL, *tmp_tn;
     int aux_size = bam_blk_size(b) -
 	((char *)bam_aux(b) - (char *)&bam_ref(b));
-	
+
     /* Worst case is 1 nul char on every ??:Z: string, so +33% */
     BLOCK_GROW(s->aux_blk, aux_size*1.34+1);
     tmp = (char *)BLOCK_END(s->aux_blk);
@@ -1823,7 +1823,7 @@ static char *cram_encode_aux_1_0(cram_fd *fd, bam_seq_t *b, cram_container *c,
 		fprintf(stderr, "Unknown sub-type '%c' for aux type 'B'\n",
 			type);
 		return NULL;
-		    
+
 	    }
 
 	    tmp += itf8_put(tmp, blen+5);
@@ -1971,7 +1971,7 @@ static char *cram_encode_aux(cram_fd *fd, bam_seq_t *b, cram_container *c,
 		fprintf(stderr, "Unknown sub-type '%c' for aux type 'B'\n",
 			type);
 		return NULL;
-		    
+
 	    }
 
 	    tmp += itf8_put(tmp, blen+5);
@@ -1992,12 +1992,12 @@ static char *cram_encode_aux(cram_fd *fd, bam_seq_t *b, cram_container *c,
     }
 
     // FIXME: sort BLOCK_DATA(td_b) by char[3] triples
-    
+
     // And and increment TD hash entry
     BLOCK_APPEND_CHAR(td_b, 0);
 
     // Duplicate key as BLOCK_DATA() can be realloced to a new pointer.
-    key = string_ndup(c->comp_hdr->TD_keys, 
+    key = string_ndup(c->comp_hdr->TD_keys,
 		      (char *)BLOCK_DATA(td_b) + TD_blk_size,
 		      BLOCK_SIZE(td_b) - TD_blk_size);
     k = kh_put(m_s2i, c->comp_hdr->TD_hash, key, &new);
@@ -2024,7 +2024,7 @@ static char *cram_encode_aux(cram_fd *fd, bam_seq_t *b, cram_container *c,
 
 /*
  * Handles creation of a new container or new slice, flushing any
- * existing containers when appropriate. 
+ * existing containers when appropriate.
  *
  * Really this is next slice, which may or may not lead to a new container.
  *
@@ -2171,7 +2171,7 @@ static int process_one_read(cram_fd *fd, cram_container *c,
     }
     cram_stats_add(c->RG_stats, cr->rg);
 
-    
+
     cr->ref_id      = bam_ref(b);  cram_stats_add(c->RI_stats, cr->ref_id);
     cr->flags       = bam_flag(b);
     if (bam_cigar_len(b) == 0)
@@ -2295,7 +2295,7 @@ static int process_one_read(cram_fd *fd, cram_container *c,
 		    spos += cig_len;
 		}
 		break;
-		
+
 	    case BAM_CDEL:
 		if (cram_add_deletion(c, s, cr, spos, cig_len, &seq[spos]))
 		    return -1;
@@ -2345,7 +2345,7 @@ static int process_one_read(cram_fd *fd, cram_container *c,
 		if (cram_add_hardclip(c, s, cr, spos, cig_len, &seq[spos]))
 		    return -1;
 		break;
-	
+
 	    case BAM_CPAD:
 		if (cram_add_pad(c, s, cr, spos, cig_len, &seq[spos]))
 		    return -1;
@@ -2372,7 +2372,7 @@ static int process_one_read(cram_fd *fd, cram_container *c,
 
     /*
      * Append to the qual block now. We do this here as
-     * cram_add_substitution() can generate BA/QS events which need to 
+     * cram_add_substitution() can generate BA/QS events which need to
      * be in the qual block before we append the rest of the data.
      */
     if (cr->cram_flags & CRAM_FLAG_PRESERVE_QUAL_SCORES) {
@@ -2422,7 +2422,7 @@ static int process_one_read(cram_fd *fd, cram_container *c,
 
 	if (new == 0) {
 	    cram_record *p = &s->crecs[kh_val(s->pair, k)];
-	    
+
 	    //fprintf(stderr, "paired %"PRId64"\n", kh_val(s->pair, k));
 
 	    // copy from p to cr
@@ -2580,7 +2580,7 @@ int cram_put_bam_seq(cram_fd *fd, bam_seq_t *b) {
 	// Have we seen this reference before?
 	if (bam_ref(b) >= 0 && bam_ref(b) != curr_ref && !fd->embed_ref &&
 	    !fd->unsorted) {
-	    
+
 	    if (!c->refs_used) {
 		pthread_mutex_lock(&fd->ref_lock);
 		c->refs_used = calloc(fd->refs->nref, sizeof(int));

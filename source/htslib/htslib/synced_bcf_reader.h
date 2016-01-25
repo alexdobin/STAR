@@ -33,7 +33,7 @@
 #include "tbx.h"
 
 // How should be treated sites with the same position but different alleles
-#define COLLAPSE_NONE   0   // require the exact same set of alleles in all files 
+#define COLLAPSE_NONE   0   // require the exact same set of alleles in all files
 #define COLLAPSE_SNPS   1   // allow different alleles, as long as they all are SNPs
 #define COLLAPSE_INDELS 2   // the same as above, but with indels
 #define COLLAPSE_ANY    4   // any combination of alleles can be returned by bcf_sr_next_line()
@@ -105,7 +105,7 @@ typedef struct
 	int nreaders;
 	int streaming;      // reading mode: index-jumping or streaming
     int explicit_regs;  // was the list of regions se by bcf_sr_set_regions or guessed from tabix index?
-	char **samples;	// List of samples 
+	char **samples;	// List of samples
     bcf_sr_regions_t *regions, *targets;    // see bcf_sr_set_[targets|regions] for description
     int targets_als;    // subset to targets not only by position but also by alleles? (todo)
     kstring_t tmps;
@@ -133,7 +133,7 @@ int bcf_sr_add_reader(bcf_srs_t *readers, const char *fname);
 void bcf_sr_remove_reader(bcf_srs_t *files, int i);
 
 
-/** 
+/**
  * bcf_sr_next_line() - the iterator
  * @readers:    holder of the open readers
  *
@@ -157,7 +157,7 @@ int bcf_sr_seek(bcf_srs_t *readers, const char *seq, int pos);
  * bcf_sr_set_samples() - sets active samples
  * @readers: holder of the open readers
  * @samples: this can be one of: file name with one sample per line;
- *           or column-separated list of samples; or '-' for a list of 
+ *           or column-separated list of samples; or '-' for a list of
  *           samples shared by all files. If first character is the
  *           exclamation mark, all but the listed samples are included.
  * @is_file: 0: list of samples; 1: file with sample names
@@ -196,7 +196,7 @@ int bcf_sr_set_regions(bcf_srs_t *readers, const char *regions, int is_file);
 
 
 /*
- *  bcf_sr_regions_init() 
+ *  bcf_sr_regions_init()
  *  @regions:   regions can be either a comma-separated list of regions
  *              (chr|chr:pos|chr:from-to|chr:from-) or VCF, BED, or
  *              tab-delimited file (the default). Uncompressed files
@@ -205,10 +205,10 @@ int bcf_sr_set_regions(bcf_srs_t *readers, const char *regions, int is_file);
  *  @is_file:   0: regions is a comma-separated list of regions
  *                  (chr|chr:pos|chr:from-to|chr:from-)
  *              1: VCF, BED or tab-delimited file
- *  @chr, from, to:       
+ *  @chr, from, to:
  *              Column indexes of chromosome, start position and end position
  *              in the tab-delimited file. The positions are 1-based and
- *              inclusive. 
+ *              inclusive.
  *              These parameters are ignored when reading from VCF, BED or
  *              tabix-indexed files. When end position column is not present,
  *              supply 'from' in place of 'to'. When 'to' is negative, first

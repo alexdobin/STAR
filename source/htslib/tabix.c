@@ -90,7 +90,7 @@ static int query_regions(char **argv, int argc, int mode)
     {
         htsFile *fp = hts_open(fname,"r");
         if ( !fp ) error("Could not read %s\n", fname);
-        htsFile *out = hts_open("-","w"); 
+        htsFile *out = hts_open("-","w");
         if ( !out ) error("Could not open stdout\n", fname);
         hts_idx_t *idx = bcf_index_load(fname);
         if ( !idx ) error("Could not load .csi index of %s\n", fname);
@@ -145,7 +145,7 @@ static int query_chroms(char *fname)
         hts_idx_t *idx = bcf_index_load(fname);
         if ( !idx ) error("Could not load .csi index of %s\n", fname);
         seq = bcf_index_seqnames(idx, hdr, &nseq);
-        for (i=0; i<nseq; i++) 
+        for (i=0; i<nseq; i++)
             printf("%s\n", seq[i]);
         free(seq);
         bcf_hdr_destroy(hdr);
@@ -258,7 +258,7 @@ int main(int argc, char *argv[])
 	tbx_conf_t conf = tbx_conf_gff, *conf_ptr = NULL;
     char *reheader = NULL;
 
-    static struct option loptions[] = 
+    static struct option loptions[] =
     {
         {"help",0,0,'h'},
         {"zero-based",0,0,'0'},
@@ -278,7 +278,7 @@ int main(int argc, char *argv[])
 
 	while ((c = getopt_long(argc, argv, "hH?0b:c:e:fm:p:s:S:lr:", loptions,NULL)) >= 0)
     {
-        switch (c) 
+        switch (c)
         {
             case 'r': reheader = optarg; break;
             case 'h': mode = PRINT_HEADER; break;
@@ -315,16 +315,16 @@ int main(int argc, char *argv[])
     int ftype = file_type(fname);
     if ( !conf_ptr )    // no preset given
     {
-        if ( ftype==IS_GFF ) conf_ptr = &tbx_conf_gff; 
+        if ( ftype==IS_GFF ) conf_ptr = &tbx_conf_gff;
         else if ( ftype==IS_BED ) conf_ptr = &tbx_conf_bed;
         else if ( ftype==IS_SAM ) conf_ptr = &tbx_conf_sam;
         else if ( ftype==IS_VCF ) conf_ptr = &tbx_conf_vcf;
         else if ( ftype==IS_BCF )
-        { 
+        {
             if ( min_shift <= 0 ) min_shift = 14;
         }
         else if ( ftype==IS_BAM )
-        { 
+        {
             if ( min_shift <= 0 ) min_shift = 14;
         }
     }
@@ -352,7 +352,7 @@ int main(int argc, char *argv[])
 
     if ( min_shift > 0 ) // CSI index
     {
-        if ( ftype==IS_BCF ) 
+        if ( ftype==IS_BCF )
         {
             if ( bcf_index_build(fname, min_shift)!=0 ) error("bcf_index_build failed: %s\n", fname);
             return 0;

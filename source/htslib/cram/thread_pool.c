@@ -2,23 +2,23 @@
 Copyright (c) 2013 Genome Research Ltd.
 Author: James Bonfield <jkb@sanger.ac.uk>
 
-Redistribution and use in source and binary forms, with or without 
+Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
-   1. Redistributions of source code must retain the above copyright notice, 
+   1. Redistributions of source code must retain the above copyright notice,
 this list of conditions and the following disclaimer.
 
-   2. Redistributions in binary form must reproduce the above copyright notice, 
-this list of conditions and the following disclaimer in the documentation 
+   2. Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation
 and/or other materials provided with the distribution.
 
    3. Neither the names Genome Research Ltd and Wellcome Trust Sanger
 Institute nor the names of its contributors may be used to endorse or promote
 products derived from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY GENOME RESEARCH LTD AND CONTRIBUTORS "AS IS" AND 
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+THIS SOFTWARE IS PROVIDED BY GENOME RESEARCH LTD AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 DISCLAIMED. IN NO EVENT SHALL GENOME RESEARCH LTD OR CONTRIBUTORS BE LIABLE
 FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
 DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
@@ -147,7 +147,7 @@ static t_pool_result *t_pool_next_result_locked(t_results_queue *q) {
  * wait for a result to be present.
  *
  * Results will be returned in strict order.
- * 
+ *
  * Returns t_pool_result pointer if a result is ready.
  *         NULL if not.
  */
@@ -358,9 +358,9 @@ static void *t_pool_worker(void *arg) {
 	    pthread_cond_signal(&p->empty_c);
 
 	pthread_mutex_unlock(&p->pool_m);
-	    
+
 	// We have job 'j' - now execute it.
-	t_pool_add_result(j, j->func(j->arg));	
+	t_pool_add_result(j, j->func(j->arg));
 #ifdef DEBUG_TIME
 	pthread_mutex_lock(&p->pool_m);
 	gettimeofday(&t3, NULL);
@@ -404,7 +404,7 @@ t_pool *t_pool_init(int qsize, int tsize) {
 	if (0 != pthread_create(&p->t[i], NULL, t_pool_worker, p))
 	    return NULL;
     }
- 
+
     return p;
 }
 
@@ -525,7 +525,7 @@ int t_pool_dispatch2(t_pool *p, t_results_queue *q,
 	    pthread_cond_wait(&p->full_c, &p->pool_m);
 
     p->njobs++;
-    
+
 //    if (q->curr_serial % 100 == 0)
 //	fprintf(stderr, "p->njobs = %d    p->qsize = %d\n", p->njobs, p->qsize);
 
@@ -587,7 +587,7 @@ int t_pool_flush(t_pool *p) {
  */
 void t_pool_destroy(t_pool *p, int kill) {
     int i;
-    
+
 #ifdef DEBUG
     fprintf(stderr, "Destroying pool %p, kill=%d\n", p, kill);
 #endif
@@ -690,7 +690,7 @@ int main(int argc, char **argv) {
 	*ip = i;
 	printf("Submitting %d\n", i);
 	t_pool_dispatch(p, q, doit, ip);
-	
+
 	// Check for results
 	if ((r = t_pool_next_result(q))) {
 	    printf("RESULT: %d\n", *(int *)r->data);

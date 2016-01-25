@@ -63,7 +63,7 @@ int tbx_parse1(const tbx_conf_t *conf, int len, char *line, tbx_intv_t *intv)
 				if (intv->end < 1) intv->end = 1;
 			} else {
 				if ((conf->preset&0xffff) == TBX_GENERIC) {
-					if (id == conf->ec) 
+					if (id == conf->ec)
                     {
                         intv->end = strtol(line + b, &s, 0);
                         if ( s==line+b ) return -1; // expected int
@@ -196,7 +196,7 @@ tbx_t *tbx_index(BGZF *fp, int min_shift, const tbx_conf_t *conf)
 		}
 		get_intv(tbx, &str, &intv, 1);
 		ret = hts_idx_push(tbx->idx, intv.tid, intv.beg, intv.end, bgzf_tell(fp), 1);
-		if (ret < 0) 
+		if (ret < 0)
         {
             free(str.s);
             tbx_destroy(tbx);
@@ -249,7 +249,7 @@ tbx_t *tbx_index_load(const char *fn)
 	int l_meta, l_nm;
 	tbx = (tbx_t*)calloc(1, sizeof(tbx_t));
 	tbx->idx = hts_idx_load(fn, HTS_FMT_TBI);
-	if ( !tbx->idx ) 
+	if ( !tbx->idx )
     {
         free(tbx);
         return NULL;

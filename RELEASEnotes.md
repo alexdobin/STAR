@@ -5,17 +5,17 @@ STAR 2.4.5a 2015/11/06
 
 Major new features:
 -------------------
-1. It is now possible to add extra sequences to the reference genome ont the fly (without re-generating the genome) by specifying 
-_--genomeFastaFiles /path/to/genome/fasta1 /path/to/genome/fasta2_ at the mapping stage. 
+1. It is now possible to add extra sequences to the reference genome ont the fly (without re-generating the genome) by specifying
+_--genomeFastaFiles /path/to/genome/fasta1 /path/to/genome/fasta2_ at the mapping stage.
 
 2. By default, the order of the multi-mapping alignments for each read is not truly random.
-The _--outMultimapperOrder Random_ option outputs multiple alignments for each read in random order, 
-and also also randomizes the choice of the primary alignment from the highest scoring alignments. 
-Parameter _--runRNGseed_ can be used to set the random generator seed. 
-With this option, the ordering of multi-mapping alignments of each read, 
+The _--outMultimapperOrder Random_ option outputs multiple alignments for each read in random order,
+and also also randomizes the choice of the primary alignment from the highest scoring alignments.
+Parameter _--runRNGseed_ can be used to set the random generator seed.
+With this option, the ordering of multi-mapping alignments of each read,
 and the choice of the primary alignment will vary from run to run, unless only one thread is used and the seed is kept constant.
 
-3. The --outSAMmultNmax parameter limits the number of output alignments (SAM lines) for multimappers. 
+3. The --outSAMmultNmax parameter limits the number of output alignments (SAM lines) for multimappers.
 For instance, _--outSAMmultNmax 1_ will output exactly one SAM line for each mapped read.
 
 
@@ -31,13 +31,13 @@ The counts coincide with those produced by htseq-count with default parameters.
 Requires annotations (GTF or GFF with --sjdbGTFfile option) used at the genome generation step, or at the mapping step.
 
 Outputs read counts per gene into ReadsPerGene.out.tab file with 4 columns which correspond to different strandedness options:
-column 1: gene ID 
+column 1: gene ID
 column 2: counts for unstranded RNA-seq
 column 3: counts for the 1st read strand aligned with RNA (htseq-count option -s yes)
 column 4: counts for the 2nd read strand aligned with RNA (htseq-count option -s reverse)
 Select the output according to the strandedness of your data.
 Note, that if you have stranded data and choose one of the columns 3 or 4, the other column (4 or 3) will give you the count of antisense reads.
- 
+
 With --quantMode TranscriptomeSAM GeneCounts, and get both the Aligned.toTranscriptome.out.bam and ReadsPerGene.out.tab outputs.
 
 
@@ -54,7 +54,7 @@ New features:
    The on the fly genome indices can be saved (for reuse) with "--sjdbInsertSave All", into _STARgenome directory inside the current run directory.
    Default --sjdbOverhang is now set at 100, and does not have to be specified unless you need to change this value.
 
-   The "all-sample" 2-pass method can be simplified using this on the fly junction insertion option: 
+   The "all-sample" 2-pass method can be simplified using this on the fly junction insertion option:
    (i) run the 1st pass for all samples as usual, with or without annotations
    (ii) run 2nd pass for all samples, listing SJ.out.tab files from all samples in --sjdbFileChrStartEnd /path/to/sj1.tab /path/to/sj2.tab ...
 
@@ -66,12 +66,12 @@ New features:
 3. Included link (submodule) to Brian Haas' STAR-Fusion code for detecting fusion transcript from STAR chimeric output:
    https://github.com/STAR-Fusion/STAR-Fusion
 
-4. Included Gery Vessere's shared memory implementation for POSIX and SysV. 
+4. Included Gery Vessere's shared memory implementation for POSIX and SysV.
    To compile STAR with POSIX shared memory, use `make POSIXSHARED`
 
 5. New option "--chimOutType WithinBAM" to include chimeric alignments together with normal alignments in the main (sorted or unsorted) BAM file(s).
    Formatting of chimeric alignments follows the latest SAM/BAM specifications. Thanks to Felix Schlesinger for thorough testing of this option.
 
-6. New option "--quantTranscriptomeBan Singleend" allows insertions, deletions ans soft-clips in the transcriptomic alignments, which can be used by some expression quantification software (e.g. eXpress). 
-   
+6. New option "--quantTranscriptomeBan Singleend" allows insertions, deletions ans soft-clips in the transcriptomic alignments, which can be used by some expression quantification software (e.g. eXpress).
+
 7. New option "--alignEndsTypeExtension Extend5pOfRead1" to enforce full extension of the 5p of the read1, while all other ends undergo local alignment and may be soft-clipped.

@@ -2,23 +2,23 @@
 Copyright (c) 2012-2014 Genome Research Ltd.
 Author: James Bonfield <jkb@sanger.ac.uk>
 
-Redistribution and use in source and binary forms, with or without 
+Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
-   1. Redistributions of source code must retain the above copyright notice, 
+   1. Redistributions of source code must retain the above copyright notice,
 this list of conditions and the following disclaimer.
 
-   2. Redistributions in binary form must reproduce the above copyright notice, 
-this list of conditions and the following disclaimer in the documentation 
+   2. Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation
 and/or other materials provided with the distribution.
 
    3. Neither the names Genome Research Ltd and Wellcome Trust Sanger
 Institute nor the names of its contributors may be used to endorse or promote
 products derived from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY GENOME RESEARCH LTD AND CONTRIBUTORS "AS IS" AND 
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+THIS SOFTWARE IS PROVIDED BY GENOME RESEARCH LTD AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 DISCLAIMED. IN NO EVENT SHALL GENOME RESEARCH LTD OR CONTRIBUTORS BE LIABLE
 FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
 DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
@@ -75,7 +75,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define RP(...) fprintf (stderr, __VA_ARGS__)
 #else
-#define RP(...) 
+#define RP(...)
 #endif
 
 #ifdef SAMTOOLS
@@ -180,7 +180,7 @@ int itf8_encode(cram_fd *fd, int32_t val) {
  */
 int itf8_get(char *cp, int32_t *val_p) {
     unsigned char *up = (unsigned char *)cp;
-    
+
     if (up[0] < 0x80) {
 	*val_p =   up[0];
 	return 1;
@@ -305,7 +305,7 @@ int ltf8_put(char *cp, int64_t val) {
 
 int ltf8_get(char *cp, int64_t *val_p) {
     unsigned char *up = (unsigned char *)cp;
-    
+
     if (up[0] < 0x80) {
 	*val_p =   up[0];
 	return 1;
@@ -623,7 +623,7 @@ static char *zlib_mem_deflate(char *data, size_t size, size_t *cdata_size,
 	s.next_out = &cdata[cdata_pos];
 	s.avail_out = cdata_alloc - cdata_pos;
 	if (cdata_alloc - cdata_pos <= 0) {
-	    fprintf(stderr, "Deflate produced larger output than expected. Abort\n"); 
+	    fprintf(stderr, "Deflate produced larger output than expected. Abort\n");
 	    return NULL;
 	}
 	err = deflate(&s, Z_NO_FLUSH);
@@ -910,7 +910,7 @@ int cram_compress_block(cram_fd *fd, cram_block *b, cram_metrics *metrics,
 			      &s2, level2, strat2);
 	if (!c1 || !c2)
 	    return -1;
-	
+
 	//fprintf(stderr, "1: %6d   2: %6d   %5.1f\n", s1, s2, 100.0*s1/s2);
 
 	pthread_mutex_lock(&fd->metrics_lock);
@@ -1064,7 +1064,7 @@ void refs_free(refs_t *r) {
 
 	kh_destroy(refs, r->h_meta);
     }
-    
+
     if (r->ref_id)
 	free(r->ref_id);
 
@@ -1140,7 +1140,7 @@ static refs_t *refs_load_fai(refs_t *r_orig, char *fn, int is_err) {
 
     if (!(r->fn = string_dup(r->pool, fn)))
 	goto err;
-	
+
     if (fn_l > 4 && strcmp(&fn[fn_l-4], ".fai") == 0)
 	r->fn[fn_l-4] = 0;
 
@@ -1177,7 +1177,7 @@ static refs_t *refs_load_fai(refs_t *r_orig, char *fn, int is_err) {
 	    ;
 	*cp++ = 0;
 	e->name = string_dup(r->pool, line);
-	
+
 	// length
 	while (*cp && isspace(*cp))
 	    cp++;
@@ -1234,7 +1234,7 @@ static refs_t *refs_load_fai(refs_t *r_orig, char *fn, int is_err) {
 
     if (!r_orig)
 	refs_free(r);
-    
+
     return NULL;
 }
 
@@ -1629,7 +1629,7 @@ static char *load_ref_portion(FILE *fp, ref_entry *e, int start, int end) {
 	: start-1;
 
     len = (e->line_length
-	   ? e->offset + (end-1)/e->bases_per_line * e->line_length + 
+	   ? e->offset + (end-1)/e->bases_per_line * e->line_length +
 	     (end-1) % e->bases_per_line
 	   : end-1) - offset + 1;
 
@@ -1740,7 +1740,7 @@ ref_entry *cram_ref_load(refs_t *r, int id) {
      */
     RP("%d cram_ref_load INCR %d => %d\n", gettid(), id, e->count+1);
     r->last = e;
-    e->count++; 
+    e->count++;
 
     return e;
 }
@@ -1845,14 +1845,14 @@ char *cram_get_ref(cram_fd *fd, int id, int start, int end) {
     if (end < 1)
 	end = r->length;
     if (end >= r->length)
-	end  = r->length; 
+	end  = r->length;
     assert(start >= 1);
 
     if (end - start >= 0.5*r->length || fd->shared_ref) {
 	start = 1;
 	end = r->length;
     }
-    
+
     /*
      * Maybe we have it cached already? If so use it.
      *
@@ -1880,7 +1880,7 @@ char *cram_get_ref(cram_fd *fd, int id, int start, int end) {
 		 */
 		if (fd->unsorted)
 		    cram_ref_incr_locked(fd->refs, id);
-	    }	    
+	    }
 
 	    fd->ref = NULL; /* We never access it directly */
 	    fd->ref_start = 1;
@@ -2049,7 +2049,7 @@ cram_container *cram_new_container(int nrec, int nslice) {
     if (!(c->RS_stats = cram_stats_create())) goto err;
     if (!(c->PD_stats = cram_stats_create())) goto err;
     if (!(c->HC_stats = cram_stats_create())) goto err;
-    
+
     //c->aux_B_stats = cram_stats_create();
 
     if (!(c->tags_used = kh_init(s_i2i)))
@@ -2122,7 +2122,7 @@ void cram_free_container(cram_container *c) {
     if (c->HC_stats) cram_stats_free(c->HC_stats);
 
     //if (c->aux_B_stats) cram_stats_free(c->aux_B_stats);
-    
+
     if (c->tags_used) kh_destroy(s_i2i, c->tags_used);
 
     free(c);
@@ -2138,7 +2138,7 @@ cram_container *cram_read_container(cram_fd *fd) {
     cram_container c2, *c;
     int i, s;
     size_t rd = 0;
-    
+
     fd->err = 0;
 
     memset(&c2, 0, sizeof(c2));
@@ -2189,7 +2189,7 @@ cram_container *cram_read_container(cram_fd *fd) {
 	fd->err = errno;
 	cram_free_container(c);
 	return NULL;
-    }  
+    }
     for (i = 0; i < c->num_landmarks; i++) {
 	if ((s = itf8_decode(fd, &c->landmark[i])) == -1) {
 	    cram_free_container(c);
@@ -2381,7 +2381,7 @@ int cram_flush_container_mt(cram_fd *fd, cram_container *c) {
 	return -1;
     j->fd = fd;
     j->c = c;
-    
+
     t_pool_dispatch(fd->pool, fd->rqueue, cram_flush_thread, j);
 
     return cram_flush_result(fd);
@@ -2571,7 +2571,7 @@ void cram_free_slice(cram_slice *s) {
     if (s->TN)
 	free(s->TN);
 #endif
-    
+
     if (s->pair_keys)
 	string_pool_destroy(s->pair_keys);
 
@@ -2628,7 +2628,7 @@ cram_slice *cram_new_slice(enum cram_content_type type, int nrecs) {
     // Volatile keys as we do realloc in dstring
     if (!(s->pair_keys = string_pool_create(8192))) goto err;
     if (!(s->pair = kh_init(m_s2i)))                goto err;
-    
+
 #ifdef BA_external
     s->BA_len = 0;
 #endif
@@ -2720,7 +2720,7 @@ cram_slice *cram_read_slice(cram_fd *fd) {
     s->crecs = NULL;
 
     s->last_apos = s->hdr->ref_seq_start;
-    
+
     s->id = fd->slice_num++;
 
     return s;
@@ -2839,8 +2839,8 @@ SAM_hdr *cram_read_SAM_hdr(cram_fd *fd) {
 	}
 
 	len = b->comp_size + 2 +
-	    itf8_size(b->content_id) + 
-	    itf8_size(b->uncomp_size) + 
+	    itf8_size(b->content_id) +
+	    itf8_size(b->uncomp_size) +
 	    itf8_size(b->comp_size);
 
 	/* Extract header from 1st block */
@@ -2864,9 +2864,9 @@ SAM_hdr *cram_read_SAM_hdr(cram_fd *fd) {
 		cram_free_container(c);
 		return NULL;
 	    }
-	    len += b->comp_size + 2 + 
-		itf8_size(b->content_id) + 
-		itf8_size(b->uncomp_size) + 
+	    len += b->comp_size + 2 +
+		itf8_size(b->content_id) +
+		itf8_size(b->uncomp_size) +
 		itf8_size(b->comp_size);
 	    cram_free_block(b);
 	}
@@ -3031,12 +3031,12 @@ int cram_write_SAM_hdr(cram_fd *fd, SAM_hdr *hdr) {
 	c->landmark[0] = 0;
 
 	c->length = b->uncomp_size + 2 +
-	    itf8_size(b->content_id)   + 
+	    itf8_size(b->content_id)   +
 	    itf8_size(b->uncomp_size)  +
 	    itf8_size(b->comp_size);
 #else
 	c->length = b->uncomp_size + 2 +
-	    itf8_size(b->content_id)   + 
+	    itf8_size(b->content_id)   +
 	    itf8_size(b->uncomp_size)  +
 	    itf8_size(b->comp_size);
 
@@ -3156,7 +3156,7 @@ static void cram_init_tables(cram_fd *fd) {
 
 	    fd->bam_flag_swap[i]  = f;
 	}
-    
+
 	for (i = 0; i < 0x1000; i++) {
 	    int g = 0;
 
@@ -3409,7 +3409,7 @@ int cram_flush(cram_fd *fd) {
 int cram_close(cram_fd *fd) {
     spare_bams *bl, *next;
     int i;
-	
+
     if (!fd)
 	return -1;
 
@@ -3504,7 +3504,7 @@ int cram_eof(cram_fd *fd) {
 }
 
 
-/* 
+/*
  * Sets options on the cram_fd. See CRAM_OPT_* definitions in cram_structs.h.
  * Use this immediately after opening.
  *

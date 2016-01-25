@@ -5,14 +5,14 @@
 
 class PackedArray {
     private:
-        uint bitRecMask, wordCompLength;    
+        uint bitRecMask, wordCompLength;
         bool arrayAllocated; //true if charArray was allocated
     public:
         uint wordLength, length, lengthByte;
         uint operator [] (uint ii);
         char* charArray;
-        
-    PackedArray();    
+
+    PackedArray();
     void defineBits (uint Nbits, uint lengthIn);
     void writePacked(uint jj, uint x);
     void allocateArray();

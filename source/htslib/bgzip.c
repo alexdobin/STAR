@@ -95,7 +95,7 @@ int main(int argc, char **argv)
 	long start, end, size;
     char *index_fname = NULL;
 
-    static struct option loptions[] = 
+    static struct option loptions[] =
     {
         {"help",0,0,'h'},
         {"offset",1,0,'b'},
@@ -120,7 +120,7 @@ int main(int argc, char **argv)
         case 'i': index = 1; break;
         case 'I': index_fname = optarg; break;
         case 'r': reindex = 1; compress = 0; break;
-		case 'h': 
+		case 'h':
         case '?': return bgzip_main_usage();
 		}
 	}
@@ -136,10 +136,10 @@ int main(int argc, char **argv)
 
 		if ( argc>optind )
 		{
-			if ( stat(argv[optind],&sbuf)<0 ) 
-			{ 
+			if ( stat(argv[optind],&sbuf)<0 )
+			{
 				fprintf(stderr, "[bgzip] %s: %s\n", strerror(errno), argv[optind]);
-				return 1; 
+				return 1;
 			}
 
 			if ((f_src = open(argv[optind], O_RDONLY)) < 0) {
@@ -173,7 +173,7 @@ int main(int argc, char **argv)
 		while ((c = read(f_src, buffer, WINDOW_SIZE)) > 0)
 			if (bgzf_write(fp, buffer, c) < 0) error("Could not write %d bytes: Error %d\n", c, fp->errcode);
 		// f_dst will be closed here
-        if ( index ) 
+        if ( index )
         {
             if ( index_fname ) bgzf_index_dump(fp, index_fname, NULL);
             else bgzf_index_dump(fp, argv[optind], ".gz.gzi");
@@ -204,10 +204,10 @@ int main(int argc, char **argv)
         while ( (ret=bgzf_read(fp, buffer, BGZF_BLOCK_SIZE))>0 ) ;
         free(buffer);
         if ( ret<0 ) error("Is the file gzipped or bgzipped? The latter is required for indexing.\n");
- 
+
         if ( index_fname )
             bgzf_index_dump(fp, index_fname, NULL);
-        else 
+        else
             bgzf_index_dump(fp, argv[optind], ".gzi");
 
         if ( bgzf_close(fp)<0 ) error("Close failed: Error %d\n",fp->errcode);

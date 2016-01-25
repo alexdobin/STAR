@@ -2,23 +2,23 @@
 Copyright (c) 2012-2013 Genome Research Ltd.
 Author: James Bonfield <jkb@sanger.ac.uk>
 
-Redistribution and use in source and binary forms, with or without 
+Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
-   1. Redistributions of source code must retain the above copyright notice, 
+   1. Redistributions of source code must retain the above copyright notice,
 this list of conditions and the following disclaimer.
 
-   2. Redistributions in binary form must reproduce the above copyright notice, 
-this list of conditions and the following disclaimer in the documentation 
+   2. Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation
 and/or other materials provided with the distribution.
 
    3. Neither the names Genome Research Ltd and Wellcome Trust Sanger
 Institute nor the names of its contributors may be used to endorse or promote
 products derived from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY GENOME RESEARCH LTD AND CONTRIBUTORS "AS IS" AND 
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+THIS SOFTWARE IS PROVIDED BY GENOME RESEARCH LTD AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 DISCLAIMED. IN NO EVENT SHALL GENOME RESEARCH LTD OR CONTRIBUTORS BE LIABLE
 FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
 DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
@@ -216,7 +216,7 @@ typedef struct {
     unsigned char **TL;          // array of size nTL, pointer into TD_blk.
     khash_t(m_s2i) *TD_hash;     // Keyed on TD strings, map to TL[] indices
     string_alloc_t *TD_keys;     // Pooled keys for TD hash.
-    
+
     khash_t(map) *preservation_map;
     struct cram_map *rec_encoding_map[CRAM_MAP_HASH];
     struct cram_map *tag_encoding_map[CRAM_MAP_HASH];
@@ -306,7 +306,7 @@ typedef struct {
 
     /* Size of container header above */
     size_t   offset;
-    
+
     /* Compression header is always the first block? */
     cram_block_compression_hdr *comp_hdr;
     cram_block *comp_hdr_block;
@@ -680,7 +680,7 @@ typedef struct cram_fd {
     int multi_seq;
     int unsorted;
     int empty_container; 		// Marker for EOF block
-    
+
     // thread pool
     int own_pool;
     t_pool *pool;

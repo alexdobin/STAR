@@ -10,13 +10,13 @@ parametersFiles          -
 
 ### System
 sysShell            -
-    string: path to the shell binary, preferrably bash, e.g. /bin/bash. 
+    string: path to the shell binary, preferrably bash, e.g. /bin/bash.
                     - ... the default shell is executed, typically /bin/sh. This was reported to fail on some Ubuntu systems - then you need to specify path to bash.
 
 ### Run Parameters
 
 runMode                         alignReads
-    string: type of the run:    
+    string: type of the run:
                                 alignReads             ... map reads
                                 genomeGenerate         ... generate genome files
                                 inputAlignmentsFromBAM ... input alignments from BAM. Presently only works with --outWigType and --bamRemoveDuplicates.
@@ -25,7 +25,7 @@ runThreadN                      1
     int: number of threads to run STAR
 
 runDirPerm                      User_RWX
-    string: permissions for the directories created at the run-time. 
+    string: permissions for the directories created at the run-time.
                                 User_RWX ... user-read/write/execute
                                 All_RWX  ... all-read/write/execute (same as chmod 777)
 
@@ -189,16 +189,16 @@ outMultimapperOrder             Old_2.4
 ### Output: SAM and BAM
 outSAMtype                      SAM
     strings: type of SAM/BAM output
-                                1st word: 
+                                1st word:
                                 BAM  ... output BAM without sorting
                                 SAM  ... output SAM without sorting
                                 None ... no SAM/BAM output
-                                2nd, 3rd: 
+                                2nd, 3rd:
                                 Unsorted           ... standard unsorted
                                 SortedByCoordinate ... sorted by coordinate. This option will allocate extra memory for sorting which can be specified by --limitBAMsortRAM.
 
 outSAMmode                      Full
-    string: mode of SAM output  
+    string: mode of SAM output
                                 None ... no SAM output
                                 Full ... full SAM output
                                 NoQS ... full SAM but without quality scores
@@ -211,7 +211,7 @@ outSAMstrandField                               None
 outSAMattributes                Standard
     string: a string of desired SAM attributes, in the order desired for the output SAM
                                 NH HI AS nM NM MD jM jI XS ... any combination in any order
-                                Standard   ... NH HI AS nM 
+                                Standard   ... NH HI AS nM
                                 All        ... NH HI AS nM NM MD jM jI
                                 None       ... no attributes
 
@@ -252,7 +252,7 @@ outSAMflagAND           65535
     int: 0 to 65535: sam FLAG will be bitwise AND'd with this value, i.e. FLAG=FLAG & outSAMflagOR. This is applied after all flags have been set by STAR, but before outSAMflagOR. Can be used to unset specific bits that are not set otherwise.
 
 outSAMattrRGline        -
-    string(s): SAM/BAM read group line. The first word contains the read group identifier and must start with "ID:", e.g. --outSAMattrRGline ID:xxx CN:yy "DS:z z z". 
+    string(s): SAM/BAM read group line. The first word contains the read group identifier and must start with "ID:", e.g. --outSAMattrRGline ID:xxx CN:yy "DS:z z z".
             xxx will be added as RG tag to each output alignment. Any spaces in the tag values have to be double quoted.
             Comma separated RG lines correspons to different (comma separated) input files in --readFilesIn. Commas have to be surrounded by spaces, e.g.
             --outSAMattrRGline ID:xxx , ID:zzz "DS:z z" , ID:yyy DS:yyyy
@@ -295,12 +295,12 @@ outWigType          None
     string(s): type of signal output, e.g. "bedGraph" OR "bedGraph read1_5p". Requires sorted BAM: --outSAMtype BAM SortedByCoordinate .
                     1st word:
                     None       ... no signal output
-                    bedGraph   ... bedGraph format 
+                    bedGraph   ... bedGraph format
                     wiggle     ... wiggle format
                     2nd word:
                     read1_5p   ... signal from only 5' of the 1st read, useful for CAGE/RAMPAGE etc
                     read2      ... signal from only 2nd read
-                    
+
 outWigStrand        Stranded
     string: strandedness of wiggle/bedGraph output
                     Stranded   ...  separate strands, str1 and str2
@@ -308,7 +308,7 @@ outWigStrand        Stranded
 
 outWigReferencesPrefix    -
     string: prefix matching reference names to include in the output wiggle file, e.g. "chr", default "-" - include all references
- 
+
 outWigNorm              RPM
     string: type of normalization for the signal
                         RPM    ... reads per million of mapped reads
@@ -324,7 +324,7 @@ outFilterMultimapScoreRange     1
     int: the score range below the maximum score for multimapping alignments
 
 outFilterMultimapNmax           10
-    int: maximum number of loci the read is allowed to map to. Alignments (all of them) will be output only if the read maps to no more loci than this value. 
+    int: maximum number of loci the read is allowed to map to. Alignments (all of them) will be output only if the read maps to no more loci than this value.
          Otherwise no alignments will be output, and the read will be counted as "mapped to too many loci" in the Log.final.out .
 
 outFilterMismatchNmax           10
@@ -367,12 +367,12 @@ outSJfilterOverhangMin          30  12  12  12
     4 integers:    minimum overhang length for splice junctions on both sides for: (1) non-canonical motifs, (2) GT/AG and CT/AC motif, (3) GC/AG and CT/GC motif, (4) AT/AC and GT/AT motif. -1 means no output for that motif
                                 does not apply to annotated junctions
 
-outSJfilterCountUniqueMin       3   1   1   1 
+outSJfilterCountUniqueMin       3   1   1   1
     4 integers: minimum uniquely mapping read count per junction for: (1) non-canonical motifs, (2) GT/AG and CT/AC motif, (3) GC/AG and CT/GC motif, (4) AT/AC and GT/AT motif. -1 means no output for that motif
                                 Junctions are output if one of outSJfilterCountUniqueMin OR outSJfilterCountTotalMin conditions are satisfied
                                 does not apply to annotated junctions
 
-outSJfilterCountTotalMin     3   1   1   1 
+outSJfilterCountTotalMin     3   1   1   1
     4 integers: minimum total (multi-mapping+unique) read count per junction for: (1) non-canonical motifs, (2) GT/AG and CT/AC motif, (3) GC/AG and CT/GC motif, (4) AT/AC and GT/AT motif. -1 means no output for that motif
                                 Junctions are output if one of outSJfilterCountUniqueMin OR outSJfilterCountTotalMin conditions are satisfied
                                 does not apply to annotated junctions
@@ -382,7 +382,7 @@ outSJfilterDistToOtherSJmin     10  0   5   10
                                 does not apply to annotated junctions
 
 outSJfilterIntronMaxVsReadN        50000 100000 200000
-    N integers>=0: maximum gap allowed for junctions supported by 1,2,3,,,N reads 
+    N integers>=0: maximum gap allowed for junctions supported by 1,2,3,,,N reads
                                 i.e. by default junctions supported by 1 read can have gaps <=50000b, by 2 reads: <=100000b, by 3 reads: <=200000. by >=4 reads any gap <=alignIntronMax
                                 does not apply to annotated junctions
 
@@ -438,7 +438,7 @@ seedPerReadNmax       1000
 seedPerWindowNmax     50
     int>0: max number of seeds per window
 
-seedNoneLociPerWindow    10 
+seedNoneLociPerWindow    10
     int>0: max number of one seed loci per window
 
 alignIntronMin              21
@@ -454,7 +454,7 @@ alignSJoverhangMin          5
     int>0: minimum overhang (i.e. block size) for spliced alignments
 
 alignSJstitchMismatchNmax   0 -1 0 0
-    4*int>=0: maximum number of mismatches for stitching of the splice junctions (-1: no limit). 
+    4*int>=0: maximum number of mismatches for stitching of the splice junctions (-1: no limit).
                             (1) non-canonical motifs, (2) GT/AG and CT/AC motif, (3) GC/AG and CT/GC motif, (4) AT/AC and GT/AT motif.
 
 alignSJDBoverhangMin        3
@@ -465,12 +465,12 @@ alignSplicedMateMapLmin     0
 
 alignSplicedMateMapLminOverLmate 0.66
     float>0: alignSplicedMateMapLmin normalized to mate length
-   
+
 alignWindowsPerReadNmax     10000
     int>0: max number of windows per read
 
 alignTranscriptsPerWindowNmax       100
-    int>0: max number of transcripts per window           
+    int>0: max number of transcripts per window
 
 alignTranscriptsPerReadNmax               10000
     int>0: max number of different alignments per read to consider
@@ -492,7 +492,7 @@ winAnchorMultimapNmax           50
     int>0: max number of loci anchors are allowed to map to
 
 winBinNbits                     16
-    int>0: =log2(winBin), where winBin is the size of the bin for the windows/clustering, each window will occupy an integer number of bins. 
+    int>0: =log2(winBin), where winBin is the size of the bin for the windows/clustering, each window will occupy an integer number of bins.
 
 winAnchorDistNbins              9
     int>0: max number of bins between two anchors that allows aggregation of anchors into one window

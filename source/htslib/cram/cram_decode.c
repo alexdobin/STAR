@@ -2,23 +2,23 @@
 Copyright (c) 2012-2013 Genome Research Ltd.
 Author: James Bonfield <jkb@sanger.ac.uk>
 
-Redistribution and use in source and binary forms, with or without 
+Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
-   1. Redistributions of source code must retain the above copyright notice, 
+   1. Redistributions of source code must retain the above copyright notice,
 this list of conditions and the following disclaimer.
 
-   2. Redistributions in binary form must reproduce the above copyright notice, 
-this list of conditions and the following disclaimer in the documentation 
+   2. Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation
 and/or other materials provided with the distribution.
 
    3. Neither the names Genome Research Ltd and Wellcome Trust Sanger
 Institute nor the names of its contributors may be used to endorse or promote
 products derived from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY GENOME RESEARCH LTD AND CONTRIBUTORS "AS IS" AND 
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+THIS SOFTWARE IS PROVIDED BY GENOME RESEARCH LTD AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 DISCLAIMED. IN NO EVENT SHALL GENOME RESEARCH LTD OR CONTRIBUTORS BE LIABLE
 FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
 DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
@@ -62,7 +62,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /*
  * Decodes the Tag Dictionary record in the preservation map
  * Updates the cram compression header.
- * 
+ *
  * Returns number of bytes decoded on success
  *        -1 on failure
  */
@@ -113,7 +113,7 @@ int cram_decode_TD(char *cp, cram_block_compression_hdr *h) {
 	while (dat[i])
 	    i++;
     }
-    
+
     return sz;
 }
 
@@ -587,7 +587,7 @@ cram_block_compression_hdr *cram_decode_compression_header(cram_fd *fd,
 	    free(m);
 	    return NULL;
 	}
-	
+
 	cp += size;
 
 	m->next = hdr->tag_encoding_map[CRAM_MAP(key[0],key[1])];
@@ -718,7 +718,7 @@ static int cram_decode_seq(cram_fd *fd, cram_container *c, cram_slice *s,
 	orig_aux = BLOCK_SIZE(s->aux_blk);
 	BLOCK_APPEND(s->aux_blk, "MDZ", 3);
     }
-    
+
     if (!c->comp_hdr->FN_codec) return -1;
     r |= c->comp_hdr->FN_codec->decode(s,c->comp_hdr->FN_codec, blk,
 				       (char *)&fn, &out_sz);
@@ -1099,7 +1099,7 @@ static int cram_decode_aux_1_0(cram_container *c, cram_slice *s,
 			       cram_block *blk, cram_record *cr) {
     int i, r = 0, out_sz = 1;
     unsigned char ntags;
-	    
+
     if (!c->comp_hdr->TC_codec) return -1;
     r |= c->comp_hdr->TC_codec->decode(s, c->comp_hdr->TC_codec, blk,
 				       (char *)&ntags, &out_sz);
@@ -1126,7 +1126,7 @@ static int cram_decode_aux_1_0(cram_container *c, cram_slice *s,
 	    tag_data[0] = (id>>16) & 0xff;
 	    tag_data[1] = (id>>8)  & 0xff;
 	    tag_data[2] = id       & 0xff;
-	} 
+	}
 
 	m = map_find(c->comp_hdr->tag_encoding_map, tag_data, id);
 	if (!m)
@@ -1138,7 +1138,7 @@ static int cram_decode_aux_1_0(cram_container *c, cram_slice *s,
 
 	cr->aux_size += out_sz + 3;
     }
-    
+
     return r;
 }
 
@@ -1147,7 +1147,7 @@ static int cram_decode_aux(cram_container *c, cram_slice *s,
     int i, r = 0, out_sz = 1;
     int32_t TL;
     unsigned char *TN;
-	    
+
     if (!c->comp_hdr->TL_codec) return -1;
     r |= c->comp_hdr->TL_codec->decode(s, c->comp_hdr->TL_codec, blk,
 				       (char *)&TL, &out_sz);
@@ -1181,7 +1181,7 @@ static int cram_decode_aux(cram_container *c, cram_slice *s,
 	r |= m->codec->decode(s, m->codec, blk, (char *)s->aux_blk, &out_sz);
 	cr->aux_size += out_sz + 3;
     }
-    
+
     return r;
 }
 
@@ -1313,7 +1313,7 @@ static void cram_decode_slice_xref(cram_slice *s) {
 
 	if (cr->tlen == INT_MIN)
 	    cr->tlen = 0; // Just incase
-    }    
+    }
 }
 
 static char *md5_print(unsigned char *md5, char *out) {
@@ -1382,7 +1382,7 @@ int cram_decode_slice(cram_fd *fd, cram_container *c, cram_slice *s,
 	    s->ref_start = s->hdr->ref_seq_start;
 	    s->ref_end   = s->hdr->ref_seq_start + s->hdr->ref_seq_span-1;
 	} else if (!fd->no_ref) {
-	    //// Avoid Java cramtools bug by loading entire reference seq 
+	    //// Avoid Java cramtools bug by loading entire reference seq
 	    //s->ref = cram_get_ref(fd, s->hdr->ref_seq_id, 1, 0);
 	    //s->ref_start = 1;
 
@@ -1538,7 +1538,7 @@ int cram_decode_slice(cram_fd *fd, cram_container *c, cram_slice *s,
 	if (c->comp_hdr->AP_delta)
 	    cr->apos += s->last_apos;
 	s->last_apos=  cr->apos;
-		    
+
 	if (!c->comp_hdr->RG_codec) return -1;
 	r |= c->comp_hdr->RG_codec->decode(s, c->comp_hdr->RG_codec, blk,
 					   (char *)&cr->rg, &out_sz);
@@ -1578,7 +1578,7 @@ int cram_decode_slice(cram_fd *fd, cram_container *c, cram_slice *s,
 
 	    if (!c->comp_hdr->read_names_included) {
 		int32_t out_sz2 = 1;
-	    
+
 		// Read directly into name cram_block
 		cr->name = BLOCK_SIZE(s->name_blk);
 		if (!c->comp_hdr->RN_codec) return -1;
@@ -1587,7 +1587,7 @@ int cram_decode_slice(cram_fd *fd, cram_container *c, cram_slice *s,
 						   &out_sz2);
 		cr->name_len = out_sz2;
 	    }
-		    
+
 	    if (!c->comp_hdr->NS_codec) return -1;
 	    r |= c->comp_hdr->NS_codec->decode(s, c->comp_hdr->NS_codec, blk,
 					       (char *)&cr->mate_ref_id, &out_sz);
@@ -1648,7 +1648,7 @@ int cram_decode_slice(cram_fd *fd, cram_container *c, cram_slice *s,
 
 	if (!seq)
 	    return -1;
-	
+
 	cr->qual = BLOCK_SIZE(s->qual_blk);
 	BLOCK_GROW(s->qual_blk, cr->len);
 	qual = (char *)BLOCK_END(s->qual_blk);
@@ -1737,7 +1737,7 @@ int cram_decode_slice_mt(cram_fd *fd, cram_container *c, cram_slice *s,
     j->c  = c;
     j->s  = s;
     j->h  = bfd;
-    
+
     nonblock = t_pool_results_queue_len(fd->rqueue) ? 0 : 1;
 
     if (-1 == t_pool_dispatch2(fd->pool, fd->rqueue, cram_decode_slice_thread,
@@ -1836,7 +1836,7 @@ static int cram_to_bam(SAM_hdr *bfd, cram_fd *fd, cram_slice *s,
 	aux += len;
 	*aux++ = 0;
     }
-    
+
 #ifndef SAMTOOLS
     bam_set_blk_size(*bam, bam_blk_size(*bam) + (aux - aux_orig));
 #endif
@@ -1865,7 +1865,7 @@ static cram_slice *cram_next_slice(cram_fd *fd, cram_container **cp) {
 	/*
 	 * The first container may be a result of a sub-range query.
 	 * In which case it may still not be the optimal starting point
-	 * due to skipped containers/slices in the index. 
+	 * due to skipped containers/slices in the index.
 	 */
 	if (fd->range.refid != -2) {
 	    while (c->ref_seq_id != -2 &&
@@ -1985,7 +1985,7 @@ static cram_slice *cram_next_slice(cram_fd *fd, cram_container **cp) {
 	    c->max_rec = s->hdr->num_records;
 
 	    s->last_apos = s->hdr->ref_seq_start;
-	    
+
 	    /* Skip slices not yet spanning our range */
 	    if (fd->range.refid != -2 && s->hdr->ref_seq_id != -2) {
 		if (s->hdr->ref_seq_id != fd->range.refid) {
@@ -2035,7 +2035,7 @@ static cram_slice *cram_next_slice(cram_fd *fd, cram_container **cp) {
     if (fd->pool) {
 	t_pool_result *res;
 	cram_decode_job *j;
-	
+
 //	fprintf(stderr, "Thread pool len = %d, %d\n",
 //		t_pool_results_queue_len(fd->rqueue),
 //		t_pool_results_queue_sz(fd->rqueue));

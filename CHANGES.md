@@ -45,7 +45,7 @@ Major new features:
 -------------------
 * Implemented on the fly insertion of the extra sequences into the genome indexes.
 * Implemented --outSAMmultNmax parameter to limit the number of output alignments for multimappers.
-* Implemented --outMultimapperOrder Random option to output multiple alignments in random order. 
+* Implemented --outMultimapperOrder Random option to output multiple alignments in random order.
     This also randomizes the choice of the primary alignment. Parameter --runRNGseed can be used to set the random generator seed.
     With this option, the ordering of multi-mapping alignments of each read, and the choice of the primary alignment will vary from run to run, unless only one thread is used and the seed is kept constant.
 
@@ -125,7 +125,7 @@ STAR 2.4.1a 2015/04/17
 * Included link (submodule) to Brian Haas' STAR-Fusion code for detecting fusion transcript from STAR chimeric output:  https://github.com/STAR-Fusion/STAR-Fusion
 * Included Gery Vessere's shared memory implementation for POSIX and SysV. To compile STAR with POSIX shared memory, use `make POSIXSHARED`
 * New option "--chimOutType WithinBAM" to include chimeric alignments together with normal alignments in the main (sorted or unsorted) BAM file(s).
-* New option "--quantTranscriptomeBan Singleend" allows insertions, deletions ans soft-clips in the transcriptomic alignments, which are allowed by some expression quantification software (e.g. eXpress). 
+* New option "--quantTranscriptomeBan Singleend" allows insertions, deletions ans soft-clips in the transcriptomic alignments, which are allowed by some expression quantification software (e.g. eXpress).
 * New option "--alignEndsTypeExtension Extend5pOfRead1" to enforce full extension of the 5p of the read1, while all other ends undergo local alignment and may be soft-clipped.
 
 2.4.0k 03/30/2015
@@ -225,7 +225,7 @@ STAR 2.4.1a 2015/04/17
 Implemented --outWigReferencesPrefix option to filter references in the signal output.
 Implemented --runMode inputAlignmentsFromBAM --inputBAMfile
 
-2.3.1z15  
+2.3.1z15
 Implemented --outWigType bedGraph read1_5p option.
 Fixed a problem with chimeric alignments with overlapping segments.
 Fixed a problem with processing of fasta read input.
@@ -249,8 +249,8 @@ Fixed problem with FASTA reads input.
 Fixed problem with compilation, samtools/ZLIB related.
 
 2.3.1z9 06/19/2014
-2.3.1z8 
-2.3.1z7 
+2.3.1z8
+2.3.1z7
 Fixed problems with transcriptomic output.
 Changed --sjdbFileChrStartEnd importing to allow direct import from SJ.out.tab
 
@@ -269,7 +269,7 @@ Fixed chimeric output problems with --outFilterType BySJout option
 Added extra Log.out messages for multi-threaded jobs.
 
 2.3.1z1 03/13/2014
-SAM header changes: 
+SAM header changes:
     removed "cl:" attribute from the @PG line, output it as a separate comment line
     added --outSAMheaderHD, --outSAMheaderPG, --outSAMheaderCommentFile options
 Added --outTmpDir, which set the path forSTAr temporary directory independent of --outFileNamePrefix

@@ -133,9 +133,9 @@ typedef struct {
  @field  l_data     current length of bam1_t::data
  @field  m_data     maximum length of bam1_t::data
  @field  data       all variable-length data, concatenated; structure: qname-cigar-seq-qual-aux
- 
+
  @discussion Notes:
- 
+
  1. qname is zero tailing and core.l_qname includes the tailing '\0'.
  2. l_qseq is calculated from the total length of an alignment block
  on reading or from CIGAR.
@@ -365,7 +365,7 @@ extern "C" {
 #endif
 
     /**
-     *  bam_plp_init() - sets an iterator over multiple 
+     *  bam_plp_init() - sets an iterator over multiple
      *  @func:      see mplp_func in bam_plcmd.c in samtools for an example. Expected return
      *              status: 0 on success, -1 on end, < -1 on non-recoverable errors
      *  @data:      user data to pass to @func

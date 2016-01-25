@@ -2,23 +2,23 @@
 Copyright (c) 2013-2014 Genome Research Ltd.
 Author: James Bonfield <jkb@sanger.ac.uk>
 
-Redistribution and use in source and binary forms, with or without 
+Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
-   1. Redistributions of source code must retain the above copyright notice, 
+   1. Redistributions of source code must retain the above copyright notice,
 this list of conditions and the following disclaimer.
 
-   2. Redistributions in binary form must reproduce the above copyright notice, 
-this list of conditions and the following disclaimer in the documentation 
+   2. Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation
 and/or other materials provided with the distribution.
 
    3. Neither the names Genome Research Ltd and Wellcome Trust Sanger
 Institute nor the names of its contributors may be used to endorse or promote
 products derived from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY GENOME RESEARCH LTD AND CONTRIBUTORS "AS IS" AND 
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+THIS SOFTWARE IS PROVIDED BY GENOME RESEARCH LTD AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 DISCLAIMED. IN NO EVENT SHALL GENOME RESEARCH LTD OR CONTRIBUTORS BE LIABLE
 FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
 DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
@@ -123,7 +123,7 @@ int cram_index_load(cram_fd *fd, const char *fn) {
     if (!(fp = hopen(fn2, "r"))) {
 	perror(fn2);
 	free(idx_stack);
-	return -1; 
+	return -1;
     }
 
     // Load the file into memory
@@ -142,7 +142,7 @@ int cram_index_load(cram_fd *fd, const char *fn) {
 	free(idx_stack);
 	return -1;
     }
-	
+
 
     // Uncompress if required
     if (kstr.s[0] == 31 && (uc)kstr.s[1] == 139) {
@@ -254,7 +254,7 @@ void cram_index_free(cram_fd *fd) {
 
     if (!fd->index)
 	return;
-    
+
     for (i = 0; i < fd->index_sz; i++) {
 	cram_index_free_recurse(&fd->index[i]);
     }
@@ -277,7 +277,7 @@ void cram_index_free(cram_fd *fd) {
  * Returns the cram_index pointer on sucess
  *         NULL on failure
  */
-cram_index *cram_index_query(cram_fd *fd, int refid, int pos, 
+cram_index *cram_index_query(cram_fd *fd, int refid, int pos,
 			     cram_index *from) {
     int i, j, k;
     cram_index *e;
@@ -497,7 +497,7 @@ int cram_index_build(cram_fd *fd, const char *fn_base) {
 	zfclose(fp);
 	return -1;
     }
-	
+
 
     return zfclose(fp);
 }

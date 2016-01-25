@@ -7,7 +7,7 @@
 int compareUint(const void* i1, const void* i2) {//compare uint arrays
     uint s1=*( (uint*)i1 );
     uint s2=*( (uint*)i2 );
-    
+
     if (s1>s2) {
         return 1;
     } else if (s1<s2) {
@@ -18,15 +18,15 @@ int compareUint(const void* i1, const void* i2) {//compare uint arrays
 };
 
 void outputSJ(ReadAlignChunk** RAchunk, Parameters* P) {//collapses junctions from all therads/chunks; outputs junctions to file
-    
+
 //     system("echo `date` ..... Writing splice junctions >> Log.timing.out");
 
-    
+
     Junction oneSJ;
     char** sjChunks = new char* [P->runThreadN+1];
     #define OUTSJ_limitScale 5
     OutSJ allSJ (P->limitOutSJcollapsed*OUTSJ_limitScale,P);
-    
+
     if (P->outFilterBySJoutStage!=1) {//chunkOutSJ
         for (int ic=0;ic<P->runThreadN;ic++) {//populate sjChunks with links to data
             sjChunks[ic]=RAchunk[ic]->chunkOutSJ->data;
@@ -38,7 +38,7 @@ void outputSJ(ReadAlignChunk** RAchunk, Parameters* P) {//collapses junctions fr
             memset(sjChunks[ic]+RAchunk[ic]->chunkOutSJ1->N*oneSJ.dataSize,255,oneSJ.dataSize);//mark the junction after last with big number
         };
     };
-    
+
     while (true) {
         int icOut=-1;//chunk from which the junction is output
         for (int ic=0;ic<P->runThreadN;ic++) {//scan through all chunks, find the "smallest" junction
@@ -48,7 +48,7 @@ void outputSJ(ReadAlignChunk** RAchunk, Parameters* P) {//collapses junctions fr
         };
 
         if (icOut<0) break; //no more junctions to output
-        
+
         for (int ic=0;ic<P->runThreadN;ic++) {//scan through all chunks, find the junctions equal to icOut-junction
             if (ic!=icOut && compareSJ((void*) sjChunks[ic], (void*) sjChunks[icOut])==0) {
                 oneSJ.collapseOneSJ(sjChunks[icOut],sjChunks[ic],P);//collapse ic-junction into icOut
@@ -59,7 +59,7 @@ void outputSJ(ReadAlignChunk** RAchunk, Parameters* P) {//collapses junctions fr
         //write out the junction
         oneSJ.junctionPointer(sjChunks[icOut],0);//point to the icOut junction
         //filter the junction
-        bool sjFilter;        
+        bool sjFilter;
         sjFilter=*oneSJ.annot>0 \
                 || ( ( *oneSJ.countUnique>=(uint) P->outSJfilterCountUniqueMin[(*oneSJ.motif+1)/2] \
                     || (*oneSJ.countMultiple+*oneSJ.countUnique)>=(uint) P->outSJfilterCountTotalMin[(*oneSJ.motif+1)/2] )\
@@ -77,10 +77,10 @@ void outputSJ(ReadAlignChunk** RAchunk, Parameters* P) {//collapses junctions fr
                 exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
             };
         };
-        
+
         sjChunks[icOut] += oneSJ.dataSize;//shift icOut-chunk by one junction
     };
-    
+
     bool* sjFilter=new bool[allSJ.N];
     if (P->outFilterBySJoutStage!=2) {
         //filter non-canonical junctions that are close to canonical
@@ -117,7 +117,7 @@ void outputSJ(ReadAlignChunk** RAchunk, Parameters* P) {//collapses junctions fr
             };
         };
     };
-    
+
     //output junctions
     if (P->outFilterBySJoutStage!=1) {//output file
         ofstream outSJfileStream((P->outFileNamePrefix+"SJ.out.tab").c_str());
@@ -130,9 +130,9 @@ void outputSJ(ReadAlignChunk** RAchunk, Parameters* P) {//collapses junctions fr
         outSJfileStream.close();
     } else {//make sjNovel array in P
         P->sjNovelN=0;
-        for (uint ii=0;ii<allSJ.N;ii++) 
+        for (uint ii=0;ii<allSJ.N;ii++)
         {//count novel junctions
-            if (sjFilter[ii]) 
+            if (sjFilter[ii])
             {//only those passing filter
                 oneSJ.junctionPointer(allSJ.data,ii);
                 if (*oneSJ.annot==0) P->sjNovelN++;
@@ -141,7 +141,7 @@ void outputSJ(ReadAlignChunk** RAchunk, Parameters* P) {//collapses junctions fr
         P->sjNovelStart = new uint [P->sjNovelN];
         P->sjNovelEnd = new uint [P->sjNovelN];
         P->inOut->logMain <<"Detected " <<P->sjNovelN<<" novel junctions that passed filtering, will proceed to filter reads that contained unannotated junctions"<<endl;
-        
+
         uint isj=0;
         for (uint ii=0;ii<allSJ.N;ii++) {//write to file
             if (sjFilter[ii]) {

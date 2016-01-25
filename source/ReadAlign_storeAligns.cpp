@@ -12,18 +12,18 @@ void ReadAlign::storeAligns (uint iDir, uint Shift, uint Nrep, uint L, uint indS
     #ifdef OFF_BEFORE_STORE
         #warning OFF_BEFORE_STORE
         return;
-    #endif   
-        
+    #endif
+
     if ( Nrep > P->seedMultimapNmax ) {// if a piece maps too many times, do not store it
         if ( Nrep < multNmin || multNmin==0 ) {multNmin=Nrep; multNminL=L;};
-        return;     
+        return;
     };
 
     nUM[ Nrep==1 ? 0:1] += Nrep;        //add numbers of U/M aligns
     nA += Nrep;
-    
+
     uint rStart=iDir==0 ? Shift : Shift+1-L;//alignment read-start
-        
+
   #define OPTIM_STOREaligns_SIMPLE
   #ifdef OPTIM_STOREaligns_SIMPLE
     //find the place to insert the new entry to keep it sorted
@@ -41,14 +41,14 @@ void ReadAlign::storeAligns (uint iDir, uint Shift, uint Nrep, uint L, uint indS
         for (int jj=0;jj<PC_SIZE;jj++) PC[ii+1][jj]=PC[ii][jj];
     };
 
-    nP++; //now nP is the new number of elements   
-//     
+    nP++; //now nP is the new number of elements
+//
     if (nP > P->seedPerReadNmax) {
         ostringstream errOut;
         errOut <<"EXITING because of FATAL error: too many pieces pere read\n" ;
         errOut <<"SOLUTION: increase input parameter --seedPerReadNmax";
         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_RUNTIME, *P);
-    };    
+    };
   #else
 //     int iP3;
 //     for (iP3=nP-1; iP3>=0; iP3--) {
@@ -58,7 +58,7 @@ void ReadAlign::storeAligns (uint iDir, uint Shift, uint Nrep, uint L, uint indS
 //             break;
 //         };
 //     };
-    
+
     int iP2=-1,iP1;
     int nRemove=0;
     for (iP1=0; iP1<nP; iP1++) {
@@ -75,7 +75,7 @@ void ReadAlign::storeAligns (uint iDir, uint Shift, uint Nrep, uint L, uint indS
                 };
             };
         };
-        
+
         if ( rStart <= PC[iP1][PC_rStart] )  {//is old seed within new seed
             if ( rStart+L >= PC[iP1][PC_rStart]+PC[iP1][PC_Length] ) {//old piece is within the new piece
                 //decide whether to keep the new piece
@@ -85,11 +85,11 @@ void ReadAlign::storeAligns (uint iDir, uint Shift, uint Nrep, uint L, uint indS
                 };
             };
         };
-        
+
         if ( iP2==-1 && ( rStart < PC[iP1][PC_rStart] || (rStart == PC[iP1][PC_rStart] && L>PC[iP1][PC_Length]) ) ) {
             iP2=iP1;
         };
-        
+
 
     };
 
@@ -97,21 +97,21 @@ void ReadAlign::storeAligns (uint iDir, uint Shift, uint Nrep, uint L, uint indS
     if (iP2==-1) {//debug
         cout << "BUG: iP2=-1 iRead="<<iRead<<flush;
         exit(-1);
-    };   
-    
+    };
+
     int iP=iP2;
 //     if (iP!=iP3+1) {
 //         cout << "BUG: iP!=iP3+1 iRead="<<iRead<<"   "<<readName<<flush;
 //         exit(-1);
 //     };
-    
+
     if (nRemove==0) {//add piece
         if (nP == P->seedPerReadNmax) {
             ostringstream errOut;
             errOut <<"EXITING because of FATAL error: too many pieces pere read\n" ;
             errOut <<"SOLUTION: increase input parameter --seedPerReadNmax";
             exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_RUNTIME, *P);
-        };        
+        };
         for (int ii=nP-1;ii>=iP;ii--) {//move old entries to free space for the new one
             for (int jj=0;jj<PC_SIZE;jj++) PC[ii+1][jj]=PC[ii][jj];
         };
@@ -129,20 +129,20 @@ void ReadAlign::storeAligns (uint iDir, uint Shift, uint Nrep, uint L, uint indS
                 };
                 ++iP3;
             };
-        };        
+        };
         nP-=nRemove-1;
     };
   #endif
-    
+
     //store new piece
-    PC[iP][PC_rStart]=rStart;  //alignment read-start     
+    PC[iP][PC_rStart]=rStart;  //alignment read-start
     PC[iP][PC_Length]=L;       //alignment length
-    PC[iP][PC_Dir]    = iDir; //direction        
-    PC[iP][PC_Nrep]   = Nrep; //repeat number - for both strands        
+    PC[iP][PC_Dir]    = iDir; //direction
+    PC[iP][PC_Nrep]   = Nrep; //repeat number - for both strands
     PC[iP][PC_SAstart]= indStartEnd[0]; //SA index 1
-    PC[iP][PC_SAend]  = indStartEnd[1]; //SA index 2       
+    PC[iP][PC_SAend]  = indStartEnd[1]; //SA index 2
     PC[iP][PC_iFrag]  = iFrag;
-   
+
     //choose "best" alignment
 
     if (L<storedLmin) L=storedLmin;

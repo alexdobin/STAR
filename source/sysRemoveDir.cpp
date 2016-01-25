@@ -17,6 +17,6 @@ int removeFileOrDir(const char *fpath,const struct stat *sb, int typeflag, struc
 
 
 void sysRemoveDir(std::string dirName) {//remove directory and all its contents
-    int nftwFlag=FTW_DEPTH; 
+    int nftwFlag=FTW_DEPTH;
     nftw(dirName.c_str(), removeFileOrDir, 100, nftwFlag);
 };

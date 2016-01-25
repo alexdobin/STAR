@@ -962,7 +962,7 @@ int sam_format1(const bam_hdr_t *h, const bam1_t *b, kstring_t *str)
 				ksprintf(str, "f:%g", *(float*)s);
 				s += 4;
 			} else return -1;
-			
+
 		} else if (type == 'd') {
 			if (s+8 <= b->data + b->l_data) {
 				ksprintf(str, "d:%g", *(double*)s);
@@ -1414,15 +1414,15 @@ static inline int cigar_iref2iseq_set(uint32_t **cigar, uint32_t *cigar_max, int
 
         if ( cig==BAM_CSOFT_CLIP ) { (*cigar)++; *iseq += ncig; *icig = 0; continue; }
         if ( cig==BAM_CHARD_CLIP ) { (*cigar)++; *icig = 0; continue; }
-        if ( cig==BAM_CMATCH || cig==BAM_CEQUAL || cig==BAM_CDIFF ) 
-        { 
-            pos -= ncig; 
+        if ( cig==BAM_CMATCH || cig==BAM_CEQUAL || cig==BAM_CDIFF )
+        {
+            pos -= ncig;
             if ( pos < 0 ) { *icig = ncig + pos; *iseq += *icig; *iref += *icig; return BAM_CMATCH; }
             (*cigar)++; *iseq += ncig; *icig = 0; *iref += ncig;
             continue;
         }
         if ( cig==BAM_CINS ) { (*cigar)++; *iseq += ncig; *icig = 0; continue; }
-        if ( cig==BAM_CDEL ) 
+        if ( cig==BAM_CDEL )
         {
             pos -= ncig;
             if ( pos<0 ) pos = 0;
@@ -1442,11 +1442,11 @@ static inline int cigar_iref2iseq_next(uint32_t **cigar, uint32_t *cigar_max, in
         int cig  = (**cigar) & BAM_CIGAR_MASK;
         int ncig = (**cigar) >> BAM_CIGAR_SHIFT;
 
-        if ( cig==BAM_CMATCH || cig==BAM_CEQUAL || cig==BAM_CDIFF ) 
+        if ( cig==BAM_CMATCH || cig==BAM_CEQUAL || cig==BAM_CDIFF )
         {
             if ( *icig >= ncig - 1 ) { *icig = 0;  (*cigar)++; continue; }
-            (*iseq)++; (*icig)++; (*iref)++; 
-            return BAM_CMATCH; 
+            (*iseq)++; (*icig)++; (*iref)++;
+            return BAM_CMATCH;
         }
         if ( cig==BAM_CDEL ) { (*cigar)++; (*iref) += ncig; *icig = 0; continue; }
         if ( cig==BAM_CINS ) { (*cigar)++; *iseq += ncig; *icig = 0; continue; }
@@ -1456,7 +1456,7 @@ static inline int cigar_iref2iseq_next(uint32_t **cigar, uint32_t *cigar_max, in
         assert(0);
     }
     *iseq = -1;
-    *iref = -1; 
+    *iref = -1;
     return -1;
 }
 
@@ -1478,19 +1478,19 @@ static void tweak_overlap_quality(bam1_t *a, bam1_t *b)
     if ( b_ret<0 ) return;  // no overlap
 
     #if DBG
-        fprintf(stderr,"tweak %s  n_cigar=%d %d  .. %d-%d vs %d-%d\n", bam_get_qname(a), a->core.n_cigar, b->core.n_cigar, 
+        fprintf(stderr,"tweak %s  n_cigar=%d %d  .. %d-%d vs %d-%d\n", bam_get_qname(a), a->core.n_cigar, b->core.n_cigar,
             a->core.pos+1,a->core.pos+bam_cigar2rlen(a->core.n_cigar,bam_get_cigar(a)), b->core.pos+1, b->core.pos+bam_cigar2rlen(b->core.n_cigar,bam_get_cigar(b)));
     #endif
 
     while ( 1 )
     {
         // Increment reference position
-        while ( a_iref>=0 && a_iref < iref - a->core.pos ) 
+        while ( a_iref>=0 && a_iref < iref - a->core.pos )
             a_ret = cigar_iref2iseq_next(&a_cigar, a_cigar_max, &a_icig, &a_iseq, &a_iref);
         if ( a_ret<0 ) break;   // done
         if ( iref < a_iref + a->core.pos ) iref = a_iref + a->core.pos;
 
-        while ( b_iref>=0 && b_iref < iref - b->core.pos ) 
+        while ( b_iref>=0 && b_iref < iref - b->core.pos )
             b_ret = cigar_iref2iseq_next(&b_cigar, b_cigar_max, &b_icig, &b_iseq, &b_iref);
         if ( b_ret<0 ) break;   // done
         if ( iref < b_iref + b->core.pos ) iref = b_iref + b->core.pos;
@@ -1498,7 +1498,7 @@ static void tweak_overlap_quality(bam1_t *a, bam1_t *b)
         iref++;
         if ( a_iref+a->core.pos != b_iref+b->core.pos ) continue;   // only CMATCH positions, don't know what to do with indels
 
-        if ( bam_seqi(a_seq,a_iseq) == bam_seqi(b_seq,b_iseq) ) 
+        if ( bam_seqi(a_seq,a_iseq) == bam_seqi(b_seq,b_iseq) )
         {
             #if DBG
                 fprintf(stderr,"%c",seq_nt16_str[bam_seqi(a_seq,a_iseq)]);
@@ -1641,10 +1641,10 @@ int bam_plp_push(bam_plp_t iter, const bam1_t *b)
 		if (b->core.tid < 0) { overlap_remove(iter, b); return 0; }
         // Skip only unmapped reads here, any additional filtering must be done in iter->func
         if (b->core.flag & BAM_FUNMAP) { overlap_remove(iter, b); return 0; }
-		if (iter->tid == b->core.tid && iter->pos == b->core.pos && iter->mp->cnt > iter->maxcnt) 
-        { 
-            overlap_remove(iter, b); 
-            return 0; 
+		if (iter->tid == b->core.tid && iter->pos == b->core.pos && iter->mp->cnt > iter->maxcnt)
+        {
+            overlap_remove(iter, b);
+            return 0;
         }
 		bam_copy1(&iter->tail->b, b);
         overlap_push(iter, iter->tail);

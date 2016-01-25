@@ -16,13 +16,13 @@ int funCompareUintAndSuffixes ( const void *a, const void *b){
             char* gb=globalGenomeArray + *( ((uint64*) b)+1);
             int ig=0;
             while (true) {
-                if (ga[ig]>gb[ig]) 
+                if (ga[ig]>gb[ig])
                 {// second condition: reached the end of ga, it's >= than any character, but = does not matter
                     return 1;
-                } else if (ga[ig]<gb[ig]) 
+                } else if (ga[ig]<gb[ig])
                 {
                     return -1;
-                } else if (ga[ig]==5) 
+                } else if (ga[ig]==5)
                 {//reached the end of chr, now simply compare the indexes for stable search
                     if (va[1]>vb[1])
                     {
@@ -31,7 +31,7 @@ int funCompareUintAndSuffixes ( const void *a, const void *b){
                     {//va cannot be equal to vb
                         return -1;
                     };
-                } else 
+                } else
                 {//continue
                     ig++;
                 };

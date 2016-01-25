@@ -2,23 +2,23 @@
 Copyright (c) 2005-2006, 2008-2009, 2013 Genome Research Ltd.
 Author: James Bonfield <jkb@sanger.ac.uk>
 
-Redistribution and use in source and binary forms, with or without 
+Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
-   1. Redistributions of source code must retain the above copyright notice, 
+   1. Redistributions of source code must retain the above copyright notice,
 this list of conditions and the following disclaimer.
 
-   2. Redistributions in binary form must reproduce the above copyright notice, 
-this list of conditions and the following disclaimer in the documentation 
+   2. Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation
 and/or other materials provided with the distribution.
 
    3. Neither the names Genome Research Ltd and Wellcome Trust Sanger
 Institute nor the names of its contributors may be used to endorse or promote
 products derived from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY GENOME RESEARCH LTD AND CONTRIBUTORS "AS IS" AND 
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+THIS SOFTWARE IS PROVIDED BY GENOME RESEARCH LTD AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 DISCLAIMED. IN NO EVENT SHALL GENOME RESEARCH LTD OR CONTRIBUTORS BE LIABLE
 FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
 DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
@@ -79,7 +79,7 @@ static char *mfload(FILE *fp, const char *fn, size_t *size, int binary) {
 #ifdef _WIN32
     if (binary)
 	_setmode(_fileno(fp), _O_BINARY);
-    else 
+    else
 	_setmode(_fileno(fp), _O_TEXT);
 #endif
 
@@ -205,14 +205,14 @@ void mfrecreate(mFILE *mf, char *data, int size) {
  *
  * Returns mFILE * on success
  *         NULL on failure.
- */ 
+ */
 mFILE *mfcreate_from(const char *path, const char *mode_str, FILE *fp) {
-   mFILE *mf; 
+   mFILE *mf;
 
     /* Open using mfreopen() */
     if (NULL == (mf = mfreopen(path, mode_str, fp)))
 	return NULL;
-    
+
     /* Disassociate from the input stream */
     mf->fp = NULL;
 
@@ -273,7 +273,7 @@ mFILE *mfreopen(const char *path, const char *mode_str, FILE *fp) {
     if (x) {
 	mf->mode |= MF_MODEX;
     }
-    
+
     if (a) {
 	mf->flush_pos = mf->size;
 	fseek(fp, 0, SEEK_END);
@@ -360,7 +360,7 @@ void *mfsteal(mFILE *mf, size_t *size_out) {
     if (!mf) return NULL;
 
     data = mf->data;
-    
+
     if (NULL != size_out) *size_out = mf->size;
 
     mfdetach(mf);
@@ -429,7 +429,7 @@ int mfeof(mFILE *mf) {
 size_t mfread(void *ptr, size_t size, size_t nmemb, mFILE *mf) {
     size_t len;
     char *cptr = (char *)ptr;
-    
+
     if (mf == m_channel[0]) init_mstdin();
 
     if (mf->size <= mf->offset)
@@ -443,7 +443,7 @@ size_t mfread(void *ptr, size_t size, size_t nmemb, mFILE *mf) {
 
     memcpy(cptr, &mf->data[mf->offset], len);
     mf->offset += len;
-    
+
     if (len != size * nmemb) {
 	mf->eof = 1;
     }
@@ -496,7 +496,7 @@ int mungetc(int c, mFILE *mf) {
 	mf->data[--mf->offset] = c;
 	return c;
     }
-    
+
     mf->eof = 1;
     return -1;
 }
