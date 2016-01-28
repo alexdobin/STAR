@@ -17,6 +17,7 @@
 #include <sys/shm.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include "CrossPlatform.h"
 #include <fcntl.h>
 #include <errno.h>
 #include <limits>
@@ -47,7 +48,6 @@ typedef uint8_t uint8;
 #define uint32 unsigned int
 #define uint16 unsigned short int
 #define uchar unsigned char
-#define int64 long long
 #define int32 int
 
 // this is gcc extension, may need to redefine for other compilers

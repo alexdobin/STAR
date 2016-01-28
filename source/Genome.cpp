@@ -1,16 +1,28 @@
+#include <time.h>
+#include <cmath>
+#include <sys/stat.h>
+
+#ifdef _WIN32
+#include <memory>
+#include <io.h>
+#include <Windows.h>
+#else
+#include <unistd.h>
+#endif
+
 #include "Genome.h"
 #include "Parameters.h"
 #include "SuffixArrayFuns.h"
 #include "PackedArray.h"
 #include "ErrorWarning.h"
 #include "streamFuns.h"
-#include "SharedMemory.h"
 #include "genomeScanFastaFiles.h"
 
-#include <time.h>
-#include <cmath>
-#include <unistd.h>
-#include <sys/stat.h>
+#if !defined(_WIN32) && defined(USE_UNIX_SHM)
+#include "SharedMemory.h"
+#else
+#include "SharedMemorySegment.h"
+#endif
 
 //addresses with respect to shmStart of several genome values
 #define SHM_sizeG 0
@@ -24,6 +36,19 @@
 
 //arbitrary number for ftok function
 #define SHM_projectID 23
+#ifdef _WIN32
+key_t ftok(const char *pathname, int proj_id)
+{
+	struct _stat64 st;
+	key_t key;
+
+	if (_stat64(pathname, &st) < 0)
+		return (key_t)-1;
+	key = ((st.st_ino & 0xffff) | ((st.st_dev & 0xff) << 16)
+		| ((proj_id & 0xff) << 24));
+	return key;
+}
+#endif
 
 Genome::Genome (Parameters* Pin ): P(Pin), shmStart(NULL), sharedMemory(NULL) {
             shmKey=ftok(P->genomeDir.c_str(),SHM_projectID);
@@ -203,7 +228,11 @@ void Genome::genomeLoad(){//allocate and load Genome
         bool unloadLast = P->genomeLoad=="LoadAndRemove";
         try
         {
+#if !defined(_WIN32) && defined(USE_UNIX_SHM)
             sharedMemory = new SharedMemory(shmKey, unloadLast);
+#else
+			sharedMemory = new SharedMemorySegment(shmKey, unloadLast);
+#endif
             sharedMemory->SetErrorStream(P->inOut->logStdOut);
 
             if (!sharedMemory->NeedsAllocation())
@@ -261,8 +290,11 @@ void Genome::genomeLoad(){//allocate and load Genome
                 errOut << "SOLUTION: remove the shared memory chunk by running STAR with --genomeLoad Remove, and restart STAR" << flush;     
                 exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INCONSISTENT_DATA, *P);  
             }
-        
+#if !defined(_WIN32) && defined(USE_UNIX_SHM)
             P->inOut->logMain << "Using shared memory for genome. key=0x" <<hex<<shmKey<<dec<< ";   shmid="<< sharedMemory->GetId() <<endl<<flush;
+#else
+			P->inOut->logMain << "Using shared memory for genome. key=0x" << hex << shmKey << dec << endl << flush;
+#endif
         }
 
         G1=shmStart+SHM_startG;

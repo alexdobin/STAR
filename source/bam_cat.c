@@ -46,15 +46,16 @@ THE SOFTWARE.
 
 */
 
-#include "bam_cat.h"
+
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
+#include <zlib.h>
+#include <string.h>
+#include "bam_cat.h"
 #include "htslib/htslib/bgzf.h"
 #include "htslib/htslib/sam.h"
-#include <cstring>
 
 #define BUF_SIZE 0x10000
 
@@ -63,6 +64,10 @@ THE SOFTWARE.
 
 #define BGZF_EMPTY_BLOCK_SIZE 28
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 int bam_cat(int nfn, char * const *fn, const bam_hdr_t *h, const char* outbam)
 {
@@ -139,5 +144,7 @@ int bam_cat(int nfn, char * const *fn, const bam_hdr_t *h, const char* outbam)
     return 0;
 }
 
-
+#ifdef __cplusplus
+}
+#endif
 
