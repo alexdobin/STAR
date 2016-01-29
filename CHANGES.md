@@ -1,3 +1,6 @@
+* Fixed a bug that caused output of unmapped mates for single end alignments even with --outSAMunmapped None .
+
+
 STAR 2.5.1b 2016/01/22
 ======================
 

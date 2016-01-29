@@ -161,7 +161,7 @@ void ReadAlign::outputAlignments() {
                 unmapType=4;
             };
             
-            if (unmapType==4)
+            if (unmapType==4 && P->outSAMunmapped.yes)
             {//output unmapped end for single-end alignments
                 if (P->outSAMbool && !P->outSAMunmapped.keepPairs && outSAMfilterYes)
                 {
