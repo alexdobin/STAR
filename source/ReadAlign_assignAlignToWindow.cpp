@@ -9,6 +9,7 @@ void ReadAlign::assignAlignToWindow(uint a1, uint aLength, uint aStr, uint aNrep
 
     if (iW==uintWinBinMax || (!aAnchor && aLength < WALrec[iW]) ) return; //alignment does not belong to any window, or it's shorter than rec-length
 
+    
     //check if this alignment overlaps with any other alignment in the window, record the longest of the two
     {//do not check for overlap if this is an sj-align
         uint iA;
@@ -65,7 +66,7 @@ void ReadAlign::assignAlignToWindow(uint a1, uint aLength, uint aStr, uint aNrep
         };
     };          
 
-    if (nWA[iW]==P->seedPerWindowNmax) {//too many aligns per window,  re-calcualte min-length, remove the shortest one,
+    if (nWA[iW]==P->seedPerWindowNmax) {//too many aligns per window,  re-calculate min-length, remove the shortest one,
 
         WALrec[iW]=Lread+1; 
         for (uint iA=0; iA<nWA[iW]; iA++) {//find the new min-length    
@@ -104,7 +105,7 @@ void ReadAlign::assignAlignToWindow(uint a1, uint aLength, uint aStr, uint aNrep
         };
      
         uint iA;                                      
-        for (iA=0;iA<nWA[iW];iA++) {//find the insertion point in case aligns are not sorted by aRstart
+        for (iA=0; iA<nWA[iW]; iA++) {//find the insertion point in case aligns are not sorted by aRstart
                                     //TODO binary search
             if (aRstart<WA[iW][iA][WA_rStart]) break;
         };
@@ -114,7 +115,50 @@ void ReadAlign::assignAlignToWindow(uint a1, uint aLength, uint aStr, uint aNrep
             };
         };
         
-        // now iW is the window to which this align belongs, record it                
+        // now iW is the window to which this align belongs, record it
+
+        // This is the piece that breaks
+//         bt full
+//#0  0x000000000044e64f in ReadAlign::assignAlignToWindow (this=0x61c494e0, a1=5768917221, aLength=16, aStr=0, aNrep=232, aFrag=0, aRstart=3906, aAnchor=false, sjA=18446744073709551615)
+//    at ReadAlign_assignAlignToWindow.cpp:118
+//        iA = 0
+//        iW = 10000
+//#1  0x000000000043e926 in ReadAlign::stitchPieces (this=0x61c494e0, R=0x647016d0, Q=0x6486fa80, 
+//    G=0x2aaaad6810d8 "\003\001\003\003\002\003\001\001\003\003\003\002\003\002\003\003\002\001\003\003\001\002\003\003\001\003", SA=..., Lread=8204) at ReadAlign_stitchPieces.cpp:180
+//        a1 = 5768917221
+//        aStr = 0
+//        aRstart = 3906
+//        iSA = 2474311944
+//        aFrag = 0
+//        aLength = 16
+//        aDir = 1
+//        aNrep = 232
+//        aAnchor = false
+//        iP = 2030
+//        swWinCovMax = 2
+//        iW1 = 2
+//        trNtotal = 2
+//#2  0x00000000004415af in ReadAlign::mapOneRead (this=0x61c494e0) at ReadAlign_mapOneRead.cpp:102
+//        seedSearchStartLmax = 50
+//#3  0x000000000044f278 in ReadAlign::oneRead (this=0x61c494e0) at ReadAlign_oneRead.cpp:70
+//        readStatus = {1, 0}
+//#4  0x00000000004453f4 in ReadAlignChunk::mapChunk (this=0x61c49230) at ReadAlignChunk_mapChunk.cpp:25
+//        readStatus = 0
+//#5  0x0000000000444b44 in ReadAlignChunk::processChunks (this=0x61c49230) at ReadAlignChunk_processChunks.cpp:144
+//        __FUNCTION__ = "processChunks"
+//#6  0x000000000047475f in ThreadControl::threadRAprocessChunks (RAchunk=0x61c49230) at ThreadControl.h:22
+//No locals.
+//#7  0x00002aaaabacc851 in start_thread () from /lib64/libpthread.so.0
+//No symbol table info available.
+//#8  0x00002aaaabdca90d in clone () from /lib64/libc.so.6
+//No symbol table info available.
+        
+        // This is a stupid patch just to verify whether this
+        // is really the problem that is plagiung us
+        if (iW >=P->seedPerWindowNmax || iW < 0 ) {
+            throw std::bad_alloc();;
+        }
+        
         WA[iW][iA][WA_rStart]=aRstart;
         WA[iW][iA][WA_Length]=aLength;
         WA[iW][iA][WA_gStart]=a1;
@@ -125,6 +169,8 @@ void ReadAlign::assignAlignToWindow(uint a1, uint aLength, uint aStr, uint aNrep
 
         nWA[iW]++;
         nWAP[iW]++;
-        if (aAnchor && WlastAnchor[iW]<iA) WlastAnchor[iW]=iA; //record the index of the last anchor
+        if (aAnchor && WlastAnchor[iW]<iA) {
+            WlastAnchor[iW]=iA; //record the index of the last anchor
+        }
     };
 };

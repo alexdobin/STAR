@@ -9,6 +9,7 @@
 #include "alignSmithWaterman.h"
 #include "GlobalVariables.h"
 #include <time.h>
+#include "ErrorWarning.h"
 
 void ReadAlign::stitchPieces(char **R, char **Q, char *G, PackedArray& SA, uint Lread) {
     
@@ -165,16 +166,14 @@ void ReadAlign::stitchPieces(char **R, char **Q, char *G, PackedArray& SA, uint 
             if (a1>=P->sjGstart) {//this is sj read
                 uint a1D, aLengthD, a1A, aLengthA, isj1;              
                 if (sjAlignSplit(a1, aLength, P, a1D, aLengthD, a1A, aLengthA, isj1)) {//align crosses the junction
-
                         assignAlignToWindow(a1D, aLengthD, aStr, aNrep, aFrag, aRstart, aAnchor, isj1);
                         assignAlignToWindow(a1A, aLengthA, aStr, aNrep, aFrag, aRstart+aLengthD, aAnchor, isj1);
-                        
                     } else {//align does not cross the junction
                         continue; //do not check this align, continue to the next one
                     };
                     
                 } else {//this is a normal genomic read
-                    assignAlignToWindow(a1, aLength, aStr, aNrep, aFrag, aRstart, aAnchor, -1);
+                       assignAlignToWindow(a1, aLength, aStr, aNrep, aFrag, aRstart, aAnchor, -1);                 
                 };
         };
         
