@@ -8,7 +8,7 @@ void BAMbinSortUnmapped(uint32 iBin, uint nThreads, string dirBAMsort, BGZF *bgz
     bgzfBin=bgzf_open((dirBAMsort+"/b"+to_string((uint) iBin)).c_str(),("w"+to_string((long long) P->outBAMcompression)).c_str());
     outBAMwriteHeader(bgzfBin,P->samHeaderSortedCoord,P->chrName,P->chrLength);
 
-      
+
     vector<string> bamInFile;
     std::map <uint,uint> startPos;
 
@@ -17,7 +17,7 @@ void BAMbinSortUnmapped(uint32 iBin, uint nThreads, string dirBAMsort, BGZF *bgz
         bamInFile.push_back(dirBAMsort+to_string(it)+"/"+to_string((uint) iBin)+".BySJout");
     };
     vector<uint32> bamSize(bamInFile.size(),0);
-    
+
     //allocate arrays
     char **bamIn=new char* [bamInFile.size()];
     ifstream *bamInStream = new ifstream [bamInFile.size()];
@@ -42,7 +42,7 @@ void BAMbinSortUnmapped(uint32 iBin, uint nThreads, string dirBAMsort, BGZF *bgz
         uint startNext=startPos.size()>1 ? (++startPos.begin())->first : (uint) -1;
 
         while (true) {
-            bgzf_write(bgzfBin, bamIn[it], bamSize.at(it)); 
+            bgzf_write(bgzfBin, bamIn[it], bamSize.at(it));
             bamInStream[it].read(bamIn[it],sizeof(int32));//read record size
             if (bamInStream[it].good()) {
                  bamSize[it]=((*(uint32*)bamIn[it])+sizeof(int32));
@@ -58,7 +58,7 @@ void BAMbinSortUnmapped(uint32 iBin, uint nThreads, string dirBAMsort, BGZF *bgz
         };
         startPos.erase(startPos.begin());
     };
-    
+
     bgzf_flush(bgzfBin);
     bgzf_close(bgzfBin);
 

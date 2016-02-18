@@ -4,7 +4,7 @@
 #include "BAMfunctions.h"
 
 void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, string dirBAMsort, Parameters *P) {
-      
+
     if (binS==0) return; //nothing to do for empty bins
     //allocate arrays
     char *bamIn=new char[binS+1];
@@ -32,30 +32,30 @@ void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, st
         errOut << binS <<"   "<< bamInBytes <<"   "<< iBin <<"\n";
         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, 1, *P);
     };
-  
+
     //extract coordinates
-    
+
     for (uint ib=0,ia=0;ia<binN;ia++) {
         uint32 *bamIn32=(uint32*) (bamIn+ib);
         startPos[ia*3]  =( ((uint) bamIn32[1]) << 32) | ( (uint)bamIn32[2] );
-        startPos[ia*3+2]=ib;      
+        startPos[ia*3+2]=ib;
         ib+=bamIn32[0]+sizeof(uint32);//note that size of the BAM record does not include the size record itself
         startPos[ia*3+1]=*( (uint*) (bamIn+ib) ); //read order
         ib+=sizeof(uint);
     };
-        
+
     //sort
     qsort((void*) startPos, binN, sizeof(uint)*3, funCompareUint2);
-    
+
     BGZF *bgzfBin;
     bgzfBin=bgzf_open((dirBAMsort+"/b"+to_string((uint) iBin)).c_str(),("w"+to_string((long long) P->outBAMcompression)).c_str());
     outBAMwriteHeader(bgzfBin,P->samHeaderSortedCoord,P->chrName,P->chrLength);
     //send ordered aligns to bgzf one-by-one
     for (uint ia=0;ia<binN;ia++) {
         char* ib=bamIn+startPos[ia*3+2];
-        bgzf_write(bgzfBin,ib, *((uint32*) ib)+sizeof(uint32) ); 
+        bgzf_write(bgzfBin,ib, *((uint32*) ib)+sizeof(uint32) );
     };
-    
+
     bgzf_flush(bgzfBin);
     bgzf_close(bgzfBin);
     //release memory

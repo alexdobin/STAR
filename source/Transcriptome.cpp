@@ -3,7 +3,7 @@
 #include "GlobalVariables.h"
 
 Transcriptome::Transcriptome (Parameters* Pin) {
-    
+
     P=Pin;
     trInfoDir = P->sjdbGTFfile=="-" ? P->genomeDir : P->sjdbInsert.outDir; //if GTF file is given at the mapping stage, it's always used for transcript info
 
@@ -46,7 +46,7 @@ Transcriptome::Transcriptome (Parameters* Pin) {
         Ptr=Pin;
 
     };
-    
+
     if ( P->quant.geCount.yes ) {//load exon-gene structures
         ifstream & exinfo = ifstrOpen(trInfoDir+"/exonGeTrInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
         exinfo >> exG.nEx;
@@ -58,7 +58,7 @@ Transcriptome::Transcriptome (Parameters* Pin) {
         exG.g=new uint32[exG.nEx];
         exG.t=new uint32[exG.nEx];
 
-        
+
         for (uint ii=0;ii<exG.nEx;ii++) {
             int str1;
             exinfo >> exG.s[ii] >> exG.e[ii] >> str1 >> exG.g[ii] >> exG.t[ii];
@@ -70,8 +70,8 @@ Transcriptome::Transcriptome (Parameters* Pin) {
         exG.eMax[0]=exG.e[0];
         for (uint iex=1;iex<exG.nEx;iex++) {
             exG.eMax[iex]=max(exG.eMax[iex-1],exG.e[iex]);
-        };        
-        
+        };
+
         ifstream & geStream = ifstrOpen(trInfoDir+"/geneInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
         geStream >> nGe;
         geID.resize(nGe);
@@ -79,7 +79,7 @@ Transcriptome::Transcriptome (Parameters* Pin) {
             geStream >> geID[ii];
         };
         geStream.close();
-        
+
 
     };
 };
@@ -92,43 +92,43 @@ void Transcriptome::quantsAllocate() {
 
 void Transcriptome::quantsOutput() {
     ofstream qOut(P->quant.geCount.outFile);
-    
+
     qOut << "N_unmapped";
     for (int itype=0; itype<quants->geneCounts.nType; itype++)
     {
         qOut << "\t" <<g_statsAll.unmappedAll;
     };
     qOut << "\n";
-    
+
     qOut << "N_multimapping";
     for (int itype=0; itype<quants->geneCounts.nType; itype++)
     {
         qOut << "\t" <<quants->geneCounts.cMulti ;
     };
     qOut << "\n";
-    
+
     qOut << "N_noFeature";
     for (int itype=0; itype<quants->geneCounts.nType; itype++)
     {
         qOut << "\t" <<quants->geneCounts.cNone[itype];
-    };    
+    };
     qOut << "\n";
-    
+
     qOut << "N_ambiguous";
     for (int itype=0; itype<quants->geneCounts.nType; itype++)
     {
         qOut << "\t" <<quants->geneCounts.cAmbig[itype];
     };
-    qOut << "\n";    
-    
+    qOut << "\n";
+
     for (uint32 ig=0; ig<nGe; ig++)
-    {    
+    {
         qOut << geID[ig];
-        for (int itype=0; itype<quants->geneCounts.nType; itype++) 
+        for (int itype=0; itype<quants->geneCounts.nType; itype++)
         {
             qOut << "\t" <<quants->geneCounts.gCount[itype][ig];
         };
         qOut << "\n";
-    };    
+    };
     qOut.close();
 };

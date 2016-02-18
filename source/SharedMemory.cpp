@@ -45,7 +45,7 @@ SharedMemory::~SharedMemory()
             if (inUse > 0)
             {
                 (*_err) << inUse << " other job(s) are attached to the shared memory segment, will not remove it." <<endl;
-            } 
+            }
             else
             {
                 (*_err) << "No other jobs are attached to the shared memory segment, removing it."<<endl;
@@ -70,7 +70,7 @@ void SharedMemory::Allocate(size_t shmSize)
 
     if (!_needsAllocation)
         ThrowError(EALREADYALLOCATED);
-    
+
     CreateAndInitSharedObject(shmSize);
 
     if (_exception.HasError() && _exception.GetErrorCode() != EEXISTS)
@@ -79,7 +79,7 @@ void SharedMemory::Allocate(size_t shmSize)
     _exception.ClearError(); // someone else came in first so retry open
 
     OpenIfExists();
-    
+
     _isAllocator = true;
 }
 
@@ -99,7 +99,7 @@ string SharedMemory::CounterName()
 
 
 void SharedMemory::CreateAndInitSharedObject(size_t shmSize)
-{    
+{
     unsigned long long toReserve = (unsigned long long) shmSize + sizeof(unsigned long long);
 
 #ifdef POSIX_SHARED_MEM
@@ -147,7 +147,7 @@ void SharedMemory::OpenIfExists()
     if (exists)
     {
         MapSharedObjectToMemory();
-        
+
         _needsAllocation = false;
     }
 }
@@ -168,21 +168,21 @@ void SharedMemory::MapSharedObjectToMemory()
 {
 #ifdef POSIX_SHARED_MEM
     size_t size=0;
-    struct stat buf = SharedMemory::GetSharedObjectInfo(); 
+    struct stat buf = SharedMemory::GetSharedObjectInfo();
     size = (size_t) buf.st_size;
     _mapped = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_NORESERVE, _shmID, (off_t) 0);
 
-    if (_mapped==((void *) -1)) 
+    if (_mapped==((void *) -1))
         ThrowError(EMAPFAILED, errno);
-    
+
     _length = (size_t *) _mapped;
     *_length = size;
 #else
     _mapped= shmat(_shmID, NULL, 0);
 
-    if (_mapped==((void *) -1)) 
+    if (_mapped==((void *) -1))
         ThrowError(EMAPFAILED, errno);
-    
+
     _length = (size_t *) _mapped;
 #endif
 }
@@ -250,7 +250,7 @@ void SharedMemory::EnsureCounter()
     if (!exists)
     {
         errno=0;
-        _sharedCounterID=shmget(_counterKey, 1, IPC_CREAT | IPC_EXCL | SHM_NORESERVE | 0666); 
+        _sharedCounterID=shmget(_counterKey, 1, IPC_CREAT | IPC_EXCL | SHM_NORESERVE | 0666);
 
         if (_sharedCounterID < 0)
             ThrowError(ECOUNTERCREATE, errno);
@@ -260,7 +260,7 @@ void SharedMemory::EnsureCounter()
     {
         _counterMem = shmat(_sharedCounterID, NULL, 0);
 
-        if (_counterMem==((void *) -1)) 
+        if (_counterMem==((void *) -1))
             ThrowError(EMAPFAILED, errno);
     }
 }

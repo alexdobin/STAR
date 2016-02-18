@@ -9,7 +9,7 @@
 #include <fstream>
 #include <sstream>
 #include <time.h>
-#include <ctime>        
+#include <ctime>
 #include <iomanip>
 #include <vector>
 #include <sys/types.h>
@@ -39,7 +39,7 @@ using namespace std;
 #endif
 
 typedef int8_t int8;
-typedef uint8_t uint8; 
+typedef uint8_t uint8;
 
 #define uint unsigned long long
 #define sint signed long long
@@ -100,7 +100,7 @@ typedef uint8_t uint8;
     #define MAX_N_EXONS 1000
 #else
     #define MAX_N_EXONS 20
-#endif     
+#endif
 
 //input reads
 #define MAX_N_MATES 2
@@ -221,5 +221,5 @@ typedef uint uiWA[WA_SIZE];
 #endif
 
 // #define DEBUG_NreadStart 500000
-        
+
 #endif

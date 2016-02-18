@@ -11,20 +11,20 @@ class Stats {
         uint readN;//number of reads from the file
         uint readBases;//number of input bases
 //         uint mateLmax[2], mateLmin[2];//mates' max and min length
-        
+
         uint mappedReadsU, mappedReadsM;
         uint mappedBases, mappedMismatchesN, mappedInsN, mappedDelN, mappedInsL, mappedDelL;
         double mappedPortion; //portion of the read length that has been mapped
-        
+
         uint splicesN[SJ_MOTIF_SIZE];//non-can,3*can,annotated
         uint splicesNsjdb;
-        
+
         uint unmappedOther, unmappedShort, unmappedMismatch, unmappedMulti, unmappedAll;
-        
+
         uint chimericAll;
 
-        time_t timeStart, timeStartMap, timeLastReport, timeFinish;     
-        
+        time_t timeStart, timeStartMap, timeLastReport, timeFinish;
+
         Stats ();
         void resetN();
         void printShort(ostream*);

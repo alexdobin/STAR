@@ -17,7 +17,7 @@ public:
     void unsortedOneAlign (char *bamIn, uint bamSize, uint bamSize2);
     void unsortedFlush ();
     void coordUnmappedPrepareBySJout();
-    
+
     uint32 nBins; //number of bins to split genome into
     uint* binTotalN; //total number of aligns in each bin
     uint* binTotalBytes;//total size of aligns in each bin
