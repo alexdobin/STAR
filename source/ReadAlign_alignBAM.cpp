@@ -85,9 +85,10 @@ int bamAttrArrayWrite(vector<int32> &attr, const char* tagName, char* attrArray 
 };
 
 template <typename intType>
-int bamAttrArrayWriteInt(intType x, const char* tagName, char* attrArray, Parameters *P) {//adapted from samtools
+int bamAttrArrayWriteInt(intType xIn, const char* tagName, char* attrArray, Parameters *P) {//adapted from samtools
     attrArray[0]=tagName[0];attrArray[1]=tagName[1];
     #define ATTR_RECORD_INT(_intChar,_intType,_intValue) attrArray[2] = _intChar; *(_intType*)(attrArray+3) = (_intType) _intValue; return 3+sizeof(_intType)
+    int64 x = (int64) xIn;
     if (x < 0) {
         if (x >= -127) {
             ATTR_RECORD_INT('c',int8_t,x);
