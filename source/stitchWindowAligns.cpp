@@ -40,9 +40,10 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
 
             if (trA.rStart>0) {// if transcript does not start at base, extend to the read start
                 trAstep1.reset();
+                uint imate=trA.exons[0][EX_iFrag];
                 if ( extendAlign(R, Q, G, trA.rStart-1, trA.gStart-1, -1, -1, trA.rStart, tR2-trA.rStart+1, \
                                  trA.nMM, RA->outFilterMismatchNmaxTotal, P->outFilterMismatchNoverLmax, \
-                                 P->alignEndsType.ext[trA.exons[0][EX_iFrag]][trA.Str], &trAstep1) ) {//if could extend
+                                 P->alignEndsType.ext[imate][(int)(trA.Str!=imate)], &trAstep1) ) {//if could extend
 
                     trA.add(&trAstep1);
                     Score += trAstep1.maxScore;
@@ -60,9 +61,10 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
 
             if ( tR2<Lread ) {//extend alignment to the read end
                 trAstep1.reset();
+                uint imate=trA.exons[trA.nExons-1][EX_iFrag];
                 if ( extendAlign(R, Q, G, tR2+1, tG2+1, +1, +1, Lread-tR2-1, tR2-trA.rStart+1, \
                                  trA.nMM, RA->outFilterMismatchNmaxTotal,  P->outFilterMismatchNoverLmax, \
-                                 P->alignEndsType.ext[trA.exons[trA.nExons-1][EX_iFrag]][1-trA.Str], &trAstep1) ) {//if could extend
+                                 P->alignEndsType.ext[imate][(int)(imate==trA.Str)], &trAstep1) ) {//if could extend
 
                     trA.add(&trAstep1);
                     Score += trAstep1.maxScore;
