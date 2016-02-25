@@ -71,7 +71,7 @@ void sjdbInsertJunctions(Parameters * P, Parameters * P1, Genome & genome, SjdbC
     sjdbBuildIndex (P, P1, Gsj, genome.G, genome.SA, (P->twoPass.pass2 ? genome.SApass2 : genome.SApass1), genome.SAi);
     delete [] Gsj; //junction sequences have been added to G
     time ( &rawtime );
-    P->inOut->logMain     << timeMonthDayTime(rawtime) << " ..... Finished inserting junctions into genome" <<endl;
+    P->inOut->logMain     << timeMonthDayTime(rawtime) << " ..... finished inserting junctions into genome" <<endl;
 
     if (P->sjdbInsert.save=="All")
     {//save and copy all genome files into sjdbInsert.outDir, except those created above
