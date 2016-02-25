@@ -12,7 +12,7 @@ if (P->genomeFastaFiles.at(0)!="-")
 {
     time_t rawtime;
     time ( &rawtime );
-    P->inOut->logMain  << timeMonthDayTime(rawtime) << " ..... Inserting extra sequences into genome indexes" <<endl;
+    P->inOut->logMain  << timeMonthDayTime(rawtime) << " ..... inserting extra sequences into genome indexes" <<endl;
     //move the junctions to free up space for seqs
     // chrStart/Name/Length nChrReal include the extra sequences
     // nGenome is the old, small genome size
