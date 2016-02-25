@@ -141,8 +141,8 @@ void genomeGenerate(Parameters *P) {
     string timeString;
 
     time(&rawTime);
-    P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ... Starting to generate Genome files\n" <<flush;
-    *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... Starting to generate Genome files\n" <<flush;
+    P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ... starting to generate Genome files\n" <<flush;
+    *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... starting to generate Genome files\n" <<flush;
 
     //define some parameters from input parameters
     P->genomeChrBinNbases=1LLU << P->genomeChrBinNbits;
