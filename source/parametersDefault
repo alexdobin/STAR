@@ -477,9 +477,10 @@ alignTranscriptsPerReadNmax               10000
 
 alignEndsType           Local
     string: type of read ends alignment
-                        Local           ... standard local alignment with soft-clipping allowed
-                        EndToEnd        ... force end-to-end read alignment, do not soft-clip
-                        Extend5pOfRead1 ... fully extend only the 5p of the read1, all other ends: local alignment
+                        Local             ... standard local alignment with soft-clipping allowed
+                        EndToEnd          ... force end-to-end read alignment, do not soft-clip
+                        Extend5pOfRead1   ... fully extend only the 5p of the read1, all other ends: local alignment
+                        Extend5pOfReads12 ... fully extend only the 5p of the both read1 and read2, all other ends: local alignment
 
 alignSoftClipAtReferenceEnds Yes
     string: allow the soft-clipping of the alignments past the end of the chromosomes
