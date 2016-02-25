@@ -56,7 +56,7 @@ int main(int argInN, char* argIn[]) {
     Parameters *P = new Parameters; //all parameters
     P->inputParameters(argInN, argIn);
 
-    *(P->inOut->logStdOut) << timeMonthDayTime(g_statsAll.timeStart) << " ..... Started STAR run\n" <<flush;
+    *(P->inOut->logStdOut) << timeMonthDayTime(g_statsAll.timeStart) << " ..... started STAR run\n" <<flush;
 
     //generate genome
     if (P->runMode=="genomeGenerate") {
