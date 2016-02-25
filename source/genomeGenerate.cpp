@@ -218,8 +218,8 @@ void genomeGenerate(Parameters *P) {
 
     //sort SA
     time ( &rawTime );
-    P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ... starting to sort  Suffix Array. This may take a long time...\n" <<flush;
-    *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... starting to sort  Suffix Array. This may take a long time...\n" <<flush;
+    P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ... starting to sort Suffix Array. This may take a long time...\n" <<flush;
+    *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... starting to sort Suffix Array. This may take a long time...\n" <<flush;
 
 
 //     if (false)
@@ -365,8 +365,8 @@ void genomeGenerate(Parameters *P) {
     time ( &rawTime );
     timeString=asctime(localtime ( &rawTime ));
     timeString.erase(timeString.end()-1,timeString.end());
-    P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ... Finished generating suffix array\n" <<flush;
-    *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... Finished generating suffix array\n" <<flush;
+    P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ... finished generating suffix array\n" <<flush;
+    *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... finished generating suffix array\n" <<flush;
 
 ////////////////////////////////////////
 //          SA index
@@ -461,6 +461,6 @@ void genomeGenerate(Parameters *P) {
     timeString.erase(timeString.end()-1,timeString.end());
 
     time(&rawTime);
-    P->inOut->logMain    << timeMonthDayTime(rawTime) << " ..... Finished successfully\n" <<flush;
-    *P->inOut->logStdOut << timeMonthDayTime(rawTime) << " ..... Finished successfully\n" <<flush;
+    P->inOut->logMain    << timeMonthDayTime(rawTime) << " ..... finished successfully\n" <<flush;
+    *P->inOut->logStdOut << timeMonthDayTime(rawTime) << " ..... finished successfully\n" <<flush;
 };
