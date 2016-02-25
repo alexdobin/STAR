@@ -24,8 +24,8 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
 
     time_t rawtime;
     time ( &rawtime );
-    P->inOut->logMain   << timeMonthDayTime(rawtime) << " ..... Inserting junctions into the genome indices" <<endl;
-    *P->inOut->logStdOut  << timeMonthDayTime(rawtime) << " ..... Inserting junctions into the genome indices" <<endl;
+    P->inOut->logMain   << timeMonthDayTime(rawtime) << " ..... inserting junctions into the genome indices" <<endl;
+    *P->inOut->logStdOut  << timeMonthDayTime(rawtime) << " ..... inserting junctions into the genome indices" <<endl;
 
     uint nGsj=P->sjdbLength*P->sjdbN;
     for (uint ii=1; ii<=P->sjdbN; ii++)
