@@ -39,8 +39,8 @@ void genomeSAindex(char * G, PackedArray & SA, Parameters * P, PackedArray & SAi
 
     time_t rawTime;
     time(&rawTime);
-    P->inOut->logMain    << timeMonthDayTime(rawTime) <<" ... Generating Suffix Array index\n" <<flush;
-    *P->inOut->logStdOut << timeMonthDayTime(rawTime) <<" ... Generating Suffix Array index\n" <<flush;
+    P->inOut->logMain    << timeMonthDayTime(rawTime) <<" ... generating Suffix Array index\n" <<flush;
+    *P->inOut->logStdOut << timeMonthDayTime(rawTime) <<" ... generating Suffix Array index\n" <<flush;
 
     /*testing
     PackedArray SA1=SA;
@@ -95,8 +95,8 @@ void genomeSAindex(char * G, PackedArray & SA, Parameters * P, PackedArray & SAi
     genomeSAindexChunk(G, SA, P, SAi, 0, SA.length-1);
 
     time(&rawTime);
-    P->inOut->logMain    << timeMonthDayTime(rawTime) <<" ... Completed Suffix Array index\n" <<flush;
-    *P->inOut->logStdOut << timeMonthDayTime(rawTime) <<" ... Completed Suffix Array index\n" <<flush;
+    P->inOut->logMain    << timeMonthDayTime(rawTime) <<" ... completed Suffix Array index\n" <<flush;
+    *P->inOut->logStdOut << timeMonthDayTime(rawTime) <<" ... completed Suffix Array index\n" <<flush;
 
 //     for (uint ii=1;ii<=P->genomeSAindexNbases-1;ii++) {//L-mer indices starts
 //         cout <<ii<<endl;

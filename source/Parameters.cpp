@@ -494,18 +494,18 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     } else if (runMode=="inputAlignmentsFromBAM") {
         //at the moment, only wiggle output is implemented
         if (outWigFlags.yes) {
-            *inOut->logStdOut << timeMonthDayTime() << " ..... Reading from BAM, output wiggle\n" <<flush;
-            inOut->logMain << timeMonthDayTime()    << " ..... Reading from BAM, output wiggle\n" <<flush;
+            *inOut->logStdOut << timeMonthDayTime() << " ..... reading from BAM, output wiggle\n" <<flush;
+            inOut->logMain << timeMonthDayTime()    << " ..... reading from BAM, output wiggle\n" <<flush;
             string wigOutFileNamePrefix=outFileNamePrefix + "Signal";
             signalFromBAM(inputBAMfile, wigOutFileNamePrefix, *this);
-            *inOut->logStdOut << timeMonthDayTime() << " ..... Done\n" <<flush;
-            inOut->logMain << timeMonthDayTime()    << " ..... Done\n" <<flush;
+            *inOut->logStdOut << timeMonthDayTime() << " ..... done\n" <<flush;
+            inOut->logMain << timeMonthDayTime()    << " ..... done\n" <<flush;
         } else if (bamRemoveDuplicatesType=="UniqueIdentical") {
-            *inOut->logStdOut << timeMonthDayTime() << " ..... Reading from BAM, remove duplicates, output BAM\n" <<flush;
-            inOut->logMain << timeMonthDayTime()    << " ..... Reading from BAM, remove duplicates, output BAM\n" <<flush;
+            *inOut->logStdOut << timeMonthDayTime() << " ..... reading from BAM, remove duplicates, output BAM\n" <<flush;
+            inOut->logMain << timeMonthDayTime()    << " ..... reading from BAM, remove duplicates, output BAM\n" <<flush;
             bamRemoveDuplicates(inputBAMfile,(outFileNamePrefix+"Processed.out.bam").c_str(),this);
-            *inOut->logStdOut << timeMonthDayTime() << " ..... Done\n" <<flush;
-            inOut->logMain << timeMonthDayTime()    << " ..... Done\n" <<flush;
+            *inOut->logStdOut << timeMonthDayTime() << " ..... done\n" <<flush;
+            inOut->logMain << timeMonthDayTime()    << " ..... done\n" <<flush;
         } else {
             ostringstream errOut;
             errOut <<"EXITING because of fatal INPUT ERROR: at the moment --runMode inputFromBAM only works with --outWigType bedGraph OR --bamRemoveDuplicatesType Identical"<<"\n";
