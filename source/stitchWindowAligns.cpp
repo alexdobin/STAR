@@ -188,9 +188,11 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
 
             if ( trA.exons[iexM2-1][EX_G] + trA.exons[iexM2-1][EX_L] > trA.exons[iexM2][EX_G] ) {//mates overlap - check consistency of junctions
 
-                if (trA.exons[0][EX_G] > trA.exons[iexM2][EX_G]+trA.exons[0][EX_R]) return; //LeftMateStart > RightMateStart
-                if (trA.exons[iexM2-1][EX_G]+trA.exons[iexM2-1][EX_L] > trA.exons[trA.nExons-1][EX_G]+Lread-trA.exons[trA.nExons-1][EX_R]) return; //LeftMateEnd   > RightMateEnd
-
+                if (trA.exons[0][EX_G] > \
+                    trA.exons[iexM2][EX_G]+trA.exons[0][EX_R]+P->alignEndsProtrude.nBasesMax) return; //LeftMateStart > RightMateStart + allowance
+                if (trA.exons[iexM2-1][EX_G]+trA.exons[iexM2-1][EX_L] > \
+                   trA.exons[trA.nExons-1][EX_G]+Lread-trA.exons[trA.nExons-1][EX_R]+P->alignEndsProtrude.nBasesMax) return; //LeftMateEnd   > RightMateEnd +allowance            
+                
                 //check for junctions consistency
                 uint iex1=1, iex2=iexM2+1; //last exons of the junction
                 for  (; iex1<iexM2; iex1++) {//find first junction that overlaps 2nd mate

@@ -1,3 +1,5 @@
+* Implemented --alignEndsProtrude option to control output of alignments with protruding ends.
+* Implemented --outTmpKeep All option to keep the temporary files.
 * Implemented --alignEndsType Extend5pOfReads12 option for full extension of 5' ends of both mates.
 * Fixed a bug that caused output of unmapped mates for single end alignments even with --outSAMunmapped None .
 

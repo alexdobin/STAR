@@ -70,21 +70,33 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
         };
     };
 
-    uint samFLAG=0;
+    uint samFlagCommon=0;//FLAG common for both mates
+    if (flagPaired) 
+    {//paired reads
+        samFlagCommon=0x0001;
+        if (iExMate==trOut.nExons-1) 
+        {//single mate
+            if (mateChr>P->nChrReal) samFlagCommon+=0x0008; //not mapped as pair
+        } else 
+        {//paired align
+            if (P->alignEndsProtrude.concordantPair || \
+                ( (trOut.exons[0][EX_G] <= trOut.exons[iExMate+1][EX_G]+trOut.exons[0][EX_R]) && \
+                   (trOut.exons[iExMate][EX_G]+trOut.exons[iExMate][EX_L] <= trOut.exons[trOut.nExons-1][EX_G]+Lread-trOut.exons[trOut.nExons-1][EX_R]) )  )                
+            {//properly paired
+                samFlagCommon+=0x0002;
+            };
+        };
+    } else 
+    {//single end
+        samFlagCommon=0;
+    };
+
+    if (readFilter=='Y') samFlagCommon+=0x200; //not passing quality control    
+
+    uint samFLAG;
     uint leftMate=0; //the mate (0 or 1) which is on the left
     for (uint imate=0;imate<nMates;imate++) {
-        if (flagPaired) {//paired reads
-            samFLAG=0x0001;
-            if (iExMate==trOut.nExons-1) {//single mate
-                if (mateChr>P->nChrReal) samFLAG+=0x0008; //not mapped as pair
-            } else {//properly paired
-                samFLAG+=0x0002; //mapped as pair
-            };
-        } else {//single end
-            samFLAG=0;
-        };
-
-        if (readFilter=='Y') samFLAG+=0x200; //not passing quality control
+        samFLAG=samFlagCommon;
 
         uint iEx1 = (imate==0 ? 0 : iExMate+1);
         uint iEx2 = (imate==0 ? iExMate : trOut.nExons-1);

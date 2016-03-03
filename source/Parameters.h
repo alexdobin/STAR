@@ -96,7 +96,13 @@ class Parameters {
             bool ext[2][2];
         } alignEndsType;
 
-
+        struct
+        {
+            vector<string> in;
+            int nBasesMax;
+            bool concordantPair;
+        } alignEndsProtrude;
+        
         //seed parameters
         uint seedMultimapNmax; //max number of multiple alignments per piece
         uint seedSearchLmax; //max length of the seed
@@ -110,7 +116,8 @@ class Parameters {
         uint chunkInSizeBytes,chunkInSizeBytesArray,chunkOutBAMsizeBytes;
 
         //output
-        string outFileNamePrefix, outStd, outTmpDir;
+        string outFileNamePrefix, outStd;
+        string outTmpDir, outTmpKeep;
 
         //SAM output
         string outBAMfileCoordName, outBAMfileUnsortedName, outQuantBAMfileName;

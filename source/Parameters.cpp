@@ -72,6 +72,7 @@ Parameters::Parameters() {//initalize parameters info
     //output
     parArray.push_back(new ParameterInfoScalar <string>     (-1, 2, "outFileNamePrefix", &outFileNamePrefix));
     parArray.push_back(new ParameterInfoScalar <string>     (-1, 2, "outTmpDir", &outTmpDir));
+    parArray.push_back(new ParameterInfoScalar <string>     (-1, 2, "outTmpKeep", &outTmpKeep));
     parArray.push_back(new ParameterInfoScalar <string>     (-1, 2, "outStd", &outStd));
     parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "outReadsUnmapped", &outReadsUnmapped));
     parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "outQSconversionAdd", &outQSconversionAdd));
@@ -182,6 +183,8 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "alignTranscriptsPerWindowNmax", &alignTranscriptsPerWindowNmax));
     parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "alignEndsType", &alignEndsType.in));
     parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "alignSoftClipAtReferenceEnds", &alignSoftClipAtReferenceEnds));
+
+    parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "alignEndsProtrude", &alignEndsProtrude.in));
 
 
     //chimeric
@@ -1161,6 +1164,23 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         };
     };
 
+    alignEndsProtrude.nBasesMax=stoi(alignEndsProtrude.in.at(0),nullptr);
+    if (alignEndsProtrude.nBasesMax>0)
+    {//allow ends protrusion
+        if (alignEndsProtrude.in.at(1)=="ConcordantPair")
+        {
+            alignEndsProtrude.concordantPair=true;
+        } else if (alignEndsProtrude.in.at(1)=="DiscordantPair")
+        {
+            alignEndsProtrude.concordantPair=false;
+        } else
+        {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in of --alignEndsProtrude="<<alignEndsProtrude.in.at(1)<<"\n";
+            errOut << "SOLUTION: use allowed option: ConcordantPair or DiscordantPair";
+            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };
+    };
     ////////////////////////////////////////////////
     inOut->logMain << "Finished loading and checking parameters\n" <<flush;
 };

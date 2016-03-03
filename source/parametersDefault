@@ -165,6 +165,11 @@ outTmpDir                       -
     string: path to a directory that will be used as temporary by STAR. All contents of this directory will be removed!
             - the temp directory will default to outFileNamePrefix_STARtmp
 
+outTmpKeep                      None
+    string: whether to keep the tempporary files after STAR runs is finished
+                                None ... remove all temporary files
+                                All .. keep all files
+
 outStd                          Log
     string: which output will be directed to stdout (standard out)
                                 Log                    ... log messages
@@ -481,6 +486,14 @@ alignEndsType           Local
                         EndToEnd          ... force end-to-end read alignment, do not soft-clip
                         Extend5pOfRead1   ... fully extend only the 5p of the read1, all other ends: local alignment
                         Extend5pOfReads12 ... fully extend only the 5p of the both read1 and read2, all other ends: local alignment
+
+alignEndsProtrude       0    ConcordantPair
+    int, string:        allow protrusion of alignment ends, i.e. start (end) of the +strand mate downstream of the start (end) of the -strand mate
+                        1st word: int: maximum number of protrusion bases allowed
+                        2nd word: string: 
+                                            ConcordantPair ... report alignments with non-zero protrusion as concordant pairs
+                                            DiscordantPair ... report alignments with non-zero protrusion as discordant pairs
+
 
 alignSoftClipAtReferenceEnds Yes
     string: allow the soft-clipping of the alignments past the end of the chromosomes
