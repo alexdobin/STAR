@@ -61,7 +61,7 @@ class Parameters {
         int readFilesIndex;
         uint32 readFilesN;
         vector <string> readFilesIn, readFilesInTmp;
-        vector <vector <string>> readFilesNames;
+        vector <vector <string> > readFilesNames;
         uint readNmates;
         string readMatesLengthsIn;
         vector <string> readFilesCommand;

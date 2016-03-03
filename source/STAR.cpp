@@ -386,7 +386,7 @@ int main(int argInN, char* argIn[]) {
         vector <string> bamBinNamesV;
         for (uint32 ibin=0; ibin<nBins; ibin++) {
 
-            bamBinNamesV.push_back(P->outBAMsortTmpDir+"/b"+to_string((uint) ibin));
+            bamBinNamesV.push_back(P->outBAMsortTmpDir+"/b"+std::to_string((uint) ibin));
             struct stat buffer;
             if (stat (bamBinNamesV.back().c_str(), &buffer) != 0) {//check if file exists
                 bamBinNamesV.pop_back();
