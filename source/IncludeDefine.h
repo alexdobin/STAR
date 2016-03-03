@@ -38,6 +38,10 @@ using namespace std;
   #define SHM_NORESERVE 0
 #endif
 
+#if defined(__mips__) && !defined(SHM_NORESERVE)
+#define SHM_NORESERVE 010000
+#endif
+
 typedef int8_t int8;
 typedef uint8_t uint8;
 
