@@ -111,6 +111,8 @@ void ReadAlignChunk::chunkFstreamCat (fstream &chunkOut, ofstream &allOut, bool 
     if (mutexFlag) pthread_mutex_lock(&mutexVal);
     allOut << chunkOut.rdbuf();
     allOut.clear();
+    allOut.flush();
+    allOut.clear();
     if (mutexFlag) pthread_mutex_unlock(&mutexVal);
     chunkOut.clear();
     chunkOut.seekp(0,ios::beg); //set put pointer at the beginning
