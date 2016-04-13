@@ -142,7 +142,7 @@ int main(int argInN, char* argIn[]) {
         g_statsAll.resetN();
         time(&g_statsAll.timeStartMap);
         P->inOut->logProgress << timeMonthDayTime(g_statsAll.timeStartMap) <<"\tStarted 1st pass mapping\n" <<flush;
-        *P->inOut->logStdOut << timeMonthDayTime(g_statsAll.timeStartMap) << " ..... Started 1st pass mapping\n" <<flush;
+        *P->inOut->logStdOut << timeMonthDayTime(g_statsAll.timeStartMap) << " ..... started 1st pass mapping\n" <<flush;
 
         //run mapping for Pass1
         ReadAlignChunk *RAchunk1[P->runThreadN];
@@ -157,7 +157,7 @@ int main(int argInN, char* argIn[]) {
 
         time_t rawtime; time (&rawtime);
         P->inOut->logProgress << timeMonthDayTime(rawtime) <<"\tFinished 1st pass mapping\n";
-        *P->inOut->logStdOut << timeMonthDayTime(rawtime) << " ..... Finished 1st pass mapping\n" <<flush;
+        *P->inOut->logStdOut << timeMonthDayTime(rawtime) << " ..... finished 1st pass mapping\n" <<flush;
         ofstream logFinal1 ( (P->twoPass.dir + "/Log.final.out").c_str());
         g_statsAll.reportFinal(logFinal1);
 
@@ -180,7 +180,7 @@ int main(int argInN, char* argIn[]) {
     //initialize Stats
     g_statsAll.resetN();
     time(&g_statsAll.timeStartMap);
-    *P->inOut->logStdOut << timeMonthDayTime(g_statsAll.timeStartMap) << " ..... Started mapping\n" <<flush;
+    *P->inOut->logStdOut << timeMonthDayTime(g_statsAll.timeStartMap) << " ..... started mapping\n" <<flush;
 
     g_statsAll.timeLastReport=g_statsAll.timeStartMap;
 
@@ -326,8 +326,8 @@ int main(int argInN, char* argIn[]) {
 
 
     if (P->outBAMcoord) {//sort BAM if needed
-        *P->inOut->logStdOut << timeMonthDayTime() << " ..... Started sorting BAM\n" <<flush;
-        P->inOut->logMain << timeMonthDayTime() << " ..... Started sorting BAM\n" <<flush;
+        *P->inOut->logStdOut << timeMonthDayTime() << " ..... started sorting BAM\n" <<flush;
+        P->inOut->logMain << timeMonthDayTime() << " ..... started sorting BAM\n" <<flush;
         uint32 nBins=P->outBAMcoordNbins;
 
         //check max size needed for sorting
@@ -399,8 +399,8 @@ int main(int argInN, char* argIn[]) {
     };
     //wiggle output
     if (P->outWigFlags.yes) {
-        *P->inOut->logStdOut << timeMonthDayTime() << " ..... Started wiggle output\n" <<flush;
-        P->inOut->logMain << timeMonthDayTime() << " ..... Started wiggle output\n" <<flush;
+        *P->inOut->logStdOut << timeMonthDayTime() << " ..... started wiggle output\n" <<flush;
+        P->inOut->logMain << timeMonthDayTime() << " ..... started wiggle output\n" <<flush;
         string wigOutFileNamePrefix=P->outFileNamePrefix + "Signal";
         signalFromBAM(P->outBAMfileCoordName, wigOutFileNamePrefix, *P);
     };
@@ -413,7 +413,7 @@ int main(int argInN, char* argIn[]) {
     P->inOut->logProgress  << "ALL DONE!\n"<<flush;
     P->inOut->logFinal.open((P->outFileNamePrefix + "Log.final.out").c_str());
     g_statsAll.reportFinal(P->inOut->logFinal);
-    *P->inOut->logStdOut << timeMonthDayTime(g_statsAll.timeFinish) << " ..... Finished successfully\n" <<flush;
+    *P->inOut->logStdOut << timeMonthDayTime(g_statsAll.timeFinish) << " ..... finished successfully\n" <<flush;
 
     P->inOut->logMain  << "ALL DONE!\n"<<flush;
     if (P->outTmpKeep=="None")

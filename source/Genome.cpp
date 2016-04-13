@@ -75,7 +75,7 @@ void Genome::genomeLoad(){//allocate and load Genome
 
     time_t rawtime;
     time ( &rawtime );
-    *(P->inOut->logStdOut) << timeMonthDayTime(rawtime) << " ..... Loading genome\n" <<flush;
+    *(P->inOut->logStdOut) << timeMonthDayTime(rawtime) << " ..... loading genome\n" <<flush;
 
     uint *shmNG=NULL, *shmNSA=NULL;   //pointers to shm stored values , *shmSG, *shmSSA
     uint64 shmSize=0;//, shmStartG=0; shmStartSA=0;
