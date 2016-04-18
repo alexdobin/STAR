@@ -665,13 +665,19 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         };
     };
 
-    outSAMfilter.yes=false;
     outSAMfilter.KeepOnlyAddedReferences=false;
+    outSAMfilter.KeepAllAddedReferences=false;
+    outSAMfilter.yes=true;
     if (outSAMfilter.mode.at(0)=="KeepOnlyAddedReferences")
     {
-        outSAMfilter.yes=true;
         outSAMfilter.KeepOnlyAddedReferences=true;
-    } else if (outSAMfilter.mode.at(0)!="None")
+    } else if (outSAMfilter.mode.at(0)=="KeepAllAddedReferences")  
+    {
+        outSAMfilter.KeepAllAddedReferences=true;
+    } else if (outSAMfilter.mode.at(0)=="None")
+    {
+      outSAMfilter.yes=false;
+    } else
     {
         ostringstream errOut;
         errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented value for --outSAMfilter: "<<outSAMfilter.mode.at(0) <<"\n";

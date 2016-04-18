@@ -229,7 +229,7 @@ outSAMunmapped                  None
                                 None   ... no output
                                 Within ... output unmapped reads within the main SAM file (i.e. Aligned.out.sam)
                                 2nd word:
-                                KeepPairs ... record unmapped mate for each alignment, and, in case of unsroted output, keep it adjacent to its mapped mate.
+                                KeepPairs ... record unmapped mate for each alignment, and, in case of unsorted output, keep it adjacent to its mapped mate.
                                               Only affects multi-mapping reads
 
 outSAMorder                     Paired
@@ -274,6 +274,8 @@ outSAMheaderCommentFile -
 outSAMfilter            None
     string(s): filter the output into main SAM/BAM files
                         KeepOnlyAddedReferences ... only keep the reads for which all alignments are to the extra reference sequences added with --genomeFastaFiles at the mapping stage.
+                        KeepAllAddedReferences ...  keep all alignments to the extra reference sequences added with --genomeFastaFiles at the mapping stage.
+
 
 outSAMmultNmax          -1
     int: max number of multiple alignments for a read that will be output to the SAM/BAM files.

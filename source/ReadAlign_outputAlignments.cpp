@@ -75,19 +75,39 @@ void ReadAlign::outputAlignments() {
         };
 
         if (outFilterPassed) {
+            uint nTrOut=nTr; //number of aligns to output
             bool outSAMfilterYes=true;
             if (P->outSAMfilter.yes)
             {
                 if (P->outSAMfilter.KeepOnlyAddedReferences)
                 {
-                     for (uint itr=0;itr<nTr;itr++)
-                     {//check if transcripts map to chr other than added references
-                         if (trMult[itr]->Chr<P->genomeInsertChrIndFirst)
-                         {
-                             outSAMfilterYes=false;
-                             break;
-                         };
-                     };
+                    for (uint itr=0;itr<nTr;itr++)
+                    {//check if transcripts map to chr other than added references
+                        if (trMult[itr]->Chr<P->genomeInsertChrIndFirst)
+                        {
+                            outSAMfilterYes=false;
+                            break;
+                        };
+                    };
+                } else if (P->outSAMfilter.KeepAllAddedReferences)
+                {
+                    nTrOut=0;
+                    for (uint itr=0;itr<nTr;itr++)
+                    {//check if transcripts map to chr other than added references
+                        if (trMult[itr]->Chr>=P->genomeInsertChrIndFirst)
+                        {
+                            trMult[nTrOut]=trMult[itr];
+                            trMult[nTrOut]->primaryFlag=false;
+                            ++nTrOut;
+                        };
+                    };
+                    if (nTrOut==0)
+                    {
+                        outSAMfilterYes=false;
+                    } else
+                    {
+                        trMult[0]->primaryFlag=true;
+                    };
                 };
             };
             if (nTr>1) {//multimappers
@@ -103,7 +123,7 @@ void ReadAlign::outputAlignments() {
                 exitWithError(errOut.str(), std::cerr, P->inOut->logMain, EXIT_CODE_BUG, *P);
             };
 
-            uint nTrOut=min(P->outSAMmultNmax,nTr); //number of to write to SAM/BAM files
+            nTrOut=min(P->outSAMmultNmax,nTrOut); //number of to write to SAM/BAM files
 
             for (uint iTr=0;iTr<nTrOut;iTr++)
             {//write all transcripts

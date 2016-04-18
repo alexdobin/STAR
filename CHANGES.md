@@ -1,3 +1,4 @@
+* Implemented --outSAMfilter KeepAllAddedReferences option which will keep all alignments to the added references.
 * Implemented --alignEndsProtrude option to control output of alignments with protruding ends.
 * Implemented --outTmpKeep All option to keep the temporary files.
 * Implemented --alignEndsType Extend5pOfReads12 option for full extension of 5' ends of both mates.

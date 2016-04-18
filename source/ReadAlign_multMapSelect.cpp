@@ -44,8 +44,8 @@ void ReadAlign::multMapSelect() {//select multiple mappers from all transcripts 
         };
     };
 
-    if (nTr > P->outFilterMultimapNmax)
-    {//too multi, no need for further processing, isnce it will be considered unmapped
+    if (nTr > P->outFilterMultimapNmax || nTr==0)
+    {//too multi OR no alignments, no need for further processing, since it will be considered unmapped
         return;
     };
 

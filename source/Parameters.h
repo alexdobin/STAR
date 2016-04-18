@@ -154,6 +154,7 @@ class Parameters {
             vector <string> mode;
             bool yes;
             bool KeepOnlyAddedReferences;
+            bool KeepAllAddedReferences;            
         } outSAMfilter;
 
         struct
