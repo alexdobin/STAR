@@ -1,3 +1,5 @@
+* Fixed a bug that can cause STARlong seg-faults in rare cases.
+* Implemented --winReadCoverageRelativeMin and --winReadCoverageBasesMin to control coverage of the alignment windows for STARlong.
 * Implemented --outSAMfilter KeepAllAddedReferences option which will keep all alignments to the added references.
 * Implemented --alignEndsProtrude option to control output of alignments with protruding ends.
 * Implemented --outTmpKeep All option to keep the temporary files.

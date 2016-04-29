@@ -513,10 +513,14 @@ winBinNbits                     16
 winAnchorDistNbins              9
     int>0: max number of bins between two anchors that allows aggregation of anchors into one window
 
-winFlankNbins               4
+winFlankNbins                   4
     int>0: log2(winFlank), where win Flank is the size of the left and right flanking regions for each window
 
+winReadCoverageRelativeMin      0.5
+    float>=0: minimum relative coverage of the read sequence by the seeds in a window, for STARlong algorithm only.
 
+winReadCoverageBasesMin      0
+    int>0: minimum number of bases covered by the seeds in a window , for STARlong algorithm only.
 
 ### Chimeric Alignments
 chimOutType                 SeparateSAMold

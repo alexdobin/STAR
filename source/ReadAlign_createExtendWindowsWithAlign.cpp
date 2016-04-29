@@ -68,7 +68,7 @@ int ReadAlign::createExtendWindowsWithAlign(uint a1, uint aStr) {
             WC[iWin][WC_gEnd]=WC[iWin][WC_gStart]=aBin;
             ++nW;
             if (nW>=P->alignWindowsPerReadNmax) {
-                nW=P->alignWindowsPerReadNmax;
+                nW=P->alignWindowsPerReadNmax-1;
                 return EXIT_createExtendWindowsWithAlign_TOO_MANY_WINDOWS; //too many windows, do not record TODO: record a marker
             };
         } else {//record windows after merging

@@ -224,7 +224,7 @@ for (uint iW=0;iW<nW;iW++) {//check each window
     };//if (nWA[iW]>0)
 };//for (uint iW=0;iW<nW;iW++)
 for (uint iW=0;iW<nW;iW++) {
-    if (swWinCov[iW]<swWinCovMax*5/10) {//remove windows that are not good enough
+    if (swWinCov[iW]<swWinCovMax*P->winReadCoverageRelativeMin || swWinCov[iW]<P->winReadCoverageBasesMin) {//remove windows that are not good enough
         nWA[iW]=0;
     } else {//merge pieces that are adjacent in R- and G-spaces
         uint ia1=0;

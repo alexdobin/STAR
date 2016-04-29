@@ -50,6 +50,8 @@ class Parameters {
         uint genomeChrBinNbits, genomeChrBinNbases, chrBinN, *chrBin;
         uint winBinChrNbits, winBinNbits, winAnchorDistNbins, winFlankNbins, winBinN;
         uint winAnchorMultimapNmax; //max number of alignments for anchors
+        double winReadCoverageRelativeMin;
+        uint winReadCoverageBasesMin;
 
         uint genomeSAindexNbases; //length of the SA pre-index strings
         uint *genomeSAindexStart;//starts of the L-mer indices in the SAindex, 1<=L<=genomeSAindexNbases

@@ -144,6 +144,8 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "winAnchorDistNbins", &winAnchorDistNbins));
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "winFlankNbins", &winFlankNbins));
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "winAnchorMultimapNmax", &winAnchorMultimapNmax));
+    parArray.push_back(new ParameterInfoScalar <double>   (-1, -1, "winReadCoverageRelativeMin", &winReadCoverageRelativeMin));
+    parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "winReadCoverageBasesMin", &winReadCoverageBasesMin));
 
     //scoring
     parArray.push_back(new ParameterInfoScalar <intScore>   (-1, -1, "scoreGap", &scoreGap));
@@ -1292,7 +1294,7 @@ void Parameters::chrInfoLoad() {//find chrStart,Length,nChr from Genome G
     chrStreamIn.close();
     nChrReal=chrName.size();
 
-    inOut->logMain << "Number of real (reference) chromosmes= " << nChrReal <<"\n"<<flush;
+    inOut->logMain << "Number of real (reference) chromosomes= " << nChrReal <<"\n"<<flush;
     chrStart.resize(nChrReal+1);
     chrLength.resize(nChrReal);
 
