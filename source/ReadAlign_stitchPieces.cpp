@@ -298,7 +298,26 @@ std::time(&timeStart);
 
 
     #ifdef COMPILE_FOR_LONG_READS
-        stitchWindowSeeds(iW, iW1, R[trA.roStr==0 ? 0:2], Q[trA.roStr], G);
+        stitchWindowSeeds(iW, iW1, NULL, R[trA.roStr==0 ? 0:2], Q[trA.roStr], G);
+        if (P->chimSegmentMin>0) {
+            for (uint ia=0;ia<nWA[iW];ia++)
+            {//mark all seeds that overlap the best (and only for now) transcript trA
+                if (WAincl[ia]) continue;
+                for (uint iex=0;iex<trA.nExons;iex++)
+                {
+                    if ( WA[iW][ia][WA_rStart] < (trA.exons[iex][EX_R]+trA.exons[iex][EX_L]) && \
+                        (WA[iW][ia][WA_rStart]+WA[iW][ia][WA_Length]) > trA.exons[iex][EX_R] && \
+                         WA[iW][ia][WA_gStart] < (trA.exons[iex][EX_G]+trA.exons[iex][EX_L]) && \
+                        (WA[iW][ia][WA_gStart]+WA[iW][ia][WA_Length]) > trA.exons[iex][EX_G] )
+                    {
+                        WAincl[ia]=true;
+                        break;
+                    };
+                    
+                };
+            };
+            stitchWindowSeeds(iW, iW1, WAincl, R[trA.roStr==0 ? 0:2], Q[trA.roStr], G);
+        };
     #else
         stitchWindowAligns(0, nWA[iW], 0, WAincl, 0, 0, trA, Lread, WA[iW], R[trA.roStr==0 ? 0:2], Q[trA.roStr], G, sigG, P, trAll[iW1], nWinTr+iW1, this);
     #endif

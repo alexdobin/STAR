@@ -135,7 +135,7 @@ class ReadAlign : public Genome
         void stitchPieces(char **R, char **Q, char *G, PackedArray& SA, uint Lread);
         bool chimericDetection();
         void outputAlignments();
-        void stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* G);//stitches all seeds in one window: iW
+        void stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R, char *Q, char *G);//stitches all seeds in one window: iW
 
         int oneRead();
         uint quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT);

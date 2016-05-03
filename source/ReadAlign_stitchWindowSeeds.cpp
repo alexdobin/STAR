@@ -8,14 +8,16 @@
 #include "binarySearch2.h"
 #include "ErrorWarning.h"
 
-void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* G) {//stitches all seeds in one window: iW
+void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R, char *Q, char *G) {//stitches all seeds in one window: iW
 
     for (uint iS1=0;iS1<nWA[iW];iS1++) {
         scoreSeedBest[iS1]=0;
         scoreSeedBestMM[iS1]=0;
         scoreSeedBestInd[iS1]=-1;
+        if (WAexcl!=NULL && WAexcl[iS1]) continue; //do not include this seed
         intScore score2=0;
         for (uint iS2=0;iS2<=iS1;iS2++) {
+            if (WAexcl!=NULL && WAexcl[iS1]) continue; //do not include this seed
             trA1=*trInit;//initialize trA1
             if (iS2<iS1) {
                 trA1.nExons=1;
@@ -94,6 +96,7 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* 
     uint seedN=0;
     while (true) {//construct the sequence of seeds
         seedChain[seedN++]=scoreBestInd;
+        WAincl[scoreBestInd]=true;
         if (scoreBestInd>scoreSeedBestInd[scoreBestInd]){//keep going
             scoreBestInd=scoreSeedBestInd[scoreBestInd];
         } else {//this seed is the first one
@@ -264,9 +267,13 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, char* R, char* Q, char* 
 //        };
     };
 
+    if (WAexcl==NULL)
     {//record the transcript TODO: allow for multiple transcripts in one window
         *(trAll[iWrec][0])=trA;
         nWinTr[iWrec]=1;
+    } else
+    {//record 2nd best alignment in this window
+        *(trAll[iWrec][1])=trA;
+        nWinTr[iWrec]=2;
     };
-
 };
