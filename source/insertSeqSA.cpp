@@ -12,6 +12,7 @@
 #include "funCompareUintAndSuffixes.h"
 #include <cmath>
 #include "genomeSAindex.h"
+#include "sortSuffixesBucket.h"
 
 uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * G, char * G1, uint64 nG, uint64 nG1, uint64 nG2, Parameters * P)
 {//insert new sequences into the SA
@@ -97,8 +98,36 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
     time ( &rawtime );
     P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished SA search, number of new SA indices = "<<nInd<<endl;
 
+    /*//old-debug
+    uint64* indArray1=new uint64[nG1*2*2+2];
+    memcpy((void*) indArray1, (void*) indArray, 8*(nG1*2*2+2));
     globalGenomeArray=seq1[0];
-    qsort((void*) indArray, nInd, 2*sizeof(uint64), funCompareUintAndSuffixes);
+    qsort((void*) indArray1, nInd, 2*sizeof(uint64), funCompareUintAndSuffixes);
+    */
+    time ( &rawtime );
+    P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished qsort - old "<<nInd<<endl;
+
+    
+    //new sorting, 2-step: qsort for indArray, bucket sort for suffixes
+    qsort((void*) indArray, nInd, 2*sizeof(uint64), funCompareUint2);
+    time ( &rawtime );
+    P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished qsort"<<nInd<<endl;
+    
+    sortSuffixesBucket(seq1[0], (void*) indArray, nInd, 2*sizeof(uint64));
+    time ( &rawtime );
+    P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished ordering suffixes"<<nInd<<endl;
+    
+    
+    /* //debug 
+    for (int ii=0;ii<2*nInd;ii++)
+    {
+        if (indArray[ii]!=indArray1[ii]) 
+        {
+            cout << ii <<"   "<< indArray[ii]  <<"   "<< indArray1[ii] <<endl;
+        };
+    };
+    */
+    
     time ( &rawtime );
     P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished sorting SA indices"<<endl;
 
