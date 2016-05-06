@@ -10,6 +10,7 @@
 #include "streamFuns.h"
 #include "binarySearch2.h"
 #include "funCompareUintAndSuffixes.h"
+#include "funCompareUintAndSuffixesMemcmp.h"
 #include <cmath>
 #include "genomeSAindex.h"
 #include "sortSuffixesBucket.h"
@@ -101,14 +102,23 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
     /*//old-debug
     uint64* indArray1=new uint64[nG1*2*2+2];
     memcpy((void*) indArray1, (void*) indArray, 8*(nG1*2*2+2));
-    globalGenomeArray=seq1[0];
+    g_funCompareUintAndSuffixes_G=seq1[0];
     qsort((void*) indArray1, nInd, 2*sizeof(uint64), funCompareUintAndSuffixes);
-    */
     time ( &rawtime );
-    P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished qsort - old "<<nInd<<endl;
+    P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished qsort - old " <<endl;
+    */
+    
+    g_funCompareUintAndSuffixesMemcmp_G=seq1[0];
+    g_funCompareUintAndSuffixesMemcmp_L=P->genomeSuffixLengthMax/sizeof(uint64_t);
+    qsort((void*) indArray, nInd, 2*sizeof(uint64_t), funCompareUintAndSuffixesMemcmp);  
+    
+//     qsort((void*) indArray, nInd, 2*sizeof(uint64), funCompareUint2);
+    time ( &rawtime );
+    P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished qsort" <<endl;
+
 
     
-    //new sorting, 2-step: qsort for indArray, bucket sort for suffixes
+    /*//new sorting, 2-step: qsort for indArray, bucket sort for suffixes
     qsort((void*) indArray, nInd, 2*sizeof(uint64), funCompareUint2);
     time ( &rawtime );
     P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished qsort"<<nInd<<endl;
@@ -116,7 +126,7 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
     sortSuffixesBucket(seq1[0], (void*) indArray, nInd, 2*sizeof(uint64));
     time ( &rawtime );
     P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished ordering suffixes"<<nInd<<endl;
-    
+    */
     
     /* //debug 
     for (int ii=0;ii<2*nInd;ii++)

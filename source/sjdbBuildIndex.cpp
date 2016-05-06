@@ -98,7 +98,7 @@ void sjdbBuildIndex (Parameters *P, Parameters *P1, char *Gsj, char *G, PackedAr
         };
     };
 
-    globalGenomeArray=Gsj;
+    g_funCompareUintAndSuffixes_G=Gsj;
     qsort((void*) indArray, nInd, 2*sizeof(uint64), funCompareUintAndSuffixes);
     time ( &rawtime );
     P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished sorting SA indicesL nInd="<<nInd <<endl;
