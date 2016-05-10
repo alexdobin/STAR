@@ -1,10 +1,15 @@
+STAR 2.5.2a 2016/05/10
+======================
+
+* Fixed the "GstrandBit" problem. 
+* Fixed a bug introduced in 2.5.1a that caused problems with single-end alignments output in some cases.
 * Fixed a bug that can cause STARlong seg-faults in rare cases.
+* Fixed a bug that caused output of unmapped mates for single end alignments even with --outSAMunmapped None .
 * Implemented --winReadCoverageRelativeMin and --winReadCoverageBasesMin to control coverage of the alignment windows for STARlong.
 * Implemented --outSAMfilter KeepAllAddedReferences option which will keep all alignments to the added references.
 * Implemented --alignEndsProtrude option to control output of alignments with protruding ends.
 * Implemented --outTmpKeep All option to keep the temporary files.
 * Implemented --alignEndsType Extend5pOfReads12 option for full extension of 5' ends of both mates.
-* Fixed a bug that caused output of unmapped mates for single end alignments even with --outSAMunmapped None .
 
 
 STAR 2.5.1b 2016/01/22

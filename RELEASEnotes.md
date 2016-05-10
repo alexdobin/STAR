@@ -1,4 +1,4 @@
-STAR 2.4.5a 2015/11/06
+STAR 2.5.0a 2015/11/06
 ======================
 
 **STAR now uses essential c++11 features. Compiling from sources requires gcc 4.7.0 or later.**

@@ -443,7 +443,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
         if (nMates>1) {
             pBAM[7]=trOut.exons[(imate==0 ? iExMate+1 : 0)][EX_G] - trChrStart;
         } else if (mateChr<P->nChrReal){
-            pBAM[7]=mateStart-P->chrStart[mateChr];
+            pBAM[7]=mateStart;
         } else {
             pBAM[7]=-1;
         };

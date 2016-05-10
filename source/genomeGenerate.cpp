@@ -199,7 +199,7 @@ void genomeGenerate(Parameters *P) {
         };
     };
 
-    P->GstrandBit = (uint) floor(log(N)/log(2))+1;
+    P->GstrandBit = (uint) floor(log(N+P->limitSjdbInsertNsj*P->sjdbLength)/log(2))+1;
     if (P->GstrandBit<32) P->GstrandBit=32; //TODO: use simple access function for SA
 
     P->GstrandMask = ~(1LLU<<P->GstrandBit);

@@ -128,8 +128,8 @@ void ReadAlign::outputAlignments() {
             for (uint iTr=0;iTr<nTrOut;iTr++)
             {//write all transcripts
                 //mate mapped = true if a mate was present in one of the trancsripts
-                mateMapped[trMult[iTr]->exons[0][EX_iFrag]]=true;
-                mateMapped[trMult[iTr]->exons[trMult[iTr]->nExons-1][EX_iFrag]]=true;
+                //mateMapped[trMult[iTr]->exons[0][EX_iFrag]]=true;
+                //mateMapped[trMult[iTr]->exons[trMult[iTr]->nExons-1][EX_iFrag]]=true;
 
                 //mateMapped1 = true if a mate is present in this transcript
                 bool mateMapped1[2]={false,false};
@@ -176,6 +176,9 @@ void ReadAlign::outputAlignments() {
                 };
             };
 
+            mateMapped[trBest->exons[0][EX_iFrag]]=true;
+            mateMapped[trBest->exons[trBest->nExons-1][EX_iFrag]]=true;            
+            
             if (P->readNmates>1 && !(mateMapped[0] && mateMapped[1]) )
             {
                 unmapType=4;
