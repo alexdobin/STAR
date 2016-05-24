@@ -7,8 +7,9 @@ uint genomeScanFastaFiles (Parameters *P, char* G, bool flagRun) {//scans fasta 
     uint N=0;//total number of bases in the genome, including chr "spacers"
     if (!flagRun && P->chrLength.size()>0)
     {//previous chr records exist
-       P->chrStart.pop_back();//remove last record
+       P->chrStart.pop_back();//remove last record, it will be recorded again
        N =  P->chrStart.back()+P->chrLength.back();
+       P->chrLength.pop_back();//remove last record, it will be recorded again
     };
 
     ifstream fileIn;
@@ -65,7 +66,7 @@ uint genomeScanFastaFiles (Parameters *P, char* G, bool flagRun) {//scans fasta 
     };
 
 
-    if (!flagRun) P->chrLength.push_back(N-P->chrStart.at(P->chrStart.size()-1)); //true length of the chr
+    if (!flagRun) P->chrLength.push_back(N-P->chrStart.at(P->chrStart.size()-1)); //true length of the last chr
 
     N = ( (N+1)/P->genomeChrBinNbases+1)*P->genomeChrBinNbases;
 
