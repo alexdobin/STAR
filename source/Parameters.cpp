@@ -624,9 +624,15 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     if (outFilterType=="BySJout" && outSAMorder=="PairedKeepInputOrder") {
         ostringstream errOut;
         errOut <<"EXITING: fatal input ERROR: --outFilterType=BySJout is not presently compatible with --outSAMorder=PairedKeepInputOrder\n";
-        errOut <<"SOLUTION: re-run STAR without setting one of those parameters. Send a feature request to the Authors\n";
+        errOut <<"SOLUTION: re-run STAR without setting one of those parameters.\n";
         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
+    if (!outSAMbool && outSAMorder=="PairedKeepInputOrder") {
+        ostringstream errOut;
+        errOut <<"EXITING: fatal input ERROR: --outSAMorder=PairedKeepInputOrder is presently only compatible with SAM output, i.e. default --outSMAtype SAM\n";
+        errOut <<"SOLUTION: re-run STAR without --outSAMorder=PairedKeepInputOrder, or with --outSAMorder=PairedKeepInputOrder --outSMAtype SAM .\n";
+        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };    
     //SJ filtering
     for (int ii=0;ii<4;ii++) {
         if (outSJfilterOverhangMin.at(ii)<0) outSJfilterOverhangMin.at(ii)=numeric_limits<int32>::max();

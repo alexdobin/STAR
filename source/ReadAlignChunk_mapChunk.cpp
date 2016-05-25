@@ -89,7 +89,7 @@ void ReadAlignChunk::mapChunk() {//map one chunk. Input reads stream has to be s
 
     }; //reads cycle
 
-    if ( P->outSAMorder == "PairedKeepInputOrder" && P->runThreadN>1 ) {//write the remaining part of the buffer, close and rename chunk files
+    if ( P->outSAMbool && P->outSAMorder == "PairedKeepInputOrder" && P->runThreadN>1 ) {//write the remaining part of the buffer, close and rename chunk files
         chunkOutBAMfile.write(chunkOutBAM,chunkOutBAMtotal);
         chunkOutBAMfile.clear(); //in case 0 bytes were written which could set fail bit
         chunkOutBAMfile.close();

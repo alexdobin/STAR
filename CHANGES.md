@@ -1,3 +1,4 @@
+* Fixed a bug with causing seg-faults when combining  --twopassMode Basic --outSAMorder PairedKeepInputOrder .
 * Fixed a problem with SAM header in cases where reference sequences are added at the mapping stage.
 
 STAR 2.5.2a 2016/05/10
