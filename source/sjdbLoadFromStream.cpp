@@ -25,5 +25,5 @@ void sjdbLoadFromStream(ifstream &sjdbStreamIn, SjdbClass &sjdbLoci) {
             };
             sjdbLoci.str.push_back(str1);
         };
-    }; 
+    };
 };

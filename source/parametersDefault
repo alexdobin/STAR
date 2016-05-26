@@ -10,13 +10,13 @@ parametersFiles          -
 
 ### System
 sysShell            -
-    string: path to the shell binary, preferrably bash, e.g. /bin/bash. 
+    string: path to the shell binary, preferrably bash, e.g. /bin/bash.
                     - ... the default shell is executed, typically /bin/sh. This was reported to fail on some Ubuntu systems - then you need to specify path to bash.
 
 ### Run Parameters
 
 runMode                         alignReads
-    string: type of the run:    
+    string: type of the run:
                                 alignReads             ... map reads
                                 genomeGenerate         ... generate genome files
                                 inputAlignmentsFromBAM ... input alignments from BAM. Presently only works with --outWigType and --bamRemoveDuplicates.
@@ -25,7 +25,7 @@ runThreadN                      1
     int: number of threads to run STAR
 
 runDirPerm                      User_RWX
-    string: permissions for the directories created at the run-time. 
+    string: permissions for the directories created at the run-time.
                                 User_RWX ... user-read/write/execute
                                 All_RWX  ... all-read/write/execute (same as chmod 777)
 
@@ -61,6 +61,9 @@ genomeSAindexNbases         14
 genomeSAsparseD             1
     int>0: suffux array sparsity, i.e. distance between indices: use bigger numbers to decrease needed RAM at the cost of mapping speed reduction
 
+genomeSuffixLengthMax       -1
+    int: maximum length of the suffixes, has to be longer than read length. -1 = infinite.
+
 ### Splice Junctions Database
 sjdbFileChrStartEnd                     -
     string(s): path to the files with genomic coordinates (chr <tab> start <tab> end <tab> strand) for the splice junction introns. Multiple files can be supplied wand will be concatenated.
@@ -69,7 +72,7 @@ sjdbGTFfile                             -
     string: path to the GTF file with annotations
 
 sjdbGTFchrPrefix                        -
-    string: prefix for chromosome names in a GTF file (e.g. 'chr' for using ENSMEBL annotations with UCSC geneomes)
+    string: prefix for chromosome names in a GTF file (e.g. 'chr' for using ENSMEBL annotations with UCSC genomes)
 
 sjdbGTFfeatureExon                      exon
     string: feature type in GTF file to be used as exons for building transcripts
@@ -166,6 +169,11 @@ outTmpDir                       -
     string: path to a directory that will be used as temporary by STAR. All contents of this directory will be removed!
             - the temp directory will default to outFileNamePrefix_STARtmp
 
+outTmpKeep                      None
+    string: whether to keep the tempporary files after STAR runs is finished
+                                None ... remove all temporary files
+                                All .. keep all files
+
 outStd                          Log
     string: which output will be directed to stdout (standard out)
                                 Log                    ... log messages
@@ -175,7 +183,7 @@ outStd                          Log
                                 BAM_Quant              ... alignments to transcriptome in BAM format, unsorted. Requires --quantMode TranscriptomeSAM
 
 outReadsUnmapped                None
-   string: output of unmapped reads (besides SAM)
+   string: output of unmapped and partially mapped (i.e. mapped only one mate of a paired end read) reads in separate file(s).
                                 None    ... no output
                                 Fastx   ... output in separate fasta/fastq files, Unmapped.out.mate1/2
 
@@ -190,16 +198,16 @@ outMultimapperOrder             Old_2.4
 ### Output: SAM and BAM
 outSAMtype                      SAM
     strings: type of SAM/BAM output
-                                1st word: 
+                                1st word:
                                 BAM  ... output BAM without sorting
                                 SAM  ... output SAM without sorting
                                 None ... no SAM/BAM output
-                                2nd, 3rd: 
+                                2nd, 3rd:
                                 Unsorted           ... standard unsorted
                                 SortedByCoordinate ... sorted by coordinate. This option will allocate extra memory for sorting which can be specified by --limitBAMsortRAM.
 
 outSAMmode                      Full
-    string: mode of SAM output  
+    string: mode of SAM output
                                 None ... no SAM output
                                 Full ... full SAM output
                                 NoQS ... full SAM but without quality scores
@@ -212,7 +220,7 @@ outSAMstrandField                               None
 outSAMattributes                Standard
     string: a string of desired SAM attributes, in the order desired for the output SAM
                                 NH HI AS nM NM MD jM jI XS ... any combination in any order
-                                Standard   ... NH HI AS nM 
+                                Standard   ... NH HI AS nM
                                 All        ... NH HI AS nM NM MD jM jI
                                 None       ... no attributes
 
@@ -220,9 +228,13 @@ outSAMattrIHstart               1
     int>=0:                     start value for the IH attribute. 0 may be required by some downstream software, such as Cufflinks or StringTie.
 
 outSAMunmapped                  None
-    string: output of unmapped reads in the SAM format
+    string(s): output of unmapped reads in the SAM format
+                                1st word:
                                 None   ... no output
                                 Within ... output unmapped reads within the main SAM file (i.e. Aligned.out.sam)
+                                2nd word:
+                                KeepPairs ... record unmapped mate for each alignment, and, in case of unsorted output, keep it adjacent to its mapped mate.
+                                              Only affects multi-mapping reads
 
 outSAMorder                     Paired
     string: type of sorting for the SAM output
@@ -249,7 +261,7 @@ outSAMflagAND           65535
     int: 0 to 65535: sam FLAG will be bitwise AND'd with this value, i.e. FLAG=FLAG & outSAMflagOR. This is applied after all flags have been set by STAR, but before outSAMflagOR. Can be used to unset specific bits that are not set otherwise.
 
 outSAMattrRGline        -
-    string(s): SAM/BAM read group line. The first word contains the read group identifier and must start with "ID:", e.g. --outSAMattrRGline ID:xxx CN:yy "DS:z z z". 
+    string(s): SAM/BAM read group line. The first word contains the read group identifier and must start with "ID:", e.g. --outSAMattrRGline ID:xxx CN:yy "DS:z z z".
             xxx will be added as RG tag to each output alignment. Any spaces in the tag values have to be double quoted.
             Comma separated RG lines correspons to different (comma separated) input files in --readFilesIn. Commas have to be surrounded by spaces, e.g.
             --outSAMattrRGline ID:xxx , ID:zzz "DS:z z" , ID:yyy DS:yyyy
@@ -266,6 +278,8 @@ outSAMheaderCommentFile -
 outSAMfilter            None
     string(s): filter the output into main SAM/BAM files
                         KeepOnlyAddedReferences ... only keep the reads for which all alignments are to the extra reference sequences added with --genomeFastaFiles at the mapping stage.
+                        KeepAllAddedReferences ...  keep all alignments to the extra reference sequences added with --genomeFastaFiles at the mapping stage.
+
 
 outSAMmultNmax          -1
     int: max number of multiple alignments for a read that will be output to the SAM/BAM files.
@@ -292,12 +306,12 @@ outWigType          None
     string(s): type of signal output, e.g. "bedGraph" OR "bedGraph read1_5p". Requires sorted BAM: --outSAMtype BAM SortedByCoordinate .
                     1st word:
                     None       ... no signal output
-                    bedGraph   ... bedGraph format 
+                    bedGraph   ... bedGraph format
                     wiggle     ... wiggle format
                     2nd word:
                     read1_5p   ... signal from only 5' of the 1st read, useful for CAGE/RAMPAGE etc
                     read2      ... signal from only 2nd read
-                    
+
 outWigStrand        Stranded
     string: strandedness of wiggle/bedGraph output
                     Stranded   ...  separate strands, str1 and str2
@@ -305,7 +319,7 @@ outWigStrand        Stranded
 
 outWigReferencesPrefix    -
     string: prefix matching reference names to include in the output wiggle file, e.g. "chr", default "-" - include all references
- 
+
 outWigNorm              RPM
     string: type of normalization for the signal
                         RPM    ... reads per million of mapped reads
@@ -321,29 +335,30 @@ outFilterMultimapScoreRange     1
     int: the score range below the maximum score for multimapping alignments
 
 outFilterMultimapNmax           10
-    int: read alignments will be output only if the read maps fewer than this value, otherwise no alignments will be output
+    int: maximum number of loci the read is allowed to map to. Alignments (all of them) will be output only if the read maps to no more loci than this value.
+         Otherwise no alignments will be output, and the read will be counted as "mapped to too many loci" in the Log.final.out .
 
 outFilterMismatchNmax           10
-    int: alignment will be output only if it has fewer mismatches than this value
+    int: alignment will be output only if it has no more mismatches than this value.
 
 outFilterMismatchNoverLmax      0.3
-    int: alignment will be output only if its ratio of mismatches to *mapped* length is less than this value
+    float: alignment will be output only if its ratio of mismatches to *mapped* length is less than or equal to this value.
 
-outFilterMismatchNoverReadLmax  1
-    int: alignment will be output only if its ratio of mismatches to *read* length is less than this value
+outFilterMismatchNoverReadLmax  1.0
+    float: alignment will be output only if its ratio of mismatches to *read* length is less than or equal to this value.
 
 
 outFilterScoreMin               0
-    int: alignment will be output only if its score is higher than this value
+    int: alignment will be output only if its score is higher than or equal to this value.
 
 outFilterScoreMinOverLread      0.66
-        float: outFilterScoreMin normalized to read length (sum of mates' lengths for paired-end reads)
+    float: same as outFilterScoreMin, but  normalized to read length (sum of mates' lengths for paired-end reads)
 
 outFilterMatchNmin              0
-    int: alignment will be output only if the number of matched bases is higher than this value
+    int: alignment will be output only if the number of matched bases is higher than or equal to this value.
 
 outFilterMatchNminOverLread     0.66
-    float: outFilterMatchNmin normalized to read length (sum of mates' lengths for paired-end reads)
+    float: sam as outFilterMatchNmin, but normalized to the read length (sum of mates' lengths for paired-end reads).
 
 outFilterIntronMotifs           None
     string: filter alignment using their motifs
@@ -363,12 +378,12 @@ outSJfilterOverhangMin          30  12  12  12
     4 integers:    minimum overhang length for splice junctions on both sides for: (1) non-canonical motifs, (2) GT/AG and CT/AC motif, (3) GC/AG and CT/GC motif, (4) AT/AC and GT/AT motif. -1 means no output for that motif
                                 does not apply to annotated junctions
 
-outSJfilterCountUniqueMin       3   1   1   1 
+outSJfilterCountUniqueMin       3   1   1   1
     4 integers: minimum uniquely mapping read count per junction for: (1) non-canonical motifs, (2) GT/AG and CT/AC motif, (3) GC/AG and CT/GC motif, (4) AT/AC and GT/AT motif. -1 means no output for that motif
                                 Junctions are output if one of outSJfilterCountUniqueMin OR outSJfilterCountTotalMin conditions are satisfied
                                 does not apply to annotated junctions
 
-outSJfilterCountTotalMin     3   1   1   1 
+outSJfilterCountTotalMin     3   1   1   1
     4 integers: minimum total (multi-mapping+unique) read count per junction for: (1) non-canonical motifs, (2) GT/AG and CT/AC motif, (3) GC/AG and CT/GC motif, (4) AT/AC and GT/AT motif. -1 means no output for that motif
                                 Junctions are output if one of outSJfilterCountUniqueMin OR outSJfilterCountTotalMin conditions are satisfied
                                 does not apply to annotated junctions
@@ -378,7 +393,7 @@ outSJfilterDistToOtherSJmin     10  0   5   10
                                 does not apply to annotated junctions
 
 outSJfilterIntronMaxVsReadN        50000 100000 200000
-    N integers>=0: maximum gap allowed for junctions supported by 1,2,3,,,N reads 
+    N integers>=0: maximum gap allowed for junctions supported by 1,2,3,,,N reads
                                 i.e. by default junctions supported by 1 read can have gaps <=50000b, by 2 reads: <=100000b, by 3 reads: <=200000. by >=4 reads any gap <=alignIntronMax
                                 does not apply to annotated junctions
 
@@ -434,7 +449,7 @@ seedPerReadNmax       1000
 seedPerWindowNmax     50
     int>0: max number of seeds per window
 
-seedNoneLociPerWindow    10 
+seedNoneLociPerWindow    10
     int>0: max number of one seed loci per window
 
 alignIntronMin              21
@@ -450,7 +465,7 @@ alignSJoverhangMin          5
     int>0: minimum overhang (i.e. block size) for spliced alignments
 
 alignSJstitchMismatchNmax   0 -1 0 0
-    4*int>=0: maximum number of mismatches for stitching of the splice junctions (-1: no limit). 
+    4*int>=0: maximum number of mismatches for stitching of the splice junctions (-1: no limit).
                             (1) non-canonical motifs, (2) GT/AG and CT/AC motif, (3) GC/AG and CT/GC motif, (4) AT/AC and GT/AT motif.
 
 alignSJDBoverhangMin        3
@@ -461,21 +476,30 @@ alignSplicedMateMapLmin     0
 
 alignSplicedMateMapLminOverLmate 0.66
     float>0: alignSplicedMateMapLmin normalized to mate length
-   
+
 alignWindowsPerReadNmax     10000
     int>0: max number of windows per read
 
 alignTranscriptsPerWindowNmax       100
-    int>0: max number of transcripts per window           
+    int>0: max number of transcripts per window
 
 alignTranscriptsPerReadNmax               10000
     int>0: max number of different alignments per read to consider
 
 alignEndsType           Local
     string: type of read ends alignment
-                        Local           ... standard local alignment with soft-clipping allowed
-                        EndToEnd        ... force end-to-end read alignment, do not soft-clip
-                        Extend5pOfRead1 ... fully extend only the 5p of the read1, all other ends: local alignment
+                        Local             ... standard local alignment with soft-clipping allowed
+                        EndToEnd          ... force end-to-end read alignment, do not soft-clip
+                        Extend5pOfRead1   ... fully extend only the 5p of the read1, all other ends: local alignment
+                        Extend5pOfReads12 ... fully extend only the 5p of the both read1 and read2, all other ends: local alignment
+
+alignEndsProtrude       0    ConcordantPair
+    int, string:        allow protrusion of alignment ends, i.e. start (end) of the +strand mate downstream of the start (end) of the -strand mate
+                        1st word: int: maximum number of protrusion bases allowed
+                        2nd word: string: 
+                                            ConcordantPair ... report alignments with non-zero protrusion as concordant pairs
+                                            DiscordantPair ... report alignments with non-zero protrusion as discordant pairs
+
 
 alignSoftClipAtReferenceEnds Yes
     string: allow the soft-clipping of the alignments past the end of the chromosomes
@@ -488,15 +512,19 @@ winAnchorMultimapNmax           50
     int>0: max number of loci anchors are allowed to map to
 
 winBinNbits                     16
-    int>0: =log2(winBin), where winBin is the size of the bin for the windows/clustering, each window will occupy an integer number of bins. 
+    int>0: =log2(winBin), where winBin is the size of the bin for the windows/clustering, each window will occupy an integer number of bins.
 
 winAnchorDistNbins              9
     int>0: max number of bins between two anchors that allows aggregation of anchors into one window
 
-winFlankNbins               4
+winFlankNbins                   4
     int>0: log2(winFlank), where win Flank is the size of the left and right flanking regions for each window
 
+winReadCoverageRelativeMin      0.5
+    float>=0: minimum relative coverage of the read sequence by the seeds in a window, for STARlong algorithm only.
 
+winReadCoverageBasesMin      0
+    int>0: minimum number of bases covered by the seeds in a window , for STARlong algorithm only.
 
 ### Chimeric Alignments
 chimOutType                 SeparateSAMold

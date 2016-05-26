@@ -1,5 +1,5 @@
-/* 
- * inserts sequences into the SA 
+/*
+ * inserts sequences into the SA
  * returns number of SA indexes inserted
  */
 #include "insertSeqSA.h"
@@ -10,28 +10,30 @@
 #include "streamFuns.h"
 #include "binarySearch2.h"
 #include "funCompareUintAndSuffixes.h"
+#include "funCompareUintAndSuffixesMemcmp.h"
 #include <cmath>
-#include "genomeSAindex.h" 
+#include "genomeSAindex.h"
+#include "sortSuffixesBucket.h"
 
 uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * G, char * G1, uint64 nG, uint64 nG1, uint64 nG2, Parameters * P)
 {//insert new sequences into the SA
-    
+
     uint GstrandBit1 = (uint) floor(log(nG+nG1)/log(2))+1;
     if (GstrandBit1<32) GstrandBit1=32; //TODO: use simple access function for SA
-    if ( GstrandBit1+1 != SA.wordLength) 
+    if ( GstrandBit1+1 != SA.wordLength)
     {//sequence is too long - GstrandBit changed
         ostringstream errOut;
         errOut << "EXITING because of FATAL ERROR: cannot insert sequence on the fly because of strand GstrandBit problem\n";
         errOut << "SOLUTION: please contact STAR author at https://groups.google.com/forum/#!forum/rna-star\n";
         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_GENOME_FILES, *P);
     };
-    
+
     uint N2bit= 1LLU << (SA.wordLength-1);
-    uint strandMask=~N2bit;    
+    uint strandMask=~N2bit;
     for (uint64 isa=0;isa<SA.length; isa++)
     {
         uint64 ind1=SA[isa];
-        if ( (ind1 & N2bit)>0 ) 
+        if ( (ind1 & N2bit)>0 )
         {//- strand
             if ( (ind1 & strandMask)>=nG2 )
             {//the first nG bases
@@ -47,24 +49,24 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
             };
         };
     };
-    
+
     char** seq1=new char*[2];
-    
-    #define GENOME_endFillL 16    
+
+    #define GENOME_endFillL 16
     char* seqq=new char [4*nG1+3*GENOME_endFillL];//ends shouldbe filled with 5 to mark boundaries
-            
+
     seq1[0]=seqq+GENOME_endFillL;//TODO: avoid defining an extra array, use reverse search
     seq1[1]=seqq+2*GENOME_endFillL+2*nG1;
-    
+
     memset(seqq,GENOME_spacingChar,GENOME_endFillL);
     memset(seqq+2*nG1+GENOME_endFillL,GENOME_spacingChar,GENOME_endFillL);
     memset(seqq+4*nG1+2*GENOME_endFillL,GENOME_spacingChar,GENOME_endFillL);
-    
+
     memcpy(seq1[0], G1, nG1);
-    for (uint ii=0; ii<nG1; ii++) 
+    for (uint ii=0; ii<nG1; ii++)
     {//reverse complement sequence
         seq1[0][2*nG1-1-ii]=seq1[0][ii]<4 ? 3-seq1[0][ii] : seq1[0][ii];
-    };    
+    };
     complementSeqNumbers(seq1[0], seq1[1], 2*nG1);//complement
 
     uint64* indArray=new uint64[nG1*2*2+2];// for each base, 1st number - insertion place in SA, 2nd number - index, *2 for reverse compl
@@ -83,7 +85,7 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
             indArray[ii*2+1] = ii;
         };
     };
-    
+
     uint64 nInd=0;//true number of new indices
     for (uint ii=0; ii<2*nG1; ii++) {//remove entries that cannot be inserted, this cannot be done in the parallel cycle above
         if (indArray[ii*2]!= (uint) -1) {
@@ -92,13 +94,50 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
             ++nInd;
         };
     };
-    
+
     time_t rawtime;
     time ( &rawtime );
     P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished SA search, number of new SA indices = "<<nInd<<endl;
 
-    globalGenomeArray=seq1[0];
-    qsort((void*) indArray, nInd, 2*sizeof(uint64), funCompareUintAndSuffixes);
+    /*//old-debug
+    uint64* indArray1=new uint64[nG1*2*2+2];
+    memcpy((void*) indArray1, (void*) indArray, 8*(nG1*2*2+2));
+    g_funCompareUintAndSuffixes_G=seq1[0];
+    qsort((void*) indArray1, nInd, 2*sizeof(uint64), funCompareUintAndSuffixes);
+    time ( &rawtime );
+    P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished qsort - old " <<endl;
+    */
+    
+    g_funCompareUintAndSuffixesMemcmp_G=seq1[0];
+    g_funCompareUintAndSuffixesMemcmp_L=P->genomeSuffixLengthMax/sizeof(uint64_t);
+    qsort((void*) indArray, nInd, 2*sizeof(uint64_t), funCompareUintAndSuffixesMemcmp);  
+    
+//     qsort((void*) indArray, nInd, 2*sizeof(uint64), funCompareUint2);
+    time ( &rawtime );
+    P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished qsort" <<endl;
+
+
+    
+    /*//new sorting, 2-step: qsort for indArray, bucket sort for suffixes
+    qsort((void*) indArray, nInd, 2*sizeof(uint64), funCompareUint2);
+    time ( &rawtime );
+    P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished qsort"<<nInd<<endl;
+    
+    sortSuffixesBucket(seq1[0], (void*) indArray, nInd, 2*sizeof(uint64));
+    time ( &rawtime );
+    P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished ordering suffixes"<<nInd<<endl;
+    */
+    
+    /* //debug 
+    for (int ii=0;ii<2*nInd;ii++)
+    {
+        if (indArray[ii]!=indArray1[ii]) 
+        {
+            cout << ii <<"   "<< indArray[ii]  <<"   "<< indArray1[ii] <<endl;
+        };
+    };
+    */
+    
     time ( &rawtime );
     P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished sorting SA indices"<<endl;
 
@@ -106,7 +145,7 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
     indArray[2*nInd+1]=-999; //mark the last junction
 
     SA1.defineBits(SA.wordLength,SA.length+nInd);
-    
+
     /*testing
     PackedArray SAo;
     SAo.defineBits(P->GstrandBit+1,P->nSA+nInd);
@@ -115,7 +154,7 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
     oldSAin.read(SAo.charArray,SAo.lengthByte);
     oldSAin.close();
     */
-    
+
     uint isa1=0, isa2=0;
     for (uint isa=0;isa<SA.length;isa++) {
         while (isa==indArray[isa1*2]) {//insert new index before the existing index
@@ -131,10 +170,10 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
                cout <<isa2 <<" "<< SA1[isa2]<<" "<<SAo[isa2]<<endl;
                //sleep(100);
             };
-            */              
+            */
             ++isa2; ++isa1;
-               
-        };        
+
+        };
 
         SA1.writePacked(isa2,SA[isa]); //TODO make sure that the first sj index is not before the first array index
             /*testing
@@ -142,7 +181,7 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
                cout <<isa2 <<" "<< SA1[isa2]<<" "<<SAo[isa2]<<endl;
                //sleep(100);
             };
-            */           
+            */
         ++isa2;
     };
     for (;isa1<nInd;isa1++)
@@ -151,17 +190,17 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
         if (ind1<nG1)
         {
             ind1+=nG;
-        } else 
+        } else
         {//reverse strand
             ind1=(ind1-nG1+nG2) | N2bit;
         };
         SA1.writePacked(isa2,ind1);
         ++isa2;
     };
-        
+
     time ( &rawtime );
-    P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished inserting SA indices" <<endl;   
-    
+    P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished inserting SA indices" <<endl;
+
 //     //SAi insertions
 //     for (uint iL=0; iL < P->genomeSAindexNbases; iL++) {
 //         uint iSeq=0;
@@ -169,11 +208,11 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
 //         for (uint ii=P->genomeSAindexStart[iL];ii<P->genomeSAindexStart[iL+1]; ii++) {//scan through the longest index
 //             if (ii==798466)
 //                 cout <<ii;
-//             
+//
 //             uint iSA1=SAi[ii];
 //             uint iSA2=iSA1 & P->SAiMarkNmask & P->SAiMarkAbsentMask;
-//             
-//             if ( iSeq<nInd && (iSA1 &  P->SAiMarkAbsentMaskC)>0 ) 
+//
+//             if ( iSeq<nInd && (iSA1 &  P->SAiMarkAbsentMaskC)>0 )
 //             {//index missing from the old genome
 //                 uint iSeq1=iSeq;
 //                 int64 ind1=funCalcSAi(seq1[0]+indArray[2*iSeq+1],iL);
@@ -191,31 +230,31 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
 //                 } else {
 //                     iSeq=iSeq1;
 //                 };
-//             } else 
+//             } else
 //             {//index was present in the old genome
 //                 while (iSeq<nInd && indArray[2*iSeq]+1<iSA2) {//for this index insert "smaller" junctions
 //                     ++iSeq;
 //                 };
-//                 
+//
 //                 while (iSeq<nInd && indArray[2*iSeq]+1==iSA2) {//special case, the index falls right behind SAi
 //                     if (funCalcSAi(seq1[0]+indArray[2*iSeq+1],iL) >= (int64) (ii-P->genomeSAindexStart[iL]) ) {//this belongs to the next index
 //                         break;
 //                     };
 //                     ++iSeq;
-//                 };   
-//                 
+//                 };
+//
 //                 SAi.writePacked(ii,iSA1+iSeq);
-//                 
+//
 //                 for (uint ii0=ind0+1; ii0<ii; ii0++) {//fill all the absent indices with this value
 //                     SAi.writePacked(ii0,(iSA2+iSeq) | P->SAiMarkAbsentMaskC);
 //                 };
 //                 ind0=ii;
 //             };
 //         };
-// 
+//
 //     };
 // //     time ( &rawtime );    cout << timeMonthDayTime(rawtime) << "SAi first" <<endl;
-// 
+//
 //     for (uint isj=0;isj<nInd;isj++) {
 //         int64 ind1=0;
 //         for (uint iL=0; iL < P->genomeSAindexNbases; iL++) {
@@ -241,40 +280,40 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
 //     };
 //     time ( &rawtime );
 //     P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished SAi" <<endl;
-// 
+//
 //     /* testing
 //     PackedArray SAio=SAi;
 //     SAio.allocateArray();
 //     ifstream oldSAiin("./DirTrue/SAindex");
 //     oldSAiin.read(SAio.charArray,8*(P->genomeSAindexNbases+2));//skip first bytes
 //     oldSAiin.read(SAio.charArray,SAio.lengthByte);
-//     oldSAiin.close();  
-// 
+//     oldSAiin.close();
+//
 //     for (uint iL=0; iL < P->genomeSAindexNbases; iL++) {
 //         for (uint ii=P->genomeSAindexStart[iL];ii<P->genomeSAindexStart[iL+1]; ii++) {//scan through the longets index
 //                 if ( SAio[ii]!=SAi[ii] ) {
 //                     cout <<iL<<" "<<ii<<" "<<SAio[ii]<<" "<<SAi[ii]<<endl;
 //                 };
 //         };
-//     };    
-//     */    
-    
+//     };
+//     */
+
     //change parameters, most parameters are already re-defined in sjdbPrepare.cpp
     SA.defineBits(P->GstrandBit+1,SA.length+nInd);//same as SA2
     SA.pointArray(SA1.charArray);
     P->nSA=SA.length;
     P->nSAbyte=SA.lengthByte;
-    
+
     //generate SAi
     genomeSAindex(G,SA,P,SAi);
-    
+
     time ( &rawtime );
     P->inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished SAi" <<endl;
 
-    
+
 //     P->sjGstart=P->chrStart[P->nChrReal];
 //     memcpy(G+P->chrStart[P->nChrReal],seq1[0], nseq1[0]);
-    
-    
+
+
     return nInd;
 };

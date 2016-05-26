@@ -6,7 +6,7 @@
 class SjdbClass {
 public:
     vector <string> chr;
-    vector <uint> start,end;    
+    vector <uint> start,end;
     vector <char> str;
     vector <uint8_t> priority;
 };

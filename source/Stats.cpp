@@ -21,12 +21,12 @@ Stats::Stats() {//constructor
 
 void Stats::addStats(Stats &S) {//add S to Stats
     readN += S.readN; readBases += S.readBases;
-    mappedMismatchesN += S.mappedMismatchesN; mappedInsN += S.mappedInsN; mappedDelN += S.mappedDelN; 
+    mappedMismatchesN += S.mappedMismatchesN; mappedInsN += S.mappedInsN; mappedDelN += S.mappedDelN;
     mappedInsL += S.mappedInsL; mappedDelL += S.mappedDelL; mappedBases += S.mappedBases;  mappedPortion += S.mappedPortion;
     mappedReadsU += S.mappedReadsU; mappedReadsM += S.mappedReadsM;
     unmappedOther += S.unmappedOther; unmappedShort += S.unmappedShort; unmappedMismatch += S.unmappedMismatch; unmappedMulti += S.unmappedMulti; unmappedAll += S.unmappedAll;
     chimericAll += S.chimericAll;
-            
+
     splicesNsjdb += S.splicesNsjdb;
     for (uint ii=0; ii<SJ_MOTIF_SIZE; ii++) {
         splicesN[ii] +=S.splicesN[ii];
@@ -39,7 +39,7 @@ void Stats::transcriptStats(Transcript &T, uint Lread) {
     mappedDelN += T.nDel;
     mappedInsL += T.lIns;
     mappedDelL += T.lDel;
-    
+
     uint mappedL=0;
     for (uint ii=0; ii<T.nExons; ii++) {
         mappedL += T.exons[ii][EX_L];
@@ -48,7 +48,7 @@ void Stats::transcriptStats(Transcript &T, uint Lread) {
         if (T.canonSJ[ii]>=0) splicesN[T.canonSJ[ii]]++;
         if (T.sjAnnot[ii]==1) splicesNsjdb++;
     };
-                
+
     mappedBases += mappedL;
     mappedPortion += double(mappedL)/double(Lread);
 };
@@ -65,14 +65,14 @@ void Stats::progressReportHeader(ofstream &progressStream) {
     progressStream  <<setw(15)<< " " <<SETW1<< "M/hr" <<SETW3<< "number" <<SETW1<< "length" <<SETW1<< "unique" \
             <<SETW1<< "length" <<SETW1<< "MMrate" \
             <<SETW1<< "multi" <<SETW1<< "multi+" <<SETW1<< "MM" <<SETW1<< "short" <<SETW1<< "other"\
-            << "\n"<<flush;    
+            << "\n"<<flush;
 };
 
 void Stats::progressReport(ofstream &progressStream) {
-    
+
     time_t timeCurrent;
     time( &timeCurrent);
-    
+
     if (difftime(timeCurrent,timeLastReport)>=60.0 && readN>0) {//make the report
         //progressStream.imbue(std::locale(""));
         progressStream <<setw(15)<< timeMonthDayTime(timeCurrent) \
@@ -81,7 +81,7 @@ void Stats::progressReport(ofstream &progressStream) {
                 <<SETW3<< readN \
                 <<SETW1<< (readN>0 ? readBases/readN : 0) \
                 <<SETW2<< (readN>0 ? double(mappedReadsU)/double(readN)*100 : 0)  <<'%' \
-                <<SETW1<< (readN>0 ? double(mappedBases)/double(mappedReadsU) : 0)  
+                <<SETW1<< (readN>0 ? double(mappedBases)/double(mappedReadsU) : 0)
                 <<SETW2<< (readN>0 ? double(mappedMismatchesN)/double(mappedBases)*100 : 0) <<'%' \
                 <<SETW2<< (readN>0 ? double(mappedReadsM)/double(readN)*100 : 0) <<'%'\
                 <<SETW2<< (readN>0 ? double(unmappedMulti)/double(readN)*100 : 0) <<'%'\
@@ -90,14 +90,14 @@ void Stats::progressReport(ofstream &progressStream) {
                 <<SETW2<< (readN>0 ? double(unmappedOther)/double(readN)*100 : 0) <<'%'\
                 <<"\n"<<flush;
         timeLastReport=timeCurrent;
-        
+
     };
 };
 
-void Stats::reportFinal(ofstream &streamOut, Parameters *P) {    
+void Stats::reportFinal(ofstream &streamOut) {
     int w1=50;
-    time( &timeFinish);    
-    
+    time( &timeFinish);
+
                                             //<<setiosflags(ios::left)
     streamOut  <<setiosflags(ios::fixed)  << setprecision(2) \
                <<setw(w1)<< "Started job on |\t" << timeMonthDayTime(timeStart)<<"\n" \
@@ -118,7 +118,7 @@ void Stats::reportFinal(ofstream &streamOut, Parameters *P) {
                <<setw(w1)<< "Number of splices: GC/AG |\t"                     << splicesN[3]+splicesN[4] << "\n" \
                <<setw(w1)<< "Number of splices: AT/AC |\t"                     << splicesN[5]+splicesN[6] << "\n" \
                <<setw(w1)<< "Number of splices: Non-canonical |\t"             << splicesN[0] << "\n";
-    
+
     streamOut  <<setw(w1)<< "Mismatch rate per base, % |\t"                << double(mappedMismatchesN)/double(mappedBases)*100 <<'%' <<"\n" \
                <<setw(w1)<< "Deletion rate per base |\t"                       << (mappedBases>0 ? double(mappedDelL)/double(mappedBases)*100 : 0) <<'%' <<"\n" \
                <<setw(w1)<< "Deletion average length |\t"                      << (mappedDelN>0 ? double(mappedDelL)/double(mappedDelN) : 0) <<"\n" \

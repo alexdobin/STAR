@@ -13,7 +13,7 @@
 #include <iostream>
 
 
-enum ErrorState { 
+enum ErrorState {
 ENONE,
 ENOTALLOCATED,
 ETRYAGAIN,
@@ -94,7 +94,7 @@ public:
         {
             if (!_needsAllocation)
                 return *_length - sizeof(size_t);
-            
+
             _exception.SetError(ENOTALLOCATED, 0);
             return -1;
         };
@@ -161,7 +161,7 @@ private:
         key_t _counterKey;
         bool _unloadLast;
         std::ostream * _err;
-        
+
         int SharedObjectsUseCount();
         void OpenIfExists();
         void CreateAndInitSharedObject(size_t shmSize);

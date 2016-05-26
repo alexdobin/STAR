@@ -2,7 +2,7 @@
  *
  *
  * A longer description.
- *  
+ *
  * @see something
  */
 

@@ -6,18 +6,18 @@
 #include <random>
 
 void ReadAlign::multMapSelect() {//select multiple mappers from all transcripts of all windows
-    
+
     maxScore=0;
     for (uint iW=0; iW<nW; iW++) {//scan windows
         if (maxScore < trAll[iW][0]->maxScore) maxScore = trAll[iW][0]->maxScore;
     };
-    
+
     if (maxScore!=trBest->maxScore) {
         ostringstream errOut;
         errOut  << "BUG: maxScore!=trBest->maxScore in multMapSelect";
-        exitWithError(errOut.str(), std::cerr, P->inOut->logMain, EXIT_CODE_BUG, *P);                    
+        exitWithError(errOut.str(), std::cerr, P->inOut->logMain, EXIT_CODE_BUG, *P);
     };
-    
+
     bool chimRecord = false;
 
     nTr=0;
@@ -29,30 +29,30 @@ void ReadAlign::multMapSelect() {//select multiple mappers from all transcripts 
                 if (nTr==MAX_N_MULTMAP) {//too many alignments for this read, do not record it
                     ostringstream errOut;
                     errOut  << "EXITING: Fatal ERROR: number of alignments exceeds MAX_N_MULTMAP, increase it and re-compile STAR";
-                    exitWithError(errOut.str(), std::cerr, P->inOut->logMain, EXIT_CODE_PARAMETER, *P);                    
+                    exitWithError(errOut.str(), std::cerr, P->inOut->logMain, EXIT_CODE_PARAMETER, *P);
                 };
-                    
+
                 trMult[nTr]=trAll[iW][iTr];
                 trMult[nTr]->Chr = trAll[iW][0]->Chr;
-                trMult[nTr]->Str = trAll[iW][0]->Str;                  
-                trMult[nTr]->roStr = trAll[iW][0]->roStr;                                 
-                
+                trMult[nTr]->Str = trAll[iW][0]->Str;
+                trMult[nTr]->roStr = trAll[iW][0]->roStr;
+
                 if ( (trAll[iW][iTr]->maxScore + P->outFilterMultimapScoreRange) >= maxScore) nTrMate++;
-                
-                nTr++;           
+
+                nTr++;
             };
         };
     };
-    
-    if (nTr > P->outFilterMultimapNmax)
-    {//too multi, no need for further processing, isnce it will be considered unmapped
+
+    if (nTr > P->outFilterMultimapNmax || nTr==0)
+    {//too multi OR no alignments, no need for further processing, since it will be considered unmapped
         return;
     };
-    
-    for (uint iTr=0; iTr<nTr; iTr++) 
-    {              
+
+    for (uint iTr=0; iTr<nTr; iTr++)
+    {
         trMult[iTr]->roStart = trMult[iTr]->roStr==0 ? trMult[iTr]->rStart : Lread - trMult[iTr]->rStart - trMult[iTr]->rLength;
-        trMult[iTr]->cStart=trMult[iTr]->gStart - P->chrStart[trMult[iTr]->Chr];                        
+        trMult[iTr]->cStart=trMult[iTr]->gStart - P->chrStart[trMult[iTr]->Chr];
     };
 
 //     if (P->outMultimapperOrder.sortCoord)
@@ -70,9 +70,9 @@ void ReadAlign::multMapSelect() {//select multiple mappers from all transcripts 
 //         {
 //             trMult[itr]=t[s[itr*2+1]];
 //         };
-//         delete [] s;        
+//         delete [] s;
 //     };
-    
+
     if (nTr==1)
     {//unique mappers
         trMult[0]->primaryFlag=true;
@@ -83,7 +83,7 @@ void ReadAlign::multMapSelect() {//select multiple mappers from all transcripts 
         {//bring the best alignment to the top of the list. TODO sort alignments by the score?
             for (uint itr=0; itr<nTr; itr++)
             {//move the best aligns to the top of the list
-                if ( trMult[itr]->maxScore == maxScore ) 
+                if ( trMult[itr]->maxScore == maxScore )
                 {
                     swap(trMult[itr],trMult[nbest]);
                     ++nbest;
@@ -102,15 +102,15 @@ void ReadAlign::multMapSelect() {//select multiple mappers from all transcripts 
                 int rand1=int (rngUniformReal0to1(rngMultOrder)*itr+0.5);
                 swap(trMult[nbest+itr],trMult[nbest+rand1]);
             };
-        };    
+        };
 
         if ( P->outSAMprimaryFlag=="AllBestScore" )
         {
             for (uint itr=0; itr<nTr; itr++)
             {//mark all best score aligns as primary
-                if ( trMult[itr]->maxScore == maxScore ) trMult[itr]->primaryFlag=true; 
+                if ( trMult[itr]->maxScore == maxScore ) trMult[itr]->primaryFlag=true;
             };
-        } else if (P->outMultimapperOrder.random || P->outSAMmultNmax != (uint) -1) 
+        } else if (P->outMultimapperOrder.random || P->outSAMmultNmax != (uint) -1)
         {
             trMult[0]->primaryFlag=true;//mark as primary the first one in the random ordered list: best scoring aligns are already in front of the list
     //         for (uint itr=0; itr<nTr; itr++)
@@ -120,7 +120,7 @@ void ReadAlign::multMapSelect() {//select multiple mappers from all transcripts 
     //         };
         } else
         {//old way
-            trBest->primaryFlag=true;    
+            trBest->primaryFlag=true;
         };
     };
 };

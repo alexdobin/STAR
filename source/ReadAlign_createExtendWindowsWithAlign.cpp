@@ -5,17 +5,17 @@
 #include "SequenceFuns.h"
 
 int ReadAlign::createExtendWindowsWithAlign(uint a1, uint aStr) {
-    
+
 
     uint aBin = (a1 >> P->winBinNbits); //align's bin
     uint iBinLeft=aBin, iBinRight=aBin;
     uintWinBin* wB=winBin[aStr];
     uint iBin=-1, iWin=-1, iWinRight=-1;
-    
-    
+
+
     if (wB[aBin]==uintWinBinMax) {//proceed if there is no window at this bin
         //check neighboring bins
-        
+
         bool flagMergeLeft=false;
         if (aBin>0) {//merge left only if there are bins on the left
             for (iBin=aBin-1;  iBin >= ( aBin>P->winAnchorDistNbins ? aBin-P->winAnchorDistNbins : 0 );  --iBin) {//go left, find windows in Anchor range
@@ -57,22 +57,22 @@ int ReadAlign::createExtendWindowsWithAlign(uint a1, uint aStr) {
                 for (uint ii=aBin; ii<=iBin; ii++) {//mark al bins with the existing windows ID
                     wB[ii]=iWin;
                 };
-            };        
+            };
         };
 
-        
+
         if (!flagMergeLeft && !flagMergeRight) {//no merging, a new window was added
             wB[aBin]=iWin=nW; //add new window ID for now, may change it later
             WC[iWin][WC_Chr]=P->chrBin[aBin >> P->winBinChrNbits];
             WC[iWin][WC_Str]=aStr;
             WC[iWin][WC_gEnd]=WC[iWin][WC_gStart]=aBin;
-            ++nW;        
-            if (nW>=P->alignWindowsPerReadNmax) {                 
-                nW=P->alignWindowsPerReadNmax;
+            ++nW;
+            if (nW>=P->alignWindowsPerReadNmax) {
+                nW=P->alignWindowsPerReadNmax-1;
                 return EXIT_createExtendWindowsWithAlign_TOO_MANY_WINDOWS; //too many windows, do not record TODO: record a marker
-            };     
+            };
         } else {//record windows after merging
-            WC[iWin][WC_gStart]=iBinLeft;            
+            WC[iWin][WC_gStart]=iBinLeft;
             WC[iWin][WC_gEnd]=iBinRight;
             if (flagMergeLeft && flagMergeRight) {//kill right window, it was merged with the left one
                 WC[iWinRight][WC_gStart]=1;

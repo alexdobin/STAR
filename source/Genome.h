@@ -14,13 +14,12 @@ class Genome {
         PackedArray SAi;
         Variation *Var;
         
-        
         uint nGenomeInsert, nGenomePass1, nGenomePass2, nSAinsert, nSApass1, nSApass2; 
 
         Genome (Parameters* Pin );
         Genome () {};//empty constructor
         ~Genome();
-        
+
         void freeMemory();
         void genomeLoad();
 
@@ -29,7 +28,7 @@ class Genome {
 
     private:
     Parameters* P;
-    key_t shmKey;  
+    key_t shmKey;
     char *shmStart;
     char *G1; //pointer -200 of G
     SharedMemory * sharedMemory;

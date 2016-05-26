@@ -13,7 +13,7 @@ OutSJ::OutSJ (uint nSJmax, Parameters *inP) {//do I need P?
 int compareSJ(const void* i1, const void* i2) {//compare SJs from the data structure
     uint s1=*( (uint*)i1 );
     uint s2=*( (uint*)i2 );
-    
+
     if (s1>s2) {
         return 1;
     } else if (s1<s2) {
@@ -82,14 +82,14 @@ void Junction::outputStream(ostream &outStream, Parameters* P) {
 void Junction::collapseOneSJ(char* isj1P, char* isjP, Parameters* P) {//collapse isj junction into isj1: increase counts in isj1. choose max overhangs, motif, annot
     *(uint32*)(isj1P+countUniqueP)   += *(uint32*)(isjP+countUniqueP);
     *(uint32*)(isj1P+countMultipleP) += *(uint32*)(isjP+countMultipleP);
-    
+
     if (*(uint16*)(isj1P+overhangLeftP) < *(uint16*)(isjP+overhangLeftP) ) {
         *(uint16*)(isj1P+overhangLeftP) = *(uint16*)(isjP+overhangLeftP) ;
     };
     if (*(uint16*)(isj1P+overhangRightP) < *(uint16*)(isjP+overhangRightP) ) {
         *(uint16*)(isj1P+overhangRightP) = *(uint16*)(isjP+overhangRightP) ;
-    };  
-    
+    };
+
     if (*(isj1P+motifP) != *(isjP+motifP) ) {
             stringstream errOut;
             errOut <<"EXITING becaues of BUG: different motifs for the same junction while collapsing junctions\n" \
@@ -97,14 +97,14 @@ void Junction::collapseOneSJ(char* isj1P, char* isjP, Parameters* P) {//collapse
                    <<" "<<int(*(char*)(isj1P+annotP)) <<" "<<int(*(char*)(isjP+annotP))<<"\n";
             exitWithError(errOut.str(), std::cerr, P->inOut->logMain, EXIT_CODE_BUG, *P);\
 //         *(isj1P+motifP) = *(isjP+motifP) ;
-    };      
+    };
     if (*(isj1P+annotP) < *(isjP+annotP) ) {
             stringstream errOut;
             errOut <<"EXITING becaues of BUG: different annotation status for the same junction while collapsing junctions:"\
                    <<*(uint*)(isj1P+startP) <<" "<<*(uint32*)(isj1P+gapP) <<" "<<int(*(char*)(isj1P+annotP)) <<" "<<int(*(char*)(isjP+annotP))<<"\n";
             exitWithError(errOut.str(), std::cerr, P->inOut->logMain, EXIT_CODE_BUG, *P);\
-        
+
 //         *(isj1P+annotP) = *(isjP+annotP) ;
-    };      
-    
+    };
+
 }

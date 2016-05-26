@@ -67,6 +67,9 @@
 \optName{genomeSAsparseD}
   \optValue{1}
   \optLine{int{\textgreater}0: suffux array sparsity, i.e. distance between indices: use bigger numbers to decrease needed RAM at the cost of mapping speed reduction} 
+\optName{genomeSuffixLengthMax}
+  \optValue{-1}
+  \optLine{int: maximum length of the suffixes, has to be longer than read length. -1 = infinite.} 
 \end{optTable}
 \optSection{Splice Junctions Database}\label{Splice_Junctions_Database}
 \begin{optTable}
@@ -188,7 +191,7 @@
 \end{optOptTable}
 \optName{outReadsUnmapped}
   \optValue{None}
-  \optLine{string: output of unmapped reads (besides SAM)} 
+  \optLine{string: output of unmapped and partially mapped (i.e. mapped only one mate of a paired end read) reads in separate file(s).} 
 \begin{optOptTable}
   \optOpt{None}   \optOptLine{no output}
   \optOpt{Fastx}   \optOptLine{output in separate fasta/fastq files, Unmapped.out.mate1/2}
@@ -249,11 +252,17 @@
   \optLine{int{\textgreater}=0:                     start value for the IH attribute. 0 may be required by some downstream software, such as Cufflinks or StringTie.} 
 \optName{outSAMunmapped}
   \optValue{None}
-  \optLine{string: output of unmapped reads in the SAM format} 
+  \optLine{string(s): output of unmapped reads in the SAM format} 
+  \optLine{1st word:} 
 \begin{optOptTable}
   \optOpt{None}   \optOptLine{no output}
   \optOpt{Within}   \optOptLine{output unmapped reads within the main SAM file (i.e. Aligned.out.sam)}
 \end{optOptTable}
+  \optLine{2nd word:} 
+\begin{optOptTable}
+  \optOpt{KeepPairs}   \optOptLine{record unmapped mate for each alignment, and, in case of unsroted output, keep it adjacent to its mapped mate.}
+\end{optOptTable}
+  \optLine{Only affects multi-mapping reads} 
 \optName{outSAMorder}
   \optValue{Paired}
   \optLine{string: type of sorting for the SAM output} 
@@ -377,28 +386,29 @@
   \optLine{int: the score range below the maximum score for multimapping alignments} 
 \optName{outFilterMultimapNmax}
   \optValue{10}
-  \optLine{int: read alignments will be output only if the read maps fewer than this value, otherwise no alignments will be output} 
+  \optLine{int: maximum number of loci the read is allowed to map to. Alignments (all of them) will be output only if the read maps to no more loci than this value. } 
+  \optLine{Otherwise no alignments will be output, and the read will be counted as "mapped to too many loci" in the Log.final.out .} 
 \optName{outFilterMismatchNmax}
   \optValue{10}
-  \optLine{int: alignment will be output only if it has fewer mismatches than this value} 
+  \optLine{int: alignment will be output only if it has no more mismatches than this value.} 
 \optName{outFilterMismatchNoverLmax}
   \optValue{0.3}
-  \optLine{int: alignment will be output only if its ratio of mismatches to *mapped* length is less than this value} 
+  \optLine{float: alignment will be output only if its ratio of mismatches to *mapped* length is less than or equal to this value.} 
 \optName{outFilterMismatchNoverReadLmax}
-  \optValue{1}
-  \optLine{int: alignment will be output only if its ratio of mismatches to *read* length is less than this value} 
+  \optValue{1.0}
+  \optLine{float: alignment will be output only if its ratio of mismatches to *read* length is less than or equal to this value.} 
 \optName{outFilterScoreMin}
   \optValue{0}
-  \optLine{int: alignment will be output only if its score is higher than this value} 
+  \optLine{int: alignment will be output only if its score is higher than or equal to this value.} 
 \optName{outFilterScoreMinOverLread}
   \optValue{0.66}
-  \optLine{float: outFilterScoreMin normalized to read length (sum of mates' lengths for paired-end reads)} 
+  \optLine{float: same as outFilterScoreMin, but  normalized to read length (sum of mates' lengths for paired-end reads)} 
 \optName{outFilterMatchNmin}
   \optValue{0}
-  \optLine{int: alignment will be output only if the number of matched bases is higher than this value} 
+  \optLine{int: alignment will be output only if the number of matched bases is higher than or equal to this value.} 
 \optName{outFilterMatchNminOverLread}
   \optValue{0.66}
-  \optLine{float: outFilterMatchNmin normalized to read length (sum of mates' lengths for paired-end reads)} 
+  \optLine{float: sam as outFilterMatchNmin, but normalized to the read length (sum of mates' lengths for paired-end reads).} 
 \optName{outFilterIntronMotifs}
   \optValue{None}
   \optLine{string: filter alignment using their motifs} 

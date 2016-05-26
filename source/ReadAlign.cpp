@@ -12,30 +12,31 @@ ReadAlign::ReadAlign (Parameters* Pin, const Genome &genomeIn, Transcriptome *Tr
     Var=genomeIn.Var;
     
     winBin = new uintWinBin* [2];  
+
     winBin[0] = new uintWinBin [P->winBinN];
-    winBin[1] = new uintWinBin [P->winBinN];      
+    winBin[1] = new uintWinBin [P->winBinN];
     memset(winBin[0],255,sizeof(winBin[0][0])*P->winBinN);
     memset(winBin[1],255,sizeof(winBin[0][0])*P->winBinN);
-    
+
     //RNGs
     rngMultOrder.seed(P->runRNGseed*(iChunk+1));
-    rngUniformReal0to1=std::uniform_real_distribution<double> (0.0, 1.0);    
-    
+    rngUniformReal0to1=std::uniform_real_distribution<double> (0.0, 1.0);
+
     //transcriptome
     if ( P->quant.trSAM.yes ) {
         alignTrAll=new Transcript [P->alignTranscriptsPerReadNmax];
     };
-    
+
 //     statsRA=new StatsAll;
-    
+
     //split
     splitR=new uint*[3];
     splitR[0]=new uint[P->maxNsplit]; splitR[1]=new uint[P->maxNsplit]; splitR[2]=new uint[P->maxNsplit];
-    
+
     //alignments
     PC=new uiPC[P->seedPerReadNmax];
     WC=new uiWC[P->alignWindowsPerReadNmax];
-  
+
     nWA=new uint[P->alignWindowsPerReadNmax];
     nWAP=new uint[P->alignWindowsPerReadNmax];
     WALrec=new uint[P->alignWindowsPerReadNmax];
@@ -52,33 +53,33 @@ ReadAlign::ReadAlign (Parameters* Pin, const Genome &genomeIn, Transcriptome *Tr
 //         P->swHsize=5000000000LLU;
 //         swT = new char [P->swHsize];
 //     };
-    
+
     scoreSeedToSeed = new intScore [P->seedPerWindowNmax*(P->seedPerWindowNmax+1)/2];
     scoreSeedBest = new intScore [P->seedPerWindowNmax];
     scoreSeedBestInd = new uint [P->seedPerWindowNmax];
     scoreSeedBestMM = new uint [P->seedPerWindowNmax];
     seedChain = new uint [P->seedPerWindowNmax];
-    
+
 #endif
-    
+
     WA=new uiWA*[P->alignWindowsPerReadNmax];
     for (uint ii=0;ii<P->alignWindowsPerReadNmax;ii++) WA[ii]=new uiWA[P->seedPerWindowNmax];
 
-    WAincl = new bool [P->seedPerWindowNmax];    
-   
+    WAincl = new bool [P->seedPerWindowNmax];
+
     trAll = new Transcript**[P->alignWindowsPerReadNmax+1];
 
     nWinTr = new uint[P->alignWindowsPerReadNmax];
-    
+
     trArray = new Transcript[P->alignTranscriptsPerReadNmax];
     trArrayPointer =  new Transcript*[P->alignTranscriptsPerReadNmax];
     for (uint ii=0;ii<P->alignTranscriptsPerReadNmax;ii++) trArrayPointer[ii]= &(trArray[ii]);
-    
-    
+
+
     trInit = new Transcript;
-    
+
     //read
-    Read0 = new char*[2];    
+    Read0 = new char*[2];
     Read0[0]  = new char [DEF_readSeqLengthMax+1];
     Read0[1]  = new char [DEF_readSeqLengthMax+1];
 
@@ -91,7 +92,7 @@ ReadAlign::ReadAlign (Parameters* Pin, const Genome &genomeIn, Transcriptome *Tr
         readNameMates[ii]=new char [DEF_readNameLengthMax];
     };
 
-    
+
     outBAMoneAlignNbytes = new uint [P->readNmates+2]; //extra piece for chimeric reads
     outBAMoneAlign = new char* [P->readNmates+2]; //extra piece for chimeric reads
     for (uint ii=0; ii<P->readNmates+2; ii++) {
@@ -99,15 +100,15 @@ ReadAlign::ReadAlign (Parameters* Pin, const Genome &genomeIn, Transcriptome *Tr
     };
 
 
-    
+
     readName = readNameMates[0];
     Read1 = new char*[3];
-    Read1[0]=new char[DEF_readSeqLengthMax+1]; Read1[1]=new char[DEF_readSeqLengthMax+1]; Read1[2]=new char[DEF_readSeqLengthMax+1];    
+    Read1[0]=new char[DEF_readSeqLengthMax+1]; Read1[1]=new char[DEF_readSeqLengthMax+1]; Read1[2]=new char[DEF_readSeqLengthMax+1];
     Qual1=new char*[2]; //modified QSs for scoring
     Qual1[0]=new char[DEF_readSeqLengthMax+1]; Qual1[1]=new char[DEF_readSeqLengthMax+1];
-    
+
     resetN();
-    
+
 };
 
 void ReadAlign::resetN () {//reset resets the counters to 0 for a new read
@@ -117,21 +118,21 @@ void ReadAlign::resetN () {//reset resets the counters to 0 for a new read
     nUM[0]=0;nUM[1]=0;
     storedLmin=0; uniqLmax=0; uniqLmaxInd=0; multLmax=0; multLmaxN=0; multNminL=0; multNmin=0; multNmax=0; multNmaxL=0;
     chimN=0;
-    
+
     for (uint ii=0; ii<P->readNmates; ii++) {
         maxScoreMate[ii]=0;
     };
-    
+
 //     for (uint ii=0;ii<P->alignTranscriptsPerReadNmax;ii++) trArrayPointer[ii]= &(trArray[ii]);
-    
+
 };
 
 void ReadAlign::outTxtMain(ofstream* outTxt, Transcript& t) {
-    
+
     *outTxt << setw(10) << iRead+1 << setw(7) << nTr <<"   "\
             << setw(7) << t.roStart << setw(7) << t.rLength << setw(12) <<  nW  << setw(10)<< mapMarker  << "\t" << t.maxScore << setw(7) << nextWinScore << setw(7) << t.nextTrScore <<"   " \
             << setw(7) << t.nMatch  << setw(7) << t.nMM <<"   "\
             << setw(7) << t.nGap  << setw(10) << t.lGap << setw(7) << t.nDel << setw(7) << t.lDel;
-    
-    *outTxt << "\n"; 
+
+    *outTxt << "\n";
 };

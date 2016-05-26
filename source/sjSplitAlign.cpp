@@ -1,4 +1,4 @@
-#include "IncludeDefine.h"                                                                                                                                                     
+#include "IncludeDefine.h"
 #include "Parameters.h"
 
 bool sjAlignSplit(uint a1,uint aLength,Parameters* P, uint &a1D, uint &aLengthD, uint &a1A, uint &aLengthA, uint &isj) {

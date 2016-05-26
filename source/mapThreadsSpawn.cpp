@@ -15,9 +15,9 @@ void mapThreadsSpawn (Parameters *P, ReadAlignChunk** RAchunk) {
         P->inOut->logMain << "Created thread # " <<ithread <<"\n"<<flush;
         pthread_mutex_unlock(&g_threadChunks.mutexLogMain);
     };
-    
+
     RAchunk[0]->processChunks(); //start main thread
-    
+
     for (int ithread=1;ithread<P->runThreadN;ithread++) {//wait for all threads to complete
         int threadStatus = pthread_join(g_threadChunks.threadArray[ithread], NULL);
         if (threadStatus>0) {//something went wrong with one of threads
@@ -26,8 +26,8 @@ void mapThreadsSpawn (Parameters *P, ReadAlignChunk** RAchunk) {
                 exitWithError(errOut.str(),std::cerr, P->inOut->logMain, 1, *P);
         };
         pthread_mutex_lock(&g_threadChunks.mutexLogMain);
-        P->inOut->logMain << "Joined thread # " <<ithread <<"\n"<<flush;        
+        P->inOut->logMain << "Joined thread # " <<ithread <<"\n"<<flush;
         pthread_mutex_unlock(&g_threadChunks.mutexLogMain);
     };
 };
-    
+

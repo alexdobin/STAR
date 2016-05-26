@@ -1,18 +1,59 @@
-STAR 2.4.5b 2015/11/30
+* Fixed a bug with causing seg-faults when combining  --twopassMode Basic --outSAMorder PairedKeepInputOrder .
+* Fixed a problem with SAM header in cases where reference sequences are added at the mapping stage.
+
+STAR 2.5.2a 2016/05/10
 ======================
 
-Bug-fix release:
+* Fixed the "GstrandBit" problem. 
+* Fixed a bug introduced in 2.5.1a that caused problems with single-end alignments output in some cases.
+* Fixed a bug that can cause STARlong seg-faults in rare cases.
+* Fixed a bug that caused output of unmapped mates for single end alignments even with --outSAMunmapped None .
+* Implemented --winReadCoverageRelativeMin and --winReadCoverageBasesMin to control coverage of the alignment windows for STARlong.
+* Implemented --outSAMfilter KeepAllAddedReferences option which will keep all alignments to the added references.
+* Implemented --alignEndsProtrude option to control output of alignments with protruding ends.
+* Implemented --outTmpKeep All option to keep the temporary files.
+* Implemented --alignEndsType Extend5pOfReads12 option for full extension of 5' ends of both mates.
 
-Fixed a problem with non-primary alignment flags with --outSAMmultNmax option.
-Added counting of chimeric reads into Log.final.out .
-Fixed a bug in --outSAMfilter KeepOnlyAddedReferences.
-Fixed a minor bug that caused rare seg-faults.
-Fixed a minor bug in STARlong extension at the ends of the read.
-Fixed a seg-fault that occurred when non-default value of --genomeChrBinNbits was used.
-Fixed a seg-fault that occurred when junctions where inserted after inserting reference sequences.
+
+STAR 2.5.1b 2016/01/22
+======================
+
+* Fixed a bug in signal generation with --outWigType introduced in 2.5.1a
 
 
-STAR 2.4.5a 2015/11/06
+STAR 2.5.1a 2016/01/19
+======================
+
+* Fixed a bug in --quantMode TranscriptomeSAM that prevented output to Aligned.toTranscriptome.out.bam of the reads mapped to the very last annotated transcript.
+* Cleaned up the code to remove compilation warnings (thanks to github.com/yhoogstrate).
+* Implemented --outSAMunmapped Within KeepPairs option to record unmapped mate adjacent to the mapped one, in case single-end alignments are allowed.
+  For multi-mappers, the unmapped mate will be recored mulitple times adjacent to the mappet mate of each alignment.
+
+
+STAR 2.5.0c 2015/12/23
+======================
+
+* Implemented --genomeSuffixLengthMax option to control max suffix length at the genome generation step.
+* Fixed a bug that caused genome generation stalling in some cases.
+* In Aligned.toTranscriptome.out.bam (--quantMode TranscriptomeSAM), non-primary SAM flag is assigned to all but one randomly selected alignment in Aligned.toTranscriptome.out.bam .
+* Fixed a bug that filtered out some chimeric junctions.
+* Fixed a bug that prevented chimeric output for some of the "circular" configurations.
+
+STAR 2.5.0b 2015/11/30
+======================
+
+**Bug-fix release:**
+
+* Fixed a problem with non-primary alignment flags with --outSAMmultNmax option.
+* Added counting of chimeric reads into Log.final.out .
+* Fixed a bug in --outSAMfilter KeepOnlyAddedReferences.
+* Fixed a minor bug that caused rare seg-faults.
+* Fixed a minor bug in STARlong extension at the ends of the read.
+* Fixed a seg-fault that occurred when non-default value of --genomeChrBinNbits was used.
+* Fixed a seg-fault that occurred when junctions where inserted after inserting reference sequences.
+
+
+STAR 2.5.0a 2015/11/06
 ======================
 
 **STAR now uses essential c++11 features and requires gcc 4.7.0 or later.**

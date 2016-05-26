@@ -34,31 +34,38 @@
 
 uint loadGTF(SjdbClass &sjdbLoci, Parameters *P, string dirOut) {//load gtf file, add junctions to P->sjdb
     //returns number of added junctions
-    if (P->sjdbOverhang>0 && P->sjdbGTFfile!="-") {       
+    if (P->sjdbOverhang>0 && P->sjdbGTFfile!="-") {
         time_t rawTime;
         time(&rawTime);
-        P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ..... Processing annotations GTF\n" <<flush;
-        *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ..... Processing annotations GTF\n" <<flush;           
-        
-        ifstream sjdbStreamIn ( P->sjdbGTFfile.c_str() );   
+        P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ..... processing annotations GTF\n" <<flush;
+        *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ..... processing annotations GTF\n" <<flush;
+
+        ifstream sjdbStreamIn ( P->sjdbGTFfile.c_str() );
         if (sjdbStreamIn.fail()) {
             ostringstream errOut;
             errOut << "FATAL error, could not open file sjdbGTFfile=" << P->sjdbGTFfile <<"\n";
             exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
-        };    
-        
+        };
+
+        if (P->chrNameIndex.size()==0)
+        {
+            for (uint ii=0;ii<P->nChrReal;ii++) {
+                P->chrNameIndex[P->chrName[ii]]=ii;
+            };
+        };
+
         std::map <string,uint> transcriptIDnumber, geneIDnumber;
 
         uint exonN=0;
         while (sjdbStreamIn.good()) {//count the number of exons
-            string chr1,ddd2,featureType;            
+            string chr1,ddd2,featureType;
             sjdbStreamIn >> chr1 >> ddd2 >> featureType;
             if (chr1.substr(0,1)!="#" && featureType==P->sjdbGTFfeatureExon) {
                 exonN++;
             };
             sjdbStreamIn.ignore(1000000000,'\n'); //ignore the rest of the line
         };
-        
+
         if (exonN==0)
         {
             ostringstream errOut;
@@ -68,7 +75,7 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P, string dirOut) {//load gtf file
             errOut << "          If exons are marked with a different word, use --sjdbGTFfeatureExon .\n";
             exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
         };
-        
+
         uint* exonLoci=new uint [exonN*GTF_exonLoci_size];
         char* transcriptStrand = new char [exonN];
         vector <string> transcriptID, geneID;
@@ -81,18 +88,18 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P, string dirOut) {//load gtf file
             string oneLine,chr1,ddd2,featureType;
             getline(sjdbStreamIn,oneLine);
             istringstream oneLineStream (oneLine);
-            
+
             oneLineStream >> chr1 >> ddd2 >> featureType;
             if (chr1.substr(0,1)!="#" && featureType==P->sjdbGTFfeatureExon) {//exonic line, process
-                
+
                 if (P->sjdbGTFchrPrefix!="-") chr1=P->sjdbGTFchrPrefix + chr1;
-                
+
                 if (P->chrNameIndex.count(chr1)==0) {//chr not in Genome
                     P->inOut->logMain << "WARNING: while processing sjdbGTFfile=" << P->sjdbGTFfile <<": chromosome '"<<chr1<<"' not found in Genome fasta files for line:\n";
-                    P->inOut->logMain << oneLine <<"\n"<<flush;          
+                    P->inOut->logMain << oneLine <<"\n"<<flush;
                     continue; //do not process exons/transcripts on missing chromosomes
                 };
-                
+
                 uint ex1,ex2;
                 char str1;
                 oneLineStream >> ex1 >> ex2 >> ddd2 >> str1 >> ddd2; //read all fields except the last
@@ -131,7 +138,7 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P, string dirOut) {//load gtf file
                        transcriptStrand[transcriptIDnumber[trID]]=0;
                     };
                 };
-                
+
                 if (gID=="") {//no gene ID
                     P->inOut->logMain << "WARNING: while processing sjdbGTFfile=" << P->sjdbGTFfile <<": no gene_id for line:\n";
                     P->inOut->logMain << oneLine <<"\n"<<flush;
@@ -144,18 +151,18 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P, string dirOut) {//load gtf file
                 exonLoci[GTF_exonStart(exonN)]=ex1+P->chrStart[P->chrNameIndex[chr1]]-1;
                 exonLoci[GTF_exonEnd(exonN)]=ex2+P->chrStart[P->chrNameIndex[chr1]]-1;
                 exonLoci[GTF_exonGeID(exonN)]=geneIDnumber[gID];
-                ++exonN;                
+                ++exonN;
 
             };//if (chr1.substr(0,1)!="#" && featureType=="exon")
         };//
-        
+
         if (exonN==0)
         {
             ostringstream errOut;
             errOut << "Fatal INPUT FILE error, no valid ""exon"" lines in the GTF file: " << P->sjdbGTFfile <<"\n";
             errOut << "Solution: check the formatting of the GTF file. Most likely cause is the difference in chromosome naming between GTF and FASTA file.\n";
             exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
-        };        
+        };
         //sort exonLoci by transcript ID and exon coordinates
         qsort((void*) exonLoci, exonN, sizeof(uint)*GTF_exonLoci_size, funCompareUint2);
 
@@ -189,11 +196,11 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P, string dirOut) {//load gtf file
             geOut.close();
 
         };
-        
+
         {//exon-transcript data structures
             //re-sort transcripts by transcript start/end
             uint* extrLoci=new uint [exonN*GTF_extrLoci_size]; //this also contains transcripts start and end
-            
+
             uint trex1=0;
             for (uint iex=0; iex<=exonN; iex++) {
                 if (iex==exonN || exonLoci[GTF_exonTrID(iex)] != exonLoci[GTF_exonTrID(trex1)]) {
@@ -208,14 +215,14 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P, string dirOut) {//load gtf file
                 extrLoci[GTF_extrExStart(iex)]=exonLoci[GTF_exonStart(iex)];
                 extrLoci[GTF_extrExEnd(iex)]=exonLoci[GTF_exonEnd(iex)];
             };
-            
+
             qsort((void*) extrLoci, exonN, sizeof(uint)*GTF_extrLoci_size, funCompareArrays<uint,5>);
-            
+
             ofstream trOut ((dirOut+"/transcriptInfo.tab").c_str());
             trOut<<transcriptID.size() << "\n";
             ofstream exOut ((dirOut+"/exonInfo.tab").c_str());
             exOut<<exonN<<"\n";
-            
+
             uint trid=extrLoci[GTF_extrTrID(0)];
             uint trex=0;
             uint trstart=extrLoci[GTF_extrTrStart(0)];
@@ -236,11 +243,11 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P, string dirOut) {//load gtf file
                 exOut << extrLoci[GTF_extrExStart(iex)]-trstart <<"\t"<< extrLoci[GTF_extrExEnd(iex)]-trstart <<"\t"<< exlen <<"\n";
                 exlen+=extrLoci[GTF_extrExEnd(iex)]-extrLoci[GTF_extrExStart(iex)]+1;
             };
-            trOut.close();            
-            exOut.close();            
-            
+            trOut.close();
+            exOut.close();
+
         };
-        
+
         //make junctions
         uint* sjLoci = new uint [exonN*3];
         uint trIDn=exonLoci[0];
@@ -251,7 +258,7 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P, string dirOut) {//load gtf file
                 if ( exonLoci[GTF_exonStart(exI)]<=exonLoci[GTF_exonEnd(exI-1)]+1 ) {
                     P->inOut->logMain << "WARNING: while processing sjdbGTFfile=" << P->sjdbGTFfile <<": overlapping or touching exons:\n";
                     P->inOut->logMain << P->chrName[chr1] <<"\t"<< exonLoci[GTF_exonStart(exI-1)]+1-P->chrStart[chr1] << "\t"<< exonLoci[GTF_exonEnd(exI-1)]+1-P->chrStart[chr1]  <<"\n";
-                    P->inOut->logMain << P->chrName[chr1] <<"\t"<< exonLoci[GTF_exonStart(exI)]+1-P->chrStart[chr1] << "\t"<< exonLoci[GTF_exonEnd(exI)]+1-P->chrStart[chr1]  <<"\n";                    
+                    P->inOut->logMain << P->chrName[chr1] <<"\t"<< exonLoci[GTF_exonStart(exI)]+1-P->chrStart[chr1] << "\t"<< exonLoci[GTF_exonEnd(exI)]+1-P->chrStart[chr1]  <<"\n";
                 } else {
                     sjLoci[sjN*3]=exonLoci[GTF_exonEnd(exI-1)]+1;
                     sjLoci[sjN*3+1]=exonLoci[GTF_exonStart(exI)]-1;
@@ -262,10 +269,10 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P, string dirOut) {//load gtf file
                 trIDn=exonLoci[GTF_exonTrID(exI)];
             };
         };
-        
+
         qsort((void*) sjLoci, sjN, sizeof(uint)*3, funCompareUint2);
-        
-        char strandChar[3]={'.','+','-'};                
+
+        char strandChar[3]={'.','+','-'};
         uint sjdbN1=sjdbLoci.chr.size();
         for (uint ii=0;ii<sjN;ii++) {
             if ( ii==0 || (sjLoci[ii*3]!=sjLoci[(ii-1)*3]) || (sjLoci[ii*3+1]!=sjLoci[(ii-1)*3+1]) || (sjLoci[ii*3+2]!=sjLoci[(ii-1)*3+2]) ) {
@@ -276,20 +283,20 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P, string dirOut) {//load gtf file
                 sjdbLoci.str.push_back(strandChar[sjLoci[ii*3+2]]);
             };
         };
-        
+
         ofstream sjdbList ((dirOut+"/sjdbList.fromGTF.out.tab").c_str());
         for (uint ii=sjdbN1;ii<sjdbLoci.chr.size(); ii++) {
             sjdbList << sjdbLoci.chr.at(ii)<<"\t"<< sjdbLoci.start.at(ii) << "\t"<< sjdbLoci.end.at(ii)  <<"\t"<< sjdbLoci.str.at(ii)<<"\n";
         };
         sjdbList.close();
-        
+
         P->inOut->logMain << "Processing sjdbGTFfile=" << P->sjdbGTFfile <<", found:\n";
         P->inOut->logMain << "\t\t"  << transcriptIDnumber.size() <<" transcripts\n" << "\t\t"  << exonN << " exons (non-collapsed)\n" << "\t\t"  << sjdbLoci.chr.size()-sjdbN1 << " collapsed junctions\n";
         time(&rawTime);
-        P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ..... Finished GTF processing\n" <<flush;
-//         *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ..... Finished GTF processing\n" <<flush;           
-        
-        
+        P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ..... finished GTF processing\n" <<flush;
+//         *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ..... finished GTF processing\n" <<flush;
+
+
         return sjdbLoci.chr.size()-sjdbN1;
     } else {
         return 0;

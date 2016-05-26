@@ -7,8 +7,8 @@ public:
     int inputLevel; //where the parameter was defined
     int inputLevelAllowed; //at which inpurt level parameter definition is allowed
     virtual void inputValues(istringstream &streamIn) =0;
-    friend std::ostream& operator<< (std::ostream& o, ParameterInfoBase const& b);    
-    virtual ~ParameterInfoBase() {};    
+    friend std::ostream& operator<< (std::ostream& o, ParameterInfoBase const& b);
+    virtual ~ParameterInfoBase() {};
 protected:
     virtual void printValues(std::ostream& o) const = 0;
 };
@@ -21,7 +21,7 @@ inline std::ostream& operator<< (std::ostream& o, ParameterInfoBase const& b) {
 };
 
 
-template <class parameterType> 
+template <class parameterType>
 inline parameterType inputOneValue (istringstream &streamIn) {
     parameterType oneV;
     streamIn >> oneV;
@@ -36,62 +36,62 @@ inline string inputOneValue <string> (istringstream &streamIn) {
     } else {
         streamIn.get();//skip "
         getline(streamIn,oneV,'"');
-    };    
+    };
     return oneV;
 };
 
 
-template <class parameterType> 
+template <class parameterType>
 inline void printOneValue (parameterType *value, std::ostream& outStr) {
     outStr << *value;
 };
 template <>
 inline void printOneValue <string> (string *value, std::ostream& outStr) {
     if ((*value).find_first_of(" \t")!=std::string::npos) {//there is white space in the argument, put "" around
-        outStr << '\"' << *value <<'\"';    
+        outStr << '\"' << *value <<'\"';
     } else {
         outStr << *value;
     };
 };
 
 template <class parameterType>
-class ParameterInfoScalar : public ParameterInfoBase {   
+class ParameterInfoScalar : public ParameterInfoBase {
 public:
     parameterType *value;
     vector <parameterType> allowedValues;
-    
+
     ParameterInfoScalar(int inputLevelIn, int inputLevelAllowedIn, string nameStringIn, parameterType* valueIn) {
         nameString=nameStringIn;
         inputLevel=inputLevelIn;
         inputLevelAllowed=inputLevelAllowedIn;
         value=valueIn;
     };
-    
+
     void inputValues(istringstream &streamIn) {
         *value=inputOneValue <parameterType> (streamIn);
     };
-    
+
     ~ParameterInfoScalar() {};
 protected:
    virtual void printValues(std::ostream& outStr) const {
        printOneValue(value, outStr);
-   };    
-    
+   };
+
 };
 
 template <class parameterType>
-class ParameterInfoVector : public ParameterInfoBase {   
+class ParameterInfoVector : public ParameterInfoBase {
 public:
     vector <parameterType> *value;
     vector <parameterType> allowedValues;
-    
+
     ParameterInfoVector(int inputLevelIn, int inputLevelAllowedIn, string nameStringIn, vector <parameterType> *valueIn) {
         nameString=nameStringIn;
         inputLevel=inputLevelIn;
         inputLevelAllowed=inputLevelAllowedIn;
         value=valueIn;
     };
-    
+
     void inputValues(istringstream &streamIn) {
         (*value).clear();
         while (streamIn.good()) {
@@ -99,7 +99,7 @@ public:
             streamIn >> ws; //remove white space, may arrive at the end of line
         };
     };
-    
+
     ~ParameterInfoVector() {};
 protected:
    virtual void printValues(std::ostream& outStr) const {
@@ -107,6 +107,6 @@ protected:
            printOneValue(&(*value).at(ii),outStr);
            outStr<<"   ";
        };
-   };     
+   };
 };
 #endif

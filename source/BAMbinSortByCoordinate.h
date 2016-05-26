@@ -4,6 +4,6 @@
 #include "Parameters.h"
 #include SAMTOOLS_BGZF_H
 
-void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, string dirBAMsort, BGZF *bgzfBAM, Parameters *P);
-       
+void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, string dirBAMsort, Parameters *P);
+
 #endif

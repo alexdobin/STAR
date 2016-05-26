@@ -41,7 +41,7 @@ OBJECTS = SharedMemory.o PackedArray.o SuffixArrayFuns.o STAR.o Parameters.o InO
 	ReadAlign_stitchWindowSeeds.o ReadAlign_chimericDetection.o \
         stitchWindowAligns.o extendAlign.o stitchAlignToTranscript.o alignSmithWaterman.o \
         genomeGenerate.o genomeParametersWrite.o genomeScanFastaFiles.o genomeSAindex.o \
-        Genome_insertSequences.o insertSeqSA.o funCompareUintAndSuffixes.o \
+        Genome_insertSequences.o insertSeqSA.o funCompareUintAndSuffixes.o sortSuffixesBucket.o funCompareUintAndSuffixesMemcmp.o \
 	TimeFunctions.o ErrorWarning.o loadGTF.o streamFuns.o stringSubstituteAll.o \
         Transcriptome.o Transcriptome_quantAlign.o ReadAlign_quantTranscriptome.o Quantifications.o Transcriptome_geneCountsAddAlign.o \
         sjdbLoadFromFiles.o sjdbLoadFromStream.o sjdbPrepare.o sjdbBuildIndex.o sjdbInsertJunctions.o mapThreadsSpawn.o \
@@ -76,6 +76,9 @@ cleanRelease:
 	rm -f *.o Depend.list
 	$(MAKE) -C htslib clean
 
+.PHONY: install
+install:
+	'mv' STAR STARlong ../bin
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),cleanRelease)
