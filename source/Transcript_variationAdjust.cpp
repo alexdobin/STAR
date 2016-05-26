@@ -1,5 +1,5 @@
 #include "Transcript.h"
-#include "serviceFuns.h"
+#include "serviceFuns.cpp"
 
 int Transcript::variationAdjust(Variation &Var, char *R, char **Read1, char *G, Parameters *P)
 {

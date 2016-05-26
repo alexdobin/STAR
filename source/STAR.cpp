@@ -99,9 +99,6 @@ int main(int argInN, char* argIn[]) {
         sjdbInsertJunctions(P, P1, mainGenome, sjdbLoci);
     };
 
-    //calculate genome-related parameters
-    Transcriptome *mainTranscriptome=NULL;
-
 /////////////////////////////////////////////////////////////////////////////////////////////////START
     if (P->runThreadN>1) {
         g_threadChunks.threadArray=new pthread_t[P->runThreadN];

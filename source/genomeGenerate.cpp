@@ -14,7 +14,7 @@
 #include "genomeScanFastaFiles.h"
 #include "genomeSAindex.h"
 
-#include "serviceFuns.h"
+#include "serviceFuns.cpp"
 #include "streamFuns.h"
 
 char* globalG;

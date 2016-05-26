@@ -1,7 +1,7 @@
 #include "IncludeDefine.h"
 #include "Parameters.h"
 #include "ErrorWarning.h"
-#include "serviceFuns.h"
+#include "serviceFuns.cpp"
 #include "SjdbClass.h"
 #include "streamFuns.h"
 #include "TimeFunctions.h"

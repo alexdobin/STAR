@@ -2,7 +2,7 @@
 #include "streamFuns.h"
 #include "SequenceFuns.h"
 #include "TimeFunctions.h"
-#include "serviceFuns.h"
+#include "serviceFuns.cpp"
 
 Variation::Variation (Parameters* Pin)
 {
