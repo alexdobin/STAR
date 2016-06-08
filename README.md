@@ -77,6 +77,9 @@ cd source
 make STARforMacStatic
 ```
 
+All platforms
+-------------
+
 If g++ compiler (true g++, not Clang sym-link) is not on the path, you will need to tell `make` where to find it:
 
 ```bash
@@ -84,6 +87,16 @@ If g++ compiler (true g++, not Clang sym-link) is not on the path, you will need
 cd source
 make STARforMacStatic CXX=/path/to/gcc
 ```
+
+If employing STAR only on a single machine or a homogeneously setup cluster, you may aim at helping the compiler to optimize in way that is tailored to your platform. The flags LDFLAGSextra and CXXFLAGSextra are appended to the default optimizations specified in source/Makefile.
+
+```
+# platform-specific optimization for gcc/g++
+make CXXFLAGSextra=-march=native
+# together with link-time optimization
+make LDFLAGSextra=-flto CXXFLAGSextra="-flto -march=native"
+```
+
 
 Developers
 ==========
