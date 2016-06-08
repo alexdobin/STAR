@@ -30,9 +30,6 @@ COMPILING FROM SOURCE
 
 To compile STAR from source, you must first download the latest [release](release) and uncompress it and then build it.
 
-NOTE: The following instructions only work when obtaining the source using `git`. At least until a new
-version is released which incorporates the top-level `Makefile`.
-
 Linux
 -----
 
