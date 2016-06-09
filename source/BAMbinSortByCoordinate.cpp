@@ -45,7 +45,7 @@ void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, st
     };
 
     //sort
-    qsort((void*) startPos, binN, sizeof(uint)*3, funCompareUint2);
+    qsort((void*) startPos, binN, sizeof(uint)*3, funCompareArrays<uint,3>);
 
     BGZF *bgzfBin;
     bgzfBin=bgzf_open((dirBAMsort+"/b"+to_string((uint) iBin)).c_str(),("w"+to_string((long long) P->outBAMcompression)).c_str());
