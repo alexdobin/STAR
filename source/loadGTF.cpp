@@ -69,7 +69,7 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters *P, string dirOut) {//load gtf file
         {
             ostringstream errOut;
             errOut << "Fatal INPUT FILE error, no ""exon"" lines in the GTF file: " << P->sjdbGTFfile <<"\n";
-            errOut << "Solution: check the formatting of the GTF file, it must contain some lines woth ""exon"" in the 3rd column.\n";
+            errOut << "Solution: check the formatting of the GTF file, it must contain some lines with ""exon"" in the 3rd column.\n";
             errOut << "          Make sure the GTF file is unzipped.\n";
             errOut << "          If exons are marked with a different word, use --sjdbGTFfeatureExon .\n";
             exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
