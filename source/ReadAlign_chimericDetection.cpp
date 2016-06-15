@@ -376,7 +376,7 @@ bool ReadAlign::chimericDetection() {
 
                         };
 
-                        bamN+=alignBAM(trChim[itr], 1, 1, P->chrStart[trChim[itr].Chr],  mateChr, mateStart, mateStrand, \
+                        bamN+=alignBAM(trChim[itr], 1, 1, P->chrStart[trChim[itr].Chr],  mateChr, mateStart-P->chrStart[mateChr], mateStrand, \
                                         alignType, NULL, P->outSAMattrOrder, outBAMoneAlign+bamN, outBAMoneAlignNbytes+bamN);
                         bamBytesTotal+=outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1];//outBAMoneAlignNbytes[1] = 0 if SE is recorded
                     };
