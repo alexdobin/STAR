@@ -20,5 +20,5 @@ $(OUTPUT_DIR)/STARmanual.pdf : $(INPUT_DIR)/STARmanual.tex $(INPUT_DIR)/paramete
 	cd $(INPUT_DIR) && latexmk -pdf -output-directory=../../$(OUTPUT_DIR) -jobname=STARmanual -pdflatex='pdflatex -halt-on-error %O %S -synctex=1 -interaction=nonstopmode --src-specials' -quiet -f -use-make $(basename $(notdir $<))
 
 clean : $(INPUT_DIR)/STARmanual.tex
-	cd $(INPUT_DIR) && latexmk -C -output-directory=../../$(OUTPUT_DIR) -jobname=STARmanual $(basename $(notdir $<))
+	if which latexmk; then cd $(INPUT_DIR) && latexmk -C -output-directory=../../$(OUTPUT_DIR) -jobname=STARmanual $(basename $(notdir $<)); fi
 	cd source && $(MAKE) $@
