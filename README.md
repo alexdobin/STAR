@@ -61,9 +61,9 @@ Mac OS X
 
 ```bash
 # Get latest STAR source from releases
-wget https://github.com/alexdobin/STAR/archive/STAR_2.4.2a.tar.gz
-tar -xzf STAR_2.4.2a.tar.gz
-cd STAR_2.4.2a
+wget https://github.com/alexdobin/STAR/archive/STAR_2.5.2a.tar.gz
+tar -xzf STAR_2.5.2a.tar.gz
+cd STAR_2.5.2a
 
 # Alternatively, get STAR source using git
 git clone https://github.com/alexdobin/STAR.git
