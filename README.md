@@ -38,8 +38,8 @@ Linux
 
 ```bash
 # Get latest STAR source from releases
-wget https://github.com/alexdobin/STAR/archive/2.5.2a.tar.gz
-tar -xzf STAR_2.5.2a.tar.gz
+wget https://github.com/alexdobin/STAR/archive/2.5.2b.tar.gz
+tar -xzf STAR_2.5.2b.tar.gz
 cd STAR-2.5.2a
 
 # Alternatively, get STAR source using git
