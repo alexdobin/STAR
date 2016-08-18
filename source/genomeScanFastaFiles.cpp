@@ -31,8 +31,8 @@ uint genomeScanFastaFiles (Parameters *P, char* G, bool flagRun) {//scans fasta 
         if (cc!='>')
         {
             ostringstream errOut;
-            errOut << "EXITING because of INPUT ERROR: the file format of the genomeFastaFile: " <<P->genomeFastaFiles.at(ii) << "is not fasta:";
-            errOut << " the first character is " <<cc<<" , not > .\n";
+            errOut << "EXITING because of INPUT ERROR: the file format of the genomeFastaFile: " <<P->genomeFastaFiles.at(ii) << " is not fasta:";
+            errOut << " the first character is '" <<cc<<"' ("<< (cc+0) << "), not '>'.\n";
             errOut << " Solution: check formatting of the fasta file. Make sure the file is uncompressed (unzipped).\n";
             exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
         };         while(!fileIn.eof()) {//read each file until eof
