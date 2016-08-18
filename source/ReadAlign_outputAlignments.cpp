@@ -224,7 +224,7 @@ void ReadAlign::outputAlignments() {
 
             if ( P->quant.trSAM.yes )
             {//NOTE: the transcripts are changed by this function (soft-clipping extended), cannot be reused
-                quantTranscriptome(chunkTr, nTr, trMult,  alignTrAll);
+                quantTranscriptome(chunkTr, nTrOut, trMult,  alignTrAll);
             };
         };
     };
