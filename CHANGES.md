@@ -1,3 +1,6 @@
+STAR 2.5.2b 2016/08/19
+======================
+
 * Fixed a problem with --outSAMmultNmax 1 not working for transcriptomic output.
 * Fixed a bug with chimeric BAM output for --chimOutType WithinBAM option.
 * Fixed a bug that could cause non-stable BAM sorting if the gcc qsort is unstable.
