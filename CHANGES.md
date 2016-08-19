@@ -1,3 +1,9 @@
+STAR 2.5.2b 2016/08/19
+======================
+
+* Fixed a problem with --outSAMmultNmax 1 not working for transcriptomic output.
+* Fixed a bug with chimeric BAM output for --chimOutType WithinBAM option.
+* Fixed a bug that could cause non-stable BAM sorting if the gcc qsort is unstable.
 * Fixed a bug with causing seg-faults when combining  --twopassMode Basic --outSAMorder PairedKeepInputOrder .
 * Fixed a problem with SAM header in cases where reference sequences are added at the mapping stage.
 
