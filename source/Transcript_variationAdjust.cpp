@@ -16,7 +16,7 @@ int Transcript::variationAdjust(Variation &Var, char *R, char **Read1, char *G, 
     {
         //binary search to find nearest SNP
         int32 isnp=binarySearch1b <uint> (exons[ie][EX_G], Var.snp.loci, Var.snp.N);
-        if (isnp>0)
+        if (isnp>=0)
         {
             while (isnp<Var.snp.N && exons[ie][EX_G]+exons[ie][EX_L]>Var.snp.loci[isnp])
             {//these SNPs overlap the block
@@ -48,6 +48,7 @@ int Transcript::variationAdjust(Variation &Var, char *R, char **Read1, char *G, 
         };
     };
 
+    #ifndef VAR_noScoreCorrection
     if (nMM1>0)
     {//one or more mismtaches need to be corrected
         uint nMMold=nMM;       
@@ -56,6 +57,9 @@ int Transcript::variationAdjust(Variation &Var, char *R, char **Read1, char *G, 
         nMatch+=nMM1;
         dScore=2*(nMMold-nMM);//score only changes if the number of mismatches is reduced after SNP adjustment
     };
-
+    #else
+        #warning VAR_noScoreCorrection set: no variation scroe correction
+    #endif
+    
     return dScore;
 };

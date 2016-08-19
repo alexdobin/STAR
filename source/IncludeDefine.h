@@ -72,7 +72,6 @@ typedef uint8_t uint8;
 
 
 //SAM attributes
-#define ATTR_Nmax 9
 #define ATTR_NH 1
 #define ATTR_HI 2
 #define ATTR_AS 3

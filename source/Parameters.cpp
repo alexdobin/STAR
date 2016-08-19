@@ -860,10 +860,10 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             outSAMattrPresent.jI=true;
         } else if (vAttr1.at(ii)== "vT") {
             outSAMattrOrder.push_back(ATTR_vT);
-            outSAMattrPresent.jI=true;
+            outSAMattrPresent.vT=true;
         } else if (vAttr1.at(ii)== "vL") {
             outSAMattrOrder.push_back(ATTR_vL);
-            outSAMattrPresent.jI=true;            
+            outSAMattrPresent.vL=true;            
         } else if (vAttr1.at(ii)== "RG") {
             outSAMattrOrder.push_back(ATTR_RG);
             outSAMattrOrderQuant.push_back(ATTR_RG);

@@ -376,7 +376,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
 
                     default:
                         ostringstream errOut;
-                        errOut <<"EXITING because of FATAL BUG: unknown/unimplemented SAM atrribute (tag): "<<outSAMattrOrder[ii] <<"\n";
+                        errOut <<"EXITING because of FATAL BUG: unknown/unimplemented SAM/BAM atrribute (tag): "<<outSAMattrOrder[ii] <<"\n";
                         errOut <<"SOLUTION: contact Alex Dobin at dobin@cshl.edu\n";
                         exitWithError(errOut.str(), std::cerr, P->inOut->logMain, EXIT_CODE_PARAMETER, *P);
                 };
