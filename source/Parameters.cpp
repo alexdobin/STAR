@@ -56,8 +56,8 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "inputBAMfile", &inputBAMfile));
 
     //BAM processing
-    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "bamRemoveDuplicatesType", &bamRemoveDuplicatesType));
-    parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "bamRemoveDuplicatesMate2basesN", &bamRemoveDuplicatesMate2basesN));
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "bamRemoveDuplicatesType", &removeDuplicates.mode));
+    parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "bamRemoveDuplicatesMate2basesN", &removeDuplicates.mate2basesN));
 
     //limits
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitGenomeGenerateRAM", &limitGenomeGenerateRAM));
@@ -494,6 +494,24 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
 
+    
+    //remove duplicates parameters
+    if (removeDuplicates.mode=="UniqueIdentical")
+    {
+        removeDuplicates.yes=true;
+        removeDuplicates.markMulti=true;
+    } else if (removeDuplicates.mode=="UniqueIdenticalNotMulti")
+    {
+        removeDuplicates.yes=true;
+        removeDuplicates.markMulti=false;
+    } else if (removeDuplicates.mode!="-")
+    {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in of --bamRemoveDuplicatesType="<<removeDuplicates.mode<<"\n";
+            errOut << "SOLUTION: use allowed option: - or UniqueIdentical or UniqueIdenticalNotMulti";
+            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);        
+    };    
+    
     if (runMode=="alignReads") {
         inOut->logProgress.open((outFileNamePrefix + "Log.progress.out").c_str());
     } else if (runMode=="inputAlignmentsFromBAM") {
@@ -505,7 +523,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             signalFromBAM(inputBAMfile, wigOutFileNamePrefix, *this);
             *inOut->logStdOut << timeMonthDayTime() << " ..... done\n" <<flush;
             inOut->logMain << timeMonthDayTime()    << " ..... done\n" <<flush;
-        } else if (bamRemoveDuplicatesType=="UniqueIdentical") {
+        } else if (removeDuplicates.mode!="-") {
             *inOut->logStdOut << timeMonthDayTime() << " ..... reading from BAM, remove duplicates, output BAM\n" <<flush;
             inOut->logMain << timeMonthDayTime()    << " ..... reading from BAM, remove duplicates, output BAM\n" <<flush;
             bamRemoveDuplicates(inputBAMfile,(outFileNamePrefix+"Processed.out.bam").c_str(),this);
@@ -1195,6 +1213,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
     };
+    
     ////////////////////////////////////////////////
     inOut->logMain << "Finished loading and checking parameters\n" <<flush;
 };

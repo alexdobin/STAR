@@ -1,3 +1,6 @@
+* Implemented --bamRemoveDuplicatesType UniqueIdenticalNotMulti option, which (unlike the UniqueIdentical optipon) will NOT mark multi-mappers as duplicates.
+* For --bamRemoveDuplicatesType UniqueIdentical, the unmmapped reads are no longer marked as duplicates.
+
 STAR 2.5.2b 2016/08/19
 ======================
 

@@ -291,8 +291,9 @@ outBAMsortingThreadN    0
 
 bamRemoveDuplicatesType  -
     string: mark duplicates in the BAM file, for now only works with sorted BAM feeded with inputBAMfile
-                        -               ... no duplicate removal/marking
-                        UniqueIdentical ... mark all multimappers, and duplicate unique mappers. The coordinates, FLAG, CIGAR must be identical
+                        -                       ... no duplicate removal/marking
+                        UniqueIdentical         ... mark all multimappers, and duplicate unique mappers. The coordinates, FLAG, CIGAR must be identical
+                        UniqueIdenticalNotMulti  ... mark duplicate unique mappers but not multimappers.
 
 bamRemoveDuplicatesMate2basesN   0
     int>0: number of bases from the 5' of mate 2 to use in collapsing (e.g. for RAMPAGE)

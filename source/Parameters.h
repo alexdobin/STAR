@@ -137,8 +137,17 @@ class Parameters {
         bool outBAMunsorted, outBAMcoord, outSAMbool;
         uint32 outBAMcoordNbins;
         string outBAMsortTmpDir;
-        string bamRemoveDuplicatesType;
-        uint bamRemoveDuplicatesMate2basesN;
+        
+//         string bamRemoveDuplicatesType;
+//         uint bamRemoveDuplicatesMate2basesN;
+        struct
+        {
+            string mode;
+            bool yes;
+            bool markMulti;
+            uint mate2basesN;
+        } removeDuplicates;
+        
         int outBAMsortingThreadN, outBAMsortingThreadNactual;
         uint64 *outBAMsortingBinStart; //genomic starts for bins for sorting BAM files
         uint16 outSAMflagOR, outSAMflagAND;
