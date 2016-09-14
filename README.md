@@ -1,7 +1,7 @@
 STAR 2.5
 ========
 Spliced Transcripts Alignment to a Reference
-© Alexander Dobin, 2009-20156
+© Alexander Dobin, 2009-2016
 
 AUTHOR/SUPPORT
 ==============
@@ -39,8 +39,8 @@ Linux
 ```bash
 # Get latest STAR source from releases
 wget https://github.com/alexdobin/STAR/archive/2.5.2b.tar.gz
-tar -xzf STAR_2.5.2b.tar.gz
-cd STAR-2.5.2a
+tar -xzf 2.5.2b.tar.gz
+cd STAR-2.5.2b
 
 # Alternatively, get STAR source using git
 git clone https://github.com/alexdobin/STAR.git
@@ -61,9 +61,9 @@ Mac OS X
 
 ```bash
 # Get latest STAR source from releases
-wget https://github.com/alexdobin/STAR/archive/STAR_2.5.2a.tar.gz
-tar -xzf STAR_2.5.2a.tar.gz
-cd STAR_2.5.2a
+wget https://github.com/alexdobin/STAR/archive/2.5.2b.tar.gz
+tar -xzf 2.5.2b.tar.gz
+cd STAR-2.5.2b
 
 # Alternatively, get STAR source using git
 git clone https://github.com/alexdobin/STAR.git
