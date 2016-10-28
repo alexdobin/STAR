@@ -1,3 +1,4 @@
+* Fixed a problem with RNEXT field in the Chimeric.out.sam file: RNEXT now always points to the other mate start.
 * Added static exexutables compiled with gcc 4.7.0 and 5.3.0 .
 * Implemented --bamRemoveDuplicatesType UniqueIdenticalNotMulti option, which (unlike the UniqueIdentical optipon) will NOT mark multi-mappers as duplicates.
 * For --bamRemoveDuplicatesType UniqueIdentical, the unmmapped reads are no longer marked as duplicates.

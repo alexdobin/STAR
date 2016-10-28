@@ -409,10 +409,26 @@ bool ReadAlign::chimericDetection() {
                 };
 
 
-                for (uint iTr=0;iTr<chimN;iTr++) {//write all chimeric pieces to Chimeric.out.sam/junction
-                    if (P->readNmates==2) {
-                        outputTranscriptSAM(trChim[iTr], chimN, iTr, trChim[1-iTr].Chr, trChim[1-iTr].exons[0][EX_G], (int) (trChim[1-iTr].Str!=trChim[1-iTr].exons[0][EX_iFrag]), -1, NULL, &chunkOutChimSAM);
-                    } else {
+                for (uint iTr=0;iTr<chimN;iTr++) 
+                {//write all chimeric pieces to Chimeric.out.sam/junction
+                    if (P->readNmates==2) {//PE: need mate info
+                        uint iex=0;
+                        if ( trChim[1-iTr].exons[0][EX_iFrag] != trChim[1-iTr].exons[trChim[1-iTr].nExons][EX_iFrag] )
+                        {//the other segment has 2 mates, need to find the opposite mate
+                            for (;iex<trChim[1-iTr].nExons-1;iex++) {
+                                if (trChim[1-iTr].exons[iex][EX_iFrag]!=trChim[iTr].exons[0][EX_iFrag]) {
+                                    break;
+                                };
+                            };
+                        };
+                        
+                        uint mateChr=trChim[1-iTr].Chr;
+                        uint mateStart=trChim[1-iTr].exons[iex][EX_G];
+                        char mateStrand=(char) (trChim[1-iTr].Str!=trChim[1-iTr].exons[iex][EX_iFrag]);
+                        
+                        outputTranscriptSAM(trChim[iTr], chimN, iTr, mateChr, mateStart, mateStrand, -1, NULL, &chunkOutChimSAM);
+                    } else 
+                    {
                         outputTranscriptSAM(trChim[iTr], chimN, iTr, -1, -1, -1, -1, NULL, &chunkOutChimSAM);
                     };
                 };
