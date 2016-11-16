@@ -72,7 +72,6 @@ typedef uint8_t uint8;
 
 
 //SAM attributes
-#define ATTR_Nmax 9
 #define ATTR_NH 1
 #define ATTR_HI 2
 #define ATTR_AS 3
@@ -83,7 +82,7 @@ typedef uint8_t uint8;
 #define ATTR_jI 8
 #define ATTR_XS 9
 #define ATTR_RG 10
-
+#define ATTR_ch 11
 
 //BAM definitions
 #define BAM_CIGAR_MaxSize 10000

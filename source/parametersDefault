@@ -215,9 +215,9 @@ outSAMstrandField                               None
 
 outSAMattributes                Standard
     string: a string of desired SAM attributes, in the order desired for the output SAM
-                                NH HI AS nM NM MD jM jI XS ... any combination in any order
+                                NH HI AS nM NM MD jM jI XS ch ... any combination in any order
                                 Standard   ... NH HI AS nM
-                                All        ... NH HI AS nM NM MD jM jI
+                                All        ... NH HI AS nM NM MD jM jI ch
                                 None       ... no attributes
 
 outSAMattrIHstart               1
@@ -554,6 +554,9 @@ chimFilter                  banGenomicN
     string(s): different filters for chimeric alignments
                             None ... no filtering
                             banGenomicN ... Ns are not allowed in the genome sequence around the chimeric junction
+
+chimMainSegmentMultNmax        10
+    int>=1: maximum number of multi-alignments for the main chimeric segment. =1 will prohibit multimapping main segments.
 
 ### Quantification of Annotations
 quantMode                   -

@@ -2,6 +2,7 @@ STAR 2.5
 ========
 Spliced Transcripts Alignment to a Reference
 © Alexander Dobin, 2009-2016
+https://www.ncbi.nlm.nih.gov/pubmed/23104886
 
 AUTHOR/SUPPORT
 ==============

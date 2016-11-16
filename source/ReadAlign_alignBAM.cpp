@@ -361,6 +361,12 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                     case ATTR_RG:
                         attrN+=bamAttrArrayWrite(P->outSAMattrRG.at(readFilesIndex),"RG",attrOutArray+attrN);
                         break;
+                    case ATTR_ch:
+                        if (alignType<=-10) 
+                        {//chimeric alignment
+                            attrN+=bamAttrArrayWrite('1',"ch",attrOutArray+attrN);
+                        };                        
+                        break;
                     default:
                         ostringstream errOut;
                         errOut <<"EXITING because of FATAL BUG: unknown/unimplemented SAM atrribute (tag): "<<outSAMattrOrder[ii] <<"\n";

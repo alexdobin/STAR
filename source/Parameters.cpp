@@ -195,6 +195,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "chimScoreDropMax", &chimScoreDropMax));
     parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "chimScoreSeparation", &chimScoreSeparation));
     parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "chimScoreJunctionNonGTAG", &chimScoreJunctionNonGTAG));
+    parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "chimMainSegmentMultNmax", &chimMainSegmentMultNmax));
     parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "chimJunctionOverhangMin", &chimJunctionOverhangMin));
     parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "chimOutType", &chimOutType));
     parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "chimFilter", &chimFilter));
@@ -811,8 +812,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     };
 
     //outSAMattributes
-
-
     outSAMattrPresent.NH=false;//TODO re-write as class with constructor?
     outSAMattrPresent.HI=false;
     outSAMattrPresent.AS=false;
@@ -823,18 +822,19 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     outSAMattrPresent.jI=false;
     outSAMattrPresent.RG=false;
     outSAMattrPresent.XS=false;
+    outSAMattrPresent.ch=false;
 
     //for quant SAM output only NH and HI flags
     outSAMattrPresentQuant=outSAMattrPresent;
-    outSAMattrPresent.NH=true;
-    outSAMattrPresent.NH=true;
+    outSAMattrPresentQuant.NH=true;
+    outSAMattrPresentQuant.HI=true;
     outSAMattrOrderQuant.push_back(ATTR_NH);
     outSAMattrOrderQuant.push_back(ATTR_HI);
 
     vector<string> vAttr1;
     if (outSAMattributes.at(0)=="None") {
     } else if (outSAMattributes.at(0)=="All"){
-        vAttr1={"NH","HI","AS","nM","NM","MD","jM","jI"};
+        vAttr1={"NH","HI","AS","nM","NM","MD","jM","jI","ch"};
     } else if (outSAMattributes.at(0)=="Standard"){
         vAttr1={"NH","HI","AS","nM"};
     } else {
@@ -870,6 +870,10 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             outSAMattrOrder.push_back(ATTR_RG);
             outSAMattrOrderQuant.push_back(ATTR_RG);
             outSAMattrPresent.RG=true;
+        } else if (vAttr1.at(ii)== "ch") {
+            outSAMattrOrder.push_back(ATTR_ch);
+            outSAMattrOrderQuant.push_back(ATTR_ch);
+            outSAMattrPresent.ch=true;            
         } else if (vAttr1.at(ii)== "XS") {
             outSAMattrOrder.push_back(ATTR_XS);
             outSAMattrPresent.XS=true;

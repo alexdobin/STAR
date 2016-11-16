@@ -1,5 +1,6 @@
+* Implemented --chimMainSegmentMultNmax parameters, which may be used to prohibit chimeric alignments with multimapping main segments to reduce false positive chimeras.
+* Implemented new SAM attribute 'ch' to mark chimeric aligmments in the BAM file for --chimOutType WithinBAM option.
 * Fixed a problem with RNEXT field in the Chimeric.out.sam file: RNEXT now always points to the other mate start.
-* Added static exexutables compiled with gcc 4.7.0 and 5.3.0 .
 * Implemented --bamRemoveDuplicatesType UniqueIdenticalNotMulti option, which (unlike the UniqueIdentical optipon) will NOT mark multi-mappers as duplicates.
 * For --bamRemoveDuplicatesType UniqueIdentical, the unmmapped reads are no longer marked as duplicates.
 

@@ -130,7 +130,7 @@ class Parameters {
         uint outSAMmultNmax,outSAMattrIHstart;
         string outSAMheaderCommentFile;
         int outSAMmapqUnique;
-        struct {bool NH,HI,AS,NM,MD,nM,jM,jI,RG,XS;} outSAMattrPresent, outSAMattrPresentQuant;
+        struct {bool NH,HI,AS,NM,MD,nM,jM,jI,RG,XS,ch;} outSAMattrPresent, outSAMattrPresentQuant;
         vector <int> outSAMattrOrder, outSAMattrOrderQuant;
         int outBAMcompression;
         vector <string> outSAMtype;
@@ -300,6 +300,7 @@ class Parameters {
         uint chimSegmentMin, chimJunctionOverhangMin; //min chimeric donor/acceptor length
         uint chimSegmentReadGapMax; //max read gap for stitching chimeric windows
         int chimScoreMin,chimScoreDropMax,chimScoreSeparation, chimScoreJunctionNonGTAG; //min chimeric score
+        uint chimMainSegmentMultNmax;
         string chimOutType;
         vector <string> chimFilter;
 
