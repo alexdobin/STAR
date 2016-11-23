@@ -192,6 +192,29 @@ int main(int argInN, char* argIn[]) {
             samHeaderStream << "@SQ\tSN:"<< P->chrName.at(ii) <<"\tLN:"<<P->chrLength[ii]<<"\n";
         };
 
+        P->chrNameAll=P->chrName;
+        P->chrLengthAll=P->chrLength;
+        {//add exra references
+            ifstream extrastream (P->genomeDir + "/extraReferences.txt");
+            while (extrastream.good()) {
+                string line1;
+                getline(extrastream,line1);
+                istringstream stream1 (line1);
+                string field1;
+                stream1 >> field1;//should check for @SQ
+
+                if (field1!="") {//skip blank lines
+                    samHeaderStream << line1 <<"\n";
+
+                    stream1 >> field1;
+                    P->chrNameAll.push_back(field1.substr(3));
+                    stream1 >> field1;
+                    P->chrLengthAll.push_back((uint) stoll(field1.substr(3)));
+                };
+            };
+            extrastream.close();
+        };
+        
         if (P->outSAMheaderPG.at(0)!="-") {
             samHeaderStream << P->outSAMheaderPG.at(0);
             for (uint ii=1;ii<P->outSAMheaderPG.size(); ii++) {
@@ -211,6 +234,7 @@ int main(int argInN, char* argIn[]) {
                     samHeaderStream << line1 <<"\n";
                 };
             };
+            comstream.close();
         };
 
 
@@ -238,7 +262,7 @@ int main(int argInN, char* argIn[]) {
             *P->inOut->outSAM << P->samHeader;
         };
         if (P->outBAMunsorted){
-            outBAMwriteHeader(P->inOut->outBAMfileUnsorted,P->samHeader,P->chrName,P->chrLength);
+            outBAMwriteHeader(P->inOut->outBAMfileUnsorted,P->samHeader,P->chrNameAll,P->chrLengthAll);
         };
 //             if (P->outBAMcoord){
 //                 outBAMwriteHeader(P->inOut->outBAMfileCoord,P->samHeader,P->chrName,P->chrLength);

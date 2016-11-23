@@ -525,9 +525,13 @@ winReadCoverageBasesMin      0
 
 ### Chimeric Alignments
 chimOutType                 SeparateSAMold
-    string: type of chimeric output
+    string(s): type of chimeric output
+                            1st word:
                             SeparateSAMold  ... output old SAM into separate Chimeric.out.sam file
                             WithinBAM       ... output into main aligned BAM files (Aligned.*.bam)
+                            2nd word:
+                            WithinBAM HardClip  ... hard-clipping in the CIGAR for supplemental chimeric alignments (defaultif no 2nd word is present)
+                            WithinBAM SoftClip  ... soft-clipping in the CIGAR for supplemental chimeric alignments
 
 chimSegmentMin              0
     int>=0: minimum length of chimeric segment length, if ==0, no chimeric output

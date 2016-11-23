@@ -197,7 +197,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "chimScoreJunctionNonGTAG", &chimScoreJunctionNonGTAG));
     parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "chimMainSegmentMultNmax", &chimMainSegmentMultNmax));
     parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "chimJunctionOverhangMin", &chimJunctionOverhangMin));
-    parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "chimOutType", &chimOutType));
+    parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "chimOutType", &chim.out.type));
     parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "chimFilter", &chimFilter));
     parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "chimSegmentReadGapMax", &chimSegmentReadGapMax));
 
@@ -905,10 +905,72 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         inOut->logMain << "WARNING --outSAMstrandField=intronMotif, therefore STAR will output XS attribute" <<endl;
     };
 
-    if (chimOutType=="WithinBAM" && !outSAMattrPresent.NM) {
+    //chimeric
+    if (chim.out.type.at(0)=="WithinBAM")
+    {
+        chim.out.bam=true;
+    } else if (chim.out.type.at(0)=="SeparateSAMold")
+    {
+        chim.out.bam=false;
+    } else{
+        ostringstream errOut;
+        errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented value for the first word of --chimOutType: "<<chim.out.type.at(0) <<"\n";
+        errOut <<"SOLUTION: re-run STAR with --chimOutType SeparateSAMold OR WithinBAM\n";
+        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
+    
+    if (chim.out.bam && !outBAMunsorted && !outBAMcoord) {
+            ostringstream errOut;
+            errOut <<"EXITING because of fatal PARAMETERS error: --chimOutType WithinBAM requires BAM output\n";
+            errOut <<"SOLUTION: re-run with --outSAMtype BAM Unsorted/SortedByCoordinate\n";
+            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
+    
+    if (chim.out.bam && !outSAMattrPresent.NM) {
        outSAMattrOrder.push_back(ATTR_NM);
        inOut->logMain << "WARNING --chimOutType=WithinBAM, therefore STAR will output NM attribute" <<endl;
     };
+    
+    
+    if (chim.out.bam)
+    {
+        chim.out.bamHardClip=true;//default
+        if (chim.out.type.size()>1)
+        {
+            if (chim.out.type.at(1)=="HardClip")
+            {
+                chim.out.bamHardClip=true;
+            } else if (chim.out.type.at(1)=="SoftClip")
+            {
+                chim.out.bamHardClip=false;
+            } else {
+                ostringstream errOut;
+                errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented value for the 2nd word of --chimOutType: "<<chim.out.type.at(1) <<"\n";
+                errOut <<"SOLUTION: re-run STAR with --chimOutType WithinBAM  HardClip OR SoftClip\n";
+                exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+            };
+        };
+    };
+    
+    chim.filter.genomicN=false;
+    for (uint ii=0; ii<chimFilter.size(); ii++)
+    {
+        if (chimFilter.at(ii)=="banGenomicN")
+        {
+            chim.filter.genomicN=true;
+        }
+        else if (chimFilter.at(ii)=="None")
+        {//nothing to do
+        }
+        else
+        {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: unrecognized value of --chimFilter="<<chimFilter.at(ii)<<"\n";
+            errOut << "SOLUTION: use allowed values: banGenomicN || None";
+            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };
+    };
+
 
     alignEndsType.ext[0][0]=false;
     alignEndsType.ext[0][1]=false;
@@ -1112,33 +1174,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
         inOut->logMain<<"WARNING: --limitBAMsortRAM=0, will use genome size as RAM limit for BAM sorting\n";
-    };
-
-    if (chimOutType=="WithinBAM" && !outBAMunsorted && !outBAMcoord) {
-            ostringstream errOut;
-            errOut <<"EXITING because of fatal PARAMETERS error: --chimOutType WithinBAM requires BAM output\n";
-            errOut <<"SOLUTION: re-run with --outSAMtype BAM Unsorted/SortedByCoordinate\n";
-            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-    };
-
-    //chimeric
-    chimPar.filter.genomicN=false;
-    for (uint ii=0; ii<chimFilter.size(); ii++)
-    {
-        if (chimFilter.at(ii)=="banGenomicN")
-        {
-            chimPar.filter.genomicN=true;
-        }
-        else if (chimFilter.at(ii)=="None")
-        {//nothing to do
-        }
-        else
-        {
-            ostringstream errOut;
-            errOut << "EXITING because of fatal PARAMETERS error: unrecognized value of --chimFilter="<<chimFilter.at(ii)<<"\n";
-            errOut << "SOLUTION: use allowed values: banGenomicN || None";
-            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-        };
     };
 
     for (uint ii=0; ii<readNameSeparator.size(); ii++)

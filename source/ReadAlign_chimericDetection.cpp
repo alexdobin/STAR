@@ -223,7 +223,7 @@ bool ReadAlign::chimericDetection() {
                             if (b1<4) b1=3-b1;
                         };
 
-                        if ( ( P->chimPar.filter.genomicN && (b0>3 || b1>3) ) || bR>3) {//chimera is not called if there are Ns in the genome or in the read
+                        if ( ( P->chim.filter.genomicN && (b0>3 || b1>3) ) || bR>3) {//chimera is not called if there are Ns in the genome or in the read
                             chimN=0;
                             break;
                         };
@@ -382,7 +382,7 @@ bool ReadAlign::chimericDetection() {
                     trChim[1-chimRepresent].primaryFlag=false;
                 };
 
-                if (P->chimOutType=="WithinBAM") {//BAM output
+                if (P->chim.out.bam) {//BAM output
                     int alignType, bamN=0, bamIsuppl=-1, bamIrepr=-1;
                     uint bamBytesTotal=0;//estimate of the total size of all bam records, for output buffering
                     uint mateChr,mateStart;
@@ -399,7 +399,7 @@ bool ReadAlign::chimericDetection() {
                                 alignType=-10; //this is representative part of chimeric alignment, record is as normal; if encompassing chimeric junction, both are recorded as normal
                                 bamIrepr=( (itr%2)==(trChim[itr].Str) && chimType!=3) ? bamN+1 : bamN;//this is the mate that is chimerically split
                             } else {//"supplementary" chimeric segment
-                                alignType=( (itr%2)==(trChim[itr].Str) ) ? -12 : -11; //right:left chimeric junction
+                                alignType=P->chim.out.bamHardClip ? ( ( itr%2==trChim[itr].Str ) ? -12 : -11) : -13 ; //right:left chimeric junction
                                 bamIsuppl=bamN;
                                 if (chimType==1) {//PE alignment, need mate info for the suppl
                                     uint iex=0;

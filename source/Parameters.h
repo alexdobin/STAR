@@ -38,7 +38,7 @@ class Parameters {
         string inputBAMfile;
 
         //genome, SA, ...
-        vector <uint> chrStart, chrLength;
+        vector <uint> chrStart, chrLength, chrLengthAll;
         string genomeDir,genomeLoad;
         vector <string> genomeFastaFiles;
         uint genomeSAsparseD;//sparsity=distance between indices
@@ -301,7 +301,6 @@ class Parameters {
         uint chimSegmentReadGapMax; //max read gap for stitching chimeric windows
         int chimScoreMin,chimScoreDropMax,chimScoreSeparation, chimScoreJunctionNonGTAG; //min chimeric score
         uint chimMainSegmentMultNmax;
-        string chimOutType;
         vector <string> chimFilter;
 
         struct
@@ -310,7 +309,13 @@ class Parameters {
             {
                 bool genomicN;
             } filter;
-        } chimPar;
+            struct
+            {
+                vector <string> type;
+                bool bam;
+                bool bamHardClip;
+            } out;
+        } chim;
 
         //splitting
         char Qsplit;
@@ -328,7 +333,7 @@ class Parameters {
     uint nGenome, nSA, nSAbyte, nChrReal;//genome length, SA length, # of chromosomes, vector of chromosome start loci
     uint nGenome2, nSA2, nSAbyte2, nChrReal2; //same for the 2nd pass
     uint nSAi; //size of the SAindex
-    vector <string> chrName;
+    vector <string> chrName, chrNameAll;
     map <string,uint> chrNameIndex;
     unsigned char GstrandBit, SAiMarkNbit, SAiMarkAbsentBit; //SA index bit for strand information
     uint GstrandMask, SAiMarkAbsentMask, SAiMarkAbsentMaskC, SAiMarkNmask, SAiMarkNmaskC;//maske to remove strand bit from SA index, to remove mark from SAi index
