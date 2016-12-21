@@ -20,6 +20,7 @@ runMode                         alignReads
                                 alignReads             ... map reads
                                 genomeGenerate         ... generate genome files
                                 inputAlignmentsFromBAM ... input alignments from BAM. Presently only works with --outWigType and --bamRemoveDuplicates.
+                                liftOver               ... lift-over of GTF files (--sjdbGTFfile) between genome assemblies using chain file(s) from --genomeChainFiles.
 
 runThreadN                      1
     int: number of threads to run STAR
@@ -63,6 +64,9 @@ genomeSAsparseD             1
 
 genomeSuffixLengthMax       -1
     int: maximum length of the suffixes, has to be longer than read length. -1 = infinite.
+
+genomeChainFiles            -
+    string: chain files for genomic liftover
 
 ### Splice Junctions Database
 sjdbFileChrStartEnd                     -

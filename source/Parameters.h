@@ -40,7 +40,7 @@ class Parameters {
         //genome, SA, ...
         vector <uint> chrStart, chrLength, chrLengthAll;
         string genomeDir,genomeLoad;
-        vector <string> genomeFastaFiles;
+        vector <string> genomeFastaFiles, genomeChainFiles;
         uint genomeSAsparseD;//sparsity=distance between indices
         uint genomeInsertL; //total length of the sequence to be inserted on the fly
         uint genomeInsertChrIndFirst; //index of the first inserted chromosome

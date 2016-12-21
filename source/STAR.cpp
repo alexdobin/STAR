@@ -5,6 +5,7 @@
 #include "Parameters.h"
 #include "SequenceFuns.h"
 #include "Genome.h"
+#include "Chain.h"
 #include "ReadAlignChunk.h"
 #include "ReadAlign.h"
 #include "Stats.h"
@@ -59,18 +60,32 @@ int main(int argInN, char* argIn[]) {
     *(P->inOut->logStdOut) << timeMonthDayTime(g_statsAll.timeStart) << " ..... started STAR run\n" <<flush;
 
     //generate genome
-    if (P->runMode=="genomeGenerate") {
+    if (P->runMode=="alignReads") 
+    {//continue
+    } else if (P->runMode=="genomeGenerate") 
+    {
         genomeGenerate(P);
         (void) sysRemoveDir (P->outFileTmp);
         P->inOut->logMain << "DONE: Genome generation, EXITING\n" << flush;
         exit(0);
-    } else if (P->runMode!="alignReads") {
+    } else if (P->runMode=="liftOver") 
+    {        
+        for (uint ii=0; ii<P->genomeChainFiles.size();ii++)
+        {
+            Chain chain(P,P->genomeChainFiles.at(ii));
+            chain.liftOverGTF(P->sjdbGTFfile,P->outFileNamePrefix+"GTFliftOver_"+to_string(ii+1)+".gtf");
+            P->inOut->logMain << "DONE: lift-over of GTF file, EXITING\n" << flush;
+            exit(0);
+        };
+    } else {
         P->inOut->logMain << "EXITING because of INPUT ERROR: unknown value of input parameter runMode=" <<P->runMode<<endl<<flush;
-        exit(1);
+        exit(1);        
     };
 
     Genome mainGenome (P);
     mainGenome.genomeLoad();
+    
+    
     if (P->genomeLoad=="LoadAndExit" || P->genomeLoad=="Remove")
     {
         return 0;
