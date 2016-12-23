@@ -83,11 +83,11 @@ void SharedMemory::Allocate(size_t shmSize)
     _isAllocator = true;
 }
 
-const char * SharedMemory::GetPosixObjectKey()
+string SharedMemory::GetPosixObjectKey()
 {
     ostringstream key;
     key << "/" << _key;
-    return key.str().c_str();
+    return key.str();
 }
 
 string SharedMemory::CounterName()
@@ -103,7 +103,7 @@ void SharedMemory::CreateAndInitSharedObject(size_t shmSize)
     unsigned long long toReserve = (unsigned long long) shmSize + sizeof(unsigned long long);
 
 #ifdef POSIX_SHARED_MEM
-    _shmID=shm_open(GetPosixObjectKey(), O_CREAT | O_RDWR | O_EXCL, 0666);
+    _shmID=shm_open(GetPosixObjectKey().c_str(), O_CREAT | O_RDWR | O_EXCL, 0666);
 #else
     _shmID=shmget(_key, toReserve, IPC_CREAT | IPC_EXCL | SHM_NORESERVE | 0666); //        _shmID = shmget(shmKey, shmSize, IPC_CREAT | SHM_NORESERVE | SHM_HUGETLB | 0666);
 #endif
@@ -135,7 +135,7 @@ void SharedMemory::OpenIfExists()
     errno=0;
     if (_shmID < 0){
 #ifdef POSIX_SHARED_MEM
-        _shmID=shm_open(SharedMemory::GetPosixObjectKey(), O_RDWR, 0);
+        _shmID=shm_open(GetPosixObjectKey().c_str(), O_RDWR, 0);
 #else
         _shmID=shmget(_key,0,0);
 #endif
@@ -221,7 +221,7 @@ void SharedMemory::Unlink()
     {
         int shmStatus=-1;
     #ifdef POSIX_SHARED_MEM
-        shmStatus = shm_unlink(SharedMemory::GetPosixObjectKey());
+        shmStatus = shm_unlink(GetPosixObjectKey().c_str());
     #else
         struct shmid_ds buf;
         shmStatus=shmctl(_shmID,IPC_RMID,&buf);
