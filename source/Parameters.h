@@ -45,7 +45,8 @@ class Parameters {
         uint genomeInsertL; //total length of the sequence to be inserted on the fly
         uint genomeInsertChrIndFirst; //index of the first inserted chromosome
         uint genomeSuffixLengthMax; //maximum length of the suffixes, has to be longer than read length
-
+        vector <uint> genomeFileSizes; //size of the genome files
+        
         //binning,windows,anchors
         uint genomeChrBinNbits, genomeChrBinNbases, chrBinN, *chrBin;
         uint winBinChrNbits, winBinNbits, winAnchorDistNbins, winFlankNbins, winBinN;

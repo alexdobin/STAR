@@ -146,8 +146,6 @@ void genomeGenerate(Parameters *P) {
 
     //define some parameters from input parameters
     P->genomeChrBinNbases=1LLU << P->genomeChrBinNbits;
-    //write genome parameters file
-    genomeParametersWrite(P->genomeDir+("/genomeParameters.txt"), P, ERROR_OUT);
 
     char *G=NULL, *G1=NULL;
     uint nGenomeReal=genomeScanFastaFiles(P,G,false);//first scan the fasta file to find all the sizes
@@ -420,6 +418,12 @@ void genomeGenerate(Parameters *P) {
         SA1=mainGenome.SA;
         SA1.writePacked(P->nSA,0);
     };
+
+    P->genomeFileSizes.push_back(P->nGenome);
+    P->genomeFileSizes.push_back(SA1.lengthByte);
+    
+    //write genome parameters file
+    genomeParametersWrite(P->genomeDir+("/genomeParameters.txt"), P, ERROR_OUT);
 
     //write genome to disk
     time ( &rawTime );

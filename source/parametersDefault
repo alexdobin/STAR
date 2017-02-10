@@ -68,6 +68,9 @@ genomeSuffixLengthMax       -1
 genomeChainFiles            -
     string: chain files for genomic liftover
 
+genomeFileSizes             0
+    uint(s)>0: genome files exact sizes in bytes. Typically, this should not be defined by the user.
+
 ### Splice Junctions Database
 sjdbFileChrStartEnd                     -
     string(s): path to the files with genomic coordinates (chr <tab> start <tab> end <tab> strand) for the splice junction introns. Multiple files can be supplied wand will be concatenated.
@@ -294,7 +297,7 @@ outBAMsortingThreadN    0
 ### BAM processing
 
 bamRemoveDuplicatesType  -
-    string: mark duplicates in the BAM file, for now only works with sorted BAM feeded with inputBAMfile
+    string: mark duplicates in the BAM file, for now only works with (i) sorted BAM feeded with inputBAMfile, and (ii) for paired-end alignments only
                         -                       ... no duplicate removal/marking
                         UniqueIdentical         ... mark all multimappers, and duplicate unique mappers. The coordinates, FLAG, CIGAR must be identical
                         UniqueIdenticalNotMulti  ... mark duplicate unique mappers but not multimappers.

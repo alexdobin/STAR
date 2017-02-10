@@ -27,5 +27,11 @@ void genomeParametersWrite(string fileName, Parameters* P, string errorOut)
     genomePar << "sjdbGTFtagExonParentGene\t" << P->sjdbGTFtagExonParentGene <<"\n";
 
     genomePar << "sjdbInsertSave\t" << P->sjdbInsert.save <<"\n";
+    
+    genomePar << "genomeFileSizes\t" << P->genomeFileSizes.at(0);
+    for (uint ii=1;ii<P->genomeFileSizes.size();ii++) 
+        genomePar << " " << P->genomeFileSizes.at(ii) ;
+    genomePar << "\n";
+
     genomePar.close();
 };
