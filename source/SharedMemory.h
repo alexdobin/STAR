@@ -166,7 +166,7 @@ private:
         void OpenIfExists();
         void CreateAndInitSharedObject(size_t shmSize);
         void MapSharedObjectToMemory();
-        const char * GetPosixObjectKey();
+        std::string GetPosixObjectKey();
         struct stat GetSharedObjectInfo();
         void Close();
         void Unlink();
