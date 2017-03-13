@@ -1,3 +1,5 @@
+* Fixed occasional seg-faults after the completion of the mapping runs with shared memory.
+* Implemented --genomeFileSizes option to supply sizes of the genome index files. This allows for streaming of index files.
 * Implemented extra references input in the SAM/AM header from user-created "extraReferences.txt" file in the genome directory.
 * Implemented --chimOutType HardClip OR SoftClip options to output hard (default) / soft clipping in the BAM CIGAR for supplementary chimeric alignments.
 * Implemented --chimMainSegmentMultNmax parameters, which may be used to prohibit chimeric alignments with multimapping main segments to reduce false positive chimeras.

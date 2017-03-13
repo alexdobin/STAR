@@ -47,7 +47,7 @@ void Genome::freeMemory(){//free big chunks of memory used by genome and suffix 
     };
 };
 
-uint Genome::OpenStream(string name, ifstream & stream)
+uint Genome::OpenStream(string name, ifstream & stream, uint size)
 {
     stream.open((P->genomeDir+ "/" +name).c_str(), ios::binary);
     if (!stream.good()) {
@@ -57,18 +57,23 @@ uint Genome::OpenStream(string name, ifstream & stream)
         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_GENOME_FILES, *P);
     };
 
-    uint size = 0;
 
-    P->inOut->logMain << "checking " << name << " size";
-    stream.seekg (0, ios::end);
-    size=(uint) stream.tellg();
-    stream.clear();
-    stream.seekg (0, ios::beg);
-    P->inOut->logMain << "file size: "<< size <<" bytes; state: good=" <<stream.good()\
-            <<" eof="<<stream.eof()<<" fail="<<stream.fail()<<" bad="<<stream.bad()<<"\n"<<flush;
+    if (size>0)
+    {
+        P->inOut->logMain << name << ": size given as a parameter = " << size <<"\n";
+    } else
+    {
+        P->inOut->logMain << "Checking " << name << " size";
+        stream.seekg (0, ios::end);
+        size=(uint) stream.tellg();
+        stream.clear();
+        stream.seekg (0, ios::beg);
+        P->inOut->logMain << "file size: "<< size <<" bytes; state: good=" <<stream.good()\
+                <<" eof="<<stream.eof()<<" fail="<<stream.fail()<<" bad="<<stream.bad()<<"\n"<<flush;
+    };
 
     return size;
-}
+};
 
 
 void Genome::genomeLoad(){//allocate and load Genome
@@ -138,6 +143,12 @@ void Genome::genomeLoad(){//allocate and load Genome
     P->genomeChrBinNbits=P1->genomeChrBinNbits;
     P->genomeChrBinNbases=1LLU<<P->genomeChrBinNbits;
     P->genomeSAsparseD=P1->genomeSAsparseD;
+    
+    if (P1->genomeFileSizes.size()>0)
+    {//genomeFileSize was recorded in the genomeParameters file, copy the values to P
+        P->genomeFileSizes = P1->genomeFileSizes;
+    };
+
     if (P->parArray.at(P->sjdbOverhang_par)->inputLevel==0 && P1->sjdbOverhang>0)
     {//if --sjdbOverhang was not defined by user and it was defined >0 at the genome generation step, then use sjdbOverhang from the genome generation step
         P->sjdbOverhang=P1->sjdbOverhang;
@@ -157,9 +168,14 @@ void Genome::genomeLoad(){//allocate and load Genome
 
     ifstream GenomeIn, SAin, SAiIn;
 
-    P->nGenome = OpenStream("Genome",GenomeIn);
-    P->nSAbyte = OpenStream("SA",SAin);
-    OpenStream("/SAindex",SAiIn);
+    if (P->genomeFileSizes.size() < 2)
+    {//no size info available
+        P->genomeFileSizes.push_back(0);
+        P->genomeFileSizes.push_back(0);
+    };
+    P->nGenome = OpenStream("Genome",GenomeIn,P->genomeFileSizes.at(0));
+    P->nSAbyte = OpenStream("SA",SAin,P->genomeFileSizes.at(1));
+    OpenStream("/SAindex",SAiIn,1); //we do not need SAiIn siz, using a dummy value here to prevent from reading its size from the disk
 
     uint SAiInBytes=0;
     SAiInBytes += fstreamReadBig(SAiIn,(char*) &P->genomeSAindexNbases, sizeof(P->genomeSAindexNbases));

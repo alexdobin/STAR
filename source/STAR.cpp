@@ -464,7 +464,7 @@ int main(int argInN, char* argIn[]) {
     };
 
     P->closeReadsFiles();//this will kill the readFilesCommand processes if necessary
-    mainGenome.~Genome(); //need explicit call because of the 'delete P->inOut' below, which will destroy P->inOut->logStdOut
+    //mainGenome.~Genome(); //need explicit call because of the 'delete P->inOut' below, which will destroy P->inOut->logStdOut
 
     ///@todo create Destructor to destroy P->inOut
     delete P->inOut; //to close files

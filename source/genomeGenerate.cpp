@@ -419,6 +419,7 @@ void genomeGenerate(Parameters *P) {
         SA1.writePacked(P->nSA,0);
     };
 
+    P->genomeFileSizes.clear();
     P->genomeFileSizes.push_back(P->nGenome);
     P->genomeFileSizes.push_back(SA1.lengthByte);
     
