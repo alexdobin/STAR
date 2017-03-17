@@ -1,3 +1,6 @@
+STAR 2.5.3a 2017/03/17
+======================
+
 * Fixed occasional seg-faults after the completion of the mapping runs with shared memory.
 * Implemented --genomeFileSizes option to supply sizes of the genome index files. This allows for streaming of index files.
 * Implemented extra references input in the SAM/AM header from user-created "extraReferences.txt" file in the genome directory.
