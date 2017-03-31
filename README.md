@@ -1,3 +1,5 @@
+Fixed a problem that can arise for very small genomes while using --alignIntronMax 1.
+
 STAR 2.5
 ========
 Spliced Transcripts Alignment to a Reference
@@ -42,7 +44,7 @@ cd STAR-2.5.3a
 
 # Alternatively, get STAR source using git
 git clone https://github.com/alexdobin/STAR.git
-cd STAR
+cd STAR/source
 
 # Build STAR
 make STAR
