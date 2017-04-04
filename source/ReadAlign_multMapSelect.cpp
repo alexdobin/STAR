@@ -18,13 +18,10 @@ void ReadAlign::multMapSelect() {//select multiple mappers from all transcripts 
         exitWithError(errOut.str(), std::cerr, P->inOut->logMain, EXIT_CODE_BUG, *P);
     };
 
-    bool chimRecord = false;
-
     nTr=0;
     for (uint iW=0; iW<nW; iW++) {//scan windows
         for (uint iTr=0; iTr<nWinTr[iW]; iTr++) {//scan transcripts
-            if ( ( (trAll[iW][iTr]->maxScore + P->outFilterMultimapScoreRange) >= maxScore ) || \
-                 ( chimRecord && trAll[iW][iTr]->iFrag>=0 && (trAll[iW][iTr]->maxScore + P->outFilterMultimapScoreRange) >=maxScoreMate[trAll[iW][iTr]->iFrag] )  ) {//record this alignment
+            if ( (trAll[iW][iTr]->maxScore + P->outFilterMultimapScoreRange) >= maxScore  ) {//record this alignment
                 // if paired-end, record alignments from ALL windows
                 if (nTr==MAX_N_MULTMAP) {//too many alignments for this read, do not record it
                     ostringstream errOut;

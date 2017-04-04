@@ -5,6 +5,7 @@
 #include "Parameters.h"
 #include "SequenceFuns.h"
 #include "Genome.h"
+#include "Chain.h"
 #include "ReadAlignChunk.h"
 #include "ReadAlign.h"
 #include "Stats.h"
@@ -60,18 +61,32 @@ int main(int argInN, char* argIn[]) {
     *(P->inOut->logStdOut) << timeMonthDayTime(g_statsAll.timeStart) << " ..... started STAR run\n" <<flush;
 
     //generate genome
-    if (P->runMode=="genomeGenerate") {
+    if (P->runMode=="alignReads") 
+    {//continue
+    } else if (P->runMode=="genomeGenerate") 
+    {
         genomeGenerate(P);
         (void) sysRemoveDir (P->outFileTmp);
         P->inOut->logMain << "DONE: Genome generation, EXITING\n" << flush;
         exit(0);
-    } else if (P->runMode!="alignReads") {
+    } else if (P->runMode=="liftOver") 
+    {        
+        for (uint ii=0; ii<P->genomeChainFiles.size();ii++)
+        {
+            Chain chain(P,P->genomeChainFiles.at(ii));
+            chain.liftOverGTF(P->sjdbGTFfile,P->outFileNamePrefix+"GTFliftOver_"+to_string(ii+1)+".gtf");
+            P->inOut->logMain << "DONE: lift-over of GTF file, EXITING\n" << flush;
+            exit(0);
+        };
+    } else {
         P->inOut->logMain << "EXITING because of INPUT ERROR: unknown value of input parameter runMode=" <<P->runMode<<endl<<flush;
-        exit(1);
+        exit(1);        
     };
 
     Genome mainGenome (P);
     mainGenome.genomeLoad();
+    
+    
     if (P->genomeLoad=="LoadAndExit" || P->genomeLoad=="Remove")
     {
         return 0;
@@ -192,6 +207,29 @@ int main(int argInN, char* argIn[]) {
             samHeaderStream << "@SQ\tSN:"<< P->chrName.at(ii) <<"\tLN:"<<P->chrLength[ii]<<"\n";
         };
 
+        P->chrNameAll=P->chrName;
+        P->chrLengthAll=P->chrLength;
+        {//add exra references
+            ifstream extrastream (P->genomeDir + "/extraReferences.txt");
+            while (extrastream.good()) {
+                string line1;
+                getline(extrastream,line1);
+                istringstream stream1 (line1);
+                string field1;
+                stream1 >> field1;//should check for @SQ
+
+                if (field1!="") {//skip blank lines
+                    samHeaderStream << line1 <<"\n";
+
+                    stream1 >> field1;
+                    P->chrNameAll.push_back(field1.substr(3));
+                    stream1 >> field1;
+                    P->chrLengthAll.push_back((uint) stoll(field1.substr(3)));
+                };
+            };
+            extrastream.close();
+        };
+        
         if (P->outSAMheaderPG.at(0)!="-") {
             samHeaderStream << P->outSAMheaderPG.at(0);
             for (uint ii=1;ii<P->outSAMheaderPG.size(); ii++) {
@@ -211,6 +249,7 @@ int main(int argInN, char* argIn[]) {
                     samHeaderStream << line1 <<"\n";
                 };
             };
+            comstream.close();
         };
 
 
@@ -238,7 +277,7 @@ int main(int argInN, char* argIn[]) {
             *P->inOut->outSAM << P->samHeader;
         };
         if (P->outBAMunsorted){
-            outBAMwriteHeader(P->inOut->outBAMfileUnsorted,P->samHeader,P->chrName,P->chrLength);
+            outBAMwriteHeader(P->inOut->outBAMfileUnsorted,P->samHeader,P->chrNameAll,P->chrLengthAll);
         };
 //             if (P->outBAMcoord){
 //                 outBAMwriteHeader(P->inOut->outBAMfileCoord,P->samHeader,P->chrName,P->chrLength);
@@ -425,7 +464,7 @@ int main(int argInN, char* argIn[]) {
     };
 
     P->closeReadsFiles();//this will kill the readFilesCommand processes if necessary
-    mainGenome.~Genome(); //need explicit call because of the 'delete P->inOut' below, which will destroy P->inOut->logStdOut
+    //mainGenome.~Genome(); //need explicit call because of the 'delete P->inOut' below, which will destroy P->inOut->logStdOut
 
     ///@todo create Destructor to destroy P->inOut
     delete P->inOut; //to close files

@@ -13,7 +13,7 @@ void ReadAlign::outputAlignments() {
         if ( chimericDetection() )
         {
             statsRA.chimericAll++;
-            if ( P->chimOutType=="WithinBAM" )
+            if ( P->chim.out.bam)
             {
                 //if chimeric alignment was recorded in main BAM files, it contains the representative portion, so non-chimeric aligmnent is not output
                 return;

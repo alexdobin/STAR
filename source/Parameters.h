@@ -38,14 +38,15 @@ class Parameters {
         string inputBAMfile;
 
         //genome, SA, ...
-        vector <uint> chrStart, chrLength;
+        vector <uint> chrStart, chrLength, chrLengthAll;
         string genomeDir,genomeLoad;
-        vector <string> genomeFastaFiles;
+        vector <string> genomeFastaFiles, genomeChainFiles;
         uint genomeSAsparseD;//sparsity=distance between indices
         uint genomeInsertL; //total length of the sequence to be inserted on the fly
         uint genomeInsertChrIndFirst; //index of the first inserted chromosome
         uint genomeSuffixLengthMax; //maximum length of the suffixes, has to be longer than read length
-
+        vector <uint> genomeFileSizes; //size of the genome files
+        
         //binning,windows,anchors
         uint genomeChrBinNbits, genomeChrBinNbases, chrBinN, *chrBin;
         uint winBinChrNbits, winBinNbits, winAnchorDistNbins, winFlankNbins, winBinN;
@@ -130,15 +131,25 @@ class Parameters {
         uint outSAMmultNmax,outSAMattrIHstart;
         string outSAMheaderCommentFile;
         int outSAMmapqUnique;
-        struct {bool NH,HI,AS,NM,MD,nM,jM,jI,RG,XS,vL,vT;} outSAMattrPresent, outSAMattrPresentQuant;
+        struct {bool NH,HI,AS,NM,MD,nM,jM,jI,RG,XS,vL,vT,ch;} outSAMattrPresent, outSAMattrPresentQuant;
+
         vector <int> outSAMattrOrder, outSAMattrOrderQuant;
         int outBAMcompression;
         vector <string> outSAMtype;
         bool outBAMunsorted, outBAMcoord, outSAMbool;
         uint32 outBAMcoordNbins;
         string outBAMsortTmpDir;
-        string bamRemoveDuplicatesType;
-        uint bamRemoveDuplicatesMate2basesN;
+        
+//         string bamRemoveDuplicatesType;
+//         uint bamRemoveDuplicatesMate2basesN;
+        struct
+        {
+            string mode;
+            bool yes;
+            bool markMulti;
+            uint mate2basesN;
+        } removeDuplicates;
+        
         int outBAMsortingThreadN, outBAMsortingThreadNactual;
         uint64 *outBAMsortingBinStart; //genomic starts for bins for sorting BAM files
         uint16 outSAMflagOR, outSAMflagAND;
@@ -298,7 +309,7 @@ class Parameters {
         uint chimSegmentMin, chimJunctionOverhangMin; //min chimeric donor/acceptor length
         uint chimSegmentReadGapMax; //max read gap for stitching chimeric windows
         int chimScoreMin,chimScoreDropMax,chimScoreSeparation, chimScoreJunctionNonGTAG; //min chimeric score
-        string chimOutType;
+        uint chimMainSegmentMultNmax;
         vector <string> chimFilter;
 
         struct
@@ -307,7 +318,13 @@ class Parameters {
             {
                 bool genomicN;
             } filter;
-        } chimPar;
+            struct
+            {
+                vector <string> type;
+                bool bam;
+                bool bamHardClip;
+            } out;
+        } chim;
 
         //splitting
         char Qsplit;
@@ -325,7 +342,7 @@ class Parameters {
     uint nGenome, nSA, nSAbyte, nChrReal;//genome length, SA length, # of chromosomes, vector of chromosome start loci
     uint nGenome2, nSA2, nSAbyte2, nChrReal2; //same for the 2nd pass
     uint nSAi; //size of the SAindex
-    vector <string> chrName;
+    vector <string> chrName, chrNameAll;
     map <string,uint> chrNameIndex;
     unsigned char GstrandBit, SAiMarkNbit, SAiMarkAbsentBit; //SA index bit for strand information
     uint GstrandMask, SAiMarkAbsentMask, SAiMarkAbsentMaskC, SAiMarkNmask, SAiMarkNmaskC;//maske to remove strand bit from SA index, to remove mark from SAi index

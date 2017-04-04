@@ -128,8 +128,10 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
 
     //alignType>=0: unmapped reads
     //          -1: normal mapped reads
-    //          -11: chimeric alignment, chimeric junction on the left
-    //          -12: chimeric alignment, chimeric junction on the right
+    //          -10: chimeric alignment, not supplemental (like -11,-12,-13)
+    //          -11: chimeric alignment, supplemental, hard-clipping, chimeric junction on the left
+    //          -12: chimeric alignment, supplemental, hard-clipping, chimeric junction on the right
+    //          -13: chimeric alignment, supplemental, soft-clipping
 
 
     if (P->outSAMmode=="None") return 0; //no SAM/BAM output
@@ -228,7 +230,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
 
             if (readFilter=='Y') samFLAG+=0x200; //not passing quality control
 
-            if (alignType==-11 || alignType==-12) {
+            if (alignType==-11 || alignType==-12 || alignType==-13) {
                 samFLAG+=0x800; //mark chimeric alignments
             } else {//only non-chimeric alignments will be marked as non-primary, since chimeric are already marked with 0x800
                 if (!trOut.primaryFlag) samFLAG +=0x100;//mark not primary align
@@ -373,7 +375,12 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                         attrN+=bamAttrArrayWrite(v1,"vT",attrOutArray+attrN);                                        
                         break;
                     };
-
+                    case ATTR_ch:
+                        if (alignType<=-10) 
+                        {//chimeric alignment
+                            attrN+=bamAttrArrayWrite('1',"ch",attrOutArray+attrN);
+                        };                        
+                        break;
                     default:
                         ostringstream errOut;
                         errOut <<"EXITING because of FATAL BUG: unknown/unimplemented SAM/BAM atrribute (tag): "<<outSAMattrOrder[ii] <<"\n";

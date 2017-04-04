@@ -305,6 +305,9 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
                 case ATTR_RG:
                     *outStream<< "\tRG:Z:" <<P->outSAMattrRG.at(readFilesIndex);
                     break;
+                case ATTR_ch:
+                    //do nothing - this attribute only worlks for BAM output
+                    break;
                 default:
                     ostringstream errOut;
                     errOut <<"EXITING because of FATAL BUG: unknown/unimplemented SAM atrribute (tag): "<<P->outSAMattrOrder[ii] <<"\n";

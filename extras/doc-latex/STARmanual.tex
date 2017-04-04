@@ -34,7 +34,7 @@
 
 \newcommand{\sechyperref}[1]{\hyperref[#1]{Section \ref{#1}. \nameref{#1}}}
 
-\title{STAR manual 2.5.1a}
+\title{STAR manual 2.5.3a}
 \author{Alexander Dobin\\
 dobin@cshl.edu}
 \maketitle
@@ -82,7 +82,7 @@ Generating genome indexes files (see \sechyperref{Generating_genome_indexes}.\ne
 In this step user supplied the reference genome sequences (FASTA files) and annotations (GTF file), from which STAR generate genome indexes that are utilized in the 2nd (mapping) step. The genome indexes are saved to disk and need only be generated \textbf{once} for each genome/annotation combination. A limited collection of STAR genomes is available from \url{http://labshare.cshl.edu/shares/gingeraslab/www-data/dobin/STAR/STARgenomes/}, however, it is strongly recommended that users generate their own genome indexes with most up-to-date assemblies and annotations.
 \item
 Mapping reads to the genome (see \sechyperref{Running_mapping_jobs}).\newline
-In this step user supplies the genome files generated in the 1st step, as well as the RNA-seq reads (sequences) in the form of FASTA or FASTQ files. STAR maps the reads to the genome, and writes several output files, such as alignments (SAM/BAM), mapping summary statistics, splice junctions, unmapped reads, signal (wiggle) tracks etc. Output files are described in \sechyperref{Output_files}. Mapping is controlled by a variety of input parameters (options) that are described in brief in \sechyperref{Description_of_all_options}, and in more detail in \sechyperref{Running_mapping_jobs}.
+In this step user supplies the genome files generated in the 1st step, as well as the RNA-seq reads (sequences) in the form of FASTA or FASTQ files. STAR maps the reads to the genome, and writes several output files, such as alignments (SAM/BAM), mapping summary statistics, splice junctions, unmapped reads, signal (wiggle) tracks etc. Output files are described in \sechyperref{Output_files}. Mapping is controlled by a variety of input parameters (options) that are described in brief in \sechyperref{Running_mapping_jobs}, and in more detail in \sechyperref{Description_of_all_options}.
 \end{enumerate}
 
 STAR command line has the following format:\codelines{
@@ -109,7 +109,7 @@ The basic options to generate genome indices are as follows:
 \item[]
 \opt{runMode} \optv{genomeGenerate} option directs STAR to run genome indices generation job.
 
-\opt{genomeDir} specifies path to the directory (henceforth called "genome directory" where the genome indices are stored. This directory has to be created (with \code{mkdir}) before STAR run and needs to writing permissions. The file system needs to have at least 100GB of disk space available for a typical mammalian genome. It is recommended to remove all files from the genome directory before running the genome generation step. This directory path will have to be supplied at the mapping step to identify the reference genome.
+\opt{genomeDir} specifies path to the directory (henceforth called "genome directory" where the genome indices are stored. This directory has to be created (with \code{mkdir}) before STAR run and needs to have writing permissions. The file system needs to have at least 100GB of disk space available for a typical mammalian genome. It is recommended to remove all files from the genome directory before running the genome generation step. This directory path will have to be supplied at the mapping step to identify the reference genome.
 
 \item[]
 \opt{genomeFastaFiles} specified one or more FASTA files with the genome reference sequences. Multiple reference sequences (henceforth called “chromosomes”) are allowed for each fasta file. You can rename the chromosomes’ names in the chrName.txt keeping the order of the chromosomes in the file: the names from this file will be used in all output alignment files (such as .sam). The tabs are not allowed in chromosomes’ names, and spaces are not recommended.
@@ -216,6 +216,24 @@ maximum intron length
 maximum genomic distance between mates
 \end{itemize}
 
+\subsection{Using shared memory for the genome indexes.}
+The \opt{genomeLoad} option controls how the genome is loaded into memory. By default, \opt{genomeLoad} \optvr{NoSharedMemory}, shared memory is not used. 
+
+With \opt{genomeLoad} \optvr{LoadAndKeep}, STAR loads the genome as a standard Linux shared memory piece. The genomes are identified by their unique directory paths. Before loading the genome, STAR checks if the genome has already been loaded into the shared memory.  If the genome has not been loaded, STAR  will load it and will keep it in memory even after STAR job finishes. The genome will be shared with all the other STAR jobs. You can remove the genome from the shared memory running STAR with \opt{genomeLoad} \optvr{Remove}. The shared memory piece will be physically removed only after all STAR jobs attached to it complete. With \opt{genomeLoad} \optvr{LoadAndRemove}, STAR will load genome in the shared memory, and mark it for removal, so that the genome will be removed from the shared memory once all STAR jobs using it exit. \opt{genomeLoad} \optvr{LoadAndExit}, STAR will load genome in the shared memory, and immediately exit, keeping the genome loaded in the shared memory for the future runs.
+
+If you need to check or remove shared memory pieces manually, use the standard Linux command ipcs and ipcrm. If the genome residing in shared memory is not used for a long time it may get paged out of RAM which will slow down STAR runs considerably. It is strongly recommended to regularly re-load (i.e. remove and load again) the shared memory genomes.
+
+Many standard Linux distributions do not allow large enough shared memory blocks. You can fix this issue if you have root privileges, or ask you system administrator to do it. To enable the shared memory modify or add the following lines to /etc/sysctl.conf:\\
+\code{kernel.shmmax = Nmax}\\
+\code{kernel.shmall = Nall}\\
+$Nmax$, $Nall$ numbers should be chosen as follows:\\
+$Nmax > GenomeIndexSize=Genome + SA + SAindex$ (~31000000000 for human genome)\\
+$Nall > GenomeIndexSize/PageSize$ \\
+where PageSize is typically 4096 (this can be checked with \code {getconf PAGE\_SIZE}).
+Then run:\\
+\code{/sbin/sysctl -p}\\
+This will increase the allowed shared memory blocks to ~31GB, enough for human or mouse genome.
+
 \section{Output files.}\label{Output_files}
 STAR produces multiple output files. All files have standard name, however, you can change the file prefixes using \opt{outFileNamePrefix} \optvr{/path/to/output/dir/prefix}. By default, this parameter is \optv{./}, i.e. all output files are written in the current directory.
 \subsection{Log files.}
@@ -231,20 +249,20 @@ STAR produces multiple output files. All files have standard name, however, you 
 \subsection{SAM.}
 \ofilen{Aligned.out.sam} - alignments in standard SAM format.
 \subsubsection{Multimappers.}
-The number of loci Nmap a read maps to is given by \code{NH:i:}  field. Value of 1 corresponds to unique mappers, while values \textgreater1 corresponds to multi-mappers. \code{HI} attrbiutes enumerates multiple alignments of a read starting with 1 (this can be changed with the \opt{outSAMattrIHstart} - setting it to 0 may be required for compatibility with downstream software such as Cufflinks or StringTie).
+The number of loci \code{Nmap} a read maps to is given by \code{NH:i:Nmap}  field. Value of 1 corresponds to unique mappers, while values \textgreater1 corresponds to multi-mappers. \code{HI} attrbiutes enumerates multiple alignments of a read starting with 1 (this can be changed with the \opt{outSAMattrIHstart} - setting it to 0 may be required for compatibility with downstream software such as Cufflinks or StringTie).
 
-The mapping quality MAPQ (column 5) is 255 for uniquely mapping reads, and int(-10*log10(1-1/Nmap))  for multi-mapping reads. This scheme is same as the one used by TopHat and is compatible with Cufflinks. The default MAPQ=255 for the unique mappers maybe changed with \opt{outSAMmapqUnique} \optvr{Integer0to255} option to ensure compatibility with downstream tools such as GATK.
+The mapping quality MAPQ (column 5) is 255 for uniquely mapping reads, and int(-10*log10(1-1/Nmap))  for multi-mapping reads. This scheme is same as the one used by TopHat and is compatible with Cufflinks. The default MAPQ=255 for the unique mappers maybe changed with \opt{outSAMmapqUnique}  parameter (integer 0 to 255) to ensure compatibility with downstream tools such as GATK.
 
 For multi-mappers, all alignments except one are marked with 0x100 (secondary alignment) in the FLAG (column 2 of the SAM). The unmarked alignment is selected from the best ones (i.e. highest scoring). This default behavior can be changed with \opt{outSAMprimaryFlag} \optv{AllBestScore} option, that will output all alignments with the best score as primary alignments (i.e. 0x100 bit in the FLAG unset).
 
 By default, the order of the multi-mapping alignments for each read is not truly random.
 The \opt{outMultimapperOrder} \optv{Random} option outputs multiple alignments for each read in random order, and also also randomizes the choice of the primary alignment from the highest scoring alignments. Parameter \opt{runRNGseed} can be used to set the random generator seed. With this option, the ordering of multi-mapping alignments of each read, and the choice of the primary alignment will vary from run to run, unless only one thread is used and the seed is kept constant.
 
-The \opt{outSAMmultNmax} parameter limits the number of output alignments (SAM lines) for multimappers. For instance, \opt{outSAMmultNmax} \optv{1} will output exactly one SAM line for each mapped read.
+The \opt{outSAMmultNmax} parameter limits the number of output alignments (SAM lines) for multimappers. For instance, \opt{outSAMmultNmax} \optv{1} will output exactly one SAM line for each mapped read. Note that \code{NH:i:} tag in STAR will still report the actual number of loci that the reads map to, while the the number of reported alignments for a read in the SAM file is \code{min(NH,--outSAMmultNMax)}.
 
 
 \subsubsection{SAM attributes.}
-The SAM attributes can be specified by the user using \opt{outSAMattributes} \optvr{A1 A2 A3 ...} option which accept a list of 2-character SAM attrbiutes. The implemented attrbutes are: \optv{NH HI NM MD AS nM jM jI XS}. By default, STAR outputs \optv{NH HI AS nM} attributes.
+The SAM attributes can be specified by the user using \opt{outSAMattributes} \optvr{A1 A2 A3 ...} option which accept a list of 2-character SAM attributes. The implemented attributes are: \optv{NH HI NM MD AS nM jM jI XS}. By default, STAR outputs \optv{NH HI AS nM} attributes.
 \begin{itemize}
 \item[]
 \optv{NH HI NM MD} have standard meaning as defined in the SAM format specifications.

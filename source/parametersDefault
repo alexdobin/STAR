@@ -20,6 +20,7 @@ runMode                         alignReads
                                 alignReads             ... map reads
                                 genomeGenerate         ... generate genome files
                                 inputAlignmentsFromBAM ... input alignments from BAM. Presently only works with --outWigType and --bamRemoveDuplicates.
+                                liftOver               ... lift-over of GTF files (--sjdbGTFfile) between genome assemblies using chain file(s) from --genomeChainFiles.
 
 runThreadN                      1
     int: number of threads to run STAR
@@ -53,16 +54,22 @@ genomeFastaFiles            -
     string(s): path(s) to the fasta files with genomic sequences for genome generation, separated by spaces. Only used if runMode==genomeGenerate. These files should be plain text FASTA files, they *cannot* be zipped.
 
 genomeChrBinNbits           18
-    int: =log2(chrBin), where chrBin is the size of the bins for genome storage: each chromosome will occupy an integer number of bins
+    int: =log2(chrBin), where chrBin is the size of the bins for genome storage: each chromosome will occupy an integer number of bins. For a genome with large number of contigs, it is recommended to scale this parameter as min(18, log2[max(GenomeLength/NumberOfReferences,ReadLength)]).
 
 genomeSAindexNbases         14
-    int: length (bases) of the SA pre-indexing string. Typically between 10 and 15. Longer strings will use much more memory, but allow faster searches.
+    int: length (bases) of the SA pre-indexing string. Typically between 10 and 15. Longer strings will use much more memory, but allow faster searches. For small genomes, the parameter --genomeSAindexNbases must be scaled down to min(14, log2(GenomeLength)/2 - 1).
 
 genomeSAsparseD             1
     int>0: suffux array sparsity, i.e. distance between indices: use bigger numbers to decrease needed RAM at the cost of mapping speed reduction
 
 genomeSuffixLengthMax       -1
     int: maximum length of the suffixes, has to be longer than read length. -1 = infinite.
+
+genomeChainFiles            -
+    string: chain files for genomic liftover
+
+genomeFileSizes             0
+    uint(s)>0: genome files exact sizes in bytes. Typically, this should not be defined by the user.
 
 ### Splice Junctions Database
 sjdbFileChrStartEnd                     -
@@ -219,9 +226,9 @@ outSAMstrandField                               None
 
 outSAMattributes                Standard
     string: a string of desired SAM attributes, in the order desired for the output SAM
-                                NH HI AS nM NM MD jM jI XS ... any combination in any order
+                                NH HI AS nM NM MD jM jI XS ch ... any combination in any order
                                 Standard   ... NH HI AS nM
-                                All        ... NH HI AS nM NM MD jM jI
+                                All        ... NH HI AS nM NM MD jM jI ch
                                 None       ... no attributes
 
 outSAMattrIHstart               1
@@ -294,9 +301,10 @@ outBAMsortingThreadN    0
 ### BAM processing
 
 bamRemoveDuplicatesType  -
-    string: mark duplicates in the BAM file, for now only works with sorted BAM feeded with inputBAMfile
-                        -               ... no duplicate removal/marking
-                        UniqueIdentical ... mark all multimappers, and duplicate unique mappers. The coordinates, FLAG, CIGAR must be identical
+    string: mark duplicates in the BAM file, for now only works with (i) sorted BAM feeded with inputBAMfile, and (ii) for paired-end alignments only
+                        -                       ... no duplicate removal/marking
+                        UniqueIdentical         ... mark all multimappers, and duplicate unique mappers. The coordinates, FLAG, CIGAR must be identical
+                        UniqueIdenticalNotMulti  ... mark duplicate unique mappers but not multimappers.
 
 bamRemoveDuplicatesMate2basesN   0
     int>0: number of bases from the 5' of mate 2 to use in collapsing (e.g. for RAMPAGE)
@@ -528,9 +536,13 @@ winReadCoverageBasesMin      0
 
 ### Chimeric Alignments
 chimOutType                 SeparateSAMold
-    string: type of chimeric output
+    string(s): type of chimeric output
+                            1st word:
                             SeparateSAMold  ... output old SAM into separate Chimeric.out.sam file
                             WithinBAM       ... output into main aligned BAM files (Aligned.*.bam)
+                            2nd word:
+                            WithinBAM HardClip  ... hard-clipping in the CIGAR for supplemental chimeric alignments (defaultif no 2nd word is present)
+                            WithinBAM SoftClip  ... soft-clipping in the CIGAR for supplemental chimeric alignments
 
 chimSegmentMin              0
     int>=0: minimum length of chimeric segment length, if ==0, no chimeric output
@@ -557,6 +569,9 @@ chimFilter                  banGenomicN
     string(s): different filters for chimeric alignments
                             None ... no filtering
                             banGenomicN ... Ns are not allowed in the genome sequence around the chimeric junction
+
+chimMainSegmentMultNmax        10
+    int>=1: maximum number of multi-alignments for the main chimeric segment. =1 will prohibit multimapping main segments.
 
 ### Quantification of Annotations
 quantMode                   -

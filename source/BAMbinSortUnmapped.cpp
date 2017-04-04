@@ -6,7 +6,7 @@ void BAMbinSortUnmapped(uint32 iBin, uint nThreads, string dirBAMsort, BGZF *bgz
 
     BGZF *bgzfBin;
     bgzfBin=bgzf_open((dirBAMsort+"/b"+to_string((uint) iBin)).c_str(),("w"+to_string((long long) P->outBAMcompression)).c_str());
-    outBAMwriteHeader(bgzfBin,P->samHeaderSortedCoord,P->chrName,P->chrLength);
+    outBAMwriteHeader(bgzfBin,P->samHeaderSortedCoord,P->chrNameAll,P->chrLengthAll);
 
 
     vector<string> bamInFile;

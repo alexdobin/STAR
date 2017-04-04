@@ -1,3 +1,16 @@
+STAR 2.5.3a 2017/03/17
+======================
+
+* Fixed occasional seg-faults after the completion of the mapping runs with shared memory.
+* Implemented --genomeFileSizes option to supply sizes of the genome index files. This allows for streaming of index files.
+* Implemented extra references input in the SAM/AM header from user-created "extraReferences.txt" file in the genome directory.
+* Implemented --chimOutType HardClip OR SoftClip options to output hard (default) / soft clipping in the BAM CIGAR for supplementary chimeric alignments.
+* Implemented --chimMainSegmentMultNmax parameters, which may be used to prohibit chimeric alignments with multimapping main segments to reduce false positive chimeras.
+* Implemented new SAM attribute 'ch' to mark chimeric aligmments in the BAM file for --chimOutType WithinBAM option.
+* Fixed a problem with RNEXT field in the Chimeric.out.sam file: RNEXT now always points to the other mate start.
+* Implemented --bamRemoveDuplicatesType UniqueIdenticalNotMulti option, which (unlike the UniqueIdentical optipon) will NOT mark multi-mappers as duplicates.
+* For --bamRemoveDuplicatesType UniqueIdentical, the unmmapped reads are no longer marked as duplicates.
+
 STAR 2.5.2b 2016/08/19
 ======================
 

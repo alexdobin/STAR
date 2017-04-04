@@ -146,8 +146,6 @@ void genomeGenerate(Parameters *P) {
 
     //define some parameters from input parameters
     P->genomeChrBinNbases=1LLU << P->genomeChrBinNbits;
-    //write genome parameters file
-    genomeParametersWrite(P->genomeDir+("/genomeParameters.txt"), P, ERROR_OUT);
 
     char *G=NULL, *G1=NULL;
     uint nGenomeReal=genomeScanFastaFiles(P,G,false);//first scan the fasta file to find all the sizes
@@ -183,7 +181,7 @@ void genomeGenerate(Parameters *P) {
     if (P->limitGenomeGenerateRAM < (nG1alloc+nG1alloc/3)) {//allocate nG1alloc/3 for SA generation
         ostringstream errOut;
         errOut <<"EXITING because of FATAL PARAMETER ERROR: limitGenomeGenerateRAM="<< (P->limitGenomeGenerateRAM) <<"is too small for your genome\n";
-        errOut <<"SOLUTION: please specify limitGenomeGenerateRAM not less than"<< nG1alloc+nG1alloc/3 <<" and make that much RAM available \n";
+        errOut <<"SOLUTION: please specify --limitGenomeGenerateRAM not less than "<< nG1alloc+nG1alloc/3 <<" and make that much RAM available \n";
         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
     };
 
@@ -420,6 +418,13 @@ void genomeGenerate(Parameters *P) {
         SA1=mainGenome.SA;
         SA1.writePacked(P->nSA,0);
     };
+
+    P->genomeFileSizes.clear();
+    P->genomeFileSizes.push_back(P->nGenome);
+    P->genomeFileSizes.push_back(SA1.lengthByte);
+    
+    //write genome parameters file
+    genomeParametersWrite(P->genomeDir+("/genomeParameters.txt"), P, ERROR_OUT);
 
     //write genome to disk
     time ( &rawTime );

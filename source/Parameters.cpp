@@ -39,10 +39,12 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "genomeDir", &genomeDir));
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "genomeLoad", &genomeLoad));
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "genomeFastaFiles", &genomeFastaFiles));
+    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "genomeChainFiles", &genomeChainFiles));
     parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "genomeSAindexNbases", &genomeSAindexNbases));
     parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "genomeChrBinNbits", &genomeChrBinNbits));
     parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "genomeSAsparseD", &genomeSAsparseD));
     parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "genomeSuffixLengthMax", &genomeSuffixLengthMax));
+    parArray.push_back(new ParameterInfoVector <uint> (-1, -1, "genomeFileSizes", &genomeFileSizes));
 
     //read
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readFilesIn", &readFilesIn));
@@ -56,8 +58,8 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "inputBAMfile", &inputBAMfile));
 
     //BAM processing
-    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "bamRemoveDuplicatesType", &bamRemoveDuplicatesType));
-    parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "bamRemoveDuplicatesMate2basesN", &bamRemoveDuplicatesMate2basesN));
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "bamRemoveDuplicatesType", &removeDuplicates.mode));
+    parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "bamRemoveDuplicatesMate2basesN", &removeDuplicates.mate2basesN));
 
     //limits
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitGenomeGenerateRAM", &limitGenomeGenerateRAM));
@@ -195,8 +197,9 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "chimScoreDropMax", &chimScoreDropMax));
     parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "chimScoreSeparation", &chimScoreSeparation));
     parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "chimScoreJunctionNonGTAG", &chimScoreJunctionNonGTAG));
+    parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "chimMainSegmentMultNmax", &chimMainSegmentMultNmax));
     parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "chimJunctionOverhangMin", &chimJunctionOverhangMin));
-    parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "chimOutType", &chimOutType));
+    parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "chimOutType", &chim.out.type));
     parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "chimFilter", &chimFilter));
     parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "chimSegmentReadGapMax", &chimSegmentReadGapMax));
 
@@ -497,6 +500,24 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
 
+    
+    //remove duplicates parameters
+    if (removeDuplicates.mode=="UniqueIdentical")
+    {
+        removeDuplicates.yes=true;
+        removeDuplicates.markMulti=true;
+    } else if (removeDuplicates.mode=="UniqueIdenticalNotMulti")
+    {
+        removeDuplicates.yes=true;
+        removeDuplicates.markMulti=false;
+    } else if (removeDuplicates.mode!="-")
+    {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in of --bamRemoveDuplicatesType="<<removeDuplicates.mode<<"\n";
+            errOut << "SOLUTION: use allowed option: - or UniqueIdentical or UniqueIdenticalNotMulti";
+            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);        
+    };    
+    
     if (runMode=="alignReads") {
         inOut->logProgress.open((outFileNamePrefix + "Log.progress.out").c_str());
     } else if (runMode=="inputAlignmentsFromBAM") {
@@ -508,7 +529,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             signalFromBAM(inputBAMfile, wigOutFileNamePrefix, *this);
             *inOut->logStdOut << timeMonthDayTime() << " ..... done\n" <<flush;
             inOut->logMain << timeMonthDayTime()    << " ..... done\n" <<flush;
-        } else if (bamRemoveDuplicatesType=="UniqueIdentical") {
+        } else if (removeDuplicates.mode!="-") {
             *inOut->logStdOut << timeMonthDayTime() << " ..... reading from BAM, remove duplicates, output BAM\n" <<flush;
             inOut->logMain << timeMonthDayTime()    << " ..... reading from BAM, remove duplicates, output BAM\n" <<flush;
             bamRemoveDuplicates(inputBAMfile,(outFileNamePrefix+"Processed.out.bam").c_str(),this);
@@ -815,6 +836,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     outSAMattrPresent.XS=false;
     outSAMattrPresent.vT=false;
     outSAMattrPresent.vL=false;
+    outSAMattrPresent.ch=false;
 
     //for quant SAM output only NH and HI flags
     outSAMattrPresentQuant=outSAMattrPresent;
@@ -826,7 +848,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     vector<string> vAttr1;
     if (outSAMattributes.at(0)=="None") {
     } else if (outSAMattributes.at(0)=="All"){
-        vAttr1={"NH","HI","AS","nM","NM","MD","jM","jI"};
+        vAttr1={"NH","HI","AS","nM","NM","MD","jM","jI","ch"};
     } else if (outSAMattributes.at(0)=="Standard"){
         vAttr1={"NH","HI","AS","nM"};
     } else {
@@ -868,6 +890,10 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             outSAMattrOrder.push_back(ATTR_RG);
             outSAMattrOrderQuant.push_back(ATTR_RG);
             outSAMattrPresent.RG=true;
+        } else if (vAttr1.at(ii)== "ch") {
+            outSAMattrOrder.push_back(ATTR_ch);
+            outSAMattrOrderQuant.push_back(ATTR_ch);
+            outSAMattrPresent.ch=true;            
         } else if (vAttr1.at(ii)== "XS") {
             outSAMattrOrder.push_back(ATTR_XS);
             outSAMattrPresent.XS=true;
@@ -907,10 +933,72 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         inOut->logMain << "WARNING --outSAMstrandField=intronMotif, therefore STAR will output XS attribute" <<endl;
     };
 
-    if (chimOutType=="WithinBAM" && !outSAMattrPresent.NM) {
+    //chimeric
+    if (chim.out.type.at(0)=="WithinBAM")
+    {
+        chim.out.bam=true;
+    } else if (chim.out.type.at(0)=="SeparateSAMold")
+    {
+        chim.out.bam=false;
+    } else{
+        ostringstream errOut;
+        errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented value for the first word of --chimOutType: "<<chim.out.type.at(0) <<"\n";
+        errOut <<"SOLUTION: re-run STAR with --chimOutType SeparateSAMold OR WithinBAM\n";
+        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
+    
+    if (chim.out.bam && !outBAMunsorted && !outBAMcoord) {
+            ostringstream errOut;
+            errOut <<"EXITING because of fatal PARAMETERS error: --chimOutType WithinBAM requires BAM output\n";
+            errOut <<"SOLUTION: re-run with --outSAMtype BAM Unsorted/SortedByCoordinate\n";
+            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
+    
+    if (chim.out.bam && !outSAMattrPresent.NM) {
        outSAMattrOrder.push_back(ATTR_NM);
        inOut->logMain << "WARNING --chimOutType=WithinBAM, therefore STAR will output NM attribute" <<endl;
     };
+    
+    
+    if (chim.out.bam)
+    {
+        chim.out.bamHardClip=true;//default
+        if (chim.out.type.size()>1)
+        {
+            if (chim.out.type.at(1)=="HardClip")
+            {
+                chim.out.bamHardClip=true;
+            } else if (chim.out.type.at(1)=="SoftClip")
+            {
+                chim.out.bamHardClip=false;
+            } else {
+                ostringstream errOut;
+                errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented value for the 2nd word of --chimOutType: "<<chim.out.type.at(1) <<"\n";
+                errOut <<"SOLUTION: re-run STAR with --chimOutType WithinBAM  HardClip OR SoftClip\n";
+                exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+            };
+        };
+    };
+    
+    chim.filter.genomicN=false;
+    for (uint ii=0; ii<chimFilter.size(); ii++)
+    {
+        if (chimFilter.at(ii)=="banGenomicN")
+        {
+            chim.filter.genomicN=true;
+        }
+        else if (chimFilter.at(ii)=="None")
+        {//nothing to do
+        }
+        else
+        {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: unrecognized value of --chimFilter="<<chimFilter.at(ii)<<"\n";
+            errOut << "SOLUTION: use allowed values: banGenomicN || None";
+            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };
+    };
+
 
     alignEndsType.ext[0][0]=false;
     alignEndsType.ext[0][1]=false;
@@ -1116,33 +1204,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         inOut->logMain<<"WARNING: --limitBAMsortRAM=0, will use genome size as RAM limit for BAM sorting\n";
     };
 
-    if (chimOutType=="WithinBAM" && !outBAMunsorted && !outBAMcoord) {
-            ostringstream errOut;
-            errOut <<"EXITING because of fatal PARAMETERS error: --chimOutType WithinBAM requires BAM output\n";
-            errOut <<"SOLUTION: re-run with --outSAMtype BAM Unsorted/SortedByCoordinate\n";
-            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-    };
-
-    //chimeric
-    chimPar.filter.genomicN=false;
-    for (uint ii=0; ii<chimFilter.size(); ii++)
-    {
-        if (chimFilter.at(ii)=="banGenomicN")
-        {
-            chimPar.filter.genomicN=true;
-        }
-        else if (chimFilter.at(ii)=="None")
-        {//nothing to do
-        }
-        else
-        {
-            ostringstream errOut;
-            errOut << "EXITING because of fatal PARAMETERS error: unrecognized value of --chimFilter="<<chimFilter.at(ii)<<"\n";
-            errOut << "SOLUTION: use allowed values: banGenomicN || None";
-            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-        };
-    };
-
     for (uint ii=0; ii<readNameSeparator.size(); ii++)
     {
         if (readNameSeparator.at(ii)=="space")
@@ -1219,6 +1280,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
     };
+    
     ////////////////////////////////////////////////
     inOut->logMain << "Finished loading and checking parameters\n" <<flush;
 };
