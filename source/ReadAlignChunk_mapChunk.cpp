@@ -28,7 +28,6 @@ void ReadAlignChunk::mapChunk() {//map one chunk. Input reads stream has to be s
             RA->iRead++;
 //         chunkOutBAMtotal=(uint) RA->outSAMstream->tellp();
             chunkOutBAMtotal+=RA->outBAMbytes;
-            chunkOutBAMtotal1+=RA->outBAMbytes1;
 //             uint ddd=(uint) RA->outSAMstream->tellp();
         };
 

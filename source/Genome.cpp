@@ -298,7 +298,6 @@ void Genome::genomeLoad(){//allocate and load Genome
 //         exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_SHM, *P);
 //     };
      if (P->annotScoreScale>0) {//optional allocation
-            sigG = shmNext;
             shmNext += P->nGenome;
         }
     }

@@ -5,11 +5,7 @@
 
 ReadAlign::ReadAlign (Parameters* Pin, const Genome &genomeIn, Transcriptome *TrIn, int iChunk) : P(Pin), chunkTr(TrIn) {//allocate arrays
 
-    G=genomeIn.G;
-    SA=genomeIn.SA;
-    SAi=genomeIn.SAi;
-    sigG=genomeIn.sigG;
-    Var=genomeIn.Var;
+    G=genomeIn; 
     
     winBin = new uintWinBin* [2];  
 

@@ -319,7 +319,7 @@ std::time(&timeStart);
             stitchWindowSeeds(iW, iW1, WAincl, R[trA.roStr==0 ? 0:2], Q[trA.roStr], G);
         };
     #else
-        stitchWindowAligns(0, nWA[iW], 0, WAincl, 0, 0, trA, Lread, WA[iW], R[trA.roStr==0 ? 0:2], Q[trA.roStr], G, sigG, P, trAll[iW1], nWinTr+iW1, this);
+        stitchWindowAligns(0, nWA[iW], 0, WAincl, 0, 0, trA, Lread, WA[iW], R[trA.roStr==0 ? 0:2], Q[trA.roStr], G, P, trAll[iW1], nWinTr+iW1, this);
     #endif
         trAll[iW1][0]->nextTrScore= nWinTr[iW1]==1 ? 0 : trAll[iW1][1]->maxScore;
 

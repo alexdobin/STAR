@@ -5,7 +5,6 @@
 void ReadAlign::outputAlignments() {
 
     outBAMbytes=0;
-    outBAMbytes1=0;
 
     bool mateMapped[2]={false,false};
 

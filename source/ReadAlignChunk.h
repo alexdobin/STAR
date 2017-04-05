@@ -32,7 +32,7 @@ public:
     uint iChunkIn; //current chunk # as read from .fastq
     uint iChunkOutSAM; //current chunk # writtedn to Aligned.out.sam
     int iThread; //current thread
-    uint chunkOutBAMtotal, chunkOutBAMtotal1; //total number of bytes in the write buffer
+    uint chunkOutBAMtotal; //total number of bytes in the write buffer
 
     ReadAlignChunk(Parameters* Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk);
     void processChunks();
