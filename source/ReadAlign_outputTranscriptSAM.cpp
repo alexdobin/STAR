@@ -241,8 +241,8 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
             uint matchN=0;
             for (uint iex=iEx1;iex<=iEx2;iex++) {
                 for (uint ii=0;ii<trOut.exons[iex][EX_L];ii++) {
-                    char r1=R[ii+trOut.exons[iex][EX_R]];
-                    char g1=G.G[ii+trOut.exons[iex][EX_G]];
+                    char r1 = R[ii+trOut.exons[iex][EX_R]];
+                    char g1 = mapGen.G[ii+trOut.exons[iex][EX_G]];
                     if ( r1!=g1 || r1==4 || g1==4) {
                         ++tagNM;
 //                         if (matchN>0 || (ii==0 && iex>0 && trOut.canonSJ[iex]==-1) ) {
@@ -259,7 +259,7 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
                         tagNM+=trOut.exons[iex+1][EX_G]-(trOut.exons[iex][EX_G]+trOut.exons[iex][EX_L]);
                         tagMD+=to_string(matchN) + "^";
                         for (uint ii=trOut.exons[iex][EX_G]+trOut.exons[iex][EX_L];ii<trOut.exons[iex+1][EX_G];ii++) {
-                            tagMD+=P->genomeNumToNT[(uint8) G.G[ii]];
+                            tagMD+=P->genomeNumToNT[(uint8) mapGen.G[ii]];
                         };
                         matchN=0;
                     } else if (trOut.canonSJ[iex]==-2) {//insertion

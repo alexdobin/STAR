@@ -22,7 +22,7 @@ class ReadAlign
         
         //vars
 
-        Genome G; //genome structure
+        Genome mapGen; //mapped-to-genome structure
 
         uint iRead;
         char** Read1;
@@ -144,10 +144,11 @@ class ReadAlign
         void outTxtMain(ofstream*,Transcript&);
         int createExtendWindowsWithAlign(uint a1, uint aStr); //extends and windows with one alignment
         void assignAlignToWindow(uint a1, uint aLength, uint aStr, uint aNrep, uint aFrag, uint aRstart,bool aAnchor, uint sjA); //assigns one alignment to a window
-        void stitchPieces(char **R, char **Q, char *G, PackedArray& SA, uint Lread);
         bool chimericDetection();
         void outputAlignments();
-        void stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R, char *Q, char *G);//stitches all seeds in one window: iW
+        
+        void stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R, char *Q);//stitches all seeds in one window: iW
+        void stitchPieces(char **R, char **Q, uint Lread);
 
         uint quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT);
 };

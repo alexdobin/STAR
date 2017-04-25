@@ -10,7 +10,7 @@
 #include "GlobalVariables.h"
 #include <time.h>
 
-void ReadAlign::stitchPieces(char **R, char **Q, char *G, PackedArray& SA, uint Lread) {
+void ReadAlign::stitchPieces(char **R, char **Q, uint Lread) {
 
        //zero-out winBin
     memset(winBin[0],255,sizeof(winBin[0][0])*P->winBinN);
@@ -49,7 +49,7 @@ void ReadAlign::stitchPieces(char **R, char **Q, char *G, PackedArray& SA, uint 
 
             for (uint iSA=PC[iP][PC_SAstart]; iSA<=PC[iP][PC_SAend]; iSA++) {//scan through all alignments of this piece
 
-                uint a1 = SA[iSA];
+                uint a1 = mapGen.SA[iSA];
                 uint aStr = a1 >> P->GstrandBit;
                 a1 &= P->GstrandMask; //remove strand bit
 
@@ -139,7 +139,7 @@ void ReadAlign::stitchPieces(char **R, char **Q, char *G, PackedArray& SA, uint 
 
         for (uint iSA=PC[iP][PC_SAstart]; iSA<=PC[iP][PC_SAend]; iSA++) {//scan through all alignments
 
-            uint a1 = SA[iSA];
+            uint a1 = mapGen.SA[iSA];
             uint aStr = a1 >> P->GstrandBit;
             a1 &= P->GstrandMask; //remove strand bit
             uint aRstart=PC[iP][PC_rStart];
@@ -298,7 +298,7 @@ std::time(&timeStart);
 
 
     #ifdef COMPILE_FOR_LONG_READS
-        stitchWindowSeeds(iW, iW1, NULL, R[trA.roStr==0 ? 0:2], Q[trA.roStr], G);
+        stitchWindowSeeds(iW, iW1, NULL, R[trA.roStr==0 ? 0:2], Q[trA.roStr], mapGen.G);
         if (P->chimSegmentMin>0) {
             for (uint ia=0;ia<nWA[iW];ia++)
             {//mark all seeds that overlap the best (and only for now) transcript trA
@@ -316,10 +316,10 @@ std::time(&timeStart);
                     
                 };
             };
-            stitchWindowSeeds(iW, iW1, WAincl, R[trA.roStr==0 ? 0:2], Q[trA.roStr], G);
+            stitchWindowSeeds(iW, iW1, WAincl, R[trA.roStr==0 ? 0:2], Q[trA.roStr], mapGen.G);
         };
     #else
-        stitchWindowAligns(0, nWA[iW], 0, WAincl, 0, 0, trA, Lread, WA[iW], R[trA.roStr==0 ? 0:2], Q[trA.roStr], G, P, trAll[iW1], nWinTr+iW1, this);
+        stitchWindowAligns(0, nWA[iW], 0, WAincl, 0, 0, trA, Lread, WA[iW], R[trA.roStr==0 ? 0:2], Q[trA.roStr], mapGen.G, P, trAll[iW1], nWinTr+iW1, this);
     #endif
         trAll[iW1][0]->nextTrScore= nWinTr[iW1]==1 ? 0 : trAll[iW1][1]->maxScore;
 

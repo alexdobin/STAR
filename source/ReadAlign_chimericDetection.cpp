@@ -210,16 +210,16 @@ bool ReadAlign::chimericDetection() {
 
                         char b0,b1;
                         if (trChim[0].Str==0) {
-                            b0=G.G[trChim[0].exons[e0][EX_G]+jR];
+                            b0=mapGen.G[trChim[0].exons[e0][EX_G]+jR];
                         } else {
-                            b0=G.G[trChim[0].exons[e0][EX_G]+trChim[0].exons[e0][EX_L]-1-jR];
+                            b0=mapGen.G[trChim[0].exons[e0][EX_G]+trChim[0].exons[e0][EX_L]-1-jR];
                             if (b0<4) b0=3-b0;
                         };
 
                         if (trChim[1].Str==0) {
-                            b1=G.G[trChim[1].exons[e1][EX_G]-roStart1+roStart0+jR];
+                            b1=mapGen.G[trChim[1].exons[e1][EX_G]-roStart1+roStart0+jR];
                         } else {
-                            b1=G.G[trChim[1].exons[e1][EX_G]+trChim[1].exons[e1][EX_L]-1+roStart1-roStart0-jR];
+                            b1=mapGen.G[trChim[1].exons[e1][EX_G]+trChim[1].exons[e1][EX_L]-1+roStart1-roStart0-jR];
                             if (b1<4) b1=3-b1;
                         };
 
@@ -230,21 +230,21 @@ bool ReadAlign::chimericDetection() {
 
                         char b01,b02,b11,b12;
                         if (trChim[0].Str==0) {
-                            b01=G.G[trChim[0].exons[e0][EX_G]+jR+1];
-                            b02=G.G[trChim[0].exons[e0][EX_G]+jR+2];
+                            b01=mapGen.G[trChim[0].exons[e0][EX_G]+jR+1];
+                            b02=mapGen.G[trChim[0].exons[e0][EX_G]+jR+2];
                         } else {
-                            b01=G.G[trChim[0].exons[e0][EX_G]+trChim[0].exons[e0][EX_L]-1-jR-1];
+                            b01=mapGen.G[trChim[0].exons[e0][EX_G]+trChim[0].exons[e0][EX_L]-1-jR-1];
                             if (b01<4) b01=3-b01;
-                            b02=G.G[trChim[0].exons[e0][EX_G]+trChim[0].exons[e0][EX_L]-1-jR-2];
+                            b02=mapGen.G[trChim[0].exons[e0][EX_G]+trChim[0].exons[e0][EX_L]-1-jR-2];
                             if (b02<4) b02=3-b02;
                         };
                         if (trChim[1].Str==0) {
-                            b11=G.G[trChim[1].exons[e1][EX_G]-roStart1+roStart0+jR-1];
-                            b12=G.G[trChim[1].exons[e1][EX_G]-roStart1+roStart0+jR];
+                            b11=mapGen.G[trChim[1].exons[e1][EX_G]-roStart1+roStart0+jR-1];
+                            b12=mapGen.G[trChim[1].exons[e1][EX_G]-roStart1+roStart0+jR];
                         } else {
-                            b11=G.G[trChim[1].exons[e1][EX_G]+trChim[1].exons[e1][EX_L]-1+roStart1-roStart0-jR+1];
+                            b11=mapGen.G[trChim[1].exons[e1][EX_G]+trChim[1].exons[e1][EX_L]-1+roStart1-roStart0-jR+1];
                             if (b11<4) b11=3-b11;
-                            b12=G.G[trChim[1].exons[e1][EX_G]+trChim[1].exons[e1][EX_L]-1+roStart1-roStart0-jR];
+                            b12=mapGen.G[trChim[1].exons[e1][EX_G]+trChim[1].exons[e1][EX_L]-1+roStart1-roStart0-jR];
                             if (b12<4) b12=3-b12;
                         };
 
@@ -300,16 +300,16 @@ bool ReadAlign::chimericDetection() {
                         uint jR;
                         for (jR=0;jR<100;jR++) {//forward check
                             if (trChim[0].Str==0) {
-                                b0=G.G[chimJ0+jR];
+                                b0=mapGen.G[chimJ0+jR];
                             } else {
-                                b0=G.G[chimJ0-jR];
+                                b0=mapGen.G[chimJ0-jR];
                                 if (b0<4) b0=3-b0;
                             };
 
                             if (trChim[1].Str==0) {
-                                b1=G.G[chimJ1+1+jR];
+                                b1=mapGen.G[chimJ1+1+jR];
                             } else {
-                                b1=G.G[chimJ1-1-jR];
+                                b1=mapGen.G[chimJ1-1-jR];
                                 if (b1<4) b1=3-b1;
                             };
                             if (b0!=b1) break;
@@ -317,16 +317,16 @@ bool ReadAlign::chimericDetection() {
                         chimRepeat1=jR;
                         for (jR=0;jR<100;jR++) {//reverse check
                             if (trChim[0].Str==0) {
-                                b0=G.G[chimJ0-1-jR];
+                                b0=mapGen.G[chimJ0-1-jR];
                             } else {
-                                b0=G.G[chimJ0+1+jR];
+                                b0=mapGen.G[chimJ0+1+jR];
                                 if (b0<4) b0=3-b0;
                             };
 
                             if (trChim[1].Str==0) {
-                                b1=G.G[chimJ1-jR];
+                                b1=mapGen.G[chimJ1-jR];
                             } else {
-                                b1=G.G[chimJ1+jR];
+                                b1=mapGen.G[chimJ1+jR];
                                 if (b1<4) b1=3-b1;
                             };
                             if (b0!=b1) break;
@@ -356,8 +356,8 @@ bool ReadAlign::chimericDetection() {
                 chimRecord=true; //chimeric alignment was recorded
 
                 //re-calculate the score for chimeric transcripts
-                trChim[0].alignScore(Read1, G.G, P);
-                trChim[1].alignScore(Read1, G.G, P);
+                trChim[0].alignScore(Read1, mapGen.G, P);
+                trChim[1].alignScore(Read1, mapGen.G, P);
 
                 int chimRepresent=-999, chimType=0;
                 if (trChim[0].exons[0][EX_iFrag]!=trChim[0].exons[trChim[0].nExons-1][EX_iFrag]) {//tr0 has both mates

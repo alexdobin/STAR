@@ -39,12 +39,12 @@ uint ReadAlign::quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript 
 
                 for (uint b=1; b<=left1 ; b++) {//extend to the left
                     char r1=R[alignG[iag]->exons[iab][EX_R]-b];
-                    char g1=G.G[alignG[iag]->exons[iab][EX_G]-b];
+                    char g1=mapGen.G[alignG[iag]->exons[iab][EX_G]-b];
                     if ( r1!=g1 && r1<4 && g1<4) ++nMM1;
                 };
                 for (uint b=0; b<right1 ; b++) {//extend to the left
                     char r1=R[alignG[iag]->exons[iab][EX_R]+alignG[iag]->exons[iab][EX_L]+b];
-                    char g1=G.G[alignG[iag]->exons[iab][EX_G]+alignG[iag]->exons[iab][EX_L]+b];
+                    char g1=mapGen.G[alignG[iag]->exons[iab][EX_G]+alignG[iag]->exons[iab][EX_L]+b];
                     if ( r1!=g1 && r1<4 && g1<4) ++nMM1;
                 };
                 alignG[iag]->exons[iab][EX_R] -= left1;

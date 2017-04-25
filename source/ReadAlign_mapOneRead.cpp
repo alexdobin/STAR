@@ -97,7 +97,7 @@ int ReadAlign::mapOneRead() {
         nW=0;
     } else if (Nsplit>0 && nA>0) {//otherwise there are no good pieces, or all pieces map too many times: read cannot be mapped
 //         qsort((void*) PC, nP, sizeof(uint)*PC_SIZE, funCompareUint2);//sort PC by rStart and length
-        stitchPieces(Read1, Qual1, G.G, G.SA,  Lread);
+        stitchPieces(Read1, Qual1, Lread);
         if (nW>0) multMapSelect(); //check all the windows and transcripts for multiple mappers
     };
 
