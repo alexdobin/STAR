@@ -2,7 +2,7 @@
 #include "streamFuns.h"
 #include "serviceFuns.cpp"
 
-Chain::Chain(Parameters *Pin, string chainFileNameIn) : P(Pin), chainFileName(chainFileNameIn)
+Chain::Chain(Parameters &Pin, string chainFileNameIn) : P(Pin), chainFileName(chainFileNameIn)
 {
     chainLoad();
 };
@@ -74,7 +74,7 @@ void Chain::liftOverGTF(string gtfFileName, string outFileName)
             continue;//empty or comment line
         
         if (chrChains.count(chr1)==0)
-            exitWithError("GTF contains chromosome " + chr1 + " not present in the chain file " + chainFileName,std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+            exitWithError("GTF contains chromosome " + chr1 + " not present in the chain file " + chainFileName,std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         
         OneChain *ch1 = & chrChains[chr1];//the chain for the chr1
                
@@ -115,12 +115,12 @@ void Chain::liftOverGTF(string gtfFileName, string outFileName)
     streamOut.close();
 };
 
-//             if (P->chrNameIndex.count(oldname))
+//             if (P.chrNameIndex.count(oldname))
 //             {
 //                 ostringstream errOut;
 //                 errOut << "EXITING because of fatal INPUT file error: chain file contains chromosome (scaffold) not present in the genome " << oldname <<"\n";
 //                 errOut << ERROR_OUT << "\n";
-//                 exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+//                 exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
 //             };            
-//             uint ichr=P->chrNameIndex[oldname];//chr index in the genome list
-//             bStart1[bN] += P->chrLength[ichr];//whole genome chain - shift by chr start
+//             uint ichr=P.chrNameIndex[oldname];//chr index in the genome list
+//             bStart1[bN] += P.chrLength[ichr];//whole genome chain - shift by chr start

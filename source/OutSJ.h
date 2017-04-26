@@ -24,8 +24,8 @@ public:
     const static uint dataSize=overhangRightP+sizeof(uint16);
 
     void junctionPointer(char* sjPoint, uint isj);
-    void outputStream(ostream &outStream, Parameters* P);
-    void collapseOneSJ(char* isj1P, char* isjP, Parameters* P);
+    void outputStream(ostream &outStream, Parameters& P);
+    void collapseOneSJ(char* isj1P, char* isjP, Parameters& P);
 };
 
 class OutSJ {
@@ -38,9 +38,9 @@ public:
 
     Junction oneSJ;
 
-    Parameters *P;
+    Parameters &P;
 
-    OutSJ(uint nSJmax, Parameters *P);
+    OutSJ(uint nSJmax, Parameters &P);
 
     void collapseSJ();//collapse the junctions in data
 //     int compareSJ(void* i1, void* i2);

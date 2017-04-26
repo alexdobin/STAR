@@ -14,7 +14,7 @@ void ReadAlign::storeAligns (uint iDir, uint Shift, uint Nrep, uint L, uint indS
         return;
     #endif
 
-    if ( Nrep > P->seedMultimapNmax ) {// if a piece maps too many times, do not store it
+    if ( Nrep > P.seedMultimapNmax ) {// if a piece maps too many times, do not store it
         if ( Nrep < multNmin || multNmin==0 ) {multNmin=Nrep; multNminL=L;};
         return;
     };
@@ -43,11 +43,11 @@ void ReadAlign::storeAligns (uint iDir, uint Shift, uint Nrep, uint L, uint indS
 
     nP++; //now nP is the new number of elements
 //
-    if (nP > P->seedPerReadNmax) {
+    if (nP > P.seedPerReadNmax) {
         ostringstream errOut;
         errOut <<"EXITING because of FATAL error: too many pieces pere read\n" ;
         errOut <<"SOLUTION: increase input parameter --seedPerReadNmax";
-        exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_RUNTIME, *P);
+        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_RUNTIME, *P);
     };
   #else
 //     int iP3;
@@ -106,11 +106,11 @@ void ReadAlign::storeAligns (uint iDir, uint Shift, uint Nrep, uint L, uint indS
 //     };
 
     if (nRemove==0) {//add piece
-        if (nP == P->seedPerReadNmax) {
+        if (nP == P.seedPerReadNmax) {
             ostringstream errOut;
             errOut <<"EXITING because of FATAL error: too many pieces pere read\n" ;
             errOut <<"SOLUTION: increase input parameter --seedPerReadNmax";
-            exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_RUNTIME, *P);
+            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_RUNTIME, *P);
         };
         for (int ii=nP-1;ii>=iP;ii--) {//move old entries to free space for the new one
             for (int jj=0;jj<PC_SIZE;jj++) PC[ii+1][jj]=PC[ii][jj];

@@ -18,10 +18,10 @@ class Chain {
 // //         uint bN;//number of blocks
 // //         vector <uint> bStart1, bStart2, bLen; //blocks starts in 1/2, lengths
         
-        Chain(Parameters *Pin, string chainFileNameIn);
+        Chain(Parameters &Pin, string chainFileNameIn);
         void liftOverGTF(string gtfFileName, string outFileName);
     private:
-        Parameters *P;
+        Parameters &P;
         string chainFileName;
         void chainLoad();
         std::map <string,OneChain> chrChains;

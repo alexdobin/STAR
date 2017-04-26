@@ -19,15 +19,15 @@ bool ReadAlign::chimericDetection() {
     //output chains for out-of-STAR chimeric detection
     #ifdef OUTPUT_localChains
     {
-        P->inOut->outLocalChains << readName <<"\t"<< Read0[0] <<"\t"<< Read0[1] << "\n";
+        P.inOut->outLocalChains << readName <<"\t"<< Read0[0] <<"\t"<< Read0[1] << "\n";
         for (uint iw=0; iw<nW; iw++) {
             for (uint itr=0;itr<nWinTr[iw];itr++) {
-                P->inOut->outLocalChains << trAll[iw][itr]->maxScore<<"\t"<< trAll[iw][itr]->Chr<<"\t"<<trAll[iw][itr]->Str<<"\t"<<trAll[iw][itr]->nExons;
+                P.inOut->outLocalChains << trAll[iw][itr]->maxScore<<"\t"<< trAll[iw][itr]->Chr<<"\t"<<trAll[iw][itr]->Str<<"\t"<<trAll[iw][itr]->nExons;
                 for (uint ib=0;ib<trAll[iw][itr]->nExons;ib++) {
-                    P->inOut->outLocalChains <<"\t"<< trAll[iw][itr]->exons[ib][EX_G]-P->chrStart[trAll[iw][itr]->Chr] \
+                    P.inOut->outLocalChains <<"\t"<< trAll[iw][itr]->exons[ib][EX_G]-P.chrStart[trAll[iw][itr]->Chr] \
                                              <<"\t"<< trAll[iw][itr]->exons[ib][EX_R] <<"\t"<< trAll[iw][itr]->exons[ib][EX_L];
                 };
-                P->inOut->outLocalChains <<"\n";
+                P.inOut->outLocalChains <<"\n";
             };
         };
     };
@@ -44,7 +44,7 @@ bool ReadAlign::chimericDetection() {
 //             return chimRecord;//false
 //         };
 //         //special degenerate case: nTr=2
-//         if (P->readNmates==2)
+//         if (P.readNmates==2)
 //         {//PE
 //            uint f00=trMult[0]->exons[0][EX_iFrag];
 //            uint f01=trMult[0]->exons[trMult[0]->nExons][EX_iFrag];
@@ -61,14 +61,14 @@ bool ReadAlign::chimericDetection() {
 //         };
 //     };
     
-    if (nTr>P->chimMainSegmentMultNmax && nTr!=2)
+    if (nTr>P.chimMainSegmentMultNmax && nTr!=2)
     {//multimapping main segment, nTr==2 is a secial case to be checked later
         return chimRecord;
     };
     
-    if (P->chimSegmentMin>0 && trBest->rLength >= P->chimSegmentMin \
-            && ( trBest->exons[trBest->nExons-1][EX_R] + trBest->exons[trBest->nExons-1][EX_L] + P->chimSegmentMin <= Lread \
-              || trBest->exons[0][EX_R] >= P->chimSegmentMin ) \
+    if (P.chimSegmentMin>0 && trBest->rLength >= P.chimSegmentMin \
+            && ( trBest->exons[trBest->nExons-1][EX_R] + trBest->exons[trBest->nExons-1][EX_L] + P.chimSegmentMin <= Lread \
+              || trBest->exons[0][EX_R] >= P.chimSegmentMin ) \
              && trBest->intronMotifs[0]==0 && (trBest->intronMotifs[1]==0 || trBest->intronMotifs[2]==0) ) {
             //there is unmapped space at the start/end, and the main window is not a multimapping window, and non non-canonical junctions, and consistend junction motif
         int chimScoreBest=0,chimScoreNext=0;
@@ -124,8 +124,8 @@ bool ReadAlign::chimericDetection() {
                 bool diffMates=(roEnd1 < readLength[0] && roStart2 >= readLength[0]) || (roEnd2 < readLength[0] && roStart1 >= readLength[0]);
 
                 //segment lengths && (different mates || small gap between segments)
-                if (roEnd1 > P->chimSegmentMin + roStart1 + chimOverlap && roEnd2> P->chimSegmentMin + roStart2 + chimOverlap  \
-                    && ( diffMates || ( (roEnd1 + P->chimSegmentReadGapMax + 1) >= roStart2 && (roEnd2 + P->chimSegmentReadGapMax + 1) >= roStart1 ) ) ) {
+                if (roEnd1 > P.chimSegmentMin + roStart1 + chimOverlap && roEnd2> P.chimSegmentMin + roStart2 + chimOverlap  \
+                    && ( diffMates || ( (roEnd1 + P.chimSegmentReadGapMax + 1) >= roStart2 && (roEnd2 + P.chimSegmentReadGapMax + 1) >= roStart1 ) ) ) {
 
                     int chimScore=trBest->maxScore + trAll[iW][iWt]->maxScore - (int)chimOverlap; //subtract overlap to avoid double counting
 
@@ -135,7 +135,7 @@ bool ReadAlign::chimericDetection() {
                         overlap1=blocksOverlap(trChim[1],*trAll[iW][iWt]);
                     };
 
-                    if (chimScore > chimScoreBest && chimScore >= P->chimScoreMin && chimScore+P->chimScoreDropMax >= (int) (readLength[0]+readLength[1]) ) {
+                    if (chimScore > chimScoreBest && chimScore >= P.chimScoreMin && chimScore+P.chimScoreDropMax >= (int) (readLength[0]+readLength[1]) ) {
                         trChim[1]=*trAll[iW][iWt];
                         trChim1=trAll[iW][iWt];
                         if (overlap1==0)
@@ -144,7 +144,7 @@ bool ReadAlign::chimericDetection() {
                         };
                         chimScoreBest=chimScore;
                         trChim[1].roStart = trChim[1].roStr ==0 ? trChim[1].rStart : Lread - trChim[1].rStart - trChim[1].rLength;
-                        trChim[1].cStart  = trChim[1].gStart - P->chrStart[trChim[1].Chr];
+                        trChim[1].cStart  = trChim[1].gStart - P.chrStart[trChim[1].Chr];
                         chimStrBest=chimStr1;
                     } else if (chimScore>chimScoreNext && overlap1==0) {//replace the nextscore if it's not the best one and is higher than the previous one
                         chimScoreNext=chimScore;
@@ -153,7 +153,7 @@ bool ReadAlign::chimericDetection() {
             };//cycle over window transcripts
         };//cycle over windows
 
-        if (nTr>P->chimMainSegmentMultNmax)
+        if (nTr>P.chimMainSegmentMultNmax)
         {//check main segment for multi-aligns
          //this is nTr==2 - a special case: chimeras are allowed only if the 2nd chimeric segment is the next best alignment
             if ( trChim1!=trMult[0] && trChim1!=trMult[1] )
@@ -166,7 +166,7 @@ bool ReadAlign::chimericDetection() {
         if (chimStr==0) chimStr=chimStrBest;
 
         chimN=0;
-        if (chimScoreNext + P->chimScoreSeparation < chimScoreBest) {//report only if chimera is unique
+        if (chimScoreNext + P.chimScoreSeparation < chimScoreBest) {//report only if chimera is unique
             
             if (trChim[0].roStart > trChim[1].roStart) swap (trChim[0],trChim[1]);
 
@@ -196,7 +196,7 @@ bool ReadAlign::chimericDetection() {
                     chimJ1=trChim[1].exons[e1][EX_G]+trChim[1].exons[e1][EX_L];
                 };
             } else {//chimeric junctions is within one of the mates, check and shift chimeric junction if necessary
-                if (trChim[0].exons[e0][EX_L]>=P->chimJunctionOverhangMin && trChim[1].exons[e1][EX_L]>=P->chimJunctionOverhangMin ) {//large enough overhang required
+                if (trChim[0].exons[e0][EX_L]>=P.chimJunctionOverhangMin && trChim[1].exons[e1][EX_L]>=P.chimJunctionOverhangMin ) {//large enough overhang required
                     uint roStart0 = trChim[0].Str==0 ? trChim[0].exons[e0][EX_R] : Lread - trChim[0].exons[e0][EX_R] - trChim[0].exons[e0][EX_L];
                     uint roStart1 = trChim[1].Str==0 ? trChim[1].exons[e1][EX_R] : Lread - trChim[1].exons[e1][EX_R] - trChim[1].exons[e1][EX_L];
 
@@ -223,7 +223,7 @@ bool ReadAlign::chimericDetection() {
                             if (b1<4) b1=3-b1;
                         };
 
-                        if ( ( P->chim.filter.genomicN && (b0>3 || b1>3) ) || bR>3) {//chimera is not called if there are Ns in the genome or in the read
+                        if ( ( P.chim.filter.genomicN && (b0>3 || b1>3) ) || bR>3) {//chimera is not called if there are Ns in the genome or in the read
                             chimN=0;
                             break;
                         };
@@ -265,7 +265,7 @@ bool ReadAlign::chimericDetection() {
                             jScore--;
                         };
 
-                        jScoreJ =jMotif==0 ? jScore +  P->chimScoreJunctionNonGTAG : jScore ;
+                        jScoreJ =jMotif==0 ? jScore +  P.chimScoreJunctionNonGTAG : jScore ;
 
                         if ( jScoreJ > jScoreBest || (jScoreJ == jScoreBest && jMotif>0) ) {
                             chimMotif=jMotif;
@@ -337,18 +337,18 @@ bool ReadAlign::chimericDetection() {
             };//chimeric junction is within a mate
 
             //debug
-    //             cout << readName <<"\t"<< (trChim[0].Str==0 ? chimJ1-chimJ0 : chimJ0-chimJ1) << "\t"<< (chimMotif>=0 ? P->alignIntronMax :  P->alignMatesGapMax)<<"\n";
+    //             cout << readName <<"\t"<< (trChim[0].Str==0 ? chimJ1-chimJ0 : chimJ0-chimJ1) << "\t"<< (chimMotif>=0 ? P.alignIntronMax :  P.alignMatesGapMax)<<"\n";
     //             cout <<  chimRepeat0 <<"\t"<<trChim[0].exons[e0][EX_L]<<"\n";
             //chimeric alignments output
             if ( chimN==2 \
                     && ( trChim[0].Str!=trChim[1].Str ||  trChim[0].Chr!=trChim[1].Chr \
-                    || (trChim[0].Str==0 ? chimJ1-chimJ0+1LLU : chimJ0-chimJ1+1LLU) > (chimMotif>=0 ? P->alignIntronMax :  P->alignMatesGapMax) ) )
+                    || (trChim[0].Str==0 ? chimJ1-chimJ0+1LLU : chimJ0-chimJ1+1LLU) > (chimMotif>=0 ? P.alignIntronMax :  P.alignMatesGapMax) ) )
             {//
              //&& (diff str || diff chr ||
              //|| gap > (alignIntronMax,alignMatesGapMax) ) negative gap = very large # because of uint
 
                 if (chimMotif>=0 && \
-                     (trChim[0].exons[e0][EX_L]<P->chimJunctionOverhangMin+chimRepeat0 || trChim[1].exons[e1][EX_L]<P->chimJunctionOverhangMin+chimRepeat1) )
+                     (trChim[0].exons[e0][EX_L]<P.chimJunctionOverhangMin+chimRepeat0 || trChim[1].exons[e1][EX_L]<P.chimJunctionOverhangMin+chimRepeat1) )
                 {//filter out linear junctions that are very close to chimeric junction
                     return false;
                 };
@@ -382,7 +382,7 @@ bool ReadAlign::chimericDetection() {
                     trChim[1-chimRepresent].primaryFlag=false;
                 };
 
-                if (P->chim.out.bam) {//BAM output
+                if (P.chim.out.bam) {//BAM output
                     int alignType, bamN=0, bamIsuppl=-1, bamIrepr=-1;
                     uint bamBytesTotal=0;//estimate of the total size of all bam records, for output buffering
                     uint mateChr,mateStart;
@@ -399,7 +399,7 @@ bool ReadAlign::chimericDetection() {
                                 alignType=-10; //this is representative part of chimeric alignment, record is as normal; if encompassing chimeric junction, both are recorded as normal
                                 bamIrepr=( (itr%2)==(trChim[itr].Str) && chimType!=3) ? bamN+1 : bamN;//this is the mate that is chimerically split
                             } else {//"supplementary" chimeric segment
-                                alignType=P->chim.out.bamHardClip ? ( ( itr%2==trChim[itr].Str ) ? -12 : -11) : -13 ; //right:left chimeric junction
+                                alignType=P.chim.out.bamHardClip ? ( ( itr%2==trChim[itr].Str ) ? -12 : -11) : -13 ; //right:left chimeric junction
                                 bamIsuppl=bamN;
                                 if (chimType==1) {//PE alignment, need mate info for the suppl
                                     uint iex=0;
@@ -416,8 +416,8 @@ bool ReadAlign::chimericDetection() {
 
                         };
 
-                        bamN+=alignBAM(trChim[itr], 1, 0, P->chrStart[trChim[itr].Chr],  mateChr, mateStart-P->chrStart[mateChr], mateStrand, \
-                                        alignType, NULL, P->outSAMattrOrder, outBAMoneAlign+bamN, outBAMoneAlignNbytes+bamN);
+                        bamN+=alignBAM(trChim[itr], 1, 0, P.chrStart[trChim[itr].Chr],  mateChr, mateStart-P.chrStart[mateChr], mateStrand, \
+                                        alignType, NULL, P.outSAMattrOrder, outBAMoneAlign+bamN, outBAMoneAlignNbytes+bamN);
                         bamBytesTotal+=outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1];//outBAMoneAlignNbytes[1] = 0 if SE is recorded
                     };
 
@@ -435,7 +435,7 @@ bool ReadAlign::chimericDetection() {
                             bam_read1_fromArray(outBAMoneAlign[tagI], b);
                             uint8_t* auxp=bam_aux_get(b,"NM");
                             uint32_t auxv=bam_aux2i(auxp);
-                            string tagSA1="SAZ"+P->chrName[b->core.tid]+','+to_string((uint)b->core.pos+1) +',' + ( (b->core.flag&0x10)==0 ? '+':'-') + \
+                            string tagSA1="SAZ"+P.chrName[b->core.tid]+','+to_string((uint)b->core.pos+1) +',' + ( (b->core.flag&0x10)==0 ? '+':'-') + \
                                     ',' + bam_cigarString(b) + ',' + to_string((uint)b->core.qual) + ',' + to_string((uint)auxv) + ';' ;
 
                              memcpy( (void*) (outBAMoneAlign[ii]+outBAMoneAlignNbytes[ii]), tagSA1.c_str(), tagSA1.size()+1);//copy string including \0 at the end
@@ -443,15 +443,15 @@ bool ReadAlign::chimericDetection() {
                              * ( (uint32*) outBAMoneAlign[ii] ) = outBAMoneAlignNbytes[ii]-sizeof(uint32);
                         };
 
-                        if (P->outBAMunsorted) outBAMunsorted->unsortedOneAlign(outBAMoneAlign[ii], outBAMoneAlignNbytes[ii], ii>0 ? 0 : bamBytesTotal);
-                        if (P->outBAMcoord)    outBAMcoord->coordOneAlign(outBAMoneAlign[ii], outBAMoneAlignNbytes[ii], (iReadAll<<32) );
+                        if (P.outBAMunsorted) outBAMunsorted->unsortedOneAlign(outBAMoneAlign[ii], outBAMoneAlignNbytes[ii], ii>0 ? 0 : bamBytesTotal);
+                        if (P.outBAMcoord)    outBAMcoord->coordOneAlign(outBAMoneAlign[ii], outBAMoneAlignNbytes[ii], (iReadAll<<32) );
                     };
                 };
 
 
                 for (uint iTr=0;iTr<chimN;iTr++) 
                 {//write all chimeric pieces to Chimeric.out.sam/junction
-                    if (P->readNmates==2) {//PE: need mate info
+                    if (P.readNmates==2) {//PE: need mate info
                         uint iex=0;
                         if ( trChim[1-iTr].exons[0][EX_iFrag] != trChim[1-iTr].exons[trChim[1-iTr].nExons-1][EX_iFrag] )
                         {//the other segment has 2 mates, need to find the opposite mate
@@ -473,11 +473,11 @@ bool ReadAlign::chimericDetection() {
                     };
                 };
                 //junction + SAMp
-                chunkOutChimJunction << P->chrName[trChim[0].Chr] <<"\t"<< chimJ0 - P->chrStart[trChim[0].Chr]+1 <<"\t"<< (trChim[0].Str==0 ? "+":"-") \
-                        <<"\t"<< P->chrName[trChim[1].Chr] <<"\t"<< chimJ1 - P->chrStart[trChim[1].Chr]+1 <<"\t"<< (trChim[1].Str==0 ? "+":"-") \
+                chunkOutChimJunction << P.chrName[trChim[0].Chr] <<"\t"<< chimJ0 - P.chrStart[trChim[0].Chr]+1 <<"\t"<< (trChim[0].Str==0 ? "+":"-") \
+                        <<"\t"<< P.chrName[trChim[1].Chr] <<"\t"<< chimJ1 - P.chrStart[trChim[1].Chr]+1 <<"\t"<< (trChim[1].Str==0 ? "+":"-") \
                         <<"\t"<< chimMotif <<"\t"<< chimRepeat0  <<"\t"<< chimRepeat1 <<"\t"<< readName+1 \
-                        <<"\t"<< trChim[0].exons[0][EX_G] - P->chrStart[trChim[0].Chr]+1 <<"\t"<< outputTranscriptCIGARp(trChim[0]) \
-                        <<"\t"<< trChim[1].exons[0][EX_G] - P->chrStart[trChim[1].Chr]+1 <<"\t"<<  outputTranscriptCIGARp(trChim[1]) <<"\n"; //<<"\t"<< trChim[0].exons[0][EX_iFrag]+1 --- no need for that, since trChim[0] is always on the first mate
+                        <<"\t"<< trChim[0].exons[0][EX_G] - P.chrStart[trChim[0].Chr]+1 <<"\t"<< outputTranscriptCIGARp(trChim[0]) \
+                        <<"\t"<< trChim[1].exons[0][EX_G] - P.chrStart[trChim[1].Chr]+1 <<"\t"<<  outputTranscriptCIGARp(trChim[1]) <<"\n"; //<<"\t"<< trChim[0].exons[0][EX_iFrag]+1 --- no need for that, since trChim[0] is always on the first mate
             };
         };//chimeric score
     };//chimeric search

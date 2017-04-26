@@ -30,15 +30,15 @@ class Variation
 {
 public:
     //methods
-    Variation (Parameters* Pin); //create transcriptome structure, load and initialize parameters
+    Variation (Parameters &Pin); //create transcriptome structure, load and initialize parameters
     void loadVCF(string fileIn); //load VCF file
     vector<vector<array<int,2>>> sjdbSnp(uint sjStart, uint sjEnd, uint sjdbOverhang); //calculates snp loci in sjdb sequences
     
     //variables
     bool yes;    
     SNP snp;
-    
-    Parameters* P;
+        
+    Parameters &P; //TODO: make this private
     
 private:
     string vcfFile;

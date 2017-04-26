@@ -2,12 +2,12 @@
 #include "streamFuns.h"
 #include "GlobalVariables.h"
 
-Transcriptome::Transcriptome (Parameters* Pin) {
+Transcriptome::Transcriptome (Parameters& Pin) {
 
     P=Pin;
-    trInfoDir = P->sjdbGTFfile=="-" ? P->genomeDir : P->sjdbInsert.outDir; //if GTF file is given at the mapping stage, it's always used for transcript info
+    trInfoDir = P.sjdbGTFfile=="-" ? P.genomeDir : P.sjdbInsert.outDir; //if GTF file is given at the mapping stage, it's always used for transcript info
 
-    if ( P->quant.trSAM.yes ) {//load exon-transcript structures
+    if ( P.quant.trSAM.yes ) {//load exon-transcript structures
         //load tr and ex info
 
         ifstream & trinfo = ifstrOpen(trInfoDir+"/transcriptInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step",P);
@@ -26,7 +26,7 @@ Transcriptome::Transcriptome (Parameters* Pin) {
             trinfo >> trID[itr] >> trS[itr] >> trE[itr] >> trEmax[itr] >> str1 >> trExN[itr] >> trExI[itr];
             trStr[itr]=str1;
         };
-        P->inOut->logMain << "Loaded transcript database, nTr="<<nTr<<endl;
+        P.inOut->logMain << "Loaded transcript database, nTr="<<nTr<<endl;
 
         trinfo.close();
 
@@ -38,7 +38,7 @@ Transcriptome::Transcriptome (Parameters* Pin) {
         for (uint32 iex=0; iex<nEx; iex++) {
             exinfo >> exSE[2*iex] >> exSE[2*iex+1] >> exLenCum[iex]; //reading all elements one after another
         };
-        P->inOut->logMain << "Loaded exon database, nEx="<<nEx<<endl;
+        P.inOut->logMain << "Loaded exon database, nEx="<<nEx<<endl;
 
         exinfo.close();
 
@@ -47,7 +47,7 @@ Transcriptome::Transcriptome (Parameters* Pin) {
 
     };
 
-    if ( P->quant.geCount.yes ) {//load exon-gene structures
+    if ( P.quant.geCount.yes ) {//load exon-gene structures
         ifstream & exinfo = ifstrOpen(trInfoDir+"/exonGeTrInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
         exinfo >> exG.nEx;
 
@@ -85,13 +85,13 @@ Transcriptome::Transcriptome (Parameters* Pin) {
 };
 
 void Transcriptome::quantsAllocate() {
-    if ( P->quant.geCount.yes ) {
+    if ( P.quant.geCount.yes ) {
         quants = new Quantifications (nGe);
     };
 };
 
 void Transcriptome::quantsOutput() {
-    ofstream qOut(P->quant.geCount.outFile);
+    ofstream qOut(P.quant.geCount.outFile);
 
     qOut << "N_unmapped";
     for (int itype=0; itype<quants->geneCounts.nType; itype++)

@@ -2,7 +2,7 @@
 #include "ErrorWarning.h"
 #include "serviceFuns.cpp"
 
-void sjdbPrepare (SjdbClass &sjdbLoci, Parameters *P, uint nGenomeReal, string outDir, Genome & genome, char *Gsj) {
+void sjdbPrepare (SjdbClass &sjdbLoci, Parameters &P, uint nGenomeReal, string outDir, Genome & genome, char *Gsj) {
     uint *sjdbS=new uint [sjdbLoci.chr.size()];
     uint *sjdbE=new uint [sjdbLoci.chr.size()];
 
@@ -16,20 +16,20 @@ void sjdbPrepare (SjdbClass &sjdbLoci, Parameters *P, uint nGenomeReal, string o
     uint iChr=0;
     for (uint ii=0;ii<sjdbLoci.chr.size();ii++) {
         if (chrOld!=sjdbLoci.chr.at(ii)) {//find numeric value of the chr
-            for (iChr=0;iChr<P->nChrReal;iChr++) {
-                if (sjdbLoci.chr.at(ii)==P->chrName[iChr]) break;
+            for (iChr=0;iChr<P.nChrReal;iChr++) {
+                if (sjdbLoci.chr.at(ii)==P.chrName[iChr]) break;
             };
-            if (iChr>=P->nChrReal) {
+            if (iChr>=P.nChrReal) {
                 ostringstream errOut;
                 errOut << "EXITING because of FATAL error, the sjdb chromosome " << sjdbLoci.chr.at(ii) << " is not found among the genomic chromosomes\n";
                 errOut << "SOLUTION: fix your file(s) --sjdbFileChrStartEnd, offending junciton:" <<sjdbLoci.chr.at(ii)<<"\t"<<sjdbLoci.start.at(ii)<<"\t"<<sjdbLoci.end.at(ii)<<"\n";
-                exitWithError(errOut.str(),std::cerr, P->inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
             };
             chrOld=sjdbLoci.chr.at(ii);
         };
 
-        sjdbS[ii] = sjdbLoci.start.at(ii) + P->chrStart[iChr] - 1;//sj names contain 1-based intron loci
-        sjdbE[ii] = sjdbLoci.end.at(ii)   + P->chrStart[iChr] - 1;
+        sjdbS[ii] = sjdbLoci.start.at(ii) + P.chrStart[iChr] - 1;//sj names contain 1-based intron loci
+        sjdbE[ii] = sjdbLoci.end.at(ii)   + P.chrStart[iChr] - 1;
 
         //motifs
         if ( G[sjdbS[ii]]==2 && G[sjdbS[ii]+1]==3 && G[sjdbE[ii]-1]==0 && G[sjdbE[ii]]==2 ) {//GTAG
@@ -61,8 +61,8 @@ void sjdbPrepare (SjdbClass &sjdbLoci, Parameters *P, uint nGenomeReal, string o
 
 
         if (jjR==255 || jjL==255) {
-            P->inOut->logMain << "WARNING: long repeat for junction # " << ii+1 <<" : " \
-                    << sjdbLoci.chr.at(ii) <<" "<<sjdbS[ii] - P->chrStart[iChr] + 1 <<" "<< sjdbE[ii] - P->chrStart[iChr] + 1 \
+            P.inOut->logMain << "WARNING: long repeat for junction # " << ii+1 <<" : " \
+                    << sjdbLoci.chr.at(ii) <<" "<<sjdbS[ii] - P.chrStart[iChr] + 1 <<" "<< sjdbE[ii] - P.chrStart[iChr] + 1 \
                     << "; left shift = "<< (int) sjdbShiftLeft[ii] <<"; right shift = "<< (int) sjdbShiftRight[ii] <<"\n";
         };
 
@@ -132,12 +132,12 @@ void sjdbPrepare (SjdbClass &sjdbLoci, Parameters *P, uint nGenomeReal, string o
     uint nsj1=nsj;
     if (genome.Var->yes) nsj1*=2;
     
-    P->sjdbStart=new uint [nsj1];
-    P->sjdbEnd=new uint [nsj1];
-    P->sjdbMotif=new uint8 [nsj1];
-    P->sjdbShiftLeft=new uint8 [nsj1];
-    P->sjdbShiftRight=new uint8 [nsj1];    
-    P->sjdbStrand=new uint8 [nsj1];  
+    P.sjdbStart=new uint [nsj1];
+    P.sjdbEnd=new uint [nsj1];
+    P.sjdbMotif=new uint8 [nsj1];
+    P.sjdbShiftLeft=new uint8 [nsj1];
+    P.sjdbShiftRight=new uint8 [nsj1];    
+    P.sjdbStrand=new uint8 [nsj1];  
     
     vector<vector<array<int,2>>> sjdbSnp;
     
@@ -146,7 +146,7 @@ void sjdbPrepare (SjdbClass &sjdbLoci, Parameters *P, uint nGenomeReal, string o
     for (uint ii=0;ii<nsj;ii++) {
         uint isj=sjdbSort[ii*3+2];
 
-        if ( nsj1>0 && P->sjdbStart[nsj1-1]==sjdbSort[ii*3] && P->sjdbEnd[nsj1-1]==sjdbSort[ii*3+1] ) {//same loci on opposite strands
+        if ( nsj1>0 && P.sjdbStart[nsj1-1]==sjdbSort[ii*3] && P.sjdbEnd[nsj1-1]==sjdbSort[ii*3+1] ) {//same loci on opposite strands
             uint isj0=sjdbSort[(ii-1)*3+2];
 
             if (sjdbLoci.priority.at(isj)<sjdbLoci.priority.at(isj0))
@@ -155,17 +155,17 @@ void sjdbPrepare (SjdbClass &sjdbLoci, Parameters *P, uint nGenomeReal, string o
             } else if (sjdbLoci.priority.at(isj)>sjdbLoci.priority.at(isj0))
             {//new junction has higher priority
                 nsj1--;//replace the old junction with the new one
-            } else if (P->sjdbStrand[nsj1-1]>0 && sjdbLoci.str.at(isj)=='.')
+            } else if (P.sjdbStrand[nsj1-1]>0 && sjdbLoci.str.at(isj)=='.')
             {//new junction strand is not defined
                 continue;
-            } else if (P->sjdbStrand[nsj1-1]==0 && sjdbLoci.str.at(isj)!='.')
+            } else if (P.sjdbStrand[nsj1-1]==0 && sjdbLoci.str.at(isj)!='.')
             {//old junction strand is not defined
                 nsj1--; //replace old with new
-            } else if (P->sjdbMotif[nsj1-1]==0 && sjdbMotif[isj]==0)
+            } else if (P.sjdbMotif[nsj1-1]==0 && sjdbMotif[isj]==0)
             {//both are non-canonical (on opposite strand)
-                P->sjdbStrand[nsj1-1]=0;//do not record new junction, keep old with undefined strand
+                P.sjdbStrand[nsj1-1]=0;//do not record new junction, keep old with undefined strand
                 continue;
-            } else if ( (P->sjdbMotif[nsj1-1]>0 && sjdbMotif[isj]==0) ||(P->sjdbMotif[nsj1-1]%2 == (2-P->sjdbStrand[nsj1-1])) ){//both strands defined, both junctions canonical
+            } else if ( (P.sjdbMotif[nsj1-1]>0 && sjdbMotif[isj]==0) ||(P.sjdbMotif[nsj1-1]%2 == (2-P.sjdbStrand[nsj1-1])) ){//both strands defined, both junctions canonical
                 //old junction is canonical, new is not, OR old junction is on correct strand
                 continue;
             } else {
@@ -174,67 +174,67 @@ void sjdbPrepare (SjdbClass &sjdbLoci, Parameters *P, uint nGenomeReal, string o
             };
         };
         
-        vector<vector<array<int,2>>> sjdbSnp1=genome.Var->sjdbSnp(sjdbSort[ii*3],sjdbSort[ii*3+1],P->sjdbOverhang);
+        vector<vector<array<int,2>>> sjdbSnp1=genome.Var->sjdbSnp(sjdbSort[ii*3],sjdbSort[ii*3+1],P.sjdbOverhang);
         for (int ia=0; ia<sjdbSnp1.size(); ia++)
         {
             sjdbSnp.push_back(sjdbSnp1.at(ia));
 
             //record junction
-            P->sjdbStart[nsj1]=sjdbSort[ii*3];
-            P->sjdbEnd[nsj1]=sjdbSort[ii*3+1];
-            P->sjdbMotif[nsj1]=sjdbMotif[isj];
-            P->sjdbShiftLeft[nsj1]=sjdbShiftLeft[isj];                    
-            P->sjdbShiftRight[nsj1]=sjdbShiftRight[isj];
+            P.sjdbStart[nsj1]=sjdbSort[ii*3];
+            P.sjdbEnd[nsj1]=sjdbSort[ii*3+1];
+            P.sjdbMotif[nsj1]=sjdbMotif[isj];
+            P.sjdbShiftLeft[nsj1]=sjdbShiftLeft[isj];                    
+            P.sjdbShiftRight[nsj1]=sjdbShiftRight[isj];
             if (sjdbLoci.str.at(isj)=='+') {
-                P->sjdbStrand[nsj1]=1;
+                P.sjdbStrand[nsj1]=1;
             } else if (sjdbLoci.str.at(isj)=='-') {
-                P->sjdbStrand[nsj1]=2;
+                P.sjdbStrand[nsj1]=2;
             } else {
-                if (P->sjdbMotif[nsj1]==0) {//strand un-defined
-                    P->sjdbStrand[nsj1]=0;
+                if (P.sjdbMotif[nsj1]==0) {//strand un-defined
+                    P.sjdbStrand[nsj1]=0;
                 } else {
-                    P->sjdbStrand[nsj1]=2-P->sjdbMotif[nsj1]%2;
+                    P.sjdbStrand[nsj1]=2-P.sjdbMotif[nsj1]%2;
                 };
             };
             nsj1++;
         };
     };            
-    P->sjdbN=nsj1;       
+    P.sjdbN=nsj1;       
 
-    P->sjDstart = new uint [P->sjdbN];
-    P->sjAstart = new uint [P->sjdbN];
+    P.sjDstart = new uint [P.sjdbN];
+    P.sjAstart = new uint [P.sjdbN];
 
     ofstream sjdbInfo((outDir+"/sjdbInfo.txt").c_str());
     ofstream sjdbList ((outDir+"/sjdbList.out.tab").c_str());
     char strandChar[3]={'.','+','-'};
     //first line is some general useful information
-    sjdbInfo << P->sjdbN <<"\t"<< P->sjdbOverhang <<"\n";
+    sjdbInfo << P.sjdbN <<"\t"<< P.sjdbOverhang <<"\n";
     uint sjGstart=0;
 
-    for (uint ii=0;ii<P->sjdbN;ii++)
+    for (uint ii=0;ii<P.sjdbN;ii++)
     {//add sjdb sequence to genome
-        P->sjDstart[ii]   = P->sjdbStart[ii]  - P->sjdbOverhang;
-        P->sjAstart[ii]   = P->sjdbEnd[ii] + 1;
-        if (P->sjdbMotif[ii]==0) {//shift non-canonical junctions back to their true coordinates
-            P->sjDstart[ii] += P->sjdbShiftLeft[ii];
-            P->sjAstart[ii] += P->sjdbShiftLeft[ii];
+        P.sjDstart[ii]   = P.sjdbStart[ii]  - P.sjdbOverhang;
+        P.sjAstart[ii]   = P.sjdbEnd[ii] + 1;
+        if (P.sjdbMotif[ii]==0) {//shift non-canonical junctions back to their true coordinates
+            P.sjDstart[ii] += P.sjdbShiftLeft[ii];
+            P.sjAstart[ii] += P.sjdbShiftLeft[ii];
         };
-        memcpy(Gsj+sjGstart,G+P->sjDstart[ii],P->sjdbOverhang);//sjdbStart contains 1-based intron loci
-        memcpy(Gsj+sjGstart+P->sjdbOverhang,G+P->sjAstart[ii],P->sjdbOverhang);//sjdbStart contains 1-based intron loci
+        memcpy(Gsj+sjGstart,G+P.sjDstart[ii],P.sjdbOverhang);//sjdbStart contains 1-based intron loci
+        memcpy(Gsj+sjGstart+P.sjdbOverhang,G+P.sjAstart[ii],P.sjdbOverhang);//sjdbStart contains 1-based intron loci
 
         for (int ia=0; ia<sjdbSnp.at(ii).size(); ia++)
         {//replace with SNPs
             Gsj[sjGstart+sjdbSnp.at(ii).at(ia).at(0)]=sjdbSnp.at(ii).at(ia).at(1);
         };
 
-        sjGstart += P->sjdbLength;     
+        sjGstart += P.sjdbLength;     
 
         Gsj[sjGstart-1]=GENOME_spacingChar;//spacing char between the sjdb seqs
-        sjdbInfo << P->sjdbStart[ii] <<"\t"<< P->sjdbEnd[ii] <<"\t"<<(int) P->sjdbMotif[ii] <<"\t"<<(int) P->sjdbShiftLeft[ii] <<"\t"<<(int) P->sjdbShiftRight[ii]<<"\t"<<(int) P->sjdbStrand[ii] <<"\n";
-        uint chr1=P->chrBin[ P->sjdbStart[ii] >> P->genomeChrBinNbits];
-        sjdbList << P->chrName[chr1]<< "\t" << P->sjdbStart[ii]-P->chrStart[chr1] + 1 + (P->sjdbMotif[ii]>0 ? 0:P->sjdbShiftLeft[ii]) \
-                                    << "\t"<<  P->sjdbEnd[ii]-P->chrStart[chr1] + 1 + (P->sjdbMotif[ii]>0 ? 0:P->sjdbShiftLeft[ii]) \
-                                    << "\t"<< strandChar[P->sjdbStrand[ii]]<<"\n";
+        sjdbInfo << P.sjdbStart[ii] <<"\t"<< P.sjdbEnd[ii] <<"\t"<<(int) P.sjdbMotif[ii] <<"\t"<<(int) P.sjdbShiftLeft[ii] <<"\t"<<(int) P.sjdbShiftRight[ii]<<"\t"<<(int) P.sjdbStrand[ii] <<"\n";
+        uint chr1=P.chrBin[ P.sjdbStart[ii] >> P.genomeChrBinNbits];
+        sjdbList << P.chrName[chr1]<< "\t" << P.sjdbStart[ii]-P.chrStart[chr1] + 1 + (P.sjdbMotif[ii]>0 ? 0:P.sjdbShiftLeft[ii]) \
+                                    << "\t"<<  P.sjdbEnd[ii]-P.chrStart[chr1] + 1 + (P.sjdbMotif[ii]>0 ? 0:P.sjdbShiftLeft[ii]) \
+                                    << "\t"<< strandChar[P.sjdbStrand[ii]]<<"\n";
     };
     sjdbInfo.close();
     sjdbList.close();

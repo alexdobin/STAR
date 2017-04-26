@@ -3,7 +3,7 @@
 #include "serviceFuns.cpp"
 #include "BAMfunctions.h"
 
-void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, string dirBAMsort, Parameters *P) {
+void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, string dirBAMsort, Parameters &P) {
 
     if (binS==0) return; //nothing to do for empty bins
     //allocate arrays
@@ -30,7 +30,7 @@ void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, st
         ostringstream errOut;
         errOut << "EXITING because of FATAL ERROR: number of bytes expected from the BAM bin does not agree with the actual size on disk: ";
         errOut << binS <<"   "<< bamInBytes <<"   "<< iBin <<"\n";
-        exitWithError(errOut.str(),std::cerr, P->inOut->logMain, 1, *P);
+        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, 1, *P);
     };
 
     //extract coordinates
@@ -48,8 +48,8 @@ void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, st
     qsort((void*) startPos, binN, sizeof(uint)*3, funCompareArrays<uint,3>);
 
     BGZF *bgzfBin;
-    bgzfBin=bgzf_open((dirBAMsort+"/b"+to_string((uint) iBin)).c_str(),("w"+to_string((long long) P->outBAMcompression)).c_str());
-    outBAMwriteHeader(bgzfBin,P->samHeaderSortedCoord,P->chrNameAll,P->chrLengthAll);
+    bgzfBin=bgzf_open((dirBAMsort+"/b"+to_string((uint) iBin)).c_str(),("w"+to_string((long long) P.outBAMcompression)).c_str());
+    outBAMwriteHeader(bgzfBin,P.samHeaderSortedCoord,P.chrNameAll,P.chrLengthAll);
     //send ordered aligns to bgzf one-by-one
     for (uint ia=0;ia<binN;ia++) {
         char* ib=bamIn+startPos[ia*3+2];

@@ -1,7 +1,7 @@
 #include "Transcript.h"
 #include "serviceFuns.cpp"
 
-int Transcript::variationAdjust(Variation &Var, char *R, char **Read1, char *G, Parameters *P)
+int Transcript::variationAdjust(Variation &Var, char *R, char **Read1, char *G, Parameters &P)
 {
     if (!Var.yes)
     {//no variation
@@ -21,7 +21,7 @@ int Transcript::variationAdjust(Variation &Var, char *R, char **Read1, char *G, 
             while (isnp<Var.snp.N && exons[ie][EX_G]+exons[ie][EX_L]>Var.snp.loci[isnp])
             {//these SNPs overlap the block
                 snpInd.push_back(isnp); //record snp index
-                snpLoci.push_back(Var.snp.loci[isnp]-Var.P->chrStart[Chr]);
+                snpLoci.push_back(Var.snp.loci[isnp]-Var.P.chrStart[Chr]);
                 
                 char ntR=R[exons[ie][EX_R]+Var.snp.loci[isnp]-exons[ie][EX_G]];//nt of the read in the SNP position, already trnasformed to + genome strand
                 uint8 igt;

@@ -111,8 +111,8 @@ int funCompareCoordFlagCigarSeq(const void *a, const void *b) {
     return 0;
 };
 
-void bamRemoveDuplicates(const string bamFileName, const string bamFileNameOut, Parameters* const P) {
-    g_bamRemoveDuplicatesMate2basesN=P->removeDuplicates.mate2basesN;
+void bamRemoveDuplicates(const string bamFileName, const string bamFileNameOut, Parameters &P) {
+    g_bamRemoveDuplicatesMate2basesN=P.removeDuplicates.mate2basesN;
 
     bam1_t *bamA;
     bamA=bam_init1();
@@ -121,10 +121,10 @@ void bamRemoveDuplicates(const string bamFileName, const string bamFileNameOut, 
     bam_hdr_t *bamHeader=bam_hdr_read(bamIn);
 
     BGZF *bgzfOut;
-    bgzfOut=bgzf_open(bamFileNameOut.c_str(),("w"+to_string((long long) P->outBAMcompression)).c_str());
+    bgzfOut=bgzf_open(bamFileNameOut.c_str(),("w"+to_string((long long) P.outBAMcompression)).c_str());
     bam_hdr_write(bgzfOut, bamHeader);
 
-    uint bamLengthMax=P->limitBAMsortRAM; //max length to load
+    uint bamLengthMax=P.limitBAMsortRAM; //max length to load
     if (bamLengthMax==0) bamLengthMax=16000000000;
     uint grNmax=1000000;//max number of alignments
 
@@ -145,7 +145,7 @@ void bamRemoveDuplicates(const string bamFileName, const string bamFileNameOut, 
                     ostringstream errOut;
                     errOut <<"EXITING because of fatal ERROR: not enough memory for marking duplicates \n";
                     errOut <<"SOLUTION: re-run STAR with at least --limitBAMsortRAM " <<bamLengthMax*2;
-                    exitWithError(errOut.str(), std::cerr, P->inOut->logMain, EXIT_CODE_PARAMETER, *P);
+                    exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, *P);
                 };
 
                 //write out processed block
@@ -178,7 +178,7 @@ void bamRemoveDuplicates(const string bamFileName, const string bamFileNameOut, 
                 
             nMult=bam_aux2i(bam_aux_get(bamA,"NH"));
         
-            if (nMult==1 || (nMult>1 && P->removeDuplicates.markMulti)) 
+            if (nMult==1 || (nMult>1 && P.removeDuplicates.markMulti)) 
             {
                 bamP[4] |= (0x400<<16);//mark all aligns as duplicate, will unmark. If multimappers, onyl mark if markMult=true
             };

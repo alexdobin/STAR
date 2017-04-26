@@ -10,14 +10,14 @@ class Transcriptome {
 public:
 
     //methods:
-    Transcriptome (Parameters* Pin); //create transcriptome structure, load and initialize parameters
+    Transcriptome (Parameters& Pin); //create transcriptome structure, load and initialize parameters
     uint32 quantAlign (Transcript &aG, Transcript *aTall);//transform coordinates for all aligns from genomic in RA to transcriptomic in RAtr
     void geneCountsAddAlign(uint nA, Transcript **aAll); //add one alignment to gene counts
     void quantsAllocate(); //allocate quants structure
     void quantsOutput(); //output quantification files
     string trInfoDir;
 
-    Parameters* Ptr; //transcriptomic parameters (i.e. chrName,...), to be used with RAtr for output
+    Parameters& Ptr; //transcriptomic parameters (i.e. chrName,...), to be used with RAtr for output
 
     vector <string> trID, geID; //transcript/gene IDs
     uint32 nTr, nGe; //number of transcript/genes
@@ -41,7 +41,7 @@ public:
     Quantifications *quants;
 
 private:
-    Parameters* P; //normal "genomic" parameters
+    Parameters& P; //normal "genomic" parameters
 
 };
 

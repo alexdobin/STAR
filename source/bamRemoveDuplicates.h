@@ -5,6 +5,6 @@
 
 using namespace std;
 
-void bamRemoveDuplicates(const string bamFileName, const string bamFileNameOut, Parameters* const P);
+void bamRemoveDuplicates(const string bamFileName, const string bamFileNameOut, Parameters &P);
 
 #endif

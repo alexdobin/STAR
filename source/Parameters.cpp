@@ -532,7 +532,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         } else if (removeDuplicates.mode!="-") {
             *inOut->logStdOut << timeMonthDayTime() << " ..... reading from BAM, remove duplicates, output BAM\n" <<flush;
             inOut->logMain << timeMonthDayTime()    << " ..... reading from BAM, remove duplicates, output BAM\n" <<flush;
-            bamRemoveDuplicates(inputBAMfile,(outFileNamePrefix+"Processed.out.bam").c_str(),this);
+            bamRemoveDuplicates(inputBAMfile, (outFileNamePrefix+"Processed.out.bam").c_str(), *this);
             *inOut->logStdOut << timeMonthDayTime() << " ..... done\n" <<flush;
             inOut->logMain << timeMonthDayTime()    << " ..... done\n" <<flush;
         } else {

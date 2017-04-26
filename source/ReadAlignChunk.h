@@ -11,7 +11,7 @@
 
 class ReadAlignChunk {//chunk of reads and alignments
 public:
-    Parameters* P;
+    Parameters& P;
     ReadAlign* RA;
 
     Transcriptome *chunkTr;
@@ -34,7 +34,7 @@ public:
     int iThread; //current thread
     uint chunkOutBAMtotal; //total number of bytes in the write buffer
 
-    ReadAlignChunk(Parameters* Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk);
+    ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk);
     void processChunks();
     void mapChunk();
     void chunkFstreamOpen(string filePrefix, int iChunk, fstream &fstreamOut);

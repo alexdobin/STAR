@@ -60,8 +60,8 @@ class Transcript {
         void resetMapG(); // reset map to 0
         void resetMapG(uint); // reset map to 0 for Lread bases
         void add(Transcript*); // add
-        void alignScore(char **Read1, char *G, Parameters *P);
-        int variationAdjust(Variation &Var, char *R, char **Read1, char *G, Parameters *P);
+        void alignScore(char **Read1, char *G, Parameters &P);
+        int variationAdjust(Variation &Var, char *R, char **Read1, char *G, Parameters &P);
 };
 
 #endif

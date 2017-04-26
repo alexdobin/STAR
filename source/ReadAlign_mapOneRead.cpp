@@ -14,7 +14,7 @@ int ReadAlign::mapOneRead() {
     revertStrand = false; //the 2nd read is awlays on opposite strand. 1st and 2nd reads have already been reversed.
 
     if (Lread>0) {
-        Nsplit=qualitySplit(Read1[0], Qual1[0], Lread, P->Qsplit, P->maxNsplit, P->minLsplit, splitR);
+        Nsplit=qualitySplit(Read1[0], Qual1[0], Lread, P.Qsplit, P.maxNsplit, P.minLsplit, splitR);
     } else {
         Nsplit=0;
     };
@@ -31,11 +31,11 @@ int ReadAlign::mapOneRead() {
 
     trNext=trBest=trInit;
 
-    uint seedSearchStartLmax=min(P->seedSearchStartLmax,(uint) (P->seedSearchStartLmaxOverLread*(Lread-1)));
+    uint seedSearchStartLmax=min(P.seedSearchStartLmax,(uint) (P.seedSearchStartLmaxOverLread*(Lread-1)));
     // align all good pieces
     for (uint ip=0; ip<Nsplit; ip++) {
 
-        uint Nstart = P->seedSearchStartLmax>0 && seedSearchStartLmax<splitR[1][ip] ? splitR[1][ip]/seedSearchStartLmax+1 : 1;
+        uint Nstart = P.seedSearchStartLmax>0 && seedSearchStartLmax<splitR[1][ip] ? splitR[1][ip]/seedSearchStartLmax+1 : 1;
         uint Lstart = splitR[1][ip]/Nstart;
         bool flagDirMap=true;
         for (uint iDir=0; iDir<2; iDir++) {//loop over two directions
@@ -49,26 +49,26 @@ int ReadAlign::mapOneRead() {
 //               #else
                 if (flagDirMap || istart>0) {//check if the 1st piece in reveree direction does not need to be remapped
                     Lmapped=0;
-                    while ( istart*Lstart + Lmapped + P->minLmap < splitR[1][ip] ) {//map until unmapped portion is <=minLmap
+                    while ( istart*Lstart + Lmapped + P.minLmap < splitR[1][ip] ) {//map until unmapped portion is <=minLmap
 
                         uint Shift = iDir==0 ? ( splitR[0][ip] + istart*Lstart + Lmapped ) : \
                                    ( splitR[0][ip] + splitR[1][ip] - istart*Lstart-1-Lmapped); //choose Shift for forward or reverse
 
-                        //uint seedLength=min(splitR[1][ip] - Lmapped - istart*Lstart, P->seedSearchLmax);
+                        //uint seedLength=min(splitR[1][ip] - Lmapped - istart*Lstart, P.seedSearchLmax);
                         uint seedLength=splitR[1][ip] - Lmapped - istart*Lstart;
-                        maxMappableLength2strands(Shift, seedLength, iDir, 0, P->nSA-1, L, splitR[2][ip]);//L=max mappable length, unique or multiple
+                        maxMappableLength2strands(Shift, seedLength, iDir, 0, P.nSA-1, L, splitR[2][ip]);//L=max mappable length, unique or multiple
                         if (iDir==0 && istart==0 && Lmapped==0 && Shift+L == splitR[1][ip] ) {//this piece maps full length and does not need to be mapped from the opposite direction
                             flagDirMap=false;
                         };
                         Lmapped+=L;
-                    };//while ( istart*Lstart + Lmapped + P->minLmap < splitR[1][ip] )
+                    };//while ( istart*Lstart + Lmapped + P.minLmap < splitR[1][ip] )
                 };//if (flagDirMap || istart>0)
 
-                if (P->seedSearchLmax>0) {//search fixed length. Not very efficient, need to improve
+                if (P.seedSearchLmax>0) {//search fixed length. Not very efficient, need to improve
                     uint Shift = iDir==0 ? ( splitR[0][ip] + istart*Lstart ) : \
                                    ( splitR[0][ip] + splitR[1][ip] - istart*Lstart-1); //choose Shift for forward or reverse
-                    uint seedLength = min(P->seedSearchLmax, iDir==0 ? (splitR[0][ip] + splitR[1][ip]-Shift):(Shift+1) );
-                    maxMappableLength2strands(Shift, seedLength, iDir, 0, P->nSA-1, L, splitR[2][ip]);//L=max mappable length, unique or multiple
+                    uint seedLength = min(P.seedSearchLmax, iDir==0 ? (splitR[0][ip] + splitR[1][ip]-Shift):(Shift+1) );
+                    maxMappableLength2strands(Shift, seedLength, iDir, 0, P.nSA-1, L, splitR[2][ip]);//L=max mappable length, unique or multiple
                 };
 
 
@@ -83,7 +83,7 @@ int ReadAlign::mapOneRead() {
     #endif
 
     nTr=0;//nothing mapped yet
-    if (Lread<P->outFilterMatchNmin) {//read is too short (trimmed too much?)
+    if (Lread<P.outFilterMatchNmin) {//read is too short (trimmed too much?)
         mapMarker=MARKER_READ_TOO_SHORT;
         trBest->rLength=0; //min good piece length
         nW=0;

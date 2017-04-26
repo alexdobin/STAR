@@ -6,7 +6,7 @@ inline uint medianUint2(uint a, uint b) {
     return a/2 + b/2 + (a%2 + b%2)/2;
 };
 
-uint compareSeqToGenome(char** s2, uint S, uint N, uint L, char* g, PackedArray& SA, uint iSA, bool dirR, bool& compRes, Parameters* P) {
+uint compareSeqToGenome(char** s2, uint S, uint N, uint L, char* g, PackedArray& SA, uint iSA, bool dirR, bool& compRes, Parameters& P) {
     // compare s to g, find the maximum identity length
     // s2[0] read sequence; s2[1] complementary sequence
     // S position to start search from in s2[0],s2[1]
@@ -15,8 +15,8 @@ uint compareSeqToGenome(char** s2, uint S, uint N, uint L, char* g, PackedArray&
     register int64 ii;
 
     uint SAstr=SA[iSA];
-    bool dirG = (SAstr>>P->GstrandBit) == 0; //forward or reverse strand of the genome
-    SAstr &= P->GstrandMask;
+    bool dirG = (SAstr>>P.GstrandBit) == 0; //forward or reverse strand of the genome
+    SAstr &= P.GstrandMask;
 
 
     if (dirR && dirG) {//forward on read, forward on genome
@@ -41,7 +41,7 @@ uint compareSeqToGenome(char** s2, uint S, uint N, uint L, char* g, PackedArray&
         return N; //exact match
     } else if (dirR && !dirG) {
         char* s  = s2[1] + S + L;
-        g += P->nGenome-1-SAstr - L;
+        g += P.nGenome-1-SAstr - L;
         for (ii=0; (uint) ii < N-L; ii++)
         {
             if (s[ii]!=g[-ii])
@@ -79,7 +79,7 @@ uint compareSeqToGenome(char** s2, uint S, uint N, uint L, char* g, PackedArray&
         return N;
     } else {//if (!dirR && !dirG)
         char* s  = s2[0] + S - L;
-        g += P->nGenome-1-SAstr - L;
+        g += P.nGenome-1-SAstr - L;
         for (ii=0; (uint) ii < N-L; ii++)
         {
             if (s[-ii]!=g[-ii])
@@ -99,7 +99,7 @@ uint compareSeqToGenome(char** s2, uint S, uint N, uint L, char* g, PackedArray&
     };
 };
 
-uint findMultRange(uint i3, uint L3, uint i1, uint L1, uint i1a, uint L1a, uint i1b, uint L1b, char** s, char* g, PackedArray& SA, bool dirR, uint S, Parameters* P) {
+uint findMultRange(uint i3, uint L3, uint i1, uint L1, uint i1a, uint L1a, uint i1b, uint L1b, char** s, char* g, PackedArray& SA, bool dirR, uint S, Parameters& P) {
     // given SA index i3 and identity length L3, return the index of the farthest element with the same length, starting from i1,L1 or i1a,L1a, or i1b,L1b
 
     bool compRes;
@@ -126,7 +126,7 @@ uint findMultRange(uint i3, uint L3, uint i1, uint L1, uint i1a, uint L1a, uint 
     return i1a;
 };
 
-uint maxMappableLength(char** s, uint S, uint N, char* g, PackedArray& SA, uint i1, uint i2, bool dirR, uint& L, uint* indStartEnd, Parameters* P) {
+uint maxMappableLength(char** s, uint S, uint N, char* g, PackedArray& SA, uint i1, uint i2, bool dirR, uint& L, uint* indStartEnd, Parameters& P) {
     // find minimum mappable length of sequence s to the genome g with suffix array SA; length(s)=N; [i1 i2] is
     // returns number of mappings (1=unique);range indStartEnd; min mapped length = L
     // binary search in SA space
@@ -189,7 +189,7 @@ uint maxMappableLength(char** s, uint S, uint N, char* g, PackedArray& SA, uint 
 };
 
 /*
-uint suffixArraySearch(char** s2, uint S, uint N, char* G, PackedArray& SA, uint i1, uint i2, uint L, Parameters* P) {
+uint suffixArraySearch(char** s2, uint S, uint N, char* G, PackedArray& SA, uint i1, uint i2, uint L, Parameters& P) {
     // binary search in SA space
     // s[0],s[1] - sequence, complementary sequence
     // S - start offset
@@ -220,8 +220,8 @@ uint suffixArraySearch(char** s2, uint S, uint N, char* G, PackedArray& SA, uint
         register int64 ii;
 
         uint SAstr=SA[i3];
-        bool dirG = (SAstr>>P->GstrandBit) == 0; //forward or reverse strand of the genome
-        SAstr &= P->GstrandMask;
+        bool dirG = (SAstr>>P.GstrandBit) == 0; //forward or reverse strand of the genome
+        SAstr &= P.GstrandMask;
 
 
         if (dirG)
@@ -240,7 +240,7 @@ uint suffixArraySearch(char** s2, uint S, uint N, char* G, PackedArray& SA, uint
         } else
         {
             char* s = s2[1] + S + L;
-            char* g = G + P->nGenome-1-SAstr - L;
+            char* g = G + P.nGenome-1-SAstr - L;
             for (ii=0; (uint) ii < N-L; ii++)
             {
                 if (s[ii]!=g[-ii])
@@ -274,20 +274,20 @@ uint suffixArraySearch(char** s2, uint S, uint N, char* G, PackedArray& SA, uint
 };
 */
 
-int compareRefEnds (uint64 SAstr,  uint64 gInsert, bool strG, bool strR, Parameters* P)
+int compareRefEnds (uint64 SAstr,  uint64 gInsert, bool strG, bool strR, Parameters& P)
 {
     if ( strG)
     {// + strand g
        return strR ? (SAstr < gInsert ? 1:-1) : 1;
     } else
     {// - strand g
-       return strR ? -1 : ( gInsert==-1LLU ? -1 : ( SAstr < P->nGenome-gInsert ? 1:-1) );
+       return strR ? -1 : ( gInsert==-1LLU ? -1 : ( SAstr < P.nGenome-gInsert ? 1:-1) );
     };
 };
 
 
 
-uint compareSeqToGenome1(char** s2, uint S, uint N, uint L, char* g, PackedArray& SA, uint iSA, bool dirR, uint64 gInsert, int & compRes, Parameters* P) {
+uint compareSeqToGenome1(char** s2, uint S, uint N, uint L, char* g, PackedArray& SA, uint iSA, bool dirR, uint64 gInsert, int & compRes, Parameters& P) {
     // compare s to g, find the maximum identity length
     // s2[0] read sequence; s2[1] complementary sequence
     // S position to start search from in s2[0],s2[1]
@@ -302,8 +302,8 @@ uint compareSeqToGenome1(char** s2, uint S, uint N, uint L, char* g, PackedArray
     register int64 ii;
 
     uint SAstr=SA[iSA];
-    bool dirG = (SAstr>>P->GstrandBit) == 0; //forward or reverse strand of the genome
-    SAstr &= P->GstrandMask;
+    bool dirG = (SAstr>>P.GstrandBit) == 0; //forward or reverse strand of the genome
+    SAstr &= P.GstrandMask;
 
 
     if (dirG) {//forward on read, forward on genome
@@ -334,7 +334,7 @@ uint compareSeqToGenome1(char** s2, uint S, uint N, uint L, char* g, PackedArray
     else
     {
         char* s  = s2[1] + S + L;
-        g += P->nGenome-1-SAstr - L;
+        g += P.nGenome-1-SAstr - L;
         for (ii=0; (uint) ii < N-L; ii++)
         {
             if (s[ii]!=g[-ii])
@@ -362,7 +362,7 @@ uint compareSeqToGenome1(char** s2, uint S, uint N, uint L, char* g, PackedArray
 };
 
 
-uint suffixArraySearch1(char** s, uint S, uint N, char* g, uint64 gInsert, PackedArray& SA, bool strR, uint i1, uint i2, uint L, Parameters* P)
+uint suffixArraySearch1(char** s, uint S, uint N, char* g, uint64 gInsert, PackedArray& SA, bool strR, uint i1, uint i2, uint L, Parameters& P)
 {
     // binary search in SA space
     // s[0],s[1] - query sequence, complementary sequence
@@ -417,11 +417,11 @@ uint suffixArraySearch1(char** s, uint S, uint N, char* g, uint64 gInsert, Packe
     return i2; //index at i2 is always bigger than the sequence
 };
 
-uint funCalcSAiFromSA(char* G, PackedArray& SA, uint iSA, int L, Parameters* P, int & iL4)
+uint funCalcSAiFromSA(char* G, PackedArray& SA, uint iSA, int L, Parameters& P, int & iL4)
 {
     uint SAstr=SA[iSA];
-    bool dirG = (SAstr>>P->GstrandBit) == 0; //forward or reverse strand of the genome
-    SAstr &= P->GstrandMask;
+    bool dirG = (SAstr>>P.GstrandBit) == 0; //forward or reverse strand of the genome
+    SAstr &= P.GstrandMask;
     iL4=-1;
     register uint saind=0;
     if (dirG)
@@ -443,7 +443,7 @@ uint funCalcSAiFromSA(char* G, PackedArray& SA, uint iSA, int L, Parameters* P, 
         return saind;
     } else
     {
-        register uint128 g1=*( (uint128*) (G+P->nGenome-SAstr-16) );
+        register uint128 g1=*( (uint128*) (G+P.nGenome-SAstr-16) );
         for (int ii=0; ii<L; ii++)
         {
             register char g2=(char) (g1>>(8*(15-ii)));

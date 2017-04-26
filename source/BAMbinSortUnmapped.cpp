@@ -2,11 +2,11 @@
 #include "ErrorWarning.h"
 #include "BAMfunctions.h"
 
-void BAMbinSortUnmapped(uint32 iBin, uint nThreads, string dirBAMsort, BGZF *bgzfBAM, Parameters *P) {
+void BAMbinSortUnmapped(uint32 iBin, uint nThreads, string dirBAMsort, BGZF *bgzfBAM, Parameters &P) {
 
     BGZF *bgzfBin;
-    bgzfBin=bgzf_open((dirBAMsort+"/b"+to_string((uint) iBin)).c_str(),("w"+to_string((long long) P->outBAMcompression)).c_str());
-    outBAMwriteHeader(bgzfBin,P->samHeaderSortedCoord,P->chrNameAll,P->chrLengthAll);
+    bgzfBin=bgzf_open((dirBAMsort+"/b"+to_string((uint) iBin)).c_str(),("w"+to_string((long long) P.outBAMcompression)).c_str());
+    outBAMwriteHeader(bgzfBin,P.samHeaderSortedCoord,P.chrNameAll,P.chrLengthAll);
 
 
     vector<string> bamInFile;

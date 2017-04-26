@@ -7,7 +7,7 @@ void ReadAlign::outputTranscriptSJ(Transcript const &trOut, uint nTrOut, OutSJ *
     //For a multimapper, several alignments may contain the same junctions - now it's recorded several time.
 //     if (nTrOut>1) return; //junctions from multi-mappers are not recorded
 
-//     if (P->outSAMmode=="None") return; //no SAM output
+//     if (P.outSAMmode=="None") return; //no SAM output
 
     for (uint iex=0;iex<trOut.nExons-1;iex++) {//record all junctions
         if (trOut.canonSJ[iex]>=0) {//only record junctions, not indels or mate gap

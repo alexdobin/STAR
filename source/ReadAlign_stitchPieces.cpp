@@ -13,8 +13,8 @@
 void ReadAlign::stitchPieces(char **R, char **Q, uint Lread) {
 
        //zero-out winBin
-    memset(winBin[0],255,sizeof(winBin[0][0])*P->winBinN);
-    memset(winBin[1],255,sizeof(winBin[0][0])*P->winBinN);
+    memset(winBin[0],255,sizeof(winBin[0][0])*P.winBinN);
+    memset(winBin[1],255,sizeof(winBin[0][0])*P.winBinN);
 
 
 //     for (uint iWin=0;iWin<nWall;iWin++) {//zero out winBin
@@ -27,7 +27,7 @@ void ReadAlign::stitchPieces(char **R, char **Q, uint Lread) {
 //     };
 
 //     //debug
-//     for (uint ii=0;ii<P->winBinN;ii++){
+//     for (uint ii=0;ii<P.winBinN;ii++){
 //         if (winBin[0][ii]!=uintWinBinMax || winBin[1][ii]!=uintWinBinMax) {
 //             cerr<< "BUG in stitchPieces: ii="<<ii<<"   "<< winBin[0][ii] <<"   "<<winBin[1][ii] <<"   iRead="<<iRead<<"   nW="<<nW<<endl;
 //             for (uint iWin=0;iWin<nW;iWin++) {
@@ -41,8 +41,8 @@ void ReadAlign::stitchPieces(char **R, char **Q, uint Lread) {
     nW=0; //number of windows
     for (uint iP=0; iP<nP; iP++) {//scan through all anchor pieces, create alignment windows
 
-//          if (PC[iP][PC_Nrep]<=P->winAnchorMultimapNmax || PC[iP][PC_Length]>=readLength[PC[iP][PC_iFrag]] ) {//proceed if piece is an anchor, i.e. maps few times or is long enough
-       if (PC[iP][PC_Nrep]<=P->winAnchorMultimapNmax ) {//proceed if piece is an anchor, i.e. maps few times
+//          if (PC[iP][PC_Nrep]<=P.winAnchorMultimapNmax || PC[iP][PC_Length]>=readLength[PC[iP][PC_iFrag]] ) {//proceed if piece is an anchor, i.e. maps few times or is long enough
+       if (PC[iP][PC_Nrep]<=P.winAnchorMultimapNmax ) {//proceed if piece is an anchor, i.e. maps few times
 
             uint aDir   = PC[iP][PC_Dir];
             uint aLength= PC[iP][PC_Length];
@@ -50,17 +50,17 @@ void ReadAlign::stitchPieces(char **R, char **Q, uint Lread) {
             for (uint iSA=PC[iP][PC_SAstart]; iSA<=PC[iP][PC_SAend]; iSA++) {//scan through all alignments of this piece
 
                 uint a1 = mapGen.SA[iSA];
-                uint aStr = a1 >> P->GstrandBit;
-                a1 &= P->GstrandMask; //remove strand bit
+                uint aStr = a1 >> P.GstrandBit;
+                a1 &= P.GstrandMask; //remove strand bit
 
                 //convert to positive strand
                 if (aDir==1 && aStr==0) {
                     aStr=1;
                 } else if (aDir==0 && aStr==1) {
-                    a1 = P->nGenome - (aLength+a1);
+                    a1 = P.nGenome - (aLength+a1);
                 } else if (aDir==1 && aStr==1) {
                     aStr=0;
-                    a1 = P->nGenome - (aLength+a1);
+                    a1 = P.nGenome - (aLength+a1);
                 };
 
                 //final strand
@@ -68,7 +68,7 @@ void ReadAlign::stitchPieces(char **R, char **Q, uint Lread) {
                     aStr=1-aStr;
                 };
 
-                if (a1>=P->sjGstart) {//this is sj align
+                if (a1>=P.sjGstart) {//this is sj align
                     uint a1D, aLengthD, a1A, aLengthA, sj1;
                     if (sjAlignSplit(a1, aLength, P, a1D, aLengthD, a1A, aLengthA, sj1)) {//align crosses the junction
 
@@ -88,7 +88,7 @@ void ReadAlign::stitchPieces(char **R, char **Q, uint Lread) {
                     };
                 };
             }; //for (uint iSA=PC[iP][PC_SAstart]; iSA<=PC[iP][PC_SAend]; iSA++) //scan through all alignments of this piece
-        };//if (PC[iP][PC_Nrep]<=P->winAnchorMultimapNmax) //proceed if anchor
+        };//if (PC[iP][PC_Nrep]<=P.winAnchorMultimapNmax) //proceed if anchor
     };//for (uint iP=0; iP<nP; iP++) //scan through all anchor pieces, create alignment windows
 
 
@@ -96,14 +96,14 @@ void ReadAlign::stitchPieces(char **R, char **Q, uint Lread) {
         if (WC[iWin][WC_gStart]<=WC[iWin][WC_gEnd]) {//otherwise the window is dead
 
             uint wb=WC[iWin][WC_gStart];
-            for (uint ii=0; ii<P->winFlankNbins && wb>0 && P->chrBin[(wb-1) >> P->winBinChrNbits]==WC[iWin][WC_Chr];ii++) {
+            for (uint ii=0; ii<P.winFlankNbins && wb>0 && P.chrBin[(wb-1) >> P.winBinChrNbits]==WC[iWin][WC_Chr];ii++) {
                 wb--;
                 winBin[ WC[iWin][WC_Str] ][ wb ]=(uintWinBin) iWin;
             };
             WC[iWin][WC_gStart] = wb;
 
             wb=WC[iWin][WC_gEnd];
-            for (uint ii=0; ii<P->winFlankNbins && wb+1<P->winBinN && P->chrBin[(wb+1) >> P->winBinChrNbits]==WC[iWin][WC_Chr];ii++) {
+            for (uint ii=0; ii<P.winFlankNbins && wb+1<P.winBinN && P.chrBin[(wb+1) >> P.winBinChrNbits]==WC[iWin][WC_Chr];ii++) {
                 wb++;
                 winBin[ WC[iWin][WC_Str] ][ wb ]=(uintWinBin) iWin;
             };
@@ -131,7 +131,7 @@ void ReadAlign::stitchPieces(char **R, char **Q, uint Lread) {
         uint aLength=PC[iP][PC_Length];
         uint aDir=PC[iP][PC_Dir];
 
-        bool aAnchor=(aNrep<=P->winAnchorMultimapNmax); //this align is an anchor or not
+        bool aAnchor=(aNrep<=P.winAnchorMultimapNmax); //this align is an anchor or not
 
         for (uint ii=0;ii<nW;ii++) {//initialize nWAP
             nWAP[ii]=0;
@@ -140,8 +140,8 @@ void ReadAlign::stitchPieces(char **R, char **Q, uint Lread) {
         for (uint iSA=PC[iP][PC_SAstart]; iSA<=PC[iP][PC_SAend]; iSA++) {//scan through all alignments
 
             uint a1 = mapGen.SA[iSA];
-            uint aStr = a1 >> P->GstrandBit;
-            a1 &= P->GstrandMask; //remove strand bit
+            uint aStr = a1 >> P.GstrandBit;
+            a1 &= P.GstrandMask; //remove strand bit
             uint aRstart=PC[iP][PC_rStart];
 
             //convert to positive strand
@@ -150,10 +150,10 @@ void ReadAlign::stitchPieces(char **R, char **Q, uint Lread) {
                 aRstart = Lread - (aLength+aRstart);
             } else if (aDir==0 && aStr==1) {
                 aRstart = Lread - (aLength+aRstart);
-                a1 = P->nGenome - (aLength+a1);
+                a1 = P.nGenome - (aLength+a1);
             } else if (aDir==1 && aStr==1) {
                 aStr=0;
-                a1 = P->nGenome - (aLength+a1);
+                a1 = P.nGenome - (aLength+a1);
             };
 
             //final strand
@@ -162,7 +162,7 @@ void ReadAlign::stitchPieces(char **R, char **Q, uint Lread) {
             };
 
 
-            if (a1>=P->sjGstart) {//this is sj read
+            if (a1>=P.sjGstart) {//this is sj read
                 uint a1D, aLengthD, a1A, aLengthA, isj1;
                 if (sjAlignSplit(a1, aLength, P, a1D, aLengthD, a1A, aLengthA, isj1)) {//align crosses the junction
 
@@ -179,7 +179,7 @@ void ReadAlign::stitchPieces(char **R, char **Q, uint Lread) {
         };
 
 //         for (uint ii=0;ii<nW;ii++) {//check of some pieces created too many aligns in some windows, and remove those from WA (ie shift nWA indices
-//             if (nWAP[ii]>P->seedNoneLociPerWindow) nWA[ii] -= nWAP[ii];
+//             if (nWAP[ii]>P.seedNoneLociPerWindow) nWA[ii] -= nWAP[ii];
 //         };
     };
 
@@ -224,7 +224,7 @@ for (uint iW=0;iW<nW;iW++) {//check each window
     };//if (nWA[iW]>0)
 };//for (uint iW=0;iW<nW;iW++)
 for (uint iW=0;iW<nW;iW++) {
-    if (swWinCov[iW]<swWinCovMax*P->winReadCoverageRelativeMin || swWinCov[iW]<P->winReadCoverageBasesMin) {//remove windows that are not good enough
+    if (swWinCov[iW]<swWinCovMax*P.winReadCoverageRelativeMin || swWinCov[iW]<P.winReadCoverageBasesMin) {//remove windows that are not good enough
         nWA[iW]=0;
     } else {//merge pieces that are adjacent in R- and G-spaces
         uint ia1=0;
@@ -288,9 +288,9 @@ std::time(&timeStart);
         trA.maxScore=0;
 
         trAll[iW1]=trArrayPointer+trNtotal;
-        if (trNtotal+P->alignTranscriptsPerWindowNmax >= P->alignTranscriptsPerReadNmax) {
-            P->inOut->logMain << "WARNING: not enough space allocated for transcript. Did not process all windows for read "<< readName+1 <<endl;
-            P->inOut->logMain <<"   SOLUTION: increase alignTranscriptsPerReadNmax and re-run\n" << flush;
+        if (trNtotal+P.alignTranscriptsPerWindowNmax >= P.alignTranscriptsPerReadNmax) {
+            P.inOut->logMain << "WARNING: not enough space allocated for transcript. Did not process all windows for read "<< readName+1 <<endl;
+            P.inOut->logMain <<"   SOLUTION: increase alignTranscriptsPerReadNmax and re-run\n" << flush;
             break;
         };
         *(trAll[iW1][0])=trA;
@@ -299,7 +299,7 @@ std::time(&timeStart);
 
     #ifdef COMPILE_FOR_LONG_READS
         stitchWindowSeeds(iW, iW1, NULL, R[trA.roStr==0 ? 0:2], Q[trA.roStr], mapGen.G);
-        if (P->chimSegmentMin>0) {
+        if (P.chimSegmentMin>0) {
             for (uint ia=0;ia<nWA[iW];ia++)
             {//mark all seeds that overlap the best (and only for now) transcript trA
                 if (WAincl[ia]) continue;

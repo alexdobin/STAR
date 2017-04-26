@@ -8,7 +8,7 @@ string ReadAlign::outputTranscriptCIGARp(Transcript const &trOut) {//generates C
     samStreamCIGAR.str(std::string());
 
     uint leftMate=0;
-    if (P->readFilesIn.size()>1) leftMate=trOut.Str;
+    if (P.readFilesIn.size()>1) leftMate=trOut.Str;
 
     uint trimL=trOut.exons[0][EX_R] - (trOut.exons[0][EX_R]<readLengthOriginal[leftMate] ? 0 : readLengthOriginal[leftMate]+1);
     if (trimL>0) {

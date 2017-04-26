@@ -5,6 +5,6 @@
 #include "SjdbClass.h"
 #include "Parameters.h"
 
-void sjdbLoadFromFiles(Parameters *P, SjdbClass &sjdbLoci);
+void sjdbLoadFromFiles(Parameters &P, SjdbClass &sjdbLoci);
 
 #endif

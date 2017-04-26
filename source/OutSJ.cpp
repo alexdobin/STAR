@@ -1,7 +1,7 @@
 #include "OutSJ.h"
 #include "ErrorWarning.h"
 
-OutSJ::OutSJ (uint nSJmax, Parameters *inP) {//do I need P?
+OutSJ::OutSJ (uint nSJmax, Parameters &inP) {//do I need P?
 
     data = new char [oneSJ.dataSize*nSJmax]; //allocate big array of SJ loci and properties
     memset(data,0,oneSJ.dataSize*nSJmax);
@@ -72,14 +72,14 @@ void Junction::junctionPointer(char* sjPoint, uint isj) {//
     overhangRight=(uint16*) (d1+overhangRightP);
 };
 
-void Junction::outputStream(ostream &outStream, Parameters* P) {
-    uint sjChr=P->chrBin[*start >> P->genomeChrBinNbits];
-    outStream << P->chrName.at(sjChr) <<"\t"<< *start + 1 - P->chrStart[sjChr] <<"\t"<<*start + *gap - P->chrStart[sjChr] \
+void Junction::outputStream(ostream &outStream, Parameters& P) {
+    uint sjChr=P.chrBin[*start >> P.genomeChrBinNbits];
+    outStream << P.chrName.at(sjChr) <<"\t"<< *start + 1 - P.chrStart[sjChr] <<"\t"<<*start + *gap - P.chrStart[sjChr] \
             <<"\t"<< int(*strand) <<"\t"<< int(*motif) <<"\t"<< int (*annot) <<"\t"<< *countUnique <<"\t"<< *countMultiple \
             <<"\t"<< *overhangLeft << endl;
 };
 
-void Junction::collapseOneSJ(char* isj1P, char* isjP, Parameters* P) {//collapse isj junction into isj1: increase counts in isj1. choose max overhangs, motif, annot
+void Junction::collapseOneSJ(char* isj1P, char* isjP, Parameters& P) {//collapse isj junction into isj1: increase counts in isj1. choose max overhangs, motif, annot
     *(uint32*)(isj1P+countUniqueP)   += *(uint32*)(isjP+countUniqueP);
     *(uint32*)(isj1P+countMultipleP) += *(uint32*)(isjP+countMultipleP);
 
@@ -95,14 +95,14 @@ void Junction::collapseOneSJ(char* isj1P, char* isjP, Parameters* P) {//collapse
             errOut <<"EXITING becaues of BUG: different motifs for the same junction while collapsing junctions\n" \
                    <<*(uint*)(isj1P+startP) <<" "<<*(uint32*)(isj1P+gapP) <<" "<<int(*(char*)(isj1P+motifP)) <<" "<<int(*(char*)(isjP+motifP)) \
                    <<" "<<int(*(char*)(isj1P+annotP)) <<" "<<int(*(char*)(isjP+annotP))<<"\n";
-            exitWithError(errOut.str(), std::cerr, P->inOut->logMain, EXIT_CODE_BUG, *P);\
+            exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_BUG, *P);\
 //         *(isj1P+motifP) = *(isjP+motifP) ;
     };
     if (*(isj1P+annotP) < *(isjP+annotP) ) {
             stringstream errOut;
             errOut <<"EXITING becaues of BUG: different annotation status for the same junction while collapsing junctions:"\
                    <<*(uint*)(isj1P+startP) <<" "<<*(uint32*)(isj1P+gapP) <<" "<<int(*(char*)(isj1P+annotP)) <<" "<<int(*(char*)(isjP+annotP))<<"\n";
-            exitWithError(errOut.str(), std::cerr, P->inOut->logMain, EXIT_CODE_BUG, *P);\
+            exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_BUG, *P);\
 
 //         *(isj1P+annotP) = *(isjP+annotP) ;
     };

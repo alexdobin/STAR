@@ -1,7 +1,7 @@
 #include "IncludeDefine.h"
 #include "Parameters.h"
 
-int stitchGapIndel (uint rAend, uint gAend, uint rBstart, uint gBstart, uint L, uint gapStart, uint gapEnd, char* R, char* G, Parameters* P,\
+int stitchGapIndel (uint rAend, uint gAend, uint rBstart, uint gBstart, uint L, uint gapStart, uint gapEnd, char* R, char* G, Parameters& P,\
                     uint &iRbest, uint &nMM){//returns stitch score
 
     uint gapLength = gapEnd-gapStart+1;
@@ -37,7 +37,7 @@ int stitchGapIndel (uint rAend, uint gAend, uint rBstart, uint gBstart, uint L, 
 
         //score the alignment with inDel at iRbest
         nMM=0;
-        score2= L - inDel*P->scoreDelBase - P->scoreDelOpen; //score B and deletion
+        score2= L - inDel*P.scoreDelBase - P.scoreDelOpen; //score B and deletion
         for (uint iR=1; iR<rBstart-rAend; iR++) {//scan to find the best position iR of the indel
             uint iG=gAend+iR;
             if (iR>iRbest) iG += (uint) inDel;

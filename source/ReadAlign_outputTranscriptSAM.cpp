@@ -4,18 +4,18 @@
 
 uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint mateChr, uint mateStart, char mateStrand, int unmapType, bool *mateMapped, ostream *outStream) {
 
-    if (P->outSAMmode=="None") return 0; //no SAM output
+    if (P.outSAMmode=="None") return 0; //no SAM output
 
     uint outStreamPos0=(uint)outStream->tellp();
 
     if (unmapType>=0)
     {//unmapped reads: SAM
-        for (uint imate=0;imate<P->readNmates;imate++)
+        for (uint imate=0;imate<P.readNmates;imate++)
         {//cycle over mates
             if (!mateMapped[imate])
             {
                 uint16 samFLAG=0x4;
-                if (P->readNmates==2)
+                if (P.readNmates==2)
                 {//paired read
                     samFLAG+=0x1 + (imate==0 ? 0x40 : 0x80);
                     if (mateMapped[1-imate])
@@ -41,14 +41,14 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
                         <<"\t"<< '*' <<"\t"<< '0' <<"\t"<< '0' <<"\t"<< '*';
 
                 if (mateMapped[1-imate]) {//mate is mapped
-                    *outStream <<"\t"<< P->chrName[trOut.Chr] <<"\t"<< trOut.exons[0][EX_G] + 1 - P->chrStart[trOut.Chr];
+                    *outStream <<"\t"<< P.chrName[trOut.Chr] <<"\t"<< trOut.exons[0][EX_G] + 1 - P.chrStart[trOut.Chr];
                 } else {
                     *outStream <<"\t"<< '*' <<"\t"<< '0';
                 };
 
                 *outStream <<"\t"<< '0' <<"\t"<< Read0[imate] <<"\t"<< (readFileType==2 ? Qual0[imate]:"*") \
                         <<"\tNH:i:0" <<"\tHI:i:0" <<"\tAS:i:"<<trOut.maxScore <<"\tnM:i:"<<trOut.nMM<<"\tuT:A:" <<unmapType;
-                if (!P->outSAMattrRG.empty()) *outStream<< "\tRG:Z:" <<P->outSAMattrRG.at(readFilesIndex);
+                if (!P.outSAMattrRG.empty()) *outStream<< "\tRG:Z:" <<P.outSAMattrRG.at(readFilesIndex);
                 *outStream <<"\n";
 
             };
@@ -57,7 +57,7 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
     };//if (unmapType>=0 && outStream != NULL) //unmapped reads: SAM
 
 
-    bool flagPaired = P->readNmates==2;
+    bool flagPaired = P.readNmates==2;
     string CIGAR;
 
     //for SAM output need to split mates
@@ -76,10 +76,10 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
         samFlagCommon=0x0001;
         if (iExMate==trOut.nExons-1) 
         {//single mate
-            if (mateChr>P->nChrReal) samFlagCommon+=0x0008; //not mapped as pair
+            if (mateChr>P.nChrReal) samFlagCommon+=0x0008; //not mapped as pair
         } else 
         {//paired align
-            if (P->alignEndsProtrude.concordantPair || \
+            if (P.alignEndsProtrude.concordantPair || \
                 ( (trOut.exons[0][EX_G] <= trOut.exons[iExMate+1][EX_G]+trOut.exons[0][EX_R]) && \
                    (trOut.exons[iExMate][EX_G]+trOut.exons[iExMate][EX_L] <= trOut.exons[trOut.nExons-1][EX_G]+Lread-trOut.exons[trOut.nExons-1][EX_R]) )  )                
             {//properly paired
@@ -156,8 +156,8 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
                     samStreamCIGAR << "N";
                     samStreamSJmotif <<','<< trOut.canonSJ[ii-1] + (trOut.sjAnnot[ii-1]==0 ? 0 : SJ_SAM_AnnotatedMotifShift); //record junction type
 //                     samStreamSJannot <<','<< (int) trOut.sjAnnot[ii-1]; //record annotation type
-                    samStreamSJintron <<','<< trOut.exons[ii-1][EX_G] + trOut.exons[ii-1][EX_L] + 1 - P->chrStart[trOut.Chr] <<','\
-                                   << trOut.exons[ii][EX_G] - P->chrStart[trOut.Chr]; //record intron loci
+                    samStreamSJintron <<','<< trOut.exons[ii-1][EX_G] + trOut.exons[ii-1][EX_L] + 1 - P.chrStart[trOut.Chr] <<','\
+                                   << trOut.exons[ii][EX_G] - P.chrStart[trOut.Chr]; //record intron loci
                 } else if (gapG>0) {//deletion: N
                     samStreamCIGAR << gapG;
                     samStreamCIGAR << "D";
@@ -202,7 +202,7 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
 
 //         return;
 
-        int MAPQ=P->outSAMmapqUnique;
+        int MAPQ=P.outSAMmapqUnique;
         if (nTrOut>=5) {
             MAPQ=0;
         } else if (nTrOut>=3) {
@@ -211,14 +211,14 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
             MAPQ=3;
         };
 
-        *outStream << readName+1 <<"\t"<< ((samFLAG & P->outSAMflagAND) | P->outSAMflagOR) <<"\t"<< P->chrName[trOut.Chr] <<"\t"<< trOut.exons[iEx1][EX_G] + 1 - P->chrStart[trOut.Chr]
+        *outStream << readName+1 <<"\t"<< ((samFLAG & P.outSAMflagAND) | P.outSAMflagOR) <<"\t"<< P.chrName[trOut.Chr] <<"\t"<< trOut.exons[iEx1][EX_G] + 1 - P.chrStart[trOut.Chr]
                 <<"\t"<< MAPQ <<"\t"<< CIGAR;
 
         if (nMates>1) {
-            *outStream <<"\t"<< "=" <<"\t"<< trOut.exons[(imate==0 ? iExMate+1 : 0)][EX_G]+  1 - P->chrStart[trOut.Chr]
+            *outStream <<"\t"<< "=" <<"\t"<< trOut.exons[(imate==0 ? iExMate+1 : 0)][EX_G]+  1 - P.chrStart[trOut.Chr]
                      <<"\t"<< (imate==0? "":"-") << trOut.exons[trOut.nExons-1][EX_G]+trOut.exons[trOut.nExons-1][EX_L]-trOut.exons[0][EX_G];
-        } else if (mateChr<P->nChrReal){//mateChr is given in the function parameters
-            *outStream <<"\t"<< P->chrName[mateChr] <<"\t"<< mateStart+1-P->chrStart[mateChr] <<"\t"<< 0;
+        } else if (mateChr<P.nChrReal){//mateChr is given in the function parameters
+            *outStream <<"\t"<< P.chrName[mateChr] <<"\t"<< mateStart+1-P.chrStart[mateChr] <<"\t"<< 0;
         } else {
             *outStream <<"\t"<< "*" <<"\t"<< 0 <<"\t"<< 0;
         };
@@ -226,7 +226,7 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
 
         *outStream <<"\t"<< seqOut;
 
-        if (readFileType==2 && P->outSAMmode != "NoQS") {//fastq
+        if (readFileType==2 && P.outSAMmode != "NoQS") {//fastq
             *outStream <<"\t"<< qualOut ;
         } else {
             *outStream <<"\t"<< "*";
@@ -236,7 +236,7 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
 
         uint tagNM=0;
         string tagMD("");
-        if (P->outSAMattrPresent.NM || P->outSAMattrPresent.MD) {
+        if (P.outSAMattrPresent.NM || P.outSAMattrPresent.MD) {
             char* R=Read1[trOut.roStr==0 ? 0:2];
             uint matchN=0;
             for (uint iex=iEx1;iex<=iEx2;iex++) {
@@ -248,7 +248,7 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
 //                         if (matchN>0 || (ii==0 && iex>0 && trOut.canonSJ[iex]==-1) ) {
                         tagMD+=to_string(matchN);
 //                         };
-                        tagMD+=P->genomeNumToNT[(uint8) g1];
+                        tagMD+=P.genomeNumToNT[(uint8) g1];
                         matchN=0;
                     } else {
                         matchN++;
@@ -259,7 +259,7 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
                         tagNM+=trOut.exons[iex+1][EX_G]-(trOut.exons[iex][EX_G]+trOut.exons[iex][EX_L]);
                         tagMD+=to_string(matchN) + "^";
                         for (uint ii=trOut.exons[iex][EX_G]+trOut.exons[iex][EX_L];ii<trOut.exons[iex+1][EX_G];ii++) {
-                            tagMD+=P->genomeNumToNT[(uint8) mapGen.G[ii]];
+                            tagMD+=P.genomeNumToNT[(uint8) mapGen.G[ii]];
                         };
                         matchN=0;
                     } else if (trOut.canonSJ[iex]==-2) {//insertion
@@ -269,13 +269,13 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
             };
             tagMD+=to_string(matchN);
         };
-        for (uint ii=0;ii<P->outSAMattrOrder.size();ii++) {
-            switch (P->outSAMattrOrder[ii]) {
+        for (uint ii=0;ii<P.outSAMattrOrder.size();ii++) {
+            switch (P.outSAMattrOrder[ii]) {
                 case ATTR_NH:
                     *outStream <<"\tNH:i:" << nTrOut;
                     break;
                 case ATTR_HI:
-                    *outStream <<"\tHI:i:"<<iTrOut+P->outSAMattrIHstart;
+                    *outStream <<"\tHI:i:"<<iTrOut+P.outSAMattrIHstart;
                     break;
                 case ATTR_AS:
                     *outStream<<"\tAS:i:"<<trOut.maxScore;
@@ -303,16 +303,16 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
                     *outStream<< "\tMD:Z:" <<tagMD;
                     break;
                 case ATTR_RG:
-                    *outStream<< "\tRG:Z:" <<P->outSAMattrRG.at(readFilesIndex);
+                    *outStream<< "\tRG:Z:" <<P.outSAMattrRG.at(readFilesIndex);
                     break;
                 case ATTR_ch:
                     //do nothing - this attribute only worlks for BAM output
                     break;
                 default:
                     ostringstream errOut;
-                    errOut <<"EXITING because of FATAL BUG: unknown/unimplemented SAM atrribute (tag): "<<P->outSAMattrOrder[ii] <<"\n";
+                    errOut <<"EXITING because of FATAL BUG: unknown/unimplemented SAM atrribute (tag): "<<P.outSAMattrOrder[ii] <<"\n";
                     errOut <<"SOLUTION: contact Alex Dobin at dobin@cshl.edu\n";
-                    exitWithError(errOut.str(), std::cerr, P->inOut->logMain, EXIT_CODE_PARAMETER, *P);
+                    exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, *P);
             };
         };
 

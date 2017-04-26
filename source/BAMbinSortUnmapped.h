@@ -4,6 +4,6 @@
 #include "Parameters.h"
 #include SAMTOOLS_BGZF_H
 
-void BAMbinSortUnmapped(uint32 iBin, uint nThreads, string dirBAMsort, BGZF *bgzfBAM, Parameters *P);
+void BAMbinSortUnmapped(uint32 iBin, uint nThreads, string dirBAMsort, BGZF *bgzfBAM, Parameters &P);
 
 #endif

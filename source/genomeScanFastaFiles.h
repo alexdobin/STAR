@@ -4,6 +4,6 @@
 #include "Parameters.h"
 #include "IncludeDefine.h"
 
-uint genomeScanFastaFiles (Parameters *P, char* G, bool flagRun);
+uint genomeScanFastaFiles (Parameters &P, char* G, bool flagRun);
 
 #endif

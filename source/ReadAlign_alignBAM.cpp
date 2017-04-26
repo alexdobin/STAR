@@ -16,7 +16,7 @@ void ReadAlign::samAttrNM_MD (Transcript const &trOut, uint iEx1, uint iEx2, uin
             if ( r1!=g1 || r1==4 || g1==4) {
                 ++tagNM;
                 tagMD+=to_string(matchN);
-                tagMD+=P->genomeNumToNT[(uint8) g1];
+                tagMD+=P.genomeNumToNT[(uint8) g1];
                 matchN=0;
             } else {
                 matchN++;
@@ -27,7 +27,7 @@ void ReadAlign::samAttrNM_MD (Transcript const &trOut, uint iEx1, uint iEx2, uin
                 tagNM+=trOut.exons[iex+1][EX_G]-(trOut.exons[iex][EX_G]+trOut.exons[iex][EX_L]);
                 tagMD+=to_string(matchN) + "^";
                 for (uint ii=trOut.exons[iex][EX_G]+trOut.exons[iex][EX_L];ii<trOut.exons[iex+1][EX_G];ii++) {
-                    tagMD+=P->genomeNumToNT[(uint8) mapGen.G[ii]];
+                    tagMD+=P.genomeNumToNT[(uint8) mapGen.G[ii]];
                 };
                 matchN=0;
             } else if (trOut.canonSJ[iex]==-2) {//insertion
@@ -85,7 +85,7 @@ int bamAttrArrayWrite(vector<int32> &attr, const char* tagName, char* attrArray 
 };
 
 template <typename intType>
-int bamAttrArrayWriteInt(intType xIn, const char* tagName, char* attrArray, Parameters *P) {//adapted from samtools
+int bamAttrArrayWriteInt(intType xIn, const char* tagName, char* attrArray, Parameters &P) {//adapted from samtools
     attrArray[0]=tagName[0];attrArray[1]=tagName[1];
     #define ATTR_RECORD_INT(_intChar,_intType,_intValue) attrArray[2] = _intChar; *(_intType*)(attrArray+3) = (_intType) _intValue; return 3+sizeof(_intType)
     int64 x = (int64) xIn;
@@ -100,7 +100,7 @@ int bamAttrArrayWriteInt(intType xIn, const char* tagName, char* attrArray, Para
                 ostringstream errOut;
                 errOut <<"EXITING because of FATAL BUG: integer out of range for BAM conversion: "<< x <<"\n";
                 errOut <<"SOLUTION: contact Alex Dobin at dobin@cshl.edu\n";
-                exitWithError(errOut.str(), std::cerr, P->inOut->logMain, EXIT_CODE_BUG, *P);
+                exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_BUG, *P);
             };
         };
     } else {
@@ -114,7 +114,7 @@ int bamAttrArrayWriteInt(intType xIn, const char* tagName, char* attrArray, Para
                 ostringstream errOut;
                 errOut <<"EXITING because of FATAL BUG: integer out of range for BAM conversion: "<< x <<"\n";
                 errOut <<"SOLUTION: contact Alex Dobin at dobin@cshl.edu\n";
-                exitWithError(errOut.str(), std::cerr, P->inOut->logMain, EXIT_CODE_BUG, *P);
+                exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_BUG, *P);
             };
         };
     };
@@ -134,7 +134,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
     //          -13: chimeric alignment, supplemental, soft-clipping
 
 
-    if (P->outSAMmode=="None") return 0; //no SAM/BAM output
+    if (P.outSAMmode=="None") return 0; //no SAM/BAM output
 
     uint32 recSize=0; //record size - total for both mates
     outBAMarrayN[0]=0;
@@ -146,7 +146,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
     uint16 samFLAG=0;
     uint leftMate=0; //the mate (0 or 1) which is on the left
 
-    bool flagPaired = P->readNmates==2;
+    bool flagPaired = P.readNmates==2;
 
     uint nMates=1;
     if (alignType<0) {//mapped reads: SAM
@@ -160,7 +160,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
         nMates=0;
     };
 
-    for (uint imate=0;imate < (alignType<0 ? nMates:P->readNmates);imate++) {
+    for (uint imate=0;imate < (alignType<0 ? nMates:P.readNmates);imate++) {
 
         uint iEx1=0;
         uint iEx2=0;
@@ -176,7 +176,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
         if (alignType>=0) {//this mate is unmapped
             if (mateMapped!=NULL && mateMapped[imate]) continue; //this mate was mapped, do not record it as unmapped
             samFLAG=0x4;
-            if (P->readNmates==2) {//paired read
+            if (P.readNmates==2) {//paired read
                 samFLAG+=0x1 + (imate==0 ? 0x40 : 0x80);
                 if (mateMapped[1-imate]) {//mate mapped
                     if (trOut.Str!=(1-imate))
@@ -184,7 +184,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                        samFLAG+=0x20;
                     };
                     mateChr=trOut.Chr;
-                    trChrStart=P->chrStart[mateChr];
+                    trChrStart=P.chrStart[mateChr];
                     mateStart=trOut.exons[0][EX_G] - trChrStart;
                     mateStrand= trOut.Str == (1-imate) ? 0 : 1;
 
@@ -214,13 +214,13 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
             attrN+=bamAttrArrayWriteInt(trOut.maxScore,"AS",attrOutArray+attrN,P);
             attrN+=bamAttrArrayWriteInt(trOut.nMM,"nM",attrOutArray+attrN,P);
             attrN+=bamAttrArrayWrite((to_string((uint) alignType)).at(0), "uT",attrOutArray+attrN); //cast to uint is only necessary for old compilers
-            if (!P->outSAMattrRG.empty()) attrN+=bamAttrArrayWrite(P->outSAMattrRG.at(readFilesIndex),"RG",attrOutArray+attrN);
+            if (!P.outSAMattrRG.empty()) attrN+=bamAttrArrayWrite(P.outSAMattrRG.at(readFilesIndex),"RG",attrOutArray+attrN);
 
         } else {//this mate is mapped
             if (flagPaired) {//paired reads
                 samFLAG=0x0001;
                 if (iExMate==trOut.nExons-1) {//single mate
-                    if (mateChr>P->nChrReal) samFLAG+=0x0008; //not mapped as pair
+                    if (mateChr>P.nChrReal) samFLAG+=0x0008; //not mapped as pair
                 } else {//properly paired
                     samFLAG+=0x0002; //mapped as pair
                 };
@@ -311,7 +311,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                 packedCIGAR[nCIGAR++]=trimR1<<BAM_CIGAR_OperationShift | (alignType==-12 ? BAM_CIGAR_H : BAM_CIGAR_S);
             };
 
-            MAPQ=P->outSAMmapqUnique;
+            MAPQ=P.outSAMmapqUnique;
             if (nTrOut>=5) {
                 MAPQ=0;
             } else if (nTrOut>=3) {
@@ -331,7 +331,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                         attrN+=bamAttrArrayWriteInt(nTrOut,"NH",attrOutArray+attrN,P);
                         break;
                     case ATTR_HI:
-                        attrN+=bamAttrArrayWriteInt(iTrOut+P->outSAMattrIHstart,"HI",attrOutArray+attrN,P);
+                        attrN+=bamAttrArrayWriteInt(iTrOut+P.outSAMattrIHstart,"HI",attrOutArray+attrN,P);
                         break;
                     case ATTR_AS:
                         attrN+=bamAttrArrayWriteInt(trOut.maxScore,"AS",attrOutArray+attrN,P);
@@ -361,7 +361,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                         attrN+=bamAttrArrayWrite(tagMD,"MD",attrOutArray+attrN);
                         break;
                     case ATTR_RG:
-                        attrN+=bamAttrArrayWrite(P->outSAMattrRG.at(readFilesIndex),"RG",attrOutArray+attrN);                    
+                        attrN+=bamAttrArrayWrite(P.outSAMattrRG.at(readFilesIndex),"RG",attrOutArray+attrN);                    
                         break;                    
                     case ATTR_vL:
                     {
@@ -385,7 +385,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                         ostringstream errOut;
                         errOut <<"EXITING because of FATAL BUG: unknown/unimplemented SAM/BAM atrribute (tag): "<<outSAMattrOrder[ii] <<"\n";
                         errOut <<"SOLUTION: contact Alex Dobin at dobin@cshl.edu\n";
-                        exitWithError(errOut.str(), std::cerr, P->inOut->logMain, EXIT_CODE_PARAMETER, *P);
+                        exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, *P);
                 };
             };
         };
@@ -445,7 +445,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
         };
 
         //4: FLAG<<16|n cigar op; n cigar op is the number of operations in CIGAR.
-        pBAM[4]=( ( ((samFLAG & P->outSAMflagAND) | P->outSAMflagOR) << 16 ) | (nCIGAR) );
+        pBAM[4]=( ( ((samFLAG & P.outSAMflagAND) | P.outSAMflagOR) << 16 ) | (nCIGAR) );
 
         //5: l seq Length of SEQ
         pBAM[5]=seqMateLength;
@@ -453,7 +453,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
         //6: next refID Ref-ID of the next segment (􀀀1  mate refID < n ref)
         if (nMates>1) {
             pBAM[6]=trOut.Chr;
-        } else if (mateChr<P->nChrReal){
+        } else if (mateChr<P.nChrReal){
             pBAM[6]=mateChr;
         } else {
             pBAM[6]=-1;
@@ -462,7 +462,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
         //7: next pos 0-based leftmost pos of the next segment (= PNEXT 􀀀 1)
         if (nMates>1) {
             pBAM[7]=trOut.exons[(imate==0 ? iExMate+1 : 0)][EX_G] - trChrStart;
-        } else if (mateChr<P->nChrReal){
+        } else if (mateChr<P.nChrReal){
             pBAM[7]=mateStart;
         } else {
             pBAM[7]=-1;
@@ -492,7 +492,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
         recSize+=(seqMateLength+1)/2;
 
         //Phred base quality (a sequence of 0xFF if absent)
-        if (readFileType==2 && P->outSAMmode != "NoQS") {//output qualtiy
+        if (readFileType==2 && P.outSAMmode != "NoQS") {//output qualtiy
             for (uint32 ii=0; ii<seqMateLength; ii++) {
                 outBAMarray[imate][recSize+ii]=qualOut[ii]-33;
             };

@@ -4,10 +4,9 @@
 #include "TimeFunctions.h"
 #include "serviceFuns.cpp"
 
-Variation::Variation (Parameters* Pin)
+Variation::Variation (Parameters &Pin) : P(Pin)
 {
-    P=Pin;
-    if (!P->var.yes)
+    if (!P.var.yes)
     {
         yes=false;
         return;
@@ -15,15 +14,15 @@ Variation::Variation (Parameters* Pin)
     
     yes=true;
     
-    varOutFileName=P->outFileNamePrefix+"Variation.out";
+    varOutFileName=P.outFileNamePrefix+"Variation.out";
     varOutStream.open(varOutFileName);
     
-    vcfFile=P->var.vcfFile;
+    vcfFile=P.var.vcfFile;
     loadVCF(vcfFile);
 
 };
 
-void scanVCF(ifstream& vcf, bool load, Parameters* P, SNP& snp)
+void scanVCF(ifstream& vcf, bool load, Parameters& P, SNP& snp)
 {
     snp.N=0;
     uint nlines=0;
@@ -49,10 +48,10 @@ void scanVCF(ifstream& vcf, bool load, Parameters* P, SNP& snp)
             {
                 altV.insert(altV.begin(),ref);//add ref to the beginning
                 
-                if (P->chrNameIndex.count(chr)==0) {//chr not in Genome
+                if (P.chrNameIndex.count(chr)==0) {//chr not in Genome
                     if (!load)
                     {
-                        P->inOut->logMain << "WARNING: while processing varVCFfile file=" << P->var.vcfFile <<": chromosome '"<<chr<<"' not found in Genome fasta file\n";
+                        P.inOut->logMain << "WARNING: while processing varVCFfile file=" << P.var.vcfFile <<": chromosome '"<<chr<<"' not found in Genome fasta file\n";
                     };
                 } else if (sample.size()<3)
                 {
@@ -61,7 +60,7 @@ void scanVCF(ifstream& vcf, bool load, Parameters* P, SNP& snp)
                 {
                     if (!load)
                     {
-                        P->inOut->logMain << "WARNING: while processing varVCFfile file=" << P->var.vcfFile <<": more than 2 alleles per sample for line number "<<nlines<<"\n";
+                        P.inOut->logMain << "WARNING: while processing varVCFfile file=" << P.var.vcfFile <<": more than 2 alleles per sample for line number "<<nlines<<"\n";
                     };
                 } else if (sample.at(0)=='0' && sample.at(2)=='0')
                 {    
@@ -73,7 +72,7 @@ void scanVCF(ifstream& vcf, bool load, Parameters* P, SNP& snp)
                 {
                     if (load)
                     {
-                        snp.loci[snp.N]=pos-1+P->chrStart[P->chrNameIndex[chr]];
+                        snp.loci[snp.N]=pos-1+P.chrStart[P.chrNameIndex[chr]];
                         snp.nt[snp.N][0]=convertNt01234( ref.at(0) );
                         snp.nt[snp.N][1]=convertNt01234( altV.at( atoi(&sample.at(0)) ).at(0) );
                         snp.nt[snp.N][2]=convertNt01234( altV.at( atoi(&sample.at(2)) ).at(0) );
@@ -94,8 +93,8 @@ void Variation::loadVCF(string fileIn)
 {
     time_t rawTime;
     time(&rawTime);
-    P->inOut->logMain     << timeMonthDayTime(rawTime) <<" ..... Loading variations VCF GTF\n" <<flush;
-    *P->inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ..... Loading variations VCF GTF\n" <<flush;
+    P.inOut->logMain     << timeMonthDayTime(rawTime) <<" ..... Loading variations VCF GTF\n" <<flush;
+    *P.inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ..... Loading variations VCF GTF\n" <<flush;
         
     ifstream & vcf = ifstrOpen(fileIn, ERROR_OUT, "SOLUTION: check the path and permissions of the VCF file: "+fileIn, P);
     scanVCF(vcf, false, P, snp);
@@ -113,7 +112,7 @@ void Variation::loadVCF(string fileIn)
     vcf.close();
 
     time(&rawTime);
-    P->inOut->logMain << timeMonthDayTime(rawTime) <<" ..... Loaded VCF data, found "<<snp.N<< " SNPs"<<endl;
+    P.inOut->logMain << timeMonthDayTime(rawTime) <<" ..... Loaded VCF data, found "<<snp.N<< " SNPs"<<endl;
     
     uint *s1=new uint[2*snp.N];
     for (uint ii=0;ii<snp.N; ii++) 
@@ -132,7 +131,7 @@ void Variation::loadVCF(string fileIn)
     };
     //sort SNPs by coordinate
     time(&rawTime);
-    P->inOut->logMain << timeMonthDayTime(rawTime) <<" ..... Finished sorting VCF data"<<endl;
+    P.inOut->logMain << timeMonthDayTime(rawTime) <<" ..... Finished sorting VCF data"<<endl;
 };
 
 void SNP::snpOnBlocks(uint blockStart, uint blockL, int blockShift, vector<vector<array<int,2>>> &snpV)

@@ -16,8 +16,7 @@ class Genome {
         
         uint nGenomeInsert, nGenomePass1, nGenomePass2, nSAinsert, nSApass1, nSApass2; 
 
-        Genome (Parameters* Pin );
-        Genome () {};//empty constructor
+        Genome (Parameters &Pin );
         ~Genome();
 
         void freeMemory();
@@ -27,7 +26,7 @@ class Genome {
 
 
     private:
-    Parameters* P;
+    Parameters &P;
     key_t shmKey;
     char *shmStart;
     char *G1; //pointer -200 of G

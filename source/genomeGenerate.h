@@ -1,4 +1,4 @@
 #include "Parameters.h"
 
-void genomeGenerate(Parameters *P);
+void genomeGenerate(Parameters &P);
 

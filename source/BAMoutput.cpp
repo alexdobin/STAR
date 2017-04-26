@@ -5,18 +5,18 @@
 #include "serviceFuns.cpp"
 #include "ThreadControl.h"
 
-BAMoutput::BAMoutput (int iChunk, string tmpDir, Parameters *Pin) {//allocate bam array
+BAMoutput::BAMoutput (int iChunk, string tmpDir, Parameters &Pin) {//allocate bam array
 
     P=Pin;
 
-    nBins=P->outBAMcoordNbins;
-    binSize=P->chunkOutBAMsizeBytes/nBins;
+    nBins=P.outBAMcoordNbins;
+    binSize=P.chunkOutBAMsizeBytes/nBins;
     bamArraySize=binSize*nBins;
     bamArray = new char [bamArraySize];
 
     bamDir=tmpDir+to_string((uint) iChunk);//local directory for this thread (iChunk)
 
-    mkdir(bamDir.c_str(),P->runDirPerm);
+    mkdir(bamDir.c_str(),P.runDirPerm);
     binStart=new char* [nBins];
     binBytes=new uint64 [nBins];
     binStream=new ofstream* [nBins];
@@ -34,11 +34,11 @@ BAMoutput::BAMoutput (int iChunk, string tmpDir, Parameters *Pin) {//allocate ba
     nBins=1;//start with one bin to estimate genomic bin sizes
 };
 
-BAMoutput::BAMoutput (BGZF *bgzfBAMin, Parameters *Pin) {//allocate BAM array with one bin, streamed directly into bgzf file
+BAMoutput::BAMoutput (BGZF *bgzfBAMin, Parameters &Pin) {//allocate BAM array with one bin, streamed directly into bgzf file
 
     P=Pin;
 
-    bamArraySize=P->chunkOutBAMsizeBytes;
+    bamArraySize=P.chunkOutBAMsizeBytes;
     bamArray = new char [bamArraySize];
     binBytes1=0;
     bgzfBAM=bgzfBAMin;
@@ -90,9 +90,9 @@ void BAMoutput::coordOneAlign (char *bamIn, uint bamSize, uint iRead) {
         bamIn32=(uint32*) bamIn;
         alignG=( ((uint) bamIn32[1]) << 32 ) | ( (uint)bamIn32[2] );
         if (bamIn32[1] == ((uint32) -1) ) {//unmapped
-            iBin=P->outBAMcoordNbins-1;
+            iBin=P.outBAMcoordNbins-1;
         } else if (nBins>1) {//bin starts have already been determined
-            iBin=binarySearch1a <uint64> (alignG, P->outBAMsortingBinStart, (int32) (nBins-1));
+            iBin=binarySearch1a <uint64> (alignG, P.outBAMsortingBinStart, (int32) (nBins-1));
         };
     };
 
@@ -104,7 +104,7 @@ void BAMoutput::coordOneAlign (char *bamIn, uint bamSize, uint iRead) {
 
     //write buffer is filled
     if (binBytes[iBin]+bamSize+sizeof(uint) > ( (iBin>0 || nBins>1) ? binSize : binSize1) ) {//write out this buffer
-        if ( nBins>1 || iBin==(P->outBAMcoordNbins-1) ) {//normal writing, bins have already been determined
+        if ( nBins>1 || iBin==(P.outBAMcoordNbins-1) ) {//normal writing, bins have already been determined
             binStream[iBin]->write(binStart[iBin],binBytes[iBin]);
             binBytes[iBin]=0;//rewind the buffer
         } else {//the first chunk of reads was written in one bin, need to determine bin sizes, and re-distribute reads into bins
@@ -125,11 +125,11 @@ void BAMoutput::coordOneAlign (char *bamIn, uint bamSize, uint iRead) {
 };
 
 void BAMoutput::coordBins() {//define genomic starts for bins
-    nBins=P->outBAMcoordNbins;//this is the true number of bins
+    nBins=P.outBAMcoordNbins;//this is the true number of bins
 
     //mutex here
-    if (P->runThreadN>1) pthread_mutex_lock(&g_threadChunks.mutexBAMsortBins);
-    if (P->outBAMsortingBinStart[0]!=0) {//it's set to 0 only after the bin sizes are determined
+    if (P.runThreadN>1) pthread_mutex_lock(&g_threadChunks.mutexBAMsortBins);
+    if (P.outBAMsortingBinStart[0]!=0) {//it's set to 0 only after the bin sizes are determined
         //extract coordinates and sort
         uint *startPos = new uint [binTotalN[0]];//array of aligns start positions
         for (uint ib=0,ia=0;ia<binTotalN[0];ia++) {
@@ -140,19 +140,19 @@ void BAMoutput::coordBins() {//define genomic starts for bins
         qsort((void*) startPos, binTotalN[0], sizeof(uint), funCompareUint1);
 
         //determine genomic starts of the bins
-        P->inOut->logMain << "BAM sorting: "<<binTotalN[0]<< " mapped reads\n";
-        P->inOut->logMain << "BAM sorting bins genomic start loci:\n";
+        P.inOut->logMain << "BAM sorting: "<<binTotalN[0]<< " mapped reads\n";
+        P.inOut->logMain << "BAM sorting bins genomic start loci:\n";
 
-        P->outBAMsortingBinStart[0]=0;
+        P.outBAMsortingBinStart[0]=0;
         for (uint32 ib=1; ib<(nBins-1); ib++) {
-            P->outBAMsortingBinStart[ib]=startPos[binTotalN[0]/(nBins-1)*ib];
-            P->inOut->logMain << ib <<"\t"<< (P->outBAMsortingBinStart[ib]>>32) << "\t" << ((P->outBAMsortingBinStart[ib]<<32)>>32) <<endl;
+            P.outBAMsortingBinStart[ib]=startPos[binTotalN[0]/(nBins-1)*ib];
+            P.inOut->logMain << ib <<"\t"<< (P.outBAMsortingBinStart[ib]>>32) << "\t" << ((P.outBAMsortingBinStart[ib]<<32)>>32) <<endl;
             //how to deal with equal boundaries???
         };
         delete [] startPos;
     };
     //mutex here
-    if (P->runThreadN>1) pthread_mutex_unlock(&g_threadChunks.mutexBAMsortBins);
+    if (P.runThreadN>1) pthread_mutex_unlock(&g_threadChunks.mutexBAMsortBins);
 
     //re-allocate binStart
     uint binTotalNold=binTotalN[0];
@@ -186,7 +186,7 @@ void BAMoutput::coordFlush () {//flush all alignments
 };
 
 void BAMoutput::coordUnmappedPrepareBySJout () {//flush all alignments
-    uint iBin=P->outBAMcoordNbins-1;
+    uint iBin=P.outBAMcoordNbins-1;
     binStream[iBin]->write(binStart[iBin],binBytes[iBin]);
     binStream[iBin]->flush();
     binBytes[iBin]=0;//rewind the buffer

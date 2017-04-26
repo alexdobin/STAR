@@ -8,12 +8,12 @@
 class BAMoutput {//
 public:
     //sorted output
-    BAMoutput (int iChunk, string tmpDir, Parameters *Pin);
+    BAMoutput (int iChunk, string tmpDir, Parameters &Pin);
     void coordOneAlign (char *bamIn, uint bamSize, uint iRead);
     void coordBins ();
     void coordFlush ();
     //unsorted output
-    BAMoutput (BGZF *bgzfBAMin, Parameters *Pin);
+    BAMoutput (BGZF *bgzfBAMin, Parameters &Pin);
     void unsortedOneAlign (char *bamIn, uint bamSize, uint bamSize2);
     void unsortedFlush ();
     void coordUnmappedPrepareBySJout();
@@ -30,7 +30,7 @@ private:
     uint64 *binBytes, binBytes1;//number of bytes currently written to each bin
     ofstream **binStream;//output streams for each bin
     BGZF *bgzfBAM;
-    Parameters *P;
+    Parameters &P;
     string bamDir;
 };
 
