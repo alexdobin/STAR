@@ -9,7 +9,7 @@ void mapThreadsSpawn (Parameters &P, ReadAlignChunk** RAchunk) {
         if (threadStatus>0) {//something went wrong with one of threads
                 ostringstream errOut;
                 errOut << "EXITING because of FATAL ERROR: phtread error while creating thread # " << ithread <<", error code: "<<threadStatus ;
-                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, 1, *P);
+                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, 1, P);
         };
         pthread_mutex_lock(&g_threadChunks.mutexLogMain);
         P.inOut->logMain << "Created thread # " <<ithread <<"\n"<<flush;
@@ -23,7 +23,7 @@ void mapThreadsSpawn (Parameters &P, ReadAlignChunk** RAchunk) {
         if (threadStatus>0) {//something went wrong with one of threads
                 ostringstream errOut;
                 errOut << "EXITING because of FATAL ERROR: phtread error while joining thread # " << ithread <<", error code: "<<threadStatus ;
-                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, 1, *P);
+                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, 1, P);
         };
         pthread_mutex_lock(&g_threadChunks.mutexLogMain);
         P.inOut->logMain << "Joined thread # " <<ithread <<"\n"<<flush;

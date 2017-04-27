@@ -86,7 +86,7 @@ void genomeSAindex(char * G, PackedArray & SA, Parameters & P, PackedArray & SAi
             } else if ( indPref < ind0[iL] ) {
                 ostringstream errOut;
                 errOut << "BUG: next index is smaller than previous, EXITING\n" <<flush;
-                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
             };
         };
     };//for (uint isa=0; isa<P.nSA; isa++)
@@ -169,7 +169,7 @@ void genomeSAindexChunk(char * G, PackedArray & SA, Parameters & P, PackedArray 
                     } else if ( indPref1 < ind0a[iL] ) {
                         ostringstream errOut;
                         errOut << "BUG: next index is smaller than previous, EXITING\n" <<flush;
-                        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+                        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
                     };
                 };
             };
@@ -207,7 +207,7 @@ void genomeSAindexChunk(char * G, PackedArray & SA, Parameters & P, PackedArray 
             } else if ( indPref < ind0[iL] ) {
                 ostringstream errOut;
                 errOut << "BUG: next index is smaller than previous, EXITING\n" <<flush;
-                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
             };
 
 

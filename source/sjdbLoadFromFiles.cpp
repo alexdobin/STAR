@@ -10,7 +10,7 @@ void sjdbLoadFromFiles(Parameters &P, SjdbClass &sjdbLoci) {
             if (sjdbStreamIn.fail()) {
                 ostringstream errOut;
                 errOut << "FATAL INPUT error, could not open input file sjdbFileChrStartEnd=" << P.sjdbFileChrStartEnd.at(ifile) <<"\n";
-                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
             };
 
             sjdbLoadFromStream(sjdbStreamIn, sjdbLoci);

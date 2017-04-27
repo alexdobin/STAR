@@ -121,7 +121,7 @@ void genomeGenerate(Parameters &P) {
         errOut << "EXITING because of FATAL INPUT PARAMETER ERROR: for generating genome with annotations (--sjdbFileChrStartEnd or --sjdbGTFfile options)\n";
         errOut << "you need to specify >0 --sjdbOverhang\n";
         errOut << "SOLUTION: re-run genome generation specifying non-zero --sjdbOverhang, which ideally should be equal to OneMateLength-1, or could be chosen generically as ~100\n";
-        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
     }
     if (P.sjdbFileChrStartEnd.at(0)=="-" && P.sjdbGTFfile=="-")
     {
@@ -131,7 +131,7 @@ void genomeGenerate(Parameters &P) {
             errOut << "EXITING because of FATAL INPUT PARAMETER ERROR: when generating genome without annotations (--sjdbFileChrStartEnd or --sjdbGTFfile options)\n";
             errOut << "do not specify >0 --sjdbOverhang\n";
             errOut << "SOLUTION: re-run genome generation without --sjdbOverhang option\n";
-            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         };
         P.sjdbOverhang=0;
     };
@@ -182,7 +182,7 @@ void genomeGenerate(Parameters &P) {
         ostringstream errOut;
         errOut <<"EXITING because of FATAL PARAMETER ERROR: limitGenomeGenerateRAM="<< (P.limitGenomeGenerateRAM) <<"is too small for your genome\n";
         errOut <<"SOLUTION: please specify --limitGenomeGenerateRAM not less than "<< nG1alloc+nG1alloc/3 <<" and make that much RAM available \n";
-        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
     };
 
     //preparing to generate SA
@@ -347,7 +347,7 @@ void genomeGenerate(Parameters &P) {
             errOut << "EXITING because of FATAL problem while generating the suffix array\n";
             errOut << "The number of indices read from chunks = "<<packedInd<<" is not equal to expected nSA="<<P.nSA<<"\n";
             errOut << "SOLUTION: try to re-run suffix array generation, if it still does not work, report this problem to the author\n"<<flush;
-            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         };
 
         //DONE with suffix array generation
@@ -408,8 +408,8 @@ void genomeGenerate(Parameters &P) {
         P.sjdbN=0;//no junctions are loaded yet
         P.twoPass.pass2=false;
 
-        Parameters &P1=new Parameters;
-        *P1=*P;
+        Parameters P1;
+        P1=P;
 
         sjdbInsertJunctions(P, P1, mainGenome, sjdbLoci);
 

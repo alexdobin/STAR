@@ -116,7 +116,7 @@ void sjdbBuildIndex (Parameters &P, Parameters &P1, char *Gsj, char *G, PackedAr
         ostringstream errOut;
         errOut << "EXITING because of FATAL ERROR: cannot insert junctions on the fly because of strand GstrandBit problem\n";
         errOut << "SOLUTION: please contact STAR author at https://groups.google.com/forum/#!forum/rna-star\n";
-        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_GENOME_FILES, *P);
+        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_GENOME_FILES, P);
     };
 
     SA2.defineBits(P.GstrandBit+1,P.nSA);

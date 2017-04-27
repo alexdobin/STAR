@@ -44,7 +44,7 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters &P, string dirOut) {//load gtf file
         if (sjdbStreamIn.fail()) {
             ostringstream errOut;
             errOut << "FATAL error, could not open file sjdbGTFfile=" << P.sjdbGTFfile <<"\n";
-            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         };
 
         if (P.chrNameIndex.size()==0)
@@ -73,7 +73,7 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters &P, string dirOut) {//load gtf file
             errOut << "Solution: check the formatting of the GTF file, it must contain some lines with ""exon"" in the 3rd column.\n";
             errOut << "          Make sure the GTF file is unzipped.\n";
             errOut << "          If exons are marked with a different word, use --sjdbGTFfeatureExon .\n";
-            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         };
 
         uint* exonLoci=new uint [exonN*GTF_exonLoci_size];
@@ -161,7 +161,7 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters &P, string dirOut) {//load gtf file
             ostringstream errOut;
             errOut << "Fatal INPUT FILE error, no valid ""exon"" lines in the GTF file: " << P.sjdbGTFfile <<"\n";
             errOut << "Solution: check the formatting of the GTF file. Most likely cause is the difference in chromosome naming between GTF and FASTA file.\n";
-            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         };
         //sort exonLoci by transcript ID and exon coordinates
         qsort((void*) exonLoci, exonN, sizeof(uint)*GTF_exonLoci_size, funCompareUint2);

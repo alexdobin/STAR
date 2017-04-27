@@ -33,18 +33,16 @@ class OutSJ {
 public:
     //all junctions
     char* data; //sj array[Njunctions][dataSize]
-
     uint N; //number of junctions stored
-
     Junction oneSJ;
 
-    Parameters &P;
-
-    OutSJ(uint nSJmax, Parameters &P);
-
+    OutSJ(uint nSJmax, Parameters &Pin);
     void collapseSJ();//collapse the junctions in data
 //     int compareSJ(void* i1, void* i2);
 
+private:
+    Parameters &P;                
+    
 };
 
 int compareSJ(const void* i1, const void* i2); //external functions

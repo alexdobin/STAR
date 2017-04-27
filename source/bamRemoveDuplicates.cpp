@@ -145,7 +145,7 @@ void bamRemoveDuplicates(const string bamFileName, const string bamFileNameOut, 
                     ostringstream errOut;
                     errOut <<"EXITING because of fatal ERROR: not enough memory for marking duplicates \n";
                     errOut <<"SOLUTION: re-run STAR with at least --limitBAMsortRAM " <<bamLengthMax*2;
-                    exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, *P);
+                    exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
                 };
 
                 //write out processed block

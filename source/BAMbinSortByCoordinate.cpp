@@ -30,7 +30,7 @@ void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, st
         ostringstream errOut;
         errOut << "EXITING because of FATAL ERROR: number of bytes expected from the BAM bin does not agree with the actual size on disk: ";
         errOut << binS <<"   "<< bamInBytes <<"   "<< iBin <<"\n";
-        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, 1, *P);
+        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, 1, P);
     };
 
     //extract coordinates

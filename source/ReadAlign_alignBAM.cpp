@@ -100,7 +100,7 @@ int bamAttrArrayWriteInt(intType xIn, const char* tagName, char* attrArray, Para
                 ostringstream errOut;
                 errOut <<"EXITING because of FATAL BUG: integer out of range for BAM conversion: "<< x <<"\n";
                 errOut <<"SOLUTION: contact Alex Dobin at dobin@cshl.edu\n";
-                exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_BUG, *P);
+                exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_BUG, P);
             };
         };
     } else {
@@ -114,7 +114,7 @@ int bamAttrArrayWriteInt(intType xIn, const char* tagName, char* attrArray, Para
                 ostringstream errOut;
                 errOut <<"EXITING because of FATAL BUG: integer out of range for BAM conversion: "<< x <<"\n";
                 errOut <<"SOLUTION: contact Alex Dobin at dobin@cshl.edu\n";
-                exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_BUG, *P);
+                exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_BUG, P);
             };
         };
     };
@@ -385,7 +385,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                         ostringstream errOut;
                         errOut <<"EXITING because of FATAL BUG: unknown/unimplemented SAM/BAM atrribute (tag): "<<outSAMattrOrder[ii] <<"\n";
                         errOut <<"SOLUTION: contact Alex Dobin at dobin@cshl.edu\n";
-                        exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, *P);
+                        exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
                 };
             };
         };

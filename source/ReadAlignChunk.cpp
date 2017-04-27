@@ -100,7 +100,7 @@ void ReadAlignChunk::chunkFstreamOpen(string filePrefix, int iChunk, fstream &fs
         ostringstream errOut;
         errOut << "EXITING because of FATAL ERROR: could not create output file "<< fName1 << "\n";
         errOut << "Solution: check that you have permission to write this file\n";
-        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
     };
     P.inOut->logMain << "ok" <<endl;
 };

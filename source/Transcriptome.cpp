@@ -2,9 +2,8 @@
 #include "streamFuns.h"
 #include "GlobalVariables.h"
 
-Transcriptome::Transcriptome (Parameters& Pin) {
+Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
 
-    P=Pin;
     trInfoDir = P.sjdbGTFfile=="-" ? P.genomeDir : P.sjdbInsert.outDir; //if GTF file is given at the mapping stage, it's always used for transcript info
 
     if ( P.quant.trSAM.yes ) {//load exon-transcript structures
@@ -43,8 +42,6 @@ Transcriptome::Transcriptome (Parameters& Pin) {
         exinfo.close();
 
         //
-        Ptr=Pin;
-
     };
 
     if ( P.quant.geCount.yes ) {//load exon-gene structures

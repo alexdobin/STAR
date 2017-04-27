@@ -37,7 +37,7 @@ void ReadAlignChunk::mapChunk() {//map one chunk. Input reads stream has to be s
                 ostringstream errOut;
                 errOut <<"EXITING because of fatal error: buffer size for SAM/BAM output is too small\n";
                 errOut <<"Solution: increase input parameter --limitOutSAMoneReadBytes\n";
-                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
             } else if ( chunkOutBAMtotal + P.limitOutSAMoneReadBytes > P.chunkOutBAMsizeBytes || (readStatus==-1 && noReadsLeft) ) {//write buffer to disk because it's almost full, or all reads are mapped
                 if ( P.outSAMorder == "PairedKeepInputOrder" && P.runThreadN>1 ) {//output chunks into separate files
                     chunkOutBAMfile.write(chunkOutBAM,chunkOutBAMtotal);
@@ -59,14 +59,14 @@ void ReadAlignChunk::mapChunk() {//map one chunk. Input reads stream has to be s
             ostringstream errOut;
             errOut <<"EXITING because of fatal error: buffer size for SJ output is too small\n";
             errOut <<"Solution: increase input parameter --limitOutSJoneRead\n";
-            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         } else if ( chunkOutSJ->N + P.limitOutSJoneRead > P.limitOutSJcollapsed || (readStatus==-1 && noReadsLeft) ) {//write buffer to disk because it's almost full, or all reads are mapped
             chunkOutSJ->collapseSJ();
             if ( chunkOutSJ->N + 2*P.limitOutSJoneRead > P.limitOutSJcollapsed ) {
                 ostringstream errOut;
                 errOut <<"EXITING because of fatal error: buffer size for SJ output is too small\n";
                 errOut <<"Solution: increase input parameter --limitOutSJcollapsed\n";
-                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
             };
         };
 
@@ -75,14 +75,14 @@ void ReadAlignChunk::mapChunk() {//map one chunk. Input reads stream has to be s
             ostringstream errOut;
             errOut <<"EXITING because of fatal error: buffer size for SJ output is too small\n";
             errOut <<"Solution: increase input parameter --limitOutSJoneRead\n";
-            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         } else if ( chunkOutSJ1->N + P.limitOutSJoneRead > P.limitOutSJcollapsed || (readStatus==-1 && noReadsLeft) ) {//write buffer to disk because it's almost full, or all reads are mapped
             chunkOutSJ1->collapseSJ();
             if ( chunkOutSJ1->N + 2*P.limitOutSJoneRead > P.limitOutSJcollapsed ) {
                 ostringstream errOut;
                 errOut <<"EXITING because of fatal error: buffer size for SJ output is too small\n";
                 errOut <<"Solution: increase input parameter --limitOutSJcollapsed\n";
-                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
             };
         };
 

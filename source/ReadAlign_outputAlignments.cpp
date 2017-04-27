@@ -119,7 +119,7 @@ void ReadAlign::outputAlignments() {
             } else {//cannot be
                 ostringstream errOut;
                 errOut  << "EXITING because of a BUG: nTr=0 in outputAlignments.cpp";
-                exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_BUG, *P);
+                exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_BUG, P);
             };
 
             nTrOut=min(P.outSAMmultNmax,nTrOut); //number of to write to SAM/BAM files

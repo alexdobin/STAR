@@ -17,7 +17,7 @@ int readLoad(istream& readInStream, Parameters& P, uint iMate, uint& Lread, uint
         errOut << "Read Name="<<readName<<"\n";
         errOut << "DEF_readNameLengthMax="<<DEF_readNameLengthMax<<"\n";
         errOut << "SOLUTION: increase DEF_readNameLengthMax in IncludeDefine.h and re-compile STAR\n";
-        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
     };
 
     readInStream >> iReadAll >> readFilter >> readFilesIndex; //extract read number
@@ -33,7 +33,7 @@ int readLoad(istream& readInStream, Parameters& P, uint iMate, uint& Lread, uint
         errOut << "Read Sequence="<<Seq<<"===\n";
         errOut << "DEF_readNameLengthMax="<<DEF_readNameLengthMax<<"\n";
         errOut << "DEF_readSeqLengthMax="<<DEF_readSeqLengthMax<<"\n";
-        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
     };
     --Lread;//do not count /n in the read length
     LreadOriginal=Lread;
@@ -43,7 +43,7 @@ int readLoad(istream& readInStream, Parameters& P, uint iMate, uint& Lread, uint
         errOut << "EXITING because of FATAL ERROR in reads input: Lread>=" << Lread << "   while DEF_readSeqLengthMax=" << DEF_readSeqLengthMax <<"\n";
         errOut << "Read Name="<<readName<<"\n";
         errOut << "SOLUTION: increase DEF_readSeqLengthMax in IncludeDefine.h and re-compile STAR\n";
-        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
     };
 
 //     //was trying to read multi-line
@@ -59,7 +59,7 @@ int readLoad(istream& readInStream, Parameters& P, uint iMate, uint& Lread, uint
 //         errOut << "EXITING because of FATAL ERROR in reads input: Lread>=" << Lread << "   while DEF_readSeqLengthMax=" << DEF_readSeqLengthMax <<"\n";
 //         errOut << "Read Name="<<readName<<"\n";
 //         errOut << "SOLUTION: increase DEF_readSeqLengthMax in IncludeDefine.h and re-compile STAR\n";
-//         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+//         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
 //     };
 //     LreadOriginal=Lread;
 
@@ -99,7 +99,7 @@ int readLoad(istream& readInStream, Parameters& P, uint iMate, uint& Lread, uint
             errOut << Seq <<"\n";
             errOut << Qual <<"\n";
             errOut << "SOLUTION: fix your fastq file\n";
-            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         };
         if (P.outQSconversionAdd!=0) {
             for (uint ii=0;ii<LreadOriginal;ii++) {
@@ -120,7 +120,7 @@ int readLoad(istream& readInStream, Parameters& P, uint iMate, uint& Lread, uint
     } else {//header
         ostringstream errOut;
         errOut <<"Unknown reads file format: header line does not start with @ or > : "<< readName<<"\n";
-        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
     };
 
     for (uint ii=0;ii<Lread;ii++) {//for now: qualities are all 1

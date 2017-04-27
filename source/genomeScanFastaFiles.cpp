@@ -19,14 +19,14 @@ uint genomeScanFastaFiles (Parameters &P, char* G, bool flagRun) {//scans fasta 
         {//
             ostringstream errOut;
             errOut << "EXITING because of INPUT ERROR: could not open genomeFastaFile: " <<P.genomeFastaFiles.at(ii) <<"\n";
-            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         };
         char cc=fileIn.peek();
         if ( !fileIn.good() )
         {//
             ostringstream errOut;
             errOut << "EXITING because of INPUT ERROR: could not read from genomeFastaFile: " <<P.genomeFastaFiles.at(ii) <<"\n";
-            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         };
         if (cc!='>')
         {
@@ -34,7 +34,7 @@ uint genomeScanFastaFiles (Parameters &P, char* G, bool flagRun) {//scans fasta 
             errOut << "EXITING because of INPUT ERROR: the file format of the genomeFastaFile: " <<P.genomeFastaFiles.at(ii) << " is not fasta:";
             errOut << " the first character is '" <<cc<<"' ("<< (cc+0) << "), not '>'.\n";
             errOut << " Solution: check formatting of the fasta file. Make sure the file is uncompressed (unzipped).\n";
-            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         };         while(!fileIn.eof()) {//read each file until eof
             string lineIn (4096,'.');
             getline(fileIn,lineIn);

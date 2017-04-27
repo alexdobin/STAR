@@ -74,7 +74,7 @@ void outputSJ(ReadAlignChunk** RAchunk, Parameters& P) {//collapses junctions fr
                 ostringstream errOut;
                 errOut <<"EXITING because of fatal error: buffer size for SJ output is too small\n";
                 errOut <<"Solution: increase input parameter --limitOutSJcollapsed\n";
-                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
             };
         };
 

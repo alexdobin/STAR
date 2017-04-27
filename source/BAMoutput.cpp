@@ -5,9 +5,7 @@
 #include "serviceFuns.cpp"
 #include "ThreadControl.h"
 
-BAMoutput::BAMoutput (int iChunk, string tmpDir, Parameters &Pin) {//allocate bam array
-
-    P=Pin;
+BAMoutput::BAMoutput (int iChunk, string tmpDir, Parameters &Pin) : P(Pin){//allocate bam array
 
     nBins=P.outBAMcoordNbins;
     binSize=P.chunkOutBAMsizeBytes/nBins;
@@ -34,9 +32,7 @@ BAMoutput::BAMoutput (int iChunk, string tmpDir, Parameters &Pin) {//allocate ba
     nBins=1;//start with one bin to estimate genomic bin sizes
 };
 
-BAMoutput::BAMoutput (BGZF *bgzfBAMin, Parameters &Pin) {//allocate BAM array with one bin, streamed directly into bgzf file
-
-    P=Pin;
+BAMoutput::BAMoutput (BGZF *bgzfBAMin, Parameters &Pin) : P(Pin){//allocate BAM array with one bin, streamed directly into bgzf file
 
     bamArraySize=P.chunkOutBAMsizeBytes;
     bamArray = new char [bamArraySize];

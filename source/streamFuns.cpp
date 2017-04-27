@@ -53,7 +53,7 @@ void fstreamWriteBig(std::ofstream &S, char* A, unsigned long long N, std::strin
         errOut << "File size on disk = " << statBuf.st_size<<" bytes\n";
         errOut << "Solution: check that you have enough space on the disk\n";
         errOut << "Empty space on disk = " << statvfsBuf.f_bavail * statvfsBuf.f_bsize <<" bytes\n";
-        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_FILE_WRITE, *P);
+        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_FILE_WRITE, P);
     };
     P.inOut->logMain << " done\n" <<flush;
 };
@@ -66,7 +66,7 @@ std::ofstream & ofstrOpen (std::string fileName, std::string errorID, Parameters
         ostringstream errOut;
         errOut << errorID<<": exiting because of *OUTPUT FILE* error: could not create output file "<< fileName <<"\n";
         errOut << "Solution: check that the path exists and you have write permission for this file\n";
-        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_FILE_OPEN, *P);
+        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_FILE_OPEN, P);
     };
     return ofStream;
 };
@@ -82,7 +82,7 @@ std::ifstream & ifstrOpen (std::string fileName, std::string errorID, std::strin
         if (solutionString.size()>0) {
             errOut << "          "<< solutionString <<"\n";
         };
-        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_FILE_OPEN, *P);
+        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_FILE_OPEN, P);
     };
     return ifStream;
 };

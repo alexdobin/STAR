@@ -312,7 +312,7 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
                     ostringstream errOut;
                     errOut <<"EXITING because of FATAL BUG: unknown/unimplemented SAM atrribute (tag): "<<P.outSAMattrOrder[ii] <<"\n";
                     errOut <<"SOLUTION: contact Alex Dobin at dobin@cshl.edu\n";
-                    exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, *P);
+                    exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
             };
         };
 

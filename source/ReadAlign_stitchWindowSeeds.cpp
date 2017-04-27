@@ -249,7 +249,7 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R, c
             ostringstream errOut;
             errOut << "EXITING because of FATAL INPUT error: unrecognized value of --outFilterIntronMotifs=" <<P.outFilterIntronMotifs <<"\n";
             errOut << "SOLUTION: re-run STAR with --outFilterIntronMotifs = None -OR- RemoveNoncanonical -OR- RemoveNoncanonicalUnannotated\n";
-            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         };
 
 //         if (P.outFilterIntronMotifs=="KeepCanonical" && (trA.intronMotifs[0]>0 || (trA.intronMotifs[1]>0 && trA.intronMotifs[2]>0) ) ) {//keep only conistent canonical introns

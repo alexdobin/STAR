@@ -67,7 +67,7 @@ uint ReadAlign::maxMappableLength2strands(uint pieceStartIn, uint pieceLengthIn,
             if ((iSA1 & P.SAiMarkNmaskC)!=0) {
                 ostringstream errOut;
                 errOut  << "BUG: in ReadAlign::maxMappableLength2strands";
-                exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_BUG, *P);
+                exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_BUG, P);
             };
             indStartEnd[0]=indStartEnd[1]=iSA1;
             Nrep=1;

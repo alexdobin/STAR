@@ -16,7 +16,7 @@ int ReadAlign::oneRead() {//process one read: load, map, write
             ostringstream errOut;
             errOut << "EXITING because of FATAL ERROR: Read1 and Read2 are not consistent, reached the end of the one before the other one\n";
             errOut << "SOLUTION: Check you your input files: they may be corrupted\n";
-            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         } else if (readStatus[0]==-1) {//finished with the stream
             return -1;
         };
@@ -29,7 +29,7 @@ int ReadAlign::oneRead() {//process one read: load, map, write
             errOut << "EXITING because of FATAL ERROR in reads input: Lread of the pair = " << Lread << "   while DEF_readSeqLengthMax=" << DEF_readSeqLengthMax <<endl;
             errOut << "Read Name="<<readNameMates[0]<<endl;
             errOut << "SOLUTION: increase DEF_readSeqLengthMax in IncludeDefine.h and re-compile STAR"<<endl<<flush;
-            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         };
 
         Read1[0][readLength[0]]=MARK_FRAG_SPACER_BASE; //marker for spacer base

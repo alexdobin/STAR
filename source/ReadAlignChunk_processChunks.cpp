@@ -114,7 +114,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                     } else {//error
                         ostringstream errOut;
                         errOut << ERROR_OUT <<" EXITING because of FATAL ERROR in input reads: unknown file format: the read ID should start with @ or > \n";
-                        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+                        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
                     };
                 };
             };

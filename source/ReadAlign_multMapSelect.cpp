@@ -15,7 +15,7 @@ void ReadAlign::multMapSelect() {//select multiple mappers from all transcripts 
     if (maxScore!=trBest->maxScore) {
         ostringstream errOut;
         errOut  << "BUG: maxScore!=trBest->maxScore in multMapSelect";
-        exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_BUG, *P);
+        exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_BUG, P);
     };
 
     nTr=0;
@@ -26,7 +26,7 @@ void ReadAlign::multMapSelect() {//select multiple mappers from all transcripts 
                 if (nTr==MAX_N_MULTMAP) {//too many alignments for this read, do not record it
                     ostringstream errOut;
                     errOut  << "EXITING: Fatal ERROR: number of alignments exceeds MAX_N_MULTMAP, increase it and re-compile STAR";
-                    exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, *P);
+                    exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
                 };
 
                 trMult[nTr]=trAll[iW][iTr];

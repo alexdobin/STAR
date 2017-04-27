@@ -28,7 +28,7 @@ void sjdbInsertJunctions(Parameters & P, Parameters & P1, Genome & genome, SjdbC
         if (sjdbStreamIn.fail()) {
             ostringstream errOut;
             errOut << "FATAL INPUT error, could not open input file with junctions from the 1st pass=" << P.twoPass.pass1sjFile <<"\n";
-            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         };
         sjdbLoadFromStream(sjdbStreamIn, sjdbLoci);
         sjdbLoci.priority.resize(sjdbLoci.chr.size(),0);
@@ -65,7 +65,7 @@ void sjdbInsertJunctions(Parameters & P, Parameters & P1, Genome & genome, SjdbC
         ostringstream errOut;
         errOut << "Fatal LIMIT error: the number of junctions to be inserted on the fly ="<<P.sjdbN<<" is larger than the limitSjdbInsertNsj="<<P.limitSjdbInsertNsj<<"\n";                errOut << "Fatal LIMIT error: the number of junctions to be inserted on the fly ="<<P.sjdbN<<" is larger than the limitSjdbInsertNsj="<<P.limitSjdbInsertNsj<<"\n";
         errOut << "SOLUTION: re-run with at least --limitSjdbInsertNsj "<<P.sjdbN<<"\n";
-        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, *P);
+        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
     };
     //insert junctions into the genome and SA and SAi
     sjdbBuildIndex (P, P1, Gsj, genome.G, genome.SA, (P.twoPass.pass2 ? genome.SApass2 : genome.SApass1), genome.SAi);
