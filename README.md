@@ -1,5 +1,3 @@
-Fixed a problem that can arise for very small genomes while using --alignIntronMax 1.
-
 STAR 2.5
 ========
 Spliced Transcripts Alignment to a Reference
@@ -60,18 +58,6 @@ Mac OS X
 --------
 
 ```bash
-# Get latest STAR source from releases
-wget https://github.com/alexdobin/STAR/archive/2.5.2b.tar.gz
-tar -xzf 2.5.2b.tar.gz
-cd STAR-2.5.2b
-
-# Alternatively, get STAR source using git
-git clone https://github.com/alexdobin/STAR.git
-cd STAR
-
-# To include STAR-Fusion
-git submodule update --init --recursive
-
 # Build STAR
 cd source
 make STARforMacStatic

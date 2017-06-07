@@ -186,7 +186,7 @@ class Parameters {
         uint outFilterMatchNmin,outFilterMultimapNmax;//min number of matches
         double outFilterScoreMinOverLread, outFilterMatchNminOverLread;//normalzied to read length
         intScore outFilterScoreMin,outFilterMultimapScoreRange;//min score to output
-        string outFilterIntronMotifs;
+        string outFilterIntronMotifs,outFilterIntronStrands;
         string outFilterType; //type of filtering
         int outFilterBySJoutStage; //indicates the stage of filtering by SJout
 

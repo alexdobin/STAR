@@ -1,3 +1,6 @@
+* Implemented --outFilterIntronStrands None option to switch off filtering by strand consistency of junctions.
+* Added new scripts extras/scripts/mergeLogFinal.awk,mergeSuperContig.awk,sjMotif.m
+
 STAR 2.5.3a 2017/03/17
 ======================
 
