@@ -398,6 +398,11 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 
 
     ///////////////////////////////////////// Old variables
+    outputBED[0]=0; outputBED[1]=0; //controls the format of starBED output. Will be replaced with HDF5 output
+
+    //annot scoring
+    annotScoreScale=0;
+    annotSignalFile="-";
 
     //splitting
     Qsplit=0;

@@ -175,7 +175,7 @@ void Genome::genomeLoad(){//allocate and load Genome
     };
     P.nGenome = OpenStream("Genome",GenomeIn,P.genomeFileSizes.at(0));
     P.nSAbyte = OpenStream("SA",SAin,P.genomeFileSizes.at(1));
-    OpenStream("SAindex",SAiIn,1); //we do not need SAiIn siz, using a dummy value here to prevent from reading its size from the disk
+    OpenStream("/SAindex",SAiIn,1); //we do not need SAiIn siz, using a dummy value here to prevent from reading its size from the disk
 
     uint SAiInBytes=0;
     SAiInBytes += fstreamReadBig(SAiIn,(char*) &P.genomeSAindexNbases, sizeof(P.genomeSAindexNbases));
@@ -208,6 +208,8 @@ void Genome::genomeLoad(){//allocate and load Genome
 
     shmSize=SA.lengthByte + P.nGenome+L+L+SHM_startG+8;
     shmSize+= SAi.lengthByte;
+    if (P.annotScoreScale>0) shmSize+=P.nGenome;
+
 
     if ((P.genomeLoad=="LoadAndKeep" ||
          P.genomeLoad=="LoadAndRemove" ||
@@ -295,6 +297,9 @@ void Genome::genomeLoad(){//allocate and load Genome
 //         errOut << "SOLUTION: check shared memory settigns as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;
 //         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_SHM, P);
 //     };
+     if (P.annotScoreScale>0) {//optional allocation
+            shmNext += P.nGenome;
+        }
     }
     else if (P.genomeLoad=="NoSharedMemory") // simply allocate memory, do not use shared memory
     {
