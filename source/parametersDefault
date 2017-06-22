@@ -456,6 +456,9 @@ seedPerWindowNmax     50
 seedNoneLociPerWindow    10
     int>0: max number of one seed loci per window
 
+seedSplitMin                12
+    int>0: min length of the seed sequences split by Ns or mate gap
+
 alignIntronMin              21
     minimum intron size: genomic gap is considered intron if its length>=alignIntronMin, otherwise it is considered Deletion
 
