@@ -114,6 +114,7 @@ class Parameters {
         uint seedNoneLociPerWindow; //max number of aligns from one piece per window
         uint seedSearchStartLmax;
         double seedSearchStartLmaxOverLread; //length of split start points
+        uint seedSplitMin;
 
         //chunk parameters
         uint chunkInSizeBytes,chunkInSizeBytesArray,chunkOutBAMsizeBytes;

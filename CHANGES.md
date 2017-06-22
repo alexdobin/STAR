@@ -1,3 +1,6 @@
+* Implemented --seedSplitMin option which was previously hardcoded at 12. his will allow mapping of mates shorter than 12nt.
+* Fixed a bug in liftOver command that output an extra field in the GTF file. 
+* Fixed a problem that can arise for very small genomes while using --alignIntronMax 1.
 * Implemented --outFilterIntronStrands None option to switch off filtering by strand consistency of junctions.
 * Added new scripts extras/scripts/mergeLogFinal.awk,mergeSuperContig.awk,sjMotif.m
 
