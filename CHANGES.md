@@ -1,3 +1,4 @@
+* Fixed a bug which set non-primary bit 0x100 in the SAM FLAG for unmapped mates.
 * Implemented --seedSplitMin option which was previously hardcoded at 12. his will allow mapping of mates shorter than 12nt.
 * Fixed a bug in liftOver command that output an extra field in the GTF file. 
 * Fixed a problem that can arise for very small genomes while using --alignIntronMax 1.

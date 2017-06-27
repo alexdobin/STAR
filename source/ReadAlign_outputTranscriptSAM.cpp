@@ -17,24 +17,24 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
                 uint16 samFLAG=0x4;
                 if (P->readNmates==2)
                 {//paired read
-                    samFLAG+=0x1 + (imate==0 ? 0x40 : 0x80);
+                    samFLAG|=0x1 + (imate==0 ? 0x40 : 0x80);
                     if (mateMapped[1-imate])
                     {//mate mapped
                         if ( trOut.Str != (1-imate) )
                         {
-                            samFLAG+=0x20;//mate strand reverted
+                            samFLAG|=0x20;//mate strand reverted
                         };
                     } else
                     {//mate unmapped
-                        samFLAG+=0x8;
+                        samFLAG|=0x8;
                     };
                 };
 
-                if (readFilter=='Y') samFLAG+=0x200; //not passing quality control
+                if (readFilter=='Y') samFLAG|=0x200; //not passing quality control
 
-                if (mateMapped[1-imate] && !trOut.primaryFlag)
-                {//mapped mate is not primary
-                    samFLAG+=0x100;
+                if (mateMapped[1-imate] && !trOut.primaryFlag && P->outSAMunmapped.keepPairs)
+                {//mapped mate is not primary, keep unmapped mate for each pair, hence need to mark some as not primary
+                    samFLAG|=0x100;
                 };
 
                 *outStream << readName+1 <<"\t"<< samFLAG \
@@ -104,21 +104,21 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
         uint Str= trOut.Str;//note that Strand = the mate on the left
 
         if (Mate==0) {
-            samFLAG += Str*0x10;
-            if (nMates==2) samFLAG += (1-Str)*0x20;
+            samFLAG|= Str*0x10;
+            if (nMates==2) samFLAG|= (1-Str)*0x20;
         } else {//second mate strand need to be reverted
-            samFLAG += (1-Str)*0x10;
-            if (nMates==2) samFLAG += Str*0x20;
+            samFLAG|= (1-Str)*0x10;
+            if (nMates==2) samFLAG|= Str*0x20;
         };
 
         if (flagPaired) {
             leftMate=Str;
-            samFLAG += (Mate==0 ? 0x0040 : 0x0080);
-            if (flagPaired && nMates==1 && mateStrand==1) samFLAG +=0x20;//revert strand using inout value of mateStrand (e.g. for chimeric aligns)
+            samFLAG|= (Mate==0 ? 0x0040 : 0x0080);
+            if (flagPaired && nMates==1 && mateStrand==1) samFLAG|=0x20;//revert strand using inout value of mateStrand (e.g. for chimeric aligns)
         };
 
         //not primary align?
-        if (!trOut.primaryFlag) samFLAG +=0x100;
+        if (!trOut.primaryFlag) samFLAG|=0x100;
 
         //empty streams
         samStreamCIGAR.str(std::string());

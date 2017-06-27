@@ -236,8 +236,7 @@ outSAMunmapped                  None
                                 None   ... no output
                                 Within ... output unmapped reads within the main SAM file (i.e. Aligned.out.sam)
                                 2nd word:
-                                KeepPairs ... record unmapped mate for each alignment, and, in case of unsorted output, keep it adjacent to its mapped mate.
-                                              Only affects multi-mapping reads
+                                KeepPairs ... record unmapped mate for each alignment, and, in case of unsorted output, keep it adjacent to its mapped mate. Only affects multi-mapping reads.
 
 outSAMorder                     Paired
     string: type of sorting for the SAM output
