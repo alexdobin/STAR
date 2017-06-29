@@ -114,6 +114,7 @@ class Parameters {
         uint seedNoneLociPerWindow; //max number of aligns from one piece per window
         uint seedSearchStartLmax;
         double seedSearchStartLmaxOverLread; //length of split start points
+        uint seedSplitMin;
 
         //chunk parameters
         uint chunkInSizeBytes,chunkInSizeBytesArray,chunkOutBAMsizeBytes;
@@ -187,7 +188,7 @@ class Parameters {
         uint outFilterMatchNmin,outFilterMultimapNmax;//min number of matches
         double outFilterScoreMinOverLread, outFilterMatchNminOverLread;//normalzied to read length
         intScore outFilterScoreMin,outFilterMultimapScoreRange;//min score to output
-        string outFilterIntronMotifs;
+        string outFilterIntronMotifs,outFilterIntronStrands;
         string outFilterType; //type of filtering
         int outFilterBySJoutStage; //indicates the stage of filtering by SJout
 

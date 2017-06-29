@@ -107,28 +107,26 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
         };
         if (trA.nExons>1 && trA.sjAnnot[trA.nExons-2]==1 && trA.exons[trA.nExons-1][EX_L] < P.alignSJDBoverhangMin) return; //this exon was not checkedin the cycle above
 
-        trA.intronMotifs[0]=0;trA.intronMotifs[1]=0;trA.intronMotifs[2]=0;
+        //filter strand consistency
+        uint sjN=0;
+        trA.intronMotifs[0]=0;trA.intronMotifs[1]=0;trA.intronMotifs[2]=0;        
         for (uint iex=0;iex<trA.nExons-1;iex++) {
-            if (trA.canonSJ[iex]==0) {
-                ++trA.intronMotifs[0];
-            } else if (trA.canonSJ[iex]>0) {
-                ++trA.intronMotifs[2-trA.canonSJ[iex]%2];
+            if (trA.canonSJ[iex]>=0) 
+            {//junctions - others are indels
+                sjN++;
+                trA.intronMotifs[trA.sjStr[iex]]++;
             };
         };
 
-        //filter strand consistency
-        trA.sjMotifStrand=0;
-        uint sjN=0;
-        for (uint iex=0;iex<trA.nExons-1;iex++) {
-            if (trA.canonSJ[iex]>=0) sjN++;
-            if (trA.sjStr[iex]>0) {//only these sjs have defined strand
-                if (trA.sjMotifStrand==0) {
-                    trA.sjMotifStrand=trA.sjStr[iex];
-                } else if (trA.sjMotifStrand != trA.sjStr[iex]) {//inconsistent strand
-                    return; //kill this transcript
-                };
-            };
-        };
+        if (trA.intronMotifs[1]>0 && trA.intronMotifs[2]==0)
+            trA.sjMotifStrand=1;
+        else if (trA.intronMotifs[1]==0 && trA.intronMotifs[2]>0)
+            trA.sjMotifStrand=2;
+        else
+            trA.sjMotifStrand=0;
+
+        if (trA.intronMotifs[1]>0 && trA.intronMotifs[2]>0 && P.outFilterIntronStrands=="RemoveInconsistentStrands")
+                return;
 
         if (sjN>0 && trA.sjMotifStrand==0 && P.outSAMstrandField=="intronMotif") {//strand not defined for a junction
             return;

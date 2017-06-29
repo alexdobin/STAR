@@ -153,7 +153,7 @@ limitIObufferSize                    150000000
     int>0: max available buffers size (bytes) for input/output, per thread
 
 limitOutSAMoneReadBytes              100000
-    int>0: max size of the SAM record for one read. Recommended value: >(2*(LengthMate1+LengthMate2+100)*outFilterMultimapNmax
+    int>0: max size of the SAM record (bytes) for one read. Recommended value: >(2*(LengthMate1+LengthMate2+100)*outFilterMultimapNmax
 
 limitOutSJoneRead                    1000
     int>0: max number of junctions for one read (including all multi-mappers)
@@ -162,7 +162,7 @@ limitOutSJcollapsed                  1000000
     int>0: max number of collapsed junctions
 
 limitBAMsortRAM                         0
-    int>=0: maximum available RAM for sorting BAM. If =0, it will be set to the genome index size. 0 value can only be used with --genomeLoad NoSharedMemory option.
+    int>=0: maximum available RAM (bytes) for sorting BAM. If =0, it will be set to the genome index size. 0 value can only be used with --genomeLoad NoSharedMemory option.
 
 limitSjdbInsertNsj                     1000000
     int>=0: maximum number of junction to be inserted to the genome on the fly at the mapping stage, including those from annotations and those detected in the 1st step of the 2-pass run
@@ -240,8 +240,7 @@ outSAMunmapped                  None
                                 None   ... no output
                                 Within ... output unmapped reads within the main SAM file (i.e. Aligned.out.sam)
                                 2nd word:
-                                KeepPairs ... record unmapped mate for each alignment, and, in case of unsorted output, keep it adjacent to its mapped mate.
-                                              Only affects multi-mapping reads
+                                KeepPairs ... record unmapped mate for each alignment, and, in case of unsorted output, keep it adjacent to its mapped mate. Only affects multi-mapping reads.
 
 outSAMorder                     Paired
     string: type of sorting for the SAM output
@@ -374,7 +373,10 @@ outFilterIntronMotifs           None
 				RemoveNoncanonical             ... filter out alignments that contain non-canonical junctions
 				RemoveNoncanonicalUnannotated  ... filter out alignments that contain non-canonical unannotated junctions when using annotated splice junctions database. The annotated non-canonical junctions will be kept.
 
-
+outFilterIntronStrands          RemoveInconsistentStrands
+    string: filter alignments 
+                RemoveInconsistentStrands      ... remove alignments that have junctions with inconsistent strands
+                None                           ... no filtering
 
 ### Output Filtering: Splice Junctions
 outSJfilterReads                All
@@ -459,6 +461,9 @@ seedPerWindowNmax     50
 
 seedNoneLociPerWindow    10
     int>0: max number of one seed loci per window
+
+seedSplitMin                12
+    int>0: min length of the seed sequences split by Ns or mate gap
 
 alignIntronMin              21
     minimum intron size: genomic gap is considered intron if its length>=alignIntronMin, otherwise it is considered Deletion

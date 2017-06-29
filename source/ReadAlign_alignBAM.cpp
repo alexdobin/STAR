@@ -177,28 +177,28 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
             if (mateMapped!=NULL && mateMapped[imate]) continue; //this mate was mapped, do not record it as unmapped
             samFLAG=0x4;
             if (P.readNmates==2) {//paired read
-                samFLAG+=0x1 + (imate==0 ? 0x40 : 0x80);
+                samFLAG|=0x1 + (imate==0 ? 0x40 : 0x80);
                 if (mateMapped[1-imate]) {//mate mapped
                     if (trOut.Str!=(1-imate))
                     {//mate strand reverted
-                       samFLAG+=0x20;
+                       samFLAG|=0x20;
                     };
                     mateChr=trOut.Chr;
                     trChrStart=P.chrStart[mateChr];
                     mateStart=trOut.exons[0][EX_G] - trChrStart;
                     mateStrand= trOut.Str == (1-imate) ? 0 : 1;
 
-                    if (!trOut.primaryFlag)
-                    {//mapped mate is not primary
-                        samFLAG+=0x100;
+                    if (!trOut.primaryFlag && P.outSAMunmapped.keepPairs)
+                    {//mapped mate is not primary, keep unmapped mate for each pair, hence need to mark some as not primary
+                        samFLAG|=0x100;
                     };
 
                 } else {//mate unmapped
-                    samFLAG+=0x8;
+                    samFLAG|=0x8;
                 };
             };
 
-            if (readFilter=='Y') samFLAG+=0x200; //not passing quality control
+            if (readFilter=='Y') samFLAG|=0x200; //not passing quality control
 
             if (mateMapped[1-imate])
             {//mate is mapped, fill the infromation from trOut
@@ -220,20 +220,20 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
             if (flagPaired) {//paired reads
                 samFLAG=0x0001;
                 if (iExMate==trOut.nExons-1) {//single mate
-                    if (mateChr>P.nChrReal) samFLAG+=0x0008; //not mapped as pair
+                    if (mateChr>P.nChrReal) samFLAG|=0x0008; //not mapped as pair
                 } else {//properly paired
-                    samFLAG+=0x0002; //mapped as pair
+                    samFLAG|=0x0002; //mapped as pair
                 };
             } else {//single end
                 samFLAG=0;
             };
 
-            if (readFilter=='Y') samFLAG+=0x200; //not passing quality control
+            if (readFilter=='Y') samFLAG|=0x200; //not passing quality control
 
             if (alignType==-11 || alignType==-12 || alignType==-13) {
-                samFLAG+=0x800; //mark chimeric alignments
+                samFLAG|=0x800; //mark chimeric alignments
             } else {//only non-chimeric alignments will be marked as non-primary, since chimeric are already marked with 0x800
-                if (!trOut.primaryFlag) samFLAG +=0x100;//mark not primary align
+                if (!trOut.primaryFlag) samFLAG|=0x100;//mark not primary align
             };
 
             iEx1 = (imate==0 ? 0 : iExMate+1);
@@ -242,17 +242,17 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
             Str= trOut.Str;//note that Strand = the mate on the left
 
             if (Mate==0) {
-                samFLAG += Str*0x10;
-                if (nMates==2) samFLAG += (1-Str)*0x20;
+                samFLAG|= Str*0x10;
+                if (nMates==2) samFLAG|= (1-Str)*0x20;
             } else {//second mate strand need to be reverted
-                samFLAG += (1-Str)*0x10;
-                if (nMates==2) samFLAG += Str*0x20;
+                samFLAG|= (1-Str)*0x10;
+                if (nMates==2) samFLAG|= Str*0x20;
             };
 
             if (flagPaired) {
                 leftMate=Str;
-                samFLAG += (Mate==0 ? 0x0040 : 0x0080);
-                if (flagPaired && nMates==1 && mateStrand==1) samFLAG +=0x20;//revert strand using inout value of mateStrand (e.g. for chimeric aligns)
+                samFLAG|= (Mate==0 ? 0x0040 : 0x0080);
+                if (flagPaired && nMates==1 && mateStrand==1) samFLAG|=0x20;//revert strand using inout value of mateStrand (e.g. for chimeric aligns)
             };
 
 

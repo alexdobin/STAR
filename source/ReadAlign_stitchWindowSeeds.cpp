@@ -202,15 +202,6 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R, c
             trA.iFrag=-1;
         };
 
-        trA.intronMotifs[0]=0;trA.intronMotifs[1]=0;trA.intronMotifs[2]=0;
-        for (uint iex=0;iex<trA.nExons-1;iex++) {
-            if (trA.canonSJ[iex]==0) {
-                ++trA.intronMotifs[0];
-            } else if (trA.canonSJ[iex]>0) {
-                ++trA.intronMotifs[2-trA.canonSJ[iex]%2];
-            };
-        };
-
         if (P.scoreGenomicLengthLog2scale!=0) {//add gap length score
             trA.maxScore += int(ceil( log2( (double) ( trA.exons[trA.nExons-1][EX_G]+trA.exons[trA.nExons-1][EX_L] - trA.exons[0][EX_G]) ) \
                      * P.scoreGenomicLengthLog2scale - 0.5));
@@ -218,19 +209,26 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R, c
         };
 
         //filter strand consistency
-        trA.sjMotifStrand=0;
         uint sjN=0;
+        trA.intronMotifs[0]=0;trA.intronMotifs[1]=0;trA.intronMotifs[2]=0;        
         for (uint iex=0;iex<trA.nExons-1;iex++) {
-            if (trA.canonSJ[iex]>=0) sjN++;
-            if (trA.sjStr[iex]>0) {//only these sjs have defined strand
-                if (trA.sjMotifStrand==0) {
-                    trA.sjMotifStrand=trA.sjStr[iex];
-                } else if (trA.sjMotifStrand != trA.sjStr[iex]) {//inconsistent strand
-                    return; //kill this transcript
-                };
+            if (trA.canonSJ[iex]>=0) 
+            {//junctions - others are indels
+                sjN++;
+                trA.intronMotifs[trA.sjStr[iex]]++;
             };
         };
 
+        if (trA.intronMotifs[1]>0 && trA.intronMotifs[2]==0)
+            trA.sjMotifStrand=1;
+        else if (trA.intronMotifs[1]==0 && trA.intronMotifs[2]>0)
+            trA.sjMotifStrand=2;
+        else
+            trA.sjMotifStrand=0;
+
+        if (trA.intronMotifs[1]>0 && trA.intronMotifs[2]>0 && P.outFilterIntronStrands=="RemoveInconsistentStrands")
+                return;        
+        
         if (sjN>0 && trA.sjMotifStrand==0 && P.outSAMstrandField=="intronMotif") {//strand not defined for a junction
             return;
         };
