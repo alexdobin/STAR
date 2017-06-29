@@ -36,30 +36,6 @@ bool ReadAlign::chimericDetection() {
     //stich windows => chimeras
     //stich only the best window with one of the lower score ones for now - do not stich 2 lower score windows
     //stitch only one window on each end of the read
-
-//     if (nTr>chimMainSegmentMultNmax)
-//     {//check main segment for multi-aligns
-//         if (nTr!=2)
-//         {
-//             return chimRecord;//false
-//         };
-//         //special degenerate case: nTr=2
-//         if (P.readNmates==2)
-//         {//PE
-//            uint f00=trMult[0]->exons[0][EX_iFrag];
-//            uint f01=trMult[0]->exons[trMult[0]->nExons][EX_iFrag];
-//            uint f10=trMult[1]->exons[0][EX_iFrag];
-//            uint f11=trMult[1]->exons[trMult[1]->nExons][EX_iFrag];
-//            
-//            if (f00==f10 || f00==f11 || f01==f10 || f01==f11)
-//            {//only allow this case if the two alignments reside on different mates
-//                return chimRecord;
-//            };
-//         } else
-//         {//SE
-//             
-//         };
-//     };
     
     if (nTr>P.chimMainSegmentMultNmax && nTr!=2)
     {//multimapping main segment, nTr==2 is a secial case to be checked later
@@ -93,16 +69,6 @@ bool ReadAlign::chimericDetection() {
             for (uint iWt=0; iWt<nWinTr[iW]; iWt++){//cycl over transcripts in the window
                 if (trBest!=trAll[iW][0] && iWt>0) break; //for all windows except that of the best transcript - hceck only iWt=0 (best trnascripts)
                 if (trBest==trAll[iW][0] && iWt==0) continue;
-    //                 {//same window
-    //                     if (iWt==0) continue; //do not check the best transcript itself
-    //                     if (trBest->exons[0][EX_R]<=trAll[iW][iWt]->exons[0][EX_R]) {
-    //                         //start of the last Best exon is before end of the first Chim exon
-    //                         if (trBest->exons[trBest->nExons-1][EX_G]<trAll[iW][iWt]->exons[0][EX_G]+trAll[iW][iWt]->exons[0][EX_L]) continue;
-    //                     } else {
-    //                         if (trAll[iW][iWt]->exons[trAll[iW][iWt]->nExons-1][EX_G]<trBest->exons[0][EX_G]+trBest->exons[0][EX_L]) continue;
-    //                     };
-    //                 };
-
                 if (trAll[iW][iWt]->intronMotifs[0]>0) continue; //do not stitch a window to itself, or to a window with non-canonical junctions
                 uint chimStr1;
                 if (trAll[iW][iWt]->intronMotifs[1]==0 && trAll[iW][iWt]->intronMotifs[2]==0) {//strand is undefined
@@ -336,17 +302,11 @@ bool ReadAlign::chimericDetection() {
                 };//large enough overhang
             };//chimeric junction is within a mate
 
-            //debug
-    //             cout << readName <<"\t"<< (trChim[0].Str==0 ? chimJ1-chimJ0 : chimJ0-chimJ1) << "\t"<< (chimMotif>=0 ? P.alignIntronMax :  P.alignMatesGapMax)<<"\n";
-    //             cout <<  chimRepeat0 <<"\t"<<trChim[0].exons[e0][EX_L]<<"\n";
             //chimeric alignments output
             if ( chimN==2 \
                     && ( trChim[0].Str!=trChim[1].Str ||  trChim[0].Chr!=trChim[1].Chr \
                     || (trChim[0].Str==0 ? chimJ1-chimJ0+1LLU : chimJ0-chimJ1+1LLU) > (chimMotif>=0 ? P.alignIntronMax :  P.alignMatesGapMax) ) )
             {//
-             //&& (diff str || diff chr ||
-             //|| gap > (alignIntronMax,alignMatesGapMax) ) negative gap = very large # because of uint
-
                 if (chimMotif>=0 && \
                      (trChim[0].exons[e0][EX_L]<P.chimJunctionOverhangMin+chimRepeat0 || trChim[1].exons[e1][EX_L]<P.chimJunctionOverhangMin+chimRepeat1) )
                 {//filter out linear junctions that are very close to chimeric junction
