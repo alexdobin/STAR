@@ -107,17 +107,9 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
         };
         if (trA.nExons>1 && trA.sjAnnot[trA.nExons-2]==1 && trA.exons[trA.nExons-1][EX_L] < P->alignSJDBoverhangMin) return; //this exon was not checkedin the cycle above
 
-        trA.intronMotifs[0]=0;trA.intronMotifs[1]=0;trA.intronMotifs[2]=0;
-        for (uint iex=0;iex<trA.nExons-1;iex++) {
-            if (trA.canonSJ[iex]==0) {
-                ++trA.intronMotifs[0];
-            } else if (trA.canonSJ[iex]>0) {
-                ++trA.intronMotifs[2-trA.canonSJ[iex]%2];
-            };
-        };
-
         //filter strand consistency
         uint sjN=0;
+        trA.intronMotifs[0]=0;trA.intronMotifs[1]=0;trA.intronMotifs[2]=0;        
         for (uint iex=0;iex<trA.nExons-1;iex++) {
             if (trA.canonSJ[iex]>=0) 
             {//junctions - others are indels

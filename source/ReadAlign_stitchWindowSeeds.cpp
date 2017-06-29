@@ -202,15 +202,6 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R, c
             trA.iFrag=-1;
         };
 
-        trA.intronMotifs[0]=0;trA.intronMotifs[1]=0;trA.intronMotifs[2]=0;
-        for (uint iex=0;iex<trA.nExons-1;iex++) {
-            if (trA.canonSJ[iex]==0) {
-                ++trA.intronMotifs[0];
-            } else if (trA.canonSJ[iex]>0) {
-                ++trA.intronMotifs[2-trA.canonSJ[iex]%2];
-            };
-        };
-
         if (P->scoreGenomicLengthLog2scale!=0) {//add gap length score
             trA.maxScore += int(ceil( log2( (double) ( trA.exons[trA.nExons-1][EX_G]+trA.exons[trA.nExons-1][EX_L] - trA.exons[0][EX_G]) ) \
                      * P->scoreGenomicLengthLog2scale - 0.5));
@@ -219,6 +210,7 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R, c
 
         //filter strand consistency
         uint sjN=0;
+        trA.intronMotifs[0]=0;trA.intronMotifs[1]=0;trA.intronMotifs[2]=0;        
         for (uint iex=0;iex<trA.nExons-1;iex++) {
             if (trA.canonSJ[iex]>=0) 
             {//junctions - others are indels
