@@ -3,6 +3,9 @@
 #include "serviceFuns.cpp"
 
 void sjdbPrepare (SjdbClass &sjdbLoci, Parameters &P, uint nGenomeReal, string outDir, Genome & genome, char *Gsj) {
+
+    char *G=genome.G;
+    
     uint *sjdbS=new uint [sjdbLoci.chr.size()];
     uint *sjdbE=new uint [sjdbLoci.chr.size()];
 
@@ -10,8 +13,7 @@ void sjdbPrepare (SjdbClass &sjdbLoci, Parameters &P, uint nGenomeReal, string o
     uint8 *sjdbShiftLeft=new uint8 [sjdbLoci.chr.size()];
     uint8 *sjdbShiftRight=new uint8 [sjdbLoci.chr.size()];
 
-    char *G=genome.G;
-    
+
     string chrOld="";
     uint iChr=0;
     for (uint ii=0;ii<sjdbLoci.chr.size();ii++) {
@@ -129,20 +131,14 @@ void sjdbPrepare (SjdbClass &sjdbLoci, Parameters &P, uint nGenomeReal, string o
 
     qsort((void *) sjdbSort, nsj, sizeof(uint)*3, funCompareUint2);
 
-    uint nsj1=nsj;
-    if (genome.Var->yes) nsj1*=2;
-    
-    P.sjdbStart=new uint [nsj1];
-    P.sjdbEnd=new uint [nsj1];
-    P.sjdbMotif=new uint8 [nsj1];
-    P.sjdbShiftLeft=new uint8 [nsj1];
-    P.sjdbShiftRight=new uint8 [nsj1];    
-    P.sjdbStrand=new uint8 [nsj1];  
-    
-    vector<vector<array<int,2>>> sjdbSnp;
-    
-    nsj1=0;
+    P.sjdbStart=new uint [nsj];
+    P.sjdbEnd=new uint [nsj];
+    P.sjdbMotif=new uint8 [nsj];
+    P.sjdbShiftLeft=new uint8 [nsj];
+    P.sjdbShiftRight=new uint8 [nsj];
+    P.sjdbStrand=new uint8 [nsj];
 
+    uint nsj1=0;
     for (uint ii=0;ii<nsj;ii++) {
         uint isj=sjdbSort[ii*3+2];
 
@@ -173,34 +169,27 @@ void sjdbPrepare (SjdbClass &sjdbLoci, Parameters &P, uint nGenomeReal, string o
                 nsj1--;
             };
         };
-        
-        vector<vector<array<int,2>>> sjdbSnp1=genome.Var->sjdbSnp(sjdbSort[ii*3],sjdbSort[ii*3+1],P.sjdbOverhang);
-        for (int ia=0; ia<sjdbSnp1.size(); ia++)
-        {
-            sjdbSnp.push_back(sjdbSnp1.at(ia));
 
-            //record junction
-            P.sjdbStart[nsj1]=sjdbSort[ii*3];
-            P.sjdbEnd[nsj1]=sjdbSort[ii*3+1];
-            P.sjdbMotif[nsj1]=sjdbMotif[isj];
-            P.sjdbShiftLeft[nsj1]=sjdbShiftLeft[isj];                    
-            P.sjdbShiftRight[nsj1]=sjdbShiftRight[isj];
-            if (sjdbLoci.str.at(isj)=='+') {
-                P.sjdbStrand[nsj1]=1;
-            } else if (sjdbLoci.str.at(isj)=='-') {
-                P.sjdbStrand[nsj1]=2;
+        //record junction
+        P.sjdbStart[nsj1]=sjdbSort[ii*3];
+        P.sjdbEnd[nsj1]=sjdbSort[ii*3+1];
+        P.sjdbMotif[nsj1]=sjdbMotif[isj];
+        P.sjdbShiftLeft[nsj1]=sjdbShiftLeft[isj];
+        P.sjdbShiftRight[nsj1]=sjdbShiftRight[isj];
+        if (sjdbLoci.str.at(isj)=='+') {
+            P.sjdbStrand[nsj1]=1;
+        } else if (sjdbLoci.str.at(isj)=='-') {
+            P.sjdbStrand[nsj1]=2;
+        } else {
+            if (P.sjdbMotif[nsj1]==0) {//strand un-defined
+                P.sjdbStrand[nsj1]=0;
             } else {
-                if (P.sjdbMotif[nsj1]==0) {//strand un-defined
-                    P.sjdbStrand[nsj1]=0;
-                } else {
-                    P.sjdbStrand[nsj1]=2-P.sjdbMotif[nsj1]%2;
-                };
+                P.sjdbStrand[nsj1]=2-P.sjdbMotif[nsj1]%2;
             };
-            nsj1++;
         };
-    };            
-    P.sjdbN=nsj1;       
-
+        nsj1++;
+    };
+    P.sjdbN=nsj1;
     P.sjDstart = new uint [P.sjdbN];
     P.sjAstart = new uint [P.sjdbN];
 
@@ -221,14 +210,7 @@ void sjdbPrepare (SjdbClass &sjdbLoci, Parameters &P, uint nGenomeReal, string o
         };
         memcpy(Gsj+sjGstart,G+P.sjDstart[ii],P.sjdbOverhang);//sjdbStart contains 1-based intron loci
         memcpy(Gsj+sjGstart+P.sjdbOverhang,G+P.sjAstart[ii],P.sjdbOverhang);//sjdbStart contains 1-based intron loci
-
-        for (int ia=0; ia<sjdbSnp.at(ii).size(); ia++)
-        {//replace with SNPs
-            Gsj[sjGstart+sjdbSnp.at(ii).at(ia).at(0)]=sjdbSnp.at(ii).at(ia).at(1);
-        };
-
-        sjGstart += P.sjdbLength;     
-
+        sjGstart += P.sjdbLength;
         Gsj[sjGstart-1]=GENOME_spacingChar;//spacing char between the sjdb seqs
         sjdbInfo << P.sjdbStart[ii] <<"\t"<< P.sjdbEnd[ii] <<"\t"<<(int) P.sjdbMotif[ii] <<"\t"<<(int) P.sjdbShiftLeft[ii] <<"\t"<<(int) P.sjdbShiftRight[ii]<<"\t"<<(int) P.sjdbStrand[ii] <<"\n";
         uint chr1=P.chrBin[ P.sjdbStart[ii] >> P.genomeChrBinNbits];
