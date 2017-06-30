@@ -16,6 +16,7 @@
 bool ReadAlign::chimericDetection() {
 
     bool chimRecord=false;
+    
     //output chains for out-of-STAR chimeric detection
     #ifdef OUTPUT_localChains
     {
@@ -38,7 +39,7 @@ bool ReadAlign::chimericDetection() {
     //stitch only one window on each end of the read
     
     if (nTr>P.chimMainSegmentMultNmax && nTr!=2)
-    {//multimapping main segment, nTr==2 is a secial case to be checked later
+    {//multimapping main segment, nTr==2 is a special case to be checked later
         return chimRecord;
     };
     
