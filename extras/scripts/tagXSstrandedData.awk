@@ -6,11 +6,9 @@ BEGIN {
 
 {
 
-    printf $0;
-   
-    if (substr($1,1,1)=="@")
-    {# header - nothing to do
-        printf "\n";
+    if (substr($1,1,1)=="@" || $4==0)
+    {# header, or unmapped read - just print
+        print;
         next;
     };
 
@@ -25,11 +23,11 @@ BEGIN {
     };
 
     if (mate>0 && mate <3)
-    {# mate is defined
+    {# mate is defined - add XS tag
        if (mate!=strType) str=1-str; #revert strand if the mate is opposite
-       printf "\t" "XS:A:" strSym[str];
+       print $0 "\t" "XS:A:" strSym[str];
+    } else 
+    {# mate is not defined - just print
+       print;
     };    
-    
-    printf "\n";
-
 }
