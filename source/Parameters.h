@@ -307,25 +307,8 @@ class Parameters {
         } var;
 
         //chimeric
-        uint chimSegmentMin, chimJunctionOverhangMin; //min chimeric donor/acceptor length
-        uint chimSegmentReadGapMax; //max read gap for stitching chimeric windows
-        int chimScoreMin,chimScoreDropMax,chimScoreSeparation, chimScoreJunctionNonGTAG; //min chimeric score
-        uint chimMainSegmentMultNmax;
-        vector <string> chimFilter;
+        ParametersChimeric parChim;
 
-        struct
-        {
-            struct
-            {
-                bool genomicN;
-            } filter;
-            struct
-            {
-                vector <string> type;
-                bool bam;
-                bool bamHardClip;
-            } out;
-        } chim;
 
         //splitting
         char Qsplit;
