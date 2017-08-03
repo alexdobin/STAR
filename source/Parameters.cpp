@@ -194,16 +194,18 @@ Parameters::Parameters() {//initalize parameters info
 
 
     //chimeric
-    parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "chimSegmentMin", &chimSegmentMin));
-    parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "chimScoreMin", &chimScoreMin));
-    parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "chimScoreDropMax", &chimScoreDropMax));
-    parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "chimScoreSeparation", &chimScoreSeparation));
-    parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "chimScoreJunctionNonGTAG", &chimScoreJunctionNonGTAG));
-    parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "chimMainSegmentMultNmax", &chimMainSegmentMultNmax));
-    parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "chimJunctionOverhangMin", &chimJunctionOverhangMin));
-    parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "chimOutType", &chim.out.type));
-    parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "chimFilter", &chimFilter));
-    parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "chimSegmentReadGapMax", &chimSegmentReadGapMax));
+    parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "chimSegmentMin", &pCh.segmentMin));
+    parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "chimScoreMin", &pCh.scoreMin));
+    parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "chimScoreDropMax", &pCh.scoreDropMax));
+    parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "chimScoreSeparation", &pCh.scoreSeparation));
+    parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "chimScoreJunctionNonGTAG", &pCh.scoreJunctionNonGTAG));
+    parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "chimMainSegmentMultNmax", &pCh.mainSegmentMultNmax));
+    parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "chimJunctionOverhangMin", &pCh.junctionOverhangMin));
+    parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "chimOutType", &pCh.out.type));
+    parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "chimFilter", &pCh.filter.stringIn));
+    parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "chimSegmentReadGapMax", &pCh.segmentReadGapMax));
+    parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "chimMultimapNmax", &pCh.multimapNmax));
+    parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "chimMultimapScoreRange", &pCh.multimapScoreRange));
 
     //sjdb
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "sjdbFileChrStartEnd", &sjdbFileChrStartEnd));
@@ -936,66 +938,66 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     };
 
     //chimeric
-    if (chim.out.type.at(0)=="WithinBAM")
+    if (pCh.out.type.at(0)=="WithinBAM")
     {
-        chim.out.bam=true;
-    } else if (chim.out.type.at(0)=="SeparateSAMold")
+        pCh.out.bam=true;
+    } else if (pCh.out.type.at(0)=="SeparateSAMold")
     {
-        chim.out.bam=false;
+        pCh.out.bam=false;
     } else{
         ostringstream errOut;
-        errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented value for the first word of --chimOutType: "<<chim.out.type.at(0) <<"\n";
+        errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented value for the first word of --chimOutType: "<<pCh.out.type.at(0) <<"\n";
         errOut <<"SOLUTION: re-run STAR with --chimOutType SeparateSAMold OR WithinBAM\n";
         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
     
-    if (chim.out.bam && !outBAMunsorted && !outBAMcoord) {
+    if (pCh.out.bam && !outBAMunsorted && !outBAMcoord) {
             ostringstream errOut;
             errOut <<"EXITING because of fatal PARAMETERS error: --chimOutType WithinBAM requires BAM output\n";
             errOut <<"SOLUTION: re-run with --outSAMtype BAM Unsorted/SortedByCoordinate\n";
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
     
-    if (chim.out.bam && !outSAMattrPresent.NM) {
+    if (pCh.out.bam && !outSAMattrPresent.NM) {
        outSAMattrOrder.push_back(ATTR_NM);
        inOut->logMain << "WARNING --chimOutType=WithinBAM, therefore STAR will output NM attribute" <<endl;
     };
     
     
-    if (chim.out.bam)
+    if (pCh.out.bam)
     {
-        chim.out.bamHardClip=true;//default
-        if (chim.out.type.size()>1)
+        pCh.out.bamHardClip=true;//default
+        if (pCh.out.type.size()>1)
         {
-            if (chim.out.type.at(1)=="HardClip")
+            if (pCh.out.type.at(1)=="HardClip")
             {
-                chim.out.bamHardClip=true;
-            } else if (chim.out.type.at(1)=="SoftClip")
+                pCh.out.bamHardClip=true;
+            } else if (pCh.out.type.at(1)=="SoftClip")
             {
-                chim.out.bamHardClip=false;
+                pCh.out.bamHardClip=false;
             } else {
                 ostringstream errOut;
-                errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented value for the 2nd word of --chimOutType: "<<chim.out.type.at(1) <<"\n";
+                errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented value for the 2nd word of --chimOutType: "<<pCh.out.type.at(1) <<"\n";
                 errOut <<"SOLUTION: re-run STAR with --chimOutType WithinBAM  HardClip OR SoftClip\n";
                 exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
             };
         };
     };
     
-    chim.filter.genomicN=false;
-    for (uint ii=0; ii<chimFilter.size(); ii++)
+    pCh.filter.genomicN=false;
+    for (uint ii=0; ii<pCh.filter.stringIn.size(); ii++)
     {
-        if (chimFilter.at(ii)=="banGenomicN")
+        if (pCh.filter.stringIn.at(ii)=="banGenomicN")
         {
-            chim.filter.genomicN=true;
+            pCh.filter.genomicN=true;
         }
-        else if (chimFilter.at(ii)=="None")
+        else if (pCh.filter.stringIn.at(ii)=="None")
         {//nothing to do
         }
         else
         {
             ostringstream errOut;
-            errOut << "EXITING because of fatal PARAMETERS error: unrecognized value of --chimFilter="<<chimFilter.at(ii)<<"\n";
+            errOut << "EXITING because of fatal PARAMETERS error: unrecognized value of --chimFilter="<<pCh.filter.stringIn.at(ii)<<"\n";
             errOut << "SOLUTION: use allowed values: banGenomicN || None";
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };

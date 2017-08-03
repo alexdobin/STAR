@@ -578,6 +578,13 @@ chimFilter                  banGenomicN
 chimMainSegmentMultNmax        10
     int>=1: maximum number of multi-alignments for the main chimeric segment. =1 will prohibit multimapping main segments.
 
+chimMultimapNmax                    0
+    int>=0: maximum number of multi-alignments for the chimera
+                                0 ... use the old scheme for chimeric detection which only considered unique alignments
+
+chimMultimapScoreRange          1
+    int>=0: the score range for multi-mapping chimeras below the best chimeric score
+
 ### Quantification of Annotations
 quantMode                   -
     string(s): types of quantification requested

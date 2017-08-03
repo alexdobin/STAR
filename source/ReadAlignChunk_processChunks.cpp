@@ -156,7 +156,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
         if (chunkOutBAMquant!=NULL) chunkOutBAMquant->unsortedFlush();
 
         //the thread is finished mapping reads, concatenate the temp files into output files
-        if (P.chimSegmentMin>0) {
+        if (P.pCh.segmentMin>0) {
             chunkFstreamCat (RA->chunkOutChimSAM, P.inOut->outChimSAM, P.runThreadN>1, g_threadChunks.mutexOutChimSAM);
             chunkFstreamCat (RA->chunkOutChimJunction, P.inOut->outChimJunction, P.runThreadN>1, g_threadChunks.mutexOutChimJunction);
         };

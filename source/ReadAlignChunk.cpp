@@ -69,7 +69,7 @@ ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome 
     RA->chunkOutSJ=chunkOutSJ;
     RA->chunkOutSJ1=chunkOutSJ1;
 
-    if (P.chimSegmentMin>0) {
+    if (P.pCh.segmentMin>0) {
         chunkFstreamOpen(P.outFileTmp + "/Chimeric.out.sam.thread", iChunk, RA->chunkOutChimSAM);
         chunkFstreamOpen(P.outFileTmp + "/Chimeric.out.junction.thread", iChunk, RA->chunkOutChimJunction);
     };

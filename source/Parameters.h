@@ -8,6 +8,7 @@
 #include "TimeFunctions.h"
 #include <unistd.h>
 #include <signal.h>
+#include "ParametersChimeric.h"
 
 class Parameters {
 
@@ -307,7 +308,7 @@ class Parameters {
         } var;
 
         //chimeric
-        ParametersChimeric parChim;
+        ParametersChimeric pCh;
 
 
         //splitting

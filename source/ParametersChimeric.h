@@ -2,22 +2,23 @@
 #define CODE_ParametersChimeric
 
 #include "IncludeDefine.h"
-#include "Parameters.h"
-#include "Transcript.h"
 
 class ParametersChimeric
 {//
     public:
-        uint chimSegmentMin, chimJunctionOverhangMin; //min chimeric donor/acceptor length
-        uint chimSegmentReadGapMax; //max read gap for stitching chimeric windows
-        int chimScoreMin,chimScoreDropMax,chimScoreSeparation, chimScoreJunctionNonGTAG; //min chimeric score
-        uint chimMainSegmentMultNmax;
-        vector <string> chimFilter;
+        uint segmentMin, junctionOverhangMin; //min chimeric donor/acceptor length
+        uint segmentReadGapMax; //max read gap for stitching chimeric windows
+        int scoreMin,scoreDropMax,scoreSeparation, scoreJunctionNonGTAG; //min chimeric score
+        uint mainSegmentMultNmax;
+        
+        uint multimapScoreRange, multimapNmax;
 
         struct
         {
+            vector <string> stringIn;
             bool genomicN;
         } filter;
+
         struct
         {
             vector <string> type;

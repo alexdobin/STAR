@@ -299,7 +299,7 @@ std::time(&timeStart);
 
     #ifdef COMPILE_FOR_LONG_READS
         stitchWindowSeeds(iW, iW1, NULL, R[trA.roStr==0 ? 0:2], Q[trA.roStr], mapGen.G);
-        if (P.chimSegmentMin>0) {
+        if (P.pCh.segmentMin>0) {
             for (uint ia=0;ia<nWA[iW];ia++)
             {//mark all seeds that overlap the best (and only for now) transcript trA
                 if (WAincl[ia]) continue;

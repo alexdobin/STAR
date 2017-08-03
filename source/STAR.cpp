@@ -137,7 +137,7 @@ int main(int argInN, char* argIn[]) {
         P1.outBAMunsorted=false;
         P1.outBAMcoord=false;
 
-        P1.chimSegmentMin=0;
+        P1.pCh.segmentMin=0;
 
         P1.quant.yes=false;
         P1.quant.trSAM.yes=false;
@@ -297,7 +297,7 @@ int main(int argInN, char* argIn[]) {
 
     };
 
-    if (P.chimSegmentMin>0) {
+    if (P.pCh.segmentMin>0) {
         P.inOut->outChimJunction.open((P.outFileNamePrefix + "Chimeric.out.junction").c_str());
         P.inOut->outChimSAM.open((P.outFileNamePrefix + "Chimeric.out.sam").c_str());
         P.inOut->outChimSAM << P.samHeader;

@@ -242,7 +242,7 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
         // transcript has been finalized, compare the score and record
         if (       Score+P.outFilterMultimapScoreRange >= wTr[0]->maxScore \
                 || ( trA.iFrag>=0 && Score+P.outFilterMultimapScoreRange >= RA->maxScoreMate[trA.iFrag] ) \
-                || P.chimSegmentMin>0) {
+                || P.pCh.segmentMin>0) {
                 //only record the transcripts within the window that are in the Score range
                 //OR within the score range of each mate
                 //OR all transcript if chimeric detection is activated
