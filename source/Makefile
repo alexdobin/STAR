@@ -38,7 +38,8 @@ OBJECTS = SharedMemory.o PackedArray.o SuffixArrayFuns.o STAR.o Parameters.o InO
 	ReadAlign_outputAlignments.o  \
 	ReadAlign_outputTranscriptSAM.o ReadAlign_outputTranscriptSJ.o ReadAlign_outputTranscriptCIGARp.o \
         ReadAlign_createExtendWindowsWithAlign.o ReadAlign_assignAlignToWindow.o ReadAlign_oneRead.o \
-	ReadAlign_stitchWindowSeeds.o ReadAlign_chimericDetection.o ReadAlign_chimericDetectionOld.o\
+	ReadAlign_stitchWindowSeeds.o \
+        ReadAlign_chimericDetection.o ReadAlign_chimericDetectionOld.o ReadAlign_chimericDetectionMult.o ChimericSegment.cpp \
         stitchWindowAligns.o extendAlign.o stitchAlignToTranscript.o alignSmithWaterman.o \
         genomeGenerate.o genomeParametersWrite.o genomeScanFastaFiles.o genomeSAindex.o \
         Genome_insertSequences.o insertSeqSA.o funCompareUintAndSuffixes.o sortSuffixesBucket.o funCompareUintAndSuffixesMemcmp.o \

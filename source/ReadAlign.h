@@ -144,8 +144,11 @@ class ReadAlign
         void outTxtMain(ofstream*,Transcript&);
         int createExtendWindowsWithAlign(uint a1, uint aStr); //extends and windows with one alignment
         void assignAlignToWindow(uint a1, uint aLength, uint aStr, uint aNrep, uint aFrag, uint aRstart,bool aAnchor, uint sjA); //assigns one alignment to a window
+        
         bool chimericDetection();
-        bool chimericDetectionOld();        
+        bool chimericDetectionOld();
+        bool chimericDetectionMult();        
+
         void outputAlignments();
         
         void stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R, char *Q);//stitches all seeds in one window: iW

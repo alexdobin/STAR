@@ -4,13 +4,38 @@
 #include "ReadAlign.h"
 #include "BAMfunctions.h"
 #include "blocksOverlap.h"
+#include "ChimericSegment.h"
 
+int chimericAlignScore (ChimericSegment & seg1, ChimericSegment & seg2)
+{
+    int chimScore=0;
+    uint chimOverlap = seg2.roS>seg1.roS ?  (seg2.roS>seg1.roE ? 0 : seg1.roE-seg2.roS+1) : (seg2.roE<seg1.roS ? 0 : seg2.roE-seg1.roS+1);
+    bool diffMates=(seg1.roE < seg1.readLength[0] && seg2.roS >= seg1.readLength[0]) || (seg2.roE < seg1.readLength[0] && seg1.roS >= seg1.readLength[0]);
+
+    //segment lengths && (different mates || small gap between segments)
+    if (seg1.roE > seg1.P.pCh.segmentMin + seg1.roS + chimOverlap && seg2.roE > seg1.P.pCh.segmentMin + seg2.roS + chimOverlap  \
+        && ( diffMates || ( (seg1.roE + seg1.P.pCh.segmentReadGapMax + 1) >= seg2.roS && (seg2.roE + seg1.P.pCh.segmentReadGapMax + 1) >= seg1.roS ) ) ) 
+    {
+       chimScore=chimScore= seg1.align.maxScore + seg2.align.maxScore - (int)chimOverlap; //subtract overlap to avoid double counting
+    };
+    
+    return chimScore;
+};
+
+/////////////////////////////////////////////////////////////
 bool ReadAlign::chimericDetectionMult() {
 
     bool chimRecord=false;
     
-    //scan through all aligns
+    //////////////////// chimeras
+    //stich windows => chimeras
+    //stich only the best window with one of the lower score ones for now - do not stich 2 lower score windows
+    //stitch only one window on each end of the read
     
+    if (nTr>P.pCh.mainSegmentMultNmax && nTr!=2)
+    {//multimapping main segment, nTr==2 is a special case to be checked later
+        return chimRecord;
+    };
     
     if (P.pCh.segmentMin>0 && trBest->rLength >= P.pCh.segmentMin \
             && ( trBest->exons[trBest->nExons-1][EX_R] + trBest->exons[trBest->nExons-1][EX_L] + P.pCh.segmentMin <= Lread \
@@ -18,53 +43,27 @@ bool ReadAlign::chimericDetectionMult() {
              && trBest->intronMotifs[0]==0 && (trBest->intronMotifs[1]==0 || trBest->intronMotifs[2]==0) ) {
             //there is unmapped space at the start/end, and the main window is not a multimapping window, and non non-canonical junctions, and consistend junction motif
         int chimScoreBest=0,chimScoreNext=0;
+        uint chimStrBest=0;
+        
         trChim[0]=*trBest;
         Transcript* trChim1=NULL;
 
-        uint roStart1=trBest->Str==0 ? trBest->exons[0][EX_R] : Lread - trBest->exons[trBest->nExons-1][EX_R] - trBest->exons[trBest->nExons-1][EX_L];
-        uint roEnd1=trBest->Str==0 ? trBest->exons[trBest->nExons-1][EX_R] + trBest->exons[trBest->nExons-1][EX_L] - 1 : Lread - trBest->exons[0][EX_R] - 1;
-        if (roStart1>readLength[0]) roStart1--;
-        if (roEnd1>readLength[0]) roEnd1--;
-
-        uint chimStrBest=0;
-        if (trBest->intronMotifs[1]==0 && trBest->intronMotifs[2]==0) {//strand is undefined
-            chimStr=0;
-        } else if ( (trBest->Str==0) == (trBest->intronMotifs[1]>0)) {//strand the same as RNA
-            chimStr=1;
-        } else {//strand opposite to RNA
-            chimStr=2;
-        };
+        ChimericSegment seg1(P,trChim[0],Lread,readLength);
 
         for (uint iW=0; iW<nW; iW++) {//check all other windows for chimeras
             for (uint iWt=0; iWt<nWinTr[iW]; iWt++){//cycl over transcripts in the window
                 if (trBest!=trAll[iW][0] && iWt>0) break; //for all windows except that of the best transcript - hceck only iWt=0 (best trnascripts)
                 if (trBest==trAll[iW][0] && iWt==0) continue;
-                if (trAll[iW][iWt]->intronMotifs[0]>0) continue; //do not stitch a window to itself, or to a window with non-canonical junctions
-                uint chimStr1;
-                if (trAll[iW][iWt]->intronMotifs[1]==0 && trAll[iW][iWt]->intronMotifs[2]==0) {//strand is undefined
-                    chimStr1=0;
-                } else if ( (trAll[iW][iWt]->Str==0) == (trAll[iW][iWt]->intronMotifs[1]>0)) {//strand the same as RNA
-                    chimStr1=1;
-                } else {//strand opposite to RNA
-                    chimStr1=2;
-                };
+                
+                ChimericSegment seg2(P,*trAll[iW][iWt],Lread,readLength);
+                if (seg2.align.intronMotifs[0]>0) continue; //do not stitch a window to itself, or to a window with non-canonical junctions
+                
+                if (seg1.str!=0 && seg2.str!=0 && seg2.str!=seg1.str) continue; //chimeric segments have to have consitent strands                
 
-                if (chimStr!=0 && chimStr1!=0 && chimStr!=chimStr1) continue; //chimeric segments have to have consitent strands
-
-                uint roStart2=trAll[iW][iWt]->Str==0 ? trAll[iW][iWt]->exons[0][EX_R] : Lread - trAll[iW][iWt]->exons[trAll[iW][iWt]->nExons-1][EX_R] - trAll[iW][iWt]->exons[trAll[iW][iWt]->nExons-1][EX_L];
-                uint roEnd2=trAll[iW][iWt]->Str==0 ? trAll[iW][iWt]->exons[trAll[iW][iWt]->nExons-1][EX_R] + trAll[iW][iWt]->exons[trAll[iW][iWt]->nExons-1][EX_L] - 1 : Lread - trAll[iW][iWt]->exons[0][EX_R] - 1;
-                if (roStart2>readLength[0]) roStart2--;
-                if (roEnd2>readLength[0]) roEnd2--;
-
-                uint chimOverlap = roStart2>roStart1 ?  (roStart2>roEnd1 ? 0 : roEnd1-roStart2+1) : (roEnd2<roStart1 ? 0 : roEnd2-roStart1+1);
-                bool diffMates=(roEnd1 < readLength[0] && roStart2 >= readLength[0]) || (roEnd2 < readLength[0] && roStart1 >= readLength[0]);
-
-                //segment lengths && (different mates || small gap between segments)
-                if (roEnd1 > P.pCh.segmentMin + roStart1 + chimOverlap && roEnd2> P.pCh.segmentMin + roStart2 + chimOverlap  \
-                    && ( diffMates || ( (roEnd1 + P.pCh.segmentReadGapMax + 1) >= roStart2 && (roEnd2 + P.pCh.segmentReadGapMax + 1) >= roStart1 ) ) ) {
-
-                    int chimScore=trBest->maxScore + trAll[iW][iWt]->maxScore - (int)chimOverlap; //subtract overlap to avoid double counting
-
+                int chimScore=chimericAlignScore(seg1,seg2);
+                
+                if  (chimScore>0)
+                {
                     uint overlap1=0;
                     if (iWt>0 && chimScoreBest>0)
                     {//overlap between chimeric candidate segment and the best chimeric segment so far. Maybe non-zero only if both are in the same window.
@@ -81,7 +80,7 @@ bool ReadAlign::chimericDetectionMult() {
                         chimScoreBest=chimScore;
                         trChim[1].roStart = trChim[1].roStr ==0 ? trChim[1].rStart : Lread - trChim[1].rStart - trChim[1].rLength;
                         trChim[1].cStart  = trChim[1].gStart - P.chrStart[trChim[1].Chr];
-                        chimStrBest=chimStr1;
+                        chimStrBest=seg1.str;
                     } else if (chimScore>chimScoreNext && overlap1==0) {//replace the nextscore if it's not the best one and is higher than the previous one
                         chimScoreNext=chimScore;
                     };
