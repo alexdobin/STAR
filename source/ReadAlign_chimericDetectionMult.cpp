@@ -49,6 +49,7 @@ bool ReadAlign::chimericDetectionMult() {
         Transcript* trChim1=NULL;
 
         ChimericSegment seg1(P,trChim[0],Lread,readLength);
+        chimStr=seg1.str;
 
         for (uint iW=0; iW<nW; iW++) {//check all other windows for chimeras
             for (uint iWt=0; iWt<nWinTr[iW]; iWt++){//cycl over transcripts in the window

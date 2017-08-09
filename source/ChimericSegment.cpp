@@ -9,8 +9,8 @@ ChimericSegment::ChimericSegment(Parameters &Pin, Transcript &alignIn, uint Lrea
     } else {//strand opposite to RNA
         str=2;
     };
-    uint roS=align.Str==0 ? align.exons[0][EX_R] : Lread - align.exons[align.nExons-1][EX_R] - align.exons[align.nExons-1][EX_L];
-    uint roE=align.Str==0 ? align.exons[align.nExons-1][EX_R] + align.exons[align.nExons-1][EX_L] - 1 : Lread - align.exons[0][EX_R] - 1;
+    roS=align.Str==0 ? align.exons[0][EX_R] : Lread - align.exons[align.nExons-1][EX_R] - align.exons[align.nExons-1][EX_L];
+    roE=align.Str==0 ? align.exons[align.nExons-1][EX_R] + align.exons[align.nExons-1][EX_L] - 1 : Lread - align.exons[0][EX_R] - 1;
     if (roS>readLength[0]) roS--;
     if (roE>readLength[0]) roE--;
 };
