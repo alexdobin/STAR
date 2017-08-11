@@ -85,7 +85,17 @@ bool ReadAlign::chimericDetectionMult() {
                         uint e1 = s1->align.Str==1 ? 0 : s1->align.nExons-1;
                         uint e2 = s2->align.Str==0 ? 0 : s2->align.nExons-1;   
                         if ( s1->align.exons[e1][EX_iFrag] > s2->align.exons[e2][EX_iFrag] )  
-                            continue;
+                            continue; //strange configuration
+                        
+                        //         if ( trChim[0].exons[e0][EX_iFrag] > trChim[1].exons[e1][EX_iFrag] ) {//strange configuration, rare, similar to the next one
+                        //             chimN=0;//reject such chimeras
+                        //             //good test example:
+                        //             //CTTAGCTAGCAGCGTCTTCCCAGTGCCTGGAGGGCCAGTGAGAATGGCACCCTCTGGGATTTTTGCTCCTAGGTCT
+                        //             //TTGAGGTGAAGTTCAAAGATGTGGCTGGCTGTGAGGAGGCCGAGCTAGAGATCATGGAATTTGTGAATTTCTTGAA
+                        //         } else 
+                        
+                        if (s1->align.exons[e1][EX_L] < P.pCh.junctionOverhangMin &&  s2->align.exons[e2][EX_L] < P.pCh.junctionOverhangMin)                       
+                            continue; //junction overhangs too short
 
                         uint overlap1=0;
                         if (iA2>0 && chimScoreBest>0)
@@ -139,12 +149,6 @@ bool ReadAlign::chimericDetectionMult() {
         uint chimRepeat0=0,chimRepeat1=0,chimJ0=0,chimJ1=0;
         int chimMotif=0;
         chimN=2;
-//         if ( trChim[0].exons[e0][EX_iFrag] > trChim[1].exons[e1][EX_iFrag] ) {//strange configuration, rare, similar to the next one
-//             chimN=0;//reject such chimeras
-//             //good test example:
-//             //CTTAGCTAGCAGCGTCTTCCCAGTGCCTGGAGGGCCAGTGAGAATGGCACCCTCTGGGATTTTTGCTCCTAGGTCT
-//             //TTGAGGTGAAGTTCAAAGATGTGGCTGGCTGTGAGGAGGCCGAGCTAGAGATCATGGAATTTGTGAATTTCTTGAA
-//         } else 
         if ( trChim[0].exons[e0][EX_iFrag] < trChim[1].exons[e1][EX_iFrag] ) {//mates bracket the chimeric junction
             chimN=2;
             chimRepeat=0;
@@ -160,7 +164,7 @@ bool ReadAlign::chimericDetectionMult() {
                 chimJ1=trChim[1].exons[e1][EX_G]+trChim[1].exons[e1][EX_L];
             };
         } else {//chimeric junctions is within one of the mates, check and shift chimeric junction if necessary
-            if (trChim[0].exons[e0][EX_L]>=P.pCh.junctionOverhangMin && trChim[1].exons[e1][EX_L]>=P.pCh.junctionOverhangMin ) {//large enough overhang required
+            {
                 uint roStart0 = trChim[0].Str==0 ? trChim[0].exons[e0][EX_R] : Lread - trChim[0].exons[e0][EX_R] - trChim[0].exons[e0][EX_L];
                 uint roStart1 = trChim[1].Str==0 ? trChim[1].exons[e1][EX_R] : Lread - trChim[1].exons[e1][EX_R] - trChim[1].exons[e1][EX_L];
 
@@ -187,10 +191,10 @@ bool ReadAlign::chimericDetectionMult() {
                         if (b1<4) b1=3-b1;
                     };
 
-                    if ( ( P.pCh.filter.genomicN && (b0>3 || b1>3) ) || bR>3) {//chimera is not called if there are Ns in the genome or in the read
-                        chimN=0;
-                        break;
-                    };
+//                     if ( ( P.pCh.filter.genomicN && (b0>3 || b1>3) ) || bR>3) {//chimera is not called if there are Ns in the genome or in the read
+//                         chimN=0;
+//                         break;
+//                     };
 
                     char b01,b02,b11,b12;
                     if (trChim[0].Str==0) {
