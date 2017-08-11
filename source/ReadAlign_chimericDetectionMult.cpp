@@ -135,14 +135,14 @@ bool ReadAlign::chimericDetectionMult() {
 
     trChim[0]=chimAligns[0].seg1.align;
     trChim[1]=chimAligns[0].seg2.align;
+    if (trChim[0].roStart > trChim[1].roStart) 
+        swap (trChim[0],trChim[1]);
 
     chimStr = max(chimAligns[0].seg1.str,chimAligns[0].seg2.str); //segment strands are either equal, or one is zero - select the non-zero strand
     
     chimN=0;
     if (chimScoreNext + P.pCh.scoreSeparation < chimScoreBest) {//report only if chimera is unique
         
-        if (trChim[0].roStart > trChim[1].roStart) 
-            swap (trChim[0],trChim[1]);
         uint e0 = trChim[0].Str==1 ? 0 : trChim[0].nExons-1;
         uint e1 = trChim[1].Str==0 ? 0 : trChim[1].nExons-1;
 
@@ -305,9 +305,9 @@ bool ReadAlign::chimericDetectionMult() {
         };//chimeric junction is within a mate
 
         //chimeric alignments output
-        if ( chimN==2 \
-                && ( trChim[0].Str!=trChim[1].Str ||  trChim[0].Chr!=trChim[1].Chr \
-                || (trChim[0].Str==0 ? chimJ1-chimJ0+1LLU : chimJ0-chimJ1+1LLU) > (chimMotif>=0 ? P.alignIntronMax :  P.alignMatesGapMax) ) )
+        if ( chimN==2)
+//                 && ( trChim[0].Str!=trChim[1].Str ||  trChim[0].Chr!=trChim[1].Chr \
+//                 || (trChim[0].Str==0 ? chimJ1-chimJ0+1LLU : chimJ0-chimJ1+1LLU) > (chimMotif>=0 ? P.alignIntronMax :  P.alignMatesGapMax) ) )
         {//
             if (chimMotif>=0 && \
                  (trChim[0].exons[e0][EX_L]<P.pCh.junctionOverhangMin+chimRepeat0 || trChim[1].exons[e1][EX_L]<P.pCh.junctionOverhangMin+chimRepeat1) )
