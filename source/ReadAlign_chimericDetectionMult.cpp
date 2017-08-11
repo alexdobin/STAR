@@ -46,65 +46,61 @@ bool ReadAlign::chimericDetectionMult() {
         for (uint iA1=0; iA1<nWinTr[iW1]; iA1++)
         {//cycle aligns in the window
             
-//             if ( trAll[iW1][iA1] != trBest)
-//                 continue; //debug
-            
             ChimericSegment seg1(P,*trAll[iW1][iA1],Lread,readLength);
     
-            if (P.pCh.segmentMin>0 && seg1.align.rLength >= P.pCh.segmentMin \
-                    && ( seg1.align.exons[seg1.align.nExons-1][EX_R] + seg1.align.exons[seg1.align.nExons-1][EX_L] + P.pCh.segmentMin <= Lread \
-                      || seg1.align.exons[0][EX_R] >= P.pCh.segmentMin ) \
-                     && seg1.align.intronMotifs[0]==0 && (seg1.align.intronMotifs[1]==0 || seg1.align.intronMotifs[2]==0) ) 
-            {//there is unmapped space at the start/end, and the main window is not a multimapping window, and non non-canonical junctions, and consistend junction motif
+            bool seg1yes = true;
+            seg1yes = seg1yes && seg1.align.rLength >= P.pCh.segmentMin; //mapped length >= chim segmentMin
+            seg1yes = seg1yes && (seg1.align.exons[seg1.align.nExons-1][EX_R] + seg1.align.exons[seg1.align.nExons-1][EX_L] + P.pCh.segmentMin <= Lread) \
+                      || (seg1.align.exons[0][EX_R] >= P.pCh.segmentMin); //uncovered by seg1 read length is <= segmentMin
+            seg1yes = seg1yes && seg1.align.intronMotifs[0]==0; //no non-canonical juncions. TODO: allow non-canonical anotated
+            seg1yes = seg1yes && (seg1.align.intronMotifs[1]==0 || seg1.align.intronMotifs[2]==0); //consistent intron motifs. TODO: switch to strands
+            
+            if (!seg1yes)
+                continue; //seg1 is bad
+            
+            for (uint iW2=0; iW2<nW; iW2++) 
+            {//check all windows for chimeras
+                for (uint iA2=0; iA2<nWinTr[iW2]; iA2++)
+                {//cycle over aligns in the window
+                    if (trBest!=trAll[iW2][0] && iA2>0) break; //check only best transcripts in each window 2(i.e. iA2=0), for all windows except that of the trBest
+                    if (trBest==trAll[iW2][0] && iA2==0) continue;//for trBest window, check all iA2>0
 
-                for (uint iW2=0; iW2<nW; iW2++) 
-                {//check all windows for chimeras
-                    for (uint iA2=0; iA2<nWinTr[iW2]; iA2++)
-                    {//cycle over aligns in the window
-//                         if (&seg1.align!=trAll[iW2][0] && iA2>0) break; //check only best transcripts in each window 2(i.e. iA2=0), for all windows except that of the trBest
-//                         if (&seg1.align==trAll[iW2][0] && iA2==0) continue;//for trBest window, check all iA2>0
-                        if (trBest!=trAll[iW2][0] && iA2>0) break; //check only best transcripts in each window 2(i.e. iA2=0), for all windows except that of the trBest
-                        if (trBest==trAll[iW2][0] && iA2==0) continue;//for trBest window, check all iA2>0
+                    ChimericSegment seg2(P,*trAll[iW2][iA2],Lread,readLength);
 
-                        ChimericSegment seg2(P,*trAll[iW2][iA2],Lread,readLength);
-                        
-//                         if (seg2.align.maxScore>seg1.align.maxScore)
-//                             swap(seg1,seg2);
-                        
-                        if (seg2.align.intronMotifs[0]>0) continue; //do not stitch to a window with non-canonical junctions
+                    if (seg2.align.intronMotifs[0]>0) 
+                        continue; //do not stitch to a window with non-canonical junctions
+                    if (seg1.str!=0 && seg2.str!=0 && seg2.str!=seg1.str) 
+                        continue; //chimeric segments have to have consitent strands                
 
-                        if (seg1.str!=0 && seg2.str!=0 && seg2.str!=seg1.str) continue; //chimeric segments have to have consitent strands                
+                    int chimScore=chimericAlignScore(seg1,seg2);
 
-                        int chimScore=chimericAlignScore(seg1,seg2);
+                    if ( &seg1.align!=trBest && &seg2.align!=trBest )
+                        continue; //debug
 
-                        if ( &seg1.align!=trBest && &seg2.align!=trBest )
-                            continue; //debug
-                        
-                        if  (chimScore>0)
-                        {
-                            uint overlap1=0;
-                            if (iA2>0 && chimScoreBest>0)
-                            {//overlap between chimeric candidate segment and the best chimeric segment so far. Maybe non-zero only if both are in the same window.
-                                overlap1=blocksOverlap(chimAligns.back().seg2.align,seg2.align);
-                            };
-
-                            if (chimScore > chimScoreBest && chimScore >= P.pCh.scoreMin && chimScore+P.pCh.scoreDropMax >= (int) (readLength[0]+readLength[1]) ) 
-                            {
-                                chimAligns.clear();
-                                chimAligns.push_back(ChimericAlign(seg1,seg2));
-                                if (overlap1==0)
-                                {
-                                    chimScoreNext=chimScoreBest;
-                                };
-                                chimScoreBest=chimScore;
-
-                            } else if (chimScore>chimScoreNext && overlap1==0) {//replace the nextscore if it's not the best one and is higher than the previous one
-                                chimScoreNext=chimScore;
-                            };
+                    if  (chimScore>0)
+                    {
+                        uint overlap1=0;
+                        if (iA2>0 && chimScoreBest>0)
+                        {//overlap between chimeric candidate segment and the best chimeric segment so far. Maybe non-zero only if both are in the same window.
+                            overlap1=blocksOverlap(chimAligns.back().seg2.align,seg2.align);
                         };
-                    };//cycle over window2 aligns
-                };//cycle over window2
-            };//if seg1 is good
+
+                        if (chimScore > chimScoreBest && chimScore >= P.pCh.scoreMin && chimScore+P.pCh.scoreDropMax >= (int) (readLength[0]+readLength[1]) ) 
+                        {
+                            chimAligns.clear();
+                            chimAligns.push_back(ChimericAlign(seg1,seg2));
+                            if (overlap1==0)
+                            {
+                                chimScoreNext=chimScoreBest;
+                            };
+                            chimScoreBest=chimScore;
+
+                        } else if (chimScore>chimScoreNext && overlap1==0) {//replace the nextscore if it's not the best one and is higher than the previous one
+                            chimScoreNext=chimScore;
+                        };
+                    };
+                };//cycle over window2 aligns
+            };//cycle over window2
         };//cycle over window1 aligns
     };//cycle over window1                
 
@@ -138,12 +134,7 @@ bool ReadAlign::chimericDetectionMult() {
         uint chimRepeat0=0,chimRepeat1=0,chimJ0=0,chimJ1=0;
         int chimMotif=0;
         chimN=2;
-        if ( trChim[0].exons[e0][EX_iFrag] > trChim[1].exons[e1][EX_iFrag] ) {//strange configuration, rare, similar to the next one
-            chimN=0;//reject such chimeras
-            //good test example:
-            //CTTAGCTAGCAGCGTCTTCCCAGTGCCTGGAGGGCCAGTGAGAATGGCACCCTCTGGGATTTTTGCTCCTAGGTCT
-            //TTGAGGTGAAGTTCAAAGATGTGGCTGGCTGTGAGGAGGCCGAGCTAGAGATCATGGAATTTGTGAATTTCTTGAA
-        } else if ( trChim[0].exons[e0][EX_iFrag] < trChim[1].exons[e1][EX_iFrag] ) {//mates bracket the chimeric junction
+        if ( trChim[0].exons[e0][EX_iFrag] < trChim[1].exons[e1][EX_iFrag] ) {//mates bracket the chimeric junction
             chimN=2;
             chimRepeat=0;
             chimMotif=-1;
