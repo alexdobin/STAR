@@ -50,8 +50,8 @@ bool ReadAlign::chimericDetectionMult() {
     
             bool seg1yes = true;
             seg1yes = seg1yes && seg1.align.rLength >= P.pCh.segmentMin; //mapped length >= chim segmentMin
-            seg1yes = seg1yes && (seg1.align.exons[seg1.align.nExons-1][EX_R] + seg1.align.exons[seg1.align.nExons-1][EX_L] + P.pCh.segmentMin <= Lread) \
-                      || (seg1.align.exons[0][EX_R] >= P.pCh.segmentMin); //uncovered by seg1 read length is <= segmentMin
+            seg1yes = seg1yes && (seg1.align.exons[seg1.align.nExons-1][EX_R] + seg1.align.exons[seg1.align.nExons-1][EX_L] + P.pCh.segmentMin <= Lread \
+                      || seg1.align.exons[0][EX_R] >= P.pCh.segmentMin); //uncovered by seg1 read length is <= segmentMin
             seg1yes = seg1yes && seg1.align.intronMotifs[0]==0; //no non-canonical juncions. TODO: allow non-canonical anotated
             seg1yes = seg1yes && (seg1.align.intronMotifs[1]==0 || seg1.align.intronMotifs[2]==0); //consistent intron motifs. TODO: switch to strands
             
@@ -78,13 +78,20 @@ bool ReadAlign::chimericDetectionMult() {
                         continue; //debug
 
                     if  (chimScore>0)
-                    {
+                    {//candidate chimera                       
+
+                        ChimericSegment *s1=&seg1,*s2=&seg2;
+                        if (seg1.align.roStart > seg2.align.roStart) swap (s1,s2);
+                        uint e1 = s1->align.Str==1 ? 0 : s1->align.nExons-1;
+                        uint e2 = s2->align.Str==0 ? 0 : s2->align.nExons-1;   
+                        if ( s1->align.exons[e1][EX_iFrag] > s2->align.exons[e2][EX_iFrag] )  
+                            continue;
+
                         uint overlap1=0;
                         if (iA2>0 && chimScoreBest>0)
                         {//overlap between chimeric candidate segment and the best chimeric segment so far. Maybe non-zero only if both are in the same window.
                             overlap1=blocksOverlap(chimAligns.back().seg2.align,seg2.align);
                         };
-
                         if (chimScore > chimScoreBest && chimScore >= P.pCh.scoreMin && chimScore+P.pCh.scoreDropMax >= (int) (readLength[0]+readLength[1]) ) 
                         {
                             chimAligns.clear();
@@ -118,28 +125,27 @@ bool ReadAlign::chimericDetectionMult() {
 
     trChim[0]=chimAligns[0].seg1.align;
     trChim[1]=chimAligns[0].seg2.align;
-//     trChim[1].roStart = trChim[1].roStr ==0 ? trChim[1].rStart : Lread - trChim[1].rStart - trChim[1].rLength;
-//     trChim[1].cStart  = trChim[1].gStart - P.chrStart[trChim[1].Chr];        
 
     chimStr = max(chimAligns[0].seg1.str,chimAligns[0].seg2.str); //segment strands are either equal, or one is zero - select the non-zero strand
     
     chimN=0;
     if (chimScoreNext + P.pCh.scoreSeparation < chimScoreBest) {//report only if chimera is unique
-
-        if (trChim[0].roStart > trChim[1].roStart) swap (trChim[0],trChim[1]);
-
+        
+        if (trChim[0].roStart > trChim[1].roStart) 
+            swap (trChim[0],trChim[1]);
         uint e0 = trChim[0].Str==1 ? 0 : trChim[0].nExons-1;
         uint e1 = trChim[1].Str==0 ? 0 : trChim[1].nExons-1;
 
         uint chimRepeat0=0,chimRepeat1=0,chimJ0=0,chimJ1=0;
         int chimMotif=0;
         chimN=2;
-        if ( trChim[0].exons[e0][EX_iFrag] > trChim[1].exons[e1][EX_iFrag] ) {//strange configuration, rare, similar to the next one
-            chimN=0;//reject such chimeras
-            //good test example:
-            //CTTAGCTAGCAGCGTCTTCCCAGTGCCTGGAGGGCCAGTGAGAATGGCACCCTCTGGGATTTTTGCTCCTAGGTCT
-            //TTGAGGTGAAGTTCAAAGATGTGGCTGGCTGTGAGGAGGCCGAGCTAGAGATCATGGAATTTGTGAATTTCTTGAA
-        } else if ( trChim[0].exons[e0][EX_iFrag] < trChim[1].exons[e1][EX_iFrag] ) {//mates bracket the chimeric junction
+//         if ( trChim[0].exons[e0][EX_iFrag] > trChim[1].exons[e1][EX_iFrag] ) {//strange configuration, rare, similar to the next one
+//             chimN=0;//reject such chimeras
+//             //good test example:
+//             //CTTAGCTAGCAGCGTCTTCCCAGTGCCTGGAGGGCCAGTGAGAATGGCACCCTCTGGGATTTTTGCTCCTAGGTCT
+//             //TTGAGGTGAAGTTCAAAGATGTGGCTGGCTGTGAGGAGGCCGAGCTAGAGATCATGGAATTTGTGAATTTCTTGAA
+//         } else 
+        if ( trChim[0].exons[e0][EX_iFrag] < trChim[1].exons[e1][EX_iFrag] ) {//mates bracket the chimeric junction
             chimN=2;
             chimRepeat=0;
             chimMotif=-1;
