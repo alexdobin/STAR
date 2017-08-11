@@ -118,8 +118,8 @@ bool ReadAlign::chimericDetectionMult() {
 
     trChim[0]=chimAligns[0].seg1.align;
     trChim[1]=chimAligns[0].seg2.align;
-    trChim[1].roStart = trChim[1].roStr ==0 ? trChim[1].rStart : Lread - trChim[1].rStart - trChim[1].rLength;
-    trChim[1].cStart  = trChim[1].gStart - P.chrStart[trChim[1].Chr];        
+//     trChim[1].roStart = trChim[1].roStr ==0 ? trChim[1].rStart : Lread - trChim[1].rStart - trChim[1].rLength;
+//     trChim[1].cStart  = trChim[1].gStart - P.chrStart[trChim[1].Chr];        
 
     chimStr = max(chimAligns[0].seg1.str,chimAligns[0].seg2.str); //segment strands are either equal, or one is zero - select the non-zero strand
     
@@ -134,7 +134,12 @@ bool ReadAlign::chimericDetectionMult() {
         uint chimRepeat0=0,chimRepeat1=0,chimJ0=0,chimJ1=0;
         int chimMotif=0;
         chimN=2;
-        if ( trChim[0].exons[e0][EX_iFrag] < trChim[1].exons[e1][EX_iFrag] ) {//mates bracket the chimeric junction
+        if ( trChim[0].exons[e0][EX_iFrag] > trChim[1].exons[e1][EX_iFrag] ) {//strange configuration, rare, similar to the next one
+            chimN=0;//reject such chimeras
+            //good test example:
+            //CTTAGCTAGCAGCGTCTTCCCAGTGCCTGGAGGGCCAGTGAGAATGGCACCCTCTGGGATTTTTGCTCCTAGGTCT
+            //TTGAGGTGAAGTTCAAAGATGTGGCTGGCTGTGAGGAGGCCGAGCTAGAGATCATGGAATTTGTGAATTTCTTGAA
+        } else if ( trChim[0].exons[e0][EX_iFrag] < trChim[1].exons[e1][EX_iFrag] ) {//mates bracket the chimeric junction
             chimN=2;
             chimRepeat=0;
             chimMotif=-1;
