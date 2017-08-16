@@ -20,8 +20,11 @@ class Transcript {
 
         uint nExons; //number of exons in the read transcript
 
+        //variables from ReadAlign
+        uint *readLengthOriginal, *readLength;
         uint Lread, readLengthPairOriginal;
         uint iRead; //read identifier
+        uint readNmates;
 
         int iFrag; //frag number of the transcript, if the the transcript contains only one frag
 
@@ -51,6 +54,7 @@ class Transcript {
         
         uint nUnique, nAnchor; //number of unique pieces in the alignment, number of anchor pieces in the alignment   
         
+        
         vector <int32> snpInd;
         vector <int32> snpLoci;
         vector <char> snpGt;
@@ -62,6 +66,11 @@ class Transcript {
         void add(Transcript*); // add
         void alignScore(char **Read1, char *G, Parameters &P);
         int variationAdjust(Variation &Var, char *R, char **Read1, char *G, Parameters &P);
+        string generateCigarP(); //generates CIGAR
+        
+    private:
+
+        
 };
 
 #endif

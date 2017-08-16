@@ -30,7 +30,7 @@ CFLAGS := -O3 -pipe -Wall -Wextra $(CFLAGS)
 ##########################################################################################################
 
 OBJECTS = SharedMemory.o PackedArray.o SuffixArrayFuns.o STAR.o Parameters.o InOutStreams.o SequenceFuns.o Genome.o Stats.o \
-        Transcript.o Transcript_alignScore.o Transcript_variationAdjust.o Chain.o \
+        Transcript.o Transcript_alignScore.o Transcript_variationAdjust.o Transcript_generateCigarP.o Chain.o \
         ReadAlign.o ReadAlign_storeAligns.o ReadAlign_stitchPieces.o ReadAlign_multMapSelect.o ReadAlign_mapOneRead.o readLoad.o \
 	ReadAlignChunk.o ReadAlignChunk_processChunks.o ReadAlignChunk_mapChunk.o \
 	OutSJ.o outputSJ.o blocksOverlap.o ThreadControl.o sysRemoveDir.o \
@@ -39,7 +39,8 @@ OBJECTS = SharedMemory.o PackedArray.o SuffixArrayFuns.o STAR.o Parameters.o InO
 	ReadAlign_outputTranscriptSAM.o ReadAlign_outputTranscriptSJ.o ReadAlign_outputTranscriptCIGARp.o \
         ReadAlign_createExtendWindowsWithAlign.o ReadAlign_assignAlignToWindow.o ReadAlign_oneRead.o \
 	ReadAlign_stitchWindowSeeds.o \
-        ReadAlign_chimericDetection.o ReadAlign_chimericDetectionOld.o ReadAlign_chimericDetectionMult.o ChimericSegment.cpp ChimericAlign.cpp \
+        ReadAlign_chimericDetection.o ReadAlign_chimericDetectionOld.o ReadAlign_chimericDetectionMult.o \
+        ChimericSegment.cpp ChimericAlign.cpp ChimericAlign_chimericJunctionOutput.o ChimericAlign_chimericStitching.o \
         stitchWindowAligns.o extendAlign.o stitchAlignToTranscript.o alignSmithWaterman.o \
         genomeGenerate.o genomeParametersWrite.o genomeScanFastaFiles.o genomeSAindex.o \
         Genome_insertSequences.o insertSeqSA.o funCompareUintAndSuffixes.o sortSuffixesBucket.o funCompareUintAndSuffixesMemcmp.o \

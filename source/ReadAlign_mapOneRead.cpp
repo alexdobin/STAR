@@ -26,9 +26,12 @@ int ReadAlign::mapOneRead() {
     trInit->Chr=0;    trInit->Str=0; trInit->roStr=0;    trInit->cStart=0;     trInit->gLength=0; //to generate nice output of 0 for non-mapped reads
     trInit->iRead=iRead;
     trInit->Lread=Lread;
-    trInit->readLengthPairOriginal=readLengthPairOriginal;
     trInit->nExons=0;
-
+    trInit->readLengthOriginal=readLengthOriginal;
+    trInit->readLengthPairOriginal=readLengthPairOriginal;
+    trInit->readLength=readLength;
+    trInit->readNmates=P.readNmates;
+            
     trNext=trBest=trInit;
 
     uint seedSearchStartLmax=min(P.seedSearchStartLmax,(uint) (P.seedSearchStartLmaxOverLread*(Lread-1)));
