@@ -31,7 +31,8 @@ int ReadAlign::mapOneRead() {
     trInit->readLengthPairOriginal=readLengthPairOriginal;
     trInit->readLength=readLength;
     trInit->readNmates=P.readNmates;
-            
+    trInit->readName=readName;
+    
     trNext=trBest=trInit;
 
     uint seedSearchStartLmax=min(P.seedSearchStartLmax,(uint) (P.seedSearchStartLmaxOverLread*(Lread-1)));

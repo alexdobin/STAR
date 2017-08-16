@@ -139,7 +139,7 @@ bool ReadAlign::chimericDetectionMult() {
     if (chimScoreNext + P.pCh.scoreSeparation < chimScoreBest) {//report only if chimera is unique
             chimAligns[0].chimericStitching(mapGen.G, Read1[0]);
             if (chimAligns[0].chimScore>0)
-                chimAligns[0].chimericJunctionOutput(chunkOutChimJunction, readName);
+                chimAligns[0].chimericJunctionOutput(chunkOutChimJunction);
     };
     return chimRecord;
 };//END
