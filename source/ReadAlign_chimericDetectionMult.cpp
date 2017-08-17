@@ -17,7 +17,7 @@ int chimericAlignScore (ChimericSegment & seg1, ChimericSegment & seg2)
     if (seg1.roE > seg1.P.pCh.segmentMin + seg1.roS + chimOverlap && seg2.roE > seg1.P.pCh.segmentMin + seg2.roS + chimOverlap  \
         && ( diffMates || ( (seg1.roE + seg1.P.pCh.segmentReadGapMax + 1) >= seg2.roS && (seg2.roE + seg1.P.pCh.segmentReadGapMax + 1) >= seg1.roS ) ) ) 
     {
-       chimScore=chimScore= seg1.align.maxScore + seg2.align.maxScore - (int)chimOverlap; //subtract overlap to avoid double counting
+       chimScore = seg1.align.maxScore + seg2.align.maxScore - (int)chimOverlap; //subtract overlap to avoid double counting
     };
     
     return chimScore;
@@ -131,15 +131,41 @@ bool ReadAlign::chimericDetectionMult() {
         };
     };
 
-    if (chimAligns.size()==0)
+    chimN=0;   
+    for (uint ic=0; ic<chimAligns.size(); ic++) {//scan all chimeras, find the number within score range
+        if (chimAligns[ic].chimScore >= chimScoreBest - (int)P.pCh.multimapScoreRange)
+            ++chimN;
+    };
+
+    if (chimN > 2*P.pCh.multimapNmax) //too many loci (consider 2* more candidates for stitching below)
         return chimRecord;
     
-    chimN=0;   
-    
-    if (chimScoreNext + P.pCh.scoreSeparation < chimScoreBest) {//report only if chimera is unique
-            chimAligns[0].chimericStitching(mapGen.G, Read1[0]);
-            if (chimAligns[0].chimScore>0)
-                chimAligns[0].chimericJunctionOutput(chunkOutChimJunction);
+    //TODO deal with the case chimScoreBest chimera is eliminated
+    chimN=0;
+    for (uint ic=0; ic<chimAligns.size(); ic++) {//re-scan all chimeras: stitch and re-check the score
+        if (chimAligns[ic].chimScore >= chimScoreBest-(int)P.pCh.multimapScoreRange) {
+            chimAligns[ic].chimericStitching(mapGen.G, Read1[0]);
+            if (chimAligns[ic].chimScore >= chimScoreBest-(int)P.pCh.multimapScoreRange)
+                ++chimN;
+        };
     };
+    
+    if (chimN > P.pCh.multimapNmax) //too many loci
+        return chimRecord;
+    
+    if (chimScoreNext >= chimScoreBest - P.pCh.scoreSeparation)
+        return chimRecord;
+    
+    for (uint ic=0; ic<chimAligns.size(); ic++) {//output chimeras within score range
+        if (chimAligns[ic].chimScore >= chimScoreBest-(int)P.pCh.multimapScoreRange)
+            chimAligns[ic].chimericJunctionOutput(chunkOutChimJunction);
+    };
+//     if (chimScoreNext + P.pCh.scoreSeparation < chimScoreBest) {//report only if chimera is unique
+//             chimAligns[0].chimericStitching(mapGen.G, Read1[0]);
+//             if (chimAligns[0].chimScore>0)
+//                 chimAligns[0].chimericJunctionOutput(chunkOutChimJunction);
+//     };
+    if (chimN>0)
+        chimRecord=true;
     return chimRecord;
 };//END
