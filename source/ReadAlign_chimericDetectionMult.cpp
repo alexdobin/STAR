@@ -105,7 +105,7 @@ bool ReadAlign::chimericDetectionMult() {
                         
                         if (chimScore > chimScoreBest && chimScore >= P.pCh.scoreMin && chimScore+P.pCh.scoreDropMax >= (int) (readLength[0]+readLength[1]) ) 
                         {
-                            chimAligns.clear();
+//                             chimAligns.clear();
                             chimAligns.push_back(ChimericAlign(seg1, seg2, chimScore));
                             if (overlap1==0)
                             {
