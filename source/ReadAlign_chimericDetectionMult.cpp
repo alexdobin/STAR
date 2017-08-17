@@ -39,7 +39,7 @@ bool ReadAlign::chimericDetectionMult() {
     };
     
     vector <ChimericAlign> chimAligns;
-    int chimScoreBest=0,chimScoreNext=0;
+    int chimScoreBest=0;
                 
     for (uint iW1=0; iW1<nW; iW1++)
     {//cycle windows 
@@ -96,26 +96,13 @@ bool ReadAlign::chimericDetectionMult() {
                         
                         if (s1->align.exons[e1][EX_L] < P.pCh.junctionOverhangMin &&  s2->align.exons[e2][EX_L] < P.pCh.junctionOverhangMin)                       
                             continue; //junction overhangs too short
-
-                        uint overlap1=0;
-                        if (iA2>0 && chimScoreBest>0)
-                        {//overlap between chimeric candidate segment and the best chimeric segment so far. Maybe non-zero only if both are in the same window.
-                            overlap1=blocksOverlap(chimAligns.back().seg2.align,seg2.align);
-                        };
-                        
-                        if (chimScore > chimScoreBest && chimScore >= P.pCh.scoreMin && chimScore+P.pCh.scoreDropMax >= (int) (readLength[0]+readLength[1]) ) 
-                        {
-//                             chimAligns.clear();
+       
+                        if (chimScore>=chimScoreBest-(int)P.pCh.multimapScoreRange && chimScore >= P.pCh.scoreMin) 
                             chimAligns.push_back(ChimericAlign(seg1, seg2, chimScore));
-                            if (overlap1==0)
-                            {
-                                chimScoreNext=chimScoreBest;
-                            };
+                            
+                        if (chimScore > chimScoreBest)
                             chimScoreBest=chimScore;
 
-                        } else if (chimScore>chimScoreNext && overlap1==0) {//replace the nextscore if it's not the best one and is higher than the previous one
-                            chimScoreNext=chimScore;
-                        };
                     };
                 };//cycle over window2 aligns
             };//cycle over window2
@@ -131,6 +118,9 @@ bool ReadAlign::chimericDetectionMult() {
         };
     };
 
+    if ( chimScoreBest+P.pCh.scoreDropMax < (int) (readLength[0]+readLength[1]) )
+        return chimRecord;//highest score is too low
+    
     chimN=0;   
     for (uint ic=0; ic<chimAligns.size(); ic++) {//scan all chimeras, find the number within score range
         if (chimAligns[ic].chimScore >= chimScoreBest - (int)P.pCh.multimapScoreRange)
@@ -151,9 +141,6 @@ bool ReadAlign::chimericDetectionMult() {
     };
     
     if (chimN > P.pCh.multimapNmax) //too many loci
-        return chimRecord;
-    
-    if (chimScoreNext >= chimScoreBest - P.pCh.scoreSeparation)
         return chimRecord;
     
     for (uint ic=0; ic<chimAligns.size(); ic++) {//output chimeras within score range
