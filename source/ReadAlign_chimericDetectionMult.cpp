@@ -44,14 +44,11 @@ bool ReadAlign::chimericDetectionMult() {
             
             if (!seg1yes)
                 continue; //seg1 is bad
-            
-            for (uint iW2=0; iW2<nW; iW2++) 
-            {//check all windows for chimeras
-                for (uint iA2=0; iA2<nWinTr[iW2]; iA2++)
-                {//cycle over aligns in the window
-                    if (trBest!=trAll[iW2][0] && iA2>0) break; //check only best transcripts in each window 2(i.e. iA2=0), for all windows except that of the trBest
-                    if (trBest==trAll[iW2][0] && iA2==0) continue;//for trBest window, check all iA2>0
-
+           
+            for (uint iW2=iW1; iW2<nW; iW2++) {//check all windows for chimeras
+                for (uint iA2=(iW1!=iW2 ? 0 : iA1+1); iA2<nWinTr[iW2]; iA2++) {//cycle over aligns in the window
+                    //for the same window, start iA2 at iA1+1 to avoid duplicating
+                    
                     ChimericSegment seg2(P,*trAll[iW2][iA2]);
 
                     if (seg2.align.intronMotifs[0]>0) 
