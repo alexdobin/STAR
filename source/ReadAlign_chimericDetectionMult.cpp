@@ -26,18 +26,7 @@ int chimericAlignScore (ChimericSegment & seg1, ChimericSegment & seg2)
 /////////////////////////////////////////////////////////////
 bool ReadAlign::chimericDetectionMult() {
 
-    bool chimRecord=false;
-    
-    //////////////////// chimeras
-    //stich windows => chimeras
-    //stich only the best window with one of the lower score ones for now - do not stich 2 lower score windows
-    //stitch only one window on each end of the read
-    
-    if (nTr>P.pCh.mainSegmentMultNmax && nTr!=2)
-    {//multimapping main segment, nTr==2 is a special case to be checked later
-        return chimRecord;
-    };
-    
+    bool chimRecord=false;  
     vector <ChimericAlign> chimAligns;
     int chimScoreBest=0;
                 
@@ -110,15 +99,6 @@ bool ReadAlign::chimericDetectionMult() {
         };//cycle over window1 aligns
     };//cycle over window1                
 
-    if (nTr>P.pCh.mainSegmentMultNmax)
-    {//check main segment for multi-aligns
-     //this is nTr==2 - a special case: chimeras are allowed only if the 2nd chimeric segment is the next best alignment
-        if ( &chimAligns[0].seg2.align!=trMult[0] && &chimAligns[0].seg2.align!=trMult[1] )
-        {
-            return chimRecord;
-        };
-    };
-    
     if (chimScoreBest==0)
         return chimRecord;
     
