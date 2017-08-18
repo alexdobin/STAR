@@ -100,8 +100,11 @@ bool ReadAlign::chimericDetectionMult() {
                         if (chimScore>=chimScoreBest-(int)P.pCh.multimapScoreRange && chimScore >= P.pCh.scoreMin) 
                             chimAligns.push_back(ChimericAlign(seg1, seg2, chimScore));
                             
-                        if (chimScore > chimScoreBest)
-                            chimScoreBest=chimScore;
+                        if (chimScore > chimScoreBest) {
+                            chimAligns.back().chimericStitching(mapGen.G, Read1[0]);
+                            if (chimAligns.back().chimScore > chimScoreBest)
+                                chimScoreBest=chimAligns.back().chimScore;
+                        };
 
                     };
                 };//cycle over window2 aligns
@@ -126,20 +129,17 @@ bool ReadAlign::chimericDetectionMult() {
         if (chimAligns[ic].chimScore >= chimScoreBest - (int)P.pCh.multimapScoreRange)
             ++chimN;
     };
-
-    if (chimN > 2*P.pCh.multimapNmax) //too many loci (consider 2* more candidates for stitching below)
+    if (chimN > 2*P.pCh.multimapNmax) //too many loci (considering 2* more candidates for stitching below)
         return chimRecord;
     
-    //TODO deal with the case chimScoreBest chimera is eliminated
-    chimN=0;
+    chimN=0;   
     for (uint ic=0; ic<chimAligns.size(); ic++) {//re-scan all chimeras: stitch and re-check the score
         if (chimAligns[ic].chimScore >= chimScoreBest-(int)P.pCh.multimapScoreRange) {
             chimAligns[ic].chimericStitching(mapGen.G, Read1[0]);
-            if (chimAligns[ic].chimScore >= chimScoreBest-(int)P.pCh.multimapScoreRange)
+            if (chimAligns[ic].chimScore >= chimScoreBest - (int)P.pCh.multimapScoreRange)
                 ++chimN;
         };
     };
-    
     if (chimN > P.pCh.multimapNmax) //too many loci
         return chimRecord;
     
@@ -154,5 +154,6 @@ bool ReadAlign::chimericDetectionMult() {
 //     };
     if (chimN>0)
         chimRecord=true;
+    
     return chimRecord;
 };//END

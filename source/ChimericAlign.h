@@ -21,6 +21,8 @@ class ChimericAlign
         void chimericJunctionOutput(fstream &outStream);
         void chimericStitching(char *genSeq, char *readSeq);
         
+        bool stitchingDone;
+        
     private:
         Parameters &P;
 };

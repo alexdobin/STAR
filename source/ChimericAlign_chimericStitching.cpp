@@ -2,6 +2,11 @@
 
 void ChimericAlign::chimericStitching(char *genSeq, char *readSeq) {
  
+    if (stitchingDone)
+        return;
+    
+    stitchingDone=true;
+    
     al1=new Transcript(seg1.align);
     al2=new Transcript(seg2.align);
     
