@@ -41,10 +41,8 @@ bool ReadAlign::chimericDetectionMult() {
     vector <ChimericAlign> chimAligns;
     int chimScoreBest=0;
                 
-    for (uint iW1=0; iW1<nW; iW1++)
-    {//cycle windows 
-        for (uint iA1=0; iA1<nWinTr[iW1]; iA1++)
-        {//cycle aligns in the window
+    for (uint iW1=0; iW1<nW; iW1++) {//cycle windows 
+        for (uint iA1=0; iA1<nWinTr[iW1]; iA1++) {//cycle aligns in the window
             
             ChimericSegment seg1(P,*trAll[iW1][iA1]);
     
@@ -100,7 +98,7 @@ bool ReadAlign::chimericDetectionMult() {
                         if (chimScore>=chimScoreBest-(int)P.pCh.multimapScoreRange && chimScore >= P.pCh.scoreMin) 
                             chimAligns.push_back(ChimericAlign(seg1, seg2, chimScore));
                             
-                        if (chimScore > chimScoreBest) {
+                        if ( chimScore > chimScoreBest && chimScore >= (int)(readLength[0]+readLength[1]) - P.pCh.scoreDropMax ) {
                             chimAligns.back().chimericStitching(mapGen.G, Read1[0]);
                             if (chimAligns.back().chimScore > chimScoreBest)
                                 chimScoreBest=chimAligns.back().chimScore;
@@ -120,9 +118,9 @@ bool ReadAlign::chimericDetectionMult() {
             return chimRecord;
         };
     };
-
-    if ( chimScoreBest+P.pCh.scoreDropMax < (int) (readLength[0]+readLength[1]) )
-        return chimRecord;//highest score is too low
+    
+    if (chimScoreBest==0)
+        return chimRecord;
     
     chimN=0;   
     for (uint ic=0; ic<chimAligns.size(); ic++) {//scan all chimeras, find the number within score range
@@ -147,11 +145,7 @@ bool ReadAlign::chimericDetectionMult() {
         if (chimAligns[ic].chimScore >= chimScoreBest-(int)P.pCh.multimapScoreRange)
             chimAligns[ic].chimericJunctionOutput(chunkOutChimJunction);
     };
-//     if (chimScoreNext + P.pCh.scoreSeparation < chimScoreBest) {//report only if chimera is unique
-//             chimAligns[0].chimericStitching(mapGen.G, Read1[0]);
-//             if (chimAligns[0].chimScore>0)
-//                 chimAligns[0].chimericJunctionOutput(chunkOutChimJunction);
-//     };
+
     if (chimN>0)
         chimRecord=true;
     
