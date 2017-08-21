@@ -2,9 +2,10 @@
 
 ChimericSegment::ChimericSegment(Parameters &Pin, Transcript &alignIn) : P(Pin), align(alignIn)
 {
-    if (align.intronMotifs[1]==0 && align.intronMotifs[2]==0) {//strand is undefined
+    if ( (align.intronMotifs[1]==0 && align.intronMotifs[2]==0) || (align.intronMotifs[1]>0 && align.intronMotifs[2]>0)) {//strand is undefined
         str=0;
-    } else if ( (align.Str==0) == (align.intronMotifs[1]>0)) {//strand the same as RNA
+    } else if ( (align.Str==0) == (align.intronMotifs[1]>0)) {//strand the same as RNA. 
+        //This assumes that the aligns have consistent strands, i.e. only intronMotifs[1]>0 OR intronMotifs[2]>0
         str=1;
     } else {//strand opposite to RNA
         str=2;

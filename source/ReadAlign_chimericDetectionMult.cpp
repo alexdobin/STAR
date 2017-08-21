@@ -57,9 +57,9 @@ bool ReadAlign::chimericDetectionMult() {
                         continue; //chimeric segments have to have consitent strands                
 
                     int chimScore=chimericAlignScore(seg1,seg2);
-
-                    if ( &seg1.align!=trBest && &seg2.align!=trBest )
-                        continue; //debug
+// 
+//                     if ( &seg1.align!=trBest && &seg2.align!=trBest )
+//                         continue; //debug
 
                     if  (chimScore>0)
                     {//candidate chimera                       
