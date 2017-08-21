@@ -35,15 +35,8 @@ bool ReadAlign::chimericDetectionMult() {
             
             ChimericSegment seg1(P,*trAll[iW1][iA1]);
     
-            bool seg1yes = true;
-            seg1yes = seg1yes && seg1.align.rLength >= P.pCh.segmentMin; //mapped length >= chim segmentMin
-            seg1yes = seg1yes && (seg1.align.exons[seg1.align.nExons-1][EX_R] + seg1.align.exons[seg1.align.nExons-1][EX_L] + P.pCh.segmentMin <= Lread \
-                      || seg1.align.exons[0][EX_R] >= P.pCh.segmentMin); //uncovered by seg1 read length is <= segmentMin
-            seg1yes = seg1yes && seg1.align.intronMotifs[0]==0; //no non-canonical juncions. TODO: allow non-canonical anotated
-            seg1yes = seg1yes && (seg1.align.intronMotifs[1]==0 || seg1.align.intronMotifs[2]==0); //consistent intron motifs. TODO: switch to strands
-            
-            if (!seg1yes)
-                continue; //seg1 is bad
+            if (!seg1.segmentCheck())
+                continue; //seg1 is bad - skip
            
             for (uint iW2=iW1; iW2<nW; iW2++) {//check all windows for chimeras
                 for (uint iA2=(iW1!=iW2 ? 0 : iA1+1); iA2<nWinTr[iW2]; iA2++) {//cycle over aligns in the window
@@ -51,26 +44,22 @@ bool ReadAlign::chimericDetectionMult() {
                     
                     ChimericSegment seg2(P,*trAll[iW2][iA2]);
 
-                    if (seg2.align.intronMotifs[0]>0) 
-                        continue; //do not stitch to a window with non-canonical junctions
+                    if (!seg2.segmentCheck())
+                        continue; //seg2 is bad - skip
+
                     if (seg1.str!=0 && seg2.str!=0 && seg2.str!=seg1.str) 
-                        continue; //chimeric segments have to have consitent strands                
+                        continue; //chimeric segments have to have consistent strands. TODO: make this optional                
 
                     int chimScore=chimericAlignScore(seg1,seg2);
-// 
-//                     if ( &seg1.align!=trBest && &seg2.align!=trBest )
-//                         continue; //debug
 
                     if  (chimScore>0)
                     {//candidate chimera                       
-
                         ChimericSegment *s1=&seg1,*s2=&seg2;
                         if (seg1.align.roStart > seg2.align.roStart) swap (s1,s2);
                         uint e1 = s1->align.Str==1 ? 0 : s1->align.nExons-1;
                         uint e2 = s2->align.Str==0 ? 0 : s2->align.nExons-1;   
                         if ( s1->align.exons[e1][EX_iFrag] > s2->align.exons[e2][EX_iFrag] )  
                             continue; //strange configuration
-                        
                         //         if ( trChim[0].exons[e0][EX_iFrag] > trChim[1].exons[e1][EX_iFrag] ) {//strange configuration, rare, similar to the next one
                         //             chimN=0;//reject such chimeras
                         //             //good test example:
