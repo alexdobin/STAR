@@ -58,12 +58,11 @@ bool ReadAlign::chimericDetectionMult() {
                         
                         if (!chAl.chimericCheck())
                             continue; //check chimeric alignment
-
        
-                        if (chimScore>=chimScoreBest-(int)P.pCh.multimapScoreRange && chimScore >= P.pCh.scoreMin) 
+                        if (chimScore>=chimScoreBest-(int)P.pCh.multimapScoreRange) 
                             chimAligns.push_back(chAl);//add this chimeric alignment
                             
-                        if ( chimScore > chimScoreBest && chimScore >= (int)(readLength[0]+readLength[1]) - P.pCh.scoreDropMax ) {
+                        if ( chimScore > chimScoreBest && chimScore >= P.pCh.scoreMin && chimScore >= (int)(readLength[0]+readLength[1]) - P.pCh.scoreDropMax ) {
                             chimAligns.back().chimericStitching(mapGen.G, Read1[0]);
                             if (chimAligns.back().chimScore > chimScoreBest)
                                 chimScoreBest=chimAligns.back().chimScore;
@@ -99,7 +98,7 @@ bool ReadAlign::chimericDetectionMult() {
     
     for (uint ic=0; ic<chimAligns.size(); ic++) {//output chimeras within score range
         if (chimAligns[ic].chimScore >= chimScoreBest-(int)P.pCh.multimapScoreRange)
-            chimAligns[ic].chimericJunctionOutput(chunkOutChimJunction);
+            chimAligns[ic].chimericJunctionOutput(chunkOutChimJunction, chimN);
     };
 
     if (chimN>0)
