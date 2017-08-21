@@ -53,25 +53,15 @@ bool ReadAlign::chimericDetectionMult() {
                     int chimScore=chimericAlignScore(seg1,seg2);
 
                     if  (chimScore>0)
-                    {//candidate chimera                       
-                        ChimericSegment *s1=&seg1,*s2=&seg2;
-                        if (seg1.align.roStart > seg2.align.roStart) swap (s1,s2);
-                        uint e1 = s1->align.Str==1 ? 0 : s1->align.nExons-1;
-                        uint e2 = s2->align.Str==0 ? 0 : s2->align.nExons-1;   
-                        if ( s1->align.exons[e1][EX_iFrag] > s2->align.exons[e2][EX_iFrag] )  
-                            continue; //strange configuration
-                        //         if ( trChim[0].exons[e0][EX_iFrag] > trChim[1].exons[e1][EX_iFrag] ) {//strange configuration, rare, similar to the next one
-                        //             chimN=0;//reject such chimeras
-                        //             //good test example:
-                        //             //CTTAGCTAGCAGCGTCTTCCCAGTGCCTGGAGGGCCAGTGAGAATGGCACCCTCTGGGATTTTTGCTCCTAGGTCT
-                        //             //TTGAGGTGAAGTTCAAAGATGTGGCTGGCTGTGAGGAGGCCGAGCTAGAGATCATGGAATTTGTGAATTTCTTGAA
-                        //         } else 
+                    {//candidate chimera
+                        ChimericAlign chAl(seg1, seg2, chimScore);
                         
-                        if (s1->align.exons[e1][EX_L] < P.pCh.junctionOverhangMin &&  s2->align.exons[e2][EX_L] < P.pCh.junctionOverhangMin)                       
-                            continue; //junction overhangs too short
+                        if (!chAl.chimericCheck())
+                            continue; //check chimeric alignment
+
        
                         if (chimScore>=chimScoreBest-(int)P.pCh.multimapScoreRange && chimScore >= P.pCh.scoreMin) 
-                            chimAligns.push_back(ChimericAlign(seg1, seg2, chimScore));
+                            chimAligns.push_back(chAl);//add this chimeric alignment
                             
                         if ( chimScore > chimScoreBest && chimScore >= (int)(readLength[0]+readLength[1]) - P.pCh.scoreDropMax ) {
                             chimAligns.back().chimericStitching(mapGen.G, Read1[0]);
