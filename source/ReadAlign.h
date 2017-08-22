@@ -7,10 +7,12 @@
 #include "Genome.h"
 #include "Stats.h"
 #include "OutSJ.h"
-#include <time.h>
 #include "Transcriptome.h"
 #include "BAMoutput.h"
 #include "Quantifications.h"
+#include "ChimericDetection.h"
+
+#include <time.h>
 #include <random>
 
 class ReadAlign
@@ -116,13 +118,17 @@ class ReadAlign
         uint nTr, nTrMate; // number of transcripts called
         intScore maxScore, nextWinScore;//maximum alignment score, next best score
 
-        uint chimN, chimRepeat, chimStr, chimMotif;
-        Transcript trChim[MAX_N_CHIMERAS];
-
         Transcript trA, trA1, *trBest, *trNext, *trInit; //transcript, best tr, next best tr, initialized tr
         Transcript ***trAll; //all transcripts for all windows
         uint *nWinTr; //number of recorded transcripts per window
 
+        //old chimeric detection
+        uint chimN, chimRepeat, chimStr, chimMotif;
+        Transcript trChim[MAX_N_CHIMERAS];
+        //new chimeric detection
+        ChimericDetection *chimDet;
+        
+        
         Transcript *alignC, *extendC, *polyAtailC; //alignment rules/conditions
 
         Transcript* trMult[MAX_N_MULTMAP];//multimapping transcripts

@@ -1,11 +1,6 @@
-#include "IncludeDefine.h"
-#include "Parameters.h"
-#include "Transcript.h"
-#include "ReadAlign.h"
-#include "BAMfunctions.h"
-#include "blocksOverlap.h"
+//#include "blocksOverlap.h"
+#include "ChimericDetection.h"
 #include "ChimericSegment.h"
-#include "ChimericAlign.h"
 
 int chimericAlignScore (ChimericSegment & seg1, ChimericSegment & seg2)
 {
@@ -24,11 +19,11 @@ int chimericAlignScore (ChimericSegment & seg1, ChimericSegment & seg2)
 };
 
 /////////////////////////////////////////////////////////////
-bool ReadAlign::chimericDetectionMult() {
+bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength) {
 
-    bool chimRecord=false;  
-    vector <ChimericAlign> chimAligns;
-    int chimScoreBest=0;
+    chimRecord=false;  
+    chimAligns.clear();
+    chimScoreBest=0;
                 
     for (uint iW1=0; iW1<nW; iW1++) {//cycle windows 
         for (uint iA1=0; iA1<nWinTr[iW1]; iA1++) {//cycle aligns in the window
@@ -63,7 +58,7 @@ bool ReadAlign::chimericDetectionMult() {
                             chimAligns.push_back(chAl);//add this chimeric alignment
                             
                         if ( chimScore > chimScoreBest && chimScore >= P.pCh.scoreMin && chimScore >= (int)(readLength[0]+readLength[1]) - P.pCh.scoreDropMax ) {
-                            chimAligns.back().chimericStitching(mapGen.G, Read1[0]);
+                            chimAligns.back().chimericStitching(outGen.G, Read1[0]);
                             if (chimAligns.back().chimScore > chimScoreBest)
                                 chimScoreBest=chimAligns.back().chimScore;
                         };
@@ -88,7 +83,7 @@ bool ReadAlign::chimericDetectionMult() {
     chimN=0;   
     for (uint ic=0; ic<chimAligns.size(); ic++) {//re-scan all chimeras: stitch and re-check the score
         if (chimAligns[ic].chimScore >= chimScoreBest-(int)P.pCh.multimapScoreRange) {
-            chimAligns[ic].chimericStitching(mapGen.G, Read1[0]);
+            chimAligns[ic].chimericStitching(outGen.G, Read1[0]);
             if (chimAligns[ic].chimScore >= chimScoreBest - (int)P.pCh.multimapScoreRange)
                 ++chimN;
         };
@@ -98,7 +93,7 @@ bool ReadAlign::chimericDetectionMult() {
     
     for (uint ic=0; ic<chimAligns.size(); ic++) {//output chimeras within score range
         if (chimAligns[ic].chimScore >= chimScoreBest-(int)P.pCh.multimapScoreRange)
-            chimAligns[ic].chimericJunctionOutput(chunkOutChimJunction, chimN);
+            chimAligns[ic].chimericJunctionOutput(ostreamChimJunction, chimN);
     };
 
     if (chimN>0)

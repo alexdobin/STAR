@@ -39,7 +39,7 @@ bool ReadAlign::chimericDetection() {
         chimRecord=chimericDetectionOld();
     } else
     {
-        chimRecord=chimericDetectionMult();
+        chimRecord=chimDet->chimericDetectionMult(nW, readLength);
     };
     
     return chimRecord;

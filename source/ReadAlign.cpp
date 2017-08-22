@@ -103,6 +103,8 @@ ReadAlign::ReadAlign (Parameters& Pin, const Genome &genomeIn, Transcriptome *Tr
     Qual1[0]=new char[DEF_readSeqLengthMax+1]; Qual1[1]=new char[DEF_readSeqLengthMax+1];
 
     resetN();
+    
+    chimDet= new ChimericDetection(P, trAll, nWinTr, Read1, mapGen, chunkOutChimJunction);
 
 };
 
