@@ -19,7 +19,6 @@ class ChimericAlign
         int chimMotif, chimStr, chimScore;
         
         ChimericAlign(ChimericSegment &seg1in, ChimericSegment &seg2in, int chimScoreIn); //allocate
-        ~ChimericAlign();
         void chimericJunctionOutput(fstream &outStream, uint chimN);
         void chimericStitching(char *genSeq, char *readSeq);
         bool chimericCheck();
