@@ -14,6 +14,12 @@ ChimericAlign::ChimericAlign(ChimericSegment &seg1in, ChimericSegment &seg2in, i
     ex2 = al2->Str==0 ? 0 : al2->nExons-1;
 };
 
+ChimericAlign::~ChimericAlign()
+{
+    delete al1;
+    delete al2;
+};
+
 bool ChimericAlign::chimericCheck()
 {
     bool chimGood=true;
