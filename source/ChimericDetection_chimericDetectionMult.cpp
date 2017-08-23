@@ -23,6 +23,21 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength) {
 
     chimRecord=false;
     vecAligns.clear();
+    
+//     for (uint ii=0;ii<chimAligns.size();ii++) {//deallocate aligns
+//         if (chimAligns.at(ii).stitchingDone) {//al1,al2 were allocated
+//             delete chimAligns.at(ii).al1;
+//             delete chimAligns.at(ii).al2;
+//         };
+//     };
+
+    for (auto cAit=chimAligns.begin(); cAit<chimAligns.end(); cAit++) {//deallocate aligns
+        if (cAit->stitchingDone) {//al1,al2 were allocated
+            delete cAit->al1;
+            delete cAit->al2;
+        };
+    };
+    
     chimAligns.clear();
     chimScoreBest=0;
                 
@@ -74,27 +89,27 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength) {
         return chimRecord;
     
     chimN=0;   
-    for (uint ic=0; ic<chimAligns.size(); ic++) {//scan all chimeras, find the number within score range
-        if (chimAligns.at(ic).chimScore >= chimScoreBest - (int)P.pCh.multimapScoreRange)
+    for (auto cAit=chimAligns.begin(); cAit<chimAligns.end(); cAit++) {//scan all chimeras, find the number within score range
+        if (cAit->chimScore >= chimScoreBest - (int)P.pCh.multimapScoreRange)
             ++chimN;
     };
     if (chimN > 2*P.pCh.multimapNmax) //too many loci (considering 2* more candidates for stitching below)
         return chimRecord;
     
     chimN=0;   
-    for (uint ic=0; ic<chimAligns.size(); ic++) {//re-scan all chimeras: stitch and re-check the score
-        if (chimAligns.at(ic).chimScore >= chimScoreBest-(int)P.pCh.multimapScoreRange) {
-            chimAligns.at(ic).chimericStitching(outGen.G, Read1[0]);
-            if (chimAligns.at(ic).chimScore >= chimScoreBest - (int)P.pCh.multimapScoreRange)
+    for (auto cAit=chimAligns.begin(); cAit<chimAligns.end(); cAit++) {//re-scan all chimeras: stitch and re-check the score
+        if (cAit->chimScore >= chimScoreBest-(int)P.pCh.multimapScoreRange) {
+            cAit->chimericStitching(outGen.G, Read1[0]);
+            if (cAit->chimScore >= chimScoreBest - (int)P.pCh.multimapScoreRange)
                 ++chimN;
         };
     };
     if (chimN > P.pCh.multimapNmax) //too many loci
         return chimRecord;
     
-    for (uint ic=0; ic<chimAligns.size(); ic++) {//output chimeras within score range
-        if (chimAligns.at(ic).chimScore >= chimScoreBest-(int)P.pCh.multimapScoreRange)
-            chimAligns.at(ic).chimericJunctionOutput(ostreamChimJunction, chimN);
+    for (auto cAit=chimAligns.begin(); cAit<chimAligns.end(); cAit++) {//output chimeras within score range
+        if (cAit->chimScore >= chimScoreBest-(int)P.pCh.multimapScoreRange)
+            cAit->chimericJunctionOutput(ostreamChimJunction, chimN);
     };
 
     if (chimN>0)
