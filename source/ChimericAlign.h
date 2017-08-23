@@ -18,7 +18,7 @@ class ChimericAlign
         uint chimJ1, chimJ2, chimRepeat1, chimRepeat2;
         int chimMotif, chimStr, chimScore;
         
-        ChimericAlign(ChimericSegment &seg1in, ChimericSegment &seg2in, int chimScoreIn); //allocate
+        ChimericAlign(ChimericSegment &seg1in, ChimericSegment &seg2in, int chimScoreIn, vector <Transcript> &vecAlignsIn); //allocate
         void chimericJunctionOutput(fstream &outStream, uint chimN);
         void chimericStitching(char *genSeq, char *readSeq);
         bool chimericCheck();
@@ -28,6 +28,7 @@ class ChimericAlign
     private:
         Parameters &P;
         ParametersChimeric &pCh;
+        vector <Transcript> &vecAligns;
 };
 
 #endif

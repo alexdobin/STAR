@@ -7,10 +7,11 @@ void ChimericAlign::chimericStitching(char *genSeq, char *readSeq) {
     
     stitchingDone=true;
     
-    al1=new Transcript(*al1);
-    al2=new Transcript(*al2);
-
-    Transcript &a1=*al1;
+    vecAligns.push_back(*al1);
+    al1=&vecAligns.back();
+    Transcript &a1=*al1;//to use instead of pointers
+    vecAligns.push_back(*al2);
+    al2=&vecAligns.back();
     Transcript &a2=*al2;//to use instead of pointers
 
     chimStr = max(seg1.str,seg2.str); //segment strands are either equal, or one is zero - select the non-zero strand
@@ -168,7 +169,7 @@ void ChimericAlign::chimericStitching(char *genSeq, char *readSeq) {
 
     if (chimMotif>=0 && (a1.exons[ex1][EX_L]<P.pCh.junctionOverhangMin+chimRepeat1 || a2.exons[ex2][EX_L]<P.pCh.junctionOverhangMin+chimRepeat2) ) {
         //filter out cases where linear junctions that are very close to chimeric junction
-        chimScore=0;
+        chimScore=0; //TODO: if chimScore==0, pop_back vec Aligns
         return;
     };
 };

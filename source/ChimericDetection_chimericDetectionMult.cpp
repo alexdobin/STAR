@@ -21,7 +21,8 @@ int chimericAlignScore (ChimericSegment & seg1, ChimericSegment & seg2)
 /////////////////////////////////////////////////////////////
 bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength) {
 
-    chimRecord=false;  
+    chimRecord=false;
+    vecAligns.clear();
     chimAligns.clear();
     chimScoreBest=0;
                 
@@ -49,7 +50,7 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength) {
 
                     if  (chimScore>0)
                     {//candidate chimera
-                        ChimericAlign chAl(seg1, seg2, chimScore);
+                        ChimericAlign chAl(seg1, seg2, chimScore, vecAligns);
                         
                         if (!chAl.chimericCheck())
                             continue; //check chimeric alignment
@@ -74,7 +75,7 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength) {
     
     chimN=0;   
     for (uint ic=0; ic<chimAligns.size(); ic++) {//scan all chimeras, find the number within score range
-        if (chimAligns[ic].chimScore >= chimScoreBest - (int)P.pCh.multimapScoreRange)
+        if (chimAligns.at(ic).chimScore >= chimScoreBest - (int)P.pCh.multimapScoreRange)
             ++chimN;
     };
     if (chimN > 2*P.pCh.multimapNmax) //too many loci (considering 2* more candidates for stitching below)
@@ -82,9 +83,9 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength) {
     
     chimN=0;   
     for (uint ic=0; ic<chimAligns.size(); ic++) {//re-scan all chimeras: stitch and re-check the score
-        if (chimAligns[ic].chimScore >= chimScoreBest-(int)P.pCh.multimapScoreRange) {
-            chimAligns[ic].chimericStitching(outGen.G, Read1[0]);
-            if (chimAligns[ic].chimScore >= chimScoreBest - (int)P.pCh.multimapScoreRange)
+        if (chimAligns.at(ic).chimScore >= chimScoreBest-(int)P.pCh.multimapScoreRange) {
+            chimAligns.at(ic).chimericStitching(outGen.G, Read1[0]);
+            if (chimAligns.at(ic).chimScore >= chimScoreBest - (int)P.pCh.multimapScoreRange)
                 ++chimN;
         };
     };
@@ -92,8 +93,8 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength) {
         return chimRecord;
     
     for (uint ic=0; ic<chimAligns.size(); ic++) {//output chimeras within score range
-        if (chimAligns[ic].chimScore >= chimScoreBest-(int)P.pCh.multimapScoreRange)
-            chimAligns[ic].chimericJunctionOutput(ostreamChimJunction, chimN);
+        if (chimAligns.at(ic).chimScore >= chimScoreBest-(int)P.pCh.multimapScoreRange)
+            chimAligns.at(ic).chimericJunctionOutput(ostreamChimJunction, chimN);
     };
 
     if (chimN>0)

@@ -14,7 +14,7 @@ class ChimericDetection {
         bool chimRecord;
         int chimScoreBest;
         
-        vector <Transcript> alignsModified; //separate storage for modified aligns
+        vector <Transcript> vecAligns; //separate storage for modified aligns
         
         ChimericDetection(Parameters &Pin, Transcript ***trAll, uint *nWinTr, char** Read1in, Genome &mapGenIn, fstream &ostreamChimJunctionIn);
         bool chimericDetectionMult(uint nWin, uint *readLengthIn);
