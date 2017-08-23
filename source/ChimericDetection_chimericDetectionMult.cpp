@@ -22,7 +22,6 @@ int chimericAlignScore (ChimericSegment & seg1, ChimericSegment & seg2)
 bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength) {
 
     chimRecord=false;
-    vecAligns.clear();
     
 //     for (uint ii=0;ii<chimAligns.size();ii++) {//deallocate aligns
 //         if (chimAligns.at(ii).stitchingDone) {//al1,al2 were allocated
@@ -65,7 +64,7 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength) {
 
                     if  (chimScore>0)
                     {//candidate chimera
-                        ChimericAlign chAl(seg1, seg2, chimScore, vecAligns);
+                        ChimericAlign chAl(seg1, seg2, chimScore);
                         
                         if (!chAl.chimericCheck())
                             continue; //check chimeric alignment
