@@ -43,8 +43,9 @@ if ($1=="###") {# new group/subsection of parameters
            nOpt=0;
       } else {
            if (nOpt==0) print optOptTableBegin;
-           #n1=match($0,/[:space:]*\.\.\./);
-           print "  \\optOpt{" substr(oo[1],1,match(oo[1],/[[:space:]$]/)-1) "}" "   " "\\optOptLine{" substr(oo[2],match(oo[2],/[^[:space:]]/)) "}" ;
+           gsub(/^[ \t]+|[ \t]+$/, "",oo[1]); #remove leading trailing spaces
+           gsub(/^[ \t]+|[ \t]+$/, "",oo[2]);
+           print "  \\optOpt{" oo[1] "}   \\optOptLine{" oo[2] "}" ;
            ++nOpt;
       };
       getline; substLatexSymbols();

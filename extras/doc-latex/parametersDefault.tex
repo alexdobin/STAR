@@ -42,10 +42,10 @@
 \begin{optTable}
 \optName{genomeDir}
   \optValue{./GenomeDir/}
-  \optLine{string: path to the directory where genome files are stored (if runMode!=generateGenome) or will be generated (if runMode==generateGenome)} 
+  \optLine{string: path to the directory where genome files are stored (for --runMode alignReads) or will be generated (for --runMode generateGenome)} 
 \optName{genomeLoad}
   \optValue{NoSharedMemory}
-  \optLine{string: mode of shared memory usage for the genome files} 
+  \optLine{string: mode of shared memory usage for the genome files. Only used with --runMode alignReads.} 
 \begin{optOptTable}
   \optOpt{LoadAndKeep}   \optOptLine{load genome into shared and keep it in memory after run}
   \optOpt{LoadAndRemove}   \optOptLine{load genome into shared but remove it after run}
@@ -53,30 +53,31 @@
   \optOpt{Remove}   \optOptLine{do not map anything, just remove loaded genome from memory}
   \optOpt{NoSharedMemory}   \optOptLine{do not use shared memory, each job will have its own private copy of the genome}
 \end{optOptTable}
-\end{optTable}
-\optSection{Genome Generation Parameters}\label{Genome_Generation_Parameters}
-\begin{optTable}
 \optName{genomeFastaFiles}
   \optValue{-}
-  \optLine{string(s): path(s) to the fasta files with genomic sequences for genome generation, separated by spaces. Only used if runMode==genomeGenerate. These files should be plain text FASTA files, they *cannot* be zipped.} 
+  \optLine{string(s): path(s) to the fasta files with the genome sequences, separated by spaces. These files should be plain text FASTA files, they *cannot* be zipped.} 
+  \optLine{Required for the genome generation (--runMode genomeGenerate). Can also be used in the mapping (--runMode alignReads) to add extra (new) sequences to the genome (e.g. spike-ins).} 
+\optName{genomeChainFiles}
+  \optValue{-}
+  \optLine{string: chain files for genomic liftover. Only used with --runMode liftOver .} 
+\optName{genomeFileSizes}
+  \optValue{0}
+  \optLine{uint(s){\textgreater}0: genome files exact sizes in bytes. Typically, this should not be defined by the user.} 
+\end{optTable}
+\optSection{Genome Indexing Parameters - only used with --runMode genomeGenerate}\label{Genome_Indexing_Parameters_-_only_used_with_--runMode_genomeGenerate}
+\begin{optTable}
 \optName{genomeChrBinNbits}
   \optValue{18}
-  \optLine{int: =log2(chrBin), where chrBin is the size of the bins for genome storage: each chromosome will occupy an integer number of bins} 
+  \optLine{int: =log2(chrBin), where chrBin is the size of the bins for genome storage: each chromosome will occupy an integer number of bins. For a genome with large number of contigs, it is recommended to scale this parameter as min(18, log2[max(GenomeLength/NumberOfReferences,ReadLength)]).} 
 \optName{genomeSAindexNbases}
   \optValue{14}
-  \optLine{int: length (bases) of the SA pre-indexing string. Typically between 10 and 15. Longer strings will use much more memory, but allow faster searches.} 
+  \optLine{int: length (bases) of the SA pre-indexing string. Typically between 10 and 15. Longer strings will use much more memory, but allow faster searches. For small genomes, the parameter --genomeSAindexNbases must be scaled down to min(14, log2(GenomeLength)/2 - 1).} 
 \optName{genomeSAsparseD}
   \optValue{1}
   \optLine{int{\textgreater}0: suffux array sparsity, i.e. distance between indices: use bigger numbers to decrease needed RAM at the cost of mapping speed reduction} 
 \optName{genomeSuffixLengthMax}
   \optValue{-1}
   \optLine{int: maximum length of the suffixes, has to be longer than read length. -1 = infinite.} 
-\optName{genomeChainFiles}
-  \optValue{-}
-  \optLine{string: chain files for genomic liftover} 
-\optName{genomeFileSizes}
-  \optValue{0}
-  \optLine{uint(s){\textgreater}0: genome files exact sizes in bytes. Typically, this should not be defined by the user.} 
 \end{optTable}
 \optSection{Splice Junctions Database}\label{Splice_Junctions_Database}
 \begin{optTable}
@@ -163,7 +164,7 @@
   \optLine{int{\textgreater}0: max available buffers size (bytes) for input/output, per thread} 
 \optName{limitOutSAMoneReadBytes}
   \optValue{100000}
-  \optLine{int{\textgreater}0: max size of the SAM record for one read. Recommended value: {\textgreater}(2*(LengthMate1+LengthMate2+100)*outFilterMultimapNmax} 
+  \optLine{int{\textgreater}0: max size of the SAM record (bytes) for one read. Recommended value: {\textgreater}(2*(LengthMate1+LengthMate2+100)*outFilterMultimapNmax} 
 \optName{limitOutSJoneRead}
   \optValue{1000}
   \optLine{int{\textgreater}0: max number of junctions for one read (including all multi-mappers)} 
@@ -172,7 +173,7 @@
   \optLine{int{\textgreater}0: max number of collapsed junctions} 
 \optName{limitBAMsortRAM}
   \optValue{0}
-  \optLine{int{\textgreater}=0: maximum available RAM for sorting BAM. If =0, it will be set to the genome index size. 0 value can only be used with --genomeLoad NoSharedMemory option.} 
+  \optLine{int{\textgreater}=0: maximum available RAM (bytes) for sorting BAM. If =0, it will be set to the genome index size. 0 value can only be used with --genomeLoad NoSharedMemory option.} 
 \optName{limitSjdbInsertNsj}
   \optValue{1000000}
   \optLine{int{\textgreater}=0: maximum number of junction to be inserted to the genome on the fly at the mapping stage, including those from annotations and those detected in the 1st step of the 2-pass run} 
@@ -256,7 +257,7 @@
   \optValue{Standard}
   \optLine{string: a string of desired SAM attributes, in the order desired for the output SAM} 
 \begin{optOptTable}
-  \optOpt{NH}   \optOptLine{any combination in any order}
+  \optOpt{NH HI AS nM NM MD jM jI XS ch}   \optOptLine{any combination in any order}
   \optOpt{Standard}   \optOptLine{NH HI AS nM}
   \optOpt{All}   \optOptLine{NH HI AS nM NM MD jM jI ch}
   \optOpt{None}   \optOptLine{no attributes}
@@ -274,9 +275,8 @@
 \end{optOptTable}
   \optLine{2nd word:} 
 \begin{optOptTable}
-  \optOpt{KeepPairs}   \optOptLine{record unmapped mate for each alignment, and, in case of unsorted output, keep it adjacent to its mapped mate.}
+  \optOpt{KeepPairs}   \optOptLine{record unmapped mate for each alignment, and, in case of unsorted output, keep it adjacent to its mapped mate. Only affects multi-mapping reads.}
 \end{optOptTable}
-  \optLine{Only affects multi-mapping reads} 
 \optName{outSAMorder}
   \optValue{Paired}
   \optLine{string: type of sorting for the SAM output} 
@@ -433,6 +433,13 @@
   \optOpt{RemoveNoncanonical}   \optOptLine{filter out alignments that contain non-canonical junctions}
   \optOpt{RemoveNoncanonicalUnannotated}   \optOptLine{filter out alignments that contain non-canonical unannotated junctions when using annotated splice junctions database. The annotated non-canonical junctions will be kept.}
 \end{optOptTable}
+\optName{outFilterIntronStrands}
+  \optValue{RemoveInconsistentStrands}
+  \optLine{string: filter alignments } 
+\begin{optOptTable}
+  \optOpt{RemoveInconsistentStrands}   \optOptLine{remove alignments that have junctions with inconsistent strands}
+  \optOpt{None}   \optOptLine{no filtering}
+\end{optOptTable}
 \end{optTable}
 \optSection{Output Filtering: Splice Junctions}\label{Output_Filtering:_Splice_Junctions}
 \begin{optTable}
@@ -521,6 +528,9 @@
 \optName{seedNoneLociPerWindow}
   \optValue{10}
   \optLine{int{\textgreater}0: max number of one seed loci per window} 
+\optName{seedSplitMin}
+  \optValue{12}
+  \optLine{int{\textgreater}0: min length of the seed sequences split by Ns or mate gap} 
 \optName{alignIntronMin}
   \optValue{21}
   \optLine{minimum intron size: genomic gap is considered intron if its length{\textgreater}=alignIntronMin, otherwise it is considered Deletion} 
@@ -614,8 +624,8 @@
 \end{optOptTable}
   \optLine{2nd word:} 
 \begin{optOptTable}
-  \optOpt{WithinBAM}   \optOptLine{hard-clipping in the CIGAR for supplemental chimeric alignments (defaultif no 2nd word is present)}
-  \optOpt{WithinBAM}   \optOptLine{soft-clipping in the CIGAR for supplemental chimeric alignments}
+  \optOpt{WithinBAM HardClip}   \optOptLine{hard-clipping in the CIGAR for supplemental chimeric alignments (defaultif no 2nd word is present)}
+  \optOpt{WithinBAM SoftClip}   \optOptLine{soft-clipping in the CIGAR for supplemental chimeric alignments}
 \end{optOptTable}
 \optName{chimSegmentMin}
   \optValue{0}

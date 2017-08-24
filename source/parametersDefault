@@ -33,26 +33,32 @@ runDirPerm                      User_RWX
 runRNGseed                      777
     int: random number generator seed.
 
+
 ### Genome Parameters
 
 genomeDir                   ./GenomeDir/
-    string: path to the directory where genome files are stored (if runMode!=generateGenome) or will be generated (if runMode==generateGenome)
+    string: path to the directory where genome files are stored (for --runMode alignReads) or will be generated (for --runMode generateGenome)
 
 genomeLoad                NoSharedMemory
-    string: mode of shared memory usage for the genome files
+    string: mode of shared memory usage for the genome files. Only used with --runMode alignReads.
                           LoadAndKeep     ... load genome into shared and keep it in memory after run
                           LoadAndRemove   ... load genome into shared but remove it after run
                           LoadAndExit     ... load genome into shared memory and exit, keeping the genome in memory for future runs
                           Remove          ... do not map anything, just remove loaded genome from memory
                           NoSharedMemory  ... do not use shared memory, each job will have its own private copy of the genome
 
-
-
-### Genome Generation Parameters
-
 genomeFastaFiles            -
-    string(s): path(s) to the fasta files with genomic sequences for genome generation, separated by spaces. Only used if runMode==genomeGenerate. These files should be plain text FASTA files, they *cannot* be zipped.
+    string(s): path(s) to the fasta files with the genome sequences, separated by spaces. These files should be plain text FASTA files, they *cannot* be zipped.
+                            Required for the genome generation (--runMode genomeGenerate). Can also be used in the mapping (--runMode alignReads) to add extra (new) sequences to the genome (e.g. spike-ins).
 
+genomeChainFiles            -
+    string: chain files for genomic liftover. Only used with --runMode liftOver .
+
+genomeFileSizes             0
+    uint(s)>0: genome files exact sizes in bytes. Typically, this should not be defined by the user.
+
+
+### Genome Indexing Parameters - only used with --runMode genomeGenerate
 genomeChrBinNbits           18
     int: =log2(chrBin), where chrBin is the size of the bins for genome storage: each chromosome will occupy an integer number of bins. For a genome with large number of contigs, it is recommended to scale this parameter as min(18, log2[max(GenomeLength/NumberOfReferences,ReadLength)]).
 
@@ -65,11 +71,6 @@ genomeSAsparseD             1
 genomeSuffixLengthMax       -1
     int: maximum length of the suffixes, has to be longer than read length. -1 = infinite.
 
-genomeChainFiles            -
-    string: chain files for genomic liftover
-
-genomeFileSizes             0
-    uint(s)>0: genome files exact sizes in bytes. Typically, this should not be defined by the user.
 
 ### Splice Junctions Database
 sjdbFileChrStartEnd                     -
