@@ -11,7 +11,7 @@ class ParametersChimeric
         int scoreMin,scoreDropMax,scoreSeparation, scoreJunctionNonGTAG; //min chimeric score
         uint mainSegmentMultNmax;
         
-        uint multimapScoreRange, multimapNmax;
+        uint multimapScoreRange, multimapNmax, nonchimScoreDropMin;
 
         struct
         {
