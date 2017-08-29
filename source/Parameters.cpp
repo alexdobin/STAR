@@ -36,15 +36,15 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <int> (-1, -1, "runRNGseed", &runRNGseed));
 
     //genome
-    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "genomeDir", &genomeDir));
-    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "genomeLoad", &genomeLoad));
-    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "genomeFastaFiles", &genomeFastaFiles));
-    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "genomeChainFiles", &genomeChainFiles));
-    parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "genomeSAindexNbases", &genomeSAindexNbases));
-    parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "genomeChrBinNbits", &genomeChrBinNbits));
-    parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "genomeSAsparseD", &genomeSAsparseD));
-    parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "genomeSuffixLengthMax", &genomeSuffixLengthMax));
-    parArray.push_back(new ParameterInfoVector <uint> (-1, -1, "genomeFileSizes", &genomeFileSizes));
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "genomeDir", &pGe.gDir));
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "genomeLoad", &pGe.gLoad));
+    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "genomeFastaFiles", &pGe.gFastaFiles));
+    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "genomeChainFiles", &pGe.gChainFiles));
+    parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "genomeSAindexNbases", &pGe.gSAindexNbases));
+    parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "genomeChrBinNbits", &pGe.gChrBinNbits));
+    parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "genomeSAsparseD", &pGe.gSAsparseD));
+    parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "genomeSuffixLengthMax", &pGe.gSuffixLengthMax));
+    parArray.push_back(new ParameterInfoVector <uint> (-1, -1, "genomeFileSizes", &pGe.gFileSizes));
 
     //read
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readFilesIn", &readFilesIn));
@@ -209,16 +209,16 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "chimNonchimScoreDropMin", &pCh.nonchimScoreDropMin));
 
     //sjdb
-    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "sjdbFileChrStartEnd", &sjdbFileChrStartEnd));
-    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "sjdbGTFfile", &sjdbGTFfile));
-    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "sjdbGTFchrPrefix", &sjdbGTFchrPrefix));
-    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "sjdbGTFfeatureExon", &sjdbGTFfeatureExon));
-    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "sjdbGTFtagExonParentTranscript", &sjdbGTFtagExonParentTranscript));
-    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "sjdbGTFtagExonParentGene", &sjdbGTFtagExonParentGene));
-    parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "sjdbOverhang", &sjdbOverhang));
-    sjdbOverhang_par=parArray.size()-1;
-    parArray.push_back(new ParameterInfoScalar <int>    (-1, -1, "sjdbScore", &sjdbScore));
-    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "sjdbInsertSave", &sjdbInsert.save)); 
+    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "sjdbFileChrStartEnd", &pGe.sjdbFileChrStartEnd));
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "sjdbGTFfile", &pGe.sjdbGTFfile));
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "sjdbGTFchrPrefix", &pGe.sjdbGTFchrPrefix));
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "sjdbGTFfeatureExon", &pGe.sjdbGTFfeatureExon));
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "sjdbGTFtagExonParentTranscript", &pGe.sjdbGTFtagExonParentTranscript));
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "sjdbGTFtagExonParentGene", &pGe.sjdbGTFtagExonParentGene));
+    parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "sjdbOverhang", &pGe.sjdbOverhang));
+    pGe.sjdbOverhang_par=parArray.size()-1;
+    parArray.push_back(new ParameterInfoScalar <int>    (-1, -1, "sjdbScore", &pGe.sjdbScore));
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "sjdbInsertSave", &pGe.sjdbInsertSave)); 
     
     //variation
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "varVCFfile", &var.vcfFile)); 
@@ -301,9 +301,9 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         scanAllLines(parStreamCommandLine, 1, 2); //read only initial Command Line parameters
     };
 
-//     need to be careful since runMode and genomeDir are not Command-Line-Initial
-//     if (runMode=="genomeGenerate" && outFileNamePrefix=="./") {// for genome generation, output into genomeDir
-//         outFileNamePrefix=genomeDir;
+//     need to be careful since runMode and pGe.gDir are not Command-Line-Initial
+//     if (runMode=="genomeGenerate" && outFileNamePrefix=="./") {// for genome generation, output into pGe.gDir
+//         outFileNamePrefix=pGe.gDir;
 //     };
 
     inOut->logMain.open((outFileNamePrefix + "Log.out").c_str());
@@ -739,7 +739,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 
     readNmates=readFilesIn.size(); //for now the number of mates is defined by the number of input files
 
-    if (runMode=="alignReads" && genomeLoad!="Remove" && genomeLoad!="LoadAndExit") {//open reads files to check if they are present
+    if (runMode=="alignReads" && pGe.gLoad!="Remove" && pGe.gLoad!="LoadAndExit") {//open reads files to check if they are present
         openReadsFiles();
 
         //check sizes of the mate files, if not the same, assume mates are not the same length
@@ -1038,10 +1038,10 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     };
 
 //     #ifdef COMPILE_NO_SHM
-//         if (genomeLoad!="NoSharedMemory") {
+//         if (pGe.gLoad!="NoSharedMemory") {
 //             ostringstream errOut;
-//             errOut <<"EXITING because of FATAL INPUT ERROR: The code was compiled with NO SHARED MEMORY support, but genomeLoad="<<genomeLoad<<"\n";
-//             errOut <<"SOLUTION: run STAR with    --genomeLoad NoSharedMemory    option\n";
+//             errOut <<"EXITING because of FATAL INPUT ERROR: The code was compiled with NO SHARED MEMORY support, but pGe.gLoad="<<pGe.gLoad<<"\n";
+//             errOut <<"SOLUTION: run STAR with    --pGe.gLoad NoSharedMemory    option\n";
 //             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
 //         };
 //     #endif
@@ -1054,10 +1054,10 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 //     genomeNumToNT={'A','C','G','T','N'};
     strcpy(genomeNumToNT,"ACGTN");
 
-    if (genomeLoad!="LoadAndKeep" && genomeLoad!="LoadAndRemove" && genomeLoad!="Remove" && genomeLoad!="LoadAndExit" && genomeLoad!="NoSharedMemory") {// find shared memory fragment
+    if (pGe.gLoad!="LoadAndKeep" && pGe.gLoad!="LoadAndRemove" && pGe.gLoad!="Remove" && pGe.gLoad!="LoadAndExit" && pGe.gLoad!="NoSharedMemory") {// find shared memory fragment
         ostringstream errOut;
-        errOut << "EXITING because of FATAL INPUT ERROR: --genomeLoad=" << genomeLoad << "\n" <<flush;
-        errOut << "SOLUTION: use one of the allowed values of --genomeLoad : NoSharedMemory,LoadAndKeep,LoadAndRemove,LoadAndExit,Remove.\n" <<flush;
+        errOut << "EXITING because of FATAL INPUT ERROR: --pGe.gLoad=" << pGe.gLoad << "\n" <<flush;
+        errOut << "SOLUTION: use one of the allowed values of --pGe.gLoad : NoSharedMemory,LoadAndKeep,LoadAndRemove,LoadAndExit,Remove.\n" <<flush;
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
 
@@ -1137,10 +1137,10 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
 
-        if (genomeLoad!="NoSharedMemory") {
+        if (pGe.gLoad!="NoSharedMemory") {
             ostringstream errOut;
-            errOut << "EXITING because of fatal PARAMETERS error: 2-pass method is not compatible with genomeLoad<<"<<genomeLoad<<"\n";
-            errOut << "SOLUTION: re-run STAR with --genomeLoad NoSharedMemory ; this is the only compatible option at the moment.s\n";
+            errOut << "EXITING because of fatal PARAMETERS error: 2-pass method is not compatible with pGe.gLoad<<"<<pGe.gLoad<<"\n";
+            errOut << "SOLUTION: re-run STAR with --pGe.gLoad NoSharedMemory ; this is the only compatible option at the moment.s\n";
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
         twoPass.yes=true;
@@ -1159,7 +1159,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     sjdbInsert.pass1=false;
     sjdbInsert.pass2=false;
     sjdbInsert.yes=false;
-    if (sjdbFileChrStartEnd.at(0)!="-" || sjdbGTFfile!="-")
+    if (pGe.sjdbFileChrStartEnd.at(0)!="-" || pGe.sjdbGTFfile!="-")
     {//will insert annotated sjdb on the fly
        sjdbInsert.pass1=true;
        sjdbInsert.yes=true;
@@ -1170,20 +1170,20 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
        sjdbInsert.yes=true;
     };
 
-    if (genomeLoad!="NoSharedMemory" && sjdbInsert.yes )
+    if (pGe.gLoad!="NoSharedMemory" && sjdbInsert.yes )
     {
         ostringstream errOut;
         errOut << "EXITING because of fatal PARAMETERS error: on the fly junction insertion and 2-pass mappng cannot be used with shared memory genome \n" ;
-        errOut << "SOLUTION: run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;
+        errOut << "SOLUTION: run STAR with --pGe.gLoad NoSharedMemory to avoid using shared memory\n" <<flush;
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
 
     if (runMode=="alignReads" && sjdbInsert.yes )
     {//run-time genome directory, this is needed for genome files generated on the fly
-        if (sjdbOverhang<=0) {
+        if (pGe.sjdbOverhang<=0) {
             ostringstream errOut;
-            errOut << "EXITING because of fatal PARAMETERS error: sjdbOverhang <=0 while junctions are inserted on the fly with --sjdbFileChrStartEnd or/and --sjdbGTFfile\n";
-            errOut << "SOLUTION: specify sjdbOverhang>0, ideally readmateLength-1";
+            errOut << "EXITING because of fatal PARAMETERS error: pGe.sjdbOverhang <=0 while junctions are inserted on the fly with --pGe.sjdbFileChrStartEnd or/and --pGe.sjdbGTFfile\n";
+            errOut << "SOLUTION: specify pGe.sjdbOverhang>0, ideally readmateLength-1";
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
         sjdbInsert.outDir=outFileNamePrefix+"_STARgenome/";
@@ -1196,14 +1196,14 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         };
     };
 
-    //final sjdbOverhang value has been determined
-    sjdbLength = sjdbOverhang==0 ? 0 : sjdbOverhang*2+1;
+    //final pGe.sjdbOverhang value has been determined
+    sjdbLength = pGe.sjdbOverhang==0 ? 0 : pGe.sjdbOverhang*2+1;
 
     if (outBAMcoord && limitBAMsortRAM==0) {//check limitBAMsortRAM
-        if (genomeLoad!="NoSharedMemory") {
+        if (pGe.gLoad!="NoSharedMemory") {
             ostringstream errOut;
-            errOut <<"EXITING because of fatal PARAMETERS error: limitBAMsortRAM=0 (default) cannot be used with --genomeLoad="<<genomeLoad <<", or any other shared memory options\n";
-            errOut <<"SOLUTION: please use default --genomeLoad NoSharedMemory, \n        OR specify --limitBAMsortRAM the amount of RAM (bytes) that can be allocated for BAM sorting in addition to shared memory allocated for the genome.\n        --limitBAMsortRAM typically has to be > 10000000000 (i.e 10GB).\n";
+            errOut <<"EXITING because of fatal PARAMETERS error: limitBAMsortRAM=0 (default) cannot be used with --pGe.gLoad="<<pGe.gLoad <<", or any other shared memory options\n";
+            errOut <<"SOLUTION: please use default --pGe.gLoad NoSharedMemory, \n        OR specify --limitBAMsortRAM the amount of RAM (bytes) that can be allocated for BAM sorting in addition to shared memory allocated for the genome.\n        --limitBAMsortRAM typically has to be > 10000000000 (i.e 10GB).\n";
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
         inOut->logMain<<"WARNING: --limitBAMsortRAM=0, will use genome size as RAM limit for BAM sorting\n";
@@ -1234,7 +1234,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 
 
     //genome parameters
-    genomeChrBinNbases=1LLU<<genomeChrBinNbits;
+    genomeChrBinNbases=1LLU<<pGe.gChrBinNbits;
 
     //outSAMunmapped
     outSAMunmapped.yes=false;
@@ -1371,10 +1371,10 @@ int Parameters::scanOneLine (string &lineIn, int inputLevel, int inputLevelReque
 void Parameters::chrInfoLoad() {//find chrStart,Length,nChr from Genome G
 
     //load chr names
-    ifstream chrStreamIn ( (genomeDir+"/chrName.txt").c_str() );
+    ifstream chrStreamIn ( (pGe.gDir+"/chrName.txt").c_str() );
     if (chrStreamIn.fail()) {
         ostringstream errOut;
-        errOut << "EXITING because of FATAL error, could not open file " << (genomeDir+"/chrName.txt") <<"\n";
+        errOut << "EXITING because of FATAL error, could not open file " << (pGe.gDir+"/chrName.txt") <<"\n";
         errOut << "SOLUTION: re-generate genome files with STAR --runMode genomeGenerate\n";
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_INPUT_FILES, *this);
     };
@@ -1396,10 +1396,10 @@ void Parameters::chrInfoLoad() {//find chrStart,Length,nChr from Genome G
     chrLength.resize(nChrReal);
 
     //load chr lengths
-    chrStreamIn.open( (genomeDir+"/chrLength.txt").c_str() );
+    chrStreamIn.open( (pGe.gDir+"/chrLength.txt").c_str() );
     if (chrStreamIn.fail()) {
         ostringstream errOut;
-        errOut << "EXITING because of FATAL error, could not open file " << (genomeDir+"/chrLength.txt") <<"\n";
+        errOut << "EXITING because of FATAL error, could not open file " << (pGe.gDir+"/chrLength.txt") <<"\n";
         errOut << "SOLUTION: re-generate genome files with STAR --runMode genomeGenerate\n";
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_INPUT_FILES, *this);
     };
@@ -1410,10 +1410,10 @@ void Parameters::chrInfoLoad() {//find chrStart,Length,nChr from Genome G
     chrStreamIn.close();
 
     //load chr starts
-    chrStreamIn.open( (genomeDir+"/chrStart.txt").c_str() );
+    chrStreamIn.open( (pGe.gDir+"/chrStart.txt").c_str() );
     if (chrStreamIn.fail()) {
         ostringstream errOut;
-        errOut << "EXITING because of FATAL error, could not open file " << (genomeDir+"/chrStart.txt") <<"\n";
+        errOut << "EXITING because of FATAL error, could not open file " << (pGe.gDir+"/chrStart.txt") <<"\n";
         errOut << "SOLUTION: re-generate genome files with STAR --runMode genomeGenerate\n";
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_INPUT_FILES, *this);
     };

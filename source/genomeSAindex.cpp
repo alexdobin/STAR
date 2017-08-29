@@ -5,12 +5,12 @@
 
 void genomeSAindex(char * G, PackedArray & SA, Parameters & P, PackedArray & SAi)
  {
-    P.genomeSAindexStart = new uint [P.genomeSAindexNbases+1];
+    P.genomeSAindexStart = new uint [P.pGe.gSAindexNbases+1];
     P.genomeSAindexStart[0]=0;
-    for (uint ii=1;ii<=P.genomeSAindexNbases;ii++) {//L-mer indices starts
+    for (uint ii=1;ii<=P.pGe.gSAindexNbases;ii++) {//L-mer indices starts
         P.genomeSAindexStart[ii] = P.genomeSAindexStart[ii-1] + ( 1LLU<<(2*ii) );
     };
-    P.nSAi = P.genomeSAindexStart[P.genomeSAindexNbases];
+    P.nSAi = P.genomeSAindexStart[P.pGe.gSAindexNbases];
 
     /* testing
     //     uint* SAi1=new uint[P.nSAi];
@@ -19,7 +19,7 @@ void genomeSAindex(char * G, PackedArray & SA, Parameters & P, PackedArray & SAi
     SAio.defineBits(P.GstrandBit+3,P.nSAi);
     SAio.allocateArray();
     ifstream oldSAiin("./DirTrue/SAindex");
-    oldSAiin.read(SAio.charArray,8*(P.genomeSAindexNbases+2));//skip first bytes
+    oldSAiin.read(SAio.charArray,8*(P.pGe.gSAindexNbases+2));//skip first bytes
     oldSAiin.read(SAio.charArray,SAio.lengthByte);
     oldSAiin.close();
     */
@@ -44,9 +44,9 @@ void genomeSAindex(char * G, PackedArray & SA, Parameters & P, PackedArray & SAi
 
     /*testing
     PackedArray SA1=SA;
-    uint* ind0=new uint[P.genomeSAindexNbases];
+    uint* ind0=new uint[P.pGe.gSAindexNbases];
 
-    for (uint ii=0; ii<P.genomeSAindexNbases; ii++) {
+    for (uint ii=0; ii<P.pGe.gSAindexNbases; ii++) {
         ind0[ii]=-1;//this is needed in case "AAA...AAA",i.e. indPref=0 is not present in the genome for some lengths
     };
     uint* SAi1=new uint[P.nSAi];
@@ -60,14 +60,14 @@ void genomeSAindex(char * G, PackedArray & SA, Parameters & P, PackedArray & SAi
         if (!dirG) SAstr=P.nGenome-1-SAstr;
 
         uint indPref=0;
-        for (uint iL=0; iL < P.genomeSAindexNbases; iL++) {//calculate index
+        for (uint iL=0; iL < P.pGe.gSAindexNbases; iL++) {//calculate index
 
             indPref <<= 2;
 
             uint g1= (uint) G[dirG ? SAstr+iL : SAstr-iL]; //reverese if (-) strand
 
             if (g1>3) {//if N, this suffix does not belong in SAi
-                for (uint iL1=iL; iL1 < P.genomeSAindexNbases; iL1++) {
+                for (uint iL1=iL; iL1 < P.pGe.gSAindexNbases; iL1++) {
                     SAi1[P.genomeSAindexStart[iL1]+ind0[iL1]] |= P.SAiMarkNmaskC;
                 };
                 break;
@@ -98,7 +98,7 @@ void genomeSAindex(char * G, PackedArray & SA, Parameters & P, PackedArray & SAi
     P.inOut->logMain    << timeMonthDayTime(rawTime) <<" ... completed Suffix Array index\n" <<flush;
     *P.inOut->logStdOut << timeMonthDayTime(rawTime) <<" ... completed Suffix Array index\n" <<flush;
 
-//     for (uint ii=1;ii<=P.genomeSAindexNbases-1;ii++) {//L-mer indices starts
+//     for (uint ii=1;ii<=P.pGe.gSAindexNbases-1;ii++) {//L-mer indices starts
 //         cout <<ii<<endl;
 //         for (uint jj=P.genomeSAindexStart[ii-1]; jj<P.genomeSAindexStart[ii]; jj++)
 //         {
@@ -116,10 +116,10 @@ void genomeSAindex(char * G, PackedArray & SA, Parameters & P, PackedArray & SAi
 
 void genomeSAindexChunk(char * G, PackedArray & SA, Parameters & P, PackedArray & SAi, uint iSA1, uint iSA2)
 {
-    uint* ind0=new uint[P.genomeSAindexNbases];
-    uint* ind0a=new uint[P.genomeSAindexNbases];
+    uint* ind0=new uint[P.pGe.gSAindexNbases];
+    uint* ind0a=new uint[P.pGe.gSAindexNbases];
 
-    for (uint ii=0; ii<P.genomeSAindexNbases; ii++) {
+    for (uint ii=0; ii<P.pGe.gSAindexNbases; ii++) {
         ind0[ii]=-1;//this is needed in case "AAA...AAA",i.e. indPref=0 is not present in the genome for some lengths
         ind0a[ii]=-1;//this is needed in case "AAA...AAA",i.e. indPref=0 is not present in the genome for some lengths
     };
@@ -128,12 +128,12 @@ void genomeSAindexChunk(char * G, PackedArray & SA, Parameters & P, PackedArray 
     SAi1=SAi;
     SAi1.allocateArray();
 
-    uint isaStep=P.nSA/(1llu<<(2*P.genomeSAindexNbases))+1;
+    uint isaStep=P.nSA/(1llu<<(2*P.pGe.gSAindexNbases))+1;
 //     isaStep=8;
 
     uint isa=iSA1;
     int iL4;
-    uint indFull=funCalcSAiFromSA(G,SA,isa,P.genomeSAindexNbases,P,iL4);
+    uint indFull=funCalcSAiFromSA(G,SA,isa,P.pGe.gSAindexNbases,P,iL4);
     while (isa<=iSA2) {//for all suffixes
 
         /* testing
@@ -144,14 +144,14 @@ void genomeSAindexChunk(char * G, PackedArray & SA, Parameters & P, PackedArray 
         uint indPref1=0;
         */
 
-        for (uint iL=0; iL < P.genomeSAindexNbases; iL++) {//calculate index
+        for (uint iL=0; iL < P.pGe.gSAindexNbases; iL++) {//calculate index
             /*{//testing: old way
                 indPref1 <<= 2;
 
                 uint g1= (uint) G[dirG ? SAstr+iL : SAstr-iL]; //reverese if (-) strand
 
                 if (g1>3) {//if N, this suffix does not belong in SAi
-                    for (uint iL1=iL; iL1 < P.genomeSAindexNbases; iL1++) {
+                    for (uint iL1=iL; iL1 < P.pGe.gSAindexNbases; iL1++) {
                         SAi1.writePacked(P.genomeSAindexStart[iL1]+ind0[iL1],SAi[P.genomeSAindexStart[iL1]+ind0[iL1]] | P.SAiMarkNmaskC);
                     };
                 } else //relying on the true code to break iL cycle
@@ -175,13 +175,13 @@ void genomeSAindexChunk(char * G, PackedArray & SA, Parameters & P, PackedArray 
             };
             */
 
-            uint indPref = indFull >> (2*(P.genomeSAindexNbases-1-iL));
+            uint indPref = indFull >> (2*(P.pGe.gSAindexNbases-1-iL));
 //             if (indPref!=indPref1)
 //                 cout<< iL <<" "<< isa <<" "<< indPref <<" "<<indPref1<<endl;
 
 
             if ( (int)iL==iL4 ) {//this suffix contains N and does not belong in SAi
-                for (uint iL1=iL; iL1 < P.genomeSAindexNbases; iL1++) {
+                for (uint iL1=iL; iL1 < P.pGe.gSAindexNbases; iL1++) {
                     SAi.writePacked(P.genomeSAindexStart[iL1]+ind0[iL1],SAi[P.genomeSAindexStart[iL1]+ind0[iL1]] | P.SAiMarkNmaskC);
 //                     if (SAi[P.genomeSAindexStart[iL]+ind0[iL1]] != SAi1[P.genomeSAindexStart[iL]+ind0[iL1]])
 //                         cout<< iL <<" "<< isa <<" "<< indPref <<" "<<indPref1<<endl;
@@ -216,7 +216,7 @@ void genomeSAindexChunk(char * G, PackedArray & SA, Parameters & P, PackedArray 
         //find next index not equal to the current one
         funSAiFindNextIndex(P, G, SA, isaStep, isa, indFull, iL4);//indFull and iL4 have been already defined at the previous step
 //         isa++;
-//         indFull=funCalcSAiFromSA(G,SA,isa,P.genomeSAindexNbases,P,iL4);
+//         indFull=funCalcSAiFromSA(G,SA,isa,P.pGe.gSAindexNbases,P,iL4);
     };//isa cycle
     delete [] ind0;
 
@@ -227,13 +227,13 @@ void funSAiFindNextIndex(Parameters & P, char * G, PackedArray & SA, uint isaSte
     uint indFullPrev=indFull;
     int iL4prev=iL4;
     isa+=isaStep;
-    while (isa<P.nSA && (indFull=funCalcSAiFromSA(G,SA,isa,P.genomeSAindexNbases,P,iL4))==indFullPrev && iL4==iL4prev)
+    while (isa<P.nSA && (indFull=funCalcSAiFromSA(G,SA,isa,P.pGe.gSAindexNbases,P,iL4))==indFullPrev && iL4==iL4prev)
     {//make large step in isa while the indFull/iL4 are still the same
         isa+=isaStep;
     };
     if (isa>=P.nSA)
     {//reached the end of the SA
-        indFull=funCalcSAiFromSA(G,SA,P.nSA-1,P.genomeSAindexNbases,P,iL4);
+        indFull=funCalcSAiFromSA(G,SA,P.nSA-1,P.pGe.gSAindexNbases,P,iL4);
         if (indFull==indFullPrev && iL4==iL4prev)
         {
             isa=P.nSA;//no more indices, the last one is equal to the previous
@@ -247,7 +247,7 @@ void funSAiFindNextIndex(Parameters & P, char * G, PackedArray & SA, uint isaSte
         while (i1+1<i2)
         {
             isa=i1/2 + i2/2 + (i1%2 + i2%2)/2;
-            if ((indFull=funCalcSAiFromSA(G,SA,isa,P.genomeSAindexNbases,P,iL4))==indFullPrev && iL4==iL4prev)
+            if ((indFull=funCalcSAiFromSA(G,SA,isa,P.pGe.gSAindexNbases,P,iL4))==indFullPrev && iL4==iL4prev)
             {
                 i1=isa;
             } else
@@ -258,7 +258,7 @@ void funSAiFindNextIndex(Parameters & P, char * G, PackedArray & SA, uint isaSte
         if (isa==i1)
         {
             isa=i2;
-            indFull=funCalcSAiFromSA(G,SA,isa,P.genomeSAindexNbases,P,iL4);
+            indFull=funCalcSAiFromSA(G,SA,isa,P.pGe.gSAindexNbases,P,iL4);
         };
     };
 };

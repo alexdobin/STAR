@@ -36,8 +36,8 @@ void fstreamWriteBig(std::ofstream &S, char* A, unsigned long long N, std::strin
         struct statvfs statvfsBuf;
         statvfs(fileName.c_str(), &statvfsBuf);
 
-//         system(( "ls -lL "+ P.genomeDir + " > "+ P.genomeDir +"/error.info 2>&1").c_str());
-//         ifstream error_info((P.genomeDir +"/error.info").c_str());
+//         system(( "ls -lL "+ P.pGe.gDir + " > "+ P.pGe.gDir +"/error.info 2>&1").c_str());
+//         ifstream error_info((P.pGe.gDir +"/error.info").c_str());
 //         P.inOut->logMain <<error_info.rdbuf();
 
         struct stat statBuf;
@@ -89,7 +89,7 @@ std::ifstream & ifstrOpen (std::string fileName, std::string errorID, std::strin
 
 ifstream & ifstrOpenGenomeFile (std::string fileName, std::string errorID, Parameters &P) {
      //open one of the genome files
-     return ifstrOpen(P.genomeDir+"/"+fileName, errorID,  "if this file is missing from the genome directory, you will need to *re-generate the genome*", P);
+     return ifstrOpen(P.pGe.gDir+"/"+fileName, errorID,  "if this file is missing from the genome directory, you will need to *re-generate the genome*", P);
 };
 
 void copyFile(string fileIn, string fileOut)

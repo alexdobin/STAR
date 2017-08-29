@@ -26,7 +26,7 @@
 #define SHM_projectID 23
 
 Genome::Genome (Parameters& Pin ): P(Pin), shmStart(NULL), sharedMemory(NULL) {
-            shmKey=ftok(P.genomeDir.c_str(),SHM_projectID);
+            shmKey=ftok(P.pGe.gDir.c_str(),SHM_projectID);
         };
 
 Genome::~Genome()
@@ -38,7 +38,7 @@ Genome::~Genome()
 
 void Genome::freeMemory(){//free big chunks of memory used by genome and suffix array
 
-    if (P.genomeLoad=="NoSharedMemory") {//can deallocate only for non-shared memory
+    if (P.pGe.gLoad=="NoSharedMemory") {//can deallocate only for non-shared memory
         delete[] G1;
         G1=NULL;
         SA.deallocateArray();
@@ -49,11 +49,11 @@ void Genome::freeMemory(){//free big chunks of memory used by genome and suffix 
 
 uint Genome::OpenStream(string name, ifstream & stream, uint size)
 {
-    stream.open((P.genomeDir+ "/" +name).c_str(), ios::binary);
+    stream.open((P.pGe.gDir+ "/" +name).c_str(), ios::binary);
     if (!stream.good()) {
         ostringstream errOut;
-        errOut << "EXITING because of FATAL ERROR: could not open genome file "<< P.genomeDir << "/" << name <<"\n" << endl;
-        errOut << "SOLUTION: check that the path to genome files, specified in --genomeDir is correct and the files are present, and have user read permsissions\n" <<flush;
+        errOut << "EXITING because of FATAL ERROR: could not open genome file "<< P.pGe.gDir << "/" << name <<"\n" << endl;
+        errOut << "SOLUTION: check that the path to genome files, specified in --pGe.gDir is correct and the files are present, and have user read permsissions\n" <<flush;
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_GENOME_FILES, P);
     };
 
@@ -89,7 +89,7 @@ void Genome::genomeLoad(){//allocate and load Genome
 
     Parameters P1;
 
-    ifstream parFile((P.genomeDir+("/genomeParameters.txt")).c_str());
+    ifstream parFile((P.pGe.gDir+("/genomeParameters.txt")).c_str());
     if (parFile.good()) {
         P.inOut->logMain << "Reading genome generation parameters:\n";
         P1.inOut = P.inOut;
@@ -97,8 +97,8 @@ void Genome::genomeLoad(){//allocate and load Genome
         parFile.close();
     } else {
         ostringstream errOut;
-        errOut << "EXITING because of FATAL ERROR: could not open genome file "<< P.genomeDir+("/genomeParameters.txt") << endl;
-        errOut << "SOLUTION: check that the path to genome files, specified in --genomeDir is correct and the files are present, and have user read permsissions\n" <<flush;
+        errOut << "EXITING because of FATAL ERROR: could not open genome file "<< P.pGe.gDir+("/genomeParameters.txt") << endl;
+        errOut << "SOLUTION: check that the path to genome files, specified in --pGe.gDir is correct and the files are present, and have user read permsissions\n" <<flush;
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_GENOME_FILES, P);
     };
 
@@ -108,9 +108,9 @@ void Genome::genomeLoad(){//allocate and load Genome
         errOut << "EXITING because of FATAL ERROR: read no value for the versionGenome parameter from genomeParameters.txt file\n";
         errOut << "SOLUTION: please re-generate genome from scratch with the latest version of STAR\n";
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_GENOME_FILES, P);
-    } else if (P.sjdbFileChrStartEnd.at(0)=="-" && P1.versionGenome.at(0) >= P.versionGenome.at(0)) {//
+    } else if (P.pGe.sjdbFileChrStartEnd.at(0)=="-" && P1.versionGenome.at(0) >= P.versionGenome.at(0)) {//
         P.inOut->logMain << "Genome version is compatible with current STAR version\n";
-    } else if (P.sjdbFileChrStartEnd.at(0)!="-" && P1.versionGenome.at(0) >= P.versionGenome.at(1)) {//
+    } else if (P.pGe.sjdbFileChrStartEnd.at(0)!="-" && P1.versionGenome.at(0) >= P.versionGenome.at(1)) {//
         P.inOut->logMain << "Genome version is compatible with current STAR version\n";
     } else {
         ostringstream errOut;
@@ -125,12 +125,12 @@ void Genome::genomeLoad(){//allocate and load Genome
     //check if sjdbInfo.txt exists => genome was generated with junctions
     bool sjdbInfoExists=false;
     struct stat sjdb1;
-    if ( stat( (P.genomeDir+"/sjdbInfo.txt").c_str(), &sjdb1) == 0 )
+    if ( stat( (P.pGe.gDir+"/sjdbInfo.txt").c_str(), &sjdb1) == 0 )
     {//file exists
         sjdbInfoExists=true;
     };
 
-    if ( P.sjdbInsert.yes && sjdbInfoExists && P1.sjdbInsert.save=="")
+    if ( P.sjdbInsert.yes && sjdbInfoExists && P1.pGe.sjdbInsertSave=="")
     {//if sjdbInsert, and genome had junctions, and genome is old - it should be re-generated with new STAR
         ostringstream errOut;
         errOut << "EXITING because of FATAL ERROR: old Genome is INCOMPATIBLE with on the fly junction insertion\n";
@@ -139,50 +139,50 @@ void Genome::genomeLoad(){//allocate and load Genome
     };
 
     //record required genome parameters in P
-    P.genomeSAindexNbases=P1.genomeSAindexNbases;
-    P.genomeChrBinNbits=P1.genomeChrBinNbits;
-    P.genomeChrBinNbases=1LLU<<P.genomeChrBinNbits;
-    P.genomeSAsparseD=P1.genomeSAsparseD;
+    P.pGe.gSAindexNbases=P1.pGe.gSAindexNbases;
+    P.pGe.gChrBinNbits=P1.pGe.gChrBinNbits;
+    P.genomeChrBinNbases=1LLU<<P.pGe.gChrBinNbits;
+    P.pGe.gSAsparseD=P1.pGe.gSAsparseD;
     
-    if (P1.genomeFileSizes.size()>0)
+    if (P1.pGe.gFileSizes.size()>0)
     {//genomeFileSize was recorded in the genomeParameters file, copy the values to P
-        P.genomeFileSizes = P1.genomeFileSizes;
+        P.pGe.gFileSizes = P1.pGe.gFileSizes;
     };
 
-    if (P.parArray.at(P.sjdbOverhang_par)->inputLevel==0 && P1.sjdbOverhang>0)
-    {//if --sjdbOverhang was not defined by user and it was defined >0 at the genome generation step, then use sjdbOverhang from the genome generation step
-        P.sjdbOverhang=P1.sjdbOverhang;
-        P.inOut->logMain << "--sjdbOverhang = " << P.sjdbOverhang << " taken from the generated genome\n";
-    } else if (sjdbInfoExists && P.parArray.at(P.sjdbOverhang_par)->inputLevel>0 && P.sjdbOverhang!=P1.sjdbOverhang)
-    {//if sjdbOverhang was defined at the genome generation step,the mapping step value has to agree with it
+    if (P.parArray.at(P.pGe.sjdbOverhang_par)->inputLevel==0 && P1.pGe.sjdbOverhang>0)
+    {//if --pGe.sjdbOverhang was not defined by user and it was defined >0 at the genome generation step, then use pGe.sjdbOverhang from the genome generation step
+        P.pGe.sjdbOverhang=P1.pGe.sjdbOverhang;
+        P.inOut->logMain << "--pGe.sjdbOverhang = " << P.pGe.sjdbOverhang << " taken from the generated genome\n";
+    } else if (sjdbInfoExists && P.parArray.at(P.pGe.sjdbOverhang_par)->inputLevel>0 && P.pGe.sjdbOverhang!=P1.pGe.sjdbOverhang)
+    {//if pGe.sjdbOverhang was defined at the genome generation step,the mapping step value has to agree with it
         ostringstream errOut;
-        errOut << "EXITING because of fatal PARAMETERS error: present --sjdbOverhang="<<P.sjdbOverhang << " is not equal to the value at the genome generation step ="<< P1.sjdbOverhang << "\n";
+        errOut << "EXITING because of fatal PARAMETERS error: present --pGe.sjdbOverhang="<<P.pGe.sjdbOverhang << " is not equal to the value at the genome generation step ="<< P1.pGe.sjdbOverhang << "\n";
         errOut << "SOLUTION: \n" <<flush;
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_GENOME_FILES, P);
     };
 
-    P.sjdbLength = P.sjdbOverhang==0 ? 0 : P.sjdbOverhang*2+1;
+    P.sjdbLength = P.pGe.sjdbOverhang==0 ? 0 : P.pGe.sjdbOverhang*2+1;
 
 
     P.inOut->logMain << "Started loading the genome: " << asctime (localtime ( &rawtime ))<<"\n"<<flush;
 
     ifstream GenomeIn, SAin, SAiIn;
 
-    if (P.genomeFileSizes.size() < 2)
+    if (P.pGe.gFileSizes.size() < 2)
     {//no size info available
-        P.genomeFileSizes.push_back(0);
-        P.genomeFileSizes.push_back(0);
+        P.pGe.gFileSizes.push_back(0);
+        P.pGe.gFileSizes.push_back(0);
     };
-    P.nGenome = OpenStream("Genome",GenomeIn,P.genomeFileSizes.at(0));
-    P.nSAbyte = OpenStream("SA",SAin,P.genomeFileSizes.at(1));
+    P.nGenome = OpenStream("Genome",GenomeIn,P.pGe.gFileSizes.at(0));
+    P.nSAbyte = OpenStream("SA",SAin,P.pGe.gFileSizes.at(1));
     OpenStream("/SAindex",SAiIn,1); //we do not need SAiIn siz, using a dummy value here to prevent from reading its size from the disk
 
     uint SAiInBytes=0;
-    SAiInBytes += fstreamReadBig(SAiIn,(char*) &P.genomeSAindexNbases, sizeof(P.genomeSAindexNbases));
-    P.genomeSAindexStart = new uint[P.genomeSAindexNbases+1];
-    SAiInBytes += fstreamReadBig(SAiIn,(char*) P.genomeSAindexStart, sizeof(P.genomeSAindexStart[0])*(P.genomeSAindexNbases+1));
-    P.nSAi=P.genomeSAindexStart[P.genomeSAindexNbases];
-    P.inOut->logMain << "Read from SAindex: genomeSAindexNbases=" << P.genomeSAindexNbases <<"  nSAi="<< P.nSAi <<endl;
+    SAiInBytes += fstreamReadBig(SAiIn,(char*) &P.pGe.gSAindexNbases, sizeof(P.pGe.gSAindexNbases));
+    P.genomeSAindexStart = new uint[P.pGe.gSAindexNbases+1];
+    SAiInBytes += fstreamReadBig(SAiIn,(char*) P.genomeSAindexStart, sizeof(P.genomeSAindexStart[0])*(P.pGe.gSAindexNbases+1));
+    P.nSAi=P.genomeSAindexStart[P.pGe.gSAindexNbases];
+    P.inOut->logMain << "Read from SAindex: pGe.gSAindexNbases=" << P.pGe.gSAindexNbases <<"  nSAi="<< P.nSAi <<endl;
 
 
     /////////////////////////////////// at this point all array sizes should be known: calculate packed array lengths
@@ -211,12 +211,12 @@ void Genome::genomeLoad(){//allocate and load Genome
     if (P.annotScoreScale>0) shmSize+=P.nGenome;
 
 
-    if ((P.genomeLoad=="LoadAndKeep" ||
-         P.genomeLoad=="LoadAndRemove" ||
-         P.genomeLoad=="LoadAndExit" ||
-         P.genomeLoad=="Remove") && sharedMemory == NULL)
+    if ((P.pGe.gLoad=="LoadAndKeep" ||
+         P.pGe.gLoad=="LoadAndRemove" ||
+         P.pGe.gLoad=="LoadAndExit" ||
+         P.pGe.gLoad=="Remove") && sharedMemory == NULL)
     {
-        bool unloadLast = P.genomeLoad=="LoadAndRemove";
+        bool unloadLast = P.pGe.gLoad=="LoadAndRemove";
         try
         {
             sharedMemory = new SharedMemory(shmKey, unloadLast);
@@ -225,7 +225,7 @@ void Genome::genomeLoad(){//allocate and load Genome
             if (!sharedMemory->NeedsAllocation())
             P.inOut->logMain <<"Found genome in shared memory\n"<<flush;
 
-    if (P.genomeLoad=="Remove") {//kill the genome and exit
+    if (P.pGe.gLoad=="Remove") {//kill the genome and exit
                 if (sharedMemory->NeedsAllocation()) {//did not find genome in shared memory, nothing to kill
             ostringstream errOut;
             errOut << "EXITING: Did not find the genome in memory, did not remove any genomes from shared memory\n";
@@ -265,7 +265,7 @@ void Genome::genomeLoad(){//allocate and load Genome
             if (iwait==100) {
                 ostringstream errOut;
                 errOut << "EXITING because of FATAL ERROR: waited too long for the other job to finish loading the genome" << strerror(errno) << "\n" <<flush;
-                    errOut << "SOLUTION: remove the shared memory chunk by running STAR with --genomeLoad Remove, and restart STAR" <<flush;
+                    errOut << "SOLUTION: remove the shared memory chunk by running STAR with --pGe.gLoad Remove, and restart STAR" <<flush;
                     exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_GENOME_LOADING_WAITED_TOO_LONG, P);
             };
         };
@@ -274,7 +274,7 @@ void Genome::genomeLoad(){//allocate and load Genome
             {
                 ostringstream errOut;
                 errOut << "EXITING because of FATAL ERROR: the SA file size did not match what we found in shared memory" << "\n" << flush;
-                errOut << "SOLUTION: remove the shared memory chunk by running STAR with --genomeLoad Remove, and restart STAR" << flush;
+                errOut << "SOLUTION: remove the shared memory chunk by running STAR with --pGe.gLoad Remove, and restart STAR" << flush;
                 exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INCONSISTENT_DATA, P);
             }
 
@@ -294,17 +294,17 @@ void Genome::genomeLoad(){//allocate and load Genome
 //     } else {//2-pass
 //         ostringstream errOut;
 //         errOut << "EXITING because of FATAL ERROR: 2-pass procedure cannot be used with genome already loaded im memory'  "\n" ;
-//         errOut << "SOLUTION: check shared memory settigns as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;
+//         errOut << "SOLUTION: check shared memory settigns as explained in STAR manual, OR run STAR with --pGe.gLoad NoSharedMemory to avoid using shared memory\n" <<flush;
 //         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_SHM, P);
 //     };
      if (P.annotScoreScale>0) {//optional allocation
             shmNext += P.nGenome;
         }
     }
-    else if (P.genomeLoad=="NoSharedMemory") // simply allocate memory, do not use shared memory
+    else if (P.pGe.gLoad=="NoSharedMemory") // simply allocate memory, do not use shared memory
     {
         P.genomeInsertL=0;
-        if (P.genomeFastaFiles.at(0)!="-")
+        if (P.pGe.gFastaFiles.at(0)!="-")
         {//will insert sequences in the genome, now estimate the extra size
            uint oldlen=P.chrStart.back();//record the old length
            P.genomeInsertChrIndFirst=P.nChrReal;
@@ -379,7 +379,7 @@ void Genome::genomeLoad(){//allocate and load Genome
 //     } else {//2-pass
 //         ostringstream errOut;
 //         errOut << "EXITING because of FATAL ERROR: 2-pass procedure cannot be used with genome already loaded im memory'  "\n" ;
-//         errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;
+//         errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --pGe.gLoad NoSharedMemory to avoid using shared memory\n" <<flush;
 //         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_SHM, P);
 //     };
 
@@ -388,7 +388,7 @@ void Genome::genomeLoad(){//allocate and load Genome
 
     bool isAllocatorProcess = sharedMemory != NULL && sharedMemory->IsAllocator();
 
-    if (P.genomeLoad=="NoSharedMemory" || isAllocatorProcess) {//load genome and SAs from files
+    if (P.pGe.gLoad=="NoSharedMemory" || isAllocatorProcess) {//load genome and SAs from files
         //load genome
         P.inOut->logMain <<"Genome file size: "<<P.nGenome <<" bytes; state: good=" <<GenomeIn.good()\
                 <<" eof="<<GenomeIn.eof()<<" fail="<<GenomeIn.fail()<<" bad="<<GenomeIn.bad()<<"\n"<<flush;
@@ -419,9 +419,9 @@ void Genome::genomeLoad(){//allocate and load Genome
 
     SAiIn.close();
 
-    if ((P.genomeLoad=="LoadAndKeep" ||
-         P.genomeLoad=="LoadAndRemove" ||
-         P.genomeLoad=="LoadAndExit") && isAllocatorProcess )
+    if ((P.pGe.gLoad=="LoadAndKeep" ||
+         P.pGe.gLoad=="LoadAndRemove" ||
+         P.pGe.gLoad=="LoadAndExit") && isAllocatorProcess )
     {
         //record sizes. This marks the end of genome loading
         *shmNG=P.nGenome;
@@ -445,10 +445,10 @@ void Genome::genomeLoad(){//allocate and load Genome
     };
     #endif
 
-    if (P.genomeLoad=="LoadAndExit") {
+    if (P.pGe.gLoad=="LoadAndExit") {
 	uint shmSum=0;
 	for (uint ii=0;ii<shmSize;ii++) shmSum+=shmStart[ii];
-        P.inOut->logMain << "genomeLoad=LoadAndExit: completed, the genome is loaded and kept in RAM, EXITING now.\n"<<flush;
+        P.inOut->logMain << "pGe.gLoad=LoadAndExit: completed, the genome is loaded and kept in RAM, EXITING now.\n"<<flush;
         return;
     };
 
@@ -461,17 +461,17 @@ void Genome::genomeLoad(){//allocate and load Genome
         P.sjdbN=0;
         P.sjGstart=P.chrStart[P.nChrReal]+1; //not sure why I need that
     } else {//there are sjdb chromosomes
-        ifstream sjdbInfo((P.genomeDir+"/sjdbInfo.txt").c_str());
+        ifstream sjdbInfo((P.pGe.gDir+"/sjdbInfo.txt").c_str());
         if (sjdbInfo.fail()) {
             ostringstream errOut;
-            errOut << "EXITING because of FATAL error, could not open file " << (P.genomeDir+"/sjdbInfo.txt") <<"\n";
-            errOut << "SOLUTION: check that the path to genome files, specified in --genomeDir is correct and the files are present, and have user read permsissions\n" <<flush;
+            errOut << "EXITING because of FATAL error, could not open file " << (P.pGe.gDir+"/sjdbInfo.txt") <<"\n";
+            errOut << "SOLUTION: check that the path to genome files, specified in --pGe.gDir is correct and the files are present, and have user read permsissions\n" <<flush;
             exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         };
 
 
-        sjdbInfo >> P.sjdbN >> P.sjdbOverhang;
-        P.inOut->logMain << "Processing splice junctions database sjdbN=" <<P.sjdbN<<",   sjdbOverhang=" <<P.sjdbOverhang <<" \n";
+        sjdbInfo >> P.sjdbN >> P.pGe.sjdbOverhang;
+        P.inOut->logMain << "Processing splice junctions database sjdbN=" <<P.sjdbN<<",   pGe.sjdbOverhang=" <<P.pGe.sjdbOverhang <<" \n";
 
         P.sjChrStart=P.nChrReal;
         P.sjGstart=P.chrStart[P.sjChrStart];
@@ -496,7 +496,7 @@ void Genome::genomeLoad(){//allocate and load Genome
                 P.sjdbShiftRight[ii] = (uint8) d3;
                 P.sjdbStrand[ii] = (uint8) d4;
             };
-            P.sjDstart[ii]   = P.sjdbStart[ii]  - P.sjdbOverhang;
+            P.sjDstart[ii]   = P.sjdbStart[ii]  - P.pGe.sjdbOverhang;
             P.sjAstart[ii]   = P.sjdbEnd[ii] + 1;
             if (P.sjdbMotif[ii]==0) {//shinon-canonical junctions back to their true coordinates
                 P.sjDstart[ii] += P.sjdbShiftLeft[ii];
@@ -518,9 +518,9 @@ void Genome::genomeLoad(){//allocate and load Genome
         P.inOut->logMain << "To accomodate alignIntronMax="<<P.alignIntronMax<<" redefined winBinNbits="<< P.winBinNbits <<endl;
     };
 
-    if (P.winBinNbits > P.genomeChrBinNbits) {
-       P.inOut->logMain << "winBinNbits=" <<P.winBinNbits <<" > " << "genomeChrBinNbits=" << P.genomeChrBinNbits << "   redefining:\n";
-       P.winBinNbits=P.genomeChrBinNbits;
+    if (P.winBinNbits > P.pGe.gChrBinNbits) {
+       P.inOut->logMain << "winBinNbits=" <<P.winBinNbits <<" > " << "pGe.gChrBinNbits=" << P.pGe.gChrBinNbits << "   redefining:\n";
+       P.winBinNbits=P.pGe.gChrBinNbits;
        P.inOut->logMain << "winBinNbits=" <<P.winBinNbits <<endl;
     };
 
@@ -534,7 +534,7 @@ void Genome::genomeLoad(){//allocate and load Genome
                 ", redefined winFlankNbins="<<P.winFlankNbins<<" and winAnchorDistNbins="<<P.winAnchorDistNbins<<endl;
     };
 
-    P.winBinChrNbits=P.genomeChrBinNbits-P.winBinNbits;
+    P.winBinChrNbits=P.pGe.gChrBinNbits-P.winBinNbits;
     P.winBinN = P.nGenome/(1LLU << P.winBinNbits)+1;//this may be chenaged later
 };
 
@@ -549,14 +549,14 @@ void Genome::HandleSharedMemoryException(const SharedMemoryException & exc, uint
     {
         case EOPENFAILED:
             errOut << "EXITING because of FATAL ERROR: problems with shared memory: error from shmget() or shm_open()." << endl << flush;
-            errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory" << endl << flush;
+            errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --pGe.gLoad NoSharedMemory to avoid using shared memory" << endl << flush;
             break;
         case EEXISTS:
             errOut << "EXITING: fatal error from shmget() trying to allocate shared memory piece." << endl;
             errOut << "Possible cause 1: not enough RAM. Check if you have enough RAM of at least " << shmSize+2000000000 << " bytes" << endl;
             errOut << "Possible cause 2: not enough virtual memory allowed with ulimit. SOLUTION: run ulimit -v " <<  shmSize+2000000000 << endl;
             errOut << "Possible cause 3: allowed shared memory size is not large enough. SOLUTIONS: (i) consult STAR manual on how to increase shared memory allocation; " \
-            "(ii) ask your system administrator to increase shared memory allocation; (iii) run STAR with --genomeLoad NoSharedMemory" << endl<<flush;
+            "(ii) ask your system administrator to increase shared memory allocation; (iii) run STAR with --pGe.gLoad NoSharedMemory" << endl<<flush;
             break;
         case EFTRUNCATE:
             errOut << "EXITING: fatal error from ftruncate() error shared memory."  << endl;
@@ -565,7 +565,7 @@ void Genome::HandleSharedMemoryException(const SharedMemoryException & exc, uint
             break;
         case EMAPFAILED:
             errOut << "EXITING because of FATAL ERROR: problems with shared memory: error from shmat() while trying to get address of the shared memory piece." << endl << flush;
-            errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory" << endl << flush;
+            errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --pGe.gLoad NoSharedMemory to avoid using shared memory" << endl << flush;
             break;
         case ECLOSE:
             errOut << "EXITING because of FATAL ERROR: could not close the shared memory object." << endl << flush;
@@ -575,11 +575,11 @@ void Genome::HandleSharedMemoryException(const SharedMemoryException & exc, uint
             errOut << "EXITING because of FATAL ERROR:  could not delete the shared object." << endl << flush;
             #else
             errOut << "EXITING because of FATAL ERROR: problems with shared memory: error from shmctl() while trying to remove shared memory piece." << endl << flush;
-            errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory" << endl << flush;
+            errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --pGe.gLoad NoSharedMemory to avoid using shared memory" << endl << flush;
             #endif
             break;
         default:
-            errOut << "EXITING because of FATAL ERROR: There was an issue with the shared memory allocation. Try running STAR with --genomeLoad NoSharedMemory to avoid using shared memory.";
+            errOut << "EXITING because of FATAL ERROR: There was an issue with the shared memory allocation. Try running STAR with --pGe.gLoad NoSharedMemory to avoid using shared memory.";
             break;
     }
 

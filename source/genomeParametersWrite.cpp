@@ -8,29 +8,29 @@ void genomeParametersWrite(string fileName, Parameters& P, string errorOut)
     genomePar << "### "<<P.commandLineFull <<"\n";
 
     genomePar << "versionGenome\t" << P.versionSTAR <<"\n";
-    genomePar << "genomeFastaFiles\t";
-    for (uint ii=0;ii<P.genomeFastaFiles.size();ii++) genomePar << P.genomeFastaFiles.at(ii) << " ";
+    genomePar << "pGe.gFastaFiles\t";
+    for (uint ii=0;ii<P.pGe.gFastaFiles.size();ii++) genomePar << P.pGe.gFastaFiles.at(ii) << " ";
     genomePar << "\n";
-    genomePar << "genomeSAindexNbases\t" << P.genomeSAindexNbases << "\n";
-    genomePar << "genomeChrBinNbits\t" << P.genomeChrBinNbits << "\n";
-    genomePar << "genomeSAsparseD\t" << P.genomeSAsparseD <<"\n";
-    genomePar << "sjdbOverhang\t" << P.sjdbOverhang <<"\n";
+    genomePar << "pGe.gSAindexNbases\t" << P.pGe.gSAindexNbases << "\n";
+    genomePar << "pGe.gChrBinNbits\t" << P.pGe.gChrBinNbits << "\n";
+    genomePar << "pGe.gSAsparseD\t" << P.pGe.gSAsparseD <<"\n";
+    genomePar << "pGe.sjdbOverhang\t" << P.pGe.sjdbOverhang <<"\n";
 
-    genomePar << "sjdbFileChrStartEnd\t";
-    for (uint ii=0;ii<P.sjdbFileChrStartEnd.size();ii++) genomePar<< P.sjdbFileChrStartEnd.at(ii) << " ";
+    genomePar << "pGe.sjdbFileChrStartEnd\t";
+    for (uint ii=0;ii<P.pGe.sjdbFileChrStartEnd.size();ii++) genomePar<< P.pGe.sjdbFileChrStartEnd.at(ii) << " ";
     genomePar<<"\n";
 
-    genomePar << "sjdbGTFfile\t" << P.sjdbGTFfile <<"\n";
-    genomePar << "sjdbGTFchrPrefix\t" << P.sjdbGTFchrPrefix <<"\n";
-    genomePar << "sjdbGTFfeatureExon\t" << P.sjdbGTFfeatureExon <<"\n";
-    genomePar << "sjdbGTFtagExonParentTranscript\t" << P.sjdbGTFtagExonParentTranscript <<"\n";
-    genomePar << "sjdbGTFtagExonParentGene\t" << P.sjdbGTFtagExonParentGene <<"\n";
+    genomePar << "pGe.sjdbGTFfile\t" << P.pGe.sjdbGTFfile <<"\n";
+    genomePar << "pGe.sjdbGTFchrPrefix\t" << P.pGe.sjdbGTFchrPrefix <<"\n";
+    genomePar << "pGe.sjdbGTFfeatureExon\t" << P.pGe.sjdbGTFfeatureExon <<"\n";
+    genomePar << "pGe.sjdbGTFtagExonParentTranscript\t" << P.pGe.sjdbGTFtagExonParentTranscript <<"\n";
+    genomePar << "pGe.sjdbGTFtagExonParentGene\t" << P.pGe.sjdbGTFtagExonParentGene <<"\n";
 
-    genomePar << "sjdbInsertSave\t" << P.sjdbInsert.save <<"\n";
+    genomePar << "pGe.sjdbInsertSave\t" << P.pGe.sjdbInsertSave <<"\n";
     
-    genomePar << "genomeFileSizes\t" << P.genomeFileSizes.at(0);
-    for (uint ii=1;ii<P.genomeFileSizes.size();ii++) 
-        genomePar << " " << P.genomeFileSizes.at(ii) ;
+    genomePar << "pGe.gFileSizes\t" << P.pGe.gFileSizes.at(0);
+    for (uint ii=1;ii<P.pGe.gFileSizes.size();ii++) 
+        genomePar << " " << P.pGe.gFileSizes.at(ii) ;
     genomePar << "\n";
 
     genomePar.close();

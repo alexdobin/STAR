@@ -24,7 +24,7 @@ void sjdbPrepare (SjdbClass &sjdbLoci, Parameters &P, uint nGenomeReal, string o
             if (iChr>=P.nChrReal) {
                 ostringstream errOut;
                 errOut << "EXITING because of FATAL error, the sjdb chromosome " << sjdbLoci.chr.at(ii) << " is not found among the genomic chromosomes\n";
-                errOut << "SOLUTION: fix your file(s) --sjdbFileChrStartEnd, offending junciton:" <<sjdbLoci.chr.at(ii)<<"\t"<<sjdbLoci.start.at(ii)<<"\t"<<sjdbLoci.end.at(ii)<<"\n";
+                errOut << "SOLUTION: fix your file(s) --pGe.sjdbFileChrStartEnd, offending junciton:" <<sjdbLoci.chr.at(ii)<<"\t"<<sjdbLoci.start.at(ii)<<"\t"<<sjdbLoci.end.at(ii)<<"\n";
                 exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
             };
             chrOld=sjdbLoci.chr.at(ii);
@@ -197,23 +197,23 @@ void sjdbPrepare (SjdbClass &sjdbLoci, Parameters &P, uint nGenomeReal, string o
     ofstream sjdbList ((outDir+"/sjdbList.out.tab").c_str());
     char strandChar[3]={'.','+','-'};
     //first line is some general useful information
-    sjdbInfo << P.sjdbN <<"\t"<< P.sjdbOverhang <<"\n";
+    sjdbInfo << P.sjdbN <<"\t"<< P.pGe.sjdbOverhang <<"\n";
     uint sjGstart=0;
 
     for (uint ii=0;ii<P.sjdbN;ii++)
     {//add sjdb sequence to genome
-        P.sjDstart[ii]   = P.sjdbStart[ii]  - P.sjdbOverhang;
+        P.sjDstart[ii]   = P.sjdbStart[ii]  - P.pGe.sjdbOverhang;
         P.sjAstart[ii]   = P.sjdbEnd[ii] + 1;
         if (P.sjdbMotif[ii]==0) {//shift non-canonical junctions back to their true coordinates
             P.sjDstart[ii] += P.sjdbShiftLeft[ii];
             P.sjAstart[ii] += P.sjdbShiftLeft[ii];
         };
-        memcpy(Gsj+sjGstart,G+P.sjDstart[ii],P.sjdbOverhang);//sjdbStart contains 1-based intron loci
-        memcpy(Gsj+sjGstart+P.sjdbOverhang,G+P.sjAstart[ii],P.sjdbOverhang);//sjdbStart contains 1-based intron loci
+        memcpy(Gsj+sjGstart,G+P.sjDstart[ii],P.pGe.sjdbOverhang);//sjdbStart contains 1-based intron loci
+        memcpy(Gsj+sjGstart+P.pGe.sjdbOverhang,G+P.sjAstart[ii],P.pGe.sjdbOverhang);//sjdbStart contains 1-based intron loci
         sjGstart += P.sjdbLength;
         Gsj[sjGstart-1]=GENOME_spacingChar;//spacing char between the sjdb seqs
         sjdbInfo << P.sjdbStart[ii] <<"\t"<< P.sjdbEnd[ii] <<"\t"<<(int) P.sjdbMotif[ii] <<"\t"<<(int) P.sjdbShiftLeft[ii] <<"\t"<<(int) P.sjdbShiftRight[ii]<<"\t"<<(int) P.sjdbStrand[ii] <<"\n";
-        uint chr1=P.chrBin[ P.sjdbStart[ii] >> P.genomeChrBinNbits];
+        uint chr1=P.chrBin[ P.sjdbStart[ii] >> P.pGe.gChrBinNbits];
         sjdbList << P.chrName[chr1]<< "\t" << P.sjdbStart[ii]-P.chrStart[chr1] + 1 + (P.sjdbMotif[ii]>0 ? 0:P.sjdbShiftLeft[ii]) \
                                     << "\t"<<  P.sjdbEnd[ii]-P.chrStart[chr1] + 1 + (P.sjdbMotif[ii]>0 ? 0:P.sjdbShiftLeft[ii]) \
                                     << "\t"<< strandChar[P.sjdbStrand[ii]]<<"\n";

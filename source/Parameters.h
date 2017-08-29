@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include "ParametersChimeric.h"
+#include "ParametersGenome.h"
 
 class Parameters {
 
@@ -39,24 +40,20 @@ class Parameters {
         string inputBAMfile;
 
         //genome, SA, ...
+        
+        ParametersGenome pGe;
         vector <uint> chrStart, chrLength, chrLengthAll;
-        string genomeDir,genomeLoad;
-        vector <string> genomeFastaFiles, genomeChainFiles;
-        uint genomeSAsparseD;//sparsity=distance between indices
         uint genomeInsertL; //total length of the sequence to be inserted on the fly
         uint genomeInsertChrIndFirst; //index of the first inserted chromosome
-        uint genomeSuffixLengthMax; //maximum length of the suffixes, has to be longer than read length
-        vector <uint> genomeFileSizes; //size of the genome files
-        
+        uint genomeChrBinNbases, chrBinN, *chrBin;
+
         //binning,windows,anchors
-        uint genomeChrBinNbits, genomeChrBinNbases, chrBinN, *chrBin;
         uint winBinChrNbits, winBinNbits, winAnchorDistNbins, winFlankNbins, winBinN;
         uint winAnchorMultimapNmax; //max number of alignments for anchors
         double winReadCoverageRelativeMin;
         uint winReadCoverageBasesMin;
 
-        uint genomeSAindexNbases; //length of the SA pre-index strings
-        uint *genomeSAindexStart;//starts of the L-mer indices in the SAindex, 1<=L<=genomeSAindexNbases
+        uint *genomeSAindexStart;//starts of the L-mer indices in the SAindex, 1<=L<=pGe.gSAindexNbases
 
         char genomeNumToNT[6];
         //read parameters
@@ -229,7 +226,6 @@ class Parameters {
             bool yes; //insert?
             bool pass1;//insert on the 1st pass?
             bool pass2;//insert on the 2nd pass?
-            string save;
             string outDir;
         } sjdbInsert;
 
@@ -259,11 +255,7 @@ class Parameters {
         string annotSignalFile;//binary file with annotation signal
 
         //SJ database parameters
-        vector <string> sjdbFileChrStartEnd;
-        string sjdbGTFfile, sjdbGTFchrPrefix, sjdbGTFfeatureExon, sjdbGTFtagExonParentTranscript, sjdbGTFtagExonParentGene;
-        uint sjdbOverhang,sjdbLength; //length of the donor/acceptor, length of the sj "chromosome" =2*sjdbOverhang+1 including spacer
-        int sjdbOverhang_par;
-        int sjdbScore;
+        uint sjdbLength; //length of the donor/acceptor, length of the sj "chromosome" =2*pGe.sjdbOverhang+1 including spacer
 
         uint sjChrStart,sjdbN; //first sj-db chr
         uint sjGstart; //start of the sj-db genome sequence

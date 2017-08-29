@@ -20,7 +20,7 @@ void Transcript::alignScore(char **Read1, char *G, Parameters &P) {//re-calculat
     };
     for (uint iex=0;iex<nExons-1;iex++) {//score junctions
         if (sjAnnot[iex]==1) {
-            maxScore += P.sjdbScore;
+            maxScore += P.pGe.sjdbScore;
         } else {
             switch (canonSJ[iex]) {
                 case -3: //mate pair, no scoring

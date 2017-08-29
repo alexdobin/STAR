@@ -6,17 +6,17 @@ uint ReadAlign::maxMappableLength2strands(uint pieceStartIn, uint pieceLengthIn,
     //returns number of mappings, maxMappedLength=mapped length
     uint Nrep=0, indStartEnd[2], maxL;
 
-    uint NrepAll[P.genomeSAsparseD], indStartEndAll[P.genomeSAsparseD][2], maxLall[P.genomeSAsparseD];
+    uint NrepAll[P.pGe.gSAsparseD], indStartEndAll[P.pGe.gSAsparseD][2], maxLall[P.pGe.gSAsparseD];
     maxLbest=0;
 
     bool dirR = iDir==0;
 
-    for (uint iDist=0; iDist<min(pieceLengthIn,P.genomeSAsparseD); iDist++) {//cycle through different distances
+    for (uint iDist=0; iDist<min(pieceLengthIn,P.pGe.gSAsparseD); iDist++) {//cycle through different distances
         uint pieceStart;
         uint pieceLength=pieceLengthIn-iDist;
 
         //calculate full index
-        uint Lmax=min(P.genomeSAindexNbases,pieceLength);
+        uint Lmax=min(P.pGe.gSAindexNbases,pieceLength);
         uint ind1=0;
         if (dirR) {//forward search
             pieceStart=pieceStartIn+iDist;
@@ -58,7 +58,7 @@ uint ReadAlign::maxMappableLength2strands(uint pieceStartIn, uint pieceLengthIn,
         maxL=0;
         Nrep = maxMappableLength(Read1, pieceStart, pieceLength, mapGen.G, mapGen.SA, iSA1 & P.SAiMarkNmask, iSA2, dirR, maxL, indStartEnd, P);
     #else
-        if (Lind < P.genomeSAindexNbases && (iSA1 & P.SAiMarkNmaskC)==0 ) {//no need for SA search
+        if (Lind < P.pGe.gSAindexNbases && (iSA1 & P.SAiMarkNmaskC)==0 ) {//no need for SA search
             indStartEnd[0]=iSA1;
             indStartEnd[1]=iSA2;
             Nrep=indStartEnd[1]-indStartEnd[0]+1;
@@ -92,7 +92,7 @@ uint ReadAlign::maxMappableLength2strands(uint pieceStartIn, uint pieceLengthIn,
         maxLall[iDist]=maxL;
     };
 
-    for (uint iDist=0; iDist<min(pieceLengthIn,P.genomeSAsparseD); iDist++) {//cycle through different distances, store the ones with largest maxL
+    for (uint iDist=0; iDist<min(pieceLengthIn,P.pGe.gSAsparseD); iDist++) {//cycle through different distances, store the ones with largest maxL
         if ( (maxLall[iDist]+iDist) == maxLbest) {
             storeAligns(iDir, (dirR ? pieceStartIn+iDist : pieceStartIn-iDist), NrepAll[iDist], maxLall[iDist], indStartEndAll[iDist], iFrag);
         };

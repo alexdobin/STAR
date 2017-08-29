@@ -28,7 +28,7 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
         trA->nExons++;
         trA->nMatch+=L;
         for (uint ii=rBstart;ii<rBstart+L;ii++) Score+=int(Q[ii]); //add QS for mapped portions
-        Score+=P.sjdbScore;
+        Score+=P.pGe.sjdbScore;
     } else {//general stitching
         trA->sjAnnot[trA->nExons-1]=0;
         trA->sjStr[trA->nExons-1]=0;
@@ -223,7 +223,7 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
                             };
                             trA->sjAnnot[trA->nExons-1]=1;
                             trA->sjStr[trA->nExons-1]=P.sjdbStrand[sjdbInd];
-                            Score += P.sjdbScore;
+                            Score += P.pGe.sjdbScore;
                         };
                 } else {//no annotation
                     if (Del>=P.alignIntronMin) {//junction, not short deletion

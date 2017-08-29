@@ -115,25 +115,25 @@ inline uint funG2strLocus (uint SAstr, uint const N, char const GstrandBit, uint
 void genomeGenerate(Parameters &P) {
 
     //check parameters
-    if (P.sjdbOverhang<=0 && (P.sjdbFileChrStartEnd.at(0)!="-" || P.sjdbGTFfile!="-"))
+    if (P.pGe.sjdbOverhang<=0 && (P.pGe.sjdbFileChrStartEnd.at(0)!="-" || P.pGe.sjdbGTFfile!="-"))
     {
         ostringstream errOut;
-        errOut << "EXITING because of FATAL INPUT PARAMETER ERROR: for generating genome with annotations (--sjdbFileChrStartEnd or --sjdbGTFfile options)\n";
-        errOut << "you need to specify >0 --sjdbOverhang\n";
-        errOut << "SOLUTION: re-run genome generation specifying non-zero --sjdbOverhang, which ideally should be equal to OneMateLength-1, or could be chosen generically as ~100\n";
+        errOut << "EXITING because of FATAL INPUT PARAMETER ERROR: for generating genome with annotations (--pGe.sjdbFileChrStartEnd or --pGe.sjdbGTFfile options)\n";
+        errOut << "you need to specify >0 --pGe.sjdbOverhang\n";
+        errOut << "SOLUTION: re-run genome generation specifying non-zero --pGe.sjdbOverhang, which ideally should be equal to OneMateLength-1, or could be chosen generically as ~100\n";
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
     }
-    if (P.sjdbFileChrStartEnd.at(0)=="-" && P.sjdbGTFfile=="-")
+    if (P.pGe.sjdbFileChrStartEnd.at(0)=="-" && P.pGe.sjdbGTFfile=="-")
     {
-        if (P.parArray.at(P.sjdbOverhang_par)->inputLevel>0 && P.sjdbOverhang>0)
+        if (P.parArray.at(P.pGe.sjdbOverhang_par)->inputLevel>0 && P.pGe.sjdbOverhang>0)
         {
             ostringstream errOut;
-            errOut << "EXITING because of FATAL INPUT PARAMETER ERROR: when generating genome without annotations (--sjdbFileChrStartEnd or --sjdbGTFfile options)\n";
-            errOut << "do not specify >0 --sjdbOverhang\n";
-            errOut << "SOLUTION: re-run genome generation without --sjdbOverhang option\n";
+            errOut << "EXITING because of FATAL INPUT PARAMETER ERROR: when generating genome without annotations (--pGe.sjdbFileChrStartEnd or --pGe.sjdbGTFfile options)\n";
+            errOut << "do not specify >0 --pGe.sjdbOverhang\n";
+            errOut << "SOLUTION: re-run genome generation without --pGe.sjdbOverhang option\n";
             exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         };
-        P.sjdbOverhang=0;
+        P.pGe.sjdbOverhang=0;
     };
 
     //time
@@ -145,7 +145,7 @@ void genomeGenerate(Parameters &P) {
     *P.inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... starting to generate Genome files\n" <<flush;
 
     //define some parameters from input parameters
-    P.genomeChrBinNbases=1LLU << P.genomeChrBinNbits;
+    P.genomeChrBinNbases=1LLU << P.pGe.gChrBinNbits;
 
     char *G=NULL, *G1=NULL;
     uint nGenomeReal=genomeScanFastaFiles(P,G,false);//first scan the fasta file to find all the sizes
@@ -164,10 +164,10 @@ void genomeGenerate(Parameters &P) {
     P.nGenome=N;
     uint N2 = N*2;
 
-    ofstream & chrN = ofstrOpen(P.genomeDir+"/chrName.txt",ERROR_OUT, P);
-    ofstream & chrS = ofstrOpen(P.genomeDir+"/chrStart.txt",ERROR_OUT, P);
-    ofstream & chrL = ofstrOpen(P.genomeDir+"/chrLength.txt",ERROR_OUT, P);
-    ofstream & chrNL = ofstrOpen(P.genomeDir+"/chrNameLength.txt",ERROR_OUT, P);
+    ofstream & chrN = ofstrOpen(P.pGe.gDir+"/chrName.txt",ERROR_OUT, P);
+    ofstream & chrS = ofstrOpen(P.pGe.gDir+"/chrStart.txt",ERROR_OUT, P);
+    ofstream & chrL = ofstrOpen(P.pGe.gDir+"/chrLength.txt",ERROR_OUT, P);
+    ofstream & chrNL = ofstrOpen(P.pGe.gDir+"/chrNameLength.txt",ERROR_OUT, P);
 
     for (uint ii=0;ii<P.nChrReal;ii++) {//output names, starts, lengths
         chrN<<P.chrName[ii]<<"\n";
@@ -191,7 +191,7 @@ void genomeGenerate(Parameters &P) {
     };
 
     P.nSA=0;
-    for (uint ii=0;ii<N2;ii+=P.genomeSAsparseD) {
+    for (uint ii=0;ii<N2;ii+=P.pGe.gSAsparseD) {
         if (G[ii]<4) {
             P.nSA++;
         };
@@ -227,13 +227,13 @@ void genomeGenerate(Parameters &P) {
             swap(G[N2-1-ii],G[ii]);
         };
         globalG=G;
-        globalL=P.genomeSuffixLengthMax/sizeof(uint);
+        globalL=P.pGe.gSuffixLengthMax/sizeof(uint);
         //count the number of indices with 4nt prefix
         uint indPrefN=1LLU << 16;
         uint* indPrefCount = new uint [indPrefN];
         memset(indPrefCount,0,indPrefN*sizeof(indPrefCount[0]));
         P.nSA=0;
-        for (uint ii=0;ii<N2;ii+=P.genomeSAsparseD) {
+        for (uint ii=0;ii<N2;ii+=P.pGe.gSAsparseD) {
             if (G[ii]<4) {
                 uint p1=(G[ii]<<12) + (G[ii-1]<<8) + (G[ii-2]<<4) + G[ii-3];
                 indPrefCount[p1]++;
@@ -275,7 +275,7 @@ void genomeGenerate(Parameters &P) {
         #pragma omp parallel for num_threads(P.runThreadN) ordered schedule(dynamic,1)
         for (int iChunk=0; iChunk < (int) saChunkN; iChunk++) {//start the chunk cycle: sort each chunk with qsort and write to a file
             uint* saChunk=new uint [indPrefChunkCount[iChunk]];//allocate local array for each chunk
-            for (uint ii=0,jj=0;ii<N2;ii+=P.genomeSAsparseD) {//fill the chunk with SA indices
+            for (uint ii=0,jj=0;ii<N2;ii+=P.pGe.gSAsparseD) {//fill the chunk with SA indices
                 if (G[ii]<4) {
                     uint p1=(G[ii]<<12) + (G[ii-1]<<8) + (G[ii-2]<<4) + G[ii-3];
                     if (p1>=indPrefStart[iChunk] && p1<indPrefStart[iChunk+1]) {
@@ -293,7 +293,7 @@ void genomeGenerate(Parameters &P) {
                 saChunk[ii]=N2-1-saChunk[ii];
             };
             //write files
-            string chunkFileName=P.genomeDir+"/SA_"+to_string( (uint) iChunk);
+            string chunkFileName=P.pGe.gDir+"/SA_"+to_string( (uint) iChunk);
             ofstream & saChunkFile = ofstrOpen(chunkFileName,ERROR_OUT, P);
             fstreamWriteBig(saChunkFile, (char*) saChunk, sizeof(saChunk[0])*indPrefChunkCount[iChunk],chunkFileName,ERROR_OUT,P);
             saChunkFile.close();
@@ -315,12 +315,12 @@ void genomeGenerate(Parameters &P) {
         uint* saIn=new uint[SA_CHUNK_BLOCK_SIZE]; //TODO make adjustable
 
         #ifdef genenomeGenerate_SA_textOutput
-                ofstream SAtxtStream ((P.genomeDir + "/SAtxt").c_str());
+                ofstream SAtxtStream ((P.pGe.gDir + "/SAtxt").c_str());
         #endif
 
         for (uint iChunk=0;iChunk<saChunkN;iChunk++) {//load files one by one and convert to packed
             ostringstream saChunkFileNameStream("");
-            saChunkFileNameStream<< P.genomeDir << "/SA_" << iChunk;
+            saChunkFileNameStream<< P.pGe.gDir << "/SA_" << iChunk;
             ifstream saChunkFile(saChunkFileNameStream.str().c_str());
             while (! saChunkFile.eof()) {//read blocks from each file
                 uint chunkBytesN=fstreamReadBig(saChunkFile,(char*) saIn,SA_CHUNK_BLOCK_SIZE*sizeof(saIn[0]));
@@ -395,7 +395,7 @@ void genomeGenerate(Parameters &P) {
     PackedArray SAip;
     genomeSAindex(G,SA1,P,SAip);
 
-    if (P.sjdbFileChrStartEnd.at(0)!="-" || P.sjdbGTFfile!="-")
+    if (P.pGe.sjdbFileChrStartEnd.at(0)!="-" || P.pGe.sjdbGTFfile!="-")
     {//insert junctions
         SjdbClass sjdbLoci;
 
@@ -404,7 +404,7 @@ void genomeGenerate(Parameters &P) {
         mainGenome.SA=SA1;
         mainGenome.SApass1=SA2;
         mainGenome.SAi=SAip;
-        P.sjdbInsert.outDir=P.genomeDir;
+        P.sjdbInsert.outDir=P.pGe.gDir;
         P.sjdbN=0;//no junctions are loaded yet
         P.twoPass.pass2=false;
 
@@ -419,20 +419,20 @@ void genomeGenerate(Parameters &P) {
         SA1.writePacked(P.nSA,0);
     };
 
-    P.genomeFileSizes.clear();
-    P.genomeFileSizes.push_back(P.nGenome);
-    P.genomeFileSizes.push_back(SA1.lengthByte);
+    P.pGe.gFileSizes.clear();
+    P.pGe.gFileSizes.push_back(P.nGenome);
+    P.pGe.gFileSizes.push_back(SA1.lengthByte);
     
     //write genome parameters file
-    genomeParametersWrite(P.genomeDir+("/genomeParameters.txt"), P, ERROR_OUT);
+    genomeParametersWrite(P.pGe.gDir+("/genomeParameters.txt"), P, ERROR_OUT);
 
     //write genome to disk
     time ( &rawTime );
     P.inOut->logMain     << timeMonthDayTime(rawTime) <<" ... writing Genome to disk ...\n" <<flush;
     *P.inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... writing Genome to disk ...\n" <<flush;
 
-    ofstream & genomeOut = ofstrOpen(P.genomeDir+"/Genome",ERROR_OUT, P);
-    fstreamWriteBig(genomeOut,G,P.nGenome,P.genomeDir+"/Genome",ERROR_OUT,P);
+    ofstream & genomeOut = ofstrOpen(P.pGe.gDir+"/Genome",ERROR_OUT, P);
+    fstreamWriteBig(genomeOut,G,P.nGenome,P.pGe.gDir+"/Genome",ERROR_OUT,P);
     genomeOut.close();
 
     //write SA
@@ -442,8 +442,8 @@ void genomeGenerate(Parameters &P) {
     P.inOut->logMain     << timeMonthDayTime(rawTime) <<" ... writing Suffix Array to disk ...\n" <<flush;
     *P.inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... writing Suffix Array to disk ...\n" <<flush;
 
-    ofstream & SAout = ofstrOpen(P.genomeDir+"/SA",ERROR_OUT, P);
-    fstreamWriteBig(SAout,(char*) SA1.charArray, (streamsize) SA1.lengthByte,P.genomeDir+"/SA",ERROR_OUT,P);
+    ofstream & SAout = ofstrOpen(P.pGe.gDir+"/SA",ERROR_OUT, P);
+    fstreamWriteBig(SAout,(char*) SA1.charArray, (streamsize) SA1.lengthByte,P.pGe.gDir+"/SA",ERROR_OUT,P);
     SAout.close();
 
     //write SAi
@@ -452,11 +452,11 @@ void genomeGenerate(Parameters &P) {
     *P.inOut->logStdOut << timeMonthDayTime(rawTime) <<" ... writing SAindex to disk\n" <<flush;
 
     //write SAi to disk
-    ofstream & SAiOut = ofstrOpen(P.genomeDir+"/SAindex",ERROR_OUT, P);
+    ofstream & SAiOut = ofstrOpen(P.pGe.gDir+"/SAindex",ERROR_OUT, P);
 
-    fstreamWriteBig(SAiOut, (char*) &P.genomeSAindexNbases, sizeof(P.genomeSAindexNbases),P.genomeDir+"/SAindex",ERROR_OUT,P);
-    fstreamWriteBig(SAiOut, (char*) P.genomeSAindexStart, sizeof(P.genomeSAindexStart[0])*(P.genomeSAindexNbases+1),P.genomeDir+"/SAindex",ERROR_OUT,P);
-    fstreamWriteBig(SAiOut,  SAip.charArray, SAip.lengthByte,P.genomeDir+"/SAindex",ERROR_OUT,P);
+    fstreamWriteBig(SAiOut, (char*) &P.pGe.gSAindexNbases, sizeof(P.pGe.gSAindexNbases),P.pGe.gDir+"/SAindex",ERROR_OUT,P);
+    fstreamWriteBig(SAiOut, (char*) P.genomeSAindexStart, sizeof(P.genomeSAindexStart[0])*(P.pGe.gSAindexNbases+1),P.pGe.gDir+"/SAindex",ERROR_OUT,P);
+    fstreamWriteBig(SAiOut,  SAip.charArray, SAip.lengthByte,P.pGe.gDir+"/SAindex",ERROR_OUT,P);
     SAiOut.close();
 
     SA2.deallocateArray();

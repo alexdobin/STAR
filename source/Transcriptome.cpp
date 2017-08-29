@@ -4,12 +4,12 @@
 
 Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
 
-    trInfoDir = P.sjdbGTFfile=="-" ? P.genomeDir : P.sjdbInsert.outDir; //if GTF file is given at the mapping stage, it's always used for transcript info
+    trInfoDir = P.pGe.sjdbGTFfile=="-" ? P.pGe.gDir : P.sjdbInsert.outDir; //if GTF file is given at the mapping stage, it's always used for transcript info
 
     if ( P.quant.trSAM.yes ) {//load exon-transcript structures
         //load tr and ex info
 
-        ifstream & trinfo = ifstrOpen(trInfoDir+"/transcriptInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step",P);
+        ifstream & trinfo = ifstrOpen(trInfoDir+"/transcriptInfo.tab", ERROR_OUT, "SOLUTION: utilize --pGe.sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step",P);
 
         trinfo >> nTr;
         trS=new uint [nTr];
@@ -29,7 +29,7 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
 
         trinfo.close();
 
-        ifstream & exinfo = ifstrOpen(trInfoDir+"/exonInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
+        ifstream & exinfo = ifstrOpen(trInfoDir+"/exonInfo.tab", ERROR_OUT, "SOLUTION: utilize --pGe.sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
 
         exinfo >> nEx;
         exSE = new uint32 [2*nEx];
@@ -45,7 +45,7 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
     };
 
     if ( P.quant.geCount.yes ) {//load exon-gene structures
-        ifstream & exinfo = ifstrOpen(trInfoDir+"/exonGeTrInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
+        ifstream & exinfo = ifstrOpen(trInfoDir+"/exonGeTrInfo.tab", ERROR_OUT, "SOLUTION: utilize --pGe.sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
         exinfo >> exG.nEx;
 
         exG.s=new uint64[exG.nEx];
@@ -69,7 +69,7 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
             exG.eMax[iex]=max(exG.eMax[iex-1],exG.e[iex]);
         };
 
-        ifstream & geStream = ifstrOpen(trInfoDir+"/geneInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
+        ifstream & geStream = ifstrOpen(trInfoDir+"/geneInfo.tab", ERROR_OUT, "SOLUTION: utilize --pGe.sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
         geStream >> nGe;
         geID.resize(nGe);
         for (uint ii=0;ii<nGe;ii++) {

@@ -32,7 +32,7 @@ public:
     //methods
     Variation (Parameters &Pin); //create transcriptome structure, load and initialize parameters
     void loadVCF(string fileIn); //load VCF file
-    vector<vector<array<int,2>>> sjdbSnp(uint sjStart, uint sjEnd, uint sjdbOverhang); //calculates snp loci in sjdb sequences
+    vector<vector<array<int,2>>> sjdbSnp(uint sjStart, uint sjEnd, uint sjdbOverhang1); //calculates snp loci in sjdb sequences
     
     //variables
     bool yes;    

@@ -72,7 +72,7 @@ void Junction::junctionPointer(char* sjPoint, uint isj) {//
 };
 
 void Junction::outputStream(ostream &outStream, Parameters& P) {
-    uint sjChr=P.chrBin[*start >> P.genomeChrBinNbits];
+    uint sjChr=P.chrBin[*start >> P.pGe.gChrBinNbits];
     outStream << P.chrName.at(sjChr) <<"\t"<< *start + 1 - P.chrStart[sjChr] <<"\t"<<*start + *gap - P.chrStart[sjChr] \
             <<"\t"<< int(*strand) <<"\t"<< int(*motif) <<"\t"<< int (*annot) <<"\t"<< *countUnique <<"\t"<< *countMultiple \
             <<"\t"<< *overhangLeft << endl;

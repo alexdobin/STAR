@@ -14,11 +14,11 @@ void sjdbInsertJunctions(Parameters & P, Parameters & P1, Genome & genome, SjdbC
 
     if (P.sjdbN>0 && sjdbLoci.chr.size()==0)
     {//load from the saved genome, only if the loading did not happen already (if sjdb insertion happens at the 1st pass, sjdbLoci will be populated
-        ifstream & sjdbStreamIn = ifstrOpen(P.genomeDir+"/sjdbList.out.tab", ERROR_OUT, "SOLUTION: re-generate the genome in genomeDir=" + P.genomeDir, P);
+        ifstream & sjdbStreamIn = ifstrOpen(P.pGe.gDir+"/sjdbList.out.tab", ERROR_OUT, "SOLUTION: re-generate the genome in pGe.gDir=" + P.pGe.gDir, P);
         sjdbLoadFromStream(sjdbStreamIn, sjdbLoci);
         sjdbLoci.priority.resize(sjdbLoci.chr.size(),30);
         time ( &rawtime );
-        P.inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the generated genome " << P.genomeDir+"/sjdbList.out.tab" <<": "<<sjdbLoci.chr.size()<<" total junctions\n\n";
+        P.inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the generated genome " << P.pGe.gDir+"/sjdbList.out.tab" <<": "<<sjdbLoci.chr.size()<<" total junctions\n\n";
     };
 
     if (P.twoPass.pass2)
@@ -38,20 +38,20 @@ void sjdbInsertJunctions(Parameters & P, Parameters & P1, Genome & genome, SjdbC
     {//loading junctions from GTF or tab or from the saved genome is only allowed at the 1st pass
      //at the 2nd pass these are already in the sjdbLoci
 
-        if (P.sjdbFileChrStartEnd.at(0)!="-")
+        if (P.pGe.sjdbFileChrStartEnd.at(0)!="-")
         {//load from junction files
             sjdbLoadFromFiles(P,sjdbLoci);
             sjdbLoci.priority.resize(sjdbLoci.chr.size(),10);
             time ( &rawtime );
-            P.inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the sjdbFileChrStartEnd file(s), " << sjdbLoci.chr.size()<<" total junctions\n\n";
+            P.inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the pGe.sjdbFileChrStartEnd file(s), " << sjdbLoci.chr.size()<<" total junctions\n\n";
         };
 
-        if (P.sjdbGTFfile!="-")
+        if (P.pGe.sjdbGTFfile!="-")
         {//load from GTF
             loadGTF(sjdbLoci, P, P.sjdbInsert.outDir);
             sjdbLoci.priority.resize(sjdbLoci.chr.size(),20);
             time ( &rawtime );
-            P.inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the GTF file: " << P.sjdbGTFfile<<": "<<sjdbLoci.chr.size()<<" total junctions\n\n";
+            P.inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the GTF file: " << P.pGe.sjdbGTFfile<<": "<<sjdbLoci.chr.size()<<" total junctions\n\n";
         };
     };
 
@@ -73,14 +73,14 @@ void sjdbInsertJunctions(Parameters & P, Parameters & P1, Genome & genome, SjdbC
     time ( &rawtime );
     P.inOut->logMain     << timeMonthDayTime(rawtime) << " ..... finished inserting junctions into genome" <<endl;
 
-    if (P.sjdbInsert.save=="All")
+    if (P.pGe.sjdbInsertSave=="All")
     {//save and copy all genome files into sjdbInsert.outDir, except those created above
-        if (P.genomeDir != P.sjdbInsert.outDir)
+        if (P.pGe.gDir != P.sjdbInsert.outDir)
         {
-            copyFile(P.genomeDir+"/chrName.txt", P.sjdbInsert.outDir+"/chrName.txt");
-            copyFile(P.genomeDir+"/chrStart.txt", P.sjdbInsert.outDir+"/chrStart.txt");
-            copyFile(P.genomeDir+"/chrNameLength.txt", P.sjdbInsert.outDir+"/chrNameLength.txt");
-            copyFile(P.genomeDir+"/chrLength.txt", P.sjdbInsert.outDir+"/chrLength.txt");
+            copyFile(P.pGe.gDir+"/chrName.txt", P.sjdbInsert.outDir+"/chrName.txt");
+            copyFile(P.pGe.gDir+"/chrStart.txt", P.sjdbInsert.outDir+"/chrStart.txt");
+            copyFile(P.pGe.gDir+"/chrNameLength.txt", P.sjdbInsert.outDir+"/chrNameLength.txt");
+            copyFile(P.pGe.gDir+"/chrLength.txt", P.sjdbInsert.outDir+"/chrLength.txt");
         };
 
         genomeParametersWrite(P.sjdbInsert.outDir+("/genomeParameters.txt"), P, ERROR_OUT);
@@ -94,8 +94,8 @@ void sjdbInsertJunctions(Parameters & P, Parameters & P1, Genome & genome, SjdbC
         saOut.close();
 
         ofstream & saIndexOut = ofstrOpen(P.sjdbInsert.outDir+"/SAindex",ERROR_OUT, P);
-        fstreamWriteBig(saIndexOut, (char*) &P.genomeSAindexNbases, sizeof(P.genomeSAindexNbases),P.sjdbInsert.outDir+"/SAindex",ERROR_OUT,P);
-        fstreamWriteBig(saIndexOut, (char*) P.genomeSAindexStart, sizeof(P.genomeSAindexStart[0])*(P.genomeSAindexNbases+1),P.sjdbInsert.outDir+"/SAindex",ERROR_OUT,P);
+        fstreamWriteBig(saIndexOut, (char*) &P.pGe.gSAindexNbases, sizeof(P.pGe.gSAindexNbases),P.sjdbInsert.outDir+"/SAindex",ERROR_OUT,P);
+        fstreamWriteBig(saIndexOut, (char*) P.genomeSAindexStart, sizeof(P.genomeSAindexStart[0])*(P.pGe.gSAindexNbases+1),P.sjdbInsert.outDir+"/SAindex",ERROR_OUT,P);
         fstreamWriteBig(saIndexOut,  genome.SAi.charArray, genome.SAi.lengthByte,P.sjdbInsert.outDir+"/SAindex",ERROR_OUT,P);
         saIndexOut.close();
     };

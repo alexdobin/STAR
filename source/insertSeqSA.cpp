@@ -109,7 +109,7 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
     */
     
     g_funCompareUintAndSuffixesMemcmp_G=seq1[0];
-    g_funCompareUintAndSuffixesMemcmp_L=P.genomeSuffixLengthMax/sizeof(uint64_t);
+    g_funCompareUintAndSuffixesMemcmp_L=P.pGe.gSuffixLengthMax/sizeof(uint64_t);
     qsort((void*) indArray, nInd, 2*sizeof(uint64_t), funCompareUintAndSuffixesMemcmp);  
     
 //     qsort((void*) indArray, nInd, 2*sizeof(uint64), funCompareUint2);
@@ -202,7 +202,7 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
     P.inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished inserting SA indices" <<endl;
 
 //     //SAi insertions
-//     for (uint iL=0; iL < P.genomeSAindexNbases; iL++) {
+//     for (uint iL=0; iL < P.pGe.gSAindexNbases; iL++) {
 //         uint iSeq=0;
 //         uint ind0=P.genomeSAindexStart[iL]-1;//last index that was present in the old genome
 //         for (uint ii=P.genomeSAindexStart[iL];ii<P.genomeSAindexStart[iL+1]; ii++) {//scan through the longest index
@@ -257,11 +257,11 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
 //
 //     for (uint isj=0;isj<nInd;isj++) {
 //         int64 ind1=0;
-//         for (uint iL=0; iL < P.genomeSAindexNbases; iL++) {
+//         for (uint iL=0; iL < P.pGe.gSAindexNbases; iL++) {
 //             uint g=(uint) seq1[0][indArray[2*isj+1]+iL];
 //             ind1 <<= 2;
 //             if (g>3) {//this iSA contains N, need to mark the previous
-//                 for (uint iL1=iL; iL1 < P.genomeSAindexNbases; iL1++) {
+//                 for (uint iL1=iL; iL1 < P.pGe.gSAindexNbases; iL1++) {
 //                     ind1+=3;
 //                     int64 ind2=P.genomeSAindexStart[iL1]+ind1;
 //                     for (; ind2>=0; ind2--) {//find previous index that is not absent
@@ -285,11 +285,11 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
 //     PackedArray SAio=SAi;
 //     SAio.allocateArray();
 //     ifstream oldSAiin("./DirTrue/SAindex");
-//     oldSAiin.read(SAio.charArray,8*(P.genomeSAindexNbases+2));//skip first bytes
+//     oldSAiin.read(SAio.charArray,8*(P.pGe.gSAindexNbases+2));//skip first bytes
 //     oldSAiin.read(SAio.charArray,SAio.lengthByte);
 //     oldSAiin.close();
 //
-//     for (uint iL=0; iL < P.genomeSAindexNbases; iL++) {
+//     for (uint iL=0; iL < P.pGe.gSAindexNbases; iL++) {
 //         for (uint ii=P.genomeSAindexStart[iL];ii<P.genomeSAindexStart[iL+1]; ii++) {//scan through the longets index
 //                 if ( SAio[ii]!=SAi[ii] ) {
 //                     cout <<iL<<" "<<ii<<" "<<SAio[ii]<<" "<<SAi[ii]<<endl;

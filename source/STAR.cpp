@@ -34,7 +34,7 @@
 
 
 void usage() {
-    printf("Usage: STAR  [options]... --genomeDir REFERENCE   --readFilesIn R1.fq R2.fq\n");
+    printf("Usage: STAR  [options]... --pGe.gDir REFERENCE   --readFilesIn R1.fq R2.fq\n");
     printf("Spliced Transcripts Alignment to a Reference (c) Alexander Dobin, 2009-2015\n\n");
 
     std::cout << parametersDefault;
@@ -71,10 +71,10 @@ int main(int argInN, char* argIn[]) {
         exit(0);
     } else if (P.runMode=="liftOver") 
     {        
-        for (uint ii=0; ii<P.genomeChainFiles.size();ii++)
+        for (uint ii=0; ii<P.pGe.gChainFiles.size();ii++)
         {
-            Chain chain(P,P.genomeChainFiles.at(ii));
-            chain.liftOverGTF(P.sjdbGTFfile,P.outFileNamePrefix+"GTFliftOver_"+to_string(ii+1)+".gtf");
+            Chain chain(P,P.pGe.gChainFiles.at(ii));
+            chain.liftOverGTF(P.pGe.sjdbGTFfile,P.outFileNamePrefix+"GTFliftOver_"+to_string(ii+1)+".gtf");
             P.inOut->logMain << "DONE: lift-over of GTF file, EXITING\n" << flush;
             exit(0);
         };
@@ -87,7 +87,7 @@ int main(int argInN, char* argIn[]) {
     mainGenome.genomeLoad();
     
     
-    if (P.genomeLoad=="LoadAndExit" || P.genomeLoad=="Remove")
+    if (P.pGe.gLoad=="LoadAndExit" || P.pGe.gLoad=="Remove")
     {
         return 0;
     };
@@ -100,7 +100,7 @@ int main(int argInN, char* argIn[]) {
     mainGenome.Var=new Variation(P);
 
 
-    if (P.genomeFastaFiles.at(0)!="-")
+    if (P.pGe.gFastaFiles.at(0)!="-")
     {//insert sequences in the genome
 
     };
@@ -208,7 +208,7 @@ int main(int argInN, char* argIn[]) {
         P.chrNameAll=P.chrName;
         P.chrLengthAll=P.chrLength;
         {//add exra references
-            ifstream extrastream (P.genomeDir + "/extraReferences.txt");
+            ifstream extrastream (P.pGe.gDir + "/extraReferences.txt");
             while (extrastream.good()) {
                 string line1;
                 getline(extrastream,line1);

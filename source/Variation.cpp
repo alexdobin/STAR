@@ -153,7 +153,7 @@ void SNP::snpOnBlocks(uint blockStart, uint blockL, int blockShift, vector<vecto
     };
 };
 
-vector<vector<array<int,2>>> Variation::sjdbSnp(uint sjStart, uint sjEnd, uint sjdbOverhang)
+vector<vector<array<int,2>>> Variation::sjdbSnp(uint sjStart, uint sjEnd, uint sjdbOverhang1)
 {          
     vector<vector<array<int,2>>> snpV(2);
     
@@ -163,8 +163,8 @@ vector<vector<array<int,2>>> Variation::sjdbSnp(uint sjStart, uint sjEnd, uint s
         return snpV1;
     };
 
-    snp.snpOnBlocks(sjStart-sjdbOverhang, sjdbOverhang, 0,            snpV);
-    snp.snpOnBlocks(sjEnd+1,              sjdbOverhang, sjdbOverhang, snpV);
+    snp.snpOnBlocks(sjStart-sjdbOverhang1, sjdbOverhang1, 0,            snpV);
+    snp.snpOnBlocks(sjEnd+1,              sjdbOverhang1, sjdbOverhang1, snpV);
 
     if (snpV.at(0).empty() && snpV.at(1).empty())
     {

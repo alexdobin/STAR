@@ -43,7 +43,7 @@ void sjdbBuildIndex (Parameters &P, Parameters &P1, char *Gsj, char *G, PackedAr
 
     uint32* oldSJind=new uint32[P1.sjdbN];
 
-//     uint nIndicesSJ1=P.sjdbOverhang;
+//     uint nIndicesSJ1=P.pGe.sjdbOverhang;
     uint   nIndicesSJ1=P.sjdbLength;//keep all indices - this is pre-2.4.1 of generating the genome
 
     uint64* indArray=new uint64[2*P.sjdbN*(nIndicesSJ1+1)*2];//8+4 bytes for SA index and index in the genome * nJunction * nIndices per junction * 2 for reverse compl
@@ -206,7 +206,7 @@ void sjdbBuildIndex (Parameters &P, Parameters &P1, char *Gsj, char *G, PackedAr
     P.inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished inserting junction indices" <<endl;
 
     //SAi insertions
-    for (uint iL=0; iL < P.genomeSAindexNbases; iL++) {
+    for (uint iL=0; iL < P.pGe.gSAindexNbases; iL++) {
         uint iSJ=0;
         uint ind0=P.genomeSAindexStart[iL]-1;//last index that was present in the old genome
         for (uint ii=P.genomeSAindexStart[iL];ii<P.genomeSAindexStart[iL+1]; ii++) {//scan through the longest index
@@ -257,11 +257,11 @@ void sjdbBuildIndex (Parameters &P, Parameters &P1, char *Gsj, char *G, PackedAr
 
     for (uint isj=0;isj<nInd;isj++) {
         int64 ind1=0;
-        for (uint iL=0; iL < P.genomeSAindexNbases; iL++) {
+        for (uint iL=0; iL < P.pGe.gSAindexNbases; iL++) {
             uint g=(uint) Gsj[indArray[2*isj+1]+iL];
             ind1 <<= 2;
             if (g>3) {//this iSA contains N, need to mark the previous
-                for (uint iL1=iL; iL1 < P.genomeSAindexNbases; iL1++) {
+                for (uint iL1=iL; iL1 < P.pGe.gSAindexNbases; iL1++) {
                     ind1+=3;
                     int64 ind2=P.genomeSAindexStart[iL1]+ind1;
                     for (; ind2>=0; ind2--) {//find previous index that is not absent
@@ -292,7 +292,7 @@ void sjdbBuildIndex (Parameters &P, Parameters &P1, char *Gsj, char *G, PackedAr
     PackedArray SAio=SAi;
     SAio.allocateArray();
     ifstream oldSAiin("./DirTrue/SAindex");
-    oldSAiin.read(SAio.charArray,8*(P.genomeSAindexNbases+2));//skip first bytes
+    oldSAiin.read(SAio.charArray,8*(P.pGe.gSAindexNbases+2));//skip first bytes
     oldSAiin.read(SAio.charArray,SAio.lengthByte);
     oldSAiin.close();
 
@@ -304,7 +304,7 @@ void sjdbBuildIndex (Parameters &P, Parameters &P1, char *Gsj, char *G, PackedAr
     };
 
 
-    for (uint iL=0; iL < P.genomeSAindexNbases; iL++) {
+    for (uint iL=0; iL < P.pGe.gSAindexNbases; iL++) {
         for (uint ii=P.genomeSAindexStart[iL];ii<P.genomeSAindexStart[iL+1]; ii++) {//scan through the longets index
                 if ( SAio[ii]!=SAi[ii] ) {
                     cout <<ii<<" "<<SAio[ii]<<" "<<SAi[ii]<<endl;
