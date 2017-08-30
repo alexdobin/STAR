@@ -8,7 +8,7 @@
 
 void Genome::insertSequences()
 {
-if (P.pGe.gFastaFiles.at(0)!="-")
+if (pGe.gFastaFiles.at(0)!="-")
 {
     time_t rawtime;
     time ( &rawtime );

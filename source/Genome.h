@@ -14,7 +14,12 @@ class Genome {
         PackedArray SAi;
         Variation *Var;
         
-        uint nGenomeInsert, nGenomePass1, nGenomePass2, nSAinsert, nSApass1, nSApass2; 
+        uint nGenomeInsert, nGenomePass1, nGenomePass2, nSAinsert, nSApass1, nSApass2;
+        
+        ParametersGenome &pGe;
+        
+        
+        
 
         Genome (Parameters &Pin );
         ~Genome();
