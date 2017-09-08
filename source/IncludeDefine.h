@@ -99,12 +99,13 @@ typedef uint8_t uint8;
 #define BAM_CIGAR_EQ 7
 #define BAM_CIGAR_X 8
 
-#define BAM_ATTR_MaxSize 1000
 
 #if defined COMPILE_FOR_LONG_READS
     #define MAX_N_EXONS 1000
+    #define BAM_ATTR_MaxSize 10000
 #else
     #define MAX_N_EXONS 20
+    #define BAM_ATTR_MaxSize 1000
 #endif
 
 //input reads
