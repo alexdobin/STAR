@@ -24,7 +24,7 @@ void sjdbPrepare (SjdbClass &sjdbLoci, Parameters &P, uint nGenomeReal, string o
             if (iChr>=P.nChrReal) {
                 ostringstream errOut;
                 errOut << "EXITING because of FATAL error, the sjdb chromosome " << sjdbLoci.chr.at(ii) << " is not found among the genomic chromosomes\n";
-                errOut << "SOLUTION: fix your file(s) --pGe.sjdbFileChrStartEnd, offending junciton:" <<sjdbLoci.chr.at(ii)<<"\t"<<sjdbLoci.start.at(ii)<<"\t"<<sjdbLoci.end.at(ii)<<"\n";
+                errOut << "SOLUTION: fix your file(s) --sjdbFileChrStartEnd or --sjdbGTFfile, offending junciton:" <<sjdbLoci.chr.at(ii)<<"\t"<<sjdbLoci.start.at(ii)<<"\t"<<sjdbLoci.end.at(ii)<<"\n";
                 exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
             };
             chrOld=sjdbLoci.chr.at(ii);

@@ -53,7 +53,7 @@ uint Genome::OpenStream(string name, ifstream & stream, uint size)
     if (!stream.good()) {
         ostringstream errOut;
         errOut << "EXITING because of FATAL ERROR: could not open genome file "<< pGe.gDir << "/" << name <<"\n" << endl;
-        errOut << "SOLUTION: check that the path to genome files, specified in --pGe.gDir is correct and the files are present, and have user read permsissions\n" <<flush;
+        errOut << "SOLUTION: check that the path to genome files, specified in --pGe.gDir is correct and the files are present, and have user read permissions\n" <<flush;
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_GENOME_FILES, P);
     };
 
