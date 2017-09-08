@@ -34,7 +34,7 @@
 
 
 void usage() {
-    printf("Usage: STAR  [options]... --pGe.gDir REFERENCE   --readFilesIn R1.fq R2.fq\n");
+    printf("Usage: STAR  [options]... --genomeDir REFERENCE   --readFilesIn R1.fq R2.fq\n");
     printf("Spliced Transcripts Alignment to a Reference (c) Alexander Dobin, 2009-2015\n\n");
 
     std::cout << parametersDefault;

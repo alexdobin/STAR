@@ -1041,7 +1041,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 //         if (pGe.gLoad!="NoSharedMemory") {
 //             ostringstream errOut;
 //             errOut <<"EXITING because of FATAL INPUT ERROR: The code was compiled with NO SHARED MEMORY support, but pGe.gLoad="<<pGe.gLoad<<"\n";
-//             errOut <<"SOLUTION: run STAR with    --pGe.gLoad NoSharedMemory    option\n";
+//             errOut <<"SOLUTION: run STAR with    --genomeLoad NoSharedMemory    option\n";
 //             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
 //         };
 //     #endif
@@ -1056,8 +1056,8 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 
     if (pGe.gLoad!="LoadAndKeep" && pGe.gLoad!="LoadAndRemove" && pGe.gLoad!="Remove" && pGe.gLoad!="LoadAndExit" && pGe.gLoad!="NoSharedMemory") {// find shared memory fragment
         ostringstream errOut;
-        errOut << "EXITING because of FATAL INPUT ERROR: --pGe.gLoad=" << pGe.gLoad << "\n" <<flush;
-        errOut << "SOLUTION: use one of the allowed values of --pGe.gLoad : NoSharedMemory,LoadAndKeep,LoadAndRemove,LoadAndExit,Remove.\n" <<flush;
+        errOut << "EXITING because of FATAL INPUT ERROR: --genomeLoad=" << pGe.gLoad << "\n" <<flush;
+        errOut << "SOLUTION: use one of the allowed values of --genomeLoad : NoSharedMemory,LoadAndKeep,LoadAndRemove,LoadAndExit,Remove.\n" <<flush;
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
 
@@ -1140,7 +1140,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         if (pGe.gLoad!="NoSharedMemory") {
             ostringstream errOut;
             errOut << "EXITING because of fatal PARAMETERS error: 2-pass method is not compatible with pGe.gLoad<<"<<pGe.gLoad<<"\n";
-            errOut << "SOLUTION: re-run STAR with --pGe.gLoad NoSharedMemory ; this is the only compatible option at the moment.s\n";
+            errOut << "SOLUTION: re-run STAR with --genomeLoad NoSharedMemory ; this is the only compatible option at the moment.s\n";
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
         twoPass.yes=true;
@@ -1174,7 +1174,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     {
         ostringstream errOut;
         errOut << "EXITING because of fatal PARAMETERS error: on the fly junction insertion and 2-pass mappng cannot be used with shared memory genome \n" ;
-        errOut << "SOLUTION: run STAR with --pGe.gLoad NoSharedMemory to avoid using shared memory\n" <<flush;
+        errOut << "SOLUTION: run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
 
@@ -1182,7 +1182,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     {//run-time genome directory, this is needed for genome files generated on the fly
         if (pGe.sjdbOverhang<=0) {
             ostringstream errOut;
-            errOut << "EXITING because of fatal PARAMETERS error: pGe.sjdbOverhang <=0 while junctions are inserted on the fly with --pGe.sjdbFileChrStartEnd or/and --pGe.sjdbGTFfile\n";
+            errOut << "EXITING because of fatal PARAMETERS error: pGe.sjdbOverhang <=0 while junctions are inserted on the fly with --sjdbFileChrStartEnd or/and --sjdbGTFfile\n";
             errOut << "SOLUTION: specify pGe.sjdbOverhang>0, ideally readmateLength-1";
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
@@ -1202,8 +1202,8 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     if (outBAMcoord && limitBAMsortRAM==0) {//check limitBAMsortRAM
         if (pGe.gLoad!="NoSharedMemory") {
             ostringstream errOut;
-            errOut <<"EXITING because of fatal PARAMETERS error: limitBAMsortRAM=0 (default) cannot be used with --pGe.gLoad="<<pGe.gLoad <<", or any other shared memory options\n";
-            errOut <<"SOLUTION: please use default --pGe.gLoad NoSharedMemory, \n        OR specify --limitBAMsortRAM the amount of RAM (bytes) that can be allocated for BAM sorting in addition to shared memory allocated for the genome.\n        --limitBAMsortRAM typically has to be > 10000000000 (i.e 10GB).\n";
+            errOut <<"EXITING because of fatal PARAMETERS error: limitBAMsortRAM=0 (default) cannot be used with --genomeLoad="<<pGe.gLoad <<", or any other shared memory options\n";
+            errOut <<"SOLUTION: please use default --genomeLoad NoSharedMemory, \n        OR specify --limitBAMsortRAM the amount of RAM (bytes) that can be allocated for BAM sorting in addition to shared memory allocated for the genome.\n        --limitBAMsortRAM typically has to be > 10000000000 (i.e 10GB).\n";
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
         inOut->logMain<<"WARNING: --limitBAMsortRAM=0, will use genome size as RAM limit for BAM sorting\n";

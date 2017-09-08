@@ -98,7 +98,7 @@ void Genome::genomeLoad(){//allocate and load Genome
     } else {
         ostringstream errOut;
         errOut << "EXITING because of FATAL ERROR: could not open genome file "<< pGe.gDir+("/genomeParameters.txt") << endl;
-        errOut << "SOLUTION: check that the path to genome files, specified in --pGe.gDir is correct and the files are present, and have user read permsissions\n" <<flush;
+        errOut << "SOLUTION: check that the path to genome files, specified in --genomeDir is correct and the files are present, and have user read permsissions\n" <<flush;
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_GENOME_FILES, P);
     };
 
@@ -150,13 +150,13 @@ void Genome::genomeLoad(){//allocate and load Genome
     };
 
     if (P.parArray.at(pGe.sjdbOverhang_par)->inputLevel==0 && P1.pGe.sjdbOverhang>0)
-    {//if --pGe.sjdbOverhang was not defined by user and it was defined >0 at the genome generation step, then use pGe.sjdbOverhang from the genome generation step
+    {//if --sjdbOverhang was not defined by user and it was defined >0 at the genome generation step, then use pGe.sjdbOverhang from the genome generation step
         pGe.sjdbOverhang=P1.pGe.sjdbOverhang;
-        P.inOut->logMain << "--pGe.sjdbOverhang = " << pGe.sjdbOverhang << " taken from the generated genome\n";
+        P.inOut->logMain << "--sjdbOverhang = " << pGe.sjdbOverhang << " taken from the generated genome\n";
     } else if (sjdbInfoExists && P.parArray.at(pGe.sjdbOverhang_par)->inputLevel>0 && pGe.sjdbOverhang!=P1.pGe.sjdbOverhang)
     {//if pGe.sjdbOverhang was defined at the genome generation step,the mapping step value has to agree with it
         ostringstream errOut;
-        errOut << "EXITING because of fatal PARAMETERS error: present --pGe.sjdbOverhang="<<pGe.sjdbOverhang << " is not equal to the value at the genome generation step ="<< P1.pGe.sjdbOverhang << "\n";
+        errOut << "EXITING because of fatal PARAMETERS error: present --sjdbOverhang="<<pGe.sjdbOverhang << " is not equal to the value at the genome generation step ="<< P1.pGe.sjdbOverhang << "\n";
         errOut << "SOLUTION: \n" <<flush;
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_GENOME_FILES, P);
     };
@@ -265,7 +265,7 @@ void Genome::genomeLoad(){//allocate and load Genome
             if (iwait==100) {
                 ostringstream errOut;
                 errOut << "EXITING because of FATAL ERROR: waited too long for the other job to finish loading the genome" << strerror(errno) << "\n" <<flush;
-                    errOut << "SOLUTION: remove the shared memory chunk by running STAR with --pGe.gLoad Remove, and restart STAR" <<flush;
+                    errOut << "SOLUTION: remove the shared memory chunk by running STAR with --genomeLoad Remove, and restart STAR" <<flush;
                     exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_GENOME_LOADING_WAITED_TOO_LONG, P);
             };
         };
@@ -274,7 +274,7 @@ void Genome::genomeLoad(){//allocate and load Genome
             {
                 ostringstream errOut;
                 errOut << "EXITING because of FATAL ERROR: the SA file size did not match what we found in shared memory" << "\n" << flush;
-                errOut << "SOLUTION: remove the shared memory chunk by running STAR with --pGe.gLoad Remove, and restart STAR" << flush;
+                errOut << "SOLUTION: remove the shared memory chunk by running STAR with --genomeLoad Remove, and restart STAR" << flush;
                 exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INCONSISTENT_DATA, P);
             }
 
@@ -294,7 +294,7 @@ void Genome::genomeLoad(){//allocate and load Genome
 //     } else {//2-pass
 //         ostringstream errOut;
 //         errOut << "EXITING because of FATAL ERROR: 2-pass procedure cannot be used with genome already loaded im memory'  "\n" ;
-//         errOut << "SOLUTION: check shared memory settigns as explained in STAR manual, OR run STAR with --pGe.gLoad NoSharedMemory to avoid using shared memory\n" <<flush;
+//         errOut << "SOLUTION: check shared memory settigns as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;
 //         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_SHM, P);
 //     };
      if (P.annotScoreScale>0) {//optional allocation
@@ -379,7 +379,7 @@ void Genome::genomeLoad(){//allocate and load Genome
 //     } else {//2-pass
 //         ostringstream errOut;
 //         errOut << "EXITING because of FATAL ERROR: 2-pass procedure cannot be used with genome already loaded im memory'  "\n" ;
-//         errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --pGe.gLoad NoSharedMemory to avoid using shared memory\n" <<flush;
+//         errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;
 //         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_SHM, P);
 //     };
 
@@ -465,7 +465,7 @@ void Genome::genomeLoad(){//allocate and load Genome
         if (sjdbInfo.fail()) {
             ostringstream errOut;
             errOut << "EXITING because of FATAL error, could not open file " << (pGe.gDir+"/sjdbInfo.txt") <<"\n";
-            errOut << "SOLUTION: check that the path to genome files, specified in --pGe.gDir is correct and the files are present, and have user read permsissions\n" <<flush;
+            errOut << "SOLUTION: check that the path to genome files, specified in --genomeDir is correct and the files are present, and have user read permsissions\n" <<flush;
             exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         };
 
@@ -549,14 +549,14 @@ void Genome::HandleSharedMemoryException(const SharedMemoryException & exc, uint
     {
         case EOPENFAILED:
             errOut << "EXITING because of FATAL ERROR: problems with shared memory: error from shmget() or shm_open()." << endl << flush;
-            errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --pGe.gLoad NoSharedMemory to avoid using shared memory" << endl << flush;
+            errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory" << endl << flush;
             break;
         case EEXISTS:
             errOut << "EXITING: fatal error from shmget() trying to allocate shared memory piece." << endl;
             errOut << "Possible cause 1: not enough RAM. Check if you have enough RAM of at least " << shmSize+2000000000 << " bytes" << endl;
             errOut << "Possible cause 2: not enough virtual memory allowed with ulimit. SOLUTION: run ulimit -v " <<  shmSize+2000000000 << endl;
             errOut << "Possible cause 3: allowed shared memory size is not large enough. SOLUTIONS: (i) consult STAR manual on how to increase shared memory allocation; " \
-            "(ii) ask your system administrator to increase shared memory allocation; (iii) run STAR with --pGe.gLoad NoSharedMemory" << endl<<flush;
+            "(ii) ask your system administrator to increase shared memory allocation; (iii) run STAR with --genomeLoad NoSharedMemory" << endl<<flush;
             break;
         case EFTRUNCATE:
             errOut << "EXITING: fatal error from ftruncate() error shared memory."  << endl;
@@ -565,7 +565,7 @@ void Genome::HandleSharedMemoryException(const SharedMemoryException & exc, uint
             break;
         case EMAPFAILED:
             errOut << "EXITING because of FATAL ERROR: problems with shared memory: error from shmat() while trying to get address of the shared memory piece." << endl << flush;
-            errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --pGe.gLoad NoSharedMemory to avoid using shared memory" << endl << flush;
+            errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory" << endl << flush;
             break;
         case ECLOSE:
             errOut << "EXITING because of FATAL ERROR: could not close the shared memory object." << endl << flush;
@@ -575,11 +575,11 @@ void Genome::HandleSharedMemoryException(const SharedMemoryException & exc, uint
             errOut << "EXITING because of FATAL ERROR:  could not delete the shared object." << endl << flush;
             #else
             errOut << "EXITING because of FATAL ERROR: problems with shared memory: error from shmctl() while trying to remove shared memory piece." << endl << flush;
-            errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --pGe.gLoad NoSharedMemory to avoid using shared memory" << endl << flush;
+            errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory" << endl << flush;
             #endif
             break;
         default:
-            errOut << "EXITING because of FATAL ERROR: There was an issue with the shared memory allocation. Try running STAR with --pGe.gLoad NoSharedMemory to avoid using shared memory.";
+            errOut << "EXITING because of FATAL ERROR: There was an issue with the shared memory allocation. Try running STAR with --genomeLoad NoSharedMemory to avoid using shared memory.";
             break;
     }
 

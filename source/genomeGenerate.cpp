@@ -118,9 +118,9 @@ void genomeGenerate(Parameters &P) {
     if (P.pGe.sjdbOverhang<=0 && (P.pGe.sjdbFileChrStartEnd.at(0)!="-" || P.pGe.sjdbGTFfile!="-"))
     {
         ostringstream errOut;
-        errOut << "EXITING because of FATAL INPUT PARAMETER ERROR: for generating genome with annotations (--pGe.sjdbFileChrStartEnd or --pGe.sjdbGTFfile options)\n";
-        errOut << "you need to specify >0 --pGe.sjdbOverhang\n";
-        errOut << "SOLUTION: re-run genome generation specifying non-zero --pGe.sjdbOverhang, which ideally should be equal to OneMateLength-1, or could be chosen generically as ~100\n";
+        errOut << "EXITING because of FATAL INPUT PARAMETER ERROR: for generating genome with annotations (--sjdbFileChrStartEnd or --sjdbGTFfile options)\n";
+        errOut << "you need to specify >0 --sjdbOverhang\n";
+        errOut << "SOLUTION: re-run genome generation specifying non-zero --sjdbOverhang, which ideally should be equal to OneMateLength-1, or could be chosen generically as ~100\n";
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
     }
     if (P.pGe.sjdbFileChrStartEnd.at(0)=="-" && P.pGe.sjdbGTFfile=="-")
@@ -128,9 +128,9 @@ void genomeGenerate(Parameters &P) {
         if (P.parArray.at(P.pGe.sjdbOverhang_par)->inputLevel>0 && P.pGe.sjdbOverhang>0)
         {
             ostringstream errOut;
-            errOut << "EXITING because of FATAL INPUT PARAMETER ERROR: when generating genome without annotations (--pGe.sjdbFileChrStartEnd or --pGe.sjdbGTFfile options)\n";
-            errOut << "do not specify >0 --pGe.sjdbOverhang\n";
-            errOut << "SOLUTION: re-run genome generation without --pGe.sjdbOverhang option\n";
+            errOut << "EXITING because of FATAL INPUT PARAMETER ERROR: when generating genome without annotations (--sjdbFileChrStartEnd or --sjdbGTFfile options)\n";
+            errOut << "do not specify >0 --sjdbOverhang\n";
+            errOut << "SOLUTION: re-run genome generation without --sjdbOverhang option\n";
             exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         };
         P.pGe.sjdbOverhang=0;
