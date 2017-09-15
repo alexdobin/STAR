@@ -14,5 +14,5 @@ void writePacked(Genome &mapGen, char* a, uint jj, uint x);
 uint readPacked(Genome &mapGen, char* a, uint jj);
 uint suffixArraySearch1(Genome &mapGen, char** s2, uint S, uint N, uint64 gInsert, bool dirR, uint i1, uint i2, uint L, Parameters& P);
 int64 funCalcSAi(char *G, uint iL);
-uint funCalcSAiFromSA(Genome &mapGen, uint iSA, int L, Parameters& P, int & iL4);
+uint funCalcSAiFromSA(char* gSeq, PackedArray& gSA, Genome &mapGen, uint iSA, int L, Parameters& P, int & iL4);
 #endif

@@ -331,16 +331,16 @@ uint suffixArraySearch1(Genome &mapGen, char** s, uint S, uint N, uint64 gInsert
     return i2; //index at i2 is always bigger than the sequence
 };
 
-uint funCalcSAiFromSA(Genome &mapGen, uint iSA, int L, Parameters& P, int & iL4)
+uint funCalcSAiFromSA(char* gSeq, PackedArray& gSA, Genome &mapGen, uint iSA, int L, Parameters& P, int & iL4)
 {
-    uint SAstr=mapGen.SA[iSA];
+    uint SAstr=gSA[iSA];
     bool dirG = (SAstr>>mapGen.GstrandBit) == 0; //forward or reverse strand of the genome
     SAstr &= mapGen.GstrandMask;
     iL4=-1;
     register uint saind=0;
     if (dirG)
     {
-        register uint128 g1=*( (uint128*) (mapGen.G+SAstr) );
+        register uint128 g1=*( (uint128*) (gSeq+SAstr) );
         for (int ii=0; ii<L; ii++)
         {
             register char g2=(char) g1;
@@ -357,7 +357,7 @@ uint funCalcSAiFromSA(Genome &mapGen, uint iSA, int L, Parameters& P, int & iL4)
         return saind;
     } else
     {
-        register uint128 g1=*( (uint128*) (mapGen.G+mapGen.nGenome-SAstr-16) );
+        register uint128 g1=*( (uint128*) (gSeq+mapGen.nGenome-SAstr-16) );
         for (int ii=0; ii<L; ii++)
         {
             register char g2=(char) (g1>>(8*(15-ii)));

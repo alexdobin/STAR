@@ -133,7 +133,7 @@ void genomeSAindexChunk(char * G, PackedArray & SA, Parameters & P, PackedArray 
 
     uint isa=iSA1;
     int iL4;
-    uint indFull=funCalcSAiFromSA(mapGen,isa,mapGen.pGe.gSAindexNbases,P,iL4);
+    uint indFull=funCalcSAiFromSA(G,SA,mapGen,isa,mapGen.pGe.gSAindexNbases,P,iL4);
     while (isa<=iSA2) {//for all suffixes
 
         /* testing
@@ -214,7 +214,7 @@ void genomeSAindexChunk(char * G, PackedArray & SA, Parameters & P, PackedArray 
         };
 
         //find next index not equal to the current one
-        funSAiFindNextIndex(P, isaStep, isa, indFull, iL4, mapGen);//indFull and iL4 have been already defined at the previous step
+        funSAiFindNextIndex(P, G, SA, isaStep, isa, indFull, iL4, mapGen);//indFull and iL4 have been already defined at the previous step
 //         isa++;
 //         indFull=funCalcSAiFromSA(G,SA,isa,mapGen.pGe.gSAindexNbases,P,iL4);
     };//isa cycle
@@ -222,18 +222,18 @@ void genomeSAindexChunk(char * G, PackedArray & SA, Parameters & P, PackedArray 
 
  };
 
-void funSAiFindNextIndex(Parameters & P, uint isaStep, uint & isa, uint & indFull, int & iL4, Genome &mapGen)
+void funSAiFindNextIndex(Parameters & P, char * G, PackedArray & SA, uint isaStep, uint & isa, uint & indFull, int & iL4, Genome &mapGen)
  {
     uint indFullPrev=indFull;
     int iL4prev=iL4;
     isa+=isaStep;
-    while (isa<mapGen.nSA && (indFull=funCalcSAiFromSA(mapGen,isa,mapGen.pGe.gSAindexNbases,P,iL4))==indFullPrev && iL4==iL4prev)
+    while (isa<mapGen.nSA && (indFull=funCalcSAiFromSA(G,SA,mapGen,isa,mapGen.pGe.gSAindexNbases,P,iL4))==indFullPrev && iL4==iL4prev)
     {//make large step in isa while the indFull/iL4 are still the same
         isa+=isaStep;
     };
     if (isa>=mapGen.nSA)
     {//reached the end of the SA
-        indFull=funCalcSAiFromSA(mapGen,mapGen.nSA-1,mapGen.pGe.gSAindexNbases,P,iL4);
+        indFull=funCalcSAiFromSA(G,SA,mapGen,mapGen.nSA-1,mapGen.pGe.gSAindexNbases,P,iL4);
         if (indFull==indFullPrev && iL4==iL4prev)
         {
             isa=mapGen.nSA;//no more indices, the last one is equal to the previous
@@ -247,7 +247,7 @@ void funSAiFindNextIndex(Parameters & P, uint isaStep, uint & isa, uint & indFul
         while (i1+1<i2)
         {
             isa=i1/2 + i2/2 + (i1%2 + i2%2)/2;
-            if ((indFull=funCalcSAiFromSA(mapGen,isa,mapGen.pGe.gSAindexNbases,P,iL4))==indFullPrev && iL4==iL4prev)
+            if ((indFull=funCalcSAiFromSA(G,SA,mapGen,isa,mapGen.pGe.gSAindexNbases,P,iL4))==indFullPrev && iL4==iL4prev)
             {
                 i1=isa;
             } else
@@ -258,7 +258,7 @@ void funSAiFindNextIndex(Parameters & P, uint isaStep, uint & isa, uint & indFul
         if (isa==i1)
         {
             isa=i2;
-            indFull=funCalcSAiFromSA(mapGen,isa,mapGen.pGe.gSAindexNbases,P,iL4);
+            indFull=funCalcSAiFromSA(G,SA,mapGen,isa,mapGen.pGe.gSAindexNbases,P,iL4);
         };
     };
 };
