@@ -19,12 +19,12 @@ class ReadAlign
 {
     public:
          //methods
-        ReadAlign (Parameters& Pin, const Genome &genomeIn, Transcriptome *TrIn, int iChunk);//allocate arrays
+        ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk);//allocate arrays
         int oneRead();
         
         //vars
 
-        Genome mapGen; //mapped-to-genome structure
+        Genome &mapGen; //mapped-to-genome structure
 
         uint iRead;
         char** Read1;

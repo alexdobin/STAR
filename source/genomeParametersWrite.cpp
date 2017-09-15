@@ -14,7 +14,7 @@ void genomeParametersWrite(string fileName, Parameters& P, string errorOut)
     genomePar << "genomeSAindexNbases\t" << P.pGe.gSAindexNbases << "\n";
     genomePar << "genomeChrBinNbits\t" << P.pGe.gChrBinNbits << "\n";
     genomePar << "genomeSAsparseD\t" << P.pGe.gSAsparseD <<"\n";
-    genomePar << "sjdbOverhang\t" << P.pGe.sjdbOverhang <<"\n";
+    genomePar << "sjdbOverhang\t" << mapGen.sjdbOverhang <<"\n";
 
     genomePar << "sjdbFileChrStartEnd\t";
     for (uint ii=0;ii<P.pGe.sjdbFileChrStartEnd.size();ii++) genomePar<< P.pGe.sjdbFileChrStartEnd.at(ii) << " ";

@@ -4,7 +4,7 @@
 #include "ReadAlign.h"
 #include "SequenceFuns.h"
 #include "stitchWindowAligns.h"
-#include "sjSplitAlign.cpp"
+#include "sjAlignSplit.cpp"
 #include "PackedArray.h"
 #include "alignSmithWaterman.h"
 #include "GlobalVariables.h"
@@ -12,7 +12,7 @@
 
 void ReadAlign::stitchPieces(char **R, char **Q, uint Lread) {
 
-       //zero-out winBin
+    //zero-out winBin
     memset(winBin[0],255,sizeof(winBin[0][0])*P.winBinN);
     memset(winBin[1],255,sizeof(winBin[0][0])*P.winBinN);
 
@@ -50,17 +50,17 @@ void ReadAlign::stitchPieces(char **R, char **Q, uint Lread) {
             for (uint iSA=PC[iP][PC_SAstart]; iSA<=PC[iP][PC_SAend]; iSA++) {//scan through all alignments of this piece
 
                 uint a1 = mapGen.SA[iSA];
-                uint aStr = a1 >> P.GstrandBit;
-                a1 &= P.GstrandMask; //remove strand bit
+                uint aStr = a1 >> mapGen.GstrandBit;
+                a1 &= mapGen.GstrandMask; //remove strand bit
 
                 //convert to positive strand
                 if (aDir==1 && aStr==0) {
                     aStr=1;
                 } else if (aDir==0 && aStr==1) {
-                    a1 = P.nGenome - (aLength+a1);
+                    a1 = mapGen.nGenome - (aLength+a1);
                 } else if (aDir==1 && aStr==1) {
                     aStr=0;
-                    a1 = P.nGenome - (aLength+a1);
+                    a1 = mapGen.nGenome - (aLength+a1);
                 };
 
                 //final strand
@@ -68,9 +68,9 @@ void ReadAlign::stitchPieces(char **R, char **Q, uint Lread) {
                     aStr=1-aStr;
                 };
 
-                if (a1>=P.sjGstart) {//this is sj align
+                if (a1>=mapGen.sjGstart) {//this is sj align
                     uint a1D, aLengthD, a1A, aLengthA, sj1;
-                    if (sjAlignSplit(a1, aLength, P, a1D, aLengthD, a1A, aLengthA, sj1)) {//align crosses the junction
+                    if (sjAlignSplit(a1, aLength, mapGen, a1D, aLengthD, a1A, aLengthA, sj1)) {//align crosses the junction
 
                         int addStatus=createExtendWindowsWithAlign(a1D, aStr);//add donor piece
                         if (addStatus==EXIT_createExtendWindowsWithAlign_TOO_MANY_WINDOWS) {//too many windows
@@ -96,14 +96,14 @@ void ReadAlign::stitchPieces(char **R, char **Q, uint Lread) {
         if (WC[iWin][WC_gStart]<=WC[iWin][WC_gEnd]) {//otherwise the window is dead
 
             uint wb=WC[iWin][WC_gStart];
-            for (uint ii=0; ii<P.winFlankNbins && wb>0 && P.chrBin[(wb-1) >> P.winBinChrNbits]==WC[iWin][WC_Chr];ii++) {
+            for (uint ii=0; ii<P.winFlankNbins && wb>0 && mapGen.chrBin[(wb-1) >> P.winBinChrNbits]==WC[iWin][WC_Chr];ii++) {
                 wb--;
                 winBin[ WC[iWin][WC_Str] ][ wb ]=(uintWinBin) iWin;
             };
             WC[iWin][WC_gStart] = wb;
 
             wb=WC[iWin][WC_gEnd];
-            for (uint ii=0; ii<P.winFlankNbins && wb+1<P.winBinN && P.chrBin[(wb+1) >> P.winBinChrNbits]==WC[iWin][WC_Chr];ii++) {
+            for (uint ii=0; ii<P.winFlankNbins && wb+1<P.winBinN && mapGen.chrBin[(wb+1) >> P.winBinChrNbits]==WC[iWin][WC_Chr];ii++) {
                 wb++;
                 winBin[ WC[iWin][WC_Str] ][ wb ]=(uintWinBin) iWin;
             };
@@ -140,8 +140,8 @@ void ReadAlign::stitchPieces(char **R, char **Q, uint Lread) {
         for (uint iSA=PC[iP][PC_SAstart]; iSA<=PC[iP][PC_SAend]; iSA++) {//scan through all alignments
 
             uint a1 = mapGen.SA[iSA];
-            uint aStr = a1 >> P.GstrandBit;
-            a1 &= P.GstrandMask; //remove strand bit
+            uint aStr = a1 >> mapGen.GstrandBit;
+            a1 &= mapGen.GstrandMask; //remove strand bit
             uint aRstart=PC[iP][PC_rStart];
 
             //convert to positive strand
@@ -150,10 +150,10 @@ void ReadAlign::stitchPieces(char **R, char **Q, uint Lread) {
                 aRstart = Lread - (aLength+aRstart);
             } else if (aDir==0 && aStr==1) {
                 aRstart = Lread - (aLength+aRstart);
-                a1 = P.nGenome - (aLength+a1);
+                a1 = mapGen.nGenome - (aLength+a1);
             } else if (aDir==1 && aStr==1) {
                 aStr=0;
-                a1 = P.nGenome - (aLength+a1);
+                a1 = mapGen.nGenome - (aLength+a1);
             };
 
             //final strand
@@ -162,9 +162,9 @@ void ReadAlign::stitchPieces(char **R, char **Q, uint Lread) {
             };
 
 
-            if (a1>=P.sjGstart) {//this is sj read
+            if (a1>=mapGen.sjGstart) {//this is sj read
                 uint a1D, aLengthD, a1A, aLengthA, isj1;
-                if (sjAlignSplit(a1, aLength, P, a1D, aLengthD, a1A, aLengthA, isj1)) {//align crosses the junction
+                if (sjAlignSplit(a1, aLength, mapGen, a1D, aLengthD, a1A, aLengthA, isj1)) {//align crosses the junction
 
                         assignAlignToWindow(a1D, aLengthD, aStr, aNrep, aFrag, aRstart, aAnchor, isj1);
                         assignAlignToWindow(a1A, aLengthA, aStr, aNrep, aFrag, aRstart+aLengthD, aAnchor, isj1);

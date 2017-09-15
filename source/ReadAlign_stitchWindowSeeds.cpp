@@ -30,7 +30,7 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R, c
                 score2=\
                     stitchAlignToTranscript(WA[iW][iS2][WA_rStart]+WA[iW][iS2][WA_Length]-1, WA[iW][iS2][WA_gStart]+WA[iW][iS2][WA_Length]-1,\
                                         WA[iW][iS1][WA_rStart], WA[iW][iS1][WA_gStart], WA[iW][iS1][WA_Length], WA[iW][iS1][WA_iFrag],  WA[iW][iS1][WA_sjA], \
-                                        P, R, Q, mapGen.G, &trA1, outFilterMismatchNmaxTotal);
+                                        P, R, Q, mapGen, &trA1, outFilterMismatchNmaxTotal);
 
                 if (P.outFilterBySJoutStage==2 && trA1.nExons>1)
                 {//junctions have to be present in the filtered set P.sjnovel
@@ -128,7 +128,7 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R, c
             uint iS1=seedChain[iSc], iS2=seedChain[iSc-1];
             int scoreStitch= stitchAlignToTranscript(WA[iW][iS1][WA_rStart]+WA[iW][iS1][WA_Length]-1, WA[iW][iS1][WA_gStart]+WA[iW][iS1][WA_Length]-1,\
                                         WA[iW][iS2][WA_rStart], WA[iW][iS2][WA_gStart], WA[iW][iS2][WA_Length], WA[iW][iS2][WA_iFrag],  WA[iW][iS2][WA_sjA], \
-                                        P, R, Q, mapGen.G, &trA, outFilterMismatchNmaxTotal);
+                                        P, R, Q, mapGen, &trA, outFilterMismatchNmaxTotal);
 //            if (scoreStitch>0) {
                 Score+=scoreStitch;
 //           } else {

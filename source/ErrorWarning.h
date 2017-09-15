@@ -1,5 +1,5 @@
-#ifndef DEF_ErrorWarning
-#define DEF_STATS
+#ifndef CODE_ErrorWarning
+#define CODE_ErrorWarning
 
 #include "IncludeDefine.h"
 #include "Parameters.h"

@@ -5,6 +5,6 @@
 #include "Genome.h"
 #include "SjdbClass.h"
 
-void sjdbInsertJunctions(Parameters & P, Parameters & P1, Genome & genome, SjdbClass & sjdbLoci);
+void sjdbInsertJunctions(Parameters & P, Genome & mapGen, Genome & mapGen1, SjdbClass & sjdbLoci);
 
 #endif

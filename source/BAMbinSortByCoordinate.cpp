@@ -3,7 +3,7 @@
 #include "serviceFuns.cpp"
 #include "BAMfunctions.h"
 
-void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, string dirBAMsort, Parameters &P) {
+void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, string dirBAMsort, Parameters &P, Genome &mapGen) {
 
     if (binS==0) return; //nothing to do for empty bins
     //allocate arrays
@@ -49,7 +49,7 @@ void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, st
 
     BGZF *bgzfBin;
     bgzfBin=bgzf_open((dirBAMsort+"/b"+to_string((uint) iBin)).c_str(),("w"+to_string((long long) P.outBAMcompression)).c_str());
-    outBAMwriteHeader(bgzfBin,P.samHeaderSortedCoord,P.chrNameAll,P.chrLengthAll);
+    outBAMwriteHeader(bgzfBin,P.samHeaderSortedCoord,mapGen.chrNameAll,mapGen.chrLengthAll);
     //send ordered aligns to bgzf one-by-one
     for (uint ia=0;ia<binN;ia++) {
         char* ib=bamIn+startPos[ia*3+2];

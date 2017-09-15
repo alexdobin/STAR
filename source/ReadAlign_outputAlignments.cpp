@@ -82,7 +82,7 @@ void ReadAlign::outputAlignments() {
                 {
                     for (uint itr=0;itr<nTr;itr++)
                     {//check if transcripts map to chr other than added references
-                        if (trMult[itr]->Chr<P.genomeInsertChrIndFirst)
+                        if (trMult[itr]->Chr<mapGen.genomeInsertChrIndFirst)
                         {
                             outSAMfilterYes=false;
                             break;
@@ -93,7 +93,7 @@ void ReadAlign::outputAlignments() {
                     nTrOut=0;
                     for (uint itr=0;itr<nTr;itr++)
                     {//check if transcripts map to chr other than added references
-                        if (trMult[itr]->Chr>=P.genomeInsertChrIndFirst)
+                        if (trMult[itr]->Chr>=mapGen.genomeInsertChrIndFirst)
                         {
                             trMult[nTrOut]=trMult[itr];
                             trMult[nTrOut]->primaryFlag=false;
@@ -146,7 +146,7 @@ void ReadAlign::outputAlignments() {
 
                 if ((P.outBAMunsorted || P.outBAMcoord) && outSAMfilterYes)
                 {//BAM output
-                    alignBAM(*(trMult[iTr]), nTr, iTr, P.chrStart[trMult[iTr]->Chr], (uint) -1, (uint) -1, 0, -1, NULL, P.outSAMattrOrder,outBAMoneAlign, outBAMoneAlignNbytes);
+                    alignBAM(*(trMult[iTr]), nTr, iTr, mapGen.chrStart[trMult[iTr]->Chr], (uint) -1, (uint) -1, 0, -1, NULL, P.outSAMattrOrder,outBAMoneAlign, outBAMoneAlignNbytes);
 
                     if (P.outBAMunsorted)
                     {//unsorted
@@ -156,7 +156,7 @@ void ReadAlign::outputAlignments() {
                         };
                         if (P.outSAMunmapped.keepPairs && P.readNmates>1 && ( !mateMapped1[0] || !mateMapped1[1] ) )
                         {//keep pairs && paired reads && one of the mates not mapped in this transcript
-                            alignBAM(*trMult[iTr], 0, 0, P.chrStart[trMult[iTr]->Chr], (uint) -1, (uint) -1, 0, 4, mateMapped1, P.outSAMattrOrder, outBAMoneAlign, outBAMoneAlignNbytes);
+                            alignBAM(*trMult[iTr], 0, 0, mapGen.chrStart[trMult[iTr]->Chr], (uint) -1, (uint) -1, 0, 4, mateMapped1, P.outSAMattrOrder, outBAMoneAlign, outBAMoneAlignNbytes);
                             for (uint imate=0; imate<P.readNmates; imate++)
                             {//output each mate
                                 outBAMunsorted->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], (imate>0 || iTr>0) ? 0 : (outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1])*2*nTrOut);
@@ -192,7 +192,7 @@ void ReadAlign::outputAlignments() {
 
                 if ( (P.outBAMcoord || (P.outBAMunsorted && !P.outSAMunmapped.keepPairs) ) && outSAMfilterYes)
                 {//BAM output
-                    alignBAM(*trBest, 0, 0, P.chrStart[trBest->Chr], (uint) -1, (uint) -1, 0, unmapType, mateMapped, P.outSAMattrOrder, outBAMoneAlign, outBAMoneAlignNbytes);
+                    alignBAM(*trBest, 0, 0, mapGen.chrStart[trBest->Chr], (uint) -1, (uint) -1, 0, unmapType, mateMapped, P.outSAMattrOrder, outBAMoneAlign, outBAMoneAlignNbytes);
                     for (uint imate=0; imate<P.readNmates; imate++)
                     {//alignBAM output is empty for mapped mate, but still need to scan through it
                         if (P.outBAMunsorted && !P.outSAMunmapped.keepPairs)
@@ -236,7 +236,7 @@ void ReadAlign::outputAlignments() {
     if ( P.outSAMunmapped.within && unmapType>=0 && unmapType<4 ) {//output unmapped within && unmapped read && both mates unmapped
         if (P.outBAMcoord || P.outBAMunsorted || P.quant.trSAM.yes)
         {//BAM output
-            alignBAM(*trBest, 0, 0, P.chrStart[trBest->Chr], (uint) -1, (uint) -1, 0, unmapType, mateMapped, P.outSAMattrOrder, outBAMoneAlign, outBAMoneAlignNbytes);
+            alignBAM(*trBest, 0, 0, mapGen.chrStart[trBest->Chr], (uint) -1, (uint) -1, 0, unmapType, mateMapped, P.outSAMattrOrder, outBAMoneAlign, outBAMoneAlignNbytes);
             for (uint imate=0; imate<P.readNmates; imate++)
             {//output each mate
                 if (P.outBAMunsorted)

@@ -5,11 +5,11 @@
 uint genomeScanFastaFiles (Parameters &P, char* G, bool flagRun) {//scans fasta files. flagRun=false: check and find full size, flaRun=true: collect all the data
 
     uint N=0;//total number of bases in the genome, including chr "spacers"
-    if (!flagRun && P.chrLength.size()>0)
+    if (!flagRun && mapGen.chrLength.size()>0)
     {//previous chr records exist
-       P.chrStart.pop_back();//remove last record, it will be recorded again
-       N =  P.chrStart.back()+P.chrLength.back();
-       P.chrLength.pop_back();//remove last record, it will be recorded again
+       mapGen.chrStart.pop_back();//remove last record, it will be recorded again
+       N =  mapGen.chrStart.back()+mapGen.chrLength.back();
+       mapGen.chrLength.pop_back();//remove last record, it will be recorded again
     };
 
     ifstream fileIn;
@@ -44,18 +44,18 @@ uint genomeScanFastaFiles (Parameters &P, char* G, bool flagRun) {//scans fasta 
                     lineInStream.ignore(1,' ');
                     string chrName1;
                     lineInStream >> chrName1;
-                    P.chrName.push_back(chrName1);
+                    mapGen.chrName.push_back(chrName1);
                 };
 
-                if (!flagRun && P.chrStart.size()>0) P.chrLength.push_back(N-P.chrStart.at(P.chrStart.size()-1)); //true length of the chr
+                if (!flagRun && mapGen.chrStart.size()>0) mapGen.chrLength.push_back(N-mapGen.chrStart.at(mapGen.chrStart.size()-1)); //true length of the chr
 
                 if (N>0) {//pad the chromosomes to bins boudnaries
                     N = ( (N+1)/P.genomeChrBinNbases+1 )*P.genomeChrBinNbases;
                 };
 
                 if (!flagRun) {
-                    P.chrStart.push_back(N);
-                    P.inOut->logMain << P.pGe.gFastaFiles.at(ii)<<" : chr # " << P.chrStart.size()-1 << "  \""<<P.chrName.at(P.chrStart.size()-1)<<"\" chrStart: "<<N<<"\n"<<flush;
+                    mapGen.chrStart.push_back(N);
+                    P.inOut->logMain << P.pGe.gFastaFiles.at(ii)<<" : chr # " << mapGen.chrStart.size()-1 << "  \""<<mapGen.chrName.at(mapGen.chrStart.size()-1)<<"\" chrStart: "<<N<<"\n"<<flush;
                 };
             } else {//char lines
                 if (flagRun) lineIn.copy(G+N,lineIn.size(),0);
@@ -66,16 +66,16 @@ uint genomeScanFastaFiles (Parameters &P, char* G, bool flagRun) {//scans fasta 
     };
 
 
-    if (!flagRun) P.chrLength.push_back(N-P.chrStart.at(P.chrStart.size()-1)); //true length of the last chr
+    if (!flagRun) mapGen.chrLength.push_back(N-mapGen.chrStart.at(mapGen.chrStart.size()-1)); //true length of the last chr
 
     N = ( (N+1)/P.genomeChrBinNbases+1)*P.genomeChrBinNbases;
 
     if (!flagRun)
     {
-        P.nChrReal=P.chrStart.size();
-        P.chrStart.push_back(N); //last chromosome end+1
-        for (uint ii=0;ii<P.nChrReal;ii++) {
-            P.chrNameIndex[P.chrName[ii]]=ii;
+        mapGen.nChrReal=mapGen.chrStart.size();
+        mapGen.chrStart.push_back(N); //last chromosome end+1
+        for (uint ii=0;ii<mapGen.nChrReal;ii++) {
+            mapGen.chrNameIndex[mapGen.chrName[ii]]=ii;
         };
     } else
     {//convert the genome to 0,1,2,3,4

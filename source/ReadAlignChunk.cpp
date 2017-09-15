@@ -2,7 +2,7 @@
 #include <pthread.h>
 #include "ErrorWarning.h"
 
-ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk) : P(Pin) {//initialize chunk
+ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk) : P(Pin), mapGen(genomeIn) {//initialize chunk
 
     iThread=iChunk;
 
@@ -13,7 +13,7 @@ ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome 
         chunkTr=NULL;
     };
 
-    RA = new ReadAlign(P, genomeIn, chunkTr, iChunk);//new local copy of RA for each chunk
+    RA = new ReadAlign(P, mapGen, chunkTr, iChunk);//new local copy of RA for each chunk
 
     RA->iRead=0;
 
@@ -63,8 +63,8 @@ ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome 
         RA->outBAMquant=NULL;
     };
 
-    chunkOutSJ=new OutSJ (P.limitOutSJcollapsed, P);
-    chunkOutSJ1=new OutSJ (P.limitOutSJcollapsed, P);
+    chunkOutSJ=new OutSJ (P.limitOutSJcollapsed, P, mapGen);
+    chunkOutSJ1=new OutSJ (P.limitOutSJcollapsed, P, mapGen);
 
     RA->chunkOutSJ=chunkOutSJ;
     RA->chunkOutSJ1=chunkOutSJ1;

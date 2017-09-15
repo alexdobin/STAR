@@ -60,7 +60,7 @@ int ReadAlign::mapOneRead() {
 
                         //uint seedLength=min(splitR[1][ip] - Lmapped - istart*Lstart, P.seedSearchLmax);
                         uint seedLength=splitR[1][ip] - Lmapped - istart*Lstart;
-                        maxMappableLength2strands(Shift, seedLength, iDir, 0, P.nSA-1, L, splitR[2][ip]);//L=max mappable length, unique or multiple
+                        maxMappableLength2strands(Shift, seedLength, iDir, 0, mapGen.nSA-1, L, splitR[2][ip]);//L=max mappable length, unique or multiple
                         if (iDir==0 && istart==0 && Lmapped==0 && Shift+L == splitR[1][ip] ) {//this piece maps full length and does not need to be mapped from the opposite direction
                             flagDirMap=false;
                         };
@@ -72,7 +72,7 @@ int ReadAlign::mapOneRead() {
                     uint Shift = iDir==0 ? ( splitR[0][ip] + istart*Lstart ) : \
                                    ( splitR[0][ip] + splitR[1][ip] - istart*Lstart-1); //choose Shift for forward or reverse
                     uint seedLength = min(P.seedSearchLmax, iDir==0 ? (splitR[0][ip] + splitR[1][ip]-Shift):(Shift+1) );
-                    maxMappableLength2strands(Shift, seedLength, iDir, 0, P.nSA-1, L, splitR[2][ip]);//L=max mappable length, unique or multiple
+                    maxMappableLength2strands(Shift, seedLength, iDir, 0, mapGen.nSA-1, L, splitR[2][ip]);//L=max mappable length, unique or multiple
                 };
 
 

@@ -5,6 +5,6 @@
 #include "Parameters.h"
 #include "Genome.h"
 
-void sjdbPrepare (SjdbClass &sjdbLoci, Parameters &P, uint nGenomeReal, string outDir, Genome &G, char *Gsj);
+void sjdbPrepare (SjdbClass &sjdbLoci, Parameters &P, uint nGenomeReal, string outDir, Genome &mapGen, char *Gsj);
 
 #endif

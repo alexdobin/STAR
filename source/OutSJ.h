@@ -1,7 +1,8 @@
-#ifndef OUT_SJ_DEF
-#define OUT_SJ_DEF
+#ifndef CODE_OutSJ
+#define CODE_OutSJ
 
 #include "Parameters.h"
+#include "Genome.h"
 
 class Junction {//one junction
 public:
@@ -23,9 +24,13 @@ public:
 
     const static uint dataSize=overhangRightP+sizeof(uint16);
 
+    Junction(Genome &genomeIn);
     void junctionPointer(char* sjPoint, uint isj);
     void outputStream(ostream &outStream, Parameters& P);
     void collapseOneSJ(char* isj1P, char* isjP, Parameters& P);
+    
+private:
+    Genome &mapGen;
 };
 
 class OutSJ {
@@ -36,13 +41,13 @@ public:
     uint N; //number of junctions stored
     Junction oneSJ;
 
-    OutSJ(uint nSJmax, Parameters &Pin);
+    OutSJ(uint nSJmax, Parameters &Pin, Genome &genomeIn);
     void collapseSJ();//collapse the junctions in data
 //     int compareSJ(void* i1, void* i2);
 
 private:
-    Parameters &P;                
-    
+    Parameters &P;
+    Genome &mapGen;  
 };
 
 int compareSJ(const void* i1, const void* i2); //external functions

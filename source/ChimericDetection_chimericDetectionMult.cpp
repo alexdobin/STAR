@@ -64,7 +64,7 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength) {
 
                     if  (chimScore>0)
                     {//candidate chimera
-                        ChimericAlign chAl(seg1, seg2, chimScore);
+                        ChimericAlign chAl(seg1, seg2, chimScore, outGen);
                         
                         if (!chAl.chimericCheck())
                             continue; //check chimeric alignment

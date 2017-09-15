@@ -184,7 +184,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                        samFLAG|=0x20;
                     };
                     mateChr=trOut.Chr;
-                    trChrStart=P.chrStart[mateChr];
+                    trChrStart=mapGen.chrStart[mateChr];
                     mateStart=trOut.exons[0][EX_G] - trChrStart;
                     mateStrand= trOut.Str == (1-imate) ? 0 : 1;
 
@@ -220,7 +220,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
             if (flagPaired) {//paired reads
                 samFLAG=0x0001;
                 if (iExMate==trOut.nExons-1) {//single mate
-                    if (mateChr>P.nChrReal) samFLAG|=0x0008; //not mapped as pair
+                    if (mateChr>mapGen.nChrReal) samFLAG|=0x0008; //not mapped as pair
                 } else {//properly paired
                     samFLAG|=0x0002; //mapped as pair
                 };
@@ -453,7 +453,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
         //6: next refID Ref-ID of the next segment (􀀀1  mate refID < n ref)
         if (nMates>1) {
             pBAM[6]=trOut.Chr;
-        } else if (mateChr<P.nChrReal){
+        } else if (mateChr<mapGen.nChrReal){
             pBAM[6]=mateChr;
         } else {
             pBAM[6]=-1;
@@ -462,7 +462,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
         //7: next pos 0-based leftmost pos of the next segment (= PNEXT 􀀀 1)
         if (nMates>1) {
             pBAM[7]=trOut.exons[(imate==0 ? iExMate+1 : 0)][EX_G] - trChrStart;
-        } else if (mateChr<P.nChrReal){
+        } else if (mateChr<mapGen.nChrReal){
             pBAM[7]=mateStart;
         } else {
             pBAM[7]=-1;

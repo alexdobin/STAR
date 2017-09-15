@@ -97,7 +97,7 @@ int main(int argInN, char* argIn[]) {
 
     //calculate genome-related parameters
     Transcriptome *mainTranscriptome=NULL;
-    mainGenome.Var=new Variation(P);
+    mainGenome.Var=new Variation(P, mainGenome.chrStart, mainGenome.chrNameIndex);
 
 
     if (P.pGe.gFastaFiles.at(0)!="-")
@@ -109,8 +109,8 @@ int main(int argInN, char* argIn[]) {
 
     if (P.sjdbInsert.pass1)
     {
-        Parameters P1=P;
-        sjdbInsertJunctions(P, P1, mainGenome, sjdbLoci);
+        Genome mainGenome1=mainGenome;//not sure if I need to create the copy - mainGenome1 below should not be changed
+        sjdbInsertJunctions(P, mainGenome, mainGenome1, sjdbLoci);
     };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////START
@@ -129,6 +129,8 @@ int main(int argInN, char* argIn[]) {
 
     if (P.twoPass.yes) {//2-pass
         //re-define P for the pass1
+
+        Genome mainGenome1=mainGenome;
 
         Parameters P1=P;
         //turn off unnecessary calculations
@@ -177,7 +179,7 @@ int main(int argInN, char* argIn[]) {
         P.twoPass.pass2=true;//starting the 2nd pass
         P.twoPass.pass1sjFile=P.twoPass.dir+"/SJ.out.tab";
 
-        sjdbInsertJunctions(P, P1, mainGenome, sjdbLoci);
+        sjdbInsertJunctions(P, mainGenome, mainGenome1, sjdbLoci);
 
         //reopen reads files
         P.closeReadsFiles();
@@ -201,12 +203,12 @@ int main(int argInN, char* argIn[]) {
     if (P.outSAMmode != "None") {//open SAM file and write header
         ostringstream samHeaderStream;
 
-        for (uint ii=0;ii<P.nChrReal;ii++) {
-            samHeaderStream << "@SQ\tSN:"<< P.chrName.at(ii) <<"\tLN:"<<P.chrLength[ii]<<"\n";
+        for (uint ii=0;ii<mainGenome.nChrReal;ii++) {
+            samHeaderStream << "@SQ\tSN:"<< mainGenome.chrName.at(ii) <<"\tLN:"<<mainGenome.chrLength[ii]<<"\n";
         };
 
-        P.chrNameAll=P.chrName;
-        P.chrLengthAll=P.chrLength;
+        mainGenome.chrNameAll=mainGenome.chrName;
+        mainGenome.chrLengthAll=mainGenome.chrLength;
         {//add exra references
             ifstream extrastream (P.pGe.gDir + "/extraReferences.txt");
             while (extrastream.good()) {
@@ -220,9 +222,9 @@ int main(int argInN, char* argIn[]) {
                     samHeaderStream << line1 <<"\n";
 
                     stream1 >> field1;
-                    P.chrNameAll.push_back(field1.substr(3));
+                    mainGenome.chrNameAll.push_back(field1.substr(3));
                     stream1 >> field1;
-                    P.chrLengthAll.push_back((uint) stoll(field1.substr(3)));
+                    mainGenome.chrLengthAll.push_back((uint) stoll(field1.substr(3)));
                 };
             };
             extrastream.close();
@@ -275,10 +277,10 @@ int main(int argInN, char* argIn[]) {
             *P.inOut->outSAM << P.samHeader;
         };
         if (P.outBAMunsorted){
-            outBAMwriteHeader(P.inOut->outBAMfileUnsorted,P.samHeader,P.chrNameAll,P.chrLengthAll);
+            outBAMwriteHeader(P.inOut->outBAMfileUnsorted,P.samHeader,mainGenome.chrNameAll,mainGenome.chrLengthAll);
         };
 //             if (P.outBAMcoord){
-//                 outBAMwriteHeader(P.inOut->outBAMfileCoord,P.samHeader,P.chrName,P.chrLength);
+//                 outBAMwriteHeader(P.inOut->outBAMfileCoord,P.samHeader,mainGenome.chrName,mainGenome.chrLength);
 //             };
 
         if ( P.quant.trSAM.yes ) {
@@ -342,7 +344,7 @@ int main(int argInN, char* argIn[]) {
     };
 
     if (P.outBAMcoord && P.limitBAMsortRAM==0) {//make it equal ot the genome size
-        P.limitBAMsortRAM=P.nGenome+mainGenome.SA.lengthByte+mainGenome.SAi.lengthByte;
+        P.limitBAMsortRAM=mainGenome.nGenome+mainGenome.SA.lengthByte+mainGenome.SAi.lengthByte;
     };
 
     //no need for genome anymore, free the memory
@@ -401,7 +403,7 @@ int main(int argInN, char* argIn[]) {
             if (binS==0) continue; //empty bin
 
             if (ibin == nBins-1) {//last bin for unmapped reads
-                BAMbinSortUnmapped(ibin,P.runThreadN,P.outBAMsortTmpDir,P.inOut->outBAMfileCoord, P);
+                BAMbinSortUnmapped(ibin,P.runThreadN,P.outBAMsortTmpDir,P.inOut->outBAMfileCoord, P, mainGenome);
             } else {
             uint newMem=binS+binN*24;
             bool boolWait=true;
@@ -413,7 +415,7 @@ int main(int argInN, char* argIn[]) {
                 };
                 sleep(0.1);
             };
-            BAMbinSortByCoordinate(ibin,binN,binS,P.runThreadN,P.outBAMsortTmpDir, P);
+            BAMbinSortByCoordinate(ibin,binN,binS,P.runThreadN,P.outBAMsortTmpDir, P, mainGenome);
             #pragma omp critical
             totalMem-=newMem;//"release" RAM
         };

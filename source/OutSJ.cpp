@@ -1,7 +1,7 @@
 #include "OutSJ.h"
 #include "ErrorWarning.h"
 
-OutSJ::OutSJ (uint nSJmax, Parameters &Pin) : P(Pin){//do I need P?
+OutSJ::OutSJ (uint nSJmax, Parameters &Pin, Genome &genomeIn) : P(Pin), mapGen(genomeIn), oneSJ(mapGen) {//do I need P?
 
     data = new char [oneSJ.dataSize*nSJmax]; //allocate big array of SJ loci and properties
     memset(data,0,oneSJ.dataSize*nSJmax);
@@ -56,6 +56,8 @@ void OutSJ::collapseSJ() {//collapse junctions. Simple version now: re-sort ever
     N=isj1+1;
 };
 
+Junction::Junction(Genome &genomeIn) : mapGen(genomeIn) {
+};
 
 //////////////////////////////////////////////////// oneJunctionWrite
 void Junction::junctionPointer(char* sjPoint, uint isj) {//
@@ -72,8 +74,8 @@ void Junction::junctionPointer(char* sjPoint, uint isj) {//
 };
 
 void Junction::outputStream(ostream &outStream, Parameters& P) {
-    uint sjChr=P.chrBin[*start >> P.pGe.gChrBinNbits];
-    outStream << P.chrName.at(sjChr) <<"\t"<< *start + 1 - P.chrStart[sjChr] <<"\t"<<*start + *gap - P.chrStart[sjChr] \
+    uint sjChr=mapGen.chrBin[*start >> P.pGe.gChrBinNbits];
+    outStream << mapGen.chrName.at(sjChr) <<"\t"<< *start + 1 - mapGen.chrStart[sjChr] <<"\t"<<*start + *gap - mapGen.chrStart[sjChr] \
             <<"\t"<< int(*strand) <<"\t"<< int(*motif) <<"\t"<< int (*annot) <<"\t"<< *countUnique <<"\t"<< *countMultiple \
             <<"\t"<< *overhangLeft << endl;
 };

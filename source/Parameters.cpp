@@ -1196,9 +1196,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         };
     };
 
-    //final pGe.sjdbOverhang value has been determined
-    sjdbLength = pGe.sjdbOverhang==0 ? 0 : pGe.sjdbOverhang*2+1;
-
     if (outBAMcoord && limitBAMsortRAM==0) {//check limitBAMsortRAM
         if (pGe.gLoad!="NoSharedMemory") {
             ostringstream errOut;
@@ -1232,9 +1229,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         };
     };
 
-
-    //genome parameters
-    genomeChrBinNbases=1LLU<<pGe.gChrBinNbits;
 
     //outSAMunmapped
     outSAMunmapped.yes=false;
@@ -1367,76 +1361,5 @@ int Parameters::scanOneLine (string &lineIn, int inputLevel, int inputLevelReque
     return 0;
 };
 
-//////////////////////////////////////////////////////////////////////////////////////////
-void Parameters::chrInfoLoad() {//find chrStart,Length,nChr from Genome G
 
-    //load chr names
-    ifstream chrStreamIn ( (pGe.gDir+"/chrName.txt").c_str() );
-    if (chrStreamIn.fail()) {
-        ostringstream errOut;
-        errOut << "EXITING because of FATAL error, could not open file " << (pGe.gDir+"/chrName.txt") <<"\n";
-        errOut << "SOLUTION: re-generate genome files with STAR --runMode genomeGenerate\n";
-        exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_INPUT_FILES, *this);
-    };
-
-    char chrInChar[1000];
-
-    while (chrStreamIn.good()) {
-        string chrIn;
-        chrStreamIn.getline(chrInChar,1000);
-        chrIn=chrInChar;
-        if (chrIn=="") break;
-        chrName.push_back(chrIn);
-    };
-    chrStreamIn.close();
-    nChrReal=chrName.size();
-
-    inOut->logMain << "Number of real (reference) chromosomes= " << nChrReal <<"\n"<<flush;
-    chrStart.resize(nChrReal+1);
-    chrLength.resize(nChrReal);
-
-    //load chr lengths
-    chrStreamIn.open( (pGe.gDir+"/chrLength.txt").c_str() );
-    if (chrStreamIn.fail()) {
-        ostringstream errOut;
-        errOut << "EXITING because of FATAL error, could not open file " << (pGe.gDir+"/chrLength.txt") <<"\n";
-        errOut << "SOLUTION: re-generate genome files with STAR --runMode genomeGenerate\n";
-        exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_INPUT_FILES, *this);
-    };
-
-    for  (uint ii=0;ii<nChrReal;ii++) {
-        chrStreamIn >> chrLength[ii];
-    };
-    chrStreamIn.close();
-
-    //load chr starts
-    chrStreamIn.open( (pGe.gDir+"/chrStart.txt").c_str() );
-    if (chrStreamIn.fail()) {
-        ostringstream errOut;
-        errOut << "EXITING because of FATAL error, could not open file " << (pGe.gDir+"/chrStart.txt") <<"\n";
-        errOut << "SOLUTION: re-generate genome files with STAR --runMode genomeGenerate\n";
-        exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_INPUT_FILES, *this);
-    };
-
-    for  (uint ii=0;ii<=nChrReal;ii++) {
-        chrStreamIn >> chrStart[ii];
-    };
-    chrStreamIn.close();
-
-    //log
-    for (uint ii=0; ii<nChrReal;ii++) {
-        inOut->logMain << ii+1 <<"\t"<< chrName[ii] <<"\t"<<chrLength[ii]<<"\t"<<chrStart[ii]<<"\n"<<flush;
-        chrNameIndex[chrName[ii]]=ii;
-    };
-};
-
-//////////////////////////////////////////////////////////
-void Parameters::chrBinFill() {
-    chrBinN = chrStart[nChrReal]/genomeChrBinNbases+1;
-    chrBin = new uint [chrBinN];
-    for (uint ii=0, ichr=1; ii<chrBinN; ++ii) {
-        if (ii*genomeChrBinNbases>=chrStart[ichr]) ichr++;
-        chrBin[ii]=ichr-1;
-    };
-};
 

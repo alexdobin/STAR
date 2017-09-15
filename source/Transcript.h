@@ -1,9 +1,10 @@
-#ifndef TRANSCRIPT_DEF
-#define TRANSCRIPT_DEF
+#ifndef CODE_Transcript
+#define CODE_Transcript
 
 #include "IncludeDefine.h"
 #include "Parameters.h"
 #include "Variation.h"
+#include "Genome.h"
 
 class Transcript {
     public:
@@ -66,11 +67,10 @@ class Transcript {
         void resetMapG(uint); // reset map to 0 for Lread bases
         void add(Transcript*); // add
         void alignScore(char **Read1, char *G, Parameters &P);
-        int variationAdjust(Variation &Var, char *R, char **Read1, char *G, Parameters &P);
+        int variationAdjust(const Genome &mapGen, char *R, char **Read1, char *G, Parameters &P);
         string generateCigarP(); //generates CIGAR
         
     private:
-
         
 };
 

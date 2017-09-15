@@ -14,7 +14,7 @@ class ChimericDetection {
         bool chimRecord;
         int chimScoreBest;
                 
-        ChimericDetection(Parameters &Pin, Transcript ***trAll, uint *nWinTr, char** Read1in, Genome &mapGenIn, fstream &ostreamChimJunctionIn);
+        ChimericDetection(Parameters &Pin, Transcript ***trAll, uint *nWinTr, char** Read1in, Genome &genomeIn, fstream &ostreamChimJunctionIn);
         bool chimericDetectionMult(uint nWin, uint *readLengthIn);
         
     private:

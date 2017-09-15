@@ -87,7 +87,7 @@ bool ReadAlign::chimericDetectionOld() {
                         };
                         chimScoreBest=chimScore;
                         trChim[1].roStart = trChim[1].roStr ==0 ? trChim[1].rStart : Lread - trChim[1].rStart - trChim[1].rLength;
-                        trChim[1].cStart  = trChim[1].gStart - P.chrStart[trChim[1].Chr];
+                        trChim[1].cStart  = trChim[1].gStart - mapGen.chrStart[trChim[1].Chr];
                         chimStrBest=chimStr1;
                     } else if (chimScore>chimScoreNext && overlap1==0) {//replace the nextscore if it's not the best one and is higher than the previous one
                         chimScoreNext=chimScore;
@@ -353,7 +353,7 @@ bool ReadAlign::chimericDetectionOld() {
 
                         };
 
-                        bamN+=alignBAM(trChim[itr], 1, 0, P.chrStart[trChim[itr].Chr],  mateChr, mateStart-P.chrStart[mateChr], mateStrand, \
+                        bamN+=alignBAM(trChim[itr], 1, 0, mapGen.chrStart[trChim[itr].Chr],  mateChr, mateStart-mapGen.chrStart[mateChr], mateStrand, \
                                         alignType, NULL, P.outSAMattrOrder, outBAMoneAlign+bamN, outBAMoneAlignNbytes+bamN);
                         bamBytesTotal+=outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1];//outBAMoneAlignNbytes[1] = 0 if SE is recorded
                     };
@@ -372,7 +372,7 @@ bool ReadAlign::chimericDetectionOld() {
                             bam_read1_fromArray(outBAMoneAlign[tagI], b);
                             uint8_t* auxp=bam_aux_get(b,"NM");
                             uint32_t auxv=bam_aux2i(auxp);
-                            string tagSA1="SAZ"+P.chrName[b->core.tid]+','+to_string((uint)b->core.pos+1) +',' + ( (b->core.flag&0x10)==0 ? '+':'-') + \
+                            string tagSA1="SAZ"+mapGen.chrName[b->core.tid]+','+to_string((uint)b->core.pos+1) +',' + ( (b->core.flag&0x10)==0 ? '+':'-') + \
                                     ',' + bam_cigarString(b) + ',' + to_string((uint)b->core.qual) + ',' + to_string((uint)auxv) + ';' ;
 
                              memcpy( (void*) (outBAMoneAlign[ii]+outBAMoneAlignNbytes[ii]), tagSA1.c_str(), tagSA1.size()+1);//copy string including \0 at the end
@@ -410,11 +410,11 @@ bool ReadAlign::chimericDetectionOld() {
                     };
                 };
                 //junction + SAMp
-                chunkOutChimJunction << P.chrName[trChim[0].Chr] <<"\t"<< chimJ0 - P.chrStart[trChim[0].Chr]+1 <<"\t"<< (trChim[0].Str==0 ? "+":"-") \
-                        <<"\t"<< P.chrName[trChim[1].Chr] <<"\t"<< chimJ1 - P.chrStart[trChim[1].Chr]+1 <<"\t"<< (trChim[1].Str==0 ? "+":"-") \
+                chunkOutChimJunction << mapGen.chrName[trChim[0].Chr] <<"\t"<< chimJ0 - mapGen.chrStart[trChim[0].Chr]+1 <<"\t"<< (trChim[0].Str==0 ? "+":"-") \
+                        <<"\t"<< mapGen.chrName[trChim[1].Chr] <<"\t"<< chimJ1 - mapGen.chrStart[trChim[1].Chr]+1 <<"\t"<< (trChim[1].Str==0 ? "+":"-") \
                         <<"\t"<< chimMotif <<"\t"<< chimRepeat0  <<"\t"<< chimRepeat1 <<"\t"<< readName+1 \
-                        <<"\t"<< trChim[0].exons[0][EX_G] - P.chrStart[trChim[0].Chr]+1 <<"\t"<< outputTranscriptCIGARp(trChim[0]) \
-                        <<"\t"<< trChim[1].exons[0][EX_G] - P.chrStart[trChim[1].Chr]+1 <<"\t"<<  outputTranscriptCIGARp(trChim[1]) <<"\n"; //<<"\t"<< trChim[0].exons[0][EX_iFrag]+1 --- no need for that, since trChim[0] is always on the first mate
+                        <<"\t"<< trChim[0].exons[0][EX_G] - mapGen.chrStart[trChim[0].Chr]+1 <<"\t"<< outputTranscriptCIGARp(trChim[0]) \
+                        <<"\t"<< trChim[1].exons[0][EX_G] - mapGen.chrStart[trChim[1].Chr]+1 <<"\t"<<  outputTranscriptCIGARp(trChim[1]) <<"\n"; //<<"\t"<< trChim[0].exons[0][EX_iFrag]+1 --- no need for that, since trChim[0] is always on the first mate
             };
         };//chimeric score
     };//chimeric search

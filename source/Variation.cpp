@@ -4,10 +4,8 @@
 #include "TimeFunctions.h"
 #include "serviceFuns.cpp"
 
-Variation::Variation (Parameters &Pin) : P(Pin)
-{
-    if (!P.var.yes)
-    {
+Variation::Variation (Parameters &Pin, vector <uint> &chrStartIn, map <string,uint> &chrNameIndexIn) : P(Pin), chrStart(chrStartIn), chrNameIndex(chrNameIndexIn) {
+    if (!P.var.yes) {
         yes=false;
         return;
     };
@@ -22,12 +20,10 @@ Variation::Variation (Parameters &Pin) : P(Pin)
 
 };
 
-void scanVCF(ifstream& vcf, bool load, Parameters& P, SNP& snp)
-{
+void scanVCF(ifstream& vcf, bool load, Parameters& P, SNP& snp, vector <uint> &chrStart, map <string,uint> &chrNameIndex) {
     snp.N=0;
     uint nlines=0;
-    while (true)
-    {
+    while (true) {
         string chr,id, ref, alt, dummy, sample;
         uint pos;
         nlines++;
@@ -48,7 +44,7 @@ void scanVCF(ifstream& vcf, bool load, Parameters& P, SNP& snp)
             {
                 altV.insert(altV.begin(),ref);//add ref to the beginning
                 
-                if (P.chrNameIndex.count(chr)==0) {//chr not in Genome
+                if (chrNameIndex.count(chr)==0) {//chr not in Genome
                     if (!load)
                     {
                         P.inOut->logMain << "WARNING: while processing varVCFfile file=" << P.var.vcfFile <<": chromosome '"<<chr<<"' not found in Genome fasta file\n";
@@ -72,7 +68,7 @@ void scanVCF(ifstream& vcf, bool load, Parameters& P, SNP& snp)
                 {
                     if (load)
                     {
-                        snp.loci[snp.N]=pos-1+P.chrStart[P.chrNameIndex[chr]];
+                        snp.loci[snp.N]=pos-1+chrStart[chrNameIndex[chr]];
                         snp.nt[snp.N][0]=convertNt01234( ref.at(0) );
                         snp.nt[snp.N][1]=convertNt01234( altV.at( atoi(&sample.at(0)) ).at(0) );
                         snp.nt[snp.N][2]=convertNt01234( altV.at( atoi(&sample.at(2)) ).at(0) );
@@ -97,7 +93,7 @@ void Variation::loadVCF(string fileIn)
     *P.inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ..... Loading variations VCF GTF\n" <<flush;
         
     ifstream & vcf = ifstrOpen(fileIn, ERROR_OUT, "SOLUTION: check the path and permissions of the VCF file: "+fileIn, P);
-    scanVCF(vcf, false, P, snp);
+    scanVCF(vcf, false, P, snp, chrStart, chrNameIndex);
     
     snp.loci=new uint[snp.N];
     snp.nt.resize(snp.N);
@@ -108,7 +104,7 @@ void Variation::loadVCF(string fileIn)
 //         snp.nt[
     vcf.clear();
     vcf.seekg(0,ios::beg);
-    scanVCF(vcf, true, P, snp);
+    scanVCF(vcf, true, P, snp, chrStart, chrNameIndex);
     vcf.close();
 
     time(&rawTime);

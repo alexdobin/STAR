@@ -23,7 +23,7 @@ bool ReadAlign::chimericDetection() {
             for (uint itr=0;itr<nWinTr[iw];itr++) {
                 P.inOut->outLocalChains << trAll[iw][itr]->maxScore<<"\t"<< trAll[iw][itr]->Chr<<"\t"<<trAll[iw][itr]->Str<<"\t"<<trAll[iw][itr]->nExons;
                 for (uint ib=0;ib<trAll[iw][itr]->nExons;ib++) {
-                    P.inOut->outLocalChains <<"\t"<< trAll[iw][itr]->exons[ib][EX_G]-P.chrStart[trAll[iw][itr]->Chr] \
+                    P.inOut->outLocalChains <<"\t"<< trAll[iw][itr]->exons[ib][EX_G]-mapGen.chrStart[trAll[iw][itr]->Chr] \
                                              <<"\t"<< trAll[iw][itr]->exons[ib][EX_R] <<"\t"<< trAll[iw][itr]->exons[ib][EX_L];
                 };
                 P.inOut->outLocalChains <<"\n";

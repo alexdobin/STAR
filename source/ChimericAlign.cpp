@@ -1,8 +1,7 @@
 #include "ChimericAlign.h"
 
-ChimericAlign::ChimericAlign(ChimericSegment &seg1in, ChimericSegment &seg2in, int chimScoreIn) 
-                              : seg1(seg1in), seg2(seg2in),chimScore(chimScoreIn), P(seg1in.P), pCh(P.pCh)
-{
+ChimericAlign::ChimericAlign(ChimericSegment &seg1in, ChimericSegment &seg2in, int chimScoreIn, Genome &genomeIn) 
+                              : seg1(seg1in), seg2(seg2in),chimScore(chimScoreIn), P(seg1in.P), pCh(P.pCh), mapGen(genomeIn) {
     stitchingDone=false;
     
     al1=&seg1.align;
@@ -15,8 +14,7 @@ ChimericAlign::ChimericAlign(ChimericSegment &seg1in, ChimericSegment &seg2in, i
     ex2 = al2->Str==0 ? 0 : al2->nExons-1;
 };
 
-bool ChimericAlign::chimericCheck()
-{
+bool ChimericAlign::chimericCheck() {
     bool chimGood=true;
     
     chimGood = chimGood && al1->exons[ex1][EX_iFrag] <= al2->exons[ex2][EX_iFrag];//otherwise - strange configuration, both segments contain two mates

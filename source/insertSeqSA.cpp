@@ -15,7 +15,7 @@
 #include "genomeSAindex.h"
 #include "sortSuffixesBucket.h"
 
-uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * G, char * G1, uint64 nG, uint64 nG1, uint64 nG2, Parameters & P)
+uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * G, char * G1, uint64 nG, uint64 nG1, uint64 nG2, Parameters & P, Genome &mapGen)
 {//insert new sequences into the SA
 
     uint GstrandBit1 = (uint) floor(log(nG+nG1)/log(2))+1;
@@ -81,7 +81,7 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
             indArray[ii*2]=-1;
         } else
         {
-            indArray[ii*2] =  suffixArraySearch1(seq1, ii, 10000, G, nG, SA, (ii<nG1 ? true:false), 0, SA.length-1, 0, P) ;
+            indArray[ii*2] =  suffixArraySearch1(mapGen, seq1, ii, 10000, nG, (ii<nG1 ? true:false), 0, SA.length-1, 0, P) ;
             indArray[ii*2+1] = ii;
         };
     };
@@ -109,7 +109,7 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
     */
     
     g_funCompareUintAndSuffixesMemcmp_G=seq1[0];
-    g_funCompareUintAndSuffixesMemcmp_L=P.pGe.gSuffixLengthMax/sizeof(uint64_t);
+    g_funCompareUintAndSuffixesMemcmp_L=mapGen.pGe.gSuffixLengthMax/sizeof(uint64_t);
     qsort((void*) indArray, nInd, 2*sizeof(uint64_t), funCompareUintAndSuffixesMemcmp);  
     
 //     qsort((void*) indArray, nInd, 2*sizeof(uint64), funCompareUint2);
@@ -148,7 +148,7 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
 
     /*testing
     PackedArray SAo;
-    SAo.defineBits(P.GstrandBit+1,P.nSA+nInd);
+    SAo.defineBits(mapGen.GstrandBit+1,mapGen.nSA+nInd);
     SAo.allocateArray();
     ifstream oldSAin("./DirTrue/SA");
     oldSAin.read(SAo.charArray,SAo.lengthByte);
@@ -202,28 +202,28 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
     P.inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished inserting SA indices" <<endl;
 
 //     //SAi insertions
-//     for (uint iL=0; iL < P.pGe.gSAindexNbases; iL++) {
+//     for (uint iL=0; iL < P.mapGen.gSAindexNbases; iL++) {
 //         uint iSeq=0;
-//         uint ind0=P.genomeSAindexStart[iL]-1;//last index that was present in the old genome
-//         for (uint ii=P.genomeSAindexStart[iL];ii<P.genomeSAindexStart[iL+1]; ii++) {//scan through the longest index
+//         uint ind0=mapGen.genomeSAindexStart[iL]-1;//last index that was present in the old genome
+//         for (uint ii=mapGen.genomeSAindexStart[iL];ii<mapGen.genomeSAindexStart[iL+1]; ii++) {//scan through the longest index
 //             if (ii==798466)
 //                 cout <<ii;
 //
 //             uint iSA1=SAi[ii];
-//             uint iSA2=iSA1 & P.SAiMarkNmask & P.SAiMarkAbsentMask;
+//             uint iSA2=iSA1 & mapGen.SAiMarkNmask & mapGen.SAiMarkAbsentMask;
 //
-//             if ( iSeq<nInd && (iSA1 &  P.SAiMarkAbsentMaskC)>0 )
+//             if ( iSeq<nInd && (iSA1 &  mapGen.SAiMarkAbsentMaskC)>0 )
 //             {//index missing from the old genome
 //                 uint iSeq1=iSeq;
 //                 int64 ind1=funCalcSAi(seq1[0]+indArray[2*iSeq+1],iL);
-//                 while (ind1 < (int64)(ii-P.genomeSAindexStart[iL]) && indArray[2*iSeq]<iSA2) {
+//                 while (ind1 < (int64)(ii-mapGen.genomeSAindexStart[iL]) && indArray[2*iSeq]<iSA2) {
 //                     ++iSeq;
 //                     ind1=funCalcSAi(seq1[0]+indArray[2*iSeq+1],iL);
 //                 };
-//                 if (ind1 == (int64)(ii-P.genomeSAindexStart[iL]) ) {
+//                 if (ind1 == (int64)(ii-mapGen.genomeSAindexStart[iL]) ) {
 //                     SAi.writePacked(ii,indArray[2*iSeq]+iSeq+1);
 //                     for (uint ii0=ind0+1; ii0<ii; ii0++) {//fill all the absent indices with this value
-//                         SAi.writePacked(ii0,(indArray[2*iSeq]+iSeq+1) | P.SAiMarkAbsentMaskC);
+//                         SAi.writePacked(ii0,(indArray[2*iSeq]+iSeq+1) | mapGen.SAiMarkAbsentMaskC);
 //                     };
 //                     ++iSeq;
 //                     ind0=ii;
@@ -237,7 +237,7 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
 //                 };
 //
 //                 while (iSeq<nInd && indArray[2*iSeq]+1==iSA2) {//special case, the index falls right behind SAi
-//                     if (funCalcSAi(seq1[0]+indArray[2*iSeq+1],iL) >= (int64) (ii-P.genomeSAindexStart[iL]) ) {//this belongs to the next index
+//                     if (funCalcSAi(seq1[0]+indArray[2*iSeq+1],iL) >= (int64) (ii-mapGen.genomeSAindexStart[iL]) ) {//this belongs to the next index
 //                         break;
 //                     };
 //                     ++iSeq;
@@ -246,7 +246,7 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
 //                 SAi.writePacked(ii,iSA1+iSeq);
 //
 //                 for (uint ii0=ind0+1; ii0<ii; ii0++) {//fill all the absent indices with this value
-//                     SAi.writePacked(ii0,(iSA2+iSeq) | P.SAiMarkAbsentMaskC);
+//                     SAi.writePacked(ii0,(iSA2+iSeq) | mapGen.SAiMarkAbsentMaskC);
 //                 };
 //                 ind0=ii;
 //             };
@@ -257,19 +257,19 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
 //
 //     for (uint isj=0;isj<nInd;isj++) {
 //         int64 ind1=0;
-//         for (uint iL=0; iL < P.pGe.gSAindexNbases; iL++) {
+//         for (uint iL=0; iL < P.mapGen.gSAindexNbases; iL++) {
 //             uint g=(uint) seq1[0][indArray[2*isj+1]+iL];
 //             ind1 <<= 2;
 //             if (g>3) {//this iSA contains N, need to mark the previous
-//                 for (uint iL1=iL; iL1 < P.pGe.gSAindexNbases; iL1++) {
+//                 for (uint iL1=iL; iL1 < P.mapGen.gSAindexNbases; iL1++) {
 //                     ind1+=3;
-//                     int64 ind2=P.genomeSAindexStart[iL1]+ind1;
+//                     int64 ind2=mapGen.genomeSAindexStart[iL1]+ind1;
 //                     for (; ind2>=0; ind2--) {//find previous index that is not absent
-//                         if ( (SAi[ind2] & P.SAiMarkAbsentMaskC)==0 ) {
+//                         if ( (SAi[ind2] & mapGen.SAiMarkAbsentMaskC)==0 ) {
 //                             break;
 //                         };
 //                     };
-//                     SAi.writePacked(ind2,SAi[ind2] | P.SAiMarkNmaskC);
+//                     SAi.writePacked(ind2,SAi[ind2] | mapGen.SAiMarkNmaskC);
 //                     ind1 <<= 2;
 //                 };
 //                 break;
@@ -285,12 +285,12 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
 //     PackedArray SAio=SAi;
 //     SAio.allocateArray();
 //     ifstream oldSAiin("./DirTrue/SAindex");
-//     oldSAiin.read(SAio.charArray,8*(P.pGe.gSAindexNbases+2));//skip first bytes
+//     oldSAiin.read(SAio.charArray,8*(P.mapGen.gSAindexNbases+2));//skip first bytes
 //     oldSAiin.read(SAio.charArray,SAio.lengthByte);
 //     oldSAiin.close();
 //
-//     for (uint iL=0; iL < P.pGe.gSAindexNbases; iL++) {
-//         for (uint ii=P.genomeSAindexStart[iL];ii<P.genomeSAindexStart[iL+1]; ii++) {//scan through the longets index
+//     for (uint iL=0; iL < P.mapGen.gSAindexNbases; iL++) {
+//         for (uint ii=mapGen.genomeSAindexStart[iL];ii<mapGen.genomeSAindexStart[iL+1]; ii++) {//scan through the longets index
 //                 if ( SAio[ii]!=SAi[ii] ) {
 //                     cout <<iL<<" "<<ii<<" "<<SAio[ii]<<" "<<SAi[ii]<<endl;
 //                 };
@@ -299,10 +299,10 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
 //     */
 
     //change parameters, most parameters are already re-defined in sjdbPrepare.cpp
-    SA.defineBits(P.GstrandBit+1,SA.length+nInd);//same as SA2
+    SA.defineBits(mapGen.GstrandBit+1,SA.length+nInd);//same as SA2
     SA.pointArray(SA1.charArray);
-    P.nSA=SA.length;
-    P.nSAbyte=SA.lengthByte;
+    mapGen.nSA=SA.length;
+    mapGen.nSAbyte=SA.lengthByte;
 
     //generate SAi
     genomeSAindex(G,SA,P,SAi);
@@ -311,8 +311,8 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
     P.inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished SAi" <<endl;
 
 
-//     P.sjGstart=P.chrStart[P.nChrReal];
-//     memcpy(G+P.chrStart[P.nChrReal],seq1[0], nseq1[0]);
+//     mapGen.sjGstart=mapGen.chrStart[mapGen.nChrReal];
+//     memcpy(G+mapGen.chrStart[mapGen.nChrReal],seq1[0], nseq1[0]);
 
 
     return nInd;

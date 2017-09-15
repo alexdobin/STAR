@@ -3,7 +3,8 @@
 
 #include "Parameters.h"
 #include "PackedArray.h"
+#include "Genome.h"
 
-void sjdbBuildIndex (Parameters &P, Parameters &P1, char *Gsj, char *G, PackedArray &SA, PackedArray &SA2, PackedArray &SAi);
+void sjdbBuildIndex (Parameters &P, char *Gsj, char *G, PackedArray &SA, PackedArray &SA2, PackedArray &SAi, Genome &mapGen, Genome &mapGen1);
 
 #endif

@@ -25,7 +25,7 @@ int ReadAlign::createExtendWindowsWithAlign(uint a1, uint aStr) {
                 };
                 if (iBin==0) break;
             };
-            flagMergeLeft = flagMergeLeft && (P.chrBin[iBin>>P.winBinChrNbits]==P.chrBin[aBin>>P.winBinChrNbits]);
+            flagMergeLeft = flagMergeLeft && (mapGen.chrBin[iBin>>P.winBinChrNbits]==mapGen.chrBin[aBin>>P.winBinChrNbits]);
             if (flagMergeLeft) {//this align can be merged into the existing window
                 iWin=wB[iBin];
                 iBinLeft=WC[iWin][WC_gStart];
@@ -44,7 +44,7 @@ int ReadAlign::createExtendWindowsWithAlign(uint a1, uint aStr) {
                 };
             };
 
-            flagMergeRight = flagMergeRight && (P.chrBin[iBin>>P.winBinChrNbits]==P.chrBin[aBin>>P.winBinChrNbits]);
+            flagMergeRight = flagMergeRight && (mapGen.chrBin[iBin>>P.winBinChrNbits]==mapGen.chrBin[aBin>>P.winBinChrNbits]);
             if (flagMergeRight) {//this align can be merged into the existing window
                 while (wB[iBin]==wB[iBin+1]) ++iBin; //extend through all bins of the right window
                 iBinRight=iBin;
@@ -63,7 +63,7 @@ int ReadAlign::createExtendWindowsWithAlign(uint a1, uint aStr) {
 
         if (!flagMergeLeft && !flagMergeRight) {//no merging, a new window was added
             wB[aBin]=iWin=nW; //add new window ID for now, may change it later
-            WC[iWin][WC_Chr]=P.chrBin[aBin >> P.winBinChrNbits];
+            WC[iWin][WC_Chr]=mapGen.chrBin[aBin >> P.winBinChrNbits];
             WC[iWin][WC_Str]=aStr;
             WC[iWin][WC_gEnd]=WC[iWin][WC_gStart]=aBin;
             ++nW;

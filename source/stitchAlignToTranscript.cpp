@@ -5,26 +5,27 @@
 #include "binarySearch2.h"
 // #include "stitchGapIndel.cpp"
 
-intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBstart, uint L, uint iFragB, uint sjAB, Parameters& P, char* R, char* Q, char* G,  Transcript *trA, const uint outFilterMismatchNmaxTotal) {
+intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBstart, uint L, uint iFragB, uint sjAB, Parameters& P, char* R, char* Q, Genome &mapGen, Transcript *trA, const uint outFilterMismatchNmaxTotal) {
     //stitch together A and B, extend in the gap, returns max score
     //Q is assumed modified already
 
+    char *G=mapGen.G;
     int Score=0;
 //     int score2;
 
     if (sjAB!=((uint) -1) && trA->exons[trA->nExons-1][EX_sjA]==sjAB \
             && trA->exons[trA->nExons-1][EX_iFrag]==iFragB && rBstart==rAend+1 && gAend+1<gBstart ) {//simple stitching if junction belongs to a database
-        if (P.sjdbMotif[sjAB]==0 && (L<=P.sjdbShiftRight[sjAB] || trA->exons[trA->nExons-1][EX_L]<=P.sjdbShiftLeft[sjAB]) ) {
+        if (mapGen.sjdbMotif[sjAB]==0 && (L<=mapGen.sjdbShiftRight[sjAB] || trA->exons[trA->nExons-1][EX_L]<=mapGen.sjdbShiftLeft[sjAB]) ) {
             return -1000006; //too large repeats around non-canonical junction
         };
         trA->exons[trA->nExons][EX_L] = L; //new exon length
         trA->exons[trA->nExons][EX_R] = rBstart; //new exon r-start
         trA->exons[trA->nExons][EX_G] = gBstart; //new exon g-start
-        trA->canonSJ[trA->nExons-1]=P.sjdbMotif[sjAB]; //mark sj-db
-        trA->shiftSJ[trA->nExons-1][0]=P.sjdbShiftLeft[sjAB];
-        trA->shiftSJ[trA->nExons-1][1]=P.sjdbShiftRight[sjAB];
+        trA->canonSJ[trA->nExons-1]=mapGen.sjdbMotif[sjAB]; //mark sj-db
+        trA->shiftSJ[trA->nExons-1][0]=mapGen.sjdbShiftLeft[sjAB];
+        trA->shiftSJ[trA->nExons-1][1]=mapGen.sjdbShiftRight[sjAB];
         trA->sjAnnot[trA->nExons-1]=1;
-        trA->sjStr[trA->nExons-1]=P.sjdbStrand[sjAB];;
+        trA->sjStr[trA->nExons-1]=mapGen.sjdbStrand[sjAB];;
         trA->nExons++;
         trA->nMatch+=L;
         for (uint ii=rBstart;ii<rBstart+L;ii++) Score+=int(Q[ii]); //add QS for mapped portions
@@ -161,7 +162,7 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
                     jjL++;
                 };
 
-                while ( gAend+jjR+jR+1<P.nGenome && G[gAend+jjR+jR+1]==G[gBstart1+jjR+jR+1] && G[gAend+jjR+jR+1]<4 && jjR<=MAX_SJ_REPEAT_SEARCH) {//go forward
+                while ( gAend+jjR+jR+1<mapGen.nGenome && G[gAend+jjR+jR+1]==G[gBstart1+jjR+jR+1] && G[gAend+jjR+jR+1]<4 && jjR<=MAX_SJ_REPEAT_SEARCH) {//go forward
                     jjR++;
                 };
 
@@ -195,9 +196,9 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
                 };
 
                 //score the gap
-                if (P.sjdbN>0) {//check if the junction is annotated
+                if (mapGen.sjdbN>0) {//check if the junction is annotated
                         uint jS=gAend+jR+1, jE=gBstart1+jR;//intron start/end
-                        int sjdbInd=binarySearch2(jS,jE,P.sjdbStart,P.sjdbEnd,P.sjdbN);
+                        int sjdbInd=binarySearch2(jS,jE,mapGen.sjdbStart,mapGen.sjdbEnd,mapGen.sjdbN);
                         if (sjdbInd<0) {
                             if (Del>=P.alignIntronMin) {
                                 Score += P.scoreGap + jPen; //genome gap penalty + non-canonical penalty
@@ -212,17 +213,17 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
 //                                 trA->shiftSJ[trA->nExons-1][1]=jjR;
                             };
                         } else {//annotated
-                            jCan=P.sjdbMotif[sjdbInd];
-                            if (P.sjdbMotif[sjdbInd]==0) {//shift to match annotations
-                                if (L<=P.sjdbShiftLeft[sjdbInd] || trA->exons[trA->nExons-1][EX_L]<=P.sjdbShiftLeft[sjdbInd]) {
+                            jCan=mapGen.sjdbMotif[sjdbInd];
+                            if (mapGen.sjdbMotif[sjdbInd]==0) {//shift to match annotations
+                                if (L<=mapGen.sjdbShiftLeft[sjdbInd] || trA->exons[trA->nExons-1][EX_L]<=mapGen.sjdbShiftLeft[sjdbInd]) {
                                     return -1000006;
                                 };
-                                jR += (int) P.sjdbShiftLeft[sjdbInd];
-                                jjL=P.sjdbShiftLeft[sjdbInd];
-                                jjR=P.sjdbShiftRight[sjdbInd];
+                                jR += (int) mapGen.sjdbShiftLeft[sjdbInd];
+                                jjL=mapGen.sjdbShiftLeft[sjdbInd];
+                                jjR=mapGen.sjdbShiftRight[sjdbInd];
                             };
                             trA->sjAnnot[trA->nExons-1]=1;
-                            trA->sjStr[trA->nExons-1]=P.sjdbStrand[sjdbInd];
+                            trA->sjStr[trA->nExons-1]=mapGen.sjdbStrand[sjdbInd];
                             Score += P.pGe.sjdbScore;
                         };
                 } else {//no annotation

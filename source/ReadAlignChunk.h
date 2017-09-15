@@ -1,5 +1,5 @@
-#ifndef READ_ALIGN_CHUNK_DEF
-#define READ_ALIGN_CHUNK_DEF
+#ifndef CODE_ReadAlignChunk
+#define CODE_ReadAlignChunk
 
 #include "IncludeDefine.h"
 #include "Parameters.h"
@@ -40,5 +40,8 @@ public:
     void chunkFstreamOpen(string filePrefix, int iChunk, fstream &fstreamOut);
     void chunkFstreamCat (fstream &chunkOut, ofstream &allOut, bool mutexFlag, pthread_mutex_t &mutexVal);
     void chunkFilesCat(ostream *allOut, string filePrefix, uint &iC);
+    
+    Genome &mapGen;    
+private:
 };
 #endif

@@ -26,8 +26,13 @@
 #define SHM_projectID 23
 
 Genome::Genome (Parameters &Pin ): P(Pin), pGe(Pin.pGe), shmStart(NULL), sharedMemory(NULL) {
-            shmKey=ftok(pGe.gDir.c_str(),SHM_projectID);
-        };
+    shmKey=ftok(pGe.gDir.c_str(),SHM_projectID);
+    
+    //final pGe.sjdbOverhang value has been determined
+    sjdbOverhang = pGe.sjdbOverhang;
+    sjdbLength = pGe.sjdbOverhang==0 ? 0 : pGe.sjdbOverhang*2+1;
+    
+};
 
 Genome::~Genome()
 {
@@ -120,7 +125,7 @@ void Genome::genomeLoad(){//allocate and load Genome
     };
 
     //find chr starts from files
-    P.chrInfoLoad();
+    chrInfoLoad();
 
     //check if sjdbInfo.txt exists => genome was generated with junctions
     bool sjdbInfoExists=false;
@@ -141,7 +146,7 @@ void Genome::genomeLoad(){//allocate and load Genome
     //record required genome parameters in P
     pGe.gSAindexNbases=P1.pGe.gSAindexNbases;
     pGe.gChrBinNbits=P1.pGe.gChrBinNbits;
-    P.genomeChrBinNbases=1LLU<<pGe.gChrBinNbits;
+    genomeChrBinNbases=1LLU<<pGe.gChrBinNbits;
     pGe.gSAsparseD=P1.pGe.gSAsparseD;
     
     if (P1.pGe.gFileSizes.size()>0)
@@ -161,7 +166,7 @@ void Genome::genomeLoad(){//allocate and load Genome
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_GENOME_FILES, P);
     };
 
-    P.sjdbLength = pGe.sjdbOverhang==0 ? 0 : pGe.sjdbOverhang*2+1;
+    sjdbLength = pGe.sjdbOverhang==0 ? 0 : pGe.sjdbOverhang*2+1;
 
 
     P.inOut->logMain << "Started loading the genome: " << asctime (localtime ( &rawtime ))<<"\n"<<flush;
@@ -173,42 +178,42 @@ void Genome::genomeLoad(){//allocate and load Genome
         pGe.gFileSizes.push_back(0);
         pGe.gFileSizes.push_back(0);
     };
-    P.nGenome = OpenStream("Genome",GenomeIn,pGe.gFileSizes.at(0));
-    P.nSAbyte = OpenStream("SA",SAin,pGe.gFileSizes.at(1));
+    nGenome = OpenStream("Genome",GenomeIn,pGe.gFileSizes.at(0));
+    nSAbyte = OpenStream("SA",SAin,pGe.gFileSizes.at(1));
     OpenStream("/SAindex",SAiIn,1); //we do not need SAiIn siz, using a dummy value here to prevent from reading its size from the disk
 
     uint SAiInBytes=0;
     SAiInBytes += fstreamReadBig(SAiIn,(char*) &pGe.gSAindexNbases, sizeof(pGe.gSAindexNbases));
-    P.genomeSAindexStart = new uint[pGe.gSAindexNbases+1];
-    SAiInBytes += fstreamReadBig(SAiIn,(char*) P.genomeSAindexStart, sizeof(P.genomeSAindexStart[0])*(pGe.gSAindexNbases+1));
-    P.nSAi=P.genomeSAindexStart[pGe.gSAindexNbases];
-    P.inOut->logMain << "Read from SAindex: pGe.gSAindexNbases=" << pGe.gSAindexNbases <<"  nSAi="<< P.nSAi <<endl;
+    genomeSAindexStart = new uint[pGe.gSAindexNbases+1];
+    SAiInBytes += fstreamReadBig(SAiIn,(char*) genomeSAindexStart, sizeof(genomeSAindexStart[0])*(pGe.gSAindexNbases+1));
+    nSAi=genomeSAindexStart[pGe.gSAindexNbases];
+    P.inOut->logMain << "Read from SAindex: pGe.gSAindexNbases=" << pGe.gSAindexNbases <<"  nSAi="<< nSAi <<endl;
 
 
     /////////////////////////////////// at this point all array sizes should be known: calculate packed array lengths
-    P.GstrandBit = (uint) floor(log(P.nGenome)/log(2))+1;
-    if (P.GstrandBit<32) P.GstrandBit=32; //TODO: use simple access function for SA
+    GstrandBit = (uint) floor(log(nGenome)/log(2))+1;
+    if (GstrandBit<32) GstrandBit=32; //TODO: use simple access function for SA
 
-    P.GstrandMask = ~(1LLU<<P.GstrandBit);
-    P.nSA=(P.nSAbyte*8)/(P.GstrandBit+1);
-    SA.defineBits(P.GstrandBit+1,P.nSA);
+    GstrandMask = ~(1LLU<<GstrandBit);
+    nSA=(nSAbyte*8)/(GstrandBit+1);
+    SA.defineBits(GstrandBit+1,nSA);
 
-    P.SAiMarkNbit=P.GstrandBit+1;
-    P.SAiMarkAbsentBit=P.GstrandBit+2;
+    SAiMarkNbit=GstrandBit+1;
+    SAiMarkAbsentBit=GstrandBit+2;
 
-    P.SAiMarkNmaskC=1LLU << P.SAiMarkNbit;
-    P.SAiMarkNmask=~P.SAiMarkNmaskC;
-    P.SAiMarkAbsentMaskC=1LLU << P.SAiMarkAbsentBit;
-    P.SAiMarkAbsentMask=~P.SAiMarkAbsentMaskC;
+    SAiMarkNmaskC=1LLU << SAiMarkNbit;
+    SAiMarkNmask=~SAiMarkNmaskC;
+    SAiMarkAbsentMaskC=1LLU << SAiMarkAbsentBit;
+    SAiMarkAbsentMask=~SAiMarkAbsentMaskC;
 
-    SAi.defineBits(P.GstrandBit+3,P.nSAi);
+    SAi.defineBits(GstrandBit+3,nSAi);
 
-    P.inOut->logMain << "nGenome=" << P.nGenome << ";  nSAbyte=" << P.nSAbyte <<endl<< flush;
-    P.inOut->logMain <<"GstrandBit="<<int(P.GstrandBit)<<"   SA number of indices="<<P.nSA<<endl<<flush;
+    P.inOut->logMain << "nGenome=" << nGenome << ";  nSAbyte=" << nSAbyte <<endl<< flush;
+    P.inOut->logMain <<"GstrandBit="<<int(GstrandBit)<<"   SA number of indices="<<nSA<<endl<<flush;
 
-    shmSize=SA.lengthByte + P.nGenome+L+L+SHM_startG+8;
+    shmSize=SA.lengthByte + nGenome+L+L+SHM_startG+8;
     shmSize+= SAi.lengthByte;
-    if (P.annotScoreScale>0) shmSize+=P.nGenome;
+    if (P.annotScoreScale>0) shmSize+=nGenome;
 
 
     if ((pGe.gLoad=="LoadAndKeep" ||
@@ -258,7 +263,7 @@ void Genome::genomeLoad(){//allocate and load Genome
             // and record the sizes
 
         uint iwait=0;
-            while (*shmNG != P.nGenome) {
+            while (*shmNG != nGenome) {
             iwait++;
             P.inOut->logMain <<"Another job is still loading the genome, sleeping for 1 min\n" <<flush;
             sleep(60);
@@ -270,7 +275,7 @@ void Genome::genomeLoad(){//allocate and load Genome
             };
         };
 
-            if (P.nSAbyte!=*shmNSA)
+            if (nSAbyte!=*shmNSA)
             {
                 ostringstream errOut;
                 errOut << "EXITING because of FATAL ERROR: the SA file size did not match what we found in shared memory" << "\n" << flush;
@@ -282,8 +287,8 @@ void Genome::genomeLoad(){//allocate and load Genome
         }
 
         G1=shmStart+SHM_startG;
-        SA.pointArray(G1+P.nGenome+L+L);
-        char* shmNext=SA.charArray+P.nSAbyte;
+        SA.pointArray(G1+nGenome+L+L);
+        char* shmNext=SA.charArray+nSAbyte;
 
         SAi.pointArray(shmNext);
         shmNext += SAi.lengthByte;
@@ -298,64 +303,64 @@ void Genome::genomeLoad(){//allocate and load Genome
 //         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_SHM, P);
 //     };
      if (P.annotScoreScale>0) {//optional allocation
-            shmNext += P.nGenome;
+            shmNext += nGenome;
         }
     }
     else if (pGe.gLoad=="NoSharedMemory") // simply allocate memory, do not use shared memory
     {
-        P.genomeInsertL=0;
+        genomeInsertL=0;
         if (pGe.gFastaFiles.at(0)!="-")
         {//will insert sequences in the genome, now estimate the extra size
-           uint oldlen=P.chrStart.back();//record the old length
-           P.genomeInsertChrIndFirst=P.nChrReal;
-           P.genomeInsertL=genomeScanFastaFiles(P,G,false)-oldlen;
+           uint oldlen=chrStart.back();//record the old length
+           genomeInsertChrIndFirst=nChrReal;
+           genomeInsertL=genomeScanFastaFiles(P,G,false)-oldlen;
         };
 
         try {
 
             if (P.sjdbInsert.pass1 || P.sjdbInsert.pass2)
             {//reserve extra memory for insertion at the 1st and/or 2nd step
-                nGenomeInsert=P.nGenome+P.genomeInsertL;
-                nSAinsert=P.nSA+2*P.genomeInsertL;
+                nGenomeInsert=nGenome+genomeInsertL;
+                nSAinsert=nSA+2*genomeInsertL;
 
                 nGenomePass1=nGenomeInsert;
                 nSApass1=nSAinsert;
                 if (P.sjdbInsert.pass1)
                 {
-                    nGenomePass1+=P.limitSjdbInsertNsj*P.sjdbLength;
-                    nSApass1+=2*P.limitSjdbInsertNsj*P.sjdbLength;
+                    nGenomePass1+=P.limitSjdbInsertNsj*sjdbLength;
+                    nSApass1+=2*P.limitSjdbInsertNsj*sjdbLength;
                 };
 
                 nGenomePass2=nGenomePass1;
                 nSApass2=nSApass1;
                 if (P.sjdbInsert.pass2)
                 {
-                    nGenomePass2+=P.limitSjdbInsertNsj*P.sjdbLength;
-                    nSApass2+=2*P.limitSjdbInsertNsj*P.sjdbLength;
+                    nGenomePass2+=P.limitSjdbInsertNsj*sjdbLength;
+                    nSApass2+=2*P.limitSjdbInsertNsj*sjdbLength;
                 };
 
                 G1=new char[nGenomePass2+L+L];
 
-                SApass2.defineBits(P.GstrandBit+1,nSApass2);
+                SApass2.defineBits(GstrandBit+1,nSApass2);
                 SApass2.allocateArray();
 
-                SApass1.defineBits(P.GstrandBit+1,nSApass1);
+                SApass1.defineBits(GstrandBit+1,nSApass1);
                 SApass1.pointArray(SApass2.charArray+SApass2.lengthByte-SApass1.lengthByte);
 
-                SAinsert.defineBits(P.GstrandBit+1,nSAinsert);
+                SAinsert.defineBits(GstrandBit+1,nSAinsert);
                 SAinsert.pointArray(SApass1.charArray+SApass1.lengthByte-SAinsert.lengthByte);
 
                 SA.pointArray(SAinsert.charArray+SAinsert.lengthByte-SA.lengthByte);
             } else
             {//no sjdb insertions
-                if (P.genomeInsertL==0)
+                if (genomeInsertL==0)
                 {// no sequence insertion, simple allocation
-                    G1=new char[P.nGenome+L+L];
+                    G1=new char[nGenome+L+L];
                     SA.allocateArray();
                 } else
                 {
-                    G1=new char[P.nGenome+L+L+P.genomeInsertL];
-                    SAinsert.defineBits(P.GstrandBit+1,P.nSA+2*P.genomeInsertL);//TODO: re-define GstrandBit if necessary
+                    G1=new char[nGenome+L+L+genomeInsertL];
+                    SAinsert.defineBits(GstrandBit+1,nSA+2*genomeInsertL);//TODO: re-define GstrandBit if necessary
                     SAinsert.allocateArray();
                     SA.pointArray(SAinsert.charArray+SAinsert.lengthByte-SA.lengthByte);
                 };
@@ -365,8 +370,8 @@ void Genome::genomeLoad(){//allocate and load Genome
         } catch (exception & exc) {
             ostringstream errOut;
             errOut <<"EXITING: fatal error trying to allocate genome arrays, exception thrown: "<<exc.what()<<endl;
-            errOut <<"Possible cause 1: not enough RAM. Check if you have enough RAM " << P.nGenome+L+L+SA.lengthByte+SAi.lengthByte+2000000000 << " bytes\n";
-            errOut <<"Possible cause 2: not enough virtual memory allowed with ulimit. SOLUTION: run ulimit -v " <<  P.nGenome+L+L+SA.lengthByte+SAi.lengthByte+2000000000<<endl <<flush;
+            errOut <<"Possible cause 1: not enough RAM. Check if you have enough RAM " << nGenome+L+L+SA.lengthByte+SAi.lengthByte+2000000000 << " bytes\n";
+            errOut <<"Possible cause 2: not enough virtual memory allowed with ulimit. SOLUTION: run ulimit -v " <<  nGenome+L+L+SA.lengthByte+SAi.lengthByte+2000000000<<endl <<flush;
             exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_MEMORY_ALLOCATION, P);
         };
 
@@ -390,17 +395,17 @@ void Genome::genomeLoad(){//allocate and load Genome
 
     if (pGe.gLoad=="NoSharedMemory" || isAllocatorProcess) {//load genome and SAs from files
         //load genome
-        P.inOut->logMain <<"Genome file size: "<<P.nGenome <<" bytes; state: good=" <<GenomeIn.good()\
+        P.inOut->logMain <<"Genome file size: "<<nGenome <<" bytes; state: good=" <<GenomeIn.good()\
                 <<" eof="<<GenomeIn.eof()<<" fail="<<GenomeIn.fail()<<" bad="<<GenomeIn.bad()<<"\n"<<flush;
         P.inOut->logMain <<"Loading Genome ... " << flush;
-        uint genomeReadBytesN=fstreamReadBig(GenomeIn,G,P.nGenome);
+        uint genomeReadBytesN=fstreamReadBig(GenomeIn,G,nGenome);
         P.inOut->logMain <<"done! state: good=" <<GenomeIn.good()\
                 <<" eof="<<GenomeIn.eof()<<" fail="<<GenomeIn.fail()<<" bad="<<GenomeIn.bad()<<"; loaded "<<genomeReadBytesN<<" bytes\n" << flush;
         GenomeIn.close();
 
         for (uint ii=0;ii<L;ii++) {// attach a tail with the largest symbol
             G1[ii]=K-1;
-            G[P.nGenome+ii]=K-1;
+            G[nGenome+ii]=K-1;
         };
 
         //load SAs
@@ -424,8 +429,8 @@ void Genome::genomeLoad(){//allocate and load Genome
          pGe.gLoad=="LoadAndExit") && isAllocatorProcess )
     {
         //record sizes. This marks the end of genome loading
-        *shmNG=P.nGenome;
-        *shmNSA=P.nSAbyte;
+        *shmNG=nGenome;
+        *shmNSA=nSAbyte;
     };
 
     time ( &rawtime );
@@ -434,7 +439,7 @@ void Genome::genomeLoad(){//allocate and load Genome
     #ifdef COMPILE_FOR_MAC
     {
         uint sum1=0;
-        for (uint ii=0;ii<P.nGenome; ii++) sum1 +=  (uint) (unsigned char) G[ii];
+        for (uint ii=0;ii<nGenome; ii++) sum1 +=  (uint) (unsigned char) G[ii];
         P.inOut->logMain << "Sum of all Genome bytes: " <<sum1 <<"\n"<<flush;
         sum1=0;
         for (uint ii=0;ii<SA.lengthByte; ii++) sum1 +=  (uint) (unsigned char) SA.charArray[ii];
@@ -454,12 +459,12 @@ void Genome::genomeLoad(){//allocate and load Genome
 
     insertSequences();
 
-    P.chrBinFill();
+    chrBinFill();
 
     //splice junctions database
-    if (P.nGenome==P.chrStart[P.nChrReal]) {//no sjdb
-        P.sjdbN=0;
-        P.sjGstart=P.chrStart[P.nChrReal]+1; //not sure why I need that
+    if (nGenome==chrStart[nChrReal]) {//no sjdb
+        sjdbN=0;
+        sjGstart=chrStart[nChrReal]+1; //not sure why I need that
     } else {//there are sjdb chromosomes
         ifstream sjdbInfo((pGe.gDir+"/sjdbInfo.txt").c_str());
         if (sjdbInfo.fail()) {
@@ -470,37 +475,37 @@ void Genome::genomeLoad(){//allocate and load Genome
         };
 
 
-        sjdbInfo >> P.sjdbN >> pGe.sjdbOverhang;
-        P.inOut->logMain << "Processing splice junctions database sjdbN=" <<P.sjdbN<<",   pGe.sjdbOverhang=" <<pGe.sjdbOverhang <<" \n";
+        sjdbInfo >> sjdbN >> pGe.sjdbOverhang;
+        P.inOut->logMain << "Processing splice junctions database sjdbN=" <<sjdbN<<",   pGe.sjdbOverhang=" <<pGe.sjdbOverhang <<" \n";
 
-        P.sjChrStart=P.nChrReal;
-        P.sjGstart=P.chrStart[P.sjChrStart];
+        sjChrStart=nChrReal;
+        sjGstart=chrStart[sjChrStart];
 
         //fill the sj-db to genome translation array
-        P.sjDstart=new uint [P.sjdbN];
-        P.sjAstart=new uint [P.sjdbN];
-        P.sjdbStart=new uint [P.sjdbN];
-        P.sjdbEnd=new uint [P.sjdbN];
+        sjDstart=new uint [sjdbN];
+        sjAstart=new uint [sjdbN];
+        sjdbStart=new uint [sjdbN];
+        sjdbEnd=new uint [sjdbN];
 
-        P.sjdbMotif=new uint8 [P.sjdbN];
-        P.sjdbShiftLeft=new uint8 [P.sjdbN];
-        P.sjdbShiftRight=new uint8 [P.sjdbN];
-        P.sjdbStrand=new uint8 [P.sjdbN];
+        sjdbMotif=new uint8 [sjdbN];
+        sjdbShiftLeft=new uint8 [sjdbN];
+        sjdbShiftRight=new uint8 [sjdbN];
+        sjdbStrand=new uint8 [sjdbN];
 
-        for (uint ii=0;ii<P.sjdbN;ii++) {//get the info about junctions from sjdbInfo.txt
+        for (uint ii=0;ii<sjdbN;ii++) {//get the info about junctions from sjdbInfo.txt
             {
                 uint16 d1,d2,d3,d4;
-                sjdbInfo >> P.sjdbStart[ii] >> P.sjdbEnd[ii] >> d1 >> d2 >> d3 >> d4;
-                P.sjdbMotif[ii]      = (uint8) d1;
-                P.sjdbShiftLeft[ii]  = (uint8) d2;
-                P.sjdbShiftRight[ii] = (uint8) d3;
-                P.sjdbStrand[ii] = (uint8) d4;
+                sjdbInfo >> sjdbStart[ii] >> sjdbEnd[ii] >> d1 >> d2 >> d3 >> d4;
+                sjdbMotif[ii]      = (uint8) d1;
+                sjdbShiftLeft[ii]  = (uint8) d2;
+                sjdbShiftRight[ii] = (uint8) d3;
+                sjdbStrand[ii] = (uint8) d4;
             };
-            P.sjDstart[ii]   = P.sjdbStart[ii]  - pGe.sjdbOverhang;
-            P.sjAstart[ii]   = P.sjdbEnd[ii] + 1;
-            if (P.sjdbMotif[ii]==0) {//shinon-canonical junctions back to their true coordinates
-                P.sjDstart[ii] += P.sjdbShiftLeft[ii];
-                P.sjAstart[ii] += P.sjdbShiftLeft[ii];
+            sjDstart[ii]   = sjdbStart[ii]  - pGe.sjdbOverhang;
+            sjAstart[ii]   = sjdbEnd[ii] + 1;
+            if (sjdbMotif[ii]==0) {//shinon-canonical junctions back to their true coordinates
+                sjDstart[ii] += sjdbShiftLeft[ii];
+                sjAstart[ii] += sjdbShiftLeft[ii];
             };
         };
     };
@@ -513,7 +518,7 @@ void Genome::genomeLoad(){//allocate and load Genome
     } else {
         //redefine winBinNbits
         P.winBinNbits = (uint) floor( log2( max( max(4LLU,P.alignIntronMax), (P.alignMatesGapMax==0 ? 1000LLU : P.alignMatesGapMax) ) /4 ) + 0.5);
-        P.winBinNbits = max( P.winBinNbits, (uint) floor(log2(P.nGenome/40000+1)+0.5) ); 
+        P.winBinNbits = max( P.winBinNbits, (uint) floor(log2(nGenome/40000+1)+0.5) ); 
         //ISSUE - to be fixed in STAR3: if alignIntronMax>0 but alignMatesGapMax==0, winBinNbits will be defined by alignIntronMax
         P.inOut->logMain << "To accomodate alignIntronMax="<<P.alignIntronMax<<" redefined winBinNbits="<< P.winBinNbits <<endl;
     };
@@ -535,7 +540,7 @@ void Genome::genomeLoad(){//allocate and load Genome
     };
 
     P.winBinChrNbits=pGe.gChrBinNbits-P.winBinNbits;
-    P.winBinN = P.nGenome/(1LLU << P.winBinNbits)+1;//this may be chenaged later
+    P.winBinN = nGenome/(1LLU << P.winBinNbits)+1;//this may be chenaged later
 };
 
 
@@ -594,3 +599,75 @@ void Genome::HandleSharedMemoryException(const SharedMemoryException & exc, uint
     exitWithError(errOut.str(),std::cerr, P.inOut->logMain, exitCode, P);
 };
 
+//////////////////////////////////////////////////////////////////////////////////////////
+void Genome::chrInfoLoad() {//find chrStart,Length,nChr from Genome G
+
+    //load chr names
+    ifstream chrStreamIn ( (pGe.gDir+"/chrName.txt").c_str() );
+    if (chrStreamIn.fail()) {
+        ostringstream errOut;
+        errOut << "EXITING because of FATAL error, could not open file " << (pGe.gDir+"/chrName.txt") <<"\n";
+        errOut << "SOLUTION: re-generate genome files with STAR --runMode genomeGenerate\n";
+        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
+    };
+
+    char chrInChar[1000];
+
+    while (chrStreamIn.good()) {
+        string chrIn;
+        chrStreamIn.getline(chrInChar,1000);
+        chrIn=chrInChar;
+        if (chrIn=="") break;
+        chrName.push_back(chrIn);
+    };
+    chrStreamIn.close();
+    nChrReal=chrName.size();
+
+    P.inOut->logMain << "Number of real (reference) chromosomes= " << nChrReal <<"\n"<<flush;
+    chrStart.resize(nChrReal+1);
+    chrLength.resize(nChrReal);
+
+    //load chr lengths
+    chrStreamIn.open( (pGe.gDir+"/chrLength.txt").c_str() );
+    if (chrStreamIn.fail()) {
+        ostringstream errOut;
+        errOut << "EXITING because of FATAL error, could not open file " << (pGe.gDir+"/chrLength.txt") <<"\n";
+        errOut << "SOLUTION: re-generate genome files with STAR --runMode genomeGenerate\n";
+        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
+    };
+
+    for  (uint ii=0;ii<nChrReal;ii++) {
+        chrStreamIn >> chrLength[ii];
+    };
+    chrStreamIn.close();
+
+    //load chr starts
+    chrStreamIn.open( (pGe.gDir+"/chrStart.txt").c_str() );
+    if (chrStreamIn.fail()) {
+        ostringstream errOut;
+        errOut << "EXITING because of FATAL error, could not open file " << (pGe.gDir+"/chrStart.txt") <<"\n";
+        errOut << "SOLUTION: re-generate genome files with STAR --runMode genomeGenerate\n";
+        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
+    };
+
+    for  (uint ii=0;ii<=nChrReal;ii++) {
+        chrStreamIn >> chrStart[ii];
+    };
+    chrStreamIn.close();
+
+    //log
+    for (uint ii=0; ii<nChrReal;ii++) {
+        P.inOut->logMain << ii+1 <<"\t"<< chrName[ii] <<"\t"<<chrLength[ii]<<"\t"<<chrStart[ii]<<"\n"<<flush;
+        chrNameIndex[chrName[ii]]=ii;
+    };
+};
+
+//////////////////////////////////////////////////////////
+void Genome::chrBinFill() {
+    chrBinN = chrStart[nChrReal]/genomeChrBinNbases+1;
+    chrBin = new uint [chrBinN];
+    for (uint ii=0, ichr=1; ii<chrBinN; ++ii) {
+        if (ii*genomeChrBinNbases>=chrStart[ichr]) ichr++;
+        chrBin[ii]=ichr-1;
+    };
+};
