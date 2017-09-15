@@ -345,7 +345,7 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
     //also run a transcript w/o including this align
     if (WA[iA][WA_Anchor]!=2 || trA.nAnchor>0) {//only allow exclusion if this is not the last anchor, or other anchors have been used
         WAincl[iA]=false;
-        stitchWindowAligns(iA+1, nA, Score, WAincl, tR2, tG2, trA, Lread, WA, R, Q, mapGen.G, P, wTr, nWinTr, RA);
+        stitchWindowAligns(iA+1, nA, Score, WAincl, tR2, tG2, trA, Lread, WA, R, Q, mapGen, P, wTr, nWinTr, RA);
     };
     return;
 };

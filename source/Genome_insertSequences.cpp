@@ -20,7 +20,7 @@ if (pGe.gFastaFiles.at(0)!="-")
     memmove(G+chrStart.back(),G+chrStart.back()-genomeInsertL,sjdblen);
     memset(G+chrStart.back()-genomeInsertL, GENOME_spacingChar, genomeInsertL);//fill empty space with spacing characters
 
-    genomeScanFastaFiles(P, G+chrStart.back()-genomeInsertL, true); //read the seqs from file(s) into the free space
+    genomeScanFastaFiles(P, G+chrStart.back()-genomeInsertL, true, *this); //read the seqs from file(s) into the free space
     uint64 nGenomeOld=nGenome;
     nGenome=chrStart.back()+sjdblen;
     //insert new sequences into the SA

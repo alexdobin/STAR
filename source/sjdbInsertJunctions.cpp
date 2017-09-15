@@ -83,7 +83,7 @@ void sjdbInsertJunctions(Parameters & P, Genome & mapGen, Genome & mapGen1, Sjdb
             copyFile(P.pGe.gDir+"/chrLength.txt", P.sjdbInsert.outDir+"/chrLength.txt");
         };
 
-        genomeParametersWrite(P.sjdbInsert.outDir+("/genomeParameters.txt"), P, ERROR_OUT);
+        genomeParametersWrite(P.sjdbInsert.outDir+("/genomeParameters.txt"), P, ERROR_OUT, mapGen);
 
         ofstream & genomeOut = ofstrOpen(P.sjdbInsert.outDir+"/Genome",ERROR_OUT, P);
         fstreamWriteBig(genomeOut,mapGen.G,mapGen.nGenome,P.sjdbInsert.outDir+"/Genome",ERROR_OUT,P);

@@ -305,7 +305,7 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
     mapGen.nSAbyte=SA.lengthByte;
 
     //generate SAi
-    genomeSAindex(G,SA,P,SAi);
+    genomeSAindex(G,SA,P,SAi,mapGen);
 
     time ( &rawtime );
     P.inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished SAi" <<endl;

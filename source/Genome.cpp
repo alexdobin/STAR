@@ -313,7 +313,7 @@ void Genome::genomeLoad(){//allocate and load Genome
         {//will insert sequences in the genome, now estimate the extra size
            uint oldlen=chrStart.back();//record the old length
            genomeInsertChrIndFirst=nChrReal;
-           genomeInsertL=genomeScanFastaFiles(P,G,false)-oldlen;
+           genomeInsertL=genomeScanFastaFiles(P, G, false, *this)-oldlen;
         };
 
         try {

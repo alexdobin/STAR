@@ -2,7 +2,7 @@
 #include "ErrorWarning.h"
 
 
-uint genomeScanFastaFiles (Parameters &P, char* G, bool flagRun) {//scans fasta files. flagRun=false: check and find full size, flaRun=true: collect all the data
+uint genomeScanFastaFiles (Parameters &P, char* G, bool flagRun, Genome &mapGen) {//scans fasta files. flagRun=false: check and find full size, flaRun=true: collect all the data
 
     uint N=0;//total number of bases in the genome, including chr "spacers"
     if (!flagRun && mapGen.chrLength.size()>0)
@@ -13,25 +13,25 @@ uint genomeScanFastaFiles (Parameters &P, char* G, bool flagRun) {//scans fasta 
     };
 
     ifstream fileIn;
-    for (uint ii=0;ii<P.pGe.gFastaFiles.size();ii++) {//all the input files
-        fileIn.open(P.pGe.gFastaFiles.at(ii).c_str());
+    for (uint ii=0;ii<mapGen.pGe.gFastaFiles.size();ii++) {//all the input files
+        fileIn.open(mapGen.pGe.gFastaFiles.at(ii).c_str());
         if ( !fileIn.good() )
         {//
             ostringstream errOut;
-            errOut << "EXITING because of INPUT ERROR: could not open genomeFastaFile: " <<P.pGe.gFastaFiles.at(ii) <<"\n";
+            errOut << "EXITING because of INPUT ERROR: could not open genomeFastaFile: " <<mapGen.pGe.gFastaFiles.at(ii) <<"\n";
             exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         };
         char cc=fileIn.peek();
         if ( !fileIn.good() )
         {//
             ostringstream errOut;
-            errOut << "EXITING because of INPUT ERROR: could not read from genomeFastaFile: " <<P.pGe.gFastaFiles.at(ii) <<"\n";
+            errOut << "EXITING because of INPUT ERROR: could not read from genomeFastaFile: " <<mapGen.pGe.gFastaFiles.at(ii) <<"\n";
             exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         };
         if (cc!='>')
         {
             ostringstream errOut;
-            errOut << "EXITING because of INPUT ERROR: the file format of the genomeFastaFile: " <<P.pGe.gFastaFiles.at(ii) << " is not fasta:";
+            errOut << "EXITING because of INPUT ERROR: the file format of the genomeFastaFile: " <<mapGen.pGe.gFastaFiles.at(ii) << " is not fasta:";
             errOut << " the first character is '" <<cc<<"' ("<< (cc+0) << "), not '>'.\n";
             errOut << " Solution: check formatting of the fasta file. Make sure the file is uncompressed (unzipped).\n";
             exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
@@ -50,12 +50,12 @@ uint genomeScanFastaFiles (Parameters &P, char* G, bool flagRun) {//scans fasta 
                 if (!flagRun && mapGen.chrStart.size()>0) mapGen.chrLength.push_back(N-mapGen.chrStart.at(mapGen.chrStart.size()-1)); //true length of the chr
 
                 if (N>0) {//pad the chromosomes to bins boudnaries
-                    N = ( (N+1)/P.genomeChrBinNbases+1 )*P.genomeChrBinNbases;
+                    N = ( (N+1)/mapGen.genomeChrBinNbases+1 )*mapGen.genomeChrBinNbases;
                 };
 
                 if (!flagRun) {
                     mapGen.chrStart.push_back(N);
-                    P.inOut->logMain << P.pGe.gFastaFiles.at(ii)<<" : chr # " << mapGen.chrStart.size()-1 << "  \""<<mapGen.chrName.at(mapGen.chrStart.size()-1)<<"\" chrStart: "<<N<<"\n"<<flush;
+                    P.inOut->logMain << mapGen.pGe.gFastaFiles.at(ii)<<" : chr # " << mapGen.chrStart.size()-1 << "  \""<<mapGen.chrName.at(mapGen.chrStart.size()-1)<<"\" chrStart: "<<N<<"\n"<<flush;
                 };
             } else {//char lines
                 if (flagRun) lineIn.copy(G+N,lineIn.size(),0);
@@ -68,7 +68,7 @@ uint genomeScanFastaFiles (Parameters &P, char* G, bool flagRun) {//scans fasta 
 
     if (!flagRun) mapGen.chrLength.push_back(N-mapGen.chrStart.at(mapGen.chrStart.size()-1)); //true length of the last chr
 
-    N = ( (N+1)/P.genomeChrBinNbases+1)*P.genomeChrBinNbases;
+    N = ( (N+1)/mapGen.genomeChrBinNbases+1)*mapGen.genomeChrBinNbases;
 
     if (!flagRun)
     {

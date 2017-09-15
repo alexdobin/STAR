@@ -65,7 +65,8 @@ int main(int argInN, char* argIn[]) {
     {//continue
     } else if (P.runMode=="genomeGenerate") 
     {
-        genomeGenerate(P);
+        Genome mainGenome(P);
+        mainGenome.genomeGenerate();
         (void) sysRemoveDir (P.outFileTmp);
         P.inOut->logMain << "DONE: Genome generation, EXITING\n" << flush;
         exit(0);

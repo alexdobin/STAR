@@ -55,15 +55,16 @@ class Genome {
         
         void insertSequences();
 
-
+        void genomeGenerate();
+        
     private:
-    Parameters &P;
-    key_t shmKey;
-    char *shmStart;
-    char *G1; //pointer -200 of G
-    SharedMemory * sharedMemory;
-    uint OpenStream(string name, ifstream & stream, uint size);
-    void HandleSharedMemoryException(const SharedMemoryException & exc, uint64 shmSize);
+        Parameters &P;
+        key_t shmKey;
+        char *shmStart;
+        char *G1; //pointer -200 of G
+        SharedMemory * sharedMemory;
+        uint OpenStream(string name, ifstream & stream, uint size);
+        void HandleSharedMemoryException(const SharedMemoryException & exc, uint64 shmSize);
 
 };
 #endif
