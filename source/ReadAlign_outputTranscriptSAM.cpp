@@ -49,6 +49,10 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
                 *outStream <<"\t"<< '0' <<"\t"<< Read0[imate] <<"\t"<< (readFileType==2 ? Qual0[imate]:"*") \
                         <<"\tNH:i:0" <<"\tHI:i:0" <<"\tAS:i:"<<trOut.maxScore <<"\tnM:i:"<<trOut.nMM<<"\tuT:A:" <<unmapType;
                 if (!P->outSAMattrRG.empty()) *outStream<< "\tRG:Z:" <<P->outSAMattrRG.at(readFilesIndex);
+                
+                if (P->readFilesTypeN==10 && !readNameExtra[imate].empty()) {//SAM files as input - output extra attributes
+                    *outStream << "\t" <<readNameExtra[imate];
+                };
                 *outStream <<"\n";
 
             };
@@ -316,9 +320,10 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
             };
         };
 
-
-//         for (uint ii=0;ii<customAttr.size();ii++) *outStream <<"\t"<< customAttr.at(ii); //output all attributes in the right order
-
+        if (P->readFilesTypeN==10 && !readNameExtra[imate].empty()) {//SAM files as input - output extra attributes
+             *outStream << "\t" << readNameExtra.at(imate);
+        };
+        
         *outStream << "\n"; //done with one SAM line
     };//for (uint imate=0;imate<nMates;imate++)
 

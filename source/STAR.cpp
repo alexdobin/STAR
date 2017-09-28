@@ -258,6 +258,8 @@ int main(int argInN, char* argIn[]) {
         };
 
         samHeaderStream <<  "@CO\t" <<"user command line: " << P->commandLine <<"\n";
+        
+        samHeaderStream << P->samHeaderExtra;
 
         if (P->outSAMheaderHD.at(0)!="-") {
             P->samHeaderHD = P->outSAMheaderHD.at(0);

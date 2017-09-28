@@ -56,6 +56,8 @@ void ReadAlign::outputAlignments() {
 //                 if (P->runThreadN>1) pthread_mutex_lock(&g_threadChunks.mutexOutFilterBySJout);
                 for (uint im=0;im<P->readNmates;im++) {
                    chunkOutFilterBySJoutFiles[im] << readNameMates[im] <<" "<< iReadAll <<" "<< readFilter <<" "<< readFilesIndex;
+                   if (!readNameExtra[im].empty())
+                       chunkOutFilterBySJoutFiles[im]<<" "<< readNameExtra[im];
                    chunkOutFilterBySJoutFiles[im] <<"\n";
                    chunkOutFilterBySJoutFiles[im] << Read0[im] <<"\n";
                     if (readFileType==2) {//fastq

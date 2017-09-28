@@ -47,6 +47,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoVector <uint> (-1, -1, "genomeFileSizes", &genomeFileSizes));
 
     //read
+    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readFilesType", &readFilesType));
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readFilesIn", &readFilesIn));
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readFilesCommand", &readFilesCommand));
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "readMatesLengthsIn", &readMatesLengthsIn));
@@ -730,8 +731,32 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
 
-
-    readNmates=readFilesIn.size(); //for now the number of mates is defined by the number of input files
+    //read parameters
+    if (readFilesType.at(0)=="Fastx") {
+        readFilesTypeN=1;
+    } else if (readFilesType.at(0)=="SAM"){
+        readFilesTypeN=10;
+    } else {
+        ostringstream errOut;
+        errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented value for --readFilesType: "<<readFilesType.at(0) <<"\n";
+        errOut <<"SOLUTION: specify one of the allowed values: Fastx or SAM\n";
+        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
+        
+    if (readFilesTypeN==1) {
+        readNmates=readFilesIn.size(); //for now the number of mates is defined by the number of input files
+    } else if (readFilesTypeN==10) {//find the number of mates from the SAM file
+        if (readFilesType.size()==2 && readFilesType.at(1)=="SE") {
+            readNmates=1;
+        } else if (readFilesType.size()==2 && readFilesType.at(1)=="PE") {
+            readNmates=2;
+        } else {
+            ostringstream errOut;
+            errOut <<"EXITING because of FATAL INPUT ERROR: --readFilesType SAM requires specifying SE or PE reads"<<"\n";
+            errOut <<"SOLUTION: specify --readFilesType SAM SE for single-end reads or --readFilesType SAM PE for paired-end reads\n";
+            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };
+    };
 
     if (runMode=="alignReads" && genomeLoad!="Remove" && genomeLoad!="LoadAndExit") {//open reads files to check if they are present
         openReadsFiles();

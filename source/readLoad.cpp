@@ -1,7 +1,7 @@
 #include "readLoad.h"
 #include "ErrorWarning.h"
 
-int readLoad(istream& readInStream, Parameters* P, uint iMate, uint& Lread, uint& LreadOriginal, char* readName, char* Seq, char* SeqNum, char* Qual, char* QualNum, uint &clip3pNtotal, uint &clip5pNtotal, uint &clip3pAdapterN, uint &iReadAll, uint &readFilesIndex, char &readFilter){
+int readLoad(istream& readInStream, Parameters* P, uint iMate, uint& Lread, uint& LreadOriginal, char* readName, char* Seq, char* SeqNum, char* Qual, char* QualNum, uint &clip3pNtotal, uint &clip5pNtotal, uint &clip3pAdapterN, uint &iReadAll, uint &readFilesIndex, char &readFilter, string &readNameExtra){
     //load one read from a stream
     int readFileType=0;
 
@@ -21,7 +21,18 @@ int readLoad(istream& readInStream, Parameters* P, uint iMate, uint& Lread, uint
     };
 
     readInStream >> iReadAll >> readFilter >> readFilesIndex; //extract read number
-    readInStream.ignore(DEF_readNameSeqLengthMax,'\n');//ignore the resit of the line - just in case
+    
+    getline(readInStream, readNameExtra);
+    if (!readNameExtra.empty()) {
+        size_t n1=readNameExtra.find_first_not_of(" \t");
+        if (n1!=std::string::npos) {
+            readNameExtra=readNameExtra.substr(n1);
+        } else {
+            readNameExtra="";
+        };
+    };
+        
+//     readInStream.ignore(DEF_readNameSeqLengthMax,'\n');//ignore the resit of the line - just in case
 
     readInStream.getline(Seq,DEF_readSeqLengthMax+1); //extract sequence
 

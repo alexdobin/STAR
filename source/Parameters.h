@@ -59,6 +59,8 @@ class Parameters {
 
         char genomeNumToNT[6];
         //read parameters
+        vector <string> readFilesType;
+        int readFilesTypeN;
         uint readMapNumber;
         uint iReadAll;
         int readFilesIndex;
@@ -125,7 +127,7 @@ class Parameters {
 
         //SAM output
         string outBAMfileCoordName, outBAMfileUnsortedName, outQuantBAMfileName;
-        string samHeader, samHeaderHD, samHeaderSortedCoord;
+        string samHeader, samHeaderHD, samHeaderSortedCoord, samHeaderExtra;
         string outSAMmode, outSAMstrandField,  outSAMorder, outSAMprimaryFlag;
         vector<string> outSAMattributes, outSAMheaderHD, outSAMheaderPG;
         vector<string> outSAMattrRGline,outSAMattrRGlineSplit,outSAMattrRG;
@@ -352,6 +354,7 @@ class Parameters {
     void inputParameters (int argInN, char* argIn[]); //input parameters: default, from files, from command line
     void openReadsFiles();
     void closeReadsFiles();
+    void readSAMheader(const string readFilesCommandString, const vector<string> readFilesNames);
 
 };
 #endif  // Parameters.h

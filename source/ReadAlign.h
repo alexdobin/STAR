@@ -66,6 +66,7 @@ class ReadAlign : public Genome
         uint clip3pNtotal[MAX_N_MATES], clip5pNtotal[MAX_N_MATES], clip3pAdapterN[MAX_N_MATES]; //total number of trimmed bases from 5p,3p
         int readFileType; //file type: 1=fasta; 2=fastq
         uint outFilterMismatchNmaxTotal;
+        vector<string>readNameExtra;
 
         char dummyChar[4096];
         char** Read0;
