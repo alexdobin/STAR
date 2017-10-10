@@ -1,3 +1,4 @@
+* Fixed a problem with --alignEndsProtrude implementation which prevented output of alignments with protruded ends.
 * Implemented the ability to input the reads from unmapped SAM/BAM file: --readFilesType SAM SE[PE] for single-end [paired-end] reads to read from the SAM file specified, as usual in --readFilesIn. For BAM files, in addition, specify --readFilesCommand samtools view -h .
 * Fixed a bug which set non-primary bit 0x100 in the SAM FLAG for unmapped mates.
 * Implemented --seedSplitMin option which was previously hardcoded at 12. his will allow mapping of mates shorter than 12nt.
