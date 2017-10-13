@@ -45,6 +45,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "genomeSAsparseD", &genomeSAsparseD));
     parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "genomeSuffixLengthMax", &genomeSuffixLengthMax));
     parArray.push_back(new ParameterInfoVector <uint> (-1, -1, "genomeFileSizes", &genomeFileSizes));
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "genomeConsensusFile", &genomeConsensusFile));
 
     //read
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readFilesType", &readFilesType));
