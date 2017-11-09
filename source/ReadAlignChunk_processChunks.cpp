@@ -2,6 +2,7 @@
 #include "GlobalVariables.h"
 #include "ThreadControl.h"
 #include "ErrorWarning.h"
+#include "SequenceFuns.h"
 
 void ReadAlignChunk::processChunks() {//read-map-write chunks
     noReadsLeft=false; //true if there no more reads left in the file
@@ -63,6 +64,11 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
 
                             string seq1,qual1;
                             P->inOut->readIn[0]  >> seq1 >> qual1;
+                            if (flag & 0x10) {//sequence reverse-coomplemented
+                                revComplementNucleotides(seq1);
+                                reverse(qual1.begin(),qual1.end());
+                            };
+                            
                             getline(P->inOut->readIn[0],str1); //str1 is now all SAM attributes
                             chunkInSizeBytesTotal[imate1] += sprintf(chunkIn[imate1] + chunkInSizeBytesTotal[imate1], "%s\n%s\n+\n%s\n", str1.c_str(), seq1.c_str(), qual1.c_str());
                         };

@@ -427,8 +427,8 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
         };
             
         if (P->readFilesTypeN==10) {
-            if (readNameExtra[Mate].size()<1)
-                cout << iReadAll <<" " <<readName <<endl; 
+//             if (readNameExtra[Mate].size()<1)
+//                 cout << iReadAll <<" " <<readName <<endl; 
             attrN+=bamAttrArrayWriteSAMtags(readNameExtra[Mate],attrOutArray+attrN);
         };        
 ////////////////////////////// prepare sequence and qualities

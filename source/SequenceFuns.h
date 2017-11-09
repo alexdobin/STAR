@@ -14,6 +14,7 @@
 void complementSeqNumbers(char*, char*, uint);
 void convertNucleotidesToNumbers(const char*, char*, uint);
 void revComplementNucleotides(char* ReadsIn, char* ReadsOut, uint Lread); //complement the numeric sequences
+void revComplementNucleotides(string &seq);
 char nuclToNumBAM(char cc);
 void nuclPackBAM(char* ReadsIn, char* ReadsOut, uint Lread);
 uint chrFind(uint, uint, uint*); // find chromosome from global locus
