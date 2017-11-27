@@ -97,16 +97,25 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
 
     if (readFilter=='Y') samFlagCommon+=0x200; //not passing quality control    
 
-    uint samFLAG;
+    uint Str= trOut.Str;//note that Strand = the mate on the left
     uint leftMate=0; //the mate (0 or 1) which is on the left
+    if (flagPaired) {
+        leftMate=Str;
+    };
+    
+    if (P->outSAMattrPresent.MC) {
+        calcCIGAR(trOut, nMates, iExMate, leftMate);
+    };
+    
+    uint samFLAG;
+    
     for (uint imate=0;imate<nMates;imate++) {
         samFLAG=samFlagCommon;
 
         uint iEx1 = (imate==0 ? 0 : iExMate+1);
         uint iEx2 = (imate==0 ? iExMate : trOut.nExons-1);
         uint Mate=trOut.exons[iEx1][EX_iFrag];
-        uint Str= trOut.Str;//note that Strand = the mate on the left
-
+ 
         if (Mate==0) {
             samFLAG|= Str*0x10;
             if (nMates==2) samFLAG|= (1-Str)*0x20;
@@ -116,7 +125,6 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
         };
 
         if (flagPaired) {
-            leftMate=Str;
             samFLAG|= (Mate==0 ? 0x0040 : 0x0080);
             if (flagPaired && nMates==1 && mateStrand==1) samFLAG|=0x20;//revert strand using inout value of mateStrand (e.g. for chimeric aligns)
         };
@@ -273,6 +281,7 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
             };
             tagMD+=to_string(matchN);
         };
+        
         for (uint ii=0;ii<P->outSAMattrOrder.size();ii++) {
             switch (P->outSAMattrOrder[ii]) {
                 case ATTR_NH:
@@ -309,6 +318,11 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
                 case ATTR_RG:
                     *outStream<< "\tRG:Z:" <<P->outSAMattrRG.at(readFilesIndex);
                     break;
+                case ATTR_MC:
+                    if (nMates>1) {
+                        *outStream<< "\tMC:Z:" <<matesCIGAR[1-imate];
+                    };
+                    break;                    
                 case ATTR_ch:
                     //do nothing - this attribute only worlks for BAM output
                     break;

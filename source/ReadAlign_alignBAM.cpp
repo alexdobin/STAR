@@ -193,7 +193,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
     uint iExMate=0; //last exon of the first mate
 
     uint16 samFLAG=0;
-    uint leftMate=0; //the mate (0 or 1) which is on the left
+    
 
     bool flagPaired = P->readNmates==2;
 
@@ -207,6 +207,15 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
         };
     } else {
         nMates=0;
+    };
+
+    uint leftMate=0; //the mate (0 or 1) which is on the left
+    if (flagPaired) {
+        leftMate=trOut.Str;
+    };
+                
+    if (P->outSAMattrPresent.MC) {
+        calcCIGAR(trOut, nMates, iExMate, leftMate);
     };
 
     for (uint imate=0;imate < (alignType<0 ? nMates:P->readNmates);imate++) {
@@ -298,7 +307,6 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
             };
 
             if (flagPaired) {
-                leftMate=Str;
                 samFLAG|= (Mate==0 ? 0x0040 : 0x0080);
                 if (flagPaired && nMates==1 && mateStrand==1) samFLAG|=0x20;//revert strand using inout value of mateStrand (e.g. for chimeric aligns)
             };
@@ -417,6 +425,12 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                             attrN+=bamAttrArrayWrite('1',"ch",attrOutArray+attrN);
                         };                        
                         break;
+                    case ATTR_MC:
+                        if (nMates>1) 
+                        {//chimeric alignment
+                            attrN+=bamAttrArrayWrite(matesCIGAR[1-imate],"MC",attrOutArray+attrN);
+                        };                        
+                        break;                        
                     default:
                         ostringstream errOut;
                         errOut <<"EXITING because of FATAL BUG: unknown/unimplemented SAM atrribute (tag): "<<outSAMattrOrder[ii] <<"\n";

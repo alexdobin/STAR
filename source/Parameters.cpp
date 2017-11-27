@@ -851,6 +851,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     outSAMattrPresent.jM=false;
     outSAMattrPresent.jI=false;
     outSAMattrPresent.RG=false;
+    outSAMattrPresent.MC=false;    
     outSAMattrPresent.XS=false;
     outSAMattrPresent.ch=false;
 
@@ -864,7 +865,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     vector<string> vAttr1;
     if (outSAMattributes.at(0)=="None") {
     } else if (outSAMattributes.at(0)=="All"){
-        vAttr1={"NH","HI","AS","nM","NM","MD","jM","jI","ch"};
+        vAttr1={"NH","HI","AS","nM","NM","MD","jM","jI","MC","ch"};
     } else if (outSAMattributes.at(0)=="Standard"){
         vAttr1={"NH","HI","AS","nM"};
     } else {
@@ -903,7 +904,11 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         } else if (vAttr1.at(ii)== "ch") {
             outSAMattrOrder.push_back(ATTR_ch);
             outSAMattrOrderQuant.push_back(ATTR_ch);
-            outSAMattrPresent.ch=true;            
+            outSAMattrPresent.ch=true;      
+        } else if (vAttr1.at(ii)== "MC") {
+            outSAMattrOrder.push_back(ATTR_MC);
+            outSAMattrOrderQuant.push_back(ATTR_MC);
+            outSAMattrPresent.MC=true;                        
         } else if (vAttr1.at(ii)== "XS") {
             outSAMattrOrder.push_back(ATTR_XS);
             outSAMattrPresent.XS=true;

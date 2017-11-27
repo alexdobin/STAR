@@ -135,7 +135,7 @@ class Parameters {
         uint outSAMmultNmax,outSAMattrIHstart;
         string outSAMheaderCommentFile;
         int outSAMmapqUnique;
-        struct {bool NH,HI,AS,NM,MD,nM,jM,jI,RG,XS,ch;} outSAMattrPresent, outSAMattrPresentQuant;
+        struct {bool NH,HI,AS,NM,MD,nM,jM,jI,RG,XS,ch,MC;} outSAMattrPresent, outSAMattrPresentQuant;
         vector <int> outSAMattrOrder, outSAMattrOrderQuant;
         int outBAMcompression;
         vector <string> outSAMtype;

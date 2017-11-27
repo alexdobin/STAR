@@ -36,7 +36,7 @@ OBJECTS = SharedMemory.o PackedArray.o SuffixArrayFuns.o STAR.o Parameters.o InO
 	OutSJ.o outputSJ.o blocksOverlap.o ThreadControl.o sysRemoveDir.o \
         ReadAlign_maxMappableLength2strands.o binarySearch2.o\
 	ReadAlign_outputAlignments.o  \
-	ReadAlign_outputTranscriptSAM.o ReadAlign_outputTranscriptSJ.o ReadAlign_outputTranscriptCIGARp.o \
+	ReadAlign_outputTranscriptSAM.o ReadAlign_outputTranscriptSJ.o ReadAlign_outputTranscriptCIGARp.o ReadAlign_calcCIGAR.cpp \
         ReadAlign_createExtendWindowsWithAlign.o ReadAlign_assignAlignToWindow.o ReadAlign_oneRead.o \
 	ReadAlign_stitchWindowSeeds.o ReadAlign_chimericDetection.o \
         stitchWindowAligns.o extendAlign.o stitchAlignToTranscript.o alignSmithWaterman.o \

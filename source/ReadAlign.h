@@ -44,7 +44,8 @@ class ReadAlign : public Genome
         char** outBAMoneAlign;
         uint* outBAMoneAlignNbytes;
 
-        ostringstream samStreamCIGAR, samStreamSJmotif, samStreamSJintron,samStreamSJannot;
+        ostringstream samStreamCIGAR, samStreamSJmotif, samStreamSJintron;
+        vector <string> matesCIGAR;
 
         intScore maxScoreMate[MAX_N_MATES];
         intScore *scoreSeedToSeed, *scoreSeedBest;
@@ -137,6 +138,7 @@ class ReadAlign : public Genome
         bool chimericDetection();
         void outputAlignments();
         void stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R, char *Q, char *G);//stitches all seeds in one window: iW
+        void calcCIGAR(Transcript const &trOut, uint nMates, uint iExMate, uint leftMate);
 
         int oneRead();
         uint quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT);
