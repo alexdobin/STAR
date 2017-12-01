@@ -147,13 +147,12 @@ void Genome::genomeGenerate() {
     //define some parameters from input parameters
     genomeChrBinNbases=1LLU << pGe.gChrBinNbits;
 
-    char *G=NULL, *G1=NULL;
-    uint nGenomeReal=genomeScanFastaFiles(P,G,false,*this);//first scan the fasta file to find all the sizes
+    uint nGenomeReal=genomeScanFastaFiles(P,NULL,false,*this);//first scan the fasta file to find all the sizes
     chrBinFill();
 
     uint L=10000;//maximum length of genome suffix
     uint nG1alloc=(nGenomeReal + L)*2;
-    G1=new char[nG1alloc];
+    char *G1=new char[nG1alloc];
     G=G1+L;
 
     memset(G1,GENOME_spacingChar,nG1alloc);//initialize to K-1 all bytes
@@ -201,15 +200,13 @@ void Genome::genomeGenerate() {
     if (GstrandBit<32) GstrandBit=32; //TODO: use simple access function for SA
 
     GstrandMask = ~(1LLU<<GstrandBit);
-    PackedArray SA1;//SA without sjdb
-    SA1.defineBits(GstrandBit+1,nSA);
-    PackedArray SA2;//SA with sjdb, reserve more space
+    SA.defineBits(GstrandBit+1,nSA);
     if (P.sjdbInsert.yes)
     {//reserve space for junction insertion
-        SA2.defineBits(GstrandBit+1,nSA+2*P.limitSjdbInsertNsj*sjdbLength);//TODO: this allocation is wasteful, get a better estimate of the number of junctions
+        SApass1.defineBits(GstrandBit+1,nSA+2*P.limitSjdbInsertNsj*sjdbLength);//TODO: this allocation is wasteful, get a better estimate of the number of junctions
     } else
-    {//same as SA1
-        SA2.defineBits(GstrandBit+1,nSA);
+    {//same as SA
+        SApass1.defineBits(GstrandBit+1,nSA);
     };
 
     P.inOut->logMain  << "Number of SA indices: "<< nSA << "\n"<<flush;
@@ -305,9 +302,9 @@ void Genome::genomeGenerate() {
         P.inOut->logMain     << timeMonthDayTime(rawTime) <<" ... loading chunks from disk, packing SA...\n" <<flush;
         *P.inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... loading chunks from disk, packing SA...\n" <<flush;
 
-        //read chunks and pack into full SA1
-        SA2.allocateArray();
-        SA1.pointArray(SA2.charArray + SA2.lengthByte-SA1.lengthByte); //SA1 is shifted to have space for junction insertion
+        //read chunks and pack into full SA
+        SApass1.allocateArray();
+        SA.pointArray(SApass1.charArray + SApass1.lengthByte-SA.lengthByte); //SA is shifted to have space for junction insertion
         uint N2bit= 1LLU << GstrandBit;
         uint packedInd=0;
 
@@ -325,7 +322,7 @@ void Genome::genomeGenerate() {
             while (! saChunkFile.eof()) {//read blocks from each file
                 uint chunkBytesN=fstreamReadBig(saChunkFile,(char*) saIn,SA_CHUNK_BLOCK_SIZE*sizeof(saIn[0]));
                 for (uint ii=0;ii<chunkBytesN/sizeof(saIn[0]);ii++) {
-                    SA1.writePacked( packedInd+ii, (saIn[ii]<N) ? saIn[ii] : ( (saIn[ii]-N) | N2bit ) );
+                    SA.writePacked( packedInd+ii, (saIn[ii]<N) ? saIn[ii] : ( (saIn[ii]-N) | N2bit ) );
 
                     #ifdef genenomeGenerate_SA_textOutput
                         SAtxtStream << saIn[ii] << "\n";
@@ -373,7 +370,7 @@ void Genome::genomeGenerate() {
 //
 //     if (true)
 //     {//testing: load SA from disk
-//             //read chunks and pack into full SA1
+//             //read chunks and pack into full SA
 //
 //         ifstream oldSAin("./DirTrue/SA");
 //         oldSAin.seekg (0, ios::end);
@@ -392,33 +389,28 @@ void Genome::genomeGenerate() {
 //         SA2=SAold;
 //     };
 
-    PackedArray SAip;
-    genomeSAindex(G, SA1, P, SAip, *this);
+    genomeSAindex(G, SA, P, SAi, *this);
 
+    sjdbN=0;
     if (pGe.sjdbFileChrStartEnd.at(0)!="-" || pGe.sjdbGTFfile!="-")
     {//insert junctions
         SjdbClass sjdbLoci;
 
-        Genome mainGenome(P);
-        mainGenome.G=G;
-        mainGenome.SA=SA1;
-        mainGenome.SApass1=SA2;
-        mainGenome.SAi=SAip;
+        Genome mainGenome1(*this);
+        
         P.sjdbInsert.outDir=pGe.gDir;
-        sjdbN=0;//no junctions are loaded yet
         P.twoPass.pass2=false;
 
-        sjdbInsertJunctions(P, mainGenome, mainGenome, sjdbLoci);
+        sjdbInsertJunctions(P, *this, mainGenome1, sjdbLoci);
 
         //write an extra 0 at the end of the array, filling the last bytes that otherwise are not accessible, but will be written to disk
-        //this is - to avoid valgrind complaints. Note that SA2 is allocated with plenty of space to spare.
-        SA1=mainGenome.SA;
-        SA1.writePacked(nSA,0);
+        //this is - to avoid valgrind complaints. Note that SApass1 is allocated with plenty of space to spare.
+        SA.writePacked(nSA,0);
     };
 
     pGe.gFileSizes.clear();
     pGe.gFileSizes.push_back(nGenome);
-    pGe.gFileSizes.push_back(SA1.lengthByte);
+    pGe.gFileSizes.push_back(SA.lengthByte);
     
     //write genome parameters file
     genomeParametersWrite(pGe.gDir+("/genomeParameters.txt"), P, ERROR_OUT, *this);
@@ -434,13 +426,13 @@ void Genome::genomeGenerate() {
 
     //write SA
     time ( &rawTime );
-    P.inOut->logMain  << "SA size in bytes: "<<SA1.lengthByte << "\n"<<flush;
+    P.inOut->logMain  << "SA size in bytes: "<<SA.lengthByte << "\n"<<flush;
 
     P.inOut->logMain     << timeMonthDayTime(rawTime) <<" ... writing Suffix Array to disk ...\n" <<flush;
     *P.inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... writing Suffix Array to disk ...\n" <<flush;
 
     ofstream & SAout = ofstrOpen(pGe.gDir+"/SA",ERROR_OUT, P);
-    fstreamWriteBig(SAout,(char*) SA1.charArray, (streamsize) SA1.lengthByte,pGe.gDir+"/SA",ERROR_OUT,P);
+    fstreamWriteBig(SAout,(char*) SA.charArray, (streamsize) SA.lengthByte,pGe.gDir+"/SA",ERROR_OUT,P);
     SAout.close();
 
     //write SAi
@@ -453,10 +445,10 @@ void Genome::genomeGenerate() {
 
     fstreamWriteBig(SAiOut, (char*) &pGe.gSAindexNbases, sizeof(pGe.gSAindexNbases),pGe.gDir+"/SAindex",ERROR_OUT,P);
     fstreamWriteBig(SAiOut, (char*) genomeSAindexStart, sizeof(genomeSAindexStart[0])*(pGe.gSAindexNbases+1),pGe.gDir+"/SAindex",ERROR_OUT,P);
-    fstreamWriteBig(SAiOut,  SAip.charArray, SAip.lengthByte,pGe.gDir+"/SAindex",ERROR_OUT,P);
+    fstreamWriteBig(SAiOut,  SAi.charArray, SAi.lengthByte,pGe.gDir+"/SAindex",ERROR_OUT,P);
     SAiOut.close();
 
-    SA2.deallocateArray();
+    SApass1.deallocateArray();
 
     time(&rawTime);
     timeString=asctime(localtime ( &rawTime ));
