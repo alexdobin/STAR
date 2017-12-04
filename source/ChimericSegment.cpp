@@ -26,7 +26,7 @@ bool ChimericSegment::segmentCheck()
         //this is already tested for each align with default --outFilterIntronStrands RemoveInconsistentStrands
         //segGood = segGood && (align.intronMotifs[1]==0 || align.intronMotifs[2]==0); //consistent intron motifs. 
         //this is not requiered since seg2 is tested for length
-        //   segGood = segGood && (align.exons[align.nExons-1][EX_R] + align.exons[align.nExons-1][EX_L] + P.pCh.segmentMin <= Lread \
+        //   segGood = segGood && (align.exons[align.nExons-1][EX_R] + align.exons[align.nExons-1][EX_L] + P.pCh.segmentMin <= Lread
         //             || align.exons[0][EX_R] >= P.pCh.segmentMin); //uncovered by seg1 read length is <= segmentMin
 
 };

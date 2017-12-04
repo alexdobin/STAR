@@ -337,8 +337,8 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
             } else {//stitching was not accepted
                 return -1000007;
             };
-        } else if (gBstart+trA->exons[0][EX_R] >= trA->exons[0][EX_G] || trA->exons[0][EX_G] < trA->exons[0][EX_R]){//if (iFragA==iFragB) stitch aligns from different fragments
-
+        } else if (gBstart+trA->exons[0][EX_R]+P.alignEndsProtrude.nBasesMax >= trA->exons[0][EX_G] || trA->exons[0][EX_G] < trA->exons[0][EX_R]){//if (iFragA==iFragB) stitch aligns from different fragments
+                                                                                                            //CHECK: this second confdition does not make sense
             if (P.alignMatesGapMax>0 && gBstart > trA->exons[trA->nExons-1][EX_G] + trA->exons[trA->nExons-1][EX_L] + P.alignMatesGapMax) {
                 return -1000004; //gap between mates too large
             };

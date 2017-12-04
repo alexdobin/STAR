@@ -50,6 +50,8 @@ class Parameters {
         uint winReadCoverageBasesMin;
 
         //read parameters
+        vector <string> readFilesType;
+        int readFilesTypeN;
         uint readMapNumber;
         uint iReadAll;
         int readFilesIndex;
@@ -116,14 +118,15 @@ class Parameters {
 
         //SAM output
         string outBAMfileCoordName, outBAMfileUnsortedName, outQuantBAMfileName;
-        string samHeader, samHeaderHD, samHeaderSortedCoord;
+        string samHeader, samHeaderHD, samHeaderSortedCoord, samHeaderExtra;
         string outSAMmode, outSAMstrandField,  outSAMorder, outSAMprimaryFlag;
         vector<string> outSAMattributes, outSAMheaderHD, outSAMheaderPG;
         vector<string> outSAMattrRGline,outSAMattrRGlineSplit,outSAMattrRG;
         uint outSAMmultNmax,outSAMattrIHstart;
         string outSAMheaderCommentFile;
         int outSAMmapqUnique;
-        struct {bool NH,HI,AS,NM,MD,nM,jM,jI,RG,XS,vL,vT,ch;} outSAMattrPresent, outSAMattrPresentQuant;
+
+        struct {bool NH,HI,AS,NM,MD,nM,jM,jI,RG,XS,vL,vT,ch,MC;} outSAMattrPresent, outSAMattrPresentQuant;
 
         vector <int> outSAMattrOrder, outSAMattrOrderQuant;
         int outBAMcompression;
@@ -307,6 +310,7 @@ class Parameters {
     void inputParameters (int argInN, char* argIn[]); //input parameters: default, from files, from command line
     void openReadsFiles();
     void closeReadsFiles();
+    void readSAMheader(const string readFilesCommandString, const vector<string> readFilesNames);
 
 };
 #endif  // Parameters.h

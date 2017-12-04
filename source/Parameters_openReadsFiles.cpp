@@ -5,13 +5,15 @@
 void Parameters::openReadsFiles() {
     string readFilesCommandString("");
     if (readFilesCommand.at(0)=="-") {
-        if (readFilesIn.at(0).find(',')<readFilesIn.at(0).size()) readFilesCommandString="cat";//concatenate multiple files
+        if (readFilesIn.at(0).find(',')<readFilesIn.at(0).size()) readFilesCommandString="cat   ";//concatenate multiple files
     } else {
         for (uint ii=0; ii<readFilesCommand.size(); ii++) readFilesCommandString+=readFilesCommand.at(ii)+"   ";
     };
 
+    readFilesNames.resize(readFilesIn.size());
+
     if (readFilesCommandString=="") {//read from file
-        for (uint ii=0;ii<readNmates;ii++) {//open readIn files
+        for (uint ii=0;ii<readFilesIn.size();ii++) {//open readIn files
             readFilesCommandPID[ii]=0;//no command process IDs
             if ( inOut->readIn[ii].is_open() ) inOut->readIn[ii].close();
             inOut->readIn[ii].open(readFilesIn.at(ii).c_str()); //try to open the Sequences file right away, exit if failed
@@ -25,9 +27,7 @@ void Parameters::openReadsFiles() {
 
          vector<string> readsCommandFileName;
 
-         readFilesNames.resize(readNmates);
-
-         for (uint imate=0;imate<readNmates;imate++) {//open readIn files
+         for (uint imate=0;imate<readFilesIn.size();imate++) {//open readIn files
             ostringstream sysCom;
             sysCom << outFileTmp <<"tmp.fifo.read"<<imate+1;
             readFilesInTmp.push_back(sysCom.str());
@@ -96,7 +96,7 @@ void Parameters::openReadsFiles() {
 //             system((("\""+readsCommandFileName.at(imate)+"\"") + " & ").c_str());
             inOut->readIn[imate].open(readFilesInTmp.at(imate).c_str());
         };
-        if (readNmates==2 && readFilesNames.at(0).size() != readFilesNames.at(1).size()) {
+        if (readFilesIn.size()==2 && readFilesNames.at(0).size() != readFilesNames.at(1).size()) {
             ostringstream errOut;
             errOut <<"EXITING: because of fatal INPUT ERROR: number of input files for mate1: "<<readFilesNames.at(0).size()  << " is not equal to that for mate2: "<< readFilesNames.at(1).size() <<"\n";
             errOut <<"Make sure that the number of files in --readFilesIn is the same for both mates\n";
@@ -115,4 +115,8 @@ void Parameters::openReadsFiles() {
         };
     };
     readFilesIndex=0;
+    
+    if (readFilesTypeN==10) {//SAM file - skip header lines
+        readSAMheader(readFilesCommandString, readFilesNames.at(0));
+    };
 };

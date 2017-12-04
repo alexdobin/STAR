@@ -87,6 +87,7 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
         readNameMates[ii]=new char [DEF_readNameLengthMax];
     };
 
+    readNameExtra.resize(P.readNmates);
 
     outBAMoneAlignNbytes = new uint [P.readNmates+2]; //extra piece for chimeric reads
     outBAMoneAlign = new char* [P.readNmates+2]; //extra piece for chimeric reads

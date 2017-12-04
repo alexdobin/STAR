@@ -52,6 +52,49 @@ void revComplementNucleotides(char* ReadsIn, char* ReadsOut, uint Lread) {//comp
     };
 };
 
+void revComplementNucleotides(string &seq) {//complement the numeric sequences
+    string seq1(seq);
+    for (uint jj=0;jj<seq.size();jj++) {
+        switch (seq1[seq.size()-1-jj]){
+            case ('A'): seq[jj]='T';break;
+            case ('C'): seq[jj]='G';break;
+            case ('G'): seq[jj]='C';break;
+            case ('T'): seq[jj]='A';break;
+            case ('N'): seq[jj]='N';break;
+            case ('R'): seq[jj]='Y';break;
+            case ('Y'): seq[jj]='R';break;
+            case ('K'): seq[jj]='M';break;
+            case ('M'): seq[jj]='K';break;
+            case ('S'): seq[jj]='S';break;
+            case ('W'): seq[jj]='W';break;
+            case ('B'): seq[jj]='V';break;
+            case ('D'): seq[jj]='H';break;
+            case ('V'): seq[jj]='B';break;
+            case ('H'): seq[jj]='D';break;
+
+            case ('a'): seq[jj]='t';break;
+            case ('c'): seq[jj]='g';break;
+            case ('g'): seq[jj]='c';break;
+            case ('t'): seq[jj]='a';break;
+            case ('n'): seq[jj]='n';break;
+            case ('r'): seq[jj]='y';break;
+            case ('y'): seq[jj]='r';break;
+            case ('k'): seq[jj]='m';break;
+            case ('m'): seq[jj]='k';break;
+            case ('s'): seq[jj]='s';break;
+            case ('w'): seq[jj]='w';break;
+            case ('b'): seq[jj]='v';break;
+            case ('d'): seq[jj]='h';break;
+            case ('v'): seq[jj]='b';break;
+            case ('h'): seq[jj]='d';break;
+
+            default:   seq[jj]=seq1[seq.size()-1-jj];
+        };
+    };
+};
+
+
+
 char  nuclToNumBAM(char cc){
     switch (cc) {//=ACMGRSVTWYHKDBN
         case ('='): cc=0;break;

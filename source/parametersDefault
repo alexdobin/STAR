@@ -57,6 +57,8 @@ genomeChainFiles            -
 genomeFileSizes             0
     uint(s)>0: genome files exact sizes in bytes. Typically, this should not be defined by the user.
 
+genomeConsensusFile         -
+    string: VCF file with consensus SNPs (i.e. alternative allele is the major (AF>0.5) allele)
 
 ### Genome Indexing Parameters - only used with --runMode genomeGenerate
 genomeChrBinNbits           18
@@ -111,6 +113,12 @@ inputBAMfile                -
     string: path to BAM input file, to be used with --runMode inputAlignmentsFromBAM
 
 ### Read Parameters
+
+readFilesType               Fastx
+    string: format of input read files
+                            Fastx       ... FASTA or FASTQ
+                            SAM SE      ... SAM or BAM single-end reads; for BAM use --readFilesCommand samtools view
+                            SAM PE      ... SAM or BAM paired-end reads; for BAM use --readFilesCommand samtools view
 
 readFilesIn                 Read1 Read2
     string(s): paths to files that contain input read1 (and, if needed,  read2)

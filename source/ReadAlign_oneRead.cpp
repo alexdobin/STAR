@@ -8,9 +8,10 @@ int ReadAlign::oneRead() {//process one read: load, map, write
     //load read name, sequence, quality from the streams into internal arrays
     int readStatus[2];
 
-    readStatus[0]=readLoad(*(readInStream[0]), P, 0, readLength[0], readLengthOriginal[0], readNameMates[0], Read0[0], Read1[0], Qual0[0], Qual1[0], clip3pNtotal[0], clip5pNtotal[0], clip3pAdapterN[0], iReadAll, readFilesIndex, readFilter);
+
+    readStatus[0]=readLoad(*(readInStream[0]), P, 0, readLength[0], readLengthOriginal[0], readNameMates[0], Read0[0], Read1[0], Qual0[0], Qual1[0], clip3pNtotal[0], clip5pNtotal[0], clip3pAdapterN[0], iReadAll, readFilesIndex, readFilter, readNameExtra[0]);
     if (P.readNmates==2) {//read the 2nd mate
-        readStatus[1]=readLoad(*(readInStream[1]), P, 1, readLength[1], readLengthOriginal[1], readNameMates[1], Read0[1], Read1[0]+readLength[0]+1, Qual0[1], Qual1[0]+readLength[0]+1, clip3pNtotal[1], clip5pNtotal[1], clip3pAdapterN[1], iReadAll, readFilesIndex, readFilter);
+        readStatus[1]=readLoad(*(readInStream[1]), P, 1, readLength[1], readLengthOriginal[1], readNameMates[1], Read0[1], Read1[0]+readLength[0]+1, Qual0[1], Qual1[0]+readLength[0]+1, clip3pNtotal[1], clip5pNtotal[1], clip3pAdapterN[1], iReadAll, readFilesIndex, readFilter, readNameExtra[1]);
 
         if (readStatus[0]!=readStatus[1]) {
             ostringstream errOut;

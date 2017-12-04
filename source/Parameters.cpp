@@ -45,8 +45,10 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "genomeSAsparseD", &pGe.gSAsparseD));
     parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "genomeSuffixLengthMax", &pGe.gSuffixLengthMax));
     parArray.push_back(new ParameterInfoVector <uint> (-1, -1, "genomeFileSizes", &pGe.gFileSizes));
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "genomeConsensusFile", &pGe.gConsensusFile));
 
     //read
+    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readFilesType", &readFilesType));
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readFilesIn", &readFilesIn));
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readFilesCommand", &readFilesCommand));
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "readMatesLengthsIn", &readMatesLengthsIn));
@@ -736,8 +738,32 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
 
-
-    readNmates=readFilesIn.size(); //for now the number of mates is defined by the number of input files
+    //read parameters
+    if (readFilesType.at(0)=="Fastx") {
+        readFilesTypeN=1;
+    } else if (readFilesType.at(0)=="SAM"){
+        readFilesTypeN=10;
+    } else {
+        ostringstream errOut;
+        errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented value for --readFilesType: "<<readFilesType.at(0) <<"\n";
+        errOut <<"SOLUTION: specify one of the allowed values: Fastx or SAM\n";
+        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
+        
+    if (readFilesTypeN==1) {
+        readNmates=readFilesIn.size(); //for now the number of mates is defined by the number of input files
+    } else if (readFilesTypeN==10) {//find the number of mates from the SAM file
+        if (readFilesType.size()==2 && readFilesType.at(1)=="SE") {
+            readNmates=1;
+        } else if (readFilesType.size()==2 && readFilesType.at(1)=="PE") {
+            readNmates=2;
+        } else {
+            ostringstream errOut;
+            errOut <<"EXITING because of FATAL INPUT ERROR: --readFilesType SAM requires specifying SE or PE reads"<<"\n";
+            errOut <<"SOLUTION: specify --readFilesType SAM SE for single-end reads or --readFilesType SAM PE for paired-end reads\n";
+            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };
+    };
 
     if (runMode=="alignReads" && pGe.gLoad!="Remove" && pGe.gLoad!="LoadAndExit") {//open reads files to check if they are present
         openReadsFiles();
@@ -838,6 +864,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     outSAMattrPresent.jM=false;
     outSAMattrPresent.jI=false;
     outSAMattrPresent.RG=false;
+    outSAMattrPresent.MC=false;    
     outSAMattrPresent.XS=false;
     outSAMattrPresent.vT=false;
     outSAMattrPresent.vL=false;
@@ -853,7 +880,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     vector<string> vAttr1;
     if (outSAMattributes.at(0)=="None") {
     } else if (outSAMattributes.at(0)=="All"){
-        vAttr1={"NH","HI","AS","nM","NM","MD","jM","jI","ch"};
+        vAttr1={"NH","HI","AS","nM","NM","MD","jM","jI","MC","ch"};
     } else if (outSAMattributes.at(0)=="Standard"){
         vAttr1={"NH","HI","AS","nM"};
     } else {
@@ -898,7 +925,11 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         } else if (vAttr1.at(ii)== "ch") {
             outSAMattrOrder.push_back(ATTR_ch);
             outSAMattrOrderQuant.push_back(ATTR_ch);
-            outSAMattrPresent.ch=true;            
+            outSAMattrPresent.ch=true;      
+        } else if (vAttr1.at(ii)== "MC") {
+            outSAMattrOrder.push_back(ATTR_MC);
+            outSAMattrOrderQuant.push_back(ATTR_MC);
+            outSAMattrPresent.MC=true;                        
         } else if (vAttr1.at(ii)== "XS") {
             outSAMattrOrder.push_back(ATTR_XS);
             outSAMattrPresent.XS=true;

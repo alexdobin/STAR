@@ -2,10 +2,11 @@
 #include "GlobalVariables.h"
 #include "ThreadControl.h"
 #include "ErrorWarning.h"
+#include "SequenceFuns.h"
 
 void ReadAlignChunk::processChunks() {//read-map-write chunks
     noReadsLeft=false; //true if there no more reads left in the file
-
+    bool newFile=false; //new file marker in the input stream
     while (!noReadsLeft) {//continue until the input EOF
             //////////////read a chunk from input files and store in memory
         if (P.outFilterBySJoutStage<2) {//read chunks from input file
@@ -17,6 +18,61 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                 char nextChar=P.inOut->readIn[0].peek();
                 if (P.iReadAll==P.readMapNumber) {//do nto read any more reads
                     break;
+                } else if (P.readFilesTypeN==10 && P.inOut->readIn[0].good() && P.outFilterBySJoutStage!=2) {//SAM input && not eof && not 2nd stage
+
+                    string str1;
+                    
+                    if (nextChar=='@') {//with SAM input linest that start with @ are headers
+                        getline(P.inOut->readIn[0], str1); //read line and skip it
+                        continue;
+                    };
+                    
+                    P.inOut->readIn[0] >> str1;
+                    if (str1=="FILE") {
+                        newFile=true;
+                    } else {
+                        P.iReadAll++; //increment read number
+
+                        uint imate1=0;
+                        for (uint imate=0;imate<P.readNmates;imate++) {
+                            if (imate>0)
+                                P.inOut->readIn[0] >> str1; //for imate=0 str1 was already read
+                            uint flag;
+                            P.inOut->readIn[0] >>flag; //read name and flag
+                            char passFilterIllumina=(flag & 0x800 ? 'Y' : 'N');
+
+                            if (imate==1) {//2nd line is always opposite of the 1st one
+                                imate1=1-imate1;
+                            } else if (P.readNmates==2 && (flag & 0x80)) {
+                                imate1=1;
+                            } else {
+                                imate1=0;
+                            };
+
+                            //read ID or number
+                            if (P.outSAMreadID=="Number") {
+                                chunkInSizeBytesTotal[imate1] += sprintf(chunkIn[imate1] + chunkInSizeBytesTotal[imate1], "@%llu", P.iReadAll);
+                            } else {
+                                chunkInSizeBytesTotal[imate1] += sprintf(chunkIn[imate1] + chunkInSizeBytesTotal[imate1], "@%s", str1.c_str());
+                            };
+
+                            //iReadAll, passFilterIllumina, passFilterIllumina
+                            chunkInSizeBytesTotal[imate1] += sprintf(chunkIn[imate1] + chunkInSizeBytesTotal[imate1], " %llu %c %i", P.iReadAll, passFilterIllumina, P.readFilesIndex);
+
+                            for (int ii=3; ii<=9; ii++)
+                                P.inOut->readIn[0] >> str1; //skip fields until sequence
+
+                            string seq1,qual1;
+                            P.inOut->readIn[0]  >> seq1 >> qual1;
+                            if (flag & 0x10) {//sequence reverse-coomplemented
+                                revComplementNucleotides(seq1);
+                                reverse(qual1.begin(),qual1.end());
+                            };
+                            
+                            getline(P.inOut->readIn[0],str1); //str1 is now all SAM attributes
+                            chunkInSizeBytesTotal[imate1] += sprintf(chunkIn[imate1] + chunkInSizeBytesTotal[imate1], "%s\n%s\n+\n%s\n", str1.c_str(), seq1.c_str(), qual1.c_str());
+                        };
+                    };
                 } else if (nextChar=='@') {//fastq, not multi-line
                     P.iReadAll++; //increment read number
                     for (uint imate=0; imate<P.readNmates; imate++) {//for all mates
@@ -91,7 +147,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                         };
                         chunkIn[imate][chunkInSizeBytesTotal[imate]]='\n';
                         chunkInSizeBytesTotal[imate] ++;
-                    };
+                    }; 
                 } else if (nextChar==' ' || nextChar=='\n' || !P.inOut->readIn[0].good()) {//end of stream
                     P.inOut->logMain << "Thread #" <<iThread <<" end of input stream, nextChar="<<int(nextChar) <<endl;
                     break;
@@ -99,23 +155,25 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                     string word1;
                     P.inOut->readIn[0] >> word1;
                     if (word1=="FILE") {//new file marker
-                        P.inOut->readIn[0] >> P.readFilesIndex;
-                        pthread_mutex_lock(&g_threadChunks.mutexLogMain);
-                        P.inOut->logMain << "Starting to map file # " << P.readFilesIndex<<"\n";
-                        for (uint imate=0; imate<P.readNmates; imate++) {
-                            P.inOut->logMain << "mate " <<imate+1 <<":   "<<P.readFilesNames.at(imate).at(P.readFilesIndex) <<"\n";
-                            P.inOut->readIn[imate].ignore(numeric_limits<streamsize>::max(),'\n');
-                        };
-                        P.inOut->logMain<<flush;
-                        pthread_mutex_unlock(&g_threadChunks.mutexLogMain);
-//                         if (P.readNmates==2) {//skip the FILE line for the second read
-//                             getline(P.inOut->readIn[1],word1);
-//                         };
+                        newFile=true;
                     } else {//error
                         ostringstream errOut;
                         errOut << ERROR_OUT <<" EXITING because of FATAL ERROR in input reads: unknown file format: the read ID should start with @ or > \n";
                         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
                     };
+                };
+                
+                if (newFile) {
+                        P.inOut->readIn[0] >> P.readFilesIndex;
+                        pthread_mutex_lock(&g_threadChunks.mutexLogMain);
+                        P.inOut->logMain << "Starting to map file # " << P.readFilesIndex<<"\n";
+                        for (uint imate=0; imate<P.readFilesNames.size(); imate++) {
+                            P.inOut->logMain << "mate " <<imate+1 <<":   "<<P.readFilesNames.at(imate).at(P.readFilesIndex) <<"\n";
+                            P.inOut->readIn[imate].ignore(numeric_limits<streamsize>::max(),'\n');
+                        };
+                        P.inOut->logMain<<flush;
+                        pthread_mutex_unlock(&g_threadChunks.mutexLogMain);
+                        newFile=false;
                 };
             };
             //TODO: check here that both mates are zero or non-zero

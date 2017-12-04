@@ -14,6 +14,7 @@
 void complementSeqNumbers(char*, char*, uint);
 void convertNucleotidesToNumbers(const char*, char*, uint);
 void revComplementNucleotides(char* ReadsIn, char* ReadsOut, uint Lread); //complement the numeric sequences
+void revComplementNucleotides(string &seq);
 char nuclToNumBAM(char cc);
 void nuclPackBAM(char* ReadsIn, char* ReadsOut, uint Lread);
 char convertNt01234(const char R0);//transform sequence  from ACGT into 0-1-2-3-4 code    

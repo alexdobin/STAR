@@ -7,6 +7,8 @@ class ParametersGenome {//"constant" genome parameters - user input
         string gLoad;
         vector <string> gFastaFiles;
         vector <string> gChainFiles;
+        string gConsensusFile;
+        
         uint gSAindexNbases;//length of the SA pre-index strings
         uint gChrBinNbits;
         uint gSAsparseD;//SA sparsity

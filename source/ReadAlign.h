@@ -63,7 +63,8 @@ class ReadAlign
         char** outBAMoneAlign;
         uint* outBAMoneAlignNbytes;
 
-        ostringstream samStreamCIGAR, samStreamSJmotif, samStreamSJintron,samStreamSJannot;
+        ostringstream samStreamCIGAR, samStreamSJmotif, samStreamSJintron;
+        vector <string> matesCIGAR;
 
         intScore *scoreSeedToSeed, *scoreSeedBest;
         uint *scoreSeedBestInd, *seedChain, *scoreSeedBestMM;
@@ -82,6 +83,8 @@ class ReadAlign
         bool revertStrand; //what to do with the strand, according to strandType and iMate
         uint clip3pNtotal[MAX_N_MATES], clip5pNtotal[MAX_N_MATES], clip3pAdapterN[MAX_N_MATES]; //total number of trimmed bases from 5p,3p
         int readFileType; //file type: 1=fasta; 2=fastq
+
+        vector<string>readNameExtra;
 
         char dummyChar[4096];
         char** Read0;
@@ -156,9 +159,11 @@ class ReadAlign
         bool chimericDetectionMult();        
 
         void outputAlignments();
-        
+        void calcCIGAR(Transcript const &trOut, uint nMates, uint iExMate, uint leftMate);
+
         void stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R, char *Q);//stitches all seeds in one window: iW
         void stitchPieces(char **R, char **Q, uint Lread);
+
 
         uint quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT);
 };
