@@ -16,10 +16,13 @@ void Parameters::openReadsFiles() {
         for (uint ii=0;ii<readFilesIn.size();ii++) {//open readIn files
             readFilesCommandPID[ii]=0;//no command process IDs
             if ( inOut->readIn[ii].is_open() ) inOut->readIn[ii].close();
-            inOut->readIn[ii].open(readFilesIn.at(ii).c_str()); //try to open the Sequences file right away, exit if failed
+            
+            string rfName=(readFilesPrefix=="-" ? "" : readFilesPrefix)+readFilesIn.at(ii);
+            
+            inOut->readIn[ii].open(rfName.c_str()); //try to open the Sequences file right away, exit if failed
             if (inOut->readIn[ii].fail()) {
                 ostringstream errOut;
-                errOut <<"EXITING because of fatal input ERROR: could not open readFilesIn=" << readFilesIn.at(ii) <<"\n";
+                errOut <<"EXITING because of fatal input ERROR: could not open readFilesIn=" << rfName <<"\n";
                 exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
             };
         };
@@ -51,16 +54,16 @@ void Parameters::openReadsFiles() {
             readFilesN=0;
             do {//cycle over multiple files separated by comma
                 pos = readFilesInString.find(',');
-                string file1 = readFilesInString.substr(0, pos);
+                string rfName = (readFilesPrefix=="-" ? "" : readFilesPrefix) + readFilesInString.substr(0, pos);
                 readFilesInString.erase(0, pos + 1);
-                readFilesNames.at(imate).push_back(file1);
+                readFilesNames.at(imate).push_back(rfName);
 
-                system(("ls -lL " + file1 + " > "+ outFileTmp+"/readFilesIn.info 2>&1").c_str());
+                system(("ls -lL " + rfName + " > "+ outFileTmp+"/readFilesIn.info 2>&1").c_str());
                 ifstream readFilesIn_info((outFileTmp+"/readFilesIn.info").c_str());
                 inOut->logMain <<readFilesIn_info.rdbuf();
 
                 readsCommandFile << "echo FILE " <<readFilesN << "\n";
-                readsCommandFile << readFilesCommandString << "   " <<("\""+file1+"\"") <<"\n";
+                readsCommandFile << readFilesCommandString << "   " <<("\""+rfName+"\"") <<"\n";
                 ++readFilesN;//only increase file count for one mate
 
             } while (pos!= string::npos);

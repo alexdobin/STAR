@@ -119,6 +119,10 @@ readFilesType               Fastx
 readFilesIn                 Read1 Read2
     string(s): paths to files that contain input read1 (and, if needed,  read2)
 
+readFilesPrefix             -
+    string: preifx for the read files names, i.e. it will be added in front of the strings in --readFilesIn
+                            -: no prefix
+
 readFilesCommand             -
     string(s): command line to execute for each of the input file. This command should generate FASTA or FASTQ text and send it to stdout
                For example: zcat - to uncompress .gz files, bzcat - to uncompress .bz2 files, etc.

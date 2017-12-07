@@ -1,3 +1,5 @@
+* Implemented read group ID output as the last column of the Chimeric.out.junction file.
+* Implemented --readFilesPrefix option for specifying prefix (e.g. directory path) for the file names in --readFilesIn .
 * Implemented stanard SAM attrbiute "MC" to output the mate's CIGAR. Add MC to the list of attributes in the --outSAMattribute option.
 * Fixed a problem with --alignEndsProtrude implementation which prevented output of alignments with protruded ends.
 * Implemented the ability to input the reads from unmapped SAM/BAM file: --readFilesType SAM SE[PE] for single-end [paired-end] reads to read from the SAM file specified, as usual in --readFilesIn. For BAM files, in addition, specify --readFilesCommand samtools view -h .
