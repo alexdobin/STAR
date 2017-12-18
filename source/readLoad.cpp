@@ -37,7 +37,7 @@ int readLoad(istream& readInStream, Parameters& P, uint iMate, uint& Lread, uint
     readInStream.getline(Seq,DEF_readSeqLengthMax+1); //extract sequence
 
     Lread=(uint) readInStream.gcount();
-    if (Lread<=1) {
+    if (Lread<1) {
         ostringstream errOut;
         errOut << "EXITING because of FATAL ERROR in reads input: short read sequence line: " << Lread <<"\n";
         errOut << "Read Name="<<readName<<"\n";

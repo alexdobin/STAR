@@ -9,6 +9,8 @@
 
 #include <memory>
 
+class ReadAlign;
+
 class ChimericAlign
 {//
     public:
@@ -20,7 +22,7 @@ class ChimericAlign
         uint chimJ1, chimJ2, chimRepeat1, chimRepeat2;
         int chimMotif, chimStr, chimScore;
         
-        ChimericAlign(ChimericSegment &seg1in, ChimericSegment &seg2in, int chimScoreIn, Genome &genomeIn); //allocate
+        ChimericAlign(ChimericSegment &seg1in, ChimericSegment &seg2in, int chimScoreIn, Genome &genomeIn, ReadAlign *RAin); //allocate
         void chimericJunctionOutput(fstream &outStream, uint chimN);
         void chimericStitching(char *genSeq, char *readSeq);
         bool chimericCheck();
@@ -28,6 +30,7 @@ class ChimericAlign
         bool stitchingDone;
         
     private:
+        ReadAlign *RA;
         Parameters &P;
         ParametersChimeric &pCh;
         Genome &mapGen;

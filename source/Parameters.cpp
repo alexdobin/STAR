@@ -50,7 +50,9 @@ Parameters::Parameters() {//initalize parameters info
     //read
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readFilesType", &readFilesType));
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readFilesIn", &readFilesIn));
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "readFilesPrefix", &readFilesPrefix));
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readFilesCommand", &readFilesCommand));
+    
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "readMatesLengthsIn", &readMatesLengthsIn));
     parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "readMapNumber", &readMapNumber));
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readNameSeparator", &readNameSeparator));
@@ -956,6 +958,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     if (outSAMattrRG.size()>0 && !outSAMattrPresent.RG) {
         outSAMattrOrder.push_back(ATTR_RG);
         outSAMattrOrderQuant.push_back(ATTR_RG);
+        outSAMattrPresent.RG=true;
         inOut->logMain << "WARNING --outSAMattrRG defines a read group, therefore STAR will output RG attribute" <<endl;
     } else if (outSAMattrRG.size()==0 && outSAMattrPresent.RG) {
             ostringstream errOut;

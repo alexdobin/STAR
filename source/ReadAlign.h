@@ -44,7 +44,7 @@ class ReadAlign
         uint Lread, readLength[MAX_N_MATES], readLengthOriginal[MAX_N_MATES], readLengthPair, readLengthPairOriginal;
         intScore maxScoreMate[MAX_N_MATES];
 
-        
+        uint readFilesIndex;
     private:
         Parameters& P; //pointer to the parameters, will be initialized on construction
 
@@ -78,7 +78,7 @@ class ReadAlign
         Transcript** trArrayPointer; //linear array of transcripts to store all of them from all windows
 
         //read
-        uint iReadAll, iMate, readFilesIndex;
+        uint iReadAll, iMate;
         char readFilter; //Illumina not passed Y/N
         bool revertStrand; //what to do with the strand, according to strandType and iMate
         uint clip3pNtotal[MAX_N_MATES], clip5pNtotal[MAX_N_MATES], clip3pAdapterN[MAX_N_MATES]; //total number of trimmed bases from 5p,3p

@@ -1,7 +1,7 @@
 #include "ChimericAlign.h"
 
-ChimericAlign::ChimericAlign(ChimericSegment &seg1in, ChimericSegment &seg2in, int chimScoreIn, Genome &genomeIn) 
-                              : seg1(seg1in), seg2(seg2in),chimScore(chimScoreIn), P(seg1in.P), pCh(P.pCh), mapGen(genomeIn) {
+ChimericAlign::ChimericAlign(ChimericSegment &seg1in, ChimericSegment &seg2in, int chimScoreIn, Genome &genomeIn, ReadAlign *RAin) 
+                              : seg1(seg1in), seg2(seg2in),chimScore(chimScoreIn), P(seg1in.P), pCh(P.pCh), mapGen(genomeIn), RA(RAin) {
     stitchingDone=false;
     
     al1=&seg1.align;

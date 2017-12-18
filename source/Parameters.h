@@ -52,16 +52,18 @@ class Parameters {
         //read parameters
         vector <string> readFilesType;
         int readFilesTypeN;
+        string readFilesPrefix;
+        vector <string> readFilesIn, readFilesInTmp;
+        uint32 readFilesN;
+        vector <vector <string> > readFilesNames;
+        vector <string> readFilesCommand;
+        int readFilesIndex;
+        pid_t readFilesCommandPID[MAX_N_MATES];
+
         uint readMapNumber;
         uint iReadAll;
-        int readFilesIndex;
-        uint32 readFilesN;
-        vector <string> readFilesIn, readFilesInTmp;
-        vector <vector <string> > readFilesNames;
         uint readNmates;
         string readMatesLengthsIn;
-        vector <string> readFilesCommand;
-        pid_t readFilesCommandPID[MAX_N_MATES];
 
         vector <string> readNameSeparator;
         vector <char> readNameSeparatorChar;

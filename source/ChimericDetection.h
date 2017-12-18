@@ -7,6 +7,8 @@
 #include "ChimericAlign.h"
 #include "Genome.h"
 
+class ReadAlign;
+
 class ChimericDetection {
     public:
         uint chimN;
@@ -14,10 +16,11 @@ class ChimericDetection {
         bool chimRecord;
         int chimScoreBest;
                 
-        ChimericDetection(Parameters &Pin, Transcript ***trAll, uint *nWinTr, char** Read1in, Genome &genomeIn, fstream &ostreamChimJunctionIn);
+        ChimericDetection(Parameters &Pin, Transcript ***trAll, uint *nWinTr, char** Read1in, Genome &genomeIn, fstream &ostreamChimJunctionIn, ReadAlign *RA);
         bool chimericDetectionMult(uint nWin, uint *readLengthIn);
         
     private:
+        ReadAlign *RA;
         Parameters &P;
         Transcript ***trAll;
         uint nW, *nWinTr;
