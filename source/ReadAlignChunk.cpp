@@ -14,6 +14,9 @@ ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome 
     };
 
     RA = new ReadAlign(P, mapGen, chunkTr, iChunk);//new local copy of RA for each chunk
+    if (P.wasp.yes)
+        RA->waspRA= new ReadAlign(Pin,genomeIn,TrIn,iChunk);
+
 
     RA->iRead=0;
 

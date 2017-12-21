@@ -55,11 +55,10 @@ class Transcript {
         uint lIns; //total genomic insertion length
         
         uint nUnique, nAnchor; //number of unique pieces in the alignment, number of anchor pieces in the alignment   
-        
-        
-        vector <int32> snpInd;
-        vector <int32> snpLoci;
-        vector <char> snpGt;
+                
+        vector <int32> varInd;
+        vector <int32> varGenCoord, varReadCoord ;
+        vector <char> varAllele;
 
         Transcript(); //resets to 0
         void reset(); //reset to 0

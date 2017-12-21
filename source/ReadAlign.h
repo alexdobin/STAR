@@ -45,6 +45,11 @@ class ReadAlign
         intScore maxScoreMate[MAX_N_MATES];
 
         uint readFilesIndex;
+        
+        ReadAlign *waspRA; //ReadAlign for alternative WASP alignment
+        int waspType; //alignment ASE-WASP type
+
+        
     private:
         Parameters& P; //pointer to the parameters, will be initialized on construction
 
@@ -136,6 +141,7 @@ class ReadAlign
 
         Transcript* trMult[MAX_N_MULTMAP];//multimapping transcripts
         Transcript *alignTrAll;//alignments to transcriptome
+        
 
         void resetN();//resets the counters to 0
         void multMapSelect();
@@ -166,6 +172,10 @@ class ReadAlign
 
 
         uint quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT);
+        
+        void copyRead(ReadAlign&);
+        void waspMap();
+        
 };
 
 #endif

@@ -69,7 +69,8 @@ int ReadAlign::oneRead() {//process one read: load, map, write
 
     //map the read
     mapOneRead();
-
+    waspMap();
+    
     #ifdef OFF_BEFORE_OUTPUT
         #warning OFF_BEFORE_OUTPUT
         return 0;

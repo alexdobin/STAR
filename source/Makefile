@@ -30,7 +30,8 @@ CFLAGS := -O3 -pipe -Wall -Wextra $(CFLAGS)
 ##########################################################################################################
 
 OBJECTS = SharedMemory.o PackedArray.o SuffixArrayFuns.o STAR.o Parameters.o InOutStreams.o SequenceFuns.o Genome.o Stats.o \
-        Transcript.o Transcript_alignScore.o Transcript_variationAdjust.o Transcript_generateCigarP.o Chain.o \
+        Transcript.o Transcript_alignScore.o Transcript_generateCigarP.o Chain.o \
+        Transcript_variationAdjust.o Variation.o ReadAlign_waspMap.o \
         ReadAlign.o ReadAlign_storeAligns.o ReadAlign_stitchPieces.o ReadAlign_multMapSelect.o ReadAlign_mapOneRead.o readLoad.o \
 	ReadAlignChunk.o ReadAlignChunk_processChunks.o ReadAlignChunk_mapChunk.o \
 	OutSJ.o outputSJ.o blocksOverlap.o ThreadControl.o sysRemoveDir.o \
@@ -51,7 +52,7 @@ OBJECTS = SharedMemory.o PackedArray.o SuffixArrayFuns.o STAR.o Parameters.o InO
         Parameters_openReadsFiles.cpp Parameters_closeReadsFiles.cpp Parameters_readSAMheader.o \
         BAMoutput.o BAMfunctions.o ReadAlign_alignBAM.o BAMbinSortByCoordinate.o signalFromBAM.o bamRemoveDuplicates.o BAMbinSortUnmapped.o \
         bam_cat.o \
-        Variation.o serviceFuns.o \
+        serviceFuns.o \
         GlobalVariables.cpp
 
 SOURCES := $(wildcard *.cpp) $(wildcard *.c)

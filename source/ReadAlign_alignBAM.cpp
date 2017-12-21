@@ -73,7 +73,7 @@ int bamAttrArrayWrite(string &attr, const char* tagName, char* attrArray ) {
     memcpy(attrArray+3,attr.c_str(),attr.size()+1);//copy string data including \0
     return 3+attr.size()+1;
 };
-int bamAttrArrayWrite(vector<char> &attr, const char* tagName, char* attrArray ) {
+int bamAttrArrayWrite(const vector<char> &attr, const char* tagName, char* attrArray ) {
     attrArray[0]=tagName[0];attrArray[1]=tagName[1];
     attrArray[2]='B';
     attrArray[3]='c';
@@ -81,7 +81,7 @@ int bamAttrArrayWrite(vector<char> &attr, const char* tagName, char* attrArray )
     memcpy(attrArray+4+sizeof(int32),attr.data(),attr.size());//copy array data
     return 4+sizeof(int32)+attr.size();
 };
-int bamAttrArrayWrite(vector<int32> &attr, const char* tagName, char* attrArray ) {
+int bamAttrArrayWrite(const vector<int32> &attr, const char* tagName, char* attrArray ) {
     attrArray[0]=tagName[0];attrArray[1]=tagName[1];
     attrArray[2]='B';
     attrArray[3]='i';
@@ -420,19 +420,40 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                         break;
                     case ATTR_RG:
                         attrN+=bamAttrArrayWrite(P.outSAMattrRG.at(readFilesIndex),"RG",attrOutArray+attrN);                    
-                        break;                    
-                    case ATTR_vL:
+                        break;
+                    case ATTR_rB:
+                        {
+                            vector <int32> rb;
+                            for (uint ii=iEx1;ii<=iEx2;ii++) {
+                                rb.push_back( (int32) trOut.exons[ii][EX_R]+1 );
+                                rb.push_back( (int32) trOut.exons[ii][EX_R]+trOut.exons[ii][EX_L]);
+                                rb.push_back( (int32) (trOut.exons[ii][EX_G]-mapGen.chrStart[trOut.Chr]+1) );
+                                rb.push_back( (int32) (trOut.exons[ii][EX_G]-mapGen.chrStart[trOut.Chr]+trOut.exons[ii][EX_L]) );                                
+                            };
+                            attrN+=bamAttrArrayWrite(rb,"rB",attrOutArray+attrN);                    
+                        };
+                        break;                             
+                    case ATTR_vG:
                     {
-                        vector <int32> v1=trOut.snpLoci;
-                        attrN+=bamAttrArrayWrite(v1,"vL",attrOutArray+attrN);                                        
+                        const vector <int32> &v1=trOut.varGenCoord;
+                        if (v1.size()>0)
+                            attrN+=bamAttrArrayWrite(v1,"vG",attrOutArray+attrN);                                        
                         break;
                     };
-                    case ATTR_vT:
+                    case ATTR_vA:
                     {
-                        vector <char> v1=trOut.snpGt;
-                        attrN+=bamAttrArrayWrite(v1,"vT",attrOutArray+attrN);                                        
+                        const vector <char> &v1=trOut.varAllele;
+                        if (v1.size()>0)
+                            attrN+=bamAttrArrayWrite(v1,"vA",attrOutArray+attrN);                                        
                         break;
                     };
+                    case ATTR_vW:
+                    {
+                        if (waspType>=0)
+                            attrN+=bamAttrArrayWrite( (int32) waspType, "vW", attrOutArray+attrN );                                        
+                        break;
+                    };
+                    
                     case ATTR_ch:
                         if (alignType<=-10) 
                         {//chimeric alignment

@@ -227,6 +227,10 @@ Parameters::Parameters() {//initalize parameters info
     //variation
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "varVCFfile", &var.vcfFile)); 
 
+    //WASP
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "waspOutputMode", &wasp.outputMode)); 
+
+    
     //quant
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "quantMode", &quant.mode));
     parArray.push_back(new ParameterInfoScalar <int>     (-1, -1, "quantTranscriptomeBAMcompression", &quant.trSAM.bamCompression));
@@ -856,6 +860,29 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         var.yes=true;
     };         
         
+    //WASP
+    wasp.yes=false;
+    wasp.SAMtag=false;
+    if (wasp.outputMode=="SAMtag") {
+        wasp.yes=true;
+        wasp.SAMtag=true;
+    } else if (wasp.outputMode=="None") {
+        //nothing to do
+    } else {
+        ostringstream errOut;
+        errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented --waspOutputMode option: "<<wasp.outputMode <<"\n";
+        errOut <<"SOLUTION: re-run STAR with allowed --waspOutputMode options: None or SAMtag\n";
+        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
+
+    if (wasp.yes && !var.yes) {
+        ostringstream errOut;
+        errOut <<"EXITING because of FATAL INPUT ERROR: --waspOutputMode option requires VCF file: "<<wasp.outputMode <<"\n";
+        errOut <<"SOLUTION: re-run STAR with --waspOutputMode ... and --varVCFfile /path/to/file.vcf\n";
+        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
+        
+    
     //outSAMattributes
     outSAMattrPresent.NH=false;//TODO re-write as class with constructor?
     outSAMattrPresent.HI=false;
@@ -868,10 +895,12 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     outSAMattrPresent.RG=false;
     outSAMattrPresent.MC=false;    
     outSAMattrPresent.XS=false;
-    outSAMattrPresent.vT=false;
-    outSAMattrPresent.vL=false;
+    outSAMattrPresent.vA=false;
+    outSAMattrPresent.vG=false;
+    outSAMattrPresent.vW=false;
     outSAMattrPresent.ch=false;
-
+    outSAMattrPresent.rB=false;
+            
     //for quant SAM output only NH and HI flags
     outSAMattrPresentQuant=outSAMattrPresent;
     outSAMattrPresentQuant.NH=true;
@@ -882,7 +911,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     vector<string> vAttr1;
     if (outSAMattributes.at(0)=="None") {
     } else if (outSAMattributes.at(0)=="All"){
-        vAttr1={"NH","HI","AS","nM","NM","MD","jM","jI","MC","ch"};
+        vAttr1={"NH","HI","AS","nM","NM","MD","jM","jI","rB","MC","ch"};
     } else if (outSAMattributes.at(0)=="Standard"){
         vAttr1={"NH","HI","AS","nM"};
     } else {
@@ -914,16 +943,23 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         } else if (vAttr1.at(ii)== "jI") {
             outSAMattrOrder.push_back(ATTR_jI);
             outSAMattrPresent.jI=true;
-        } else if (vAttr1.at(ii)== "vT") {
-            outSAMattrOrder.push_back(ATTR_vT);
-            outSAMattrPresent.vT=true;
-        } else if (vAttr1.at(ii)== "vL") {
-            outSAMattrOrder.push_back(ATTR_vL);
-            outSAMattrPresent.vL=true;            
+        } else if (vAttr1.at(ii)== "vA") {
+            outSAMattrOrder.push_back(ATTR_vA);
+            outSAMattrPresent.vA=true;
+        } else if (vAttr1.at(ii)== "vG") {
+            outSAMattrOrder.push_back(ATTR_vG);
+            outSAMattrPresent.vG=true; 
+        } else if (vAttr1.at(ii)== "vW") {
+            outSAMattrOrder.push_back(ATTR_vW);
+            outSAMattrPresent.vW=true;              
         } else if (vAttr1.at(ii)== "RG") {
             outSAMattrOrder.push_back(ATTR_RG);
             outSAMattrOrderQuant.push_back(ATTR_RG);
             outSAMattrPresent.RG=true;
+        } else if (vAttr1.at(ii)== "rB") {
+            outSAMattrOrder.push_back(ATTR_rB);
+            outSAMattrOrderQuant.push_back(ATTR_rB);
+            outSAMattrPresent.rB=true;            
         } else if (vAttr1.at(ii)== "ch") {
             outSAMattrOrder.push_back(ATTR_ch);
             outSAMattrOrderQuant.push_back(ATTR_ch);
@@ -947,14 +983,20 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         };
     };
     
-    if  (!var.yes && (outSAMattrPresent.vT | outSAMattrPresent.vL))
-    {
+    if  (!var.yes && (outSAMattrPresent.vA | outSAMattrPresent.vG)) {
         ostringstream errOut;
-        errOut <<"EXITING because of fatal PARAMETER error: --outSAMattributes contains vT and/or vL tag(s), but --varVCFfile is not set\n";
-        errOut <<"SOLUTION: re-run STAR with a --varVCFfile option, or without vT/vL tags in --outSAMattributes\n";
+        errOut <<"EXITING because of fatal PARAMETER error: --outSAMattributes contains vA and/or vG tag(s), but --varVCFfile is not set\n";
+        errOut <<"SOLUTION: re-run STAR with a --varVCFfile option, or without vA/vG tags in --outSAMattributes\n";
         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);        
     };
-
+    
+    if (!wasp.yes && outSAMattrPresent.vW) {
+        ostringstream errOut;
+        errOut <<"EXITING because of fatal PARAMETER error: --outSAMattributes contains vW tag, but --waspOutputMode is not set\n";
+        errOut <<"SOLUTION: re-run STAR with a --waspOutputMode option, or without vW tags in --outSAMattributes\n";
+        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);        
+    };
+    
     if (outSAMattrRG.size()>0 && !outSAMattrPresent.RG) {
         outSAMattrOrder.push_back(ATTR_RG);
         outSAMattrOrderQuant.push_back(ATTR_RG);
@@ -972,6 +1014,13 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         inOut->logMain << "WARNING --outSAMstrandField=intronMotif, therefore STAR will output XS attribute" <<endl;
     };
 
+    if (wasp.yes && !outSAMattrPresent.vW) {
+        outSAMattrOrder.push_back(ATTR_vW);
+        outSAMattrOrderQuant.push_back(ATTR_vW);
+        outSAMattrPresent.vW=true;
+        inOut->logMain << "WARNING --waspOutputMode is set, therefore STAR will output vW attribute" <<endl;
+    };    
+    
     //chimeric
     if (pCh.out.type.at(0)=="WithinBAM")
     {

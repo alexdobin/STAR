@@ -128,7 +128,7 @@ class Parameters {
         string outSAMheaderCommentFile;
         int outSAMmapqUnique;
 
-        struct {bool NH,HI,AS,NM,MD,nM,jM,jI,RG,XS,vL,vT,ch,MC;} outSAMattrPresent, outSAMattrPresentQuant;
+        struct {bool NH,HI,AS,NM,MD,nM,jM,jI,RG,XS,rB,vG,vA,vW,ch,MC;} outSAMattrPresent, outSAMattrPresentQuant;
 
         vector <int> outSAMattrOrder, outSAMattrOrderQuant;
         int outBAMcompression;
@@ -287,6 +287,13 @@ class Parameters {
             bool yes;
             string vcfFile;
         } var;
+        
+        struct
+        {
+            bool yes;
+            bool SAMtag;
+            string outputMode;
+        } wasp;
 
         //chimeric
         ParametersChimeric pCh;

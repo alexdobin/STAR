@@ -239,10 +239,14 @@ outSAMstrandField                               None
 
 outSAMattributes                Standard
     string: a string of desired SAM attributes, in the order desired for the output SAM
-                                NH HI AS nM NM MD jM jI XS ch ... any combination in any order
-                                Standard   ... NH HI AS nM
-                                All        ... NH HI AS nM NM MD jM jI ch
-                                None       ... no attributes
+                                NH HI AS nM NM MD jM jI XS MC ch ... any combination in any order
+                                Standard    ... NH HI AS nM
+                                All         ... NH HI AS nM NM MD jM jI MC ch
+                                None        ... no attributes
+                                vW          ... 0/1 - alignment does not pass / passes WASP filtering. Requires --waspOutputMode SAMtag .
+                                vG          ... genomic coordiante of the variant overlapped by the read
+                                vR          ... read coordinate of the variant
+                                vA          ... variant allele
 
 outSAMattrIHstart               1
     int>=0:                     start value for the IH attribute. 0 may be required by some downstream software, such as Cufflinks or StringTie.
@@ -625,3 +629,8 @@ twopassMode                 None
 twopass1readsN              -1
     int: number of reads to process for the 1st step. Use very large number (or default -1) to map all reads in the first step.
 
+
+### WASP parameters
+waspOutputMode                  None
+    string: WASP allele-specific output type
+                            SAMtag      ... add WASP tags to the alignments that pass WASP filtering

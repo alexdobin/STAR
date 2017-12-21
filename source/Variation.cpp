@@ -64,6 +64,7 @@ void scanVCF(ifstream& vcf, bool load, Parameters& P, SNP& snp, vector <uint> &c
                 } else if (altV.at( atoi(&sample.at(0)) ).at(0)==ref.at(0) && altV.at( atoi(&sample.at(2)) ).at(0)==ref.at(0))
                 {
                     //both alleles are reference, no need to do anything
+                    //this is a strange case in VCF when ALT allele(s) are equal to REF
                 } else
                 {
                     if (load)
@@ -89,8 +90,8 @@ void Variation::loadVCF(string fileIn)
 {
     time_t rawTime;
     time(&rawTime);
-    P.inOut->logMain     << timeMonthDayTime(rawTime) <<" ..... Loading variations VCF GTF\n" <<flush;
-    *P.inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ..... Loading variations VCF GTF\n" <<flush;
+    P.inOut->logMain     << timeMonthDayTime(rawTime) <<" ..... loading variations VCF\n" <<flush;
+    *P.inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ..... loading variations VCF\n" <<flush;
         
     ifstream & vcf = ifstrOpen(fileIn, ERROR_OUT, "SOLUTION: check the path and permissions of the VCF file: "+fileIn, P);
     scanVCF(vcf, false, P, snp, chrStart, chrNameIndex);
