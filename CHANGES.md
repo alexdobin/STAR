@@ -1,3 +1,4 @@
+* Fixed a bug in chimeric detection code which sometimes led to uninitialized memory access. The chimeric output may change for a very small number of reads.
 * Implemented read group ID output as the last column of the Chimeric.out.junction file.
 * Implemented --readFilesPrefix option for specifying prefix (e.g. directory path) for the file names in --readFilesIn .
 * Implemented stanard SAM attrbiute "MC" to output the mate's CIGAR. Add MC to the list of attributes in the --outSAMattribute option.
