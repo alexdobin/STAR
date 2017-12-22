@@ -449,7 +449,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                     };
                     case ATTR_vW:
                     {
-                        if (waspType>=0)
+                        if (waspType!=-1)
                             attrN+=bamAttrArrayWrite( (int32) waspType, "vW", attrOutArray+attrN );                                        
                         break;
                     };

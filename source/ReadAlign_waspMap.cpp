@@ -11,6 +11,11 @@ void ReadAlign::waspMap() {
     if (trBest->varAllele.size()==1) {
         
         int iv=0;
+        
+        if (trBest->varAllele.at(iv)>2) {//mismatched allele, i.e. !=A1 && !=A2
+            waspType=-2;
+            return;
+        };
 
         //we assume the homo-vars are already excluded
         char nt2=mapGen.Var->snp.nt[trBest->varInd.at(iv)][3-trBest->varAllele.at(iv)]; //the other allele
@@ -38,7 +43,15 @@ void ReadAlign::waspMap() {
             waspType=1;
         };
     } else {
-        waspType=2;
+        if (trBest->varAllele.size()==2 && trBest->varGenCoord.at(0)==trBest->varGenCoord.at(1)) {
+            if (trBest->varAllele.at(0)==trBest->varAllele.at(1)) {
+                waspType=2;
+            } else {
+                waspType=20;
+            };
+        } else {
+            waspType=3;
+        };
     };
     
     return;
