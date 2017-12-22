@@ -35,8 +35,10 @@ void ChimericAlign::chimericStitching(char *genSeq, char *readSeq) {
 
         uint jR, jRbest=0;
         int jScore=0,jMotif=0,jScoreBest=-999999,jScoreJ=0;
-        for (jR=0; jR<roStart1+a2.exons[ex2][EX_L]-roStart0-1; jR++) {//scan through the exons to find a canonical junction, and check for mismatches
-
+        uint jRmax = roStart1+a2.exons[ex2][EX_L];
+        jRmax = jRmax>roStart0 ? jRmax-roStart0-1 : 0;
+        for (jR=0; jR<jRmax; jR++) {//scan through the exons to find a canonical junction, and check for mismatches
+        
             if (jR==a1.readLength[0]) jR++; //skip the inter-mate base
 
             char bR=readSeq[roStart0+jR];
