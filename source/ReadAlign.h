@@ -47,7 +47,7 @@ class ReadAlign
         uint readFilesIndex;
         
         ReadAlign *waspRA; //ReadAlign for alternative WASP alignment
-        int waspType; //alignment ASE-WASP type
+        int waspType, waspType1; //alignment ASE-WASP type and
 
         
     private:
