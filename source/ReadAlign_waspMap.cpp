@@ -1,14 +1,30 @@
 #include "ReadAlign.h"
 
 void ReadAlign::waspMap() {
-    waspType=-1;
-    if (!P.wasp.yes || nTr>1 || trBest->varAllele.size()==0)
+    if (!P.wasp.yes || nTr>1 || trBest->varAllele.size()==0) {//no variants, vW tag will not be output
+        waspType=-1;
         return;
+    } else if (nTr>1) {//multimapping read
+        waspType=2;
+        return;
+    } else if (trBest->varAllele.size()>10) {//multimapping read
+        waspType=7;
+        return;
+    };
+        
     
     waspRA->copyRead(*this);
-    waspType=0;
 
     vector <char> vA=trBest->varAllele;
+
+    for (const auto& a : vA) {
+        if (a>3) {//read has N for the variant, drop it
+            waspType=3;
+            return;
+        };
+    };
+         
+
     
     vector<vector<char>> vvA {{}}; //all combinations
     for (const auto& u : vA) {//cycle over vars, each time add new variant by adding 2 variants to each of the existing combinations
@@ -45,15 +61,24 @@ void ReadAlign::waspMap() {
 
             waspRA->mapOneRead();
 
-            if (waspRA->unmapType==-1 && waspRA->nTr==1 && waspRA->trBest->nExons==trBest->nExons) {
+            if (waspRA->unmapType!=-1) {
+                waspType=4;
+                return;
+            } else if (waspRA->nTr>1) {
+                waspType=5;
+                return;
+            } else if (waspRA->trBest->nExons!=trBest->nExons) {
+                waspType=6;
+                return;
+            } else {
                 for (uint ii=0; ii<trBest->nExons; ii++) {               
                     for (uint jj=0; jj<=2; jj++) {
-                        if (trBest->exons[ii][jj]!=waspRA->trBest->exons[ii][jj])
+                        if (trBest->exons[ii][jj]!=waspRA->trBest->exons[ii][jj]) {
+                            waspType=6;
                             return;//this combination maps to a different place, return with waspType 0 (set above)
+                        };
                     };
                 };
-            } else {
-                return;//this combination does not map, or multi-maps, or has a different number of exons, return with waspType=0 (set above)
             };
     }; 
     waspType=1; //all combinations resulted in the same alignment

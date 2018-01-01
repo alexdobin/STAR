@@ -29,17 +29,21 @@ int Transcript::variationAdjust(const Genome &mapGen, char *R, char **Read1, cha
                 char ntR=R[varReadCoord.back()];//nt of the read in the SNP position, already trnasformed to + genome strand
                 
                 uint8 igt;
-                for (igt=1; igt<3; igt++)
-                {//1st or 2nd allele, =3 of none
-                    if (Var.snp.nt[isnp][igt]==ntR)
-                    {
-                        break;
+                if (ntR>3) {
+                    igt=4;
+                } else {
+                    for (igt=1; igt<3; igt++) {//1st or 2nd allele, =3 of none
+                        if (Var.snp.nt[isnp][igt]==ntR) {
+                            break;
+                        };
                     };
                 };
+
                 //if (ntR == Var.snp.nt[isnp][0])
                 //{//mark snp that agrees with the reference
                 //    igt*=10;
                 //};
+
                 varAllele.push_back(igt);
                 
                 if (igt<3 && ntR != Var.snp.nt[isnp][0])

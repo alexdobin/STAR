@@ -267,7 +267,7 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
                             Score1+=( R[rAend+Ins+jR1]==G[gAend+jR1] ) ? -int(Q[rAend+Ins+jR1]):+int(Q[rAend+Ins+jR1]);
                         };
 
-                        if (Score1>maxScore1) {
+                        if (Score1>maxScore1) {//TODO: equal sign (>=) would flush insertions to the right. Also need to do it even if gGap<=0
                             maxScore1=Score1;
                             jR=jR1;
                         };
