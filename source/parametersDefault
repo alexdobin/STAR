@@ -240,9 +240,10 @@ outSAMstrandField                               None
 outSAMattributes                Standard
     string: a string of desired SAM attributes, in the order desired for the output SAM
                                 NH HI AS nM NM MD jM jI XS MC ch ... any combination in any order
+                                None        ... no attributes
                                 Standard    ... NH HI AS nM
                                 All         ... NH HI AS nM NM MD jM jI MC ch
-                                None        ... no attributes
+                                rB          ... alignment block read/genomic coordinates
                                 vW          ... 0/1 - alignment does not pass / passes WASP filtering. Requires --waspOutputMode SAMtag .
                                 vG          ... genomic coordiante of the variant overlapped by the read
                                 vR          ... read coordinate of the variant
@@ -631,6 +632,6 @@ twopass1readsN              -1
 
 
 ### WASP parameters
-waspOutputMode                  None
-    string: WASP allele-specific output type
+waspOutputMode              None
+    string: WASP allele-specific output type. This is re-implemenation of the original WASP mappability filtering by Bryce van de Geijn, Graham McVicker, Yoav Gilad & Jonathan K Pritchard. Please cite the original WASP paper: Nature Methods 12, 1061–1063 (2015), https://www.nature.com/articles/nmeth.3582 .
                             SAMtag      ... add WASP tags to the alignments that pass WASP filtering

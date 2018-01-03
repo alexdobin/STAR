@@ -1,3 +1,5 @@
+* Implemented --waspOutputMode option for filtering allele specific alignments. This is re-implemenation of the original WASP algorithm by Bryce van de Geijn, Graham McVicker, Yoav Gilad & Jonathan K Pritchard. Please cite the original WASP paper: Nature Methods 12, 1061–1063 (2015), https://www.nature.com/articles/nmeth.3582 .
+
 * Fixed a bug in chimeric detection code which sometimes led to uninitialized memory access. The chimeric output may change for a very small number of reads.
 * Implemented read group ID output as the last column of the Chimeric.out.junction file.
 * Implemented --readFilesPrefix option for specifying prefix (e.g. directory path) for the file names in --readFilesIn .
