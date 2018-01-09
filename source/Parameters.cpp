@@ -102,6 +102,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "outSAMheaderCommentFile", &outSAMheaderCommentFile));
     parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "outBAMcompression", &outBAMcompression));
     parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "outBAMsortingThreadN", &outBAMsortingThreadN));
+    parArray.push_back(new ParameterInfoScalar <uint32>        (-1, -1, "outBAMsortingBinsN", &outBAMsortingBinsN));
     parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "outSAMfilter", &outSAMfilter.mode));
     parArray.push_back(new ParameterInfoScalar <uint>     (-1, -1, "outSAMmultNmax", &outSAMmultNmax));
     parArray.push_back(new ParameterInfoScalar <uint>     (-1, -1, "outSAMattrIHstart", &outSAMattrIHstart));
@@ -601,7 +602,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                 } else {
                     outBAMsortingThreadNactual=outBAMsortingThreadN;
                 };
-                outBAMcoordNbins=max(outBAMsortingThreadNactual*3,10);
+                outBAMcoordNbins=max((uint32)outBAMsortingThreadNactual*3,outBAMsortingBinsN);
                 outBAMsortingBinStart= new uint64 [outBAMcoordNbins];
                 outBAMsortingBinStart[0]=1;//this initial value means that the bin sizes have not been determined yet
 

@@ -135,6 +135,7 @@ class Parameters {
         vector <string> outSAMtype;
         bool outBAMunsorted, outBAMcoord, outSAMbool;
         uint32 outBAMcoordNbins;
+        uint32 outBAMsortingBinsN;//user-defined number of bins for sorting
         string outBAMsortTmpDir;
         
 //         string bamRemoveDuplicatesType;

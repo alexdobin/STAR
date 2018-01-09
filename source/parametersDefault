@@ -315,6 +315,9 @@ outBAMcompression       1
 outBAMsortingThreadN    0
     int: >=0: number of threads for BAM sorting. 0 will default to min(6,--runThreadN).
 
+outBAMsortingBinsN      50
+    int: >0:  number of genome bins fo coordinate-sorting
+
 ### BAM processing
 
 bamRemoveDuplicatesType  -

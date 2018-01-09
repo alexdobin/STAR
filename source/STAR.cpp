@@ -375,7 +375,7 @@ int main(int argInN, char* argIn[]) {
 
         //check max size needed for sorting
         uint maxMem=0;
-        for (uint32 ibin=0; ibin<nBins-1; ibin++) {//check akk bins
+        for (uint32 ibin=0; ibin<nBins-1; ibin++) {//check all bins
             uint binS=0;
             for (int it=0; it<P.runThreadN; it++) {//collect sizes from threads
                 binS += RAchunk[it]->chunkOutBAMcoord->binTotalBytes[ibin]+24*RAchunk[it]->chunkOutBAMcoord->binTotalN[ibin];
