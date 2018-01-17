@@ -1,7 +1,7 @@
 #include "ReadAlign.h"
 
 void ReadAlign::waspMap() {
-    if (!P.wasp.yes || nTr>1 || trBest->varAllele.size()==0) {//no variants, vW tag will not be output
+    if (!P.wasp.yes || trBest->varAllele.size()==0) {//no variants, vW tag will not be output
         waspType=-1;
         return;
     } else if (nTr>1) {//multimapping read
