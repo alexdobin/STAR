@@ -1,7 +1,7 @@
 #include "OutSJ.h"
 #include "ErrorWarning.h"
 
-OutSJ::OutSJ (uint nSJmax, Parameters &Pin, Genome &genomeIn) : P(Pin), mapGen(genomeIn), oneSJ(mapGen) {//do I need P?
+OutSJ::OutSJ (uint nSJmax, Parameters &Pin, Genome &genomeIn) : P(Pin), mapGen(genomeIn), oneSJ(genomeIn) {//do I need P?
 
     data = new char [oneSJ.dataSize*nSJmax]; //allocate big array of SJ loci and properties
     memset(data,0,oneSJ.dataSize*nSJmax);
@@ -74,7 +74,7 @@ void Junction::junctionPointer(char* sjPoint, uint isj) {//
 };
 
 void Junction::outputStream(ostream &outStream, Parameters& P) {
-    uint sjChr=mapGen.chrBin[*start >> P.pGe.gChrBinNbits];
+    uint sjChr=mapGen.chrBin[*start >> mapGen.pGe.gChrBinNbits];
     outStream << mapGen.chrName.at(sjChr) <<"\t"<< *start + 1 - mapGen.chrStart[sjChr] <<"\t"<<*start + *gap - mapGen.chrStart[sjChr] \
             <<"\t"<< int(*strand) <<"\t"<< int(*motif) <<"\t"<< int (*annot) <<"\t"<< *countUnique <<"\t"<< *countMultiple \
             <<"\t"<< *overhangLeft << endl;
@@ -92,9 +92,12 @@ void Junction::collapseOneSJ(char* isj1P, char* isjP, Parameters& P) {//collapse
     };
 
     if (*(isj1P+motifP) != *(isjP+motifP) ) {
+            uint s1=*(uint*)(isj1P+startP);
+            uint c1=mapGen.chrBin[ s1 >> mapGen.pGe.gChrBinNbits];
+            
             stringstream errOut;
             errOut <<"EXITING becaues of BUG: different motifs for the same junction while collapsing junctions\n" \
-                   <<*(uint*)(isj1P+startP) <<" "<<*(uint32*)(isj1P+gapP) <<" "<<int(*(char*)(isj1P+motifP)) <<" "<<int(*(char*)(isjP+motifP)) \
+                   << mapGen.chrName[c1] <<" "<< s1-mapGen.chrStart[c1]+1 <<" "<<s1-mapGen.chrStart[c1]+1 + *(uint32*)(isj1P+gapP) <<" "<<int(*(char*)(isj1P+motifP)) <<" "<<int(*(char*)(isjP+motifP)) \
                    <<" "<<int(*(char*)(isj1P+annotP)) <<" "<<int(*(char*)(isjP+annotP))<<"\n";
             exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_BUG, P);\
 //         *(isj1P+motifP) = *(isjP+motifP) ;

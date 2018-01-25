@@ -26,12 +26,7 @@
 #define SHM_projectID 23
 
 Genome::Genome (Parameters &Pin ): P(Pin), pGe(Pin.pGe), shmStart(NULL), sharedMemory(NULL) {
-    shmKey=ftok(pGe.gDir.c_str(),SHM_projectID);
-    
-    //final pGe.sjdbOverhang value has been determined
-    sjdbOverhang = pGe.sjdbOverhang;
-    sjdbLength = pGe.sjdbOverhang==0 ? 0 : pGe.sjdbOverhang*2+1;
-    
+    shmKey=ftok(pGe.gDir.c_str(),SHM_projectID);    
 };
 
 Genome::~Genome()
@@ -166,8 +161,8 @@ void Genome::genomeLoad(){//allocate and load Genome
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_GENOME_FILES, P);
     };
 
+    sjdbOverhang = pGe.sjdbOverhang;
     sjdbLength = pGe.sjdbOverhang==0 ? 0 : pGe.sjdbOverhang*2+1;
-
 
     P.inOut->logMain << "Started loading the genome: " << asctime (localtime ( &rawtime ))<<"\n"<<flush;
 
