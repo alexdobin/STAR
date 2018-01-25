@@ -1,18 +1,24 @@
 * Implemented --outBAMsortingBinsN option to control the number of sorting bins. Icnreasing this number reduces the amount of RAM required for sorting.
 * Implemented --waspOutputMode option for filtering allele specific alignments. This is re-implemenation of the original WASP algorithm by Bryce van de Geijn, Graham McVicker, Yoav Gilad & Jonathan K Pritchard. Please cite the original WASP paper: Nature Methods 12, 1061–1063 (2015), https://www.nature.com/articles/nmeth.3582 .
 
-* Fixed a bug in chimeric detection code which sometimes led to uninitialized memory access. The chimeric output may change for a very small number of reads.
+STAR 2.5.4a 2018/01/23
+======================
+
+### New features:
 * Implemented read group ID output as the last column of the Chimeric.out.junction file.
 * Implemented --readFilesPrefix option for specifying prefix (e.g. directory path) for the file names in --readFilesIn .
-* Implemented stanard SAM attrbiute "MC" to output the mate's CIGAR. Add MC to the list of attributes in the --outSAMattribute option.
-* Fixed a problem with --alignEndsProtrude implementation which prevented output of alignments with protruded ends.
+* Implemented standard SAM attribute "MC" to output the mate's CIGAR. Add MC to the list of attributes in the --outSAMattribute option.
 * Implemented the ability to input the reads from unmapped SAM/BAM file: --readFilesType SAM SE[PE] for single-end [paired-end] reads to read from the SAM file specified, as usual in --readFilesIn. For BAM files, in addition, specify --readFilesCommand samtools view -h .
-* Fixed a bug which set non-primary bit 0x100 in the SAM FLAG for unmapped mates.
 * Implemented --seedSplitMin option which was previously hardcoded at 12. his will allow mapping of mates shorter than 12nt.
-* Fixed a bug in liftOver command that output an extra field in the GTF file. 
-* Fixed a problem that can arise for very small genomes while using --alignIntronMax 1.
 * Implemented --outFilterIntronStrands None option to switch off filtering by strand consistency of junctions.
 * Added new scripts extras/scripts/mergeLogFinal.awk,mergeSuperContig.awk,sjMotif.m
+
+### Bug fixes:
+* Fixed a bug in chimeric detection code which sometimes led to uninitialized memory access. The chimeric output may change for a very small number of reads.
+* Fixed a problem with --alignEndsProtrude implementation which prevented the output of alignments with protruded ends.
+* Fixed a bug which set non-primary bit 0x100 in the SAM FLAG for unmapped mates.
+* Fixed a bug in liftOver command that output an extra field in the GTF file.
+* Fixed a problem that can arise for very small genomes while using --alignIntronMax 1.
 
 STAR 2.5.3a 2017/03/17
 ======================
