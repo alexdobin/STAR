@@ -8,7 +8,7 @@
 \begin{optTable}
 \optName{sysShell}
   \optValue{-}
-  \optLine{string: path to the shell binary, preferrably bash, e.g. /bin/bash.} 
+  \optLine{string: path to the shell binary, preferably bash, e.g. /bin/bash.}
 \begin{optOptTable}
   \optOpt{-}   \optOptLine{the default shell is executed, typically /bin/sh. This was reported to fail on some Ubuntu systems - then you need to specify path to bash.}
 \end{optOptTable}
@@ -344,7 +344,7 @@
 \begin{optTable}
 \optName{bamRemoveDuplicatesType}
   \optValue{-}
-  \optLine{string: mark duplicates in the BAM file, for now only works with (i) sorted BAM feeded with inputBAMfile, and (ii) for paired-end alignments only} 
+  \optLine{string: mark duplicates in the BAM file, for now only works with (i) sorted BAM fed with inputBAMfile, and (ii) for paired-end alignments only}
 \begin{optOptTable}
   \optOpt{-}   \optOptLine{no duplicate removal/marking}
   \optOpt{UniqueIdentical}   \optOptLine{mark all multimappers, and duplicate unique mappers. The coordinates, FLAG, CIGAR must be identical}
@@ -635,7 +635,7 @@
   \optLine{int{\textgreater}=0: minimum total (summed) score of the chimeric segments} 
 \optName{chimScoreDropMax}
   \optValue{20}
-  \optLine{int{\textgreater}=0: max drop (difference) of chimeric score (the sum of scores of all chimeric segements) from the read length} 
+  \optLine{int{\textgreater}=0: max drop (difference) of chimeric score (the sum of scores of all chimeric segments) from the read length}
 \optName{chimScoreSeparation}
   \optValue{10}
   \optLine{int{\textgreater}=0: minimum difference (separation) between the best chimeric score and the next one} 
