@@ -257,12 +257,10 @@ std::time(&timeStart);
     #ifdef OFF_BEFORE_STITCH
         #warning OFF_BEFORE_STITCH
         nW=0;
-        nTr=0;
         return;
     #endif
     //generate transcript for each window, choose the best
-    trInit->nWAmax=0;
-    trBest = trNext = trInit; //initialize next/best
+    trBest =trInit; //initialize next/best
     uint iW1=0;//index of non-empty windows
     uint trNtotal=0; //total number of recorded transcripts
 
@@ -280,7 +278,6 @@ std::time(&timeStart);
 
         for (uint ii=0;ii<nWA[iW];ii++) WAincl[ii]=false; //initialize mask
 
-        trInit->nWAmax=max(nWA[iW],trInit->nWAmax);
         trA=*trInit; //that one is initialized
         trA.Chr = WC[iW][WC_Chr];
         trA.Str = WC[iW][WC_Str];
@@ -321,10 +318,8 @@ std::time(&timeStart);
     #else
         stitchWindowAligns(0, nWA[iW], 0, WAincl, 0, 0, trA, Lread, WA[iW], R[trA.roStr==0 ? 0:2], Q[trA.roStr], mapGen, P, trAll[iW1], nWinTr+iW1, this);
     #endif
-        trAll[iW1][0]->nextTrScore= nWinTr[iW1]==1 ? 0 : trAll[iW1][1]->maxScore;
 
         if (trAll[iW1][0]->maxScore > trBest->maxScore || (trAll[iW1][0]->maxScore == trBest->maxScore && trAll[iW1][0]->gLength < trBest->gLength ) ) {
-            trNext=trBest;
             trBest=trAll[iW1][0];
         };
 
@@ -343,11 +338,8 @@ std::time(&timeStart);
     if (trBest->maxScore==0) {//no window was aligned (could happen if for all windows too many reads are multiples)
         mapMarker = MARKER_NO_GOOD_WINDOW;
         nW=0;
-        nTr=0;
         return;
     };
-
-    nextWinScore=trNext->maxScore;
 
 };//end of function
 

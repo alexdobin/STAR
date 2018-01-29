@@ -304,9 +304,13 @@ int main(int argInN, char* argIn[]) {
     };
 
     if (P.pCh.segmentMin>0) {
-        P.inOut->outChimJunction.open((P.outFileNamePrefix + "Chimeric.out.junction").c_str());
-        P.inOut->outChimSAM.open((P.outFileNamePrefix + "Chimeric.out.sam").c_str());
-        P.inOut->outChimSAM << P.samHeader;
+        if (P.pCh.out.junctions) {
+            P.inOut->outChimJunction.open((P.outFileNamePrefix + "Chimeric.out.junction").c_str());
+        };
+        if (P.pCh.out.samOld) {
+            P.inOut->outChimSAM.open((P.outFileNamePrefix + "Chimeric.out.sam").c_str());
+            P.inOut->outChimSAM << P.samHeader;
+        };
         pthread_mutex_init(&g_threadChunks.mutexOutChimSAM, NULL);
         pthread_mutex_init(&g_threadChunks.mutexOutChimJunction, NULL);
     };

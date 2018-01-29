@@ -40,8 +40,9 @@ OBJECTS = SharedMemory.o PackedArray.o SuffixArrayFuns.o STAR.o Parameters.o InO
 	ReadAlign_outputTranscriptSAM.o ReadAlign_outputTranscriptSJ.o ReadAlign_outputTranscriptCIGARp.o ReadAlign_calcCIGAR.cpp \
         ReadAlign_createExtendWindowsWithAlign.o ReadAlign_assignAlignToWindow.o ReadAlign_oneRead.o \
 	ReadAlign_stitchWindowSeeds.o \
-        ReadAlign_chimericDetection.o ReadAlign_chimericDetectionOld.o \
-        ChimericDetection.o ChimericDetection_chimericDetectionMult.o \
+        ReadAlign_peOverlapMergeMap.o ReadAlign_mappedFilter.o \
+        ReadAlign_chimericDetection.o ReadAlign_chimericDetectionOld.o ReadAlign_chimericDetectionOldOutput.o\
+        ChimericDetection.o ChimericDetection_chimericDetectionMult.o ReadAlign_chimericDetectionPEmerged.o \
         ChimericSegment.cpp ChimericAlign.cpp ChimericAlign_chimericJunctionOutput.o ChimericAlign_chimericStitching.o \
         stitchWindowAligns.o extendAlign.o stitchAlignToTranscript.o alignSmithWaterman.o \
         Genome_genomeGenerate.o genomeParametersWrite.o genomeScanFastaFiles.o genomeSAindex.o \

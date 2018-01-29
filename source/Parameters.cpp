@@ -197,7 +197,10 @@ Parameters::Parameters() {//initalize parameters info
 
     parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "alignEndsProtrude", &alignEndsProtrude.in));
 
-
+    //peOverlap
+    parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "peOverlapNbasesMin", &peOverlap.NbasesMin));    
+    parArray.push_back(new ParameterInfoScalar <double>     (-1, -1, "peOverlapMMp", &peOverlap.MMp));
+    
     //chimeric
     parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "chimSegmentMin", &pCh.segmentMin));
     parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "chimScoreMin", &pCh.scoreMin));
@@ -1023,17 +1026,27 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     };    
     
     //chimeric
-    if (pCh.out.type.at(0)=="WithinBAM")
-    {
-        pCh.out.bam=true;
-    } else if (pCh.out.type.at(0)=="SeparateSAMold")
-    {
-        pCh.out.bam=false;
-    } else{
-        ostringstream errOut;
-        errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented value for the first word of --chimOutType: "<<pCh.out.type.at(0) <<"\n";
-        errOut <<"SOLUTION: re-run STAR with --chimOutType SeparateSAMold OR WithinBAM\n";
-        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    pCh.out.bam=false;
+    pCh.out.junctions=false;
+    pCh.out.samOld=false;
+    pCh.out.bamHardClip=true;//default
+    for (const auto& type1 : pCh.out.type) {
+        if (type1=="WithinBAM") {
+            pCh.out.bam=true;
+        } else if (pCh.out.type.at(0)=="SeparateSAMold") {
+            pCh.out.samOld=true;
+        } else if (pCh.out.type.at(0)=="Junctions") {
+            pCh.out.junctions=true;
+        } else if (type1=="HardClip") {
+            pCh.out.bamHardClip=true;
+        } else if (type1=="SoftClip") {
+            pCh.out.bamHardClip=false;     
+        } else {
+            ostringstream errOut;
+            errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented value for --chimOutType: "<<type1 <<"\n";
+            errOut <<"SOLUTION: re-run STAR with --chimOutType Junctions , SeparateSAMold  , WithinBAM , HardClip \n";
+            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };
     };
     
     if (pCh.out.bam && !outBAMunsorted && !outBAMcoord) {
@@ -1047,28 +1060,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
        outSAMattrOrder.push_back(ATTR_NM);
        inOut->logMain << "WARNING --chimOutType=WithinBAM, therefore STAR will output NM attribute" <<endl;
     };
-    
-    
-    if (pCh.out.bam)
-    {
-        pCh.out.bamHardClip=true;//default
-        if (pCh.out.type.size()>1)
-        {
-            if (pCh.out.type.at(1)=="HardClip")
-            {
-                pCh.out.bamHardClip=true;
-            } else if (pCh.out.type.at(1)=="SoftClip")
-            {
-                pCh.out.bamHardClip=false;
-            } else {
-                ostringstream errOut;
-                errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented value for the 2nd word of --chimOutType: "<<pCh.out.type.at(1) <<"\n";
-                errOut <<"SOLUTION: re-run STAR with --chimOutType WithinBAM  HardClip OR SoftClip\n";
-                exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-            };
-        };
-    };
-    
+   
     pCh.filter.genomicN=false;
     for (uint ii=0; ii<pCh.filter.stringIn.size(); ii++)
     {
@@ -1362,6 +1354,11 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             errOut << "SOLUTION: use allowed option: ConcordantPair or DiscordantPair";
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
+    };
+    
+    //peOverlap
+    if (peOverlap.NbasesMin>0) {
+        peOverlap.yes=true;
     };
     
     ////////////////////////////////////////////////

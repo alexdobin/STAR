@@ -27,6 +27,9 @@
 
 Genome::Genome (Parameters &Pin ): P(Pin), pGe(Pin.pGe), shmStart(NULL), sharedMemory(NULL) {
     shmKey=ftok(pGe.gDir.c_str(),SHM_projectID);    
+    
+    sjdbOverhang = pGe.sjdbOverhang; //will be re-defined later if another value was used for the generated genome
+    sjdbLength = pGe.sjdbOverhang==0 ? 0 : pGe.sjdbOverhang*2+1;   
 };
 
 Genome::~Genome()

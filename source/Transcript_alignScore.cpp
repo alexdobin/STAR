@@ -4,6 +4,7 @@
 void Transcript::alignScore(char **Read1, char *G, Parameters &P) {//re-calculates score and number of mismatches
     maxScore=0;
     nMM=0;
+    nMatch=0;
     char* R=Read1[roStr==0 ? 0:2];
     for (uint iex=0;iex<nExons;iex++) {
         for (uint ii=0;ii<exons[iex][EX_L];ii++) {
@@ -12,6 +13,7 @@ void Transcript::alignScore(char **Read1, char *G, Parameters &P) {//re-calculat
             if (r1>3 || g1>3) {//nothing to do
             } else if (r1==g1) {//match
                 ++maxScore;
+                ++nMatch;
             } else {//mismatch
                 ++nMM;
                 --maxScore;

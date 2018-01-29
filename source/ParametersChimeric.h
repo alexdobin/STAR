@@ -24,6 +24,8 @@ class ParametersChimeric
             vector <string> type;
             bool bam;
             bool bamHardClip;
+            bool samOld;
+            bool junctions;
         } out;
     private:
 };

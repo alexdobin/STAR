@@ -13,8 +13,17 @@
 //#include "GlobalVariables.h"
 //#include <time.h>
 
-bool ReadAlign::chimericDetection() {
+void ReadAlign::chimericDetection() {
 
+    chimRecord=false;
+
+    if (P.pCh.segmentMin==0) {//no chimeric detection requested
+        return;
+    };
+    if (P.outFilterBySJoutStage>1) {//no chimeric output for stage=2. REVISIT: NOT SURE why
+        return;
+    };
+    
     //output chains for out-of-STAR chimeric detection
     #ifdef OUTPUT_localChains
     {
@@ -32,15 +41,17 @@ bool ReadAlign::chimericDetection() {
     };
     #endif
 
-    bool chimRecord=false;
 
-    if (P.pCh.multimapNmax==0)
-    {
+    if (P.pCh.multimapNmax==0) {
         chimRecord=chimericDetectionOld();
-    } else if (trBest->maxScore <= (int) (readLength[0]+readLength[1]) - (int) P.pCh.nonchimScoreDropMin) //require big enough drop in the best score
-    {
+        chimericDetectionOldOutput();
+    } else if (trBest->maxScore <= (int) (readLength[0]+readLength[1]) - (int) P.pCh.nonchimScoreDropMin) {//require big enough drop in the best score
         chimRecord=chimDet->chimericDetectionMult(nW, readLength);
     };
     
-    return chimRecord;
+    if ( chimRecord ) {
+        statsRA.chimericAll++;    
+    };    
+    
+    return;
 };//END

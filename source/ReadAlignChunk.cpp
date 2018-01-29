@@ -14,10 +14,13 @@ ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome 
     };
 
     RA = new ReadAlign(P, mapGen, chunkTr, iChunk);//new local copy of RA for each chunk
-    if (P.wasp.yes)
+    if (P.wasp.yes) {
         RA->waspRA= new ReadAlign(Pin,genomeIn,TrIn,iChunk);
-
-
+    };
+    if (P.peOverlap.yes) {
+        RA->peMergeRA= new ReadAlign(Pin,genomeIn,TrIn,iChunk);
+    };
+    
     RA->iRead=0;
 
     chunkIn=new char* [P.readNmates];
@@ -73,8 +76,12 @@ ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome 
     RA->chunkOutSJ1=chunkOutSJ1;
 
     if (P.pCh.segmentMin>0) {
-        chunkFstreamOpen(P.outFileTmp + "/Chimeric.out.sam.thread", iChunk, RA->chunkOutChimSAM);
-        chunkFstreamOpen(P.outFileTmp + "/Chimeric.out.junction.thread", iChunk, RA->chunkOutChimJunction);
+       if (P.pCh.out.samOld) {        
+            chunkFstreamOpen(P.outFileTmp + "/Chimeric.out.sam.thread", iChunk, RA->chunkOutChimSAM);
+       };
+       if (P.pCh.out.junctions) {       
+            chunkFstreamOpen(P.outFileTmp + "/Chimeric.out.junction.thread", iChunk, RA->chunkOutChimJunction);
+       };
     };
     if (P.outReadsUnmapped=="Fastx" ) {
         chunkFstreamOpen(P.outFileTmp + "/Unmapped.out.mate1.thread",iChunk, RA->chunkOutUnmappedReadsStream[0]);

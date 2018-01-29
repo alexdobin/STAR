@@ -7,6 +7,11 @@
 
 void ReadAlign::multMapSelect() {//select multiple mappers from all transcripts of all windows
 
+    nTr=0;
+    if (nW==0) {//no good windows
+        return;
+    };
+
     maxScore=0;
     for (uint iW=0; iW<nW; iW++) {//scan windows
         if (maxScore < trAll[iW][0]->maxScore) maxScore = trAll[iW][0]->maxScore;
@@ -18,7 +23,6 @@ void ReadAlign::multMapSelect() {//select multiple mappers from all transcripts 
         exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_BUG, P);
     };
 
-    nTr=0;
     for (uint iW=0; iW<nW; iW++) {//scan windows
         for (uint iTr=0; iTr<nWinTr[iW]; iTr++) {//scan transcripts
             if ( (trAll[iW][iTr]->maxScore + P.outFilterMultimapScoreRange) >= maxScore  ) {//record this alignment

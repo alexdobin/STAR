@@ -8,18 +8,6 @@ void ReadAlign::outputAlignments() {
 
     bool mateMapped[2]={false,false};
 
-    if (P.outFilterBySJoutStage<=1) {//no chimeric output for stage=2
-        if ( chimericDetection() )
-        {
-            statsRA.chimericAll++;
-            if (P.pCh.out.bam)
-            {
-                //if chimeric alignment was recorded in main BAM files, it contains the representative portion, so non-chimeric aligmnent is not output
-                return;
-            };
-        };
-    };
-
     if (unmapType==-1) {//output transcripts
 
         outFilterPassed=true;

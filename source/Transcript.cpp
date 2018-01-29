@@ -14,11 +14,9 @@ void Transcript::reset() {
 //     };
     primaryFlag=false;
 
-    nWAmax=0;
-
     rStart=0; roStart=0; rLength=0; gStart=0; gLength=0; //read and genomic coordinates
 
-    maxScore=0;nextTrScore=0;
+    maxScore=0;
     nMatch=0;
     nMM=0;
 

@@ -44,7 +44,7 @@ int ReadAlign::oneRead() {//process one read: load, map, write
     } else {//1 mate
 
         if (readStatus[0]==-1) {//finished with the stream
-            return -1;
+            return 0;
         };
 
         Lread=readLength[0];
@@ -69,17 +69,28 @@ int ReadAlign::oneRead() {//process one read: load, map, write
 
     //map the read
     mapOneRead();
-    waspMap();
     
+    peOverlapMergeMap();
+    multMapSelect();
+    mappedFilter();
+
+    if (!peOv.yes) {//if the alignment was not mates merged - otherwise the chimeric detection was already done
+        chimericDetection();
+    };
+    
+    if (P.pCh.out.bam && chimRecord) {//chimeric alignment was recorded in main BAM files, and it contains the representative portion, so non-chimeric aligmnent is not output
+        return 0;
+    };
+    
+    waspMap();
+
     #ifdef OFF_BEFORE_OUTPUT
         #warning OFF_BEFORE_OUTPUT
         return 0;
     #endif
+
     //write out alignments
     outputAlignments();
-
-    //debug
-//     cout <<readName<<endl;
 
     return 0;
 

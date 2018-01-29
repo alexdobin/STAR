@@ -173,6 +173,13 @@ class Parameters {
             string mode;
             bool random;
         } outMultimapperOrder;
+        
+        struct
+        {
+            bool yes;
+            uint NbasesMin;
+            double MMp;
+        } peOverlap;
 
         string outReadsUnmapped;
         int outQSconversionAdd;

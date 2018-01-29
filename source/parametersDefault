@@ -370,23 +370,23 @@ outFilterMismatchNmax           10
     int: alignment will be output only if it has no more mismatches than this value.
 
 outFilterMismatchNoverLmax      0.3
-    float: alignment will be output only if its ratio of mismatches to *mapped* length is less than or equal to this value.
+    real: alignment will be output only if its ratio of mismatches to *mapped* length is less than or equal to this value.
 
 outFilterMismatchNoverReadLmax  1.0
-    float: alignment will be output only if its ratio of mismatches to *read* length is less than or equal to this value.
+    real: alignment will be output only if its ratio of mismatches to *read* length is less than or equal to this value.
 
 
 outFilterScoreMin               0
     int: alignment will be output only if its score is higher than or equal to this value.
 
 outFilterScoreMinOverLread      0.66
-    float: same as outFilterScoreMin, but  normalized to read length (sum of mates' lengths for paired-end reads)
+    real: same as outFilterScoreMin, but  normalized to read length (sum of mates' lengths for paired-end reads)
 
 outFilterMatchNmin              0
     int: alignment will be output only if the number of matched bases is higher than or equal to this value.
 
 outFilterMatchNminOverLread     0.66
-    float: sam as outFilterMatchNmin, but normalized to the read length (sum of mates' lengths for paired-end reads).
+    real: sam as outFilterMatchNmin, but normalized to the read length (sum of mates' lengths for paired-end reads).
 
 outFilterIntronMotifs           None
     string: filter alignment using their motifs
@@ -466,7 +466,7 @@ seedSearchStartLmax             50
     int>0: defines the search start point through the read - the read is split into pieces no longer than this value
 
 seedSearchStartLmaxOverLread    1.0
-    float: seedSearchStartLmax normalized to read length (sum of mates' lengths for paired-end reads)
+    real: seedSearchStartLmax normalized to read length (sum of mates' lengths for paired-end reads)
 
 seedSearchLmax       0
     int>=0: defines the maximum length of the seeds, if =0 max seed lengthis infinite
@@ -509,7 +509,7 @@ alignSplicedMateMapLmin     0
     int>0: minimum mapped length for a read mate that is spliced
 
 alignSplicedMateMapLminOverLmate 0.66
-    float>0: alignSplicedMateMapLmin normalized to mate length
+    real>0: alignSplicedMateMapLmin normalized to mate length
 
 alignWindowsPerReadNmax     10000
     int>0: max number of windows per read
@@ -540,6 +540,13 @@ alignSoftClipAtReferenceEnds Yes
                         Yes ... allow
                         No  ... prohibit, useful for compatibility with Cufflinks
 
+### Paired-End reads
+peOverlapNbasesMin          0
+    int>=0:             minimum number of overlap bases to trigger mates merging and realignment
+
+peOverlapMMp                0.1
+    real, >=0 & <1:     maximum proportion of mismatched bases in the overlap area
+
 ### Windows, Anchors, Binning
 
 winAnchorMultimapNmax           50
@@ -555,19 +562,18 @@ winFlankNbins                   4
     int>0: log2(winFlank), where win Flank is the size of the left and right flanking regions for each window
 
 winReadCoverageRelativeMin      0.5
-    float>=0: minimum relative coverage of the read sequence by the seeds in a window, for STARlong algorithm only.
+    real>=0: minimum relative coverage of the read sequence by the seeds in a window, for STARlong algorithm only.
 
 winReadCoverageBasesMin      0
     int>0: minimum number of bases covered by the seeds in a window , for STARlong algorithm only.
 
 ### Chimeric Alignments
-chimOutType                 SeparateSAMold
+chimOutType                 Junctions
     string(s): type of chimeric output
-                            1st word:
+                            Junctions       ... Chimeric.out.junction
                             SeparateSAMold  ... output old SAM into separate Chimeric.out.sam file
                             WithinBAM       ... output into main aligned BAM files (Aligned.*.bam)
-                            2nd word:
-                            WithinBAM HardClip  ... hard-clipping in the CIGAR for supplemental chimeric alignments (defaultif no 2nd word is present)
+                            WithinBAM HardClip  ... (default) hard-clipping in the CIGAR for supplemental chimeric alignments (defaultif no 2nd word is present)
                             WithinBAM SoftClip  ... soft-clipping in the CIGAR for supplemental chimeric alignments
 
 chimSegmentMin              0

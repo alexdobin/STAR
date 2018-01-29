@@ -14,7 +14,7 @@ class Transcript {
         uint shiftSJ[MAX_N_EXONS][2]; //shift of the SJ coordinates due to genomic micro-repeats
         int canonSJ[MAX_N_EXONS]; //canonicity of each junction
         uint8 sjAnnot[MAX_N_EXONS]; //anotated or not
-        uint8 sjStr[MAX_N_EXONS]; //anotated or not
+        uint8 sjStr[MAX_N_EXONS]; //strand of the junction
 
         uint intronMotifs[3];
         uint8 sjMotifStrand;
@@ -36,17 +36,12 @@ class Transcript {
 
         bool primaryFlag;
 
-//         uint polyXlength[4], polyXnMM[4] ;
-        uint nWAmax; //number of genes, max number of alignments per gene, total number of alignments for this reads
-
         uint nMatch;//min number of matches
         uint nMM;//max number of mismatches
         uint mappedLength; //total mapped length, sum of lengths of all blocks(exons)
 
         uint extendL; //extension length
         intScore maxScore; //maximum Score
-        intScore nextTrScore; //next after maximum Tr Score
-
 
         uint nGap, lGap; //number of genomic gaps (>alignIntronMin) and their total length
         uint nDel; //number of genomic deletions (ie genomic gaps)
@@ -68,7 +63,7 @@ class Transcript {
         void alignScore(char **Read1, char *G, Parameters &P);
         int variationAdjust(const Genome &mapGen, char *R, char **Read1, char *G, Parameters &P);
         string generateCigarP(); //generates CIGAR
-        
+        void peOverlapSEtoPE(uint ixMerge, Transcript &t);
     private:
         
 };

@@ -5,7 +5,9 @@
 
 ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk) 
                     : P(Pin), mapGen(genomeIn), chunkTr(TrIn) {//allocate arrays                       
-                        
+      
+    readNmates=P.readNmates;
+    
     winBin = new uintWinBin* [2];  
 
     winBin[0] = new uintWinBin [P.winBinN];
@@ -112,7 +114,7 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
 void ReadAlign::resetN () {//reset resets the counters to 0 for a new read
     mapMarker=0;
     nA=0;nP=0;nW=0;
-    nTr=0;nTrMate=0;nextWinScore=0;
+    nTr=0;nTrMate=0;
     nUM[0]=0;nUM[1]=0;
     storedLmin=0; uniqLmax=0; uniqLmaxInd=0; multLmax=0; multLmaxN=0; multNminL=0; multNmin=0; multNmax=0; multNmaxL=0;
     chimN=0;
@@ -125,12 +127,3 @@ void ReadAlign::resetN () {//reset resets the counters to 0 for a new read
 
 };
 
-void ReadAlign::outTxtMain(ofstream* outTxt, Transcript& t) {
-
-    *outTxt << setw(10) << iRead+1 << setw(7) << nTr <<"   "\
-            << setw(7) << t.roStart << setw(7) << t.rLength << setw(12) <<  nW  << setw(10)<< mapMarker  << "\t" << t.maxScore << setw(7) << nextWinScore << setw(7) << t.nextTrScore <<"   " \
-            << setw(7) << t.nMatch  << setw(7) << t.nMM <<"   "\
-            << setw(7) << t.nGap  << setw(10) << t.lGap << setw(7) << t.nDel << setw(7) << t.lDel;
-
-    *outTxt << "\n";
-};

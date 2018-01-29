@@ -49,6 +49,7 @@ class ReadAlign
         ReadAlign *waspRA; //ReadAlign for alternative WASP alignment
         int waspType, waspType1; //alignment ASE-WASP type and
 
+        ReadAlign *peMergeRA; //ReadAlign for merged PE mates
         
     private:
         Parameters& P; //pointer to the parameters, will be initialized on construction
@@ -98,6 +99,7 @@ class ReadAlign
         char* readName;
         char** Qual1; //modified QSs for scoring
 
+        uint readNmates;
         //split
         uint** splitR;
         uint Nsplit;
@@ -124,25 +126,32 @@ class ReadAlign
 
         uint storedLmin, uniqLmax, uniqLmaxInd, multLmax, multLmaxN, multNmin, multNminL, multNmax, multNmaxL;
         uint nTr, nTrMate; // number of transcripts called
-        intScore maxScore, nextWinScore;//maximum alignment score, next best score
-
-        Transcript trA, trA1, *trBest, *trNext, *trInit; //transcript, best tr, next best tr, initialized tr
+        intScore maxScore;//maximum alignment score
+        
+        Transcript trA, trA1, *trBest, *trInit; //transcript, best tr, next best tr, initialized tr
         Transcript ***trAll; //all transcripts for all windows
         uint *nWinTr; //number of recorded transcripts per window
 
         //old chimeric detection
-        uint chimN, chimRepeat, chimStr, chimMotif;
+        uint chimN, chimRepeat, chimStr;
+        int chimMotif;
+        uint chimRepeat0, chimRepeat1, chimJ0, chimJ1;
         Transcript trChim[MAX_N_CHIMERAS];
         //new chimeric detection
         ChimericDetection *chimDet;
-        
+        bool chimRecord; //true if chimeric aligment was detected
         
         Transcript *alignC, *extendC, *polyAtailC; //alignment rules/conditions
 
         Transcript* trMult[MAX_N_MULTMAP];//multimapping transcripts
         Transcript *alignTrAll;//alignments to transcriptome
         
-
+        struct {
+            bool yes;
+            uint nOv;//number of overlapping bases 
+            uint ovS;//first read base of the overlap
+        } peOv;//PE  mates overlap/merge/remap structure
+        
         void resetN();//resets the counters to 0
         void multMapSelect();
         int mapOneRead();
@@ -156,25 +165,31 @@ class ReadAlign
 
         void outputTranscriptSJ(Transcript const &trOut, uint nTrOut, OutSJ *outStream, uint sjReadStartN );
         string outputTranscriptCIGARp(Transcript const &trOut);
-        void outTxtMain(ofstream*,Transcript&);
         int createExtendWindowsWithAlign(uint a1, uint aStr); //extends and windows with one alignment
         void assignAlignToWindow(uint a1, uint aLength, uint aStr, uint aNrep, uint aFrag, uint aRstart,bool aAnchor, uint sjA); //assigns one alignment to a window
         
-        bool chimericDetection();
+        void mappedFilter();
+        void chimericDetection();
         bool chimericDetectionOld();
+        void chimericDetectionOldOutput();
         bool chimericDetectionMult();        
-
+        void chimericDetectionPEmerged(ReadAlign &seRa);
+//         void chimericDetectionPEmergedTrim();
+                
         void outputAlignments();
         void calcCIGAR(Transcript const &trOut, uint nMates, uint iExMate, uint leftMate);
 
         void stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R, char *Q);//stitches all seeds in one window: iW
         void stitchPieces(char **R, char **Q, uint Lread);
 
-
         uint quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT);
         
         void copyRead(ReadAlign&);
         void waspMap();
+        void peOverlapMergeMap();
+        void peMergeMates();
+        void peOverlapSEtoPE(ReadAlign &seRA);
+
         
 };
 

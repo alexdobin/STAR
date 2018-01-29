@@ -30,10 +30,10 @@ int ReadAlign::mapOneRead() {
     trInit->readLengthOriginal=readLengthOriginal;
     trInit->readLengthPairOriginal=readLengthPairOriginal;
     trInit->readLength=readLength;
-    trInit->readNmates=P.readNmates;
+    trInit->readNmates=readNmates;
     trInit->readName=readName;
     
-    trNext=trBest=trInit;
+    trBest=trInit;
 
     uint seedSearchStartLmax=min(P.seedSearchStartLmax,(uint) (P.seedSearchStartLmaxOverLread*(Lread-1)));
     // align all good pieces
@@ -86,7 +86,6 @@ int ReadAlign::mapOneRead() {
         return 0;
     #endif
 
-    nTr=0;//nothing mapped yet
     if (Lread<P.outFilterMatchNmin) {//read is too short (trimmed too much?)
         mapMarker=MARKER_READ_TOO_SHORT;
         trBest->rLength=0; //min good piece length
@@ -102,25 +101,7 @@ int ReadAlign::mapOneRead() {
     } else if (Nsplit>0 && nA>0) {//otherwise there are no good pieces, or all pieces map too many times: read cannot be mapped
 //         qsort((void*) PC, nP, sizeof(uint)*PC_SIZE, funCompareUint2);//sort PC by rStart and length
         stitchPieces(Read1, Qual1, Lread);
-        if (nW>0) multMapSelect(); //check all the windows and transcripts for multiple mappers
     };
     
-    unmapType=-1;//mark as mapped
-    if ( nW==0 ) {//no good windows
-        statsRA.unmappedOther++;
-        unmapType=0;
-    } else if ( (trBest->maxScore < P.outFilterScoreMin) || (trBest->maxScore < (intScore) (P.outFilterScoreMinOverLread*(Lread-1))) \
-              || (trBest->nMatch < P.outFilterMatchNmin)  || (trBest->nMatch < (uint) (P.outFilterMatchNminOverLread*(Lread-1))) ) {//too short
-        statsRA.unmappedShort++;
-        unmapType=1;
-    } else if ( (trBest->nMM > outFilterMismatchNmaxTotal) || (double(trBest->nMM)/double(trBest->rLength)>P.outFilterMismatchNoverLmax) ) {//too many mismatches
-        statsRA.unmappedMismatch++;
-        unmapType=2;
-    } else if (nTr > P.outFilterMultimapNmax){//too multi
-        statsRA.unmappedMulti++;
-        unmapType=3;
-    };
-            
-
     return 0;
 };
