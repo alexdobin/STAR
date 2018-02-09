@@ -1,3 +1,9 @@
+STAR 2.5.4b 2018/02/09
+======================
+
+* Recompiled Linux executables with the correct version tag.
+* Updated manual.
+
 STAR 2.5.4a 2018/01/23
 ======================
 
