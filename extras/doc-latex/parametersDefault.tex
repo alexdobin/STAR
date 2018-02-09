@@ -63,6 +63,9 @@
 \optName{genomeFileSizes}
   \optValue{0}
   \optLine{uint(s){\textgreater}0: genome files exact sizes in bytes. Typically, this should not be defined by the user.} 
+\optName{genomeConsensusFile}
+  \optValue{-}
+  \optLine{string: VCF file with consensus SNPs (i.e. alternative allele is the major (AF{\textgreater}0.5) allele)} 
 \end{optTable}
 \optSection{Genome Indexing Parameters - only used with --runMode genomeGenerate}\label{Genome_Indexing_Parameters_-_only_used_with_--runMode_genomeGenerate}
 \begin{optTable}
@@ -121,9 +124,21 @@
 \end{optTable}
 \optSection{Read Parameters}\label{Read_Parameters}
 \begin{optTable}
+\optName{readFilesType}
+  \optValue{Fastx}
+  \optLine{string: format of input read files} 
+\begin{optOptTable}
+  \optOpt{Fastx}   \optOptLine{FASTA or FASTQ}
+  \optOpt{SAM SE}   \optOptLine{SAM or BAM single-end reads; for BAM use --readFilesCommand samtools view}
+  \optOpt{SAM PE}   \optOptLine{SAM or BAM paired-end reads; for BAM use --readFilesCommand samtools view}
+\end{optOptTable}
 \optName{readFilesIn}
   \optValue{Read1 Read2}
   \optLine{string(s): paths to files that contain input read1 (and, if needed,  read2)} 
+\optName{readFilesPrefix}
+  \optValue{-}
+  \optLine{string: preifx for the read files names, i.e. it will be added in front of the strings in --readFilesIn} 
+  \optLine{-: no prefix} 
 \optName{readFilesCommand}
   \optValue{-}
   \optLine{string(s): command line to execute for each of the input file. This command should generate FASTA or FASTQ text and send it to stdout} 
