@@ -54,13 +54,13 @@ void ReadAlign::peMergeMates() {
         return;
     };
  
-    uint nMM=0;
-    for (uint ii=peOv.ovS; ii<readLength[0]; ii++) {//check for MM in the overlap area
-        if (Read1[0][ii]!=Read1[0][ii-peOv.ovS+readLength[0]+1]) {
-            Read1[0][ii]=4; //replace mismatched base with N
-            ++nMM;
-        };
-    };
+    //uint nMM=0;
+    //for (uint ii=peOv.ovS; ii<readLength[0]; ii++) {//check for MM in the overlap area
+    //    if (Read1[0][ii]!=Read1[0][ii-peOv.ovS+readLength[0]+1]) {
+    //        Read1[0][ii]=4; //replace mismatched base with N
+    //        ++nMM;
+    //    };
+    //};
 
     memmove(Read1[0]+readLength[0], Read1[0]+readLength[0]+1+peOv.nOv, readLength[1]-peOv.nOv);
 

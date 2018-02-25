@@ -44,7 +44,7 @@ int ReadAlign::oneRead() {//process one read: load, map, write
     } else {//1 mate
 
         if (readStatus[0]==-1) {//finished with the stream
-            return 0;
+            return -1;
         };
 
         Lread=readLength[0];
