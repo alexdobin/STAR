@@ -78,7 +78,7 @@ bool ReadAlign::chimericDetectionOld() {
                     overlap1=blocksOverlap(trChim[1],*trAll[iW][iWt]);
                 };
 
-                if (chimScore > chimScoreBest && chimScore >= P.pCh.scoreMin && chimScore+P.pCh.scoreDropMax >= (int) (readLength[0]+readLength[1]) ) {
+                if (chimScore > chimScoreBest) {
                     trChim[1]=*trAll[iW][iWt];
                     trChim1=trAll[iW][iWt];
                     if (overlap1==0)
@@ -96,6 +96,10 @@ bool ReadAlign::chimericDetectionOld() {
         };//cycle over window transcripts
     };//cycle over windows
 
+    if (!(chimScoreBest >= P.pCh.scoreMin && chimScoreBest+P.pCh.scoreDropMax >= (int) (readLength[0]+readLength[1]) ) ) {
+        return false;
+    };
+
     if (nTr>P.pCh.mainSegmentMultNmax) {//check main segment for multi-aligns
      //this is nTr==2 - a special case: chimeras are allowed only if the 2nd chimeric segment is the next best alignment
         if ( trChim1!=trMult[0] && trChim1!=trMult[1] ) {
@@ -107,6 +111,7 @@ bool ReadAlign::chimericDetectionOld() {
 
     chimN=0;
     if (chimScoreNext + P.pCh.scoreSeparation >= chimScoreBest) {//report only if chimera is unique
+        cout << " " << chimScoreBest << " " << chimScoreNext;
         return false;
     };
     if (trChim[0].roStart > trChim[1].roStart) swap (trChim[0],trChim[1]);
@@ -291,7 +296,7 @@ bool ReadAlign::chimericDetectionOld() {
             //filter out linear junctions that are very close to chimeric junction            
             return false;
         };
-        
+        cout <<" chim+";        
         return true;
     };    
     

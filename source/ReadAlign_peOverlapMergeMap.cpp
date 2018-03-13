@@ -8,30 +8,47 @@ void ReadAlign::peOverlapMergeMap() {
     if (!P.peOverlap.yes || P.readNmates!=2 ) {//no peOverlap
         return;
     };
+
+    //debug
+    cout << ">" << readName+1;
+
         
     //merge PE mates into SE
     peMergeRA->copyRead(*this);
     peMergeRA->peMergeMates();
     peOv=peMergeRA->peOv;
+
+
     
     if (peOv.nOv==0) {//check if mates can be merged, if not - return
+        cout <<"\n-1\n";
         return;
     };
-    
+
+    //change parameters for SE mapping
+    //double P_alignSplicedMateMapLminOverLmate=P.alignSplicedMateMapLminOverLmate;
+    //P.alignSplicedMateMapLminOverLmate=P.alignSplicedMateMapLminOverLmate*peMergeRA->readLength[0]/(readLength[0]+readLength[1]);
+
     //map SE
     peMergeRA->mapOneRead();
-    if (peMergeRA->nW==0 || peMergeRA->trBest->maxScore+peOv.nOv < trBest->maxScore) {//no windows, score of the merged align is less. This is a preliminary check, more accurate check is done with alignment score calculated after transforming the SE back to PE
+    if (peMergeRA->nW==0) { // || peMergeRA->trBest->maxScore+peOv.nOv < trBest->maxScore) {//no windows, score of the merged align is less. This is a preliminary check, more accurate check is done with alignment score calculated after transforming the SE back to PE
+        cout <<" -2\n";
+        for (uint ii=0;ii<peMergeRA->Lread;ii++) {
+            cout <<P.genomeNumToNT[peMergeRA->Read1[0][ii]];
+        };
+        cout << "\n";
+
         return;
     };
     
     //convert best alignment SE to PE
-    trA=*trInit;
-    trA.peOverlapSEtoPE(peOv.nOv, *peMergeRA->trBest);
-    trA.alignScore(Read1,mapGen.G,P);
+    //trA=*trInit;
+    //trA.peOverlapSEtoPE(peOv.nOv, *peMergeRA->trBest);
+    //trA.alignScore(Read1,mapGen.G,P);
     
-    if (trA.maxScore<trBest->maxScore || trA.nMM > outFilterMismatchNmaxTotal) {//merged-mate SE alignment has lower score than the PE
-        return;
-    };
+    //if (trA.maxScore<trBest->maxScore || trA.nMM > outFilterMismatchNmaxTotal) {//merged-mate SE alignment has lower score than the PE
+    //    return;
+    //};
     
     peMergeRA->peOv=peOv;
     //SE alignment is better, copy it to *this ReadAlign
@@ -39,7 +56,17 @@ void ReadAlign::peOverlapMergeMap() {
     
     //chimeric detection for SE
     chimericDetectionPEmerged(*peMergeRA);
-    
+
+    //debug    
+    cout << "\n";
+    for (uint ii=0;ii<peMergeRA->Lread;ii++) {
+        cout <<P.genomeNumToNT[peMergeRA->Read1[0][ii]];
+    };
+    cout << "\n";
+
+
+
+    //P.alignSplicedMateMapLminOverLmate=P_alignSplicedMateMapLminOverLmate;
     peOv.yes=true;
     return;
 };
@@ -82,7 +109,7 @@ void ReadAlign::peMergeMates() {
         };
 
     };    
-    
+
     return;
 };
 
