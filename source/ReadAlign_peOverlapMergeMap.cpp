@@ -10,7 +10,7 @@ void ReadAlign::peOverlapMergeMap() {
     };
 
     //debug
-    cout << ">" << readName+1;
+    //cout << ">" << readName+1;
 
         
     //merge PE mates into SE
@@ -21,7 +21,7 @@ void ReadAlign::peOverlapMergeMap() {
 
     
     if (peOv.nOv==0) {//check if mates can be merged, if not - return
-        cout <<"\n-1\n";
+        //cout <<"\n-1\n";
         return;
     };
 
@@ -32,11 +32,11 @@ void ReadAlign::peOverlapMergeMap() {
     //map SE
     peMergeRA->mapOneRead();
     if (peMergeRA->nW==0) { // || peMergeRA->trBest->maxScore+peOv.nOv < trBest->maxScore) {//no windows, score of the merged align is less. This is a preliminary check, more accurate check is done with alignment score calculated after transforming the SE back to PE
-        cout <<" -2\n";
-        for (uint ii=0;ii<peMergeRA->Lread;ii++) {
-            cout <<P.genomeNumToNT[peMergeRA->Read1[0][ii]];
-        };
-        cout << "\n";
+        //cout <<" -2\n";
+        //for (uint ii=0;ii<peMergeRA->Lread;ii++) {
+        //    cout <<P.genomeNumToNT[peMergeRA->Read1[0][ii]];
+        //};
+        //cout << "\n";
 
         return;
     };
@@ -58,13 +58,11 @@ void ReadAlign::peOverlapMergeMap() {
     chimericDetectionPEmerged(*peMergeRA);
 
     //debug    
-    cout << "\n";
-    for (uint ii=0;ii<peMergeRA->Lread;ii++) {
-        cout <<P.genomeNumToNT[peMergeRA->Read1[0][ii]];
-    };
-    cout << "\n";
-
-
+    //cout << "\n";
+    //for (uint ii=0;ii<peMergeRA->Lread;ii++) {
+    //    cout <<P.genomeNumToNT[peMergeRA->Read1[0][ii]];
+    //};
+    //cout << "\n";
 
     //P.alignSplicedMateMapLminOverLmate=P_alignSplicedMateMapLminOverLmate;
     peOv.yes=true;
