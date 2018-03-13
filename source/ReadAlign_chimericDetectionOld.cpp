@@ -111,7 +111,7 @@ bool ReadAlign::chimericDetectionOld() {
 
     chimN=0;
     if (chimScoreNext + P.pCh.scoreSeparation >= chimScoreBest) {//report only if chimera is unique
-        cout << " " << chimScoreBest << " " << chimScoreNext;
+        //cout << " " << chimScoreBest << " " << chimScoreNext;
         return false;
     };
     if (trChim[0].roStart > trChim[1].roStart) swap (trChim[0],trChim[1]);
@@ -296,7 +296,7 @@ bool ReadAlign::chimericDetectionOld() {
             //filter out linear junctions that are very close to chimeric junction            
             return false;
         };
-        cout <<" chim+";        
+        //cout <<" chim+";        
         return true;
     };    
     
