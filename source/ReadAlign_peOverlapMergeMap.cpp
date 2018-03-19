@@ -72,7 +72,7 @@ void ReadAlign::peOverlapMergeMap() {
 void ReadAlign::peMergeMates() {
     
     peOv.ovS=localSearch(Read1[0],readLength[0],Read1[0]+readLength[0]+1,readLength[1],P.peOverlap.MMp);
-    peOv.nOv=readLength[0]-peOv.ovS;
+    peOv.nOv=min(readLength[1],readLength[0]-peOv.ovS);
     
     if (peOv.nOv<P.peOverlap.NbasesMin) {//overlap is smaller than minimum allowed
         peOv.nOv=0;
