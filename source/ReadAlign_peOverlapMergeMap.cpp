@@ -45,14 +45,21 @@ void ReadAlign::peOverlapMergeMap() {
     //trA=*trInit;
     //trA.peOverlapSEtoPE(peOv.nOv, *peMergeRA->trBest);
     //trA.alignScore(Read1,mapGen.G,P);
-    
     //if (trA.maxScore<trBest->maxScore || trA.nMM > outFilterMismatchNmaxTotal) {//merged-mate SE alignment has lower score than the PE
     //    return;
     //};
     
+    //debug
+    //intScore oldScore=trBest->maxScore;
+    
+    //convert SE to PE *this ReadAlign
     peMergeRA->peOv=peOv;
-    //SE alignment is better, copy it to *this ReadAlign
     peOverlapSEtoPE(*peMergeRA);
+    
+    //debug
+    //if (oldScore>trBest->maxScore || trBest->maxScore<peMergeRA->trBest->maxScore)
+    //    cout << readName << "   "<< oldScore << "   "<< peMergeRA->trBest->maxScore << "   "<<trBest->maxScore << endl;
+    
     
     //chimeric detection for SE
     chimericDetectionPEmerged(*peMergeRA);
@@ -71,13 +78,36 @@ void ReadAlign::peOverlapMergeMap() {
 
 void ReadAlign::peMergeMates() {
     
-    peOv.ovS=localSearch(Read1[0],readLength[0],Read1[0]+readLength[0]+1,readLength[1],P.peOverlap.MMp);
-    peOv.nOv=min(readLength[1],readLength[0]-peOv.ovS);
-    
+    uint s1=localSearch(Read1[0],readLength[0],Read1[0]+readLength[0]+1,readLength[1],P.peOverlap.MMp);
+    uint s0=localSearch(Read1[0]+readLength[0]+1,readLength[1],Read1[0],readLength[0],P.peOverlap.MMp);
+
+    uint o1=min(readLength[1],readLength[0]-s1);
+    uint o0=min(readLength[0],readLength[1]-s0);
+
+    peOv.nOv=max(o0,o1);
+
     if (peOv.nOv<P.peOverlap.NbasesMin) {//overlap is smaller than minimum allowed
         peOv.nOv=0;
         return;
     };
+    
+    if (o1>=o0) {
+        peOv.mateStart[0]=0;
+        peOv.mateStart[1]=s1;
+        if (o1<readLength[1]) {
+            memmove(Read1[0]+readLength[0], Read1[0]+readLength[0]+1+o1, readLength[1]-o1);
+        };
+    } else {
+        peOv.mateStart[1]=0;
+        peOv.mateStart[0]=s0;
+        if (s0>0) {
+            memmove(Read1[0]+Lread, Read1[0], readLength[0]);//temp move 0
+            memmove(Read1[0], Read1[0]+readLength[0]+1, readLength[1]); //move 1 into 0
+            if (o0<readLength[0]) {
+                memmove(Read1[0]+readLength[1], Read1[0]+Lread+o0, readLength[0]-o0); //move 1 into 0
+            };
+        };
+    };  
  
     //uint nMM=0;
     //for (uint ii=peOv.ovS; ii<readLength[0]; ii++) {//check for MM in the overlap area
@@ -87,7 +117,6 @@ void ReadAlign::peMergeMates() {
     //    };
     //};
 
-    memmove(Read1[0]+readLength[0], Read1[0]+readLength[0]+1+peOv.nOv, readLength[1]-peOv.nOv);
 
     Lread=Lread-peOv.nOv-1;
     readLength[0]=Lread;    
@@ -111,64 +140,89 @@ void ReadAlign::peMergeMates() {
     return;
 };
 
-void Transcript::peOverlapSEtoPE(uint nOv, Transcript &t) {//convert alignment from merged-SE to PE
+void Transcript::peOverlapSEtoPE(uint* mateStart, Transcript &t) {//convert alignment from merged-SE to PE
     
-    uint len1=readLength[t.Str];//this transcrip=trInit which was initilized for original PE read
-    uint start2=len1-nOv;//first base of the 2nd mate
+    uint mLen[2];
+    mLen[0]=readLength[t.Str];
+    mLen[1]=readLength[1-t.Str];
     
-    uint iex=0;
-    for ( ; iex<t.nExons; iex++) {//first, cycle through the exons from mate1 
-        if (t.exons[iex][EX_R] >= len1) {//this exon is only in mate2, break this cycle
-            break;
-        };
-        //record these exons for mate1
+    uint mSta2[2];
+    mSta2[0]=0;//mates starts in the PE read
+    mSta2[1]=mLen[0]+1;
 
-        exons[iex][EX_iFrag]=t.Str;
-        exons[iex][EX_sjA]=t.exons[iex][EX_sjA];
-        canonSJ[iex]=t.canonSJ[iex];
-        sjAnnot[iex]=t.sjAnnot[iex];
-        sjStr[iex]=t.sjStr[iex];
-        shiftSJ[iex][0]=t.shiftSJ[iex][0];
-        shiftSJ[iex][1]=t.shiftSJ[iex][1];
+    uint mSta[2];
+    mSta[0]=mateStart[0];//mates starts in the merged SE read
+    mSta[1]=mateStart[1];    
+    if (t.Str==1) {
+	for (uint ii=0;ii<2;ii++) {
+            mSta[ii]=t.Lread-readLength[ii]-mSta[ii];
+        };
+        swap(mSta[0],mSta[1]);
+    };
 
-        exons[iex][EX_R]=t.exons[iex][EX_R];
-        exons[iex][EX_G]=t.exons[iex][EX_G];        
-        if (t.exons[iex][EX_R]+t.exons[iex][EX_L] < len1) {//exon is fully in mate1
-            exons[iex][EX_L]=t.exons[iex][EX_L];
-        } else {
-            exons[iex][EX_L]=len1-t.exons[iex][EX_R];
+    uint mEnd[2];
+    mEnd[0]=mSta[0]+mLen[0];
+    mEnd[1]=mSta[1]+mLen[1];
+
+//     uint iex=0;
+//     for ( ; iex<t.nExons; iex++) {//first, cycle through the exons from mate1 
+//         if (t.exons[iex][EX_R] >= mEnd[0] || t.exons[iex][EX_R]+t.exons[iex][EX_L] < mSta[0]) {//this exon is only in mate2, break this cycle
+//             break;
+//         };
+//         //record these exons for mate1
+// 
+//         exons[iex][EX_iFrag]=t.Str;
+//         exons[iex][EX_sjA]=t.exons[iex][EX_sjA];
+//         canonSJ[iex]=t.canonSJ[iex];
+//         sjAnnot[iex]=t.sjAnnot[iex];
+//         sjStr[iex]=t.sjStr[iex];
+//         shiftSJ[iex][0]=t.shiftSJ[iex][0];
+//         shiftSJ[iex][1]=t.shiftSJ[iex][1];
+// 
+//         exons[iex][EX_R]=t.exons[iex][EX_R]-mSta[0];
+//         exons[iex][EX_G]=t.exons[iex][EX_G];        
+//         if (t.exons[iex][EX_R]+t.exons[iex][EX_L] < mEnd[0]) {//exon is fully in mate1
+//             exons[iex][EX_L]=t.exons[iex][EX_L];
+//         } else {
+//             exons[iex][EX_L]=mEnd[0]-t.exons[iex][EX_R];
+//         };
+//     };
+        
+    nExons=0;
+    for (uint imate=0; imate<2; imate++) {//cycle over mate 1,2
+        for (uint iex=0; iex<t.nExons; iex++) {//cycle through the exons
+            if (t.exons[iex][EX_R] >= mEnd[imate] || t.exons[iex][EX_R]+t.exons[iex][EX_L] <= mSta[imate]) {//this exon is only in mate2, do not record here
+                continue;
+            };
+
+            exons[nExons][EX_iFrag]=(imate==0 ? t.Str : 1-t.Str);
+            exons[nExons][EX_sjA]=t.exons[iex][EX_sjA];
+            canonSJ[nExons]=t.canonSJ[iex];
+            sjAnnot[nExons]=t.sjAnnot[iex];
+            sjStr[nExons]=t.sjStr[iex];
+            shiftSJ[nExons][0]=t.shiftSJ[iex][0];
+            shiftSJ[nExons][1]=t.shiftSJ[iex][1];
+
+            //record these exons for mate2
+            if (t.exons[iex][EX_R]>=mSta[imate]) {//exon left is inside the mate
+                exons[nExons][EX_G]=t.exons[iex][EX_G];  
+                exons[nExons][EX_L]=t.exons[iex][EX_L];            
+                exons[nExons][EX_R]=t.exons[iex][EX_R]-mSta[imate]+mSta2[imate];
+            } else {//need to split the exon 
+                exons[nExons][EX_R]=mSta2[imate];//exon starts at the mate start                
+                uint delta=mSta[imate]-t.exons[iex][EX_R]; //shorten exon by this length
+                exons[nExons][EX_L]=t.exons[iex][EX_L]-delta;                            
+                exons[nExons][EX_G]=t.exons[iex][EX_G]+delta;  
+            };
+
+            if (t.exons[iex][EX_R]+t.exons[iex][EX_L] > mEnd[imate]) {//exon right is to the left of the mate end, shorten the exon
+                exons[nExons][EX_L]-=t.exons[iex][EX_R]+t.exons[iex][EX_L]-mEnd[imate];
+            };
+
+            ++nExons;
         };
+        canonSJ[nExons-1]=-3; //marks "junction" between mates
     };
-        
-    nExons=iex;
-    canonSJ[nExons-1]=-3; //marks "junction" between mates
-    
-    for (iex=0; iex<t.nExons; iex++) {//cycle through the exons from mate2
-        if (t.exons[iex][EX_R]+t.exons[iex][EX_L] <= start2) {//this exon is only in mate2, do not record here
-            continue;
-        };
-        
-        exons[nExons][EX_iFrag]=1-t.Str;
-        exons[nExons][EX_sjA]=t.exons[iex][EX_sjA];
-        canonSJ[nExons]=t.canonSJ[iex];
-        sjAnnot[nExons]=t.sjAnnot[iex];
-        sjStr[nExons]=t.sjStr[iex];
-        shiftSJ[nExons][0]=t.shiftSJ[iex][0];
-        shiftSJ[nExons][1]=t.shiftSJ[iex][1];
-        
-        //record these exons for mate2
-        if (t.exons[iex][EX_R]>=start2) {//exon is fully in mate2
-            exons[nExons][EX_G]=t.exons[iex][EX_G];  
-            exons[nExons][EX_L]=t.exons[iex][EX_L];            
-            exons[nExons][EX_R]=t.exons[iex][EX_R]+nOv+1;
-        } else {//need to split the exon 
-            exons[nExons][EX_G]=t.exons[iex][EX_G]+start2-t.exons[iex][EX_R];  
-            exons[nExons][EX_L]=t.exons[iex][EX_L]-start2+t.exons[iex][EX_R];            
-            exons[nExons][EX_R]=len1+1;            
-        };
-        ++nExons;
-    };
-    
     
     
     //copy scalar variables
@@ -220,7 +274,7 @@ void ReadAlign::peOverlapSEtoPE(ReadAlign &seRA) {//ReAdAlign: convert SE to PE 
         for (uint iTr=0; iTr<nWinTr[iW]; iTr++) {//scan transcripts
             ++trNtotal;    
             *trAll[iW][iTr]=*trInit;
-            trAll[iW][iTr]->peOverlapSEtoPE(peOv.nOv, *seRA.trAll[iW][iTr]);
+            trAll[iW][iTr]->peOverlapSEtoPE(peOv.mateStart, *seRA.trAll[iW][iTr]);
             trAll[iW][iTr]->alignScore(Read1,mapGen.G,P);   
             if (trAll[iW][iTr]->maxScore > trAll[iW][0]->maxScore) {
                 swap(trAll[iW][iTr],trAll[iW][0]);

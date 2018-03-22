@@ -63,7 +63,7 @@ class Transcript {
         void alignScore(char **Read1, char *G, Parameters &P);
         int variationAdjust(const Genome &mapGen, char *R, char **Read1, char *G, Parameters &P);
         string generateCigarP(); //generates CIGAR
-        void peOverlapSEtoPE(uint ixMerge, Transcript &t);
+        void peOverlapSEtoPE(uint* mSta, Transcript &t);
     private:
         
 };

@@ -150,6 +150,7 @@ class ReadAlign
             bool yes;
             uint nOv;//number of overlapping bases 
             uint ovS;//first read base of the overlap
+            uint mateStart[2];//mates starts in the merged read
         } peOv;//PE  mates overlap/merge/remap structure
         
         void resetN();//resets the counters to 0

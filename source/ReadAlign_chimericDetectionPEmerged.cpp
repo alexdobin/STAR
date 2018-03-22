@@ -23,7 +23,7 @@ void ReadAlign::chimericDetectionPEmerged(ReadAlign &seRA) {
     //convert merged into PE   
     for (uint ii=0; ii<2; ii++) {
         trChim[ii]=*trInit;
-        trChim[ii].peOverlapSEtoPE(peOv.nOv,seRA.trChim[ii]);
+        trChim[ii].peOverlapSEtoPE(peOv.mateStart,seRA.trChim[ii]);
     };
 
     uint segLen[2][2], segEx[2];
