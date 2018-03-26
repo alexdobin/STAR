@@ -267,7 +267,7 @@ void ReadAlign::peOverlapSEtoPE(ReadAlign &seRA) {//ReAdAlign: convert SE to PE 
     memcpy((void*) nWinTr, (void*) seRA.nWinTr, nW*sizeof(*nWinTr));
     
     uint trNtotal=0;
-    intScore bestScore=0;
+    intScore bestScore=-10*Lread;
     trBest=NULL;
     for (uint iW=0; iW<nW; iW++) {//scan windows
         trAll[iW]=trArrayPointer+trNtotal;      

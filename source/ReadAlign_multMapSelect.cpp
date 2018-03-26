@@ -12,7 +12,7 @@ void ReadAlign::multMapSelect() {//select multiple mappers from all transcripts 
         return;
     };
 
-    maxScore=0;
+    maxScore=-10*Lread;
     for (uint iW=0; iW<nW; iW++) {//scan windows
         if (maxScore < trAll[iW][0]->maxScore) maxScore = trAll[iW][0]->maxScore;
     };
