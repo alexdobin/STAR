@@ -319,6 +319,10 @@ std::time(&timeStart);
         stitchWindowAligns(0, nWA[iW], 0, WAincl, 0, 0, trA, Lread, WA[iW], R[trA.roStr==0 ? 0:2], Q[trA.roStr], mapGen, P, trAll[iW1], nWinTr+iW1, this);
     #endif
 
+        if (nWinTr[iW1]==0) {
+            continue;
+        };
+
         if (trAll[iW1][0]->maxScore > trBest->maxScore || (trAll[iW1][0]->maxScore == trBest->maxScore && trAll[iW1][0]->gLength < trBest->gLength ) ) {
             trBest=trAll[iW1][0];
         };
