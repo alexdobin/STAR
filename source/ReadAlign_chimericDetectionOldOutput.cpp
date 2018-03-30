@@ -50,7 +50,16 @@ void ReadAlign::chimericDetectionOldOutput() {
                 mateChr=-1;mateStart=-1;mateStrand=0;//no need fot mate info unless this is the supplementary alignment
                 if (chimRepresent==(int)itr) {
                     alignType=-10; //this is representative part of chimeric alignment, record is as normal; if encompassing chimeric junction, both are recorded as normal
-                    bamIrepr=( (itr%2)==(trChim[itr].Str) && chimType!=3) ? bamN+1 : bamN;//this is the mate that is chimerically split
+                    bamIrepr=bamN;
+                    if (trChim[itr].exons[0][EX_iFrag]!=trChim[1-itr].exons[0][EX_iFrag]) {//the next mate is chimerically split
+                        ++bamIrepr;
+                    };
+//                     if (chimType==3) {
+//                         bamIrepr=bamN;
+//                     } else if (trChim[itr].exons[0][EX_iFrag]==trChim[1-itr].exons[0][EX_iFrag]) {
+//                         
+//                    };
+//                     bamIrepr=( (itr%2)==(trChim[itr].Str) && chimType!=3) ? bamN+1 : bamN;//this is the mate that is chimerically split
                 } else {//"supplementary" chimeric segment
                     alignType=P.pCh.out.bamHardClip ? ( ( itr%2==trChim[itr].Str ) ? -12 : -11) : -13 ; //right:left chimeric junction
                     bamIsuppl=bamN;

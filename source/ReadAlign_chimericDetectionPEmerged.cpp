@@ -26,7 +26,8 @@ void ReadAlign::chimericDetectionPEmerged(ReadAlign &seRA) {
         trChim[ii].peOverlapSEtoPE(peOv.mateStart,seRA.trChim[ii]);
     };
 
-    uint segLen[2][2], segEx[2];
+    uint segLen[2][2]; //segment length [trChim][mate]
+    uint segEx[2];//last exon of the mate0 [trChim]
     uint segLmin=-1LLU, i1,i2;    
     for (uint ii=0; ii<2; ii++) {
         segLen[ii][0]=0;
@@ -42,19 +43,25 @@ void ReadAlign::chimericDetectionPEmerged(ReadAlign &seRA) {
         for (uint jj=0; jj<2; jj++) {
             if (segLen[ii][jj]<segLmin) {
                 segLmin=segLen[ii][jj];
-                i1=ii;
-                i2=jj;
+                i1=ii;//trChim of the shortest segment length
+                i2=jj;//mate of the shortest segment length
             };
         };
     };
     
-    if (i2==1) {
+    if (i2==1) {//eliminate mate1: simply cut the exons that belong to mate1
         trChim[i1].nExons=segEx[i1]+1;
-    } else {
-        for (uint iex=segEx[i1]+1; iex<trChim[i1].nExons; iex++) {
+    } else {//eliminate mate 0: shift mate1 exon to the beginning
+        for (uint iex=0; iex<trChim[i1].nExons; iex++) {
+            uint iex1=iex+segEx[i1]+1;
             for (uint ii=0; ii<EX_SIZE; ii++) {
-                trChim[i1].exons[iex-segEx[i1]-1][ii]=trChim[i1].exons[iex][ii];
+                trChim[i1].exons[iex][ii]=trChim[i1].exons[iex1][ii];
             };
+            trChim[i1].canonSJ[iex]=trChim[i1].canonSJ[iex1];
+            trChim[i1].sjAnnot[iex]=trChim[i1].sjAnnot[iex1];
+            trChim[i1].sjStr[iex]=trChim[i1].sjStr[iex1];
+            trChim[i1].shiftSJ[iex][0]=trChim[i1].shiftSJ[iex1][0];
+            trChim[i1].shiftSJ[iex][1]=trChim[i1].shiftSJ[iex1][1];
         };
         trChim[i1].nExons=trChim[i1].nExons-segEx[i1]-1;
     };

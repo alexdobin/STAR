@@ -49,8 +49,7 @@ void ReadAlign::peOverlapMergeMap() {
     //    return;
     //};
     
-    //debug
-    //intScore oldScore=trBest->maxScore;
+    intScore peScore=trBest->maxScore;
     
     //convert SE to PE *this ReadAlign
     peMergeRA->peOv=peOv;
@@ -72,7 +71,11 @@ void ReadAlign::peOverlapMergeMap() {
     //cout << "\n";
 
     //P.alignSplicedMateMapLminOverLmate=P_alignSplicedMateMapLminOverLmate;
-    peOv.yes=true;
+    
+    if (peScore<=trBest->maxScore || chimRecord) {
+        peOv.yes=true;
+    };
+    
     return;
 };
 
