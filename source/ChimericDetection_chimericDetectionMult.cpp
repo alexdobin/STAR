@@ -108,7 +108,7 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength) {
     
     for (auto cAit=chimAligns.begin(); cAit<chimAligns.end(); cAit++) {//output chimeras within score range
         if (cAit->chimScore >= chimScoreBest-(int)P.pCh.multimapScoreRange)
-            cAit->chimericJunctionOutput(ostreamChimJunction, chimN);
+            cAit->chimericJunctionOutput(*ostreamChimJunction, chimN);
     };
 
     if (chimN>0)

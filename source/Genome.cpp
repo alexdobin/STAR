@@ -91,10 +91,36 @@ void Genome::genomeLoad(){//allocate and load Genome
     uint L=200,K=6;
 
     Parameters P1;
+    
+    //some initializations before reading the parameters
+    GstrandBit=0;
 
     ifstream parFile((pGe.gDir+("/genomeParameters.txt")).c_str());
     if (parFile.good()) {
         P.inOut->logMain << "Reading genome generation parameters:\n";
+        
+        //read genome internal parameters
+        while (parFile.good()) {
+            string word1;
+            parFile >> word1;
+            if (word1=="###") {
+                parFile >> word1;
+                if (word1=="GstrandBit") {
+                    uint gsb1=0;
+                    parFile >> gsb1;
+                    GstrandBit=(uint8) gsb1;
+                    P.inOut->logMain << "### GstrandBit=" << (uint) GstrandBit <<"\n";
+                } else {
+                    P.inOut->logMain << "### " <<word1;
+                    getline(parFile,word1);
+                    P.inOut->logMain <<word1<<"\n";
+                };
+            };
+        };
+        parFile.clear();        
+        parFile.seekg(0,ios::beg);//rewind
+
+        
         P1.inOut = P.inOut;
         P1.scanAllLines(parFile,3,-1);
         parFile.close();
@@ -178,7 +204,7 @@ void Genome::genomeLoad(){//allocate and load Genome
     };
     nGenome = OpenStream("Genome",GenomeIn,pGe.gFileSizes.at(0));
     nSAbyte = OpenStream("SA",SAin,pGe.gFileSizes.at(1));
-    OpenStream("/SAindex",SAiIn,1); //we do not need SAiIn siz, using a dummy value here to prevent from reading its size from the disk
+    OpenStream("SAindex",SAiIn,1); //we do not need SAiIn siz, using a dummy value here to prevent from reading its size from the disk
 
     uint SAiInBytes=0;
     SAiInBytes += fstreamReadBig(SAiIn,(char*) &pGe.gSAindexNbases, sizeof(pGe.gSAindexNbases));
@@ -189,8 +215,11 @@ void Genome::genomeLoad(){//allocate and load Genome
 
 
     /////////////////////////////////// at this point all array sizes should be known: calculate packed array lengths
-    GstrandBit = (uint) floor(log(nGenome)/log(2))+1;
-    if (GstrandBit<32) GstrandBit=32; //TODO: use simple access function for SA
+    if (GstrandBit==0) {//not defined before
+        GstrandBit = (uint) floor(log(nGenome)/log(2))+1;
+        if (GstrandBit<32) GstrandBit=32; //TODO: use simple access function for SA 
+    };
+    
 
     GstrandMask = ~(1LLU<<GstrandBit);
     nSA=(nSAbyte*8)/(GstrandBit+1);

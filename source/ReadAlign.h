@@ -33,7 +33,7 @@ class ReadAlign
         
         istream* readInStream[MAX_N_MATES];
         BAMoutput *outBAMcoord, *outBAMunsorted, *outBAMquant;//sorted by coordinate, unsorted, transcriptomic BAM structure
-        fstream chunkOutChimSAM, chunkOutChimJunction, chunkOutUnmappedReadsStream[MAX_N_MATES], chunkOutFilterBySJoutFiles[MAX_N_MATES];
+        fstream chunkOutChimSAM, *chunkOutChimJunction, chunkOutUnmappedReadsStream[MAX_N_MATES], chunkOutFilterBySJoutFiles[MAX_N_MATES];
         OutSJ *chunkOutSJ, *chunkOutSJ1;
 
         ostream* outSAMstream;        
@@ -50,6 +50,8 @@ class ReadAlign
         int waspType, waspType1; //alignment ASE-WASP type and
 
         ReadAlign *peMergeRA; //ReadAlign for merged PE mates
+        
+        ChimericDetection *chimDet;
         
     private:
         Parameters& P; //pointer to the parameters, will be initialized on construction
@@ -138,7 +140,6 @@ class ReadAlign
         uint chimRepeat0, chimRepeat1, chimJ0, chimJ1;
         Transcript trChim[MAX_N_CHIMERAS];
         //new chimeric detection
-        ChimericDetection *chimDet;
         bool chimRecord; //true if chimeric aligment was detected
         
         Transcript *alignC, *extendC, *polyAtailC; //alignment rules/conditions

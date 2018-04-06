@@ -107,6 +107,7 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
 
     resetN();
     
+    chunkOutChimJunction = new fstream;
     chimDet= new ChimericDetection(P, trAll, nWinTr, Read1, mapGen, chunkOutChimJunction, this);
 
 };

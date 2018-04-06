@@ -14,12 +14,6 @@ ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome 
     };
 
     RA = new ReadAlign(P, mapGen, chunkTr, iChunk);//new local copy of RA for each chunk
-    if (P.wasp.yes) {
-        RA->waspRA= new ReadAlign(Pin,genomeIn,TrIn,iChunk);
-    };
-    if (P.peOverlap.yes) {
-        RA->peMergeRA= new ReadAlign(Pin,genomeIn,TrIn,iChunk);
-    };
     
     RA->iRead=0;
 
@@ -80,7 +74,7 @@ ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome 
             chunkFstreamOpen(P.outFileTmp + "/Chimeric.out.sam.thread", iChunk, RA->chunkOutChimSAM);
        };
        if (P.pCh.out.junctions) {       
-            chunkFstreamOpen(P.outFileTmp + "/Chimeric.out.junction.thread", iChunk, RA->chunkOutChimJunction);
+            chunkFstreamOpen(P.outFileTmp + "/Chimeric.out.junction.thread", iChunk, *RA->chunkOutChimJunction);
        };
     };
     if (P.outReadsUnmapped=="Fastx" ) {
@@ -91,6 +85,16 @@ ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome 
         chunkFstreamOpen(P.outFileTmp + "/FilterBySJoutFiles.mate1.thread",iChunk, RA->chunkOutFilterBySJoutFiles[0]);
         if (P.readNmates==2) chunkFstreamOpen(P.outFileTmp + "/FilterBySJoutFiles.mate2.thread",iChunk, RA->chunkOutFilterBySJoutFiles[1]);
     };
+    
+    if (P.wasp.yes) {
+        RA->waspRA= new ReadAlign(Pin,genomeIn,TrIn,iChunk);
+    };
+    if (P.peOverlap.yes) {
+        RA->peMergeRA= new ReadAlign(Pin,genomeIn,TrIn,iChunk);
+        delete RA->peMergeRA->chunkOutChimJunction;
+        RA->peMergeRA->chunkOutChimJunction=RA->chunkOutChimJunction;//point to the same out-stream
+        RA->peMergeRA->chimDet->ostreamChimJunction=RA->peMergeRA->chunkOutChimJunction;
+    };    
 };
 
 ///////////////

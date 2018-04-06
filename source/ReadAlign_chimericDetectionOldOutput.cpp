@@ -135,14 +135,14 @@ void ReadAlign::chimericDetectionOldOutput() {
         };
     };
     //junction + SAMp
-    chunkOutChimJunction << mapGen.chrName[trChim[0].Chr] <<"\t"<< chimJ0 - mapGen.chrStart[trChim[0].Chr]+1 <<"\t"<< (trChim[0].Str==0 ? "+":"-") \
+    *chunkOutChimJunction << mapGen.chrName[trChim[0].Chr] <<"\t"<< chimJ0 - mapGen.chrStart[trChim[0].Chr]+1 <<"\t"<< (trChim[0].Str==0 ? "+":"-") \
             <<"\t"<< mapGen.chrName[trChim[1].Chr] <<"\t"<< chimJ1 - mapGen.chrStart[trChim[1].Chr]+1 <<"\t"<< (trChim[1].Str==0 ? "+":"-") \
             <<"\t"<< chimMotif <<"\t"<< chimRepeat0  <<"\t"<< chimRepeat1 <<"\t"<< readName+1 \
             <<"\t"<< trChim[0].exons[0][EX_G] - mapGen.chrStart[trChim[0].Chr]+1 <<"\t"<< outputTranscriptCIGARp(trChim[0]) \
             <<"\t"<< trChim[1].exons[0][EX_G] - mapGen.chrStart[trChim[1].Chr]+1 <<"\t"<<  outputTranscriptCIGARp(trChim[1]);
     if (P.outSAMattrPresent.RG)
-        chunkOutChimJunction <<"\t"<< P.outSAMattrRG.at(readFilesIndex);
-    chunkOutChimJunction <<"\n"; //<<"\t"<< trChim[0].exons[0][EX_iFrag]+1 --- no need for that, since trChim[0] is always on the first mate
+        *chunkOutChimJunction <<"\t"<< P.outSAMattrRG.at(readFilesIndex);
+    *chunkOutChimJunction <<"\n"; //<<"\t"<< trChim[0].exons[0][EX_iFrag]+1 --- no need for that, since trChim[0] is always on the first mate
     
     return;
 };

@@ -208,6 +208,12 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
     } else {
         nMates=0;
     };
+    
+    uint tLen,leftMostMate;
+    if (nMates>1) {
+        tLen=max(trOut.exons[trOut.nExons-1][EX_G]+trOut.exons[trOut.nExons-1][EX_L],trOut.exons[iExMate][EX_G]+trOut.exons[iExMate][EX_L])-min(trOut.exons[0][EX_G],trOut.exons[iExMate+1][EX_G]);
+        leftMostMate=(trOut.exons[0][EX_G]<=trOut.exons[iExMate+1][EX_G] ? 0 : 1);
+    };
 
     uint leftMate=0; //the mate (0 or 1) which is on the left
     if (flagPaired) {
@@ -561,9 +567,9 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
 
         //8: tlen Template length (= TLEN)
         if (nMates>1) {
-            int32 tlen=trOut.exons[trOut.nExons-1][EX_G]+trOut.exons[trOut.nExons-1][EX_L]-trOut.exons[0][EX_G];
-            if (imate>0) tlen=-tlen;
-            pBAM[8]=(uint32)tlen;
+            //int32 tlen=trOut.exons[trOut.nExons-1][EX_G]+trOut.exons[trOut.nExons-1][EX_L]-trOut.exons[0][EX_G];
+            //if (imate>0) tlen=-tlen;
+            pBAM[8]=(imate==leftMostMate ? tLen : -tLen);
         } else {
             pBAM[8]=0;
         };

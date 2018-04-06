@@ -6,6 +6,7 @@ void genomeParametersWrite(string fileName, Parameters& P, string errorOut, Geno
     ofstream & genomePar = ofstrOpen(fileName, errorOut, P);
 
     genomePar << "### "<<P.commandLineFull <<"\n";
+    genomePar << "### GstrandBit"<< mapGen.GstrandBit <<"\n";
 
     genomePar << "versionGenome\t" << P.versionSTAR <<"\n";
     genomePar << "genomeFastaFiles\t";

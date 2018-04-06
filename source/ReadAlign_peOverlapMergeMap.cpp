@@ -124,6 +124,8 @@ void ReadAlign::peMergeMates() {
     Lread=Lread-peOv.nOv-1;
     readLength[0]=Lread;    
     readLength[1]=0;
+    readLengthOriginal[0]=Lread;    
+    readLengthOriginal[1]=0;
     readNmates=1;
     
     //fill Read1[1,2]
