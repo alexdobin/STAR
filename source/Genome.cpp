@@ -516,7 +516,7 @@ void Genome::genomeLoad(){//allocate and load Genome
         P->winBinNbits = (uint) floor( log2( max( max(4LLU,P->alignIntronMax), (P->alignMatesGapMax==0 ? 1000LLU : P->alignMatesGapMax) ) /4 ) + 0.5);
         P->winBinNbits = max( P->winBinNbits, (uint) floor(log2(P->nGenome/40000+1)+0.5) ); 
         //ISSUE - to be fixed in STAR3: if alignIntronMax>0 but alignMatesGapMax==0, winBinNbits will be defined by alignIntronMax
-        P->inOut->logMain << "To accomodate alignIntronMax="<<P->alignIntronMax<<" redefined winBinNbits="<< P->winBinNbits <<endl;
+        P->inOut->logMain << "To accommodate alignIntronMax="<<P->alignIntronMax<<" redefined winBinNbits="<< P->winBinNbits <<endl;
     };
 
     if (P->winBinNbits > P->genomeChrBinNbits) {
@@ -531,7 +531,7 @@ void Genome::genomeLoad(){//allocate and load Genome
         //redefine winFlankNbins,winAnchorDistNbins
         P->winFlankNbins=max(P->alignIntronMax,P->alignMatesGapMax)/(1LLU<<P->winBinNbits)+1;
         P->winAnchorDistNbins=2*P->winFlankNbins;
-        P->inOut->logMain << "To accomodate alignIntronMax="<<P->alignIntronMax<<" and alignMatesGapMax="<<P->alignMatesGapMax<<\
+        P->inOut->logMain << "To accommodate alignIntronMax="<<P->alignIntronMax<<" and alignMatesGapMax="<<P->alignMatesGapMax<<\
                 ", redefined winFlankNbins="<<P->winFlankNbins<<" and winAnchorDistNbins="<<P->winAnchorDistNbins<<endl;
     };
 
