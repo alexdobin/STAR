@@ -128,6 +128,8 @@ class Parameters {
         string outSAMheaderCommentFile;
         int outSAMmapqUnique;
 
+        int outSAMtlen;
+        
         struct {bool NH,HI,AS,NM,MD,nM,jM,jI,RG,XS,rB,vG,vA,vW,ch,MC;} outSAMattrPresent, outSAMattrPresentQuant;
 
         vector <int> outSAMattrOrder, outSAMattrOrderQuant;

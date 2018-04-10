@@ -210,7 +210,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
     };
     
     uint tLen,leftMostMate;
-    if (nMates>1) {
+    if (nMates>1 && P.outSAMtlen==2) {
         tLen=max(trOut.exons[trOut.nExons-1][EX_G]+trOut.exons[trOut.nExons-1][EX_L],trOut.exons[iExMate][EX_G]+trOut.exons[iExMate][EX_L])-min(trOut.exons[0][EX_G],trOut.exons[iExMate+1][EX_G]);
         leftMostMate=(trOut.exons[0][EX_G]<=trOut.exons[iExMate+1][EX_G] ? 0 : 1);
     };
@@ -567,9 +567,12 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
 
         //8: tlen Template length (= TLEN)
         if (nMates>1) {
-            //int32 tlen=trOut.exons[trOut.nExons-1][EX_G]+trOut.exons[trOut.nExons-1][EX_L]-trOut.exons[0][EX_G];
-            //if (imate>0) tlen=-tlen;
-            pBAM[8]=(imate==leftMostMate ? tLen : -tLen);
+            if (P.outSAMtlen==1) {
+                int32 tlen=trOut.exons[trOut.nExons-1][EX_G]+trOut.exons[trOut.nExons-1][EX_L]-trOut.exons[0][EX_G];
+                pBAM[8]=(imate==0 ? tlen : -tlen);
+            } else if (P.outSAMtlen==1) {
+                pBAM[8]=(imate==leftMostMate ? tLen : -tLen);
+            };
         } else {
             pBAM[8]=0;
         };

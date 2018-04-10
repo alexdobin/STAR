@@ -309,6 +309,11 @@ outSAMmultNmax          -1
     int: max number of multiple alignments for a read that will be output to the SAM/BAM files.
                         -1 ... all alignments (up to --outFilterMultimapNmax) will be output
 
+outSAMtlen              1
+    int: calculation method for the TLEN field in the SAM/BAM files
+                        1 ... leftmost base of the (+)strand mate to rightmost base of the (-)mate. (+)sign for the (+)strand mate
+                        2 ... leftmost base of any mate to rightmost base of any mate. (+)sign for the mate with the leftmost base. This is different from 1 for overlapping mates with protruding ends
+
 outBAMcompression       1
     int: -1 to 10  BAM compression level, -1=default compression (6?), 0=no compression, 10=maximum compression
 

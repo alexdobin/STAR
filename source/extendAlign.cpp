@@ -3,7 +3,7 @@
 #include "Transcript.h"
 #include "extendAlign.h"
 
-bool extendAlign( char* R, char* Q, char* G, uint rStart, uint gStart, int dR, int dG, uint L, uint Lprev, uint nMMprev, uint nMMmax, double pMMmax, bool extendToEnd, Transcript* trA ) {
+bool extendAlign( char* R, char* G, uint rStart, uint gStart, int dR, int dG, uint L, uint Lprev, uint nMMprev, uint nMMmax, double pMMmax, bool extendToEnd, Transcript* trA ) {
 
 // find the maximum score
 
@@ -13,7 +13,6 @@ int Score=0, nMatch=0, nMM=0;
 trA->maxScore=0;
 
 R=R+rStart;
-Q=Q+rStart;
 G=G+gStart;
 
 if (extendToEnd) {//end to end extension
@@ -37,10 +36,10 @@ if (extendToEnd) {//end to end extension
 
         if (G[iG]==R[iS]) {//Match
             nMatch++;
-            Score += int(Q[iS]);
+            Score += scoreMatch;
         } else {
             nMM++;
-            Score -= int(Q[iS]);
+            Score -= scoreMatch;
         };
     };
 
@@ -66,7 +65,7 @@ for (int i=0;i<(int) L;i++) {
 
     if (G[iG]==R[iS]) {//Match
         nMatch++;
-        Score += int(Q[iS]);
+        Score += scoreMatch;
         if (Score>trA->maxScore) {//record new maximum
             if (nMM+nMMprev <= min(pMMmax*double(Lprev+i+1), double(nMMmax)) ) {//check nMM, if too many mismatches - do not record this maximum. Do not break - there might be still hope to make a long extension
                 trA->extendL=i+1;
@@ -81,7 +80,7 @@ for (int i=0;i<(int) L;i++) {
         };
 
         nMM++;
-        Score -= int(Q[iS]);
+        Score -= scoreMatch;
     };
 };
 

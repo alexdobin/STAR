@@ -181,8 +181,8 @@ class ReadAlign
         void outputAlignments();
         void calcCIGAR(Transcript const &trOut, uint nMates, uint iExMate, uint leftMate);
 
-        void stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R, char *Q);//stitches all seeds in one window: iW
-        void stitchPieces(char **R, char **Q, uint Lread);
+        void stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R);//stitches all seeds in one window: iW
+        void stitchPieces(char **R, uint Lread);
 
         uint quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT);
         

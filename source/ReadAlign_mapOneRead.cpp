@@ -100,7 +100,7 @@ int ReadAlign::mapOneRead() {
         nW=0;
     } else if (Nsplit>0 && nA>0) {//otherwise there are no good pieces, or all pieces map too many times: read cannot be mapped
 //         qsort((void*) PC, nP, sizeof(uint)*PC_SIZE, funCompareUint2);//sort PC by rStart and length
-        stitchPieces(Read1, Qual1, Lread);
+        stitchPieces(Read1, Lread);
     };
     
     return 0;

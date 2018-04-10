@@ -10,7 +10,7 @@
 #include "GlobalVariables.h"
 #include <time.h>
 
-void ReadAlign::stitchPieces(char **R, char **Q, uint Lread) {
+void ReadAlign::stitchPieces(char **R, uint Lread) {
 
     //zero-out winBin
     memset(winBin[0],255,sizeof(winBin[0][0])*P.winBinN);
@@ -295,7 +295,7 @@ std::time(&timeStart);
 
 
     #ifdef COMPILE_FOR_LONG_READS
-        stitchWindowSeeds(iW, iW1, NULL, R[trA.roStr==0 ? 0:2], Q[trA.roStr], mapGen.G);
+        stitchWindowSeeds(iW, iW1, NULL, R[trA.roStr==0 ? 0:2], mapGen.G);
         if (P.pCh.segmentMin>0) {
             for (uint ia=0;ia<nWA[iW];ia++)
             {//mark all seeds that overlap the best (and only for now) transcript trA
@@ -313,10 +313,10 @@ std::time(&timeStart);
                     
                 };
             };
-            stitchWindowSeeds(iW, iW1, WAincl, R[trA.roStr==0 ? 0:2], Q[trA.roStr], mapGen.G);
+            stitchWindowSeeds(iW, iW1, WAincl, R[trA.roStr==0 ? 0:2], mapGen.G);
         };
     #else
-        stitchWindowAligns(0, nWA[iW], 0, WAincl, 0, 0, trA, Lread, WA[iW], R[trA.roStr==0 ? 0:2], Q[trA.roStr], mapGen, P, trAll[iW1], nWinTr+iW1, this);
+        stitchWindowAligns(0, nWA[iW], 0, WAincl, 0, 0, trA, Lread, WA[iW], R[trA.roStr==0 ? 0:2], mapGen, P, trAll[iW1], nWinTr+iW1, this);
     #endif
 
         if (nWinTr[iW1]==0) {

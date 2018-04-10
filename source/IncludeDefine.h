@@ -66,6 +66,9 @@ typedef uint8_t uint8;
 #define intSWscore int
 #define intScore int
 
+#define scoreMatch 1
+
+
 //cleaned
 //output
 #define BAMoutput_oneAlignMaxBytes 100000
