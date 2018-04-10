@@ -10,7 +10,7 @@ parametersFiles          -
 
 ### System
 sysShell            -
-    string: path to the shell binary, preferrably bash, e.g. /bin/bash.
+    string: path to the shell binary, preferably bash, e.g. /bin/bash.
                     - ... the default shell is executed, typically /bin/sh. This was reported to fail on some Ubuntu systems - then you need to specify path to bash.
 
 ### Run Parameters
@@ -309,7 +309,7 @@ outBAMsortingThreadN    0
 ### BAM processing
 
 bamRemoveDuplicatesType  -
-    string: mark duplicates in the BAM file, for now only works with (i) sorted BAM feeded with inputBAMfile, and (ii) for paired-end alignments only
+    string: mark duplicates in the BAM file, for now only works with (i) sorted BAM fed with inputBAMfile, and (ii) for paired-end alignments only
                         -                       ... no duplicate removal/marking
                         UniqueIdentical         ... mark all multimappers, and duplicate unique mappers. The coordinates, FLAG, CIGAR must be identical
                         UniqueIdenticalNotMulti  ... mark duplicate unique mappers but not multimappers.
@@ -565,7 +565,7 @@ chimScoreMin                0
     int>=0: minimum total (summed) score of the chimeric segments
 
 chimScoreDropMax            20
-    int>=0: max drop (difference) of chimeric score (the sum of scores of all chimeric segements) from the read length
+    int>=0: max drop (difference) of chimeric score (the sum of scores of all chimeric segments) from the read length
 
 chimScoreSeparation         10
     int>=0: minimum difference (separation) between the best chimeric score and the next one
