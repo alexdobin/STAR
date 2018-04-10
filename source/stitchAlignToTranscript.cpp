@@ -250,11 +250,11 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
                 nIns=1;
                 if (gGap==0) {//simple insertion, no need to stitch
                     jR=0;
-                } else if (gGap<0) {//reduce the score
-
+                } else if (gGap<0) {//overlapping seeds: reduce the score
                     jR=0;
-                    for (int ii=0; ii<-gGap; ii++) Score -= scoreMatch;
-
+                    for (int ii=0; ii<-gGap; ii++) {
+                        Score -= scoreMatch;
+                    };
                 } else {//stitch: define the exon boundary jR
                     int Score1=0; int maxScore1=0;
                     for (int jR1=1;jR1<=gGap;jR1++) {//scan to the right to find the best score
@@ -264,13 +264,11 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
                             Score1+=( R[rAend+Ins+jR1]==G[gAend+jR1] ) ? -scoreMatch:+scoreMatch;
                         };
 
-                        if (Score1>maxScore1) {//TODO: equal sign (>=) would flush insertions to the right. Also need to do it even if gGap<=0
+                        if (Score1>=maxScore1) {//equal sign (>=) flushes insertions to the right
                             maxScore1=Score1;
                             jR=jR1;
                         };
                     };
-
-
                     for (int ii=1;ii<=gGap;ii++) {//score donor and acceptor
                         uint r1=rAend+ii+(ii<=jR ? 0:Ins);
                         if (G[gAend+ii]<4 && R[r1]<4) {
@@ -285,6 +283,11 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
                     };
                 };
 
+                for (; jR<L; jR++ ){//flush the indel to the right as much as possible
+                    if (R[rAend+jR+1]!=G[gAend+jR+1] || G[gAend+jR+1]==4) {
+                        break;
+                    };
+                };
                 Score += Ins*P.scoreInsBase + P.scoreInsOpen;
                 jCan=-3;
             }; //different types of gaps selection
