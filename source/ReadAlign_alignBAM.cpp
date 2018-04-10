@@ -209,7 +209,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
         nMates=0;
     };
     
-    uint tLen,leftMostMate;
+    uint tLen=0,leftMostMate=0;
     if (nMates>1 && P.outSAMtlen==2) {
         tLen=max(trOut.exons[trOut.nExons-1][EX_G]+trOut.exons[trOut.nExons-1][EX_L],trOut.exons[iExMate][EX_G]+trOut.exons[iExMate][EX_L])-min(trOut.exons[0][EX_G],trOut.exons[iExMate+1][EX_G]);
         leftMostMate=(trOut.exons[0][EX_G]<=trOut.exons[iExMate+1][EX_G] ? 0 : 1);
@@ -570,8 +570,9 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
             if (P.outSAMtlen==1) {
                 int32 tlen=trOut.exons[trOut.nExons-1][EX_G]+trOut.exons[trOut.nExons-1][EX_L]-trOut.exons[0][EX_G];
                 pBAM[8]=(imate==0 ? tlen : -tlen);
-            } else if (P.outSAMtlen==1) {
-                pBAM[8]=(imate==leftMostMate ? tLen : -tLen);
+            } else if (P.outSAMtlen==2) {
+                int32 tlen=(int32)tLen;
+                pBAM[8]=(imate==leftMostMate ? tlen : -tlen);
             };
         } else {
             pBAM[8]=0;
