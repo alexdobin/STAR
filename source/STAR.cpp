@@ -411,7 +411,7 @@ int main(int argInN, char* argIn[]) {
             if (binS==0) continue; //empty bin
 
             if (ibin == nBins-1) {//last bin for unmapped reads
-                BAMbinSortUnmapped(ibin,P.runThreadN,P.outBAMsortTmpDir,P.inOut->outBAMfileCoord, P, mainGenome);
+                BAMbinSortUnmapped(ibin,P.runThreadN,P.outBAMsortTmpDir, P, mainGenome);
             } else {
             uint newMem=binS+binN*24;
             bool boolWait=true;

@@ -10,6 +10,15 @@
 class ReadAlign;
 
 class ChimericDetection {
+    private:
+        Parameters &P;
+        ReadAlign *RA;
+        Transcript ***trAll;
+        uint nW, *nWinTr;
+        char** Read1;
+        Genome &outGen;        
+        uint *readLength;
+        
     public:
         uint chimN;
         vector <ChimericAlign> chimAligns;
@@ -19,15 +28,6 @@ class ChimericDetection {
         ChimericDetection(Parameters &Pin, Transcript ***trAll, uint *nWinTr, char** Read1in, Genome &genomeIn, fstream *ostreamChimJunctionIn, ReadAlign *RA);
         bool chimericDetectionMult(uint nWin, uint *readLengthIn);
         fstream *ostreamChimJunction;
-
-    private:
-        ReadAlign *RA;
-        Parameters &P;
-        Transcript ***trAll;
-        uint nW, *nWinTr;
-        char** Read1;
-        uint *readLength;
-        Genome &outGen;
 };
 
 #endif

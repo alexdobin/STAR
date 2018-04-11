@@ -88,18 +88,22 @@ class Parameters {
         string alignSoftClipAtReferenceEnds;
         vector <int32> alignSJstitchMismatchNmax;
 
-        struct
-        {
+        struct {
             string in;
             bool ext[2][2];
         } alignEndsType;
 
-        struct
-        {
+        struct {
             vector<string> in;
             int nBasesMax;
             bool concordantPair;
         } alignEndsProtrude;
+        
+        struct {
+            string in;
+            bool flushRight;
+        } alignInsertionFlush;
+        
         
         //seed parameters
         uint seedMultimapNmax; //max number of multiple alignments per piece

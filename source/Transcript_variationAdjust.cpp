@@ -1,7 +1,7 @@
 #include "Transcript.h"
 #include "serviceFuns.cpp"
 
-int Transcript::variationAdjust(const Genome &mapGen, char *R, char **Read1, char *G, Parameters &P)
+int Transcript::variationAdjust(const Genome &mapGen, char *R)
 {
     Variation &Var=*mapGen.Var;
     
@@ -20,7 +20,7 @@ int Transcript::variationAdjust(const Genome &mapGen, char *R, char **Read1, cha
         int32 isnp=binarySearch1b <uint> (exons[ie][EX_G], Var.snp.loci, Var.snp.N);
         if (isnp>=0)
         {
-            while (isnp<Var.snp.N && exons[ie][EX_G]+exons[ie][EX_L]>Var.snp.loci[isnp])
+            while ((uint)isnp<Var.snp.N && exons[ie][EX_G]+exons[ie][EX_L]>Var.snp.loci[isnp])
             {//these SNPs overlap the block
                 varInd.push_back(isnp); //record snp index
                 varGenCoord.push_back(Var.snp.loci[isnp]-mapGen.chrStart[Chr]);
@@ -67,7 +67,7 @@ int Transcript::variationAdjust(const Genome &mapGen, char *R, char **Read1, cha
         dScore=2*(nMMold-nMM);//score only changes if the number of mismatches is reduced after SNP adjustment
     };
     #else
-        #warning VAR_noScoreCorrection set: no variation score correction
+        //#warning VAR_noScoreCorrection set: no variation score correction
     #endif
     
     return dScore;

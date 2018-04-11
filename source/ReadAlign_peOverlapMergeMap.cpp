@@ -231,7 +231,7 @@ void Transcript::peOverlapSEtoPE(uint* mateStart, Transcript &t) {//convert alig
     
     
     //copy scalar variables
-    for (uint ii=0;ii<4;ii++) {
+    for (uint ii=0;ii<3;ii++) {
         intronMotifs[ii]=t.intronMotifs[ii];
     };
     sjMotifStrand=t.sjMotifStrand;

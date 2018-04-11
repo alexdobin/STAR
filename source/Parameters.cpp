@@ -197,6 +197,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "alignSoftClipAtReferenceEnds", &alignSoftClipAtReferenceEnds));
 
     parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "alignEndsProtrude", &alignEndsProtrude.in));
+    parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "alignInsertionFlush", &alignInsertionFlush.in));
 
     //peOverlap
     parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "peOverlapNbasesMin", &peOverlap.NbasesMin));    
@@ -1308,54 +1309,52 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 
 
     //outSAMunmapped
-    outSAMunmapped.yes=false;
-    outSAMunmapped.within=false;
-    outSAMunmapped.keepPairs=false;
-    if (outSAMunmapped.mode.at(0)=="None")
-    {//nothing to do
-    } else if (outSAMunmapped.mode.at(0)=="Within")
-    {
+    if (outSAMunmapped.mode.at(0)=="None" && outSAMunmapped.mode.size()==1) {
+        outSAMunmapped.yes=false;
+        outSAMunmapped.within=false;
+        outSAMunmapped.keepPairs=false;
+    } else if (outSAMunmapped.mode.at(0)=="Within" && outSAMunmapped.mode.size()==1) {
         outSAMunmapped.yes=true;
         outSAMunmapped.within=true;
-    } else
-    {
+        outSAMunmapped.keepPairs=false;   
+    } else if (outSAMunmapped.mode.at(0)=="Within" && outSAMunmapped.mode.at(1)=="KeepPairs") {
+        outSAMunmapped.yes=true;
+        outSAMunmapped.within=true;
+        outSAMunmapped.keepPairs=true;   
+    } else {
         ostringstream errOut;
-        errOut << "EXITING because of fatal PARAMETERS error: unrecognized first word of --outSAMunmapped="<<outSAMunmapped.mode.at(0)<<"\n";
-        errOut << "SOLUTION: use allowed options: None OR Within";
+        errOut << "EXITING because of fatal PARAMETERS error: unrecognized option for --outSAMunmapped=";
+        for (uint ii=0; ii<outSAMunmapped.mode.size(); ii++) errOut <<" "<< outSAMunmapped.mode.at(ii);
+        errOut << "\n";
+        errOut << "SOLUTION: use allowed options: None OR Within OR Within KeepPairs";
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
 
-    for (uint ii=1;ii<outSAMunmapped.mode.size();ii++)
-    {
-        if (outSAMunmapped.mode.at(0)=="Within")
-        {
-            outSAMunmapped.keepPairs=true;
-        } else
-        {
-            ostringstream errOut;
-            errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in of --outSAMunmapped="<<outSAMunmapped.mode.at(ii)<<"\n";
-            errOut << "SOLUTION: use allowed option: KeepPairs";
-            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-        };
-    };
-
     alignEndsProtrude.nBasesMax=stoi(alignEndsProtrude.in.at(0),nullptr);
-    if (alignEndsProtrude.nBasesMax>0)
-    {//allow ends protrusion
-        if (alignEndsProtrude.in.at(1)=="ConcordantPair")
-        {
+    if (alignEndsProtrude.nBasesMax>0) {//allow ends protrusion
+        if (alignEndsProtrude.in.at(1)=="ConcordantPair") {
             alignEndsProtrude.concordantPair=true;
-        } else if (alignEndsProtrude.in.at(1)=="DiscordantPair")
-        {
+        } else if (alignEndsProtrude.in.at(1)=="DiscordantPair") {
             alignEndsProtrude.concordantPair=false;
-        } else
-        {
+        } else  {
             ostringstream errOut;
             errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in of --alignEndsProtrude="<<alignEndsProtrude.in.at(1)<<"\n";
             errOut << "SOLUTION: use allowed option: ConcordantPair or DiscordantPair";
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
     };
+    
+    if (alignInsertionFlush.in=="None") {
+        alignInsertionFlush.flushRight=false;
+    } else if (alignInsertionFlush.in=="Right") {
+        alignInsertionFlush.flushRight=true;
+    } else  {
+        ostringstream errOut;
+        errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in of --alignInsertionFlush="<<alignInsertionFlush.in<<"\n";
+        errOut << "SOLUTION: use allowed option: None or Right";
+        exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
+        
     
     //peOverlap
     if (peOverlap.NbasesMin>0) {

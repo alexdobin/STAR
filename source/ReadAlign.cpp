@@ -4,7 +4,7 @@
 #include "ReadAlign.h"
 
 ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk) 
-                    : P(Pin), mapGen(genomeIn), chunkTr(TrIn) {//allocate arrays                       
+                    : mapGen(genomeIn), P(Pin), chunkTr(TrIn) {//allocate arrays                       
       
     readNmates=P.readNmates;
     

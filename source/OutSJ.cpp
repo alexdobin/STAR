@@ -1,7 +1,7 @@
 #include "OutSJ.h"
 #include "ErrorWarning.h"
 
-OutSJ::OutSJ (uint nSJmax, Parameters &Pin, Genome &genomeIn) : P(Pin), mapGen(genomeIn), oneSJ(genomeIn) {//do I need P?
+OutSJ::OutSJ (uint nSJmax, Parameters &Pin, Genome &genomeIn) : oneSJ(genomeIn), P(Pin), mapGen(genomeIn)  {//do I need P?
 
     data = new char [oneSJ.dataSize*nSJmax]; //allocate big array of SJ loci and properties
     memset(data,0,oneSJ.dataSize*nSJmax);
@@ -73,7 +73,7 @@ void Junction::junctionPointer(char* sjPoint, uint isj) {//
     overhangRight=(uint16*) (d1+overhangRightP);
 };
 
-void Junction::outputStream(ostream &outStream, Parameters& P) {
+void Junction::outputStream(ostream &outStream) {
     uint sjChr=mapGen.chrBin[*start >> mapGen.pGe.gChrBinNbits];
     outStream << mapGen.chrName.at(sjChr) <<"\t"<< *start + 1 - mapGen.chrStart[sjChr] <<"\t"<<*start + *gap - mapGen.chrStart[sjChr] \
             <<"\t"<< int(*strand) <<"\t"<< int(*motif) <<"\t"<< int (*annot) <<"\t"<< *countUnique <<"\t"<< *countMultiple \

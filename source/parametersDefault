@@ -539,11 +539,14 @@ alignEndsProtrude       0    ConcordantPair
                                             ConcordantPair ... report alignments with non-zero protrusion as concordant pairs
                                             DiscordantPair ... report alignments with non-zero protrusion as discordant pairs
 
-
-alignSoftClipAtReferenceEnds Yes
+alignSoftClipAtReferenceEnds    Yes
     string: allow the soft-clipping of the alignments past the end of the chromosomes
-                        Yes ... allow
-                        No  ... prohibit, useful for compatibility with Cufflinks
+                                Yes ... allow
+                                No  ... prohibit, useful for compatibility with Cufflinks
+
+alignInsertionFlush     None
+    string:             None    ... insertions are not flushed
+                        Right   ... insertions are flushed to the right
 
 ### Paired-End reads
 peOverlapNbasesMin          0

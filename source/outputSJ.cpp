@@ -124,7 +124,7 @@ void outputSJ(ReadAlignChunk** RAchunk, Parameters& P) {//collapses junctions fr
         for (uint ii=0;ii<allSJ.N;ii++) {//write to file
             if ( P.outFilterBySJoutStage==2 || sjFilter[ii]  ) {
                 oneSJ.junctionPointer(allSJ.data,ii);
-                oneSJ.outputStream(outSJfileStream, P);//write to file
+                oneSJ.outputStream(outSJfileStream);//write to file
             };
         };
         outSJfileStream.close();

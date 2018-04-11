@@ -91,7 +91,7 @@ void outBAMwriteHeader (BGZF* fp, const string &samh, const vector <string> &chr
 
 template <class TintType>
 TintType bamAttributeInt(const char *bamAux, const char *attrName) {//not tested!!!
-    char *attrStart=strstr(bamAux,attrName);
+    const char *attrStart=strstr(bamAux,attrName);
     if (attrStart==NULL) return (TintType) -1;
     switch (attrStart[2]) {
         case ('c'):

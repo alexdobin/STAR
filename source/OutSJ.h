@@ -26,7 +26,7 @@ public:
 
     Junction(Genome &genomeIn);
     void junctionPointer(char* sjPoint, uint isj);
-    void outputStream(ostream &outStream, Parameters& P);
+    void outputStream(ostream &outStream);
     void collapseOneSJ(char* isj1P, char* isjP, Parameters& P);
     
 private:

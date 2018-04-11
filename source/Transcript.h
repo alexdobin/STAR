@@ -61,7 +61,7 @@ class Transcript {
         void resetMapG(uint); // reset map to 0 for Lread bases
         void add(Transcript*); // add
         void alignScore(char **Read1, char *G, Parameters &P);
-        int variationAdjust(const Genome &mapGen, char *R, char **Read1, char *G, Parameters &P);
+        int variationAdjust(const Genome &mapGen, char *R);
         string generateCigarP(); //generates CIGAR
         void peOverlapSEtoPE(uint* mSta, Transcript &t);
     private:

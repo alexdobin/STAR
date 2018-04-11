@@ -5,6 +5,12 @@
 #include <unistd.h>
 
 int removeFileOrDir(const char *fpath,const struct stat *sb, int typeflag, struct FTW *ftwbuf) {
+    
+    {//to avoid unused variable warning
+        (void) sb;
+        (void) ftwbuf;
+    };
+    
     if (typeflag==FTW_F) {//file
         remove(fpath);
     } else if (typeflag==FTW_DP) {//dir

@@ -28,6 +28,7 @@ void ReadAlign::waspMap() {
     
     vector<vector<char>> vvA {{}}; //all combinations
     for (const auto& u : vA) {//cycle over vars, each time add new variant by adding 2 variants to each of the existing combinations
+        (void) u; //to avoid unused warning
         vector<vector<char>> r; //temp
         for (const auto& x : vvA) {
             for (const auto& y:{1,2}) {

@@ -56,7 +56,7 @@ uint ReadAlign::maxMappableLength2strands(uint pieceStartIn, uint pieceLengthIn,
     #ifdef SA_SEARCH_FULL
         //full search of the array even if the index search gave maxL
         maxL=0;
-        Nrep = maxMappableLength(mapGen, Read1, pieceStart, pieceLength, iSA1 & mapGen.SAiMarkNmask, iSA2, dirR, maxL, indStartEnd, P);
+        Nrep = maxMappableLength(mapGen, Read1, pieceStart, pieceLength, iSA1 & mapGen.SAiMarkNmask, iSA2, dirR, maxL, indStartEnd);
     #else
         if (Lind < P.pGe.gSAindexNbases && (iSA1 & mapGen.SAiMarkNmaskC)==0 ) {//no need for SA search
             indStartEnd[0]=iSA1;
@@ -72,14 +72,14 @@ uint ReadAlign::maxMappableLength2strands(uint pieceStartIn, uint pieceLengthIn,
             indStartEnd[0]=indStartEnd[1]=iSA1;
             Nrep=1;
             bool comparRes;
-            maxL=compareSeqToGenome(mapGen, Read1, pieceStart, pieceLength, Lind, iSA1, dirR, comparRes, P);
+            maxL=compareSeqToGenome(mapGen, Read1, pieceStart, pieceLength, Lind, iSA1, dirR, comparRes);
         } else {//SA search, pieceLength>maxL
         if ( (iSA1 & mapGen.SAiMarkNmaskC)==0 ) {//no N in the prefix
                 maxL=Lind;
             } else {
                 maxL=0;
             };
-            Nrep = maxMappableLength(mapGen, Read1, pieceStart, pieceLength, iSA1 & mapGen.SAiMarkNmask, iSA2, dirR, maxL, indStartEnd, P);
+            Nrep = maxMappableLength(mapGen, Read1, pieceStart, pieceLength, iSA1 & mapGen.SAiMarkNmask, iSA2, dirR, maxL, indStartEnd);
         };
     #endif
 

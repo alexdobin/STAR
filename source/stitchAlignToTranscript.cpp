@@ -264,7 +264,7 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
                             Score1+=( R[rAend+Ins+jR1]==G[gAend+jR1] ) ? -scoreMatch:+scoreMatch;
                         };
 
-                        if (Score1>=maxScore1) {//equal sign (>=) flushes insertions to the right
+                        if (Score1>maxScore1 || (Score1==maxScore1 && P.alignInsertionFlush.flushRight)) {//equal sign (>=) flushes insertions to the right
                             maxScore1=Score1;
                             jR=jR1;
                         };
@@ -283,9 +283,11 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
                     };
                 };
 
-                for (; jR<L; jR++ ){//flush the indel to the right as much as possible
-                    if (R[rAend+jR+1]!=G[gAend+jR+1] || G[gAend+jR+1]==4) {
-                        break;
+                if (P.alignInsertionFlush.flushRight) {
+                    for (; (uint)jR<L; jR++ ){//flush the indel to the right as much as possible
+                        if (R[rAend+jR+1]!=G[gAend+jR+1] || G[gAend+jR+1]==4) {
+                            break;
+                        };
                     };
                 };
                 Score += Ins*P.scoreInsBase + P.scoreInsOpen;

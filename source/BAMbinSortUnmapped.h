@@ -6,6 +6,6 @@
 
 #include SAMTOOLS_BGZF_H
 
-void BAMbinSortUnmapped(uint32 iBin, uint nThreads, string dirBAMsort, BGZF *bgzfBAM, Parameters &P, Genome &mapGen);
+void BAMbinSortUnmapped(uint32 iBin, uint nThreads, string dirBAMsort, Parameters &P, Genome &mapGen);
 
 #endif

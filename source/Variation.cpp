@@ -134,7 +134,7 @@ void Variation::loadVCF(string fileIn)
 void SNP::snpOnBlocks(uint blockStart, uint blockL, int blockShift, vector<vector<array<int,2>>> &snpV)
 {
     int32 isnp=binarySearch1b <uint> (blockStart, loci, N);
-    while (isnp<N && loci[isnp]<(blockStart+blockL))
+    while ((uint)isnp<N && loci[isnp]<(blockStart+blockL))
     {
         for (int ii=0;ii<2;ii++)
         {

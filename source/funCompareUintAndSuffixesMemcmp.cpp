@@ -18,7 +18,7 @@ int funCompareUintAndSuffixesMemcmp ( const void *a, const void *b)
     } else 
     {//compare suffixes
 //         char *p5=(char*) memchr(g_funCompareUintAndSuffixesMemcmp_G+va[1],5,g_funCompareUintAndSuffixesMemcmp_L); //first encounter of char=5
-        char *p5=g_funCompareUintAndSuffixesMemcmp_G+va[1]+g_funCompareUintAndSuffixesMemcmp_L;
+//         char *p5=g_funCompareUintAndSuffixesMemcmp_G+va[1]+g_funCompareUintAndSuffixesMemcmp_L;
         //compare suffixes but only until first char=5
 //         int comp=memcmp(g_funCompareUintAndSuffixesMemcmp_G+va[1],g_funCompareUintAndSuffixesMemcmp_G+vb[1],p5+1-(g_funCompareUintAndSuffixesMemcmp_G+va[1]));
         int comp=memcmp(g_funCompareUintAndSuffixesMemcmp_G+va[1],g_funCompareUintAndSuffixesMemcmp_G+vb[1],g_funCompareUintAndSuffixesMemcmp_L);

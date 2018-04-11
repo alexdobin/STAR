@@ -77,7 +77,7 @@ void sjdbBuildIndex (Parameters &P, char *Gsj, char *G, PackedArray &SA, PackedA
             } else
             {
                 //indArray[ind1] =  suffixArraySearch(seq1, istart, mapGen.sjdbLength-istart1, G, SA, true, 0, mapGen.nSA-1, 0, P) ;
-                indArray[ind1] =  suffixArraySearch1(mapGen, seq1, istart, 10000, -1LLU, true, 0, mapGen.nSA-1, 0, P) ;
+                indArray[ind1] =  suffixArraySearch1(mapGen, seq1, istart, 10000, -1LLU, true, 0, mapGen.nSA-1, 0) ;
                 //-1LLU results in suffixes for the new junctions to be always included in SA *after* the suffixes of the old junctions
                 //for identical suffixes, this may result in unstable ordering
                 indArray[ind1+1] = isj*mapGen.sjdbLength+istart;

@@ -26,7 +26,7 @@ void ReadAlign::chimericDetectionPEmerged(ReadAlign &seRA) {
 
         uint segLen[2][2]; //segment length [trChim][mate]
         uint segEx[2];//last exon of the mate0 [trChim]
-        uint segLmin=-1LLU, i1,i2;    
+        uint segLmin=-1LLU, i1=0,i2=0;    
         for (uint ii=0; ii<2; ii++) {
             segLen[ii][0]=0;
             segLen[ii][1]=0;
