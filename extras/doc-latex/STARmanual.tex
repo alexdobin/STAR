@@ -34,7 +34,7 @@
 
 \newcommand{\sechyperref}[1]{\hyperref[#1]{Section \ref{#1}. \nameref{#1}}}
 
-\title{STAR manual 2.5.3a}
+\title{STAR manual 2.5.4b}
 \author{Alexander Dobin\\
 dobin@cshl.edu}
 \maketitle
@@ -72,7 +72,7 @@ STAR is compiled with gcc c++ compiler and depends only on standard gcc librarie
 }
 
 \paragraph{Mac OS X.\newline}
-Current versions of Mac OS X Xcode are shipped with Clang replacing the standard gcc compiler. Presently, standard Clang does not support OpenMP which creates problems for STAR compilation. One option to avoid this problem is to install gcc (preferrably using \code{homebrew} package manager). Another option is to add OpenMP functionality to Clang.
+Current versions of Mac OS X Xcode are shipped with Clang replacing the standard gcc compiler. Presently, standard Clang does not support OpenMP which creates problems for STAR compilation. One option to avoid this problem is to install gcc (preferably using \code{homebrew} package manager). Another option is to add OpenMP functionality to Clang.
 
 \subsection{Basic workflow.}
 Basic STAR workflow consists of 2 steps:
@@ -112,7 +112,7 @@ The basic options to generate genome indices are as follows:
 \opt{genomeDir} specifies path to the directory (henceforth called "genome directory" where the genome indices are stored. This directory has to be created (with \code{mkdir}) before STAR run and needs to have writing permissions. The file system needs to have at least 100GB of disk space available for a typical mammalian genome. It is recommended to remove all files from the genome directory before running the genome generation step. This directory path will have to be supplied at the mapping step to identify the reference genome.
 
 \item[]
-\opt{genomeFastaFiles} specified one or more FASTA files with the genome reference sequences. Multiple reference sequences (henceforth called “chromosomes”) are allowed for each fasta file. You can rename the chromosomes’ names in the chrName.txt keeping the order of the chromosomes in the file: the names from this file will be used in all output alignment files (such as .sam). The tabs are not allowed in chromosomes’ names, and spaces are not recommended.
+\opt{genomeFastaFiles} specifies one or more FASTA files with the genome reference sequences. Multiple reference sequences (henceforth called “chromosomes”) are allowed for each fasta file. You can rename the chromosomes’ names in the chrName.txt keeping the order of the chromosomes in the file: the names from this file will be used in all output alignment files (such as .sam). The tabs are not allowed in chromosomes’ names, and spaces are not recommended.
 
 \item[]
 \opt{sjdbGTFfile} specifies the path to the file with annotated transcripts in the standard GTF format. STAR will extract splice junctions from this file and use them to greatly improve accuracy of the mapping. While this is optional, and STAR can be run without annotations, using annotations is \textbf{highly recommended} whenever they are available. Starting from 2.4.1a, the annotations can also be included on the fly at the mapping step.
@@ -170,12 +170,18 @@ The basic options to run a mapping job are as follows:
 \opt{genomeDir} specifies path to the genome directory where genome indices where generated (see \sechyperref{Generating_genome_indexes}).
 
 \item[]
-\opt{readFilesIn} name(s) (with path) of the files containing the sequences to be mapped (e.g. RNA-seq FASTQ files). If using Illumina paired-end reads, the \optvr{read1} and \optv{read2} files have to be supplied. STAR can process both FASTA and FASTQ files. Multi-line (i.e. sequence split in multiple lines) FASTA file are supported. If the read files are compressed, use the \opt{readFilesCommand} \optvr{UncompressionCommand} option, where \optvr{UncompressionCommand} is the un-compression command that takes the file name as input parameter, and sends the uncompressed output to stdout. For example, for gzipped files (*.gz) use
+\opt{readFilesIn} name(s) (with path) of the files containing the sequences to be mapped (e.g. RNA-seq FASTQ files). If using Illumina paired-end reads, the \optvr{read1} and \optvr{read2} files have to be supplied. STAR can process both FASTA and FASTQ files. Multi-line (i.e. sequence split in multiple lines) FASTA (but not FASTQ) files are supported. 
+
+If the read files are compressed, use the \opt{readFilesCommand} \optvr{UncompressionCommand} option, where \optvr{UncompressionCommand} is the un-compression command that takes the file name as input parameter, and sends the uncompressed output to stdout. For example, for gzipped files (*.gz) use
 \code{\opt{readFilesCommand} \optv{zcat}}
 OR
 \code{\opt{readFilesCommand} \optv{gunzip -c}}.
 For bzip2-compressed files, use
 \code{\opt{readFilesCommand} \optv{bunzip2 -c}}.
+
+Multiple samples can be mapped in one job. For single-end reads use a comma separated list (no spaces around commas), e.g.
+\opt{readFilesIn} \optv{sample1.fq,sample2.fq,sample3.fq}. For paired-end reads, use comma separated list for read1 /space/ comma separated list for read2, e.g.: \opt{readFilesIn} \optv{sample1read1.fq,sample2read1.fq,sample3read1.fq  sample1read2.fq,sample2read2.fq,sample3read2.fq}.
+
 \end{itemize}
 
 \subsection{Advanced options.}
@@ -203,8 +209,8 @@ minimum overhang for annotated junctions
 \opt{outFilterMismatchNmax}      999\\
 maximum number of mismatches per pair, large number switches off this filter
 \item[]
-%\opt{outFilterMismatchNoverReadLmax} 0.04\\
-max number of mismatches per pair relative to read length: for 2x100b, max number of mismatches is 0.06*200=8 for the paired read
+\opt{outFilterMismatchNoverReadLmax} 0.04\\
+max number of mismatches per pair relative to read length: for 2x100b, max number of mismatches is 0.04*200=8 for the paired read
 \item[]
 \opt{alignIntronMin}             20\\
 minimum intron length

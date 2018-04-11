@@ -1,5 +1,11 @@
-* Implemented --outBAMsortingBinsN option to control the number of sorting bins. Icnreasing this number reduces the amount of RAM required for sorting.
+* Implemented --outBAMsortingBinsN option to control the number of sorting bins. Increasing this number reduces the amount of RAM required for sorting.
 * Implemented --waspOutputMode option for filtering allele specific alignments. This is re-implemenation of the original WASP algorithm by Bryce van de Geijn, Graham McVicker, Yoav Gilad & Jonathan K Pritchard. Please cite the original WASP paper: Nature Methods 12, 1061–1063 (2015), https://www.nature.com/articles/nmeth.3582 .
+
+STAR 2.5.4b 2018/02/09
+======================
+
+* Recompiled Linux executables with the correct version tag.
+* Updated manual.
 
 STAR 2.5.4a 2018/01/23
 ======================
