@@ -243,11 +243,12 @@ outSAMattributes                Standard
                                 None        ... no attributes
                                 Standard    ... NH HI AS nM
                                 All         ... NH HI AS nM NM MD jM jI MC ch
-                                rB          ... alignment block read/genomic coordinates
-                                vW          ... 0/1 - alignment does not pass / passes WASP filtering. Requires --waspOutputMode SAMtag .
-                                vG          ... genomic coordiante of the variant overlapped by the read
-                                vR          ... read coordinate of the variant
                                 vA          ... variant allele
+                                vG          ... genomic coordiante of the variant overlapped by the read
+                                vW          ... 0/1 - alignment does not pass / passes WASP filtering. Requires --waspOutputMode SAMtag .
+                                Unsupported/undocumented:
+                                rB          ... alignment block read/genomic coordinates
+                                vR          ... read coordinate of the variant
 
 outSAMattrIHstart               1
     int>=0:                     start value for the IH attribute. 0 may be required by some downstream software, such as Cufflinks or StringTie.
@@ -545,10 +546,11 @@ alignSoftClipAtReferenceEnds    Yes
                                 No  ... prohibit, useful for compatibility with Cufflinks
 
 alignInsertionFlush     None
-    string:             None    ... insertions are not flushed
+    string: how to flush ambiguous insertion positions
+                        None    ... insertions are not flushed
                         Right   ... insertions are flushed to the right
 
-### Paired-End reads
+### Paired-End reads: presently unsupported/undocumented
 peOverlapNbasesMin          0
     int>=0:             minimum number of overlap bases to trigger mates merging and realignment
 
@@ -614,7 +616,7 @@ chimMainSegmentMultNmax        10
     int>=1: maximum number of multi-alignments for the main chimeric segment. =1 will prohibit multimapping main segments.
 
 chimMultimapNmax                    0
-    int>=0: maximum number of multi-alignments for the chimera
+    int>=0: maximum number of chimeric multi-alignments
                                 0 ... use the old scheme for chimeric detection which only considered unique alignments
 
 chimMultimapScoreRange          1

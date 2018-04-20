@@ -1,3 +1,40 @@
+Major new features:
+-------------------
+1. Detection of personal variants overlapping alignments.
+Option --varVCFfile /path/to/vcf/file is used to input VCF file with personal variants. Only single nucleotide variants (SNVs) are supported at the moment. 
+Each variant is expected to have a genotype with two alleles.
+To output variants that overlap alignments, vG and vA have to be added to --outSAMattributes list. 
+SAM attribute vG outputs the genomic coordinate of the variant, allowing for identification of the variant.
+SAM attribute vA outputs which allele is detected in the read: 1 or 2 match one of the genotype alleles, 3 - no match to genotype.
+
+2. WASP filtering of allele specific alignments. 
+This is re-implementation of the original WASP algorithm by Bryce van de Geijn, Graham McVicker, Yoav Gilad & Jonathan K Pritchard. Please cite the original WASP paper: Nature Methods 12, 1061–1063 (2015), https://www.nature.com/articles/nmeth.3582 .
+WASP filtering is activated with --waspOutputMode SAMtag, which will add vW tag to the SAM output:
+vW:i:1 means alignment passed WASP filtering, 
+and all other values mean it did not pass:
+vW:i:2 - multi-mapping read
+vW:i:3 - variant base in the read = N
+vW:i:4 - remapped read did not map
+vW:i:5 - remapped read multi-maps
+vW:i:6 - remapped read maps to a different locus
+vW:i:7 - read overlaps too many variants
+
+3. Detection of multimapping chimeras.
+Previous STAR chimeric detection algorithm only detected uniquely mapping chimeras, which reduced its sensitivity in some cases.
+The new algorithm can detect and output multimapping chimeras. Presently, the only output into Chimeric.out.junction is supported.
+This algorithm is activated with >0 value in --chimMultimapNmax, which defines the maximum number of chimeric multi-alignments.
+The --chimMultimapScoreRange (=1 by default) parameter defines the score range for multi-mapping chimeras below the best chimeric score, similar to the --outFilterMultimapScoreRange parameter for normal alignments.
+The --chimNonchimScoreDropMin (=20 by default) defines the threshold triggering chimeric detection: the drop in the best non-chimeric alignment score with respect to the read length has to be smaller than this value.
+
+Minor new features:
+-------------------
+* --outSAMtlen 1/2 option to select the calculation method for the TLEN field in the SAM/BAM files:
+              1 ... leftmost base of the (+)strand mate to rightmost base of the (-)mate. (+)sign for the (+)strand mate
+              2 ... leftmost base of any mate to rightmost base of any mate. (+)sign for the mate with the leftmost base. This is different from 1 for overlapping mates with protruding ends
+* --alignInsertionFlush option which defines how to flush ambiguous insertion positions: None: old method, insertions are not flushed; Right: insertions are flushed to the right.
+* --outBAMsortingBinsN option to control the number of sorting bins. Increasing this number reduces the amount of RAM required for sorting.
+
+
 STAR 2.5.0a 2015/11/06
 ======================
 

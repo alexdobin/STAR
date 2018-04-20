@@ -1,5 +1,18 @@
-* Implemented --outBAMsortingBinsN option to control the number of sorting bins. Increasing this number reduces the amount of RAM required for sorting.
-* Implemented --waspOutputMode option for filtering allele specific alignments. This is re-implemenation of the original WASP algorithm by Bryce van de Geijn, Graham McVicker, Yoav Gilad & Jonathan K Pritchard. Please cite the original WASP paper: Nature Methods 12, 1061–1063 (2015), https://www.nature.com/articles/nmeth.3582 .
+STAR 2.6.0a 2018/04/16
+======================
+
+Major new features:
+-------------------
+* --varVCFfile option to input variant VCF file.
+* New SAM attributes in the --outSAMattributes, vG, vA, and vW to report variants overlapping alignments.
+* --waspOutputMode option for filtering allele specific alignments. This is re-implementation of the original WASP algorithm by Bryce van de Geijn, Graham McVicker, Yoav Gilad & Jonathan K Pritchard. Please cite the original WASP paper: Nature Methods 12, 1061–1063 (2015), https://www.nature.com/articles/nmeth.3582 .
+* Detection of multimapping chimeras, with new options --chimMultimapNmax, --chimMultimapScoreRange and --chimNonchimScoreDropMin 
+
+Minor new features:
+-------------------
+* --alignInsertionFlush option which defines how to flush ambiguous insertion positions: None: old method, insertions are not flushed; Right: insertions are flushed to the right.
+* --outSAMtlen option to select the calculation method for the TLEN field in the SAM/BAM files.
+* --outBAMsortingBinsN option to control the number of sorting bins. Increasing this number reduces the amount of RAM required for sorting.
 
 STAR 2.5.4b 2018/02/09
 ======================

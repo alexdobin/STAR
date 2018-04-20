@@ -224,9 +224,17 @@ bool ReadAlign::chimericDetectionOld() {
                 jScoreBest=jScoreJ;
             };
         };//jR cycle
-        if (chimN==0) {//the chimera was rejected because of mismatches
+        if ( chimN==0 ) {//the chimera was rejected because of mismatches
             return false;
         };
+        
+        if (chimMotif==0) {//non-canonical chimera
+            chimScoreBest += 1+P.pCh.scoreJunctionNonGTAG; //+1 
+            if ( !(chimScoreBest >= P.pCh.scoreMin && chimScoreBest+P.pCh.scoreDropMax >= (int) (readLength[0]+readLength[1])) ) {
+                return false;
+            };
+        };
+         
 
         //shift junction in trChim
         if (trChim[0].Str==1) {

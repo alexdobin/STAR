@@ -284,10 +284,13 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
                 };
 
                 if (P.alignInsertionFlush.flushRight) {
-                    for (; (uint)jR<L; jR++ ){//flush the indel to the right as much as possible
+                    for (; (uint)jR<rBend-rAend-Ins; jR++ ){//flush the indel to the right as much as possible
                         if (R[rAend+jR+1]!=G[gAend+jR+1] || G[gAend+jR+1]==4) {
                             break;
                         };
+                    };
+                    if (jR==rBend-rAend-Ins) {//nothing left of the B-piece
+                        return -1000009;
                     };
                 };
                 Score += Ins*P.scoreInsBase + P.scoreInsOpen;
