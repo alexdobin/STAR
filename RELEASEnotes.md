@@ -24,13 +24,6 @@ SAM attribute vA outputs which allele is detected in the read: 1 or 2 match one 
 This is re-implementation of the original WASP algorithm by Bryce van de Geijn, Graham McVicker, Yoav Gilad & Jonathan K Pritchard. Please cite the original [WASP paper: Nature Methods 12, 1061–1063 (2015)   ](https://www.nature.com/articles/nmeth.3582).
 Many thanks to Bryce van de Geijn for fruitful discussions.
 WASP filtering is activated with --waspOutputMode SAMtag, which will add vW tag to the SAM output:
-vW:i:1 means alignment passed WASP filtering, and all other values mean it did not pass.
-vW:i:2 - multi-mapping read
-vW:i:3 - variant base in the read = N
-vW:i:4 - remapped read did not map
-vW:i:5 - remapped read multi-maps
-vW:i:6 - remapped read maps to a different locus
-vW:i:7 - read overlaps too many variants
 
 **4. Detection of multimapping chimeras.**
 Many thanks to Brian Haas for testing and feedback.

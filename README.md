@@ -30,7 +30,7 @@ DIRECTORY CONTENTS
 COMPILING FROM SOURCE
 =====================
 
-Download the latest [release](release) and uncompress it
+Download the latest [](https://github.com/alexdobin/STAR/releases) and uncompress it
 --------------------------------------------------------
 
 ```bash
