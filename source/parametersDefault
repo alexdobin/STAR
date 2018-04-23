@@ -14,9 +14,9 @@ sysShell            -
                     - ... the default shell is executed, typically /bin/sh. This was reported to fail on some Ubuntu systems - then you need to specify path to bash.
 
 ### Run Parameters
-
 runMode                         alignReads
-    string: type of the run:
+    string: type of the run.
+
                                 alignReads             ... map reads
                                 genomeGenerate         ... generate genome files
                                 inputAlignmentsFromBAM ... input alignments from BAM. Presently only works with --outWigType and --bamRemoveDuplicates.
@@ -35,7 +35,6 @@ runRNGseed                      777
 
 
 ### Genome Parameters
-
 genomeDir                   ./GenomeDir/
     string: path to the directory where genome files are stored (for --runMode alignReads) or will be generated (for --runMode generateGenome)
 
@@ -113,7 +112,6 @@ inputBAMfile                -
     string: path to BAM input file, to be used with --runMode inputAlignmentsFromBAM
 
 ### Read Parameters
-
 readFilesType               Fastx
     string: format of input read files
                             Fastx       ... FASTA or FASTQ
@@ -158,7 +156,6 @@ clip3pAfterAdapterNbases    0
 
 
 ### Limits
-
 limitGenomeGenerateRAM               31000000000
     int>0: maximum available RAM (bytes) for genome generation
 
@@ -325,7 +322,6 @@ outBAMsortingBinsN      50
     int: >0:  number of genome bins fo coordinate-sorting
 
 ### BAM processing
-
 bamRemoveDuplicatesType  -
     string: mark duplicates in the BAM file, for now only works with (i) sorted BAM fed with inputBAMfile, and (ii) for paired-end alignments only
                         -                       ... no duplicate removal/marking
@@ -654,3 +650,5 @@ twopass1readsN              -1
 waspOutputMode              None
     string: WASP allele-specific output type. This is re-implemenation of the original WASP mappability filtering by Bryce van de Geijn, Graham McVicker, Yoav Gilad & Jonathan K Pritchard. Please cite the original WASP paper: Nature Methods 12, 1061–1063 (2015), https://www.nature.com/articles/nmeth.3582 .
                             SAMtag      ... add WASP tags to the alignments that pass WASP filtering
+
+

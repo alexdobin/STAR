@@ -8,7 +8,7 @@
 \begin{optTable}
 \optName{sysShell}
   \optValue{-}
-  \optLine{string: path to the shell binary, preferably bash, e.g. /bin/bash.}
+  \optLine{string: path to the shell binary, preferably bash, e.g. /bin/bash.} 
 \begin{optOptTable}
   \optOpt{-}   \optOptLine{the default shell is executed, typically /bin/sh. This was reported to fail on some Ubuntu systems - then you need to specify path to bash.}
 \end{optOptTable}
@@ -17,13 +17,7 @@
 \begin{optTable}
 \optName{runMode}
   \optValue{alignReads}
-  \optLine{string: type of the run:} 
-\begin{optOptTable}
-  \optOpt{alignReads}   \optOptLine{map reads}
-  \optOpt{genomeGenerate}   \optOptLine{generate genome files}
-  \optOpt{inputAlignmentsFromBAM}   \optOptLine{input alignments from BAM. Presently only works with --outWigType and --bamRemoveDuplicates.}
-  \optOpt{liftOver}   \optOptLine{lift-over of GTF files (--sjdbGTFfile) between genome assemblies using chain file(s) from --genomeChainFiles.}
-\end{optOptTable}
+  \optLine{string: type of the run.} 
 \optName{runThreadN}
   \optValue{1}
   \optLine{int: number of threads to run STAR} 
@@ -115,6 +109,12 @@
   \optOpt{Basic}   \optOptLine{only small junction / transcript files}
   \optOpt{All}   \optOptLine{all files including big Genome, SA and SAindex - this will create a complete genome directory}
 \end{optOptTable}
+\end{optTable}
+\optSection{Variation parameters}\label{Variation_parameters}
+\begin{optTable}
+\optName{varVCFfile}
+  \optValue{-}
+  \optLine{string: path to the VCF file that contains variation data.} 
 \end{optTable}
 \optSection{Input Files}\label{Input_Files}
 \begin{optTable}
@@ -272,10 +272,18 @@
   \optValue{Standard}
   \optLine{string: a string of desired SAM attributes, in the order desired for the output SAM} 
 \begin{optOptTable}
-  \optOpt{NH HI AS nM NM MD jM jI XS ch}   \optOptLine{any combination in any order}
-  \optOpt{Standard}   \optOptLine{NH HI AS nM}
-  \optOpt{All}   \optOptLine{NH HI AS nM NM MD jM jI ch}
+  \optOpt{NH HI AS nM NM MD jM jI XS MC ch}   \optOptLine{any combination in any order}
   \optOpt{None}   \optOptLine{no attributes}
+  \optOpt{Standard}   \optOptLine{NH HI AS nM}
+  \optOpt{All}   \optOptLine{NH HI AS nM NM MD jM jI MC ch}
+  \optOpt{vA}   \optOptLine{variant allele}
+  \optOpt{vG}   \optOptLine{genomic coordiante of the variant overlapped by the read}
+  \optOpt{vW}   \optOptLine{0/1 - alignment does not pass / passes WASP filtering. Requires --waspOutputMode SAMtag .}
+\end{optOptTable}
+  \optLine{Unsupported/undocumented:} 
+\begin{optOptTable}
+  \optOpt{rB}   \optOptLine{alignment block read/genomic coordinates}
+  \optOpt{vR}   \optOptLine{read coordinate of the variant}
 \end{optOptTable}
 \optName{outSAMattrIHstart}
   \optValue{1}
@@ -348,18 +356,28 @@
 \begin{optOptTable}
   \optOpt{-1}   \optOptLine{all alignments (up to --outFilterMultimapNmax) will be output}
 \end{optOptTable}
+\optName{outSAMtlen}
+  \optValue{1}
+  \optLine{int: calculation method for the TLEN field in the SAM/BAM files} 
+\begin{optOptTable}
+  \optOpt{1}   \optOptLine{leftmost base of the (+)strand mate to rightmost base of the (-)mate. (+)sign for the (+)strand mate}
+  \optOpt{2}   \optOptLine{leftmost base of any mate to rightmost base of any mate. (+)sign for the mate with the leftmost base. This is different from 1 for overlapping mates with protruding ends}
+\end{optOptTable}
 \optName{outBAMcompression}
   \optValue{1}
   \optLine{int: -1 to 10  BAM compression level, -1=default compression (6?), 0=no compression, 10=maximum compression} 
 \optName{outBAMsortingThreadN}
   \optValue{0}
   \optLine{int: {\textgreater}=0: number of threads for BAM sorting. 0 will default to min(6,--runThreadN).} 
+\optName{outBAMsortingBinsN}
+  \optValue{50}
+  \optLine{int: {\textgreater}0:  number of genome bins fo coordinate-sorting} 
 \end{optTable}
 \optSection{BAM processing}\label{BAM_processing}
 \begin{optTable}
 \optName{bamRemoveDuplicatesType}
   \optValue{-}
-  \optLine{string: mark duplicates in the BAM file, for now only works with (i) sorted BAM fed with inputBAMfile, and (ii) for paired-end alignments only}
+  \optLine{string: mark duplicates in the BAM file, for now only works with (i) sorted BAM fed with inputBAMfile, and (ii) for paired-end alignments only} 
 \begin{optOptTable}
   \optOpt{-}   \optOptLine{no duplicate removal/marking}
   \optOpt{UniqueIdentical}   \optOptLine{mark all multimappers, and duplicate unique mappers. The coordinates, FLAG, CIGAR must be identical}
@@ -424,22 +442,22 @@
   \optLine{int: alignment will be output only if it has no more mismatches than this value.} 
 \optName{outFilterMismatchNoverLmax}
   \optValue{0.3}
-  \optLine{float: alignment will be output only if its ratio of mismatches to *mapped* length is less than or equal to this value.} 
+  \optLine{real: alignment will be output only if its ratio of mismatches to *mapped* length is less than or equal to this value.} 
 \optName{outFilterMismatchNoverReadLmax}
   \optValue{1.0}
-  \optLine{float: alignment will be output only if its ratio of mismatches to *read* length is less than or equal to this value.} 
+  \optLine{real: alignment will be output only if its ratio of mismatches to *read* length is less than or equal to this value.} 
 \optName{outFilterScoreMin}
   \optValue{0}
   \optLine{int: alignment will be output only if its score is higher than or equal to this value.} 
 \optName{outFilterScoreMinOverLread}
   \optValue{0.66}
-  \optLine{float: same as outFilterScoreMin, but  normalized to read length (sum of mates' lengths for paired-end reads)} 
+  \optLine{real: same as outFilterScoreMin, but  normalized to read length (sum of mates' lengths for paired-end reads)} 
 \optName{outFilterMatchNmin}
   \optValue{0}
   \optLine{int: alignment will be output only if the number of matched bases is higher than or equal to this value.} 
 \optName{outFilterMatchNminOverLread}
   \optValue{0.66}
-  \optLine{float: sam as outFilterMatchNmin, but normalized to the read length (sum of mates' lengths for paired-end reads).} 
+  \optLine{real: sam as outFilterMatchNmin, but normalized to the read length (sum of mates' lengths for paired-end reads).} 
 \optName{outFilterIntronMotifs}
   \optValue{None}
   \optLine{string: filter alignment using their motifs} 
@@ -527,7 +545,7 @@
   \optLine{int{\textgreater}0: defines the search start point through the read - the read is split into pieces no longer than this value} 
 \optName{seedSearchStartLmaxOverLread}
   \optValue{1.0}
-  \optLine{float: seedSearchStartLmax normalized to read length (sum of mates' lengths for paired-end reads)} 
+  \optLine{real: seedSearchStartLmax normalized to read length (sum of mates' lengths for paired-end reads)} 
 \optName{seedSearchLmax}
   \optValue{0}
   \optLine{int{\textgreater}=0: defines the maximum length of the seeds, if =0 max seed lengthis infinite} 
@@ -570,7 +588,7 @@
   \optLine{int{\textgreater}0: minimum mapped length for a read mate that is spliced} 
 \optName{alignSplicedMateMapLminOverLmate}
   \optValue{0.66}
-  \optLine{float{\textgreater}0: alignSplicedMateMapLmin normalized to mate length} 
+  \optLine{real{\textgreater}0: alignSplicedMateMapLmin normalized to mate length} 
 \optName{alignWindowsPerReadNmax}
   \optValue{10000}
   \optLine{int{\textgreater}0: max number of windows per read} 
@@ -605,6 +623,22 @@
   \optOpt{Yes}   \optOptLine{allow}
   \optOpt{No}   \optOptLine{prohibit, useful for compatibility with Cufflinks}
 \end{optOptTable}
+\optName{alignInsertionFlush}
+  \optValue{None}
+  \optLine{string: how to flush ambiguous insertion positions} 
+\begin{optOptTable}
+  \optOpt{None}   \optOptLine{insertions are not flushed}
+  \optOpt{Right}   \optOptLine{insertions are flushed to the right}
+\end{optOptTable}
+\end{optTable}
+\optSection{Paired-End reads: presently unsupported/undocumented}\label{Paired-End_reads:_presently_unsupported/undocumented}
+\begin{optTable}
+\optName{peOverlapNbasesMin}
+  \optValue{0}
+  \optLine{int{\textgreater}=0:             minimum number of overlap bases to trigger mates merging and realignment} 
+\optName{peOverlapMMp}
+  \optValue{0.1}
+  \optLine{real, {\textgreater}=0 {\&} {\textless}1:     maximum proportion of mismatched bases in the overlap area} 
 \end{optTable}
 \optSection{Windows, Anchors, Binning}\label{Windows,_Anchors,_Binning}
 \begin{optTable}
@@ -622,7 +656,7 @@
   \optLine{int{\textgreater}0: log2(winFlank), where win Flank is the size of the left and right flanking regions for each window} 
 \optName{winReadCoverageRelativeMin}
   \optValue{0.5}
-  \optLine{float{\textgreater}=0: minimum relative coverage of the read sequence by the seeds in a window, for STARlong algorithm only.} 
+  \optLine{real{\textgreater}=0: minimum relative coverage of the read sequence by the seeds in a window, for STARlong algorithm only.} 
 \optName{winReadCoverageBasesMin}
   \optValue{0}
   \optLine{int{\textgreater}0: minimum number of bases covered by the seeds in a window , for STARlong algorithm only.} 
@@ -630,16 +664,13 @@
 \optSection{Chimeric Alignments}\label{Chimeric_Alignments}
 \begin{optTable}
 \optName{chimOutType}
-  \optValue{SeparateSAMold}
+  \optValue{Junctions}
   \optLine{string(s): type of chimeric output} 
-  \optLine{1st word:} 
 \begin{optOptTable}
+  \optOpt{Junctions}   \optOptLine{Chimeric.out.junction}
   \optOpt{SeparateSAMold}   \optOptLine{output old SAM into separate Chimeric.out.sam file}
   \optOpt{WithinBAM}   \optOptLine{output into main aligned BAM files (Aligned.*.bam)}
-\end{optOptTable}
-  \optLine{2nd word:} 
-\begin{optOptTable}
-  \optOpt{WithinBAM HardClip}   \optOptLine{hard-clipping in the CIGAR for supplemental chimeric alignments (defaultif no 2nd word is present)}
+  \optOpt{WithinBAM HardClip}   \optOptLine{(default) hard-clipping in the CIGAR for supplemental chimeric alignments (defaultif no 2nd word is present)}
   \optOpt{WithinBAM SoftClip}   \optOptLine{soft-clipping in the CIGAR for supplemental chimeric alignments}
 \end{optOptTable}
 \optName{chimSegmentMin}
@@ -650,7 +681,7 @@
   \optLine{int{\textgreater}=0: minimum total (summed) score of the chimeric segments} 
 \optName{chimScoreDropMax}
   \optValue{20}
-  \optLine{int{\textgreater}=0: max drop (difference) of chimeric score (the sum of scores of all chimeric segments) from the read length}
+  \optLine{int{\textgreater}=0: max drop (difference) of chimeric score (the sum of scores of all chimeric segments) from the read length} 
 \optName{chimScoreSeparation}
   \optValue{10}
   \optLine{int{\textgreater}=0: minimum difference (separation) between the best chimeric score and the next one} 
@@ -673,6 +704,18 @@
 \optName{chimMainSegmentMultNmax}
   \optValue{10}
   \optLine{int{\textgreater}=1: maximum number of multi-alignments for the main chimeric segment. =1 will prohibit multimapping main segments.} 
+\optName{chimMultimapNmax}
+  \optValue{0}
+  \optLine{int{\textgreater}=0: maximum number of chimeric multi-alignments} 
+\begin{optOptTable}
+  \optOpt{0}   \optOptLine{use the old scheme for chimeric detection which only considered unique alignments}
+\end{optOptTable}
+\optName{chimMultimapScoreRange}
+  \optValue{1}
+  \optLine{int{\textgreater}=0: the score range for multi-mapping chimeras below the best chimeric score. Only works with --chimMultimapNmax {\textgreater} 1} 
+\optName{chimNonchimScoreDropMin}
+  \optValue{20}
+  \optLine{int{\textgreater}=0: to trigger chimeric detection, the drop in the best non-chimeric alignment score with respect to the read lenght has to be smaller than this value} 
 \end{optTable}
 \optSection{Quantification of Annotations}\label{Quantification_of_Annotations}
 \begin{optTable}
@@ -707,4 +750,13 @@
 \optName{twopass1readsN}
   \optValue{-1}
   \optLine{int: number of reads to process for the 1st step. Use very large number (or default -1) to map all reads in the first step.} 
+\end{optTable}
+\optSection{WASP parameters}\label{WASP_parameters}
+\begin{optTable}
+\optName{waspOutputMode}
+  \optValue{None}
+  \optLine{string: WASP allele-specific output type. This is re-implemenation of the original WASP mappability filtering by Bryce van de Geijn, Graham McVicker, Yoav Gilad {\&} Jonathan K Pritchard. Please cite the original WASP paper: Nature Methods 12, 1061–1063 (2015), https://www.nature.com/articles/nmeth.3582 .} 
+\begin{optOptTable}
+  \optOpt{SAMtag}   \optOptLine{add WASP tags to the alignments that pass WASP filtering}
+\end{optOptTable}
 \end{optTable}

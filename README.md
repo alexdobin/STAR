@@ -1,13 +1,18 @@
-STAR 2.5
+STAR 2.6
 ========
 Spliced Transcripts Alignment to a Reference
-© Alexander Dobin, 2009-2016
+© Alexander Dobin, 2009-2018
 https://www.ncbi.nlm.nih.gov/pubmed/23104886
 
 AUTHOR/SUPPORT
 ==============
 Alex Dobin, dobin@cshl.edu
 https://groups.google.com/d/forum/rna-star
+
+HARDWARE/SOFTWARE REQUIREMENTS
+==============================
+  * x86-64 compatible processors
+  * 64 bit Linux or Mac OS X 
 
 MANUAL
 ======
@@ -21,44 +26,36 @@ DIRECTORY CONTENTS
   * bin: pre-compiled executables for Linux and Mac OS X
   * doc: documentation
   * extras: miscellaneous files and scripts
-  * STAR-Fusion: fusion detection developed by Brian Haas, see https://github.com/STAR-Fusion/STAR-Fusion for details.
-             To populate this submodule, clone STAR with `git clone --recursive https://github.com/alexdobin/STAR`
-  * STAR-Fusion-x.x.x: latest release of the STAR-Fusion
-
 
 COMPILING FROM SOURCE
 =====================
 
-To compile STAR from source, you must first download the latest [release](release) and uncompress it and then build it.
-
-Linux
------
+Download the latest [release](release) and uncompress it
+--------------------------------------------------------
 
 ```bash
 # Get latest STAR source from releases
-wget https://github.com/alexdobin/STAR/archive/2.5.3a.tar.gz
-tar -xzf 2.5.3a.tar.gz
-cd STAR-2.5.3a
+wget https://github.com/alexdobin/STAR/archive/2.6.0a.tar.gz
+tar -xzf 2.6.0a.tar.gz
+cd STAR-2.6.0a
 
 # Alternatively, get STAR source using git
 git clone https://github.com/alexdobin/STAR.git
-cd STAR/source
 
-# Build STAR
-make STAR
-
-# To include STAR-Fusion
-git submodule update --init --recursive
-
-# If you have a TeX environment, you may like to build the documentation
-make manual
-```
-
-Mac OS X
---------
+Compile under Linux
+-------------------
 
 ```bash
-# Build STAR
+# Compile
+cd STAR/source
+make STAR
+```
+
+Compile under Mac OS X
+----------------------
+
+```bash
+# Compile
 cd source
 make STARforMacStatic
 ```
@@ -84,44 +81,15 @@ make LDFLAGSextra=-flto CXXFLAGSextra="-flto -march=native"
 ```
 
 
-Developers
-==========
-
-STAR developers with write access to https://github.com/alexdobin/STAR can update the `STAR-Fusion`
-submodule to a specific tag by following these steps:
-
-```bash
-git clone --recursive https://github.com/alexdobin/STAR.git
-cd STAR
-# or:
-#
-# git clone //github.com/alexdobin/STAR.git
-# cd STAR
-# git git submodule update --init --recursive
-
-# checkout a specific tag for the submodule
-cd STAR-Fusion
-git checkout v0.3.1
-
-# Commit the change
-cd ../
-git add STAR-Fusion
-git commit -m "Updated STAR-Fusion to v0.3.1"
-
-# Push the change to GitHub
-git push
-```
-
-
-HARDWARE/SOFTWARE REQUIREMENTS
-==============================
-  * x86-64 compatible processors
-  * 64 bit Linux or Mac OS X 
-  * 30GB of RAM for human genome 
-
-
 LIMITATIONS
 ===========
 This release was tested with the default parameters for human and mouse genomes.
+Mammal genomes require at least 16GB of RAM, ideally 32GB.
 Please contact the author for a list of recommended parameters for much larger or much smaller genomes.
 
+
+FUNDING
+=======
+The developmenr of STAR is supported by the National Human Genome Research Institute of
+the National Institutes of Health under Award Number R01HG009318. 
+The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health.
