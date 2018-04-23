@@ -4,34 +4,37 @@ STAR 2.6.0a 2018/04/23
 Major new features:
 -------------------
 
-**1. Merging and mapping of overlapping paired-end reads.**
-The developmment of this algorithm was supported by Illumina, Inc. 
-Many thanks to June Snedecor, Xiao Chen, and Felix Schlesinger for their extensive help in developing this feature.
+**1. Merging and mapping of overlapping paired-end reads.**  
+This feature improves mapping accuracy  for paired-end libraries with short insert sizes, where many reads have overlapping mates. Importantly, it allows detection of chimeric junction in the overlap region.
 STAR will search for an overlap between mates larger or equal to --peOverlapNbasesMin bases with proportion of mismatches in the overlap area not exceeding --peOverlapMMp .
 If the overlap is found, STAR will map merge the mates and attempt to map the resulting (single-end) sequence.
 If requested, the chimeric detection will be performed on the merged-mate sequence, thus allowing chimeric detection in the overlap region.
 If the score of this alignment higher than the original one, or if a chimeric alignment is found, STAR will report the merged-mate aligment instead of the original one.
-In the output, the merged-mate aligment will be converted back to paired-end format.
+In the output, the merged-mate aligment will be converted back to paired-end format.  
+The developmment of this algorithm was supported by Illumina, Inc. 
+Many thanks to June Snedecor, Xiao Chen, and Felix Schlesinger for their extensive help in developing this feature.
 
-**2. Detection of personal variants overlapping alignments.**
+
+**2. Detection of personal variants overlapping alignments.**  
 Option --varVCFfile /path/to/vcf/file is used to input VCF file with personal variants. Only single nucleotide variants (SNVs) are supported at the moment. 
 Each variant is expected to have a genotype with two alleles.
 To output variants that overlap alignments, vG and vA have to be added to --outSAMattributes list. 
 SAM attribute vG outputs the genomic coordinate of the variant, allowing for identification of the variant.
 SAM attribute vA outputs which allele is detected in the read: 1 or 2 match one of the genotype alleles, 3 - no match to genotype.
 
-**3. WASP filtering of allele specific alignments.**
+**3. WASP filtering of allele specific alignments.**  
 This is re-implementation of the original WASP algorithm by Bryce van de Geijn, Graham McVicker, Yoav Gilad & Jonathan K Pritchard. Please cite the original [WASP paper: Nature Methods 12, 1061–1063 (2015)   ](https://www.nature.com/articles/nmeth.3582).
+WASP filtering is activated with --waspOutputMode SAMtag, which will add vW tag to the SAM output: 
+vW:i:1 means alignment passed WASP filtering, while all other values mean it did not pass.  
 Many thanks to Bryce van de Geijn for fruitful discussions.
-WASP filtering is activated with --waspOutputMode SAMtag, which will add vW tag to the SAM output:
 
-**4. Detection of multimapping chimeras.**
-Many thanks to Brian Haas for testing and feedback.
+**4. Detection of multimapping chimeras.**  
 Previous STAR chimeric detection algorithm only detected uniquely mapping chimeras, which reduced its sensitivity in some cases.
 The new algorithm can detect and output multimapping chimeras. Presently, the only output into Chimeric.out.junction is supported.
 This algorithm is activated with >0 value in --chimMultimapNmax, which defines the maximum number of chimeric multi-alignments.
 The --chimMultimapScoreRange (=1 by default) parameter defines the score range for multi-mapping chimeras below the best chimeric score, similar to the --outFilterMultimapScoreRange parameter for normal alignments.
-The --chimNonchimScoreDropMin (=20 by default) defines the threshold triggering chimeric detection: the drop in the best non-chimeric alignment score with respect to the read length has to be smaller than this value.
+The --chimNonchimScoreDropMin (=20 by default) defines the threshold triggering chimeric detection: the drop in the best non-chimeric alignment score with respect to the read length has to be smaller than this value.  
+Many thanks to Brian Haas for testing and feedback.
 
 
 Minor new features:

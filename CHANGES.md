@@ -6,7 +6,7 @@ Major new features:
 * Merging and mapping of overlapping paired-end reads with new options --peOverlapNbasesMin and --peOverlapMMp. The developmment of this algorithm was supported by Illumina, Inc. Many thanks to June Snedecor, Xiao Chen, and Felix Schlesinger for their extensive help in developing this feature.
 * --varVCFfile option to input variant VCF file.
 * New SAM attributes in the --outSAMattributes, vG, vA, and vW to report variants overlapping alignments.
-* --waspOutputMode option for filtering allele specific alignments. This is re-implementation of the original WASP algorithm by Bryce van de Geijn, Graham McVicker, Yoav Gilad & Jonathan K Pritchard. Please cite the original WASP paper: Nature Methods 12, 1061–1063 (2015), https://www.nature.com/articles/nmeth.3582 .Many thanks to Bryce van de Geijn for fruitful discussions.
+* --waspOutputMode option for filtering allele specific alignments. This is re-implementation of the original WASP algorithm by Bryce van de Geijn, Graham McVicker, Yoav Gilad & Jonathan K Pritchard. Please cite the original WASP paper: Nature Methods 12, 1061–1063 (2015), https://www.nature.com/articles/nmeth.3582 . Many thanks to Bryce van de Geijn for fruitful discussions.
 * Detection of multimapping chimeras, with new options --chimMultimapNmax, --chimMultimapScoreRange and --chimNonchimScoreDropMin . Many thanks to Brian Haas for testing and feedback.
 
 

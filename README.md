@@ -18,7 +18,7 @@ MANUAL
 ======
 https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf
 
-[RELEASEnotes](RELEASEnotes.md) contains detailed information about the latest major release
+[RELEASEnotes](https://github.com/alexdobin/STAR/blob/master/RELEASEnotes.md) contains detailed information about the latest major release
 
 DIRECTORY CONTENTS
 ==================
@@ -30,7 +30,7 @@ DIRECTORY CONTENTS
 COMPILING FROM SOURCE
 =====================
 
-Download the latest [](https://github.com/alexdobin/STAR/releases) and uncompress it
+Download the latest [release from](https://github.com/alexdobin/STAR/releases) and uncompress it
 --------------------------------------------------------
 
 ```bash
