@@ -155,6 +155,8 @@ int main(int argInN, char* argIn[]) {
         P1.readMapNumber=P.twoPass.pass1readsN;
 //         P1.inOut->logMain.open((P1.outFileNamePrefix + "Log.out").c_str());
 
+        P1.wasp.outputMode="None"; //no WASP filtering on the 1st pass
+        
         g_statsAll.resetN();
         time(&g_statsAll.timeStartMap);
         P.inOut->logProgress << timeMonthDayTime(g_statsAll.timeStartMap) <<"\tStarted 1st pass mapping\n" <<flush;
