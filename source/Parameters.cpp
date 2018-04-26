@@ -1217,8 +1217,8 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 
         if (pGe.gLoad!="NoSharedMemory") {
             ostringstream errOut;
-            errOut << "EXITING because of fatal PARAMETERS error: 2-pass method is not compatible with pGe.gLoad<<"<<pGe.gLoad<<"\n";
-            errOut << "SOLUTION: re-run STAR with --genomeLoad NoSharedMemory ; this is the only compatible option at the moment.s\n";
+            errOut << "EXITING because of fatal PARAMETERS error: 2-pass method is not compatible with --genomeLoad "<<pGe.gLoad<<"\n";
+            errOut << "SOLUTION: re-run STAR with --genomeLoad NoSharedMemory ; this is the only option compatible with --twopassMode Basic .\n";
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
         twoPass.yes=true;
@@ -1359,6 +1359,8 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     //peOverlap
     if (peOverlap.NbasesMin>0) {
         peOverlap.yes=true;
+    } else {
+        peOverlap.yes=false;
     };
     
     ////////////////////////////////////////////////
