@@ -1,3 +1,9 @@
+STAR 2.6.0b 2018/05/02
+======================
+
+* Fixed bugs introduced in 2.6.0a. Please see CHANGES and RELEASEnotes from 2.5.0a.
+
+
 STAR 2.6.0a 2018/04/23
 ======================
 
