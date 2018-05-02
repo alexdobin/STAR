@@ -887,7 +887,14 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         errOut <<"SOLUTION: re-run STAR with --waspOutputMode ... and --varVCFfile /path/to/file.vcf\n";
         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
-        
+
+    
+     if (wasp.yes && outSAMtype.at(0)!="BAM") {
+        ostringstream errOut;
+        errOut <<"EXITING because of FATAL INPUT ERROR: --waspOutputMode requires output to BAM file\n";
+        errOut <<"SOLUTION: re-run STAR with --waspOutputMode ... and --outSAMtype BAM ... \n";
+        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
     
     //outSAMattributes
     outSAMattrPresent.NH=false;//TODO re-write as class with constructor?
@@ -1050,13 +1057,31 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
     };
-    
+
     if (pCh.out.bam && !outBAMunsorted && !outBAMcoord) {
             ostringstream errOut;
             errOut <<"EXITING because of fatal PARAMETERS error: --chimOutType WithinBAM requires BAM output\n";
             errOut <<"SOLUTION: re-run with --outSAMtype BAM Unsorted/SortedByCoordinate\n";
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
+    
+    if (pCh.multimapNmax>0 && (pCh.out.bam || pCh.out.samOld)) {       
+            ostringstream errOut;
+            errOut <<"EXITING because of fatal PARAMETERS error: --chimMultimapNmax > 0 (new chimeric detection) presently only works with --chimOutType Junctions\n";
+            errOut <<"SOLUTION: re-run with --chimOutType Junctions\n";
+            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
+    
+    if (peOverlap.NbasesMin > 0) {
+        if (pCh.multimapNmax == 0 && (pCh.out.junctions || pCh.out.samOld)) {
+                ostringstream errOut;
+                errOut <<"EXITING because of fatal PARAMETERS error: --chimMultimapNmax 0 (default old chimeric detection) and --peOverlapNbasesMin > 0 (merging ovelrapping mates) presently only works with --chimOutType WithinBAM\n";
+                errOut <<"SOLUTION: re-run with --chimOutType WithinBAM\n";
+                exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };
+    };
+        
+    
     
     if (pCh.out.bam && !outSAMattrPresent.NM) {
        outSAMattrOrder.push_back(ATTR_NM);

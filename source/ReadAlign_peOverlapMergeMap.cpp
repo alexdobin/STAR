@@ -3,9 +3,9 @@
 
 void ReadAlign::peOverlapMergeMap() {
     
-    peOv.yes=false;
-    
+
     if (!P.peOverlap.yes || P.readNmates!=2 ) {//no peOverlap
+        peOv.yes=false;
         return;
     };
 
@@ -18,10 +18,9 @@ void ReadAlign::peOverlapMergeMap() {
     peMergeRA->peMergeMates();
     peOv=peMergeRA->peOv;
 
-
-    
     if (peOv.nOv==0) {//check if mates can be merged, if not - return
         //cout <<"\n-1\n";
+        peOv.yes=false;
         return;
     };
 
@@ -74,6 +73,8 @@ void ReadAlign::peOverlapMergeMap() {
     
     if (peScore<=trBest->maxScore || chimRecord) {
         peOv.yes=true;
+    } else {
+        peOv.yes=false;
     };
     
     return;
@@ -202,12 +203,13 @@ void Transcript::peOverlapSEtoPE(uint* mateStart, Transcript &t) {//convert alig
 
             exons[nExons][EX_iFrag]=(imate==0 ? t.Str : 1-t.Str);
             exons[nExons][EX_sjA]=t.exons[iex][EX_sjA];
-            canonSJ[nExons]=t.canonSJ[iex];
-            sjAnnot[nExons]=t.sjAnnot[iex];
-            sjStr[nExons]=t.sjStr[iex];
-            shiftSJ[nExons][0]=t.shiftSJ[iex][0];
-            shiftSJ[nExons][1]=t.shiftSJ[iex][1];
-
+            if (nExons>0 && iex>0) {
+                canonSJ[nExons-1]=t.canonSJ[iex-1];
+                sjAnnot[nExons-1]=t.sjAnnot[iex-1];
+                sjStr[nExons-1]=t.sjStr[iex-1];
+                shiftSJ[nExons-1][0]=t.shiftSJ[iex-1][0];
+                shiftSJ[nExons-1][1]=t.shiftSJ[iex-1][1];
+            };
             //record these exons for mate2
             if (t.exons[iex][EX_R]>=mSta[imate]) {//exon left is inside the mate
                 exons[nExons][EX_G]=t.exons[iex][EX_G];  
@@ -227,8 +229,11 @@ void Transcript::peOverlapSEtoPE(uint* mateStart, Transcript &t) {//convert alig
             ++nExons;
         };
         canonSJ[nExons-1]=-3; //marks "junction" between mates
-    };
-    
+        sjAnnot[nExons-1]=0;
+        sjStr[nExons-1]=0;
+        shiftSJ[nExons-1][0]=0;
+        shiftSJ[nExons-1][1]=0;
+    }; 
     
     //copy scalar variables
     for (uint ii=0;ii<3;ii++) {

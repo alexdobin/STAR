@@ -12,8 +12,9 @@ Variation::Variation (Parameters &Pin, vector <uint> &chrStartIn, map <string,ui
     
     yes=true;
     
-    varOutFileName=P.outFileNamePrefix+"Variation.out";
-    varOutStream.open(varOutFileName);
+    //not used yet
+    //varOutFileName=P.outFileNamePrefix+"Variation.out";
+    //varOutStream.open(varOutFileName);
     
     vcfFile=P.var.vcfFile;
     loadVCF(vcfFile);

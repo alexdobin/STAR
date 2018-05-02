@@ -42,8 +42,8 @@ public:
     
 private:
     string vcfFile;
-    string varOutFileName;
-    ofstream varOutStream;//output file for variations
+    //string varOutFileName;
+    //ofstream varOutStream;//output file for variations
     
     vector <uint> &chrStart; //this needs to be replaced with a structure that contains basic genome variables
     map <string,uint> &chrNameIndex;
