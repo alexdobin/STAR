@@ -1039,74 +1039,75 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     pCh.out.junctions=false;
     pCh.out.samOld=false;
     pCh.out.bamHardClip=true;//default
-    for (const auto& type1 : pCh.out.type) {
-        if (type1=="WithinBAM") {
-            pCh.out.bam=true;
-        } else if (pCh.out.type.at(0)=="SeparateSAMold") {
-            pCh.out.samOld=true;
-        } else if (pCh.out.type.at(0)=="Junctions") {
-            pCh.out.junctions=true;
-        } else if (type1=="HardClip") {
-            pCh.out.bamHardClip=true;
-        } else if (type1=="SoftClip") {
-            pCh.out.bamHardClip=false;     
-        } else {
-            ostringstream errOut;
-            errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented value for --chimOutType: "<<type1 <<"\n";
-            errOut <<"SOLUTION: re-run STAR with --chimOutType Junctions , SeparateSAMold  , WithinBAM , HardClip \n";
-            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-        };
-    };
-
-    if (pCh.out.bam && !outBAMunsorted && !outBAMcoord) {
-            ostringstream errOut;
-            errOut <<"EXITING because of fatal PARAMETERS error: --chimOutType WithinBAM requires BAM output\n";
-            errOut <<"SOLUTION: re-run with --outSAMtype BAM Unsorted/SortedByCoordinate\n";
-            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-    };
-    
-    if (pCh.multimapNmax>0 && (pCh.out.bam || pCh.out.samOld)) {       
-            ostringstream errOut;
-            errOut <<"EXITING because of fatal PARAMETERS error: --chimMultimapNmax > 0 (new chimeric detection) presently only works with --chimOutType Junctions\n";
-            errOut <<"SOLUTION: re-run with --chimOutType Junctions\n";
-            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-    };
-    
-    if (peOverlap.NbasesMin > 0) {
-        if (pCh.multimapNmax == 0 && (pCh.out.junctions || pCh.out.samOld)) {
+    if (pCh.segmentMin>0) {//only if chimeric detection is activated
+        for (const auto& type1 : pCh.out.type) {
+            if (type1=="WithinBAM") {
+                pCh.out.bam=true;
+            } else if (pCh.out.type.at(0)=="SeparateSAMold") {
+                pCh.out.samOld=true;
+            } else if (pCh.out.type.at(0)=="Junctions") {
+                pCh.out.junctions=true;
+            } else if (type1=="HardClip") {
+                pCh.out.bamHardClip=true;
+            } else if (type1=="SoftClip") {
+                pCh.out.bamHardClip=false;     
+            } else {
                 ostringstream errOut;
-                errOut <<"EXITING because of fatal PARAMETERS error: --chimMultimapNmax 0 (default old chimeric detection) and --peOverlapNbasesMin > 0 (merging ovelrapping mates) presently only works with --chimOutType WithinBAM\n";
-                errOut <<"SOLUTION: re-run with --chimOutType WithinBAM\n";
+                errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented value for --chimOutType: "<<type1 <<"\n";
+                errOut <<"SOLUTION: re-run STAR with --chimOutType Junctions , SeparateSAMold  , WithinBAM , HardClip \n";
+                exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+            };
+        };
+
+        if (pCh.out.bam && !outBAMunsorted && !outBAMcoord) {
+                ostringstream errOut;
+                errOut <<"EXITING because of fatal PARAMETERS error: --chimOutType WithinBAM requires BAM output\n";
+                errOut <<"SOLUTION: re-run with --outSAMtype BAM Unsorted/SortedByCoordinate\n";
                 exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
-    };
-        
-    
-    
-    if (pCh.out.bam && !outSAMattrPresent.NM) {
-       outSAMattrOrder.push_back(ATTR_NM);
-       inOut->logMain << "WARNING --chimOutType=WithinBAM, therefore STAR will output NM attribute" <<endl;
-    };
-   
-    pCh.filter.genomicN=false;
-    for (uint ii=0; ii<pCh.filter.stringIn.size(); ii++)
-    {
-        if (pCh.filter.stringIn.at(ii)=="banGenomicN")
+
+        if (pCh.multimapNmax>0 && (pCh.out.bam || pCh.out.samOld)) {       
+                ostringstream errOut;
+                errOut <<"EXITING because of fatal PARAMETERS error: --chimMultimapNmax > 0 (new chimeric detection) presently only works with --chimOutType Junctions\n";
+                errOut <<"SOLUTION: re-run with --chimOutType Junctions\n";
+                exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };
+
+        if (peOverlap.NbasesMin > 0) {
+            if (pCh.multimapNmax == 0 && (pCh.out.junctions || pCh.out.samOld)) {
+                    ostringstream errOut;
+                    errOut <<"EXITING because of fatal PARAMETERS error: --chimMultimapNmax 0 (default old chimeric detection) and --peOverlapNbasesMin > 0 (merging ovelrapping mates) presently only works with --chimOutType WithinBAM\n";
+                    errOut <<"SOLUTION: re-run with --chimOutType WithinBAM\n";
+                    exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+            };
+        };
+
+
+
+        if (pCh.out.bam && !outSAMattrPresent.NM) {
+           outSAMattrOrder.push_back(ATTR_NM);
+           inOut->logMain << "WARNING --chimOutType=WithinBAM, therefore STAR will output NM attribute" <<endl;
+        };
+
+        pCh.filter.genomicN=false;
+        for (uint ii=0; ii<pCh.filter.stringIn.size(); ii++)
         {
-            pCh.filter.genomicN=true;
-        }
-        else if (pCh.filter.stringIn.at(ii)=="None")
-        {//nothing to do
-        }
-        else
-        {
-            ostringstream errOut;
-            errOut << "EXITING because of fatal PARAMETERS error: unrecognized value of --chimFilter="<<pCh.filter.stringIn.at(ii)<<"\n";
-            errOut << "SOLUTION: use allowed values: banGenomicN || None";
-            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+            if (pCh.filter.stringIn.at(ii)=="banGenomicN")
+            {
+                pCh.filter.genomicN=true;
+            }
+            else if (pCh.filter.stringIn.at(ii)=="None")
+            {//nothing to do
+            }
+            else
+            {
+                ostringstream errOut;
+                errOut << "EXITING because of fatal PARAMETERS error: unrecognized value of --chimFilter="<<pCh.filter.stringIn.at(ii)<<"\n";
+                errOut << "SOLUTION: use allowed values: banGenomicN || None";
+                exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+            };
         };
     };
-
 
     alignEndsType.ext[0][0]=false;
     alignEndsType.ext[0][1]=false;

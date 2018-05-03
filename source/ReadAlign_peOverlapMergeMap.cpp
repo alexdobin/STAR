@@ -3,10 +3,9 @@
 
 void ReadAlign::peOverlapMergeMap() {
     
-
     if (!P.peOverlap.yes || P.readNmates!=2 ) {//no peOverlap
-        peOv.yes=false;
         return;
+        peOv.yes=false;
     };
 
     //debug
@@ -17,10 +16,10 @@ void ReadAlign::peOverlapMergeMap() {
     peMergeRA->copyRead(*this);
     peMergeRA->peMergeMates();
     peOv=peMergeRA->peOv;
+    peOv.yes=false;
 
     if (peOv.nOv==0) {//check if mates can be merged, if not - return
         //cout <<"\n-1\n";
-        peOv.yes=false;
         return;
     };
 
@@ -36,7 +35,6 @@ void ReadAlign::peOverlapMergeMap() {
         //    cout <<P.genomeNumToNT[peMergeRA->Read1[0][ii]];
         //};
         //cout << "\n";
-
         return;
     };
     
@@ -71,10 +69,8 @@ void ReadAlign::peOverlapMergeMap() {
 
     //P.alignSplicedMateMapLminOverLmate=P_alignSplicedMateMapLminOverLmate;
     
-    if (peScore<=trBest->maxScore || chimRecord) {
+    if (peScore<=trBest->maxScore || chimRecord) {//otherwise peOv.yes=false
         peOv.yes=true;
-    } else {
-        peOv.yes=false;
     };
     
     return;
@@ -203,12 +199,12 @@ void Transcript::peOverlapSEtoPE(uint* mateStart, Transcript &t) {//convert alig
 
             exons[nExons][EX_iFrag]=(imate==0 ? t.Str : 1-t.Str);
             exons[nExons][EX_sjA]=t.exons[iex][EX_sjA];
-            if (nExons>0 && iex>0) {
-                canonSJ[nExons-1]=t.canonSJ[iex-1];
-                sjAnnot[nExons-1]=t.sjAnnot[iex-1];
-                sjStr[nExons-1]=t.sjStr[iex-1];
-                shiftSJ[nExons-1][0]=t.shiftSJ[iex-1][0];
-                shiftSJ[nExons-1][1]=t.shiftSJ[iex-1][1];
+            if (iex<t.nExons-1) {
+                canonSJ[nExons]=t.canonSJ[iex];
+                sjAnnot[nExons]=t.sjAnnot[iex];
+                sjStr[nExons]=t.sjStr[iex];
+                shiftSJ[nExons][0]=t.shiftSJ[iex][0];
+                shiftSJ[nExons][1]=t.shiftSJ[iex][1];
             };
             //record these exons for mate2
             if (t.exons[iex][EX_R]>=mSta[imate]) {//exon left is inside the mate
