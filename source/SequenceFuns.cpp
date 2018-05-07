@@ -201,6 +201,32 @@ uint localSearch(const char *x, uint nx, const char *y, uint ny, double pMM){
     return ixBest;
 };
 
+uint localSearchNisMM(const char *x, uint nx, const char *y, uint ny, double pMM){
+    //find the best alignment of two short sequences x and y
+    //pMM is the maximum percentage of mismatches
+    //Ns in x OR y are considered mismatches
+    uint nMatch=0, nMM=0, nMatchBest=0, nMMbest=0, ixBest=nx;
+    for (uint ix=0;ix<nx;ix++) {
+        nMatch=0; nMM=0;
+        for (uint iy=0;iy<min(ny,nx-ix);iy++) {
+            if (x[ix+iy]==y[iy] && y[iy]<4) {
+                nMatch++;
+            } else {
+                nMM++;
+            };
+        };
+
+        if ( ( nMatch>nMatchBest || (nMatch==nMatchBest && nMM<nMMbest) ) && double(nMM)/double(nMatch)<=pMM) {
+            ixBest=ix;
+            nMatchBest=nMatch;
+            nMMbest=nMM;
+        };
+    };
+    return ixBest;
+};
+
+
+
 uint qualitySplit(char* r, char* q, uint L, char Qsplit, uint maxNsplit, uint  minLsplit, uint** splitR) {
     //splits the read r[L] by quality scores q[L], outputs in splitR - split coordinate/length - per base
     //returns number of good split regions

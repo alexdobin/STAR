@@ -48,6 +48,18 @@ void usage() {
 
 
 int main(int argInN, char* argIn[]) {
+    
+    //debug
+//     uint nn=4000000000;
+//     uint* dummy=new uint[nn];
+//     std::cout <<"Allocated"<<endl;
+//     for (uint ii=0;ii<nn;ii++) {
+//         dummy[ii]=14829735431805718528LLU;;
+//     };
+//     std::cout <<"Filled "<<dummy[0]<<endl;
+//     delete[] dummy;     
+//     std::cout <<"Deleted"<<endl;
+    
     // If no argument is given, or the first argument is either '-h' or '--help', run usage()
     if((argInN == 1) || (argInN == 2 && (strcmp("-h",argIn[1]) == 0 || strcmp ("--help",argIn[1]) == 0 ))) {
         usage();

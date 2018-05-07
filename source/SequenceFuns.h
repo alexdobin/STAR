@@ -21,6 +21,8 @@ char convertNt01234(const char R0);//transform sequence  from ACGT into 0-1-2-3-
 
 uint chrFind(uint, uint, uint*); // find chromosome from global locus
 uint localSearch(const char*, uint, const char*, uint, double); //local search to clip adapter
+uint localSearchNisMM(const char *x, uint nx, const char *y, uint ny, double pMM);
+
 uint qualitySplit(char*, char*, uint, char, uint, uint, uint**);
 
 #endif

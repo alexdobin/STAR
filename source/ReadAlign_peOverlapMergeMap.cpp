@@ -78,8 +78,8 @@ void ReadAlign::peOverlapMergeMap() {
 
 void ReadAlign::peMergeMates() {
     
-    uint s1=localSearch(Read1[0],readLength[0],Read1[0]+readLength[0]+1,readLength[1],P.peOverlap.MMp);
-    uint s0=localSearch(Read1[0]+readLength[0]+1,readLength[1],Read1[0],readLength[0],P.peOverlap.MMp);
+    uint s1=localSearchNisMM(Read1[0],readLength[0],Read1[0]+readLength[0]+1,readLength[1],P.peOverlap.MMp);
+    uint s0=localSearchNisMM(Read1[0]+readLength[0]+1,readLength[1],Read1[0],readLength[0],P.peOverlap.MMp);
 
     uint o1=min(readLength[1],readLength[0]-s1);
     uint o0=min(readLength[0],readLength[1]-s0);
