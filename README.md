@@ -41,6 +41,7 @@ cd STAR-2.6.0a
 
 # Alternatively, get STAR source using git
 git clone https://github.com/alexdobin/STAR.git
+```
 
 Compile under Linux
 -------------------
