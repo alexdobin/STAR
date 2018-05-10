@@ -1043,9 +1043,9 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         for (const auto& type1 : pCh.out.type) {
             if (type1=="WithinBAM") {
                 pCh.out.bam=true;
-            } else if (pCh.out.type.at(0)=="SeparateSAMold") {
+            } else if (type1=="SeparateSAMold") {
                 pCh.out.samOld=true;
-            } else if (pCh.out.type.at(0)=="Junctions") {
+            } else if (type1=="Junctions") {
                 pCh.out.junctions=true;
             } else if (type1=="HardClip") {
                 pCh.out.bamHardClip=true;

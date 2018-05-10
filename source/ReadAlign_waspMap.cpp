@@ -61,7 +61,9 @@ void ReadAlign::waspMap() {
             };
 
             waspRA->mapOneRead();
-
+            waspRA->multMapSelect();
+            waspRA->mappedFilter();
+                    
             if (waspRA->unmapType!=-1) {
                 waspType=4;
                 return;
