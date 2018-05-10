@@ -1,3 +1,9 @@
+STAR 2.6.0c 2018/05/10
+======================
+
+* Fixed bugs in merging mates (--peOverlap*) and WASP filtering algorithms. Please see CHANGES and RELEASEnotes from 2.6.0a.
+
+
 STAR 2.6.0b 2018/05/02
 ======================
 
