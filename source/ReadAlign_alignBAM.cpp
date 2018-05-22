@@ -175,6 +175,8 @@ int bamAttrArrayWriteInt(intType xIn, const char* tagName, char* attrArray, Para
 int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint trChrStart, uint mateChr, uint mateStart, char mateStrand, int alignType, bool *mateMapped, vector<int> outSAMattrOrder, char** outBAMarray, uint* outBAMarrayN) {
     //return: number of lines (mates)
 
+    cout <<"alignBam\n";
+    cout << alignType<<" "<<trChrStart <<" "<< readLength[0]<<" "<<readLength[1] <<" "<<mateChr<<" "<<mateStart<<endl;
     //alignType>=0: unmapped reads
     //          -1: normal mapped reads
     //          -10: chimeric alignment, not supplemental (like -11,-12,-13)

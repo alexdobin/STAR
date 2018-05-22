@@ -23,6 +23,8 @@ void ReadAlign::peOverlapMergeMap() {
         return;
     };
 
+    cout << "nOv=" <<peOv.nOv << endl;
+    
     //change parameters for SE mapping
     //double P_alignSplicedMateMapLminOverLmate=P.alignSplicedMateMapLminOverLmate;
     //P.alignSplicedMateMapLminOverLmate=P.alignSplicedMateMapLminOverLmate*peMergeRA->readLength[0]/(readLength[0]+readLength[1]);
@@ -37,7 +39,7 @@ void ReadAlign::peOverlapMergeMap() {
         //cout << "\n";
         return;
     };
-    
+    cout << peMergeRA->nW <<" "<<trBest->maxScore<<" "<<peMergeRA->trBest->maxScore<< endl;
     //convert best alignment SE to PE
     //trA=*trInit;
     //trA.peOverlapSEtoPE(peOv.nOv, *peMergeRA->trBest);
@@ -51,7 +53,6 @@ void ReadAlign::peOverlapMergeMap() {
     //convert SE to PE *this ReadAlign
     peMergeRA->peOv=peOv;
     peOverlapSEtoPE(*peMergeRA);
-    
     //debug
     //if (oldScore>trBest->maxScore || trBest->maxScore<peMergeRA->trBest->maxScore)
     //    cout << readName << "   "<< oldScore << "   "<< peMergeRA->trBest->maxScore << "   "<<trBest->maxScore << endl;
@@ -59,6 +60,7 @@ void ReadAlign::peOverlapMergeMap() {
     
     //chimeric detection for SE
     chimericDetectionPEmerged(*peMergeRA);
+    cout <<trBest->maxScore <<" "<<chimRecord<<" "<<readLength[0]<<" "<<readLength[1]<< endl;
 
     //debug    
     //cout << "\n";
@@ -78,6 +80,8 @@ void ReadAlign::peOverlapMergeMap() {
 
 void ReadAlign::peMergeMates() {
     
+    cout << "peMergeMates\n";
+    
     uint s1=localSearch(Read1[0],readLength[0],Read1[0]+readLength[0]+1,readLength[1],P.peOverlap.MMp);
     uint s0=localSearch(Read1[0]+readLength[0]+1,readLength[1],Read1[0],readLength[0],P.peOverlap.MMp);
 
@@ -86,6 +90,8 @@ void ReadAlign::peMergeMates() {
 
     peOv.nOv=max(o0,o1);
 
+    cout <<s0<<" "<<s1<<" "<<o0<<" "<<o1<<endl;
+    
     if (peOv.nOv<P.peOverlap.NbasesMin) {//overlap is smaller than minimum allowed
         peOv.nOv=0;
         return;
@@ -108,7 +114,8 @@ void ReadAlign::peMergeMates() {
             };
         };
     };  
- 
+    cout <<peOv.mateStart[0]<<" "<<peOv.mateStart[1]<<endl;
+
     //uint nMM=0;
     //for (uint ii=peOv.ovS; ii<readLength[0]; ii++) {//check for MM in the overlap area
     //    if (Read1[0][ii]!=Read1[0][ii-peOv.ovS+readLength[0]+1]) {
@@ -125,6 +132,8 @@ void ReadAlign::peMergeMates() {
     readLengthOriginal[1]=0;
     readNmates=1;
     
+    cout <<Lread<<" "<<readLength[0]<<" "<<readLength[1]<<" "<<readLengthOriginal[0]<<" "<<readLengthOriginal[1]<<endl;
+    
     //fill Read1[1,2]
     complementSeqNumbers(Read1[0],Read1[1],Lread); //returns complement of Reads[ii]
     for (uint ii=0;ii<Lread;ii++) {//reverse
@@ -138,7 +147,12 @@ void ReadAlign::peMergeMates() {
         };
 
     };    
-
+    for (uint ii=0;ii<Lread;ii++) cout<<to_string(Read1[0][ii]);
+    cout<<endl;
+    for (uint ii=0;ii<Lread;ii++) cout<<to_string(Read1[1][ii]);
+    cout<<endl;
+    for (uint ii=0;ii<Lread;ii++) cout<<to_string(Read1[2][ii]);
+    cout<<endl;
     return;
 };
 
