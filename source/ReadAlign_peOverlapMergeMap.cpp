@@ -3,6 +3,10 @@
 
 void ReadAlign::peOverlapMergeMap() {
     
+    cout << readName <<endl;
+    cout << Read0[0] << endl;
+    cout << Read0[1] << endl;
+    
     if (!P.peOverlap.yes || P.readNmates!=2 ) {//no peOverlap
         return;
         peOv.yes=false;
