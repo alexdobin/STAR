@@ -1,3 +1,6 @@
+* Process substitution can now be used with zipped VCF files, e.g. --varVCFfile <(zcat vcf.gz)
+* Fixed a but with --outTmpDir and fifo files.
+
 STAR 2.6.0c 2018/05/10
 ======================
 

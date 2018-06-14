@@ -16,7 +16,8 @@ class SNP
 {
 public:
     uint32 N; //number of snps
-    uint *loci; //snp coordinate
+    uint* loci; //snp coordinates
+    vector<uint> lociV; //snp coordinates vector
 //     SNPnt* nt; //reference and alternative bases
 //     char **nt; //reference and alternative bases
 //     char *nt1; //1D array to store nt

@@ -21,7 +21,7 @@ Variation::Variation (Parameters &Pin, vector <uint> &chrStartIn, map <string,ui
 
 };
 
-void scanVCF(ifstream& vcf, bool load, Parameters& P, SNP& snp, vector <uint> &chrStart, map <string,uint> &chrNameIndex) {
+void scanVCF(ifstream& vcf, Parameters& P, SNP& snp, vector <uint> &chrStart, map <string,uint> &chrNameIndex) {
     snp.N=0;
     uint nlines=0;
     while (true) {
@@ -43,27 +43,20 @@ void scanVCF(ifstream& vcf, bool load, Parameters& P, SNP& snp, vector <uint> &c
                 altV.insert(altV.begin(),ref);//add ref to the beginning
                 
                 if (chrNameIndex.count(chr)==0) {//chr not in Genome
-                    if (!load) {
-                        P.inOut->logMain << "WARNING: while processing varVCFfile file=" << P.var.vcfFile <<": chromosome '"<<chr<<"' not found in Genome fasta file\n";
-                    };
+                    P.inOut->logMain << "WARNING: while processing varVCFfile file=" << P.var.vcfFile <<": chromosome '"<<chr<<"' not found in Genome fasta file\n";
                 } else if (sample.size()<3) {
                     //undefined genotype 
                 } else if (sample.size()>3 && sample.at(3)!=':') {
-                    if (!load) {
-                        P.inOut->logMain << "WARNING: while processing varVCFfile file=" << P.var.vcfFile <<": more than 2 alleles per sample for line number "<<nlines<<"\n";
-                    };
+                    P.inOut->logMain << "WARNING: while processing varVCFfile file=" << P.var.vcfFile <<": more than 2 alleles per sample for line number "<<nlines<<"\n";
                 } else if (sample.at(0)=='0' && sample.at(2)=='0') {    
                     //both alleles are reference, no need to do anything                    
                 } else if (altV.at( atoi(&sample.at(0)) ).at(0)==ref.at(0) && altV.at( atoi(&sample.at(2)) ).at(0)==ref.at(0)) {
                     //both alleles are reference, no need to do anything
                     //this is a strange case in VCF when ALT allele(s) are equal to REF
                 } else {
-                    if (load) {
-                        snp.loci[snp.N]=pos-1+chrStart[chrNameIndex[chr]];
-                        snp.nt[snp.N][0]=convertNt01234( ref.at(0) );
-                        snp.nt[snp.N][1]=convertNt01234( altV.at( atoi(&sample.at(0)) ).at(0) );
-                        snp.nt[snp.N][2]=convertNt01234( altV.at( atoi(&sample.at(2)) ).at(0) );
-                    };
+                    snp.lociV.push_back(pos-1+chrStart[chrNameIndex[chr]]);
+                    array<char,3> nt1={convertNt01234( ref.at(0) ), convertNt01234( altV.at( atoi(&sample.at(0)) ).at(0) ), convertNt01234( altV.at( atoi(&sample.at(2)) ).at(0) )};
+                    snp.nt.push_back(nt1);
                     snp.N++;
                 };
             };
@@ -80,14 +73,13 @@ void Variation::loadVCF(string fileIn) {
     *P.inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ..... loading variations VCF\n" <<flush;
         
     ifstream & vcf = ifstrOpen(fileIn, ERROR_OUT, "SOLUTION: check the path and permissions of the VCF file: "+fileIn, P);
-    scanVCF(vcf, false, P, snp, chrStart, chrNameIndex);
+    scanVCF(vcf, P, snp, chrStart, chrNameIndex);
     
     snp.loci=new uint[snp.N];
-    snp.nt.resize(snp.N);
-    vcf.clear();
-    vcf.seekg(0,ios::beg);
-    scanVCF(vcf, true, P, snp, chrStart, chrNameIndex);
-    vcf.close();
+    for (uint ii=0;ii<snp.N;ii++)
+        snp.loci[ii]=snp.lociV[ii];   
+    snp.lociV.clear();
+
 
     time(&rawTime);
     P.inOut->logMain << timeMonthDayTime(rawTime) <<" ..... Loaded VCF data, found "<<snp.N<< " SNPs"<<endl;

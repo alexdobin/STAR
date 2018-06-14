@@ -453,7 +453,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         outFileTmp=outFileNamePrefix +"_STARtmp/";
         sysRemoveDir (outFileTmp);
     } else {
-        outFileTmp=outTmpDir;
+        outFileTmp=outTmpDir + "/";
     };
 
     if (mkdir (outFileTmp.c_str(),runDirPerm)!=0) {
