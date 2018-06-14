@@ -4,8 +4,8 @@
 void ReadAlign::peOverlapMergeMap() {
     
     if (!P.peOverlap.yes || P.readNmates!=2 ) {//no peOverlap
-        return;
         peOv.yes=false;
+        return;        
     };
 
     //debug
