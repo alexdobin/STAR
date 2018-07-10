@@ -335,7 +335,8 @@ STAR-Fusion is a software package for detecting fusion transcript from STAR chim
 Chimeric alignments can be included together with normal alignments in the main (sorted or unsorted) BAM file(s) using \opt{chimOutType} \optv{WithinBAM}. In these files, formatting of chimeric alignments follows the latest SAM/BAM specifications.
    
 \subsection{Chimeric alignments in \ofilen{Chimeric.out.sam} .}
-When chimeric detection is switched on, STAR will output normal alignments into \ofilen{Aligned.*.sam/bam}, and will output chimeric alignments into a separate file \ofilen{Chimeric.out.sam}. 
+When chimeric detection is switched on, STAR will output normal alignments into \ofilen{Aligned.*.sam/bam}, and will output chimeric alignments into a separate file but can also be added to the main BAM file.
+To obtain the Chimeric alignment in SAM format, the \opt{chimOutType} needs to be set to \optv{SeparateSAMold}.
 Some reads may be output to both normal SAM/BAM files, and \ofilen{Chimeric.out.sam} for the following reason. STAR will output a non-chimeric alignment into \ofilen{Aligned.out.sam} with soft-clipping a portion of the read. If this portion is long enough, and it maps well and uniquely  somewhere else in the genome, there will also be a chimeric alignment output into \ofilen{Chimeric.out.sam}. For instance, if you have a paired-end read where the second mate can be split chimerically into 70 and 30 bases. The 100b of the first mate + 70b of the 2nd mate map non-chimerically,and the mapping length/score are big enough, so they will be output into \ofilen{Aligned.out.sam} file. At the same time, the chimeric segments 100-mate1 + 70-mate2 and 30-mate2 will be output into \ofilen{Chimeric.out.sam}.
 
 \subsection{Chimeric alignments in \ofilen{Chimeric.out.junction}}
