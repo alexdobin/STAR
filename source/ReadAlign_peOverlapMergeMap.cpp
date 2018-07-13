@@ -274,7 +274,7 @@ void ReadAlign::peOverlapSEtoPE(ReadAlign &seRA) {//ReAdAlign: convert SE to PE 
     
     uint trNtotal=0;
     intScore bestScore=-10*Lread;
-    trBest=NULL;
+    trBest=trAll[0][0];//just to initialize
     for (uint iW=0; iW<nW; iW++) {//scan windows
         trAll[iW]=trArrayPointer+trNtotal;      
         for (uint iTr=0; iTr<nWinTr[iW]; iTr++) {//scan transcripts
