@@ -16,7 +16,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
             uint chunkInSizeBytesTotal[2]={0,0};
             while (chunkInSizeBytesTotal[0] < P.chunkInSizeBytes && chunkInSizeBytesTotal[1] < P.chunkInSizeBytes && P.inOut->readIn[0].good() && P.inOut->readIn[1].good()) {
                 char nextChar=P.inOut->readIn[0].peek();
-                if (P.iReadAll==P.readMapNumber) {//do nto read any more reads
+                if (P.iReadAll==P.readMapNumber) {//do not read any more reads
                     break;
                 } else if (P.readFilesTypeN==10 && P.inOut->readIn[0].good() && P.outFilterBySJoutStage!=2) {//SAM input && not eof && not 2nd stage
 

@@ -777,6 +777,60 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         };
     };
 
+    //two-pass
+    if (parArray.at(twoPass.pass1readsN_par)->inputLevel>0  && twoPass.mode=="None")
+    {
+        ostringstream errOut;
+        errOut << "EXITING because of fatal PARAMETERS error: --twopass1readsN is defined, but --twoPassMode is not defined\n";
+        errOut << "SOLUTION: to activate the 2-pass mode, use --twopassMode Basic";
+        exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
+
+    twoPass.yes=false;
+    twoPass.pass2=false;
+    if (twoPass.mode!="None") {//2-pass parameters
+        if (runMode!="alignReads")
+        {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: 2-pass mapping option  can only be used with --runMode alignReads\n";
+            errOut << "SOLUTION: remove --twopassMode option";
+            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };
+
+        if (twoPass.mode!="Basic")
+        {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: unrecognized value of --twopassMode="<<twoPass.mode<<"\n";
+            errOut << "SOLUTION: for the 2-pass mode, use allowed values --twopassMode: Basic";
+            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };
+
+        if (twoPass.pass1readsN==0)
+        {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: --twopass1readsN = 0 in the 2-pass mode\n";
+            errOut << "SOLUTION: for the 2-pass mode, specify --twopass1readsN > 0. Use a very large number or -1 to map all reads in the 1st pass.\n";
+            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };
+
+        if (pGe.gLoad!="NoSharedMemory") {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: 2-pass method is not compatible with --genomeLoad "<<pGe.gLoad<<"\n";
+            errOut << "SOLUTION: re-run STAR with --genomeLoad NoSharedMemory ; this is the only option compatible with --twopassMode Basic .\n";
+            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };
+        twoPass.yes=true;
+        twoPass.dir=outFileNamePrefix+"_STARpass1/";
+        sysRemoveDir (twoPass.dir);
+        if (mkdir (twoPass.dir.c_str(),runDirPerm)!=0) {
+            ostringstream errOut;
+            errOut <<"EXITING because of fatal ERROR: could not make pass1 directory: "<< twoPass.dir<<"\n";
+            errOut <<"SOLUTION: please check the path and writing permissions \n";
+            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };
+    };   
+    
+    // openReadFiles depends on twoPass for reading SAM header
     if (runMode=="alignReads" && pGe.gLoad!="Remove" && pGe.gLoad!="LoadAndExit") {//open reads files to check if they are present
         openReadsFiles();
 
@@ -924,7 +978,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     vector<string> vAttr1;
     if (outSAMattributes.at(0)=="None") {
     } else if (outSAMattributes.at(0)=="All"){
-        vAttr1={"NH","HI","AS","nM","NM","MD","jM","jI","rB","MC","ch"};
+        vAttr1={"NH","HI","AS","nM","NM","MD","jM","jI","MC","ch"};
     } else if (outSAMattributes.at(0)=="Standard"){
         vAttr1={"NH","HI","AS","nM"};
     } else {
@@ -1200,61 +1254,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                 errOut << "SOLUTION: use one of the allowed values of --quant.mode : TranscriptomeSAM or - .\n";
                 exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
             };
-        };
-    };
-
-
-    //two-pass
-    if (parArray.at(twoPass.pass1readsN_par)->inputLevel>0  && twoPass.mode=="None")
-    {
-        ostringstream errOut;
-        errOut << "EXITING because of fatal PARAMETERS error: --twopass1readsN is defined, but --twoPassMode is not defined\n";
-        errOut << "SOLUTION: to activate the 2-pass mode, use --twopassMode Basic";
-        exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-    };
-
-
-
-    twoPass.yes=false;
-    if (twoPass.mode!="None") {//2-pass parameters
-        if (runMode!="alignReads")
-        {
-            ostringstream errOut;
-            errOut << "EXITING because of fatal PARAMETERS error: 2-pass mapping option  can only be used with --runMode alignReads\n";
-            errOut << "SOLUTION: remove --twopassMode option";
-            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-        };
-
-        if (twoPass.mode!="Basic")
-        {
-            ostringstream errOut;
-            errOut << "EXITING because of fatal PARAMETERS error: unrecognized value of --twopassMode="<<twoPass.mode<<"\n";
-            errOut << "SOLUTION: for the 2-pass mode, use allowed values --twopassMode: Basic";
-            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-        };
-
-        if (twoPass.pass1readsN==0)
-        {
-            ostringstream errOut;
-            errOut << "EXITING because of fatal PARAMETERS error: --twopass1readsN = 0 in the 2-pass mode\n";
-            errOut << "SOLUTION: for the 2-pass mode, specify --twopass1readsN > 0. Use a very large number or -1 to map all reads in the 1st pass.\n";
-            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-        };
-
-        if (pGe.gLoad!="NoSharedMemory") {
-            ostringstream errOut;
-            errOut << "EXITING because of fatal PARAMETERS error: 2-pass method is not compatible with --genomeLoad "<<pGe.gLoad<<"\n";
-            errOut << "SOLUTION: re-run STAR with --genomeLoad NoSharedMemory ; this is the only option compatible with --twopassMode Basic .\n";
-            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-        };
-        twoPass.yes=true;
-        twoPass.dir=outFileNamePrefix+"_STARpass1/";
-        sysRemoveDir (twoPass.dir);
-        if (mkdir (twoPass.dir.c_str(),runDirPerm)!=0) {
-            ostringstream errOut;
-            errOut <<"EXITING because of fatal ERROR: could not make pass1 directory: "<< twoPass.dir<<"\n";
-            errOut <<"SOLUTION: please check the path and writing permissions \n";
-            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
     };
 

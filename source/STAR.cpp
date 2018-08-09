@@ -103,10 +103,7 @@ int main(int argInN, char* argIn[]) {
     if (P.pGe.gLoad=="LoadAndExit" || P.pGe.gLoad=="Remove")
     {
         return 0;
-    };
-    
-    P.twoPass.pass2=false; //this is the 1st pass    
-    
+    };     
 
     //calculate genome-related parameters
     Transcriptome *mainTranscriptome=NULL;
@@ -164,7 +161,7 @@ int main(int argInN, char* argIn[]) {
 
         P1.outFileNamePrefix=P.twoPass.dir;
 
-        P1.readMapNumber=P.twoPass.pass1readsN;
+        P1.readMapNumber=min(P.twoPass.pass1readsN, P.readMapNumber);
 //         P1.inOut->logMain.open((P1.outFileNamePrefix + "Log.out").c_str());
 
         P1.wasp.outputMode="None"; //no WASP filtering on the 1st pass
@@ -488,7 +485,6 @@ int main(int argInN, char* argIn[]) {
     P.closeReadsFiles();//this will kill the readFilesCommand processes if necessary
     //mainGenome.~Genome(); //need explicit call because of the 'delete P.inOut' below, which will destroy P.inOut->logStdOut
 
-    ///@todo create Destructor to destroy P.inOut
     delete P.inOut; //to close files
 
     return 0;

@@ -22,7 +22,7 @@ if (substr($1,1,1)!="@") {
            sj1=$3 "\t" g "\t" g+L[k]-1;
            readSJs[sj1]++;
 
-           if (readSJs[sj1]==1) {#only count this junction if it has nto been counted for the same read
+           if (readSJs[sj1]==1) {#only count this junction if it has not been counted for the same read
                SJ[sj1]=1;
                if ($5>=mapqU) {
                    SJu[sj1]++;

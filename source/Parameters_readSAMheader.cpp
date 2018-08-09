@@ -28,7 +28,8 @@ void Parameters::readSAMheader(const string readFilesCommandString, const vector
         while (tmpFifoIn.peek()=='@') {
             string str1;
             getline(tmpFifoIn,str1);
-            if (str1.substr(1,2)!="HD" && str1.substr(1,2)!="SQ") {//SQ and HD header lines cannot be imported from uSAM
+            if (str1.substr(1,2)!="HD" && str1.substr(1,2)!="SQ" && (!twoPass.pass2) ) {
+                //SQ and HD header lines cannot be imported from uSAM; do not record the header again in the 2nd pass
                 samHeaderExtra += str1 + '\n';
             };
         };
