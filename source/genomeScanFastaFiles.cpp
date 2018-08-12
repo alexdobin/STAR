@@ -1,6 +1,6 @@
 #include "genomeScanFastaFiles.h"
 #include "ErrorWarning.h"
-
+#include "SequenceFuns.h"
 
 uint genomeScanFastaFiles (Parameters &P, char* G, bool flagRun, Genome &mapGen) {//scans fasta files. flagRun=false: check and find full size, flaRun=true: collect all the data
 
@@ -58,41 +58,31 @@ uint genomeScanFastaFiles (Parameters &P, char* G, bool flagRun, Genome &mapGen)
                     P.inOut->logMain << mapGen.pGe.gFastaFiles.at(ii)<<" : chr # " << mapGen.chrStart.size()-1 << "  \""<<mapGen.chrName.at(mapGen.chrStart.size()-1)<<"\" chrStart: "<<N<<"\n"<<flush;
                 };
             } else {//char lines
-                if (flagRun) lineIn.copy(G+N,lineIn.size(),0);
-                N += lineIn.size();
+                if (flagRun) {
+                    N += convertNucleotidesToNumbersRemoveControls(lineIn.c_str(),G+N,lineIn.size());
+                } else {
+                    for (uint ii=0; ii<lineIn.size();ii++) {
+                        if (int(lineIn.at(ii))>=32)
+                            ++N;
+                    };
+                };
+                
             };
         };
         fileIn.close();
     };
 
 
-    if (!flagRun) mapGen.chrLength.push_back(N-mapGen.chrStart.at(mapGen.chrStart.size()-1)); //true length of the last chr
+    if (!flagRun) 
+        mapGen.chrLength.push_back(N-mapGen.chrStart.at(mapGen.chrStart.size()-1)); //true length of the last chr
 
     N = ( (N+1)/mapGen.genomeChrBinNbases+1)*mapGen.genomeChrBinNbases;
 
-    if (!flagRun)
-    {
+    if (!flagRun) {
         mapGen.nChrReal=mapGen.chrStart.size();
         mapGen.chrStart.push_back(N); //last chromosome end+1
         for (uint ii=0;ii<mapGen.nChrReal;ii++) {
             mapGen.chrNameIndex[mapGen.chrName[ii]]=ii;
-        };
-    } else
-    {//convert the genome to 0,1,2,3,4
-        for (uint jj=0;jj<N;jj++) {
-            switch (int(G[jj])){
-                case(65): case(97):  G[jj]=char(0);break;//A
-                case(67): case(99):  G[jj]=char(1);break;//C
-                case(71): case(103): G[jj]=char(2);break;//G
-                case(84): case(116): G[jj]=char(3);break;//T
-                case(78): case(110): G[jj]=char(4);break;//N
-                case(48):            G[jj]=GENOME_spacingChar;break;//chromosomal breaks within the sequences
-                default:              //anything else
-                    if (G[jj]!=GENOME_spacingChar) {
-                         //P.inOut->logMain << "Unexpected character: char="<< G[jj] << "   int="<<int(G[jj])<<"   at " << jj << " , replacing with N\n";
-                         G[jj]=char(4);
-                    };
-            };
         };
     };
 

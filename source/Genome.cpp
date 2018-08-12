@@ -32,12 +32,12 @@ Genome::Genome (Parameters &Pin ): pGe(Pin.pGe), P(Pin), shmStart(NULL), sharedM
     sjdbLength = pGe.sjdbOverhang==0 ? 0 : pGe.sjdbOverhang*2+1;   
 };
 
-Genome::~Genome()
-{
-    if (sharedMemory != NULL)
-        delete sharedMemory;
-    sharedMemory = NULL;
-}
+// Genome::~Genome()
+// {
+//     if (sharedMemory != NULL)
+//         delete sharedMemory;
+//     sharedMemory = NULL;
+// }
 
 void Genome::freeMemory(){//free big chunks of memory used by genome and suffix array
 

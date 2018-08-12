@@ -12,7 +12,8 @@
 #include "IncludeDefine.h"
 
 void complementSeqNumbers(char*, char*, uint);
-void convertNucleotidesToNumbers(const char*, char*, uint);
+void convertNucleotidesToNumbers(const char* R0, char* R1, const uint Lread);
+uint convertNucleotidesToNumbersRemoveControls(const char* R0, char* R1, const uint Lread);
 void revComplementNucleotides(char* ReadsIn, char* ReadsOut, uint Lread); //complement the numeric sequences
 void revComplementNucleotides(string &seq);
 char nuclToNumBAM(char cc);

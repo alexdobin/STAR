@@ -109,9 +109,13 @@ void sjdbBuildIndex (Parameters &P, char *Gsj, char *G, PackedArray &SA, PackedA
     mapGen.nGenome=mapGen.chrStart[mapGen.nChrReal]+nGsj;
     mapGen.nSA+=nInd;
 
-    uint GstrandBit1 = (uint) floor(log(mapGen.nGenome)/log(2))+1;
+    char GstrandBit1 = (char) (uint) floor(log(mapGen.nGenome)/log(2))+1;   
     if (GstrandBit1<32) GstrandBit1=32; //TODO: use simple access function for SA
-    if ( GstrandBit1 != mapGen.GstrandBit)
+    
+    P.inOut->logMain <<"Genome size with junctions="<<mapGen.nGenome<<"  "<<mapGen.chrStart[mapGen.nChrReal]<<"   "<<nGsj<<"\n";
+    P.inOut->logMain <<"GstrandBit1="<<int(GstrandBit1)<<"   GstrandBit="<<int(mapGen.GstrandBit)<<"\n";
+    
+    if ( GstrandBit1 > mapGen.GstrandBit)
     {//too many junctions were added - GstrandBit changed
         ostringstream errOut;
         errOut << "EXITING because of FATAL ERROR: cannot insert junctions on the fly because of strand GstrandBit problem\n";

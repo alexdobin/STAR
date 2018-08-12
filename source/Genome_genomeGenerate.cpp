@@ -238,8 +238,10 @@ void Genome::genomeGenerate() {
         };
     };
 
-    GstrandBit = (uint) floor(log(N+P.limitSjdbInsertNsj*sjdbLength)/log(2))+1;
+    GstrandBit = (char) (uint) floor(log(N+P.limitSjdbInsertNsj*sjdbLength)/log(2))+1;
     if (GstrandBit<32) GstrandBit=32; //TODO: use simple access function for SA
+    P.inOut->logMain <<"Estimated genome size="<<N+P.limitSjdbInsertNsj*sjdbLength<<"   "<<N<<"   "<<P.limitSjdbInsertNsj*sjdbLength<<"\n";
+    P.inOut->logMain << "GstrandBit=" << int(GstrandBit) <<"\n";
 
     GstrandMask = ~(1LLU<<GstrandBit);
     SA.defineBits(GstrandBit+1,nSA);

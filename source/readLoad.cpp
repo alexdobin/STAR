@@ -36,7 +36,14 @@ int readLoad(istream& readInStream, Parameters& P, uint iMate, uint& Lread, uint
 
     readInStream.getline(Seq,DEF_readSeqLengthMax+1); //extract sequence
 
-    Lread=(uint) readInStream.gcount();
+    Lread=0;
+    for (uint ii=0; ii<readInStream.gcount()-1; ii++) {
+        if (int(Seq[ii])>=32) {
+            Seq[Lread]=Seq[ii];
+            ++Lread;
+        };
+    };
+    
     if (Lread<1) {
         ostringstream errOut;
         errOut << "EXITING because of FATAL ERROR in reads input: short read sequence line: " << Lread <<"\n";
@@ -46,9 +53,6 @@ int readLoad(istream& readInStream, Parameters& P, uint iMate, uint& Lread, uint
         errOut << "DEF_readSeqLengthMax="<<DEF_readSeqLengthMax<<"\n";
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
     };
-    --Lread;//do not count /n in the read length
-    LreadOriginal=Lread;
-
     if (Lread>DEF_readSeqLengthMax) {
         ostringstream errOut;
         errOut << "EXITING because of FATAL ERROR in reads input: Lread>=" << Lread << "   while DEF_readSeqLengthMax=" << DEF_readSeqLengthMax <<"\n";
@@ -74,6 +78,7 @@ int readLoad(istream& readInStream, Parameters& P, uint iMate, uint& Lread, uint
 //     };
 //     LreadOriginal=Lread;
 
+    LreadOriginal=Lread;
     if ( Lread>(P.clip5pNbases[iMate]+P.clip3pNbases[iMate]) ) {
         Lread=Lread-(P.clip5pNbases[iMate]+P.clip3pNbases[iMate]);
     } else {

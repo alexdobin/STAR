@@ -484,6 +484,10 @@ int main(int argInN, char* argIn[]) {
 
     P.closeReadsFiles();//this will kill the readFilesCommand processes if necessary
     //mainGenome.~Genome(); //need explicit call because of the 'delete P.inOut' below, which will destroy P.inOut->logStdOut
+    if (mainGenome.sharedMemory != NULL) {//need explicit call because this destructor will write to files which are deleted by 'delete P.inOut' below
+        delete mainGenome.sharedMemory;
+        mainGenome.sharedMemory = NULL;
+    };
 
     delete P.inOut; //to close files
 

@@ -1,5 +1,7 @@
+* Fixed the problem with control characters (ASCII<32) in genome and input read sequences. They used to be converted to N, now they are removed.
+* Fixed the GtstrandBit problem.
 * Fixed a bug with multiple RG lines when inputting reads in SAM format.
-* Fixed a bug causing seg-faults with sharead memory and --outStd options.
+* Fixed a bug causing seg-faults with shared memory and --outStd options.
 * Process substitution can now be used with zipped VCF files, e.g. --varVCFfile <(zcat vcf.gz)
 * Fixed a bug with --outTmpDir and fifo files.
 
