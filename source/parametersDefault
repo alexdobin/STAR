@@ -550,7 +550,7 @@ alignInsertionFlush     None
 peOverlapNbasesMin          0
     int>=0:             minimum number of overlap bases to trigger mates merging and realignment
 
-peOverlapMMp                0.1
+peOverlapMMp                0.01
     real, >=0 & <1:     maximum proportion of mismatched bases in the overlap area
 
 ### Windows, Anchors, Binning
@@ -620,6 +620,11 @@ chimMultimapScoreRange          1
 
 chimNonchimScoreDropMin         20
     int>=0: to trigger chimeric detection, the drop in the best non-chimeric alignment score with respect to the read lenght has to be smaller than this value
+
+chimOutJunctionFormat           0
+    int: formatting type for the Chimeric.out.junction file
+                                0 ... no comment lines/headers
+                                1 ... comment lines at the end of the file: command line and Nreads: total, unique, multi
 
 ### Quantification of Annotations
 quantMode                   -

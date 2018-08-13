@@ -294,7 +294,7 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
                     };
                 };
                 Score += Ins*P.scoreInsBase + P.scoreInsOpen;
-                jCan=-3;
+                jCan=-2; //marks insertion though it's not used below
             }; //different types of gaps selection
 
 

@@ -3,6 +3,7 @@
 #include "SequenceFuns.h"
 #include "TimeFunctions.h"
 #include "serviceFuns.cpp"
+#include "ErrorWarning.h"
 
 Variation::Variation (Parameters &Pin, vector <uint> &chrStartIn, map <string,uint> &chrNameIndexIn) : P(Pin), chrStart(chrStartIn), chrNameIndex(chrNameIndexIn) {
     if (!P.var.yes) {
@@ -83,6 +84,13 @@ void Variation::loadVCF(string fileIn) {
 
     time(&rawTime);
     P.inOut->logMain << timeMonthDayTime(rawTime) <<" ..... Loaded VCF data, found "<<snp.N<< " SNPs"<<endl;
+    if (snp.N==0) {
+        ostringstream errOut;
+        errOut <<"EXITING because of FATAL INPUT FILE ERROR: could not find any SNPs in VCF file: " <<fileIn<< "\n";
+        errOut <<"SOLUTION: check formatting of the VCF file; unzip VCF file or use process substitution.\n";
+        exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
+    };
+        
     
     uint *s1=new uint[2*snp.N];
     for (uint ii=0;ii<snp.N; ii++) {

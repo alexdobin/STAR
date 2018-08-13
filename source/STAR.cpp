@@ -467,13 +467,15 @@ int main(int argInN, char* argIn[]) {
     //collapse splice junctions from different threads/chunks, and output them
     outputSJ(RAchunk,P);
 
+    g_statsAll.writeLines(P.inOut->outChimJunction, P.pCh.outJunctionFormat, "#", P.commandLine);
+    
     g_statsAll.progressReport(P.inOut->logProgress);
     P.inOut->logProgress  << "ALL DONE!\n"<<flush;
     P.inOut->logFinal.open((P.outFileNamePrefix + "Log.final.out").c_str());
     g_statsAll.reportFinal(P.inOut->logFinal);
     *P.inOut->logStdOut << timeMonthDayTime(g_statsAll.timeFinish) << " ..... finished successfully\n" <<flush;
 
-    P.inOut->logMain  << "ALL DONE!\n"<<flush;
+    P.inOut->logMain  << "ALL DONE!\n" << flush;
     if (P.outTmpKeep=="None")
     {
         sysRemoveDir (P.outFileTmp);

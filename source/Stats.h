@@ -33,5 +33,6 @@ class Stats {
         void progressReportHeader(ofstream &progressStream);
         void progressReport(ofstream &progressStream) ;
         void reportFinal(ofstream &streamOut);
+        void writeLines(ofstream &streamOut, const vector<int> outType, const string commStr, const string outStr);// write commented lines to text files with stats
 };
 #endif

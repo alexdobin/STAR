@@ -139,4 +139,13 @@ void Stats::reportFinal(ofstream &streamOut) {
 
 };
 
+void Stats::writeLines(ofstream &streamOut, const vector<int> outType, const string commStr, const string outStr) {
+    for (const auto& tt : outType) {
+        if (tt==1) {
+            if (outStr!="")
+                streamOut << commStr <<" "<< outStr <<"\n";
+            streamOut << commStr <<" "<< "Nreads " << readN <<"\t"<< "NreadsUnique " << mappedReadsU <<"\t"<< "NreadsMulti " << mappedReadsM << "\n";
+        };
+    };
+};
 

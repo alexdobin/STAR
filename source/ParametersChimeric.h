@@ -12,6 +12,8 @@ class ParametersChimeric
         uint mainSegmentMultNmax;
         
         uint multimapScoreRange, multimapNmax, nonchimScoreDropMin;
+        
+        vector<int> outJunctionFormat;
 
         struct
         {

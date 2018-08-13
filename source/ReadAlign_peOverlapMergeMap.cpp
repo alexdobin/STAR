@@ -94,18 +94,17 @@ void ReadAlign::peMergeMates() {
     if (o1>=o0) {
         peOv.mateStart[0]=0;
         peOv.mateStart[1]=s1;
-        if (o1<readLength[1]) {
+        if (o1<readLength[1]) {//otherwise, if o1==readLength[1], read2 is entirely contained in read1
+            //move unoverlapped portion of read2 to the end of read1
             memmove(Read1[0]+readLength[0], Read1[0]+readLength[0]+1+o1, readLength[1]-o1);
         };
     } else {
         peOv.mateStart[1]=0;
         peOv.mateStart[0]=s0;
-        if (s0>0) {
-            memmove(Read1[0]+Lread, Read1[0], readLength[0]);//temp move 0
-            memmove(Read1[0], Read1[0]+readLength[0]+1, readLength[1]); //move 1 into 0
-            if (o0<readLength[0]) {
-                memmove(Read1[0]+readLength[1], Read1[0]+Lread+o0, readLength[0]-o0); //move 1 into 0
-            };
+        memmove(Read1[0]+Lread, Read1[0], readLength[0]);//temp move 0
+        memmove(Read1[0], Read1[0]+readLength[0]+1, readLength[1]); //move 1 into 0
+        if (o0<readLength[0]) {
+            memmove(Read1[0]+readLength[1], Read1[0]+Lread+o0, readLength[0]-o0); //move 0 into 1
         };
     };  
  

@@ -1,3 +1,6 @@
+* Implemented --chimOutJunctionFormat 1 option to output some metadata (command lines and basic mapping statistics) at the end of Chimeric.out.junction file.
+* Fixed a bug in merging mates (--peOverlap*) algorithm that was causing rare seg-faults.
+* The default value of --peOverlapMMp is reduced to 0.01 for less aggressive mate merging.
 * Fixed the problem with control characters (ASCII<32) in genome and input read sequences. They used to be converted to N, now they are removed.
 * Fixed the GtstrandBit problem.
 * Fixed a bug with multiple RG lines when inputting reads in SAM format.
