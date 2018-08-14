@@ -1,13 +1,16 @@
-* Fixed a bug that caused serious problems with --sjdbInsertSave All option.
+STAR 2.6.1a 2018/08/14
+======================
+
+* Process substitution can now be used with zipped VCF files, e.g. --varVCFfile <(zcat vcf.gz)
 * Implemented fatal error exception if no SNPs are found in VCF files.
 * Implemented --chimOutJunctionFormat 1 option to output some metadata (command lines and basic mapping statistics) at the end of Chimeric.out.junction file.
-* Fixed a bug in merging mates (--peOverlap*) algorithm that was causing rare seg-faults.
 * The default value of --peOverlapMMp is reduced to 0.01 for less aggressive mate merging.
 * Fixed the problem with control characters (ASCII<32) in genome and input read sequences. They used to be converted to N, now they are removed.
+* Fixed a bug that caused serious problems with --sjdbInsertSave All option.
+* Fixed a bug in merging mates (--peOverlap*) algorithm that was causing rare seg-faults.
 * Fixed the GtstrandBit problem.
 * Fixed a bug with multiple RG lines when inputting reads in SAM format.
 * Fixed a bug causing seg-faults with shared memory and --outStd options.
-* Process substitution can now be used with zipped VCF files, e.g. --varVCFfile <(zcat vcf.gz)
 * Fixed a bug with --outTmpDir and fifo files.
 
 STAR 2.6.0c 2018/05/10
