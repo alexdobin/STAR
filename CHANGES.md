@@ -1,3 +1,5 @@
+* Fixed a bug that caused serious problems with --sjdbInsertSave All option.
+* Implemented fatal error exception if no SNPs are found in VCF files.
 * Implemented --chimOutJunctionFormat 1 option to output some metadata (command lines and basic mapping statistics) at the end of Chimeric.out.junction file.
 * Fixed a bug in merging mates (--peOverlap*) algorithm that was causing rare seg-faults.
 * The default value of --peOverlapMMp is reduced to 0.01 for less aggressive mate merging.

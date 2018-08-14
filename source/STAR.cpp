@@ -467,7 +467,7 @@ int main(int argInN, char* argIn[]) {
     //collapse splice junctions from different threads/chunks, and output them
     outputSJ(RAchunk,P);
 
-    g_statsAll.writeLines(P.inOut->outChimJunction, P.pCh.outJunctionFormat, "#", P.commandLine);
+    g_statsAll.writeLines(P.inOut->outChimJunction, P.pCh.outJunctionFormat, "#", STAR_VERSION + P.commandLine);
     
     g_statsAll.progressReport(P.inOut->logProgress);
     P.inOut->logProgress  << "ALL DONE!\n"<<flush;

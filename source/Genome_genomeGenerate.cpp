@@ -447,9 +447,6 @@ void Genome::genomeGenerate() {
 
         sjdbInsertJunctions(P, *this, mainGenome1, sjdbLoci);
 
-        //write an extra 0 at the end of the array, filling the last bytes that otherwise are not accessible, but will be written to disk
-        //this is - to avoid valgrind complaints. Note that SApass1 is allocated with plenty of space to spare.
-        SA.writePacked(nSA,0);
     };
 
     pGe.gFileSizes.clear();

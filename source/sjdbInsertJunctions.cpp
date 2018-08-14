@@ -73,6 +73,10 @@ void sjdbInsertJunctions(Parameters & P, Genome & mapGen, Genome & mapGen1, Sjdb
     time ( &rawtime );
     P.inOut->logMain     << timeMonthDayTime(rawtime) << " ..... finished inserting junctions into genome" <<endl;
 
+    //write an extra 0 at the end of the array, filling the last bytes that otherwise are not accessible, but will be written to disk
+    //this is - to avoid valgrind complaints. Note that SApass1 is allocated with plenty of space to spare.
+    mapGen.SA.writePacked(mapGen.nSA,0);
+    
     if (P.pGe.sjdbInsertSave=="All")
     {//save and copy all genome files into sjdbInsert.outDir, except those created above
         if (P.pGe.gDir != P.sjdbInsert.outDir)
@@ -83,6 +87,9 @@ void sjdbInsertJunctions(Parameters & P, Genome & mapGen, Genome & mapGen1, Sjdb
             copyFile(P.pGe.gDir+"/chrLength.txt", P.sjdbInsert.outDir+"/chrLength.txt");
         };
 
+        mapGen.pGe.gFileSizes.clear();
+        mapGen.pGe.gFileSizes.push_back(mapGen.nGenome);
+        mapGen.pGe.gFileSizes.push_back(mapGen.SA.lengthByte);      
         genomeParametersWrite(P.sjdbInsert.outDir+("/genomeParameters.txt"), P, ERROR_OUT, mapGen);
 
         ofstream & genomeOut = ofstrOpen(P.sjdbInsert.outDir+"/Genome",ERROR_OUT, P);
