@@ -34,7 +34,7 @@
 
 \newcommand{\sechyperref}[1]{\hyperref[#1]{Section \ref{#1}. \nameref{#1}}}
 
-\title{STAR manual 2.6.0a}
+\title{STAR manual 2.6.1a}
 \author{Alexander Dobin\\
 dobin@cshl.edu}
 \maketitle
@@ -273,7 +273,7 @@ The SAM attributes can be specified by the user using \opt{outSAMattributes} \op
 \item[]
 \optv{NH HI NM MD} have standard meaning as defined in the SAM format specifications.
 \item[]
-\optv{AS} id the local alignment score (paired for paired-edn reads). 
+\optv{AS} id the local alignment score (paired for paired-end reads). 
 \item[]
 \optv{nM} is the number of mismatches per (paired) alignment, not to be confused with \optv{NM}, which is the number of mismatches in each mate.
 \item[]
@@ -335,11 +335,11 @@ STAR-Fusion is a software package for detecting fusion transcript from STAR chim
 Chimeric alignments can be included together with normal alignments in the main (sorted or unsorted) BAM file(s) using \opt{chimOutType} \optv{WithinBAM}. In these files, formatting of chimeric alignments follows the latest SAM/BAM specifications.
    
 \subsection{Chimeric alignments in \ofilen{Chimeric.out.sam} .}
-When chimeric detection is switched on, STAR will output normal alignments into \ofilen{Aligned.*.sam/bam}, and will output chimeric alignments into a separate file \ofilen{Chimeric.out.sam}. 
+With \opt{chimOutType} \optv{SeparateSAMold} STAR will output normal alignments into \ofilen{Aligned.*.sam/bam}, and will output chimeric alignments into a separate file \ofilen{Chimeric.out.sam}. Note that this option will be deprecated in the future, and the \opt{chimOutType} \optv{WithinBAM} is strongly recommended.
 Some reads may be output to both normal SAM/BAM files, and \ofilen{Chimeric.out.sam} for the following reason. STAR will output a non-chimeric alignment into \ofilen{Aligned.out.sam} with soft-clipping a portion of the read. If this portion is long enough, and it maps well and uniquely  somewhere else in the genome, there will also be a chimeric alignment output into \ofilen{Chimeric.out.sam}. For instance, if you have a paired-end read where the second mate can be split chimerically into 70 and 30 bases. The 100b of the first mate + 70b of the 2nd mate map non-chimerically,and the mapping length/score are big enough, so they will be output into \ofilen{Aligned.out.sam} file. At the same time, the chimeric segments 100-mate1 + 70-mate2 and 30-mate2 will be output into \ofilen{Chimeric.out.sam}.
 
 \subsection{Chimeric alignments in \ofilen{Chimeric.out.junction}}
-In addition to \ofilen{Chimeric.out.sam}, STAR will generate \ofilen{Chimeric.out.junction} file which maybe more convenient for downstream analysis.
+By default, or with \opt{chimOutType} \optv{Junctions}, STAR will generate \ofilen{Chimeric.out.junction} file which maybe more convenient for downstream analysis.
 The format of this file is as follows. Every line contains one chimerically aligned read, e.g.:
 \begin{verbatim}
 chr22   23632601        +       chr9    133729450       +       1       0       0      

@@ -637,7 +637,7 @@
   \optValue{0}
   \optLine{int{\textgreater}=0:             minimum number of overlap bases to trigger mates merging and realignment} 
 \optName{peOverlapMMp}
-  \optValue{0.1}
+  \optValue{0.01}
   \optLine{real, {\textgreater}=0 {\&} {\textless}1:     maximum proportion of mismatched bases in the overlap area} 
 \end{optTable}
 \optSection{Windows, Anchors, Binning}\label{Windows,_Anchors,_Binning}
@@ -716,6 +716,13 @@
 \optName{chimNonchimScoreDropMin}
   \optValue{20}
   \optLine{int{\textgreater}=0: to trigger chimeric detection, the drop in the best non-chimeric alignment score with respect to the read lenght has to be smaller than this value} 
+\optName{chimOutJunctionFormat}
+  \optValue{0}
+  \optLine{int: formatting type for the Chimeric.out.junction file} 
+\begin{optOptTable}
+  \optOpt{0}   \optOptLine{no comment lines/headers}
+  \optOpt{1}   \optOptLine{comment lines at the end of the file: command line and Nreads: total, unique, multi}
+\end{optOptTable}
 \end{optTable}
 \optSection{Quantification of Annotations}\label{Quantification_of_Annotations}
 \begin{optTable}
