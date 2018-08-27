@@ -336,10 +336,10 @@ void Genome::genomeLoad(){//allocate and load Genome
     else if (pGe.gLoad=="NoSharedMemory") // simply allocate memory, do not use shared memory
     {
         genomeInsertL=0;
+        genomeInsertChrIndFirst=nChrReal;
         if (pGe.gFastaFiles.at(0)!="-")
         {//will insert sequences in the genome, now estimate the extra size
            uint oldlen=chrStart.back();//record the old length
-           genomeInsertChrIndFirst=nChrReal;
            genomeInsertL=genomeScanFastaFiles(P, G, false, *this)-oldlen;
         };
 

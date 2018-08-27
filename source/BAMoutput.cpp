@@ -127,7 +127,7 @@ void BAMoutput::coordBins() {//define genomic starts for bins
     if (P.runThreadN>1) pthread_mutex_lock(&g_threadChunks.mutexBAMsortBins);
     if (P.outBAMsortingBinStart[0]!=0) {//it's set to 0 only after the bin sizes are determined
         //extract coordinates and sort
-        uint *startPos = new uint [binTotalN[0]];//array of aligns start positions
+        uint *startPos = new uint [binTotalN[0]+1];//array of aligns start positions
         for (uint ib=0,ia=0;ia<binTotalN[0];ia++) {
             uint32 *bamIn32=(uint32*) (binStart[0]+ib);
             startPos[ia]  =( ((uint) bamIn32[1]) << 32) | ( (uint)bamIn32[2] );
