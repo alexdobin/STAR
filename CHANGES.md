@@ -1,3 +1,6 @@
+STAR 2.6.1b 2018/09/06
+======================
+
 * Fixed a problem with --outSAMfilter KeepOnlyAddedReferences option.
 * Fixed a problem with output of an empty sorted BAM.
 
