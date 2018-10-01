@@ -39,7 +39,7 @@ void ReadAlign::chimericDetectionPEmerged(ReadAlign &seRA) {
                 };
             };
             for (uint jj=0; jj<2; jj++) {
-                if (segLen[ii][jj]<segLmin) {
+                if (segLen[ii][jj]<segLmin || (segLen[ii][jj]==segLmin && trChim[ii].exons[0][EX_G]>trChim[ii-1].exons[0][EX_G])) {
                     segLmin=segLen[ii][jj];
                     i1=ii;//trChim of the shortest segment length
                     i2=jj;//mate of the shortest segment length
