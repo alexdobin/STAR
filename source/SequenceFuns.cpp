@@ -139,7 +139,7 @@ void convertNucleotidesToNumbers(const char* R0, char* R1, const uint Lread) {//
                         case (84): case(116): 
                             R1[jj]=char(3);break;//T
                         default:                              
-                            R1[jj]=char(9);//anything else
+                            R1[jj]=char(4);//anything else is converted to N
                     };
                 };
 };
@@ -160,7 +160,7 @@ uint convertNucleotidesToNumbersRemoveControls(const char* R0, char* R1, const u
                 if (int(R0[jj]) < 32) {//control characters are skipped
                     continue;
                 } else {//all non-control non-ACGT characters are convreted to N
-                    R1[jj]=char(9);//anything else
+                    R1[jj]=char(4);//anything else
                 };
         };
         ++iR1;

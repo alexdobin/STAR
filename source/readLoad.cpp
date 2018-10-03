@@ -84,7 +84,7 @@ int readLoad(istream& readInStream, Parameters& P, uint iMate, uint& Lread, uint
     } else {
         Lread=0;
     };
-    convertNucleotidesToNumbers(Seq+P.clip5pNbases[iMate],SeqNum,Lread);
+    convertNucleotidesToNumbersRemoveControls(Seq+P.clip5pNbases[iMate],SeqNum,Lread);
 
     //clip the adapter
     if (P.clip3pAdapterSeq.at(iMate).length()>0) {
