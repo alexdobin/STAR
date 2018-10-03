@@ -236,7 +236,6 @@ Parameters::Parameters() {//initalize parameters info
 
     //WASP
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "waspOutputMode", &wasp.outputMode)); 
-
     
     //quant
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "quantMode", &quant.mode));
@@ -248,6 +247,10 @@ Parameters::Parameters() {//initalize parameters info
     twoPass.pass1readsN_par=parArray.size()-1;
     parArray.push_back(new ParameterInfoScalar <string>   (-1, -1, "twopassMode", &twoPass.mode));
 
+    //solo
+    parArray.push_back(new ParameterInfoScalar <string>   (-1, -1, "soloType", &pSolo.typeStr));
+    parArray.push_back(new ParameterInfoScalar <uint32>   (-1, -1, "soloCBlen", &pSolo.cbL));
+    parArray.push_back(new ParameterInfoScalar <uint32>   (-1, -1, "soloUMIlen", &pSolo.umiL));
 
 //     //SW parameters
 //     parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "swMode", &swMode));
@@ -785,7 +788,8 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
     };
-
+    readNmatesIn=readNmates;
+    
     //two-pass
     if (parArray.at(twoPass.pass1readsN_par)->inputLevel>0  && twoPass.mode=="None")
     {
@@ -950,7 +954,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         errOut <<"SOLUTION: re-run STAR with --waspOutputMode ... and --varVCFfile /path/to/file.vcf\n";
         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
-
     
      if (wasp.yes && outSAMtype.at(0)!="BAM") {
         ostringstream errOut;
@@ -1395,6 +1398,26 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         peOverlap.yes=true;
     } else {
         peOverlap.yes=false;
+    };
+    
+    //solo
+    if (pSolo.typeStr=="None") {
+        pSolo.type=0;
+    } else if (pSolo.typeStr=="10XchromiumV2") {
+        pSolo.type=1;
+        pSolo.bL=pSolo.cbL+pSolo.umiL;
+        readNmates=1; //output mates TODO: check that readNmatesIn==2
+    } else  {
+        ostringstream errOut;
+        errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in of --soloType="<<pSolo.typeStr<<"\n";
+        errOut << "SOLUTION: use allowed option: None or 10XchromiumV2";
+        exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
+    
+    //
+    outSAMreadIDnumber=false;
+    if (outSAMreadID=="Number") {
+        outSAMreadIDnumber=true;
     };
     
     ////////////////////////////////////////////////

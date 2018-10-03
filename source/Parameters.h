@@ -62,13 +62,14 @@ class Parameters {
 
         uint readMapNumber;
         uint iReadAll;
-        uint readNmates;
+        uint readNmates, readNmatesIn;
         string readMatesLengthsIn;
 
         vector <string> readNameSeparator;
         vector <char> readNameSeparatorChar;
 
         string outSAMreadID;
+        bool outSAMreadIDnumber;
 
         vector <uint> clip5pNbases, clip3pNbases, clip3pAfterAdapterNbases;
         vector <double> clip3pAdapterMMp;
@@ -302,13 +303,22 @@ class Parameters {
             string vcfFile;
         } var;
         
-        struct
+        struct 
         {
             bool yes;
             bool SAMtag;
             string outputMode;
         } wasp;
 
+        struct {
+            //bool yes;
+            string typeStr;
+            int type;
+            uint32 cbL; //cell barcode length
+            uint32 umiL; //umi length
+            uint32 bL; //total barcode length
+        } pSolo;
+        
         //chimeric
         ParametersChimeric pCh;
 

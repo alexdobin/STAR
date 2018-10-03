@@ -656,4 +656,13 @@ waspOutputMode              None
     string: WASP allele-specific output type. This is re-implemenation of the original WASP mappability filtering by Bryce van de Geijn, Graham McVicker, Yoav Gilad & Jonathan K Pritchard. Please cite the original WASP paper: Nature Methods 12, 1061–1063 (2015), https://www.nature.com/articles/nmeth.3582 .
                             SAMtag      ... add WASP tags to the alignments that pass WASP filtering
 
+### solo (single cell) parameters
+soloType                    None
+    string(s): type of single-cell RNA-seq
+                            10XchromiumV2    ... 10X Genomics Chromium Verison 2 chemistry
 
+soloCBlen                   16
+    int>0: cell barcode length
+
+soloUMIlen                  10
+    int>0: UMI length

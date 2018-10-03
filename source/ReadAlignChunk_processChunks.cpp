@@ -18,6 +18,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                 char nextChar=P.inOut->readIn[0].peek();
                 if (P.iReadAll==P.readMapNumber) {//do not read any more reads
                     break;
+                //} else if (P.pSolo.type==1 && P.inOut->readIn[0].good() && P.outFilterBySJoutStage!=2)                    
                 } else if (P.readFilesTypeN==10 && P.inOut->readIn[0].good() && P.outFilterBySJoutStage!=2) {//SAM input && not eof && not 2nd stage
 
                     string str1;
@@ -74,43 +75,45 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                         };
                     };
                 } else if (nextChar=='@') {//fastq, not multi-line
-                    P.iReadAll++; //increment read number
-                    for (uint imate=0; imate<P.readNmates; imate++) {//for all mates
-                        uint32 iline=0;
-                        if (P.outFilterBySJoutStage!=2) {//not the 2nd stage of the 2-stage mapping
-
-                            //read or skip the 1st field of the read name line
-                            if (P.outSAMreadID=="Number") {
-                                chunkInSizeBytesTotal[imate] += sprintf(chunkIn[imate] + chunkInSizeBytesTotal[imate], "@%llu", P.iReadAll);
-                                string dummy1;
-                                P.inOut->readIn[imate] >> dummy1; //skip the first field of the read name
-                            } else {
-                                P.inOut->readIn[imate] >> (chunkIn[imate] + chunkInSizeBytesTotal[imate]);
-                                chunkInSizeBytesTotal[imate] += strlen(chunkIn[imate] + chunkInSizeBytesTotal[imate]);
-                            };
-
-                            //read the second field of the read name line
-                            char passFilterIllumina='N';
-                            if (P.inOut->readIn[imate].peek()!='\n') {//2nd field exists
-                                string field2;
-                                P.inOut->readIn[imate] >> field2;
-                                passFilterIllumina='N';
-                                if (field2.length()>=3 && field2.at(2)=='Y') passFilterIllumina='Y';
-                            };
-
-                            //ignore the rest of the read name
-                            P.inOut->readIn[imate].ignore(DEF_readNameSeqLengthMax,'\n');
-
-                            chunkInSizeBytesTotal[imate] += sprintf(chunkIn[imate] + chunkInSizeBytesTotal[imate], " %llu %c %i \n", P.iReadAll, passFilterIllumina, P.readFilesIndex);
-
-                            iline=1;
+                    P.iReadAll++; //increment read number               
+                    if (P.outFilterBySJoutStage!=2) {//not the 2nd stage of the 2-stage mapping, read ID from the 1st read
+                        string readID;
+                        P.inOut->readIn[0] >> readID;
+                        if (P.outSAMreadIDnumber) {
+                            readID="@"+to_string(P.iReadAll);
                         };
-                        //do not need to worry about 2nd stage, that's read directly from the files
-//                         else {//2nd stage of 2-stage mapping
-//                         read index and file index are already recorded with the read name, simply copy it
-//                         P.inOut->readIn[imate].getline(chunkIn[imate] + chunkInSizeBytesTotal[imate], DEF_readNameSeqLengthMax+1 );
-//                         };
-                        for (;iline<4;iline++) {//TODO ignore the 3rd line of fastq
+                        //read the second field of the read name line
+                        char passFilterIllumina='N';
+                        if (P.inOut->readIn[0].peek()!='\n') {//2nd field exists
+                            string field2;
+                            P.inOut->readIn[0] >> field2;
+                            if (field2.length()>=3 && field2.at(1)==':' && field2.at(2)=='Y' && field2.at(3)==':' ) 
+                                passFilterIllumina='Y';
+                        };
+                        readID += ' '+ to_string(P.iReadAll)+' '+passFilterIllumina+' '+to_string(P.readFilesIndex);                       
+                        //ignore the rest of the read name for both mates
+                        for (uint imate=0; imate<P.readNmatesIn; imate++)
+                            P.inOut->readIn[imate].ignore(DEF_readNameSeqLengthMax,'\n');
+                        
+                        if (P.pSolo.type==1) {
+                            string seq1;
+                            P.inOut->readIn[1] >> seq1;
+                            if (seq1.size() != P.pSolo.bL) {
+                                ostringstream errOut;
+                                errOut << "EXITING because of FATAL ERROR in input read file: the total length of barcode sequence is "  << seq1.size() << " not equal to expected " <<P.pSolo.bL <<"\n"  ;
+                                errOut << "Read ID="<<readID<< "   Read Sequence="<<seq1<<"\n";
+                                errOut << "SOLUTION: make sure that the barcode read is the second in --readFilesIn and check that is has the correct formatting\n";
+                                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
+                            };
+                        };
+                        
+                        //copy the same readID to both mates
+                        for (uint imate=0; imate<P.readNmates; imate++)
+                            chunkInSizeBytesTotal[imate] += readID.copy(chunkIn[imate] + chunkInSizeBytesTotal[imate], readID.size(),0);
+                    };
+                    //copy 3 (4 for stage 2) lines: sequence, dummy, quality
+                    for (uint imate=0; imate<P.readNmates; imate++) {
+                        for (uint iline=(P.outFilterBySJoutStage==2 ? 0:1);iline<4;iline++) {
                             P.inOut->readIn[imate].getline(chunkIn[imate] + chunkInSizeBytesTotal[imate], DEF_readNameSeqLengthMax+1 );
                             chunkInSizeBytesTotal[imate] += P.inOut->readIn[imate].gcount();
                             chunkIn[imate][chunkInSizeBytesTotal[imate]-1]='\n';
@@ -118,7 +121,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                     };
                 } else if (nextChar=='>') {//fasta, can be multiline, which is converted to single line
                     P.iReadAll++; //increment read number
-                    for (uint imate=0; imate<P.readNmates; imate++) {
+                    for (uint imate=0; imate<P.readNmatesIn; imate++) {
                         if (P.outFilterBySJoutStage!=2) {//not the 2nd stage of the 2-stage mapping
 
                             if (P.outSAMreadID=="Number") {
