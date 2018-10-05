@@ -73,6 +73,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitOutSJoneRead", &limitOutSJoneRead));
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitBAMsortRAM", &limitBAMsortRAM));
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitSjdbInsertNsj", &limitSjdbInsertNsj));
+    parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitNreadSoft", &limitNreadSoft));
 
 
     //output
@@ -251,7 +252,8 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <string>   (-1, -1, "soloType", &pSolo.typeStr));
     parArray.push_back(new ParameterInfoScalar <uint32>   (-1, -1, "soloCBlen", &pSolo.cbL));
     parArray.push_back(new ParameterInfoScalar <uint32>   (-1, -1, "soloUMIlen", &pSolo.umiL));
-
+    parArray.push_back(new ParameterInfoScalar <string>   (-1, -1, "soloCBwhitelist", &pSolo.soloCBwhitelist));
+    
 //     //SW parameters
 //     parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "swMode", &swMode));
 //     parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "swWinCoverageMinP", &swWinCoverageMinP));
@@ -1401,18 +1403,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     };
     
     //solo
-    if (pSolo.typeStr=="None") {
-        pSolo.type=0;
-    } else if (pSolo.typeStr=="10XchromiumV2") {
-        pSolo.type=1;
-        pSolo.bL=pSolo.cbL+pSolo.umiL;
-        readNmates=1; //output mates TODO: check that readNmatesIn==2
-    } else  {
-        ostringstream errOut;
-        errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in of --soloType="<<pSolo.typeStr<<"\n";
-        errOut << "SOLUTION: use allowed option: None or 10XchromiumV2";
-        exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-    };
+    pSolo.initialize();
     
     //
     outSAMreadIDnumber=false;

@@ -238,8 +238,9 @@ void ReadAlign::outputAlignments() {
     };
     if (unmapType>=0 && P.outReadsUnmapped=="Fastx" ){//output to fasta/q files
            for (uint im=0;im<P.readNmates;im++) {
-               chunkOutUnmappedReadsStream[im] << readNameMates[im];
-               if (P.readNmates>1) chunkOutUnmappedReadsStream[im] <<"\t"<< int(mateMapped[0]) <<  int(mateMapped[1]);
+               chunkOutUnmappedReadsStream[im] << readNameMates[im]  <<" "<<im<<":"<< readFilter <<": "<< readNameExtra[im];
+               if (P.readNmates>1) 
+                   chunkOutUnmappedReadsStream[im] <<" "<< int(mateMapped[0]) <<  int(mateMapped[1]);
                chunkOutUnmappedReadsStream[im] <<"\n";
                chunkOutUnmappedReadsStream[im] << Read0[im] <<"\n";
                 if (readFileType==2) {//fastq

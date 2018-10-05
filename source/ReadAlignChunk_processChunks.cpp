@@ -95,7 +95,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                         for (uint imate=0; imate<P.readNmatesIn; imate++)
                             P.inOut->readIn[imate].ignore(DEF_readNameSeqLengthMax,'\n');
                         
-                        if (P.pSolo.type==1) {
+                        if (P.pSolo.type==1) {//record barcode sequence
                             string seq1;
                             P.inOut->readIn[1] >> seq1;
                             if (seq1.size() != P.pSolo.bL) {
@@ -105,11 +105,16 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                                 errOut << "SOLUTION: make sure that the barcode read is the second in --readFilesIn and check that is has the correct formatting\n";
                                 exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
                             };
+                            readID += ' ' + seq1;
+                            for (uint ii=0; ii<3; ii++)
+                                P.inOut->readIn[1].ignore(DEF_readNameSeqLengthMax,'\n');//skip to the end of this line, and two more TODO record qualities
                         };
                         
                         //copy the same readID to both mates
-                        for (uint imate=0; imate<P.readNmates; imate++)
-                            chunkInSizeBytesTotal[imate] += readID.copy(chunkIn[imate] + chunkInSizeBytesTotal[imate], readID.size(),0);
+                        for (uint imate=0; imate<P.readNmates; imate++) {
+                            chunkInSizeBytesTotal[imate] += 1 + readID.copy(chunkIn[imate] + chunkInSizeBytesTotal[imate], readID.size(),0);
+                            chunkIn[imate][chunkInSizeBytesTotal[imate]-1]='\n';
+                        };
                     };
                     //copy 3 (4 for stage 2) lines: sequence, dummy, quality
                     for (uint imate=0; imate<P.readNmates; imate++) {

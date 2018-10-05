@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include "ParametersChimeric.h"
+#include "ParametersSolo.h"
 #include "ParametersGenome.h"
 
 class Parameters {
@@ -249,6 +250,7 @@ class Parameters {
         uint limitOutSJoneRead, limitOutSJcollapsed;
         uint limitBAMsortRAM;
         uint limitSjdbInsertNsj;
+        uint limitNreadsSoft;
 
         // penalties
         intScore scoreGap, scoreGapNoncan, scoreGapGCAG, scoreGapATAC, scoreDelBase, scoreDelOpen, scoreInsBase, scoreInsOpen;
@@ -310,14 +312,8 @@ class Parameters {
             string outputMode;
         } wasp;
 
-        struct {
-            //bool yes;
-            string typeStr;
-            int type;
-            uint32 cbL; //cell barcode length
-            uint32 umiL; //umi length
-            uint32 bL; //total barcode length
-        } pSolo;
+        //solo
+        ParametersSolo pSolo;
         
         //chimeric
         ParametersChimeric pCh;
