@@ -1,3 +1,8 @@
+STAR 2.6.1c 2018/10/17
+======================
+
+* Enforced the consistent choice of supplementary chimeric alignments for overlapping mates.
+
 STAR 2.6.1b 2018/09/06
 ======================
 
