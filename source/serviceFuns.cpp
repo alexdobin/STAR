@@ -9,7 +9,21 @@ template <class T>
         for (uint ii=0;ii<N;ii++) s+=a[ii];
         return s;
     };
+    
+template <class numT> int funCompareNumbers (const void *a, const void *b) {
+    uint va= *((numT*) a);
+    uint vb= *((numT*) b);
 
+    if (va>vb) {
+		return 1;
+	} else if (va==vb) {
+		return 0;
+	} else {
+		return -1;
+	};
+};
+    
+    
 inline int funCompareUint1 (const void *a, const void *b) {
     uint va= *((uint*) a);
     uint vb= *((uint*) b);

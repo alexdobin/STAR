@@ -193,6 +193,17 @@ char convertNt01234(const char R0) {//transform sequence  from ACGT into 0-1-2-3
     };
 };
 
+bool convertNuclStrToInt32(const string S, uint32 &intOut) {
+    intOut=0;
+    for (uint ii=0; ii<S.size(); ii++) {
+        uint32 nt = (uint32) convertNt01234(S.at(ii));
+        if (nt>3)
+            return false;
+        intOut += nt<<(2*ii);
+    };
+    return true;
+};
+
 uint chrFind(uint Start, uint i2, uint* chrStart) {// find chromosome from global locus
     uint i1=0, i3;
     while (i1+1<i2) {

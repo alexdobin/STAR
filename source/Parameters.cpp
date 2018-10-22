@@ -73,7 +73,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitOutSJoneRead", &limitOutSJoneRead));
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitBAMsortRAM", &limitBAMsortRAM));
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitSjdbInsertNsj", &limitSjdbInsertNsj));
-    parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitNreadSoft", &limitNreadSoft));
+    parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitNreadsSoft", &limitNreadsSoft));
 
 
     //output
@@ -1403,7 +1403,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     };
     
     //solo
-    pSolo.initialize();
+    pSolo.initialize(this);
     
     //
     outSAMreadIDnumber=false;

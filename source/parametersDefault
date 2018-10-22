@@ -177,6 +177,8 @@ limitBAMsortRAM                         0
 limitSjdbInsertNsj                     1000000
     int>=0: maximum number of junction to be inserted to the genome on the fly at the mapping stage, including those from annotations and those detected in the 1st step of the 2-pass run
 
+limitNreadsSoft                        -1
+    int: soft limit on the number of reads
 
 ### Output: general
 outFileNamePrefix               ./
@@ -666,3 +668,6 @@ soloCBlen                   16
 
 soloUMIlen                  10
     int>0: UMI length
+
+soloCBwhitelist             -
+    string: file with whitelist of cell barcodes

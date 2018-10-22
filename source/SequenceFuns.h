@@ -26,4 +26,6 @@ uint localSearchNisMM(const char *x, uint nx, const char *y, uint ny, double pMM
 
 uint qualitySplit(char*, char*, uint, char, uint, uint, uint**);
 
+bool convertNuclStrToInt32(const string S, uint32 &intOut);
+
 #endif
