@@ -18,7 +18,6 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                 char nextChar=P.inOut->readIn[0].peek();
                 if (P.iReadAll==P.readMapNumber) {//do not read any more reads
                     break;
-                //} else if (P.pSolo.type==1 && P.inOut->readIn[0].good() && P.outFilterBySJoutStage!=2)                    
                 } else if (P.readFilesTypeN==10 && P.inOut->readIn[0].good() && P.outFilterBySJoutStage!=2) {//SAM input && not eof && not 2nd stage
 
                     string str1;
@@ -91,23 +90,25 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                                 passFilterIllumina='Y';
                         };
                         readID += ' '+ to_string(P.iReadAll)+' '+passFilterIllumina+' '+to_string(P.readFilesIndex);                       
+                        
                         //ignore the rest of the read name for both mates
                         for (uint imate=0; imate<P.readNmatesIn; imate++)
                             P.inOut->readIn[imate].ignore(DEF_readNameSeqLengthMax,'\n');
-                        
+                                                
                         if (P.pSolo.type==1) {//record barcode sequence
                             string seq1;
-                            P.inOut->readIn[1] >> seq1;
+                            getline(P.inOut->readIn[1],seq1);
                             if (seq1.size() != P.pSolo.bL) {
                                 ostringstream errOut;
                                 errOut << "EXITING because of FATAL ERROR in input read file: the total length of barcode sequence is "  << seq1.size() << " not equal to expected " <<P.pSolo.bL <<"\n"  ;
-                                errOut << "Read ID="<<readID<< "   Read Sequence="<<seq1<<"\n";
+                                errOut << "Read ID="<<readID<< "   Sequence="<<seq1<<"\n";
                                 errOut << "SOLUTION: make sure that the barcode read is the second in --readFilesIn and check that is has the correct formatting\n";
                                 exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
                             };
                             readID += ' ' + seq1;
-                            for (uint ii=0; ii<3; ii++)
-                                P.inOut->readIn[1].ignore(DEF_readNameSeqLengthMax,'\n');//skip to the end of this line, and two more TODO record qualities
+                            P.inOut->readIn[1].ignore(DEF_readNameSeqLengthMax,'\n');//skip to the end of 3rd ("+") line
+                            getline(P.inOut->readIn[1],seq1); //read qualities
+                            readID += ' ' + seq1;
                         };
                         
                         //copy the same readID to both mates

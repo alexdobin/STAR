@@ -158,4 +158,35 @@ inline int32 binarySearch1b(argType x, argType *X, int32 N)
     return i2;
 };
 
+template <class argType>
+inline int32 binarySearchExact(argType x, argType *X, int32 N) {
+    //binary search in the sorted list
+    //check the boundaries first
+    //returns -1 if no match found
+    //if X are not all distinct, no guarantee which element is returned
+    
+    if (x>X[N-1] || x<X[0]) 
+        return -1;
+
+    
+    int32 i1=0, i2=N-1, i3=N/2;
+    while (i2>i1+1) {//binary search
+        i3=(i1+i2)/2;
+        if (X[i3]>=x) {
+            i2=i3;
+        } else {
+            i1=i3;
+        };
+    };
+    
+    if (x==X[i2]) {
+        return i2;        
+    } else if (x==X[i1]) {
+        return i1;
+    } else {
+        return -1;
+    };
+};
+
+
 #endif

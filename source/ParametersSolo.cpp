@@ -49,14 +49,20 @@ void ParametersSolo::initialize(Parameters *pPin) {
     time_t rawTime;
     time(&rawTime);
     pP->inOut->logMain << timeMonthDayTime(rawTime) << "Finished reading CB whitelist sequences: " << cbWL.size() <<endl;
-    *pP->inOut->logStdOut << timeMonthDayTime(rawTime) << " Finished reading CB whitelist sequences: " << cbWL.size() <<endl;
+    *pP->inOut->logStdOut << timeMonthDayTime(rawTime) << "Finished reading CB whitelist sequences: " << cbWL.size() <<endl;
     
-    uint64 nn=0;
-    for (uint ii=0; ii<100000000; ii++){
-        uint32 a=ii;//(uint32) rand(); 
-//         nn+=cbWL.count(a);
-    };
-    time(&rawTime);
-    *pP->inOut->logStdOut << timeMonthDayTime(rawTime) <<" "<< nn <<endl;
-    exit(1);
+//     uint64 nn=0;
+//     for (uint ii=0; ii<1000000000; ii++){
+//         uint32 a=ii;//(uint32) rand(); 
+//         int32 acb=binarySearchExact(a,cbWL.data(),cbWL.size());
+//         
+//         if (acb>=0) {
+//             ++nn;
+//         };
+//         
+// //         nn+=cbWL.count(a);
+//     };
+//     time(&rawTime);
+//     *pP->inOut->logStdOut << timeMonthDayTime(rawTime) <<" "<< nn <<endl;
+// //     exit(1);
 };

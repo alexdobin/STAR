@@ -11,6 +11,7 @@
 #include "BAMoutput.h"
 #include "Quantifications.h"
 #include "ChimericDetection.h"
+#include "SoloCB.h"
 
 #include <time.h>
 #include <random>
@@ -52,6 +53,8 @@ class ReadAlign
         ReadAlign *peMergeRA; //ReadAlign for merged PE mates
         
         ChimericDetection *chimDet;
+        
+        SoloCB *soloCB; //counts reads per CB and outputs CB/UMI/gene into file, per thread
         
     private:
         Parameters& P; //pointer to the parameters, will be initialized on construction

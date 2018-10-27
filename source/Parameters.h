@@ -91,6 +91,11 @@ class Parameters {
         vector <int32> alignSJstitchMismatchNmax;
 
         struct {
+            string strandString;
+            int32 strand;
+        } pReads;
+        
+        struct {
             string in;
             bool ext[2][2];
         } alignEndsType;
@@ -148,8 +153,7 @@ class Parameters {
         
 //         string bamRemoveDuplicatesType;
 //         uint bamRemoveDuplicatesMate2basesN;
-        struct
-        {
+        struct {
             string mode;
             bool yes;
             bool markMulti;
@@ -160,30 +164,26 @@ class Parameters {
         uint64 *outBAMsortingBinStart; //genomic starts for bins for sorting BAM files
         uint16 outSAMflagOR, outSAMflagAND;
 
-        struct
-        {
+        struct {
             vector <string> mode;
             bool yes;
             bool within;//output unmapped reads within SAM/BAM files
             bool keepPairs;//keep mates together
         } outSAMunmapped;
 
-        struct
-        {
+        struct {
             vector <string> mode;
             bool yes;
             bool KeepOnlyAddedReferences;
             bool KeepAllAddedReferences;            
         } outSAMfilter;
 
-        struct
-        {
+        struct {
             string mode;
             bool random;
         } outMultimapperOrder;
         
-        struct
-        {
+        struct {
             bool yes;
             uint NbasesMin;
             double MMp;

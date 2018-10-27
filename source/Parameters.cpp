@@ -56,6 +56,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "readMatesLengthsIn", &readMatesLengthsIn));
     parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "readMapNumber", &readMapNumber));
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readNameSeparator", &readNameSeparator));
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "readStrand", &pReads.strandString));
 
 
     //input from BAM
@@ -74,7 +75,6 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitBAMsortRAM", &limitBAMsortRAM));
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitSjdbInsertNsj", &limitSjdbInsertNsj));
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitNreadsSoft", &limitNreadsSoft));
-
 
     //output
     parArray.push_back(new ParameterInfoScalar <string>     (-1, 2, "outFileNamePrefix", &outFileNamePrefix));
@@ -1404,6 +1404,20 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     
     //solo
     pSolo.initialize(this);
+    
+    //read parameters
+    if (pReads.strandString=="Unstranded") {
+        pReads.strand=0;
+    } else if (pReads.strandString=="Forward") {
+        pReads.strand=1;    
+    } else if (pReads.strandString=="Reverse") {
+        pReads.strand=2;    
+    } else  {
+        ostringstream errOut;
+        errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in of --readStrand="<<pReads.strandString<<"\n";
+        errOut << "SOLUTION: use allowed option: Unstranded or Forward or Reverse";
+        exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
     
     //
     outSAMreadIDnumber=false;
