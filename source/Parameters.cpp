@@ -1242,19 +1242,19 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         for (uint32 ii=0; ii<quant.mode.size(); ii++) {
             if (quant.mode.at(ii)=="TranscriptomeSAM") {
                 quant.trSAM.yes=true;
-                if (outStd=="BAM_Quant") {
-                    outFileNamePrefix="-";
-                } else {
-                    outQuantBAMfileName=outFileNamePrefix + "Aligned.toTranscriptome.out.bam";
+                if (quant.trSAM.bamCompression>-2) {
+                    if (outStd=="BAM_Quant") {
+                        outFileNamePrefix="-";
+                    } else {
+                        outQuantBAMfileName=outFileNamePrefix + "Aligned.toTranscriptome.out.bam";
+                    };
+                    inOut->outQuantBAMfile=bgzf_open(outQuantBAMfileName.c_str(),("w"+to_string((long long) quant.trSAM.bamCompression)).c_str());
                 };
-                inOut->outQuantBAMfile=bgzf_open(outQuantBAMfileName.c_str(),("w"+to_string((long long) quant.trSAM.bamCompression)).c_str());
-                if (quant.trSAM.ban=="IndelSoftclipSingleend")
-                {
+                if (quant.trSAM.ban=="IndelSoftclipSingleend") {
                     quant.trSAM.indel=false;
                     quant.trSAM.softClip=false;
                     quant.trSAM.singleEnd=false;
-                } else if (quant.trSAM.ban=="Singleend")
-                {
+                } else if (quant.trSAM.ban=="Singleend") {
                     quant.trSAM.indel=true;
                     quant.trSAM.softClip=true;
                     quant.trSAM.singleEnd=false;

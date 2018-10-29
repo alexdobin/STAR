@@ -40,8 +40,6 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
         P.inOut->logMain << "Loaded exon database, nEx="<<nEx<<endl;
 
         exinfo.close();
-
-        //
     };
 
     if ( P.quant.geCount.yes ) {//load exon-gene structures

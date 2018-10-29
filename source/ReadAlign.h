@@ -187,7 +187,7 @@ class ReadAlign
         void stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R);//stitches all seeds in one window: iW
         void stitchPieces(char **R, uint Lread);
 
-        uint quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT);
+        uint quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT, vector<uint32> &readTranscripts);
         
         void copyRead(ReadAlign&);
         void waspMap();

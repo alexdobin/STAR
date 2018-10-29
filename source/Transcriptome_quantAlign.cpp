@@ -91,7 +91,7 @@ int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, ui
     return 0; //this should not happen
 };
 
-uint32 Transcriptome::quantAlign (Transcript &aG, Transcript *aTall) {
+uint32 Transcriptome::quantAlign (Transcript &aG, Transcript *aTall, vector<uint32> &readTranscripts) {
     uint32 nAtr=0; //number of alignments to the transcriptome
 
     //binary search through transcript starts
@@ -109,6 +109,7 @@ uint32 Transcriptome::quantAlign (Transcript &aG, Transcript *aTall) {
                     aTall[nAtr].Chr = tr1;
                     aTall[nAtr].Str = trStr[tr1]==1 ? aG.Str : 1-aG.Str; //TODO strandedness
                     ++nAtr;
+                    readTranscripts.push_back(tr1);
                 };
         };
     } while (trEmax[tr1]>=aGend && tr1>0);

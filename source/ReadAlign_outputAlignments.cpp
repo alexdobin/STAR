@@ -171,8 +171,9 @@ void ReadAlign::outputAlignments() {
                 chunkTr->geneCountsAddAlign(nTr, trMult, readGene);
             };
 
+            vector<uint32> readTranscripts={};
             if ( P.quant.trSAM.yes ) {//NOTE: the transcripts are changed by this function (soft-clipping extended), cannot be reused
-                quantTranscriptome(chunkTr, nTrOut, trMult,  alignTrAll);
+                quantTranscriptome(chunkTr, nTrOut, trMult,  alignTrAll, readTranscripts);
             };
             
             soloCB->readCB(readNameExtra.at(0), nTr, readGene);

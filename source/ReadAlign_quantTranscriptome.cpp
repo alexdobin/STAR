@@ -4,7 +4,7 @@
 #include "serviceFuns.cpp"
 #include <random>
 
-uint ReadAlign::quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT) {
+uint ReadAlign::quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT, vector<uint32> &readTranscripts) {
     uint nAlignT=0;
     for (uint iag=0; iag<nAlignG; iag++) {//transform all alignments
 
@@ -54,18 +54,20 @@ uint ReadAlign::quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript 
             };
         };
 
-        nAlignT += Tr->quantAlign(*alignG[iag],alignT+nAlignT);
+        nAlignT += Tr->quantAlign(*alignG[iag],alignT+nAlignT, readTranscripts);
     };
 
-    alignT[int(rngUniformReal0to1(rngMultOrder)*nAlignT)].primaryFlag=true;
+    if (P.quant.trSAM.bamCompression>-2) {//output Aligned.toTranscriptome.bam
+        alignT[int(rngUniformReal0to1(rngMultOrder)*nAlignT)].primaryFlag=true;
 
-    for (uint iatr=0;iatr<nAlignT;iatr++) {//write all transcripts
-        alignBAM(alignT[iatr], nAlignT, iatr, 0, (uint) -1, (uint) -1, 0, -1, NULL, P.outSAMattrOrderQuant, outBAMoneAlign, outBAMoneAlignNbytes);
-        for (uint imate=0; imate<P.readNmates; imate++) {//output each mate
-            outBAMquant->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], (imate>0 || iatr>0) ? 0 : (outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1])*2*nAlignT);
+        for (uint iatr=0;iatr<nAlignT;iatr++) {//write all transcripts
+            alignBAM(alignT[iatr], nAlignT, iatr, 0, (uint) -1, (uint) -1, 0, -1, NULL, P.outSAMattrOrderQuant, outBAMoneAlign, outBAMoneAlignNbytes);
+            for (uint imate=0; imate<P.readNmates; imate++) {//output each mate
+                outBAMquant->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], (imate>0 || iatr>0) ? 0 : (outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1])*2*nAlignT);
+            };
         };
     };
-
+    
     //not used anymore, at Colin Dewey's request
     //     if (nAlignT==0 && P.outSAMunmapped=="Within") {//read could be mapped to genome, but not transcriptome - output as unmapped
     //         uint unmapType=5;

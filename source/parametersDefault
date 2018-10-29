@@ -642,7 +642,11 @@ quantMode                   -
                             GeneCounts       ... count reads per gene
 
 quantTranscriptomeBAMcompression    1       1
-    int: -1 to 10  transcriptome BAM compression level, -1=default compression (6?), 0=no compression, 10=maximum compression
+    int: -2 to 10  transcriptome BAM compression level
+                            -2  ... no BAM output
+                            -1  ... default compression (6?)
+                             0  ... no compression
+                             10 ... maximum compression
 
 quantTranscriptomeBan       IndelSoftclipSingleend
     string: prohibit various alignment type
