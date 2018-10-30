@@ -177,7 +177,7 @@ void ReadAlign::outputAlignments() {
                 quantTranscriptome(chunkTr, nTrOut, trMult,  alignTrAll, readTranscripts, readTrGenes);
             };
             
-            soloCB->readCB(readNameExtra.at(0), nTr, readGenes, readTranscripts, readTrGenes);
+            soloCB->readCB(iReadAll, readNameExtra.at(0), nTr, readGenes, readTranscripts, readTrGenes);
             
         };
     };

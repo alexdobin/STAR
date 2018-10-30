@@ -21,7 +21,7 @@ public:
     ofstream *strU_1; //uniqe mappers, CB with 1MM off whitelist
     
     SoloCB (Parameters &Pin, int iChunk);
-    void readCB(const string &readNameExtra, const uint nTr, const vector<int32> &readGenes, vector<uint32> &readTranscripts, set<uint32> &readTrGenes);
+    void readCB(const uint64 &iReadAll, const string &readNameExtra, const uint nTr, const vector<int32> &readGenes, vector<uint32> &readTranscripts, set<uint32> &readTrGenes);
 
 private:
     Parameters &P;

@@ -1,7 +1,9 @@
-#include "SoloReads.h"
+#include "Solo.h"
 SoloReads::SoloReads(Parameters Pin) : P(Pin), pSolo(P.pSolo) {
     if (pSolo==0)
         return;
+    
+    soloCBall = new SoloCB(P,-1);
     //allocate arrays
 //     reads.nMax=P.limitNreadsSoft/P.runNthreads;
 //     read.cb=new uint32[nMax];

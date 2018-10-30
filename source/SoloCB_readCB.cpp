@@ -2,13 +2,11 @@
 #include "serviceFuns.cpp"
 #include "SequenceFuns.h"
 
-void SoloCB::readCB(const string &readNameExtra, const uint nTr, const vector<int32> &readGenes, vector<uint32> &readTranscripts, set<uint32> &readTrGenes) {
+void SoloCB::readCB(const uint64 &iReadAll, const string &readNameExtra, const uint nTr, const vector<int32> &readGenes, vector<uint32> &readTranscripts, set<uint32> &readTrGenes) {
     if (pSolo.type==0)
         return;
     
 //     int32 rG=readGene.at(P.pReads.strand);
-//     if (nTr > 1) //unique mappers only for now
-//        return;
 
     if (readTrGenes.size()==0) {
         stats.V[stats.nNoGene]++;
@@ -36,16 +34,19 @@ void SoloCB::readCB(const string &readNameExtra, const uint nTr, const vector<in
     };
 
     if (cbI!=-1) {
-        *strU_0 << cbI <<' '<< *readTrGenes.begin() <<' '<< umiB <<'\n';
+        *strU_0 << cbI <<' '<< *readTrGenes.begin() <<' '<< umiB <<' '<< iReadAll  <<'\n';
+        cbReadCount[cbI]++;
     } else {
         for (uint32 ii=0; ii<2*pSolo.cbL; ii+=2) {
             for (uint32 jj=1; jj<4; jj++) {
                 cbI=binarySearchExact(cbB^(jj<<ii),pSolo.cbWL.data(),pSolo.cbWL.size());
-                if (cbI>=0) {
+                if (cbI>=0) {Yvvdzvk40
+                        
                     *strU_1 << cbI <<' '<< readNameExtra.at(pSolo.cbL+pSolo.umiL+1+ii/2) <<' ';
+                    cbReadCount[cbI]++;
                 };
             };
         };
-        *strU_1 << *readTrGenes.begin() <<' '<< umiB <<'\n';
+        *strU_1 << *readTrGenes.begin() <<' '<< umiB <<' '<< iReadAll <<'\n';
     };   
 };
