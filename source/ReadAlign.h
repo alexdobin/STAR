@@ -28,7 +28,7 @@ class ReadAlign
         Genome &mapGen; //mapped-to-genome structure
 
         uint iRead;
-        char** Read1;
+        char **Read1;
         
         Stats statsRA; //mapping statistics        
         
@@ -187,7 +187,7 @@ class ReadAlign
         void stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R);//stitches all seeds in one window: iW
         void stitchPieces(char **R, uint Lread);
 
-        uint quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT, vector<uint32> &readTranscripts);
+        uint quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT, vector<uint32> &readTranscripts, set<uint32> &readTrGenes);
         
         void copyRead(ReadAlign&);
         void waspMap();

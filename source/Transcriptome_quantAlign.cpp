@@ -24,8 +24,6 @@ int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, ui
 
     aG.canonSJ[aG.nExons-1]=-999; //marks the last exons
     for (uint32 iab=0; iab<aG.nExons; iab++) {//scan through all blocks of the align
-
-//         g1+=aG.exons[iab][EX_L]-1;//last base of the block
         if (aG.exons[iab][EX_G]+aG.exons[iab][EX_L]>exSE1[2*ex1+1]+trS1+1) {//block extends past exon end
             return 0;
         };
@@ -91,7 +89,7 @@ int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, ui
     return 0; //this should not happen
 };
 
-uint32 Transcriptome::quantAlign (Transcript &aG, Transcript *aTall, vector<uint32> &readTranscripts) {
+uint32 Transcriptome::quantAlign (Transcript &aG, Transcript *aTall, vector<uint32> &readTranscripts, set<uint32> &readTrGenes) {
     uint32 nAtr=0; //number of alignments to the transcriptome
 
     //binary search through transcript starts
@@ -110,6 +108,7 @@ uint32 Transcriptome::quantAlign (Transcript &aG, Transcript *aTall, vector<uint
                     aTall[nAtr].Str = trStr[tr1]==1 ? aG.Str : 1-aG.Str; //TODO strandedness
                     ++nAtr;
                     readTranscripts.push_back(tr1);
+                    readTrGenes.insert(trGene[tr1]);
                 };
         };
     } while (trEmax[tr1]>=aGend && tr1>0);

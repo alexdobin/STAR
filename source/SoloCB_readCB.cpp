@@ -2,21 +2,28 @@
 #include "serviceFuns.cpp"
 #include "SequenceFuns.h"
 
-void SoloCB::readCB(const string &readNameExtra, const uint nTr, const vector<int32> &readGene) {
+void SoloCB::readCB(const string &readNameExtra, const uint nTr, const vector<int32> &readGenes, vector<uint32> &readTranscripts, set<uint32> &readTrGenes) {
     if (pSolo.type==0)
         return;
     
-    int32 rG=readGene.at(P.pReads.strand);
-
+//     int32 rG=readGene.at(P.pReads.strand);
 //     if (nTr > 1) //unique mappers only for now
 //        return;
 
-    if (nTr > 1)
-        rG=-3;
-
+    if (readTrGenes.size()==0) {
+        stats.V[stats.nNoGene]++;
+        return;
+    } else if (readTrGenes.size()>1) {
+        stats.V[stats.nAmbigGene]++;
+        if (nTr>1)
+                stats.V[stats.nAmbigGeneMultimap]++;
+        return;
+    };
     
-//     if (rG < 0) //only non-ambiguous genes for now
-//         return;
+    //debug
+    if (readGenes.size()==1 && readGenes.at(0)!=*readTrGenes.begin())
+        cout <<readGenes.at(0) <<' '<< *readTrGenes.begin() <<'\n';
+    //
     
     uint32 cbB, umiB;
     int32 cbI=-2;
@@ -24,11 +31,12 @@ void SoloCB::readCB(const string &readNameExtra, const uint nTr, const vector<in
         && convertNuclStrToInt32(readNameExtra.substr(pSolo.cbL,pSolo.umiL),umiB)) {
         cbI=binarySearchExact(cbB,pSolo.cbWL.data(),pSolo.cbWL.size());
     } else {
-        return; //TODO stats for non-recorded
+        stats.V[stats.nNinBarcode]++;
+        return;
     };
 
     if (cbI!=-1) {
-        *strU_0 << cbI <<' '<< rG <<' '<< umiB <<'\n';
+        *strU_0 << cbI <<' '<< *readTrGenes.begin() <<' '<< umiB <<'\n';
     } else {
         for (uint32 ii=0; ii<2*pSolo.cbL; ii+=2) {
             for (uint32 jj=1; jj<4; jj++) {
@@ -38,6 +46,6 @@ void SoloCB::readCB(const string &readNameExtra, const uint nTr, const vector<in
                 };
             };
         };
-        *strU_1 << rG <<' '<< umiB <<'\n';
+        *strU_1 << *readTrGenes.begin() <<' '<< umiB <<'\n';
     };   
 };

@@ -298,7 +298,7 @@ int main(int argInN, char* argIn[]) {
 //                 outBAMwriteHeader(P.inOut->outBAMfileCoord,P.samHeader,mainGenome.chrName,mainGenome.chrLength);
 //             };
 
-        if ( P.quant.trSAM.yes ) {
+        if ( P.quant.trSAM.bamYes ) {
             samHeaderStream.str("");
             vector <uint> trlength;
             for (uint32 ii=0;ii<mainTranscriptome->trID.size();ii++) {

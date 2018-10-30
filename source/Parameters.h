@@ -283,6 +283,7 @@ class Parameters {
           struct
           {
               bool yes;
+              bool bamYes;
               bool indel;
               bool softClip;
               bool singleEnd;

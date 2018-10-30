@@ -19,6 +19,7 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
         trExN=new uint16 [nTr];
         trStr=new uint8 [nTr];
         trID.resize(nTr);
+        trGene=new uint32 [nTr];
 
         for (uint32 itr=0; itr<nTr; itr++) {
             uint16 str1;
@@ -40,6 +41,16 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
         P.inOut->logMain << "Loaded exon database, nEx="<<nEx<<endl;
 
         exinfo.close();
+        
+        ifstream &exinfo1 = ifstrOpen(trInfoDir+"/exonGeTrInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
+        exinfo1 >> exG.nEx;
+        for (uint32 ii=0;ii<exG.nEx;ii++) {//load only transcript->gene info. TODO this is wasteful, add one gene column to transcriptInfo.tab
+            string dummy1;
+            uint32 ig,it;
+            exinfo1 >> dummy1 >> dummy1 >> dummy1 >> ig >> it;
+            trGene[it]=ig;
+        };
+        exinfo1.close();
     };
 
     if ( P.quant.geCount.yes ) {//load exon-gene structures
@@ -74,8 +85,6 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
             geStream >> geID[ii];
         };
         geStream.close();
-
-
     };
 };
 

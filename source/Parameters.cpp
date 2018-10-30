@@ -1242,7 +1242,11 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         for (uint32 ii=0; ii<quant.mode.size(); ii++) {
             if (quant.mode.at(ii)=="TranscriptomeSAM") {
                 quant.trSAM.yes=true;
-                if (quant.trSAM.bamCompression>-2) {
+
+                if (quant.trSAM.bamCompression>-2)
+                    quant.trSAM.bamYes=true;
+
+                if (quant.trSAM.bamYes) {
                     if (outStd=="BAM_Quant") {
                         outFileNamePrefix="-";
                     } else {
