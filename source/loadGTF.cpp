@@ -16,12 +16,13 @@
 #define GTF_exonEnd(ii) ((ii)*GTF_exonLoci_size+2)
 #define GTF_exonGeID(ii) ((ii)*GTF_exonLoci_size+3)
 
-#define GTF_extrLoci_size 5
+#define GTF_extrLoci_size 6
 #define GTF_extrTrStart(ii) ((ii)*GTF_extrLoci_size)
 #define GTF_extrTrEnd(ii) ((ii)*GTF_extrLoci_size+1)
 #define GTF_extrTrID(ii) ((ii)*GTF_extrLoci_size+2)
 #define GTF_extrExStart(ii) ((ii)*GTF_extrLoci_size+3)
 #define GTF_extrExEnd(ii) ((ii)*GTF_extrLoci_size+4)
+#define GTF_extrGeID(ii) ((ii)*GTF_extrLoci_size+5)
 
 #define GTF_exgeLoci_size 5
 #define GTF_exgeExStart(ii) ((ii)*GTF_exgeLoci_size+0)
@@ -66,8 +67,7 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters &P, string dirOut, Genome &mapGen) 
             sjdbStreamIn.ignore(1000000000,'\n'); //ignore the rest of the line
         };
 
-        if (exonN==0)
-        {
+        if (exonN==0)         {
             ostringstream errOut;
             errOut << "Fatal INPUT FILE error, no ""exon"" lines in the GTF file: " << mapGen.pGe.sjdbGTFfile <<"\n";
             errOut << "Solution: check the formatting of the GTF file, it must contain some lines with ""exon"" in the 3rd column.\n";
@@ -156,8 +156,7 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters &P, string dirOut, Genome &mapGen) 
             };//if (chr1.substr(0,1)!="#" && featureType=="exon")
         };//
 
-        if (exonN==0)
-        {
+        if (exonN==0) {
             ostringstream errOut;
             errOut << "Fatal INPUT FILE error, no valid ""exon"" lines in the GTF file: " << mapGen.pGe.sjdbGTFfile <<"\n";
             errOut << "Solution: check the formatting of the GTF file. Most likely cause is the difference in chromosome naming between GTF and FASTA file.\n";
@@ -184,7 +183,7 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters &P, string dirOut, Genome &mapGen) 
             exgeOut<<exonN<<"\n";
             for (uint iex=0; iex<exonN; iex++) {
                  exgeOut<<exgeLoci[GTF_exgeExStart(iex)] <<"\t"<<  exgeLoci[GTF_exgeExEnd(iex)] <<"\t"<< exgeLoci[GTF_exgeExStrand(iex)] \
-                  <<"\t"<< exgeLoci[GTF_exgeGeID(iex)] <<"\t"<< exgeLoci[GTF_exgeTrID(iex)] <<"\n";
+                  <<"\t"<< exgeLoci[GTF_exgeGeID(iex)] <<"\t"<< exgeLoci[GTF_exgeTrID(iex)] <<"\n"; //the last value, transript-number, is worng here since tranascripts are re-sorted later
             };
             exgeOut.close();
 
@@ -214,6 +213,7 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters &P, string dirOut, Genome &mapGen) 
                 extrLoci[GTF_extrTrID(iex)]=exonLoci[GTF_exonTrID(iex)];
                 extrLoci[GTF_extrExStart(iex)]=exonLoci[GTF_exonStart(iex)];
                 extrLoci[GTF_extrExEnd(iex)]=exonLoci[GTF_exonEnd(iex)];
+                extrLoci[GTF_extrGeID(iex)]=exonLoci[GTF_exonGeID(iex)];
             };
 
             qsort((void*) extrLoci, exonN, sizeof(uint)*GTF_extrLoci_size, funCompareArrays<uint,5>);
@@ -232,7 +232,7 @@ uint loadGTF(SjdbClass &sjdbLoci, Parameters &P, string dirOut, Genome &mapGen) 
                 if (iex==exonN || extrLoci[GTF_extrTrID(iex)] != trid) {//start of the new transcript
                     //write out previous transcript
                     trOut << transcriptID.at(trid) <<"\t"<< extrLoci[GTF_extrTrStart(iex-1)]<<"\t"<< extrLoci[GTF_extrTrEnd(iex-1)] \
-                           <<"\t"<< trend << "\t"<< (uint) transcriptStrand[trid]  <<"\t"<< iex-trex <<"\t"<<trex<<"\n";
+                           <<"\t"<< trend << "\t"<< (uint) transcriptStrand[trid]  <<"\t"<< iex-trex <<"\t"<<trex<<"\t"<<extrLoci[GTF_extrGeID(iex-1)]<<"\n";
                     if (iex==exonN) break;
                     trid=extrLoci[GTF_extrTrID(iex)];
                     trstart=extrLoci[GTF_extrTrStart(iex)];

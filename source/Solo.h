@@ -3,25 +3,28 @@
 #include "IncludeDefine.h"
 #include "ReadAlignChunk.h"
 #include "SoloCB.h"
+#include "Transcriptome.h"
 
 class Solo {   
 public:
-//         struct {//uncollapsed read barcodes
-//             uint64 nMax;//size of arrays below
-//             uint64 N; //number of reads recorded 
-//             uint32* cb;
-//             uint32* umi;
-//             uint32* gene; //gene
-//         } reads;
-    SoloCB *soloCBall;
+
+    SoloCB *soloCBsum, **soloCBall;
         
-    Solo(Parameters &Pin);
-    soloPostMap(ReadAlignChunk **RAchunk);
-       
+    uint64 nReadsMapped, nCB; //total number of mapped reads
+    
+    uint32 *rGeneUMI;//mapped reads sorted by CB
+    uint32 *indCB;//index of detected CBs in the whitelist
+    uint32 *rCBn;//number of reads for detected CBs in the whitelist
+    uint32 **rCBp;//array of pointers to each CB sub-array
+    
+    Solo(Parameters &Pin, Transcriptome &inTrans);
+    void soloPostMap(ReadAlignChunk **RAchunk);
+    void collapseUMI(uint32 iCB);
+    
 private:
     Parameters &P;
     ParametersSolo &pSolo;
-
+    Transcriptome &Trans;
 };
 
 #endif

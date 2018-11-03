@@ -1237,6 +1237,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     quant.yes=false;
     quant.geCount.yes=false;
     quant.trSAM.yes=false;
+    quant.trSAM.bamYes=false;
     if (quant.mode.at(0) != "-") {
         quant.yes=true;
         for (uint32 ii=0; ii<quant.mode.size(); ii++) {

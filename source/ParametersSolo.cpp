@@ -12,6 +12,7 @@ void ParametersSolo::initialize(Parameters *pPin) {
     
     if (typeStr=="None") {
         type=0;
+        return;
     } else if (typeStr=="10XchromiumV2") {
         type=1;
         bL=cbL+umiL;
@@ -49,7 +50,7 @@ void ParametersSolo::initialize(Parameters *pPin) {
     time_t rawTime;
     time(&rawTime);
     pP->inOut->logMain << timeMonthDayTime(rawTime) << "Finished reading CB whitelist sequences: " << cbWL.size() <<endl;
-    *pP->inOut->logStdOut << timeMonthDayTime(rawTime) << "Finished reading CB whitelist sequences: " << cbWL.size() <<endl;
+    //*pP->inOut->logStdOut << timeMonthDayTime(rawTime) << "Finished reading CB whitelist sequences: " << cbWL.size() <<endl;
     
 //     uint64 nn=0;
 //     for (uint ii=0; ii<1000000000; ii++){

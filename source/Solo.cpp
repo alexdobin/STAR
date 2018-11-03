@@ -1,14 +1,9 @@
 #include "Solo.h"
-SoloReads::SoloReads(Parameters Pin) : P(Pin), pSolo(P.pSolo) {
-    if (pSolo==0)
+
+Solo::Solo(Parameters &Pin, Transcriptome &inTrans) : P(Pin), pSolo(P.pSolo), Trans(inTrans) {
+    if (pSolo.type==0)
         return;
-    
-    soloCBall = new SoloCB(P,-1);
-    //allocate arrays
-//     reads.nMax=P.limitNreadsSoft/P.runNthreads;
-//     read.cb=new uint32[nMax];
-//     read.umi=new uint32[nMax];
-//     read.gene=new uint32[nMax];
-//     reads.N=0;
-    
+
+    soloCBsum = new SoloCB(P,-1);
+    soloCBall = new SoloCB*[P.runThreadN];
 };

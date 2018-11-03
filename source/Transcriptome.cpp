@@ -1,6 +1,7 @@
 #include "Transcriptome.h"
 #include "streamFuns.h"
 #include "GlobalVariables.h"
+#include "ErrorWarning.h"
 
 Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
 
@@ -23,8 +24,16 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
 
         for (uint32 itr=0; itr<nTr; itr++) {
             uint16 str1;
-            trinfo >> trID[itr] >> trS[itr] >> trE[itr] >> trEmax[itr] >> str1 >> trExN[itr] >> trExI[itr];
+            trinfo >> trID[itr] >> trS[itr] >> trE[itr] >> trEmax[itr] >> str1 >> trExN[itr] >> trExI[itr] >> trGene[itr];
             trStr[itr]=str1;
+            
+            if (!trinfo.good()) {
+                ostringstream errOut;
+                errOut <<"EXITING because of FATAL GENOME INDEX FILE error: transcriptInfo.tab is corrupt, or is incompatible with the current STAR version\n";
+                errOut <<"SOLUTION: re-generate genome index";
+                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_GENOME_FILES, P);
+            };
+            
         };
         P.inOut->logMain << "Loaded transcript database, nTr="<<nTr<<endl;
 
@@ -42,15 +51,15 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
 
         exinfo.close();
         
-        ifstream &exinfo1 = ifstrOpen(trInfoDir+"/exonGeTrInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
-        exinfo1 >> exG.nEx;
-        for (uint32 ii=0;ii<exG.nEx;ii++) {//load only transcript->gene info. TODO this is wasteful, add one gene column to transcriptInfo.tab
-            string dummy1;
-            uint32 ig,it;
-            exinfo1 >> dummy1 >> dummy1 >> dummy1 >> ig >> it;
-            trGene[it]=ig;
-        };
-        exinfo1.close();
+//         ifstream &exinfo1 = ifstrOpen(trInfoDir+"/exonGeTrInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
+//         exinfo1 >> exG.nEx;
+//         for (uint32 ii=0;ii<exG.nEx;ii++) {//load only transcript->gene info. TODO this is wasteful, add one gene column to transcriptInfo.tab
+//             string dummy1;
+//             uint32 ig,it;
+//             exinfo1 >> dummy1 >> dummy1 >> dummy1 >> ig >> it;
+//             trGene[it]=ig;
+//         };
+//         exinfo1.close();
     };
 
     if ( P.quant.geCount.yes ) {//load exon-gene structures

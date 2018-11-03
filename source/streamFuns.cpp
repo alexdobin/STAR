@@ -61,8 +61,6 @@ void fstreamWriteBig(std::ofstream &S, char* A, unsigned long long N, std::strin
 std::ofstream & ofstrOpen (std::string fileName, std::string errorID, Parameters &P) {//open file 'fileName', generate error if cannot open
     std::ofstream & ofStream = *new std::ofstream(fileName.c_str(), std::fstream::out | std::fstream::trunc);
     if (ofStream.fail()) {//
-//         dir1=fileName.substr(0,fileName.find_last_of("/")+1);
-//         if (dir1=="") dir1="./";
         ostringstream errOut;
         errOut << errorID<<": exiting because of *OUTPUT FILE* error: could not create output file "<< fileName <<"\n";
         errOut << "Solution: check that the path exists and you have write permission for this file\n";
@@ -71,6 +69,16 @@ std::ofstream & ofstrOpen (std::string fileName, std::string errorID, Parameters
     return ofStream;
 };
 
+std::fstream &fstrOpen (std::string fileName, std::string errorID, Parameters &P) {//open file 'fileName', generate error if cannot open
+    std::fstream &fStream = *new std::fstream(fileName.c_str(), std::fstream::in | std::fstream::out | std::fstream::trunc);
+    if (fStream.fail()) {//
+        ostringstream errOut;
+        errOut << errorID<<": exiting because of *OUTPUT FILE* error: could not create input/output file "<< fileName <<"\n";
+        errOut << "Solution: check that the path exists and you have write permission for this file\n";
+        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_FILE_OPEN, P);
+    };
+    return fStream;
+};
 
 std::ifstream & ifstrOpen (std::string fileName, std::string errorID, std::string solutionString, Parameters &P) {
     //open file 'fileName', generate error if cannot open

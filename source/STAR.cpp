@@ -26,6 +26,8 @@
 #include "SjdbClass.h"
 #include "sjdbInsertJunctions.h"
 #include "Variation.h"
+#include "Solo.h"
+
 #include "bam_cat.h"
 
 #include "htslib/htslib/sam.h"
@@ -341,7 +343,6 @@ int main(int argInN, char* argIn[]) {
         outputSJ(RAchunk,P);//collapse novel junctions
         P.readFilesIndex=-1;
 
-
         P.outFilterBySJoutStage=2;
         if (P.outBAMcoord) {
             for (int it=0; it<P.runThreadN; it++) {//prepare the unmapped bin
@@ -369,10 +370,11 @@ int main(int argInN, char* argIn[]) {
     //no need for genome anymore, free the memory
     mainGenome.freeMemory();
 
-    if ( P.quant.geCount.yes )
-    {//output gene quantifications
-        for (int ichunk=1; ichunk<P.runThreadN; ichunk++)
-        {//sum counts from all chunks into 0th chunk
+    Solo soloMain(P,*RAchunk[0]->chunkTr);
+    soloMain.soloPostMap(RAchunk);
+    
+    if ( P.quant.geCount.yes ) {//output gene quantifications
+        for (int ichunk=1; ichunk<P.runThreadN; ichunk++) {//sum counts from all chunks into 0th chunk
             RAchunk[0]->chunkTr->quants->addQuants(*(RAchunk[ichunk]->chunkTr->quants));
         };
         RAchunk[0]->chunkTr->quantsOutput();

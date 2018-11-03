@@ -18,10 +18,10 @@ void SoloCB::readCB(const uint64 &iReadAll, const string &readNameExtra, const u
         return;
     };
     
-    //debug
+    /*debug
     if (readGenes.size()==1 && readGenes.at(0)!=*readTrGenes.begin())
         cout <<readGenes.at(0) <<' '<< *readTrGenes.begin() <<'\n';
-    //
+    */
     
     uint32 cbB, umiB;
     int32 cbI=-2;
@@ -33,20 +33,47 @@ void SoloCB::readCB(const uint64 &iReadAll, const string &readNameExtra, const u
         return;
     };
 
-    if (cbI!=-1) {
-        *strU_0 << cbI <<' '<< *readTrGenes.begin() <<' '<< umiB <<' '<< iReadAll  <<'\n';
-        cbReadCount[cbI]++;
+//     if (cbI!=-1) {
+//         *strU_0 << cbI <<' '<< *readTrGenes.begin() <<' '<< umiB <<' '<< iReadAll  <<'\n';
+//         cbReadCount[cbI]++;
+//     } else {
+//         for (uint32 ii=0; ii<2*pSolo.cbL; ii+=2) {
+//             for (uint32 jj=1; jj<4; jj++) {
+//                 cbI=binarySearchExact(cbB^(jj<<ii),pSolo.cbWL.data(),pSolo.cbWL.size());
+//                 if (cbI>=0) {                        
+//                     *strU_1 << cbI <<' '<< readNameExtra.at(pSolo.cbL+pSolo.umiL+1+ii/2) <<' ';
+//                     cbReadCount[cbI]++;
+//                 };
+//             };
+//         };
+//         *strU_1 << *readTrGenes.begin() <<' '<< umiB <<' '<< iReadAll <<'\n';
+//     };   
+    
+    //simple procedure: accept only if one WL CB exists with 1MM
+    if (cbI>=0) {
+        stats.V[stats.nExactMatch]++;
     } else {
         for (uint32 ii=0; ii<2*pSolo.cbL; ii+=2) {
             for (uint32 jj=1; jj<4; jj++) {
-                cbI=binarySearchExact(cbB^(jj<<ii),pSolo.cbWL.data(),pSolo.cbWL.size());
-                if (cbI>=0) {Yvvdzvk40
-                        
-                    *strU_1 << cbI <<' '<< readNameExtra.at(pSolo.cbL+pSolo.umiL+1+ii/2) <<' ';
-                    cbReadCount[cbI]++;
+                int32 cbI1=binarySearchExact(cbB^(jj<<ii),pSolo.cbWL.data(),pSolo.cbWL.size());
+                if (cbI1>=0) {                        
+                    if (cbI>=0) {//had another match already
+                        stats.V[stats.nTooMany]++;
+                        return;
+                    };
+                    cbI=cbI1;
                 };
             };
         };
-        *strU_1 << *readTrGenes.begin() <<' '<< umiB <<' '<< iReadAll <<'\n';
-    };   
+    };
+    if (cbI<0) {
+        stats.V[stats.nNoMatch]++;
+        return;
+    };
+    
+    stats.V[stats.nMatch]++;
+    //output to file
+    cbReadCount[cbI]++;
+    *strU_0 << cbI <<' '<< *readTrGenes.begin() <<' '<< umiB <<' '<< iReadAll<<'\n';
+    //*strU_0 << cbI <<' '<< *readTrGenes.begin() <<' '<< umiB <<' '<< iReadAll  <<'\n';
 };

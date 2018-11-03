@@ -7,16 +7,42 @@ SoloCB::SoloCB(Parameters &Pin, int iChunk) : P(Pin), pSolo(P.pSolo) {
     
     for (uint32 ii=0; ii<stats.nStats; ii++)
         stats.V[ii]=0;
-//     stats.nNoGene=0;
-//     stats.nAmbigGene=0;
-//     stats.nAmbigGeneMultimap=0;
-//     stats.nNinBarcode=0;
     
     cbReadCount = new uint32[pSolo.cbWL.size()];
     for (uint32 ii=0; ii<pSolo.cbWL.size(); ii++)
         cbReadCount[ii]=0;
     
-    strU_0 = &ofstrOpen(P.outFileTmp+"/soloCB_U_0_"+std::to_string(iChunk),ERROR_OUT, P);
-    strU_1 = &ofstrOpen(P.outFileTmp+"/soloCB_U_1_"+std::to_string(iChunk),ERROR_OUT, P);
+    if (iChunk>=0)
+        strU_0 = &fstrOpen(P.outFileTmp+"/soloCB_U_0_"+std::to_string(iChunk),ERROR_OUT, P);
+    //strU_1 = &ofstrOpen(P.outFileTmp+"/soloCB_U_1_"+std::to_string(iChunk),ERROR_OUT, P);
     
+};
+
+void SoloCB::addSoloCB(const SoloCB &soloCBin) {
+    for (uint32 ii=0; ii<stats.nStats; ii++)
+        stats.V[ii] += soloCBin.stats.V[ii];
+    
+    for (uint32 ii=0; ii<pSolo.cbWL.size(); ii++)
+        cbReadCount[ii] += soloCBin.cbReadCount[ii];
+};
+
+void SoloCB::statsOut(ofstream &streamOut) {
+    for (uint32 ii=0; ii<stats.nStats; ii++) {
+        streamOut << setw(25) << stats.names.at(ii) << setw(15) << stats.V[ii] << '\n';
+    };
+    streamOut.flush();
+};
+
+void SoloCB::readCBgeneUMIfromFiles(uint32 ** cbP) {
+    strU_0->flush();
+    strU_0->seekg(0,ios::beg);
+     
+    uint32 cb1, g1, umi1;
+    for (uint64 ii=0; ii<stats.nMatch; ii++) {
+        *strU_0 >> cb1 >> g1 >> umi1;
+        strU_0->ignore(1000000000,'\n'); //in case more fields were output, may remove this
+        cbP[cb1][0]=g1;
+        cbP[cb1][1]=umi1;
+        cbP[cb1]+=2;
+    };
 };

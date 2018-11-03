@@ -11,8 +11,8 @@ template <class T>
     };
     
 template <class numT> int funCompareNumbers (const void *a, const void *b) {
-    uint va= *((numT*) a);
-    uint vb= *((numT*) b);
+    numT va= *((numT*) a);
+    numT vb= *((numT*) b);
 
     if (va>vb) {
 		return 1;
@@ -54,24 +54,10 @@ inline int funCompareUint2 (const void *a, const void *b) {
 	};
 };
 
-
-
-inline int splitString(const std::string &s, char delim, std::vector<std::string> &elems) {
-    std::stringstream ss(s);
-    std::string item;
-    int maxL=0;
-    elems.clear();
-    while (std::getline(ss, item, delim)) {
-        maxL=max(maxL, (int)item.size());
-        elems.push_back(item);
-    };
-    return maxL;//returns mzx string size
-};
-
 template <class arrayType, int arraySize>
 inline int funCompareArrays (const void *a, const void *b) {
-    arrayType* va= (uint*) a;
-    arrayType* vb= (uint*) b;
+    arrayType* va= (arrayType*) a;
+    arrayType* vb= (arrayType*) b;
 
     for (int ii=0;ii<arraySize;ii++) {
         if (va[ii]>vb[ii]) {
@@ -83,6 +69,33 @@ inline int funCompareArrays (const void *a, const void *b) {
 
     return 0;
 
+};
+
+template <class Type, int Shift>
+inline int funCompareTypeShift (const void *a, const void *b) {
+    Type va= *( ((Type*) a)+Shift );
+    Type vb= *( ((Type*) b)+Shift );
+
+    if (va>vb) {
+		return 1;
+	} else if (va==vb) {
+		return 0;
+	} else {
+		return -1;
+	};
+
+};
+
+inline int splitString(const std::string &s, char delim, std::vector<std::string> &elems) {
+    std::stringstream ss(s);
+    std::string item;
+    int maxL=0;
+    elems.clear();
+    while (std::getline(ss, item, delim)) {
+        maxL=max(maxL, (int)item.size());
+        elems.push_back(item);
+    };
+    return maxL;//returns mzx string size
 };
 
 template <class argType>
