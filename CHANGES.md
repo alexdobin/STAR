@@ -1,7 +1,13 @@
+
+* Fixed the problem causing BAM sorting error with large number of threads and small ulimit -n.
+* Fixed the bug causing inconsistent output for mate1/2 in the Unmapped files.
+
+
 STAR 2.6.1c 2018/10/17
 ======================
 
 * Enforced the consistent choice of supplementary chimeric alignments for overlapping mates.
+
 
 STAR 2.6.1b 2018/09/06
 ======================
