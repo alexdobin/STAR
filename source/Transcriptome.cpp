@@ -50,16 +50,15 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
         P.inOut->logMain << "Loaded exon database, nEx="<<nEx<<endl;
 
         exinfo.close();
+
+        ifstream &geStream = ifstrOpen(trInfoDir+"/geneInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
+        geStream >> nGe;
+        geID.resize(nGe);
+        for (uint ii=0;ii<nGe;ii++) {
+            geStream >> geID[ii];
+        };
+        geStream.close();
         
-//         ifstream &exinfo1 = ifstrOpen(trInfoDir+"/exonGeTrInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
-//         exinfo1 >> exG.nEx;
-//         for (uint32 ii=0;ii<exG.nEx;ii++) {//load only transcript->gene info. TODO this is wasteful, add one gene column to transcriptInfo.tab
-//             string dummy1;
-//             uint32 ig,it;
-//             exinfo1 >> dummy1 >> dummy1 >> dummy1 >> ig >> it;
-//             trGene[it]=ig;
-//         };
-//         exinfo1.close();
     };
 
     if ( P.quant.geCount.yes ) {//load exon-gene structures
@@ -86,14 +85,6 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
         for (uint iex=1;iex<exG.nEx;iex++) {
             exG.eMax[iex]=max(exG.eMax[iex-1],exG.e[iex]);
         };
-
-        ifstream & geStream = ifstrOpen(trInfoDir+"/geneInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
-        geStream >> nGe;
-        geID.resize(nGe);
-        for (uint ii=0;ii<nGe;ii++) {
-            geStream >> geID[ii];
-        };
-        geStream.close();
     };
 };
 

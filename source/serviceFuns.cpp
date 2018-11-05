@@ -15,12 +15,25 @@ template <class numT> int funCompareNumbers (const void *a, const void *b) {
     numT vb= *((numT*) b);
 
     if (va>vb) {
-		return 1;
-	} else if (va==vb) {
-		return 0;
-	} else {
-		return -1;
-	};
+        return 1;
+    } else if (va==vb) {
+        return 0;
+    } else {
+        return -1;
+    };
+};
+
+template <class numT> int funCompareNumbersReverse (const void *a, const void *b) {
+    numT va= *((numT*) a);
+    numT vb= *((numT*) b);
+
+    if (va>vb) {
+        return -1;
+    } else if (va==vb) {
+        return 0;
+    } else {
+        return 1;
+    };
 };
     
     

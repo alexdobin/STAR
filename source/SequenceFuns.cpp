@@ -204,6 +204,18 @@ bool convertNuclStrToInt32(const string S, uint32 &intOut) {
     return true;
 };
 
+string convertNuclInt32toString(uint32 nuclNum, const uint32 L) {
+    string nuclOut(L,'N');
+    string nuclChar="ACGT";
+
+    for (uint ii=0; ii<L; ii++) {
+        nuclOut[ii] = nuclChar[nuclNum & 3];
+        nuclNum = nuclNum >> 2;
+    };
+    return nuclOut;
+};
+
+
 uint chrFind(uint Start, uint i2, uint* chrStart) {// find chromosome from global locus
     uint i1=0, i3;
     while (i1+1<i2) {

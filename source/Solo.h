@@ -4,6 +4,7 @@
 #include "ReadAlignChunk.h"
 #include "SoloCB.h"
 #include "Transcriptome.h"
+#include <fstream>
 
 class Solo {   
 public:
@@ -16,11 +17,17 @@ public:
     uint32 *indCB;//index of detected CBs in the whitelist
     uint32 *rCBn;//number of reads for detected CBs in the whitelist
     uint32 **rCBp;//array of pointers to each CB sub-array
+    uint32 *nUperCB;//number of UMIs per CB
+    uint32 *nGperCB;//number of genes (with >0 UMIs) per CB
     
+    ofstream *soloStatsStream;
+
     Solo(Parameters &Pin, Transcriptome &inTrans);
     void soloPostMap(ReadAlignChunk **RAchunk);
-    void collapseUMI(uint32 iCB);
-    
+    void collapseUMI(uint32 iCB, uint32 &nGenes, uint32 &nUtot);
+    void outputNumUMIperGeneCB();    
+
+
 private:
     Parameters &P;
     ParametersSolo &pSolo;

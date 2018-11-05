@@ -38,9 +38,9 @@ void SoloCB::readCBgeneUMIfromFiles(uint32 ** cbP) {
     strU_0->seekg(0,ios::beg);
      
     uint32 cb1, g1, umi1;
-    for (uint64 ii=0; ii<stats.nMatch; ii++) {
+    for (uint64 ii=0; ii<stats.V[stats.nMatch]; ii++) {
         *strU_0 >> cb1 >> g1 >> umi1;
-        strU_0->ignore(1000000000,'\n'); //in case more fields were output, may remove this
+        //strU_0->ignore(1000000000,'\n'); //in case more fields were output, may remove this
         cbP[cb1][0]=g1;
         cbP[cb1][1]=umi1;
         cbP[cb1]+=2;

@@ -74,6 +74,6 @@ void SoloCB::readCB(const uint64 &iReadAll, const string &readNameExtra, const u
     stats.V[stats.nMatch]++;
     //output to file
     cbReadCount[cbI]++;
-    *strU_0 << cbI <<' '<< *readTrGenes.begin() <<' '<< umiB <<' '<< iReadAll<<'\n';
+    *strU_0 << cbI <<' '<< *readTrGenes.begin() <<' '<< umiB <<'\n';
     //*strU_0 << cbI <<' '<< *readTrGenes.begin() <<' '<< umiB <<' '<< iReadAll  <<'\n';
 };
