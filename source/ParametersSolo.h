@@ -16,8 +16,9 @@ public:
     uint32 bL; //total barcode length
     string soloCBwhitelist;
     
-//     std::set <uint32> cbWL;
     std::vector <uint32> cbWL;
+
+    uint32 umiMaskLow, umiMaskHigh; //low/high half bit-mask or UMIs 
     
     static const uint64 bufferSize=1048576;
     void initialize(Parameters *pPin);

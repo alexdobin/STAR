@@ -21,7 +21,7 @@ public:
     uint32 *nGperCB;//number of genes (with >0 UMIs) per CB
     
     ofstream *soloStatsStream;
-
+    
     Solo(Parameters &Pin, Transcriptome &inTrans);
     void soloPostMap(ReadAlignChunk **RAchunk);
     void collapseUMI(uint32 iCB, uint32 &nGenes, uint32 &nUtot);

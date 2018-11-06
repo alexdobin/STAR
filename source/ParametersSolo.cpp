@@ -24,6 +24,9 @@ void ParametersSolo::initialize(Parameters *pPin) {
         exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     }; 
     
+    umiMaskLow=(uint32) ( (((uint64)1)<<umiL) - 1);
+    umiMaskHigh=~umiMaskLow;
+    
     //load the CB whitlist and create unordered_map
     ifstream & cbWlStream = ifstrOpen(soloCBwhitelist, ERROR_OUT, "SOLUTION: check the path and permissions of the CB whitelist file: " + soloCBwhitelist, *pP);
     string seq1;

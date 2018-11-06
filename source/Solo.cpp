@@ -9,4 +9,5 @@ Solo::Solo(Parameters &Pin, Transcriptome &inTrans) : P(Pin), pSolo(P.pSolo), Tr
     soloCBall = new SoloCB*[P.runThreadN];
 
     soloStatsStream = &ofstrOpen(P.outFileNamePrefix+"Solo.stats",ERROR_OUT, P);
+    
 };
