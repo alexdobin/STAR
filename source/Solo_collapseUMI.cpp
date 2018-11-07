@@ -3,26 +3,46 @@
 #include "TimeFunctions.h"
 #include "serviceFuns.cpp"
 
-// uint32 searchSortedForChange(uint32 *A, uint32 nA, uint32 strideA, uint32 stepMax) {//find the next element in the sorted list
-//     uint32 iP2=0;
-//     while (iP2<nA-1 && A[iP2]==A[0] ) //rough search
-//         iP2 += strideA*stepMax;
-//     iP2=min(iP2,nA-1);
-//     
-//     uint32 iP1=iP-stepMax;
-//     uint32 iP;
-//     while (iP1<iP2+1) {//binary search
-//         iP=(iP1+iP2)/2;
-//         if (A[iP*strideA]==A[0]) {
-//             iP1=iP;
-//         } else {
-//             iP2=iP;
-//         };
-//     };
-//     
-//     return iP2; //returns the start of the next element, or the last element in the array
-// };
+void collapseUMIwith1MMlowHalf(uint32 *rGU, uint32 umiMaskLow, uint32 nU0, uint32 &nU1, uint32 &nU2) {
+    
+    const uint32 bitTop=1<<31;
+    const uint32 bitTop1=1<<30;
+    const uint32 bitMaskTop2bits=(~bitTop) & (~bitTop1);
+    
+    for (uint32 iu=0; iu<2*nU0; iu+=2) {//each UMI
+        uint32 iuu=iu+2;
+        for (; iuu<2*nU0; iuu+=2) {//compare to all UMIs down
 
+            if ( (rGU[iuu+1] & bitTop & bitTop1) > 0)
+                continue;//this one was already found duplicated for both collapse types
+
+            uint32 uuXor=rGU[iu] ^ rGU[iuu];
+
+            if (uuXor==0)
+                exit(1); //debug
+
+            if ( uuXor > umiMaskLow)
+                break; //upper half is different
+
+            if (uuXor >> (__builtin_ctz(uuXor)/2)*2 > 3) //shift by even number of trailing zeros
+                continue;//>1MM
+
+            //1MM UMI
+            if ( (rGU[iuu] & bitTop) == 0) {
+                rGU[iuu] |= bitTop;
+                --nU1;//subtract the duplicated UMIs
+            };
+            if ( (rGU[iuu] & bitTop1) == 0 && (rGU[iu+1] & bitMaskTop2bits)>(2*(rGU[iuu+1] & bitMaskTop2bits)+1) ) {//iuu is duplicate of iu
+                rGU[iuu] |= bitTop1;
+                --nU2;//subtract the duplicated UMIs
+            };
+            if ( (rGU[iu] & bitTop1) == 0 && (rGU[iuu+1] & bitMaskTop2bits)>(2*(rGU[iu+1] & bitMaskTop2bits)+1) ) {//iu is duplicate of iu
+                rGU[iu] |= bitTop1;
+                --nU2;//subtract the duplicated UMIs
+            };            
+        };
+    };
+};
 void Solo::collapseUMI(uint32 iCB, uint32 &nGenes, uint32 &nUtot) {//iCB = CB to collapse, nReads=number of reads for this CB
     
     uint32 *rGU=rCBp[iCB];
@@ -35,81 +55,57 @@ void Solo::collapseUMI(uint32 iCB, uint32 &nGenes, uint32 &nUtot) {//iCB = CB to
     nGenes=0; //number of genes
     uint32 *gID = new uint32[min(Trans.nGe,rN)+1]; //gene IDS
     uint32 *gReadS = new uint32[min(Trans.nGe,rN)+1]; //start of gene reads TODO: allocate this array in the 2nd half of rGU
-    for (uint32 iR=0; iR<rN; iR++) {
-        if (rGU[iR*2]!=gid1) {//record gene boundary
+    for (uint32 iR=0; iR<2*rN; iR+=2) {
+        if (rGU[iR]!=gid1) {//record gene boundary
             gReadS[nGenes]=iR;
-            gid1=rGU[iR*2];
+            gid1=rGU[iR];
             gID[nGenes]=gid1;            
             ++nGenes;
         };
-        rGU[iR]=rGU[iR*2+1]; //shift UMIs        
+        rGU[iR]=rGU[iR+1]; //shift UMIs
+        //rGU[iR+1] storage this will be used later for counting
     };
-    gReadS[nGenes]=rN;//so that gReadS[nGenes]-gReadS[nGenes-1] is the number of reads for nGenes
+    gReadS[nGenes]=2*rN;//so that gReadS[nGenes]-gReadS[nGenes-1] is the number of reads for nGenes
  
     uint32 *nUg = new uint32[nGenes*3];//3 types of counts
     nUtot=0;
     for (uint32 iG=0; iG<nGenes; iG++) {//collapse UMIs for each gene
-        qsort(rGU+gReadS[iG],gReadS[iG+1]-gReadS[iG],sizeof(uint32),funCompareNumbers<uint32>);
+        uint32 *rGU1=rGU+gReadS[iG];
+        
+        qsort(rGU1, (gReadS[iG+1]-gReadS[iG])/2, 2*sizeof(uint32), funCompareNumbers<uint32>);
 
         //exact collapse
-        uint32 *nrU = new uint32[gReadS[iG+1]-gReadS[iG]]; //counts of reads per UMI
-        uint32 nU0=-1; //number of distinct UMIs for this gene
+        uint32 iR1=-2; //number of distinct UMIs for this gene
         uint32 u1=-1;
-        for (uint32 ir=gReadS[iG]; ir<gReadS[iG+1]; ir++) {//count and collapse identical UMIs
-            if (rGU[ir]!=u1) {
-                ++nU0;
-                u1=rGU[ir];                
-                rGU[nU0]=u1;
-                nrU[nU0]=0;                
+        for (uint32 iR=0; iR<gReadS[iG+1]-gReadS[iG]; iR+=2) {//count and collapse identical UMIs
+            if (rGU1[iR]!=u1) {
+                iR1 += 2;
+                u1=rGU1[iR];                
+                rGU1[iR1]=u1;
+                rGU1[iR1+1]=0;                
             };
-            nrU[nU0]++;             
+            rGU1[iR1+1]++;             
         };
-        ++nU0;//nU0 was the index of the last added U
+        uint32 nU0=(iR1+2)/2;
         
         //collapse with 1MM
-        uint8 *dupU = new uint8 [nU0]; //TODO use bits in existing array
-        for (uint32 iu=0; iu<nU0; iu++)
-            dupU[iu]=0;
         uint32 nU1=nU0, nU2=nU0;//2 types of 1MM collapsing
 
-        for (uint32 iu=0; iu<nU0; iu++) {//each UMI
-            uint32 iuu=iu+1;
-            for (; iuu<nU0; iuu++) {//compare to all UMIs down
-
-                if (dupU[iuu]==3)
-                    continue;//this one was already found duplicated for both collapse types
-
-                uint32 uuXor=rGU[iu] ^ rGU[iuu];
-                
-                if (uuXor==0)
-                    exit(1); //debug
-                
-                if ( uuXor > pSolo.umiMaskLow)
-                    break; //upper half is different
-
-                if (uuXor >> (__builtin_ctz(uuXor)/2)*2 > 3) //shift by even number of trailing zeros
-                    continue;//>1MM
-                
-                //1MM UMI
-                if ( (dupU[iuu] & 1) == 0) {
-                    dupU[iuu] |=1;
-                    --nU1;//subtract the duplicated UMIs
-                };
-                if ( (dupU[iuu] & 2) == 0 && nrU[iu]>(2*nrU[iuu]+1) ) {
-                    dupU[iuu] |=2;
-                    --nU2;//subtract the duplicated UMIs
-                };
-                if ( (dupU[iu] & 2) == 0 && nrU[iuu]>(2*nrU[iu]+1) ) {
-                    dupU[iu] |=2;
-                    --nU2;//subtract the duplicated UMIs
-                };            
-            };
+        collapseUMIwith1MMlowHalf(rGU1,pSolo.umiMaskLow, nU0, nU1, nU2);
+        
+        //exchange low and high half of UMIs, re-sort, and look for 1MM again
+        for (uint32 iu=0; iu<2*nU0; iu+=2) {
+            uint32 high=rGU1[iu]>>(pSolo.umiL);
+            rGU1[iu] &= pSolo.umiMaskLow; //remove high
+            rGU1[iu] <<= (pSolo.umiL); //move low to high
+            rGU1[iu] |= high; //add high
         };
+        collapseUMIwith1MMlowHalf(rGU1,pSolo.umiMaskLow, nU0, nU1, nU2);
                 
         nUg[3*iG]=nU0;
         nUg[3*iG+1]=nU1;
         nUg[3*iG+2]=nU2;
-        nUtot+=nU0;
+        nUtot+=nU1;//TODO user makes the choice 
     };
 
     uint32 *rGUp=rGU;
