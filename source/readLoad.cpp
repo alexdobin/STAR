@@ -37,7 +37,7 @@ int readLoad(istream& readInStream, Parameters& P, uint iMate, uint& Lread, uint
     readInStream.getline(Seq,DEF_readSeqLengthMax+1); //extract sequence
 
     Lread=0;
-    for (uint ii=0; ii<readInStream.gcount()-1; ii++) {
+    for (int ii=0; ii<readInStream.gcount()-1; ii++) {
         if (int(Seq[ii])>=32) {
             Seq[Lread]=Seq[ii];
             ++Lread;

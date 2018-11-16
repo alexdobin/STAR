@@ -133,6 +133,7 @@ int main(int argInN, char* argIn[]) {
         pthread_mutex_init(&g_threadChunks.mutexOutFilterBySJout, NULL);
         pthread_mutex_init(&g_threadChunks.mutexStats, NULL);
         pthread_mutex_init(&g_threadChunks.mutexBAMsortBins, NULL);
+        pthread_mutex_init(&g_threadChunks.mutexError, NULL);
     };
 
     g_statsAll.progressReportHeader(P.inOut->logProgress);

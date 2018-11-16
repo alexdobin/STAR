@@ -25,7 +25,7 @@
 //arbitrary number for ftok function
 #define SHM_projectID 23
 
-Genome::Genome (Parameters &Pin ): pGe(Pin.pGe), P(Pin), shmStart(NULL), sharedMemory(NULL) {
+Genome::Genome (Parameters &Pin ): sharedMemory(NULL), pGe(Pin.pGe), P(Pin), shmStart(NULL) {
     shmKey=ftok(pGe.gDir.c_str(),SHM_projectID);    
     
     sjdbOverhang = pGe.sjdbOverhang; //will be re-defined later if another value was used for the generated genome
@@ -55,20 +55,25 @@ uint Genome::OpenStream(string name, ifstream & stream, uint size)
     stream.open((pGe.gDir+ "/" +name).c_str(), ios::binary);
     if (!stream.good()) {
         ostringstream errOut;
-        errOut << "EXITING because of FATAL ERROR: could not open genome file "<< pGe.gDir << "/" << name <<"\n" << endl;
+        errOut << "EXITING because of FATAL ERROR: could not open genome file: "<< pGe.gDir << "/" << name <<"\n";
         errOut << "SOLUTION: check that the path to genome files, specified in --genomeDir is correct and the files are present, and have user read permissions\n" <<flush;
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_GENOME_FILES, P);
     };
 
 
-    if (size>0)
-    {
+    if (size>0) {
         P.inOut->logMain << name << ": size given as a parameter = " << size <<"\n";
-    } else
-    {
+    } else {
         P.inOut->logMain << "Checking " << name << " size";
         stream.seekg (0, ios::end);
-        size=(uint) stream.tellg();
+        int64 size1 = stream.tellg();
+        if (size1<=0) {
+            ostringstream errOut;
+            errOut << "EXITING because of FATAL ERROR: failed reading from genome file: "<< pGe.gDir << "/" << name <<"\n";
+            errOut << "SOLUTION: re-generate the genome index\n";
+            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, 1, P);
+        };
+        size=(uint) size1;
         stream.clear();
         stream.seekg (0, ios::beg);
         P.inOut->logMain << "file size: "<< size <<" bytes; state: good=" <<stream.good()\

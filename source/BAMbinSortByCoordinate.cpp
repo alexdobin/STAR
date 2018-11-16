@@ -16,11 +16,14 @@ void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, st
         string bamInFile=dirBAMsort+to_string(it)+"/"+to_string((uint) iBin);
         ifstream bamInStream;
         bamInStream.open(bamInFile.c_str(),std::ios::binary | std::ios::ate);//open at the end to get file size
-        uint s1=bamInStream.tellg();
-        if (s1>0)
-        {
+        int64 s1=bamInStream.tellg();
+        if (s1>0)         {
             bamInStream.seekg(std::ios::beg);
             bamInStream.read(bamIn+bamInBytes,s1);//read the whole file
+        } else if (s1<0) {
+            ostringstream errOut;
+            errOut << "EXITING because of FATAL ERROR: failed reading from temporary file: " << dirBAMsort+to_string(it)+"/"+to_string((uint) iBin);
+            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, 1, P);
         };
         bamInBytes += bamInStream.gcount();
         bamInStream.close();
@@ -29,7 +32,7 @@ void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, st
     if (bamInBytes!=binS) {
         ostringstream errOut;
         errOut << "EXITING because of FATAL ERROR: number of bytes expected from the BAM bin does not agree with the actual size on disk: ";
-        errOut << binS <<"   "<< bamInBytes <<"   "<< iBin <<"\n";
+        errOut << "Expected bin size=" <<binS <<" ; size on disk="<< bamInBytes <<" ; bin number="<< iBin <<"\n";
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, 1, P);
     };
 
