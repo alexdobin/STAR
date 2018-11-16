@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include "serviceFuns.cpp"
 #include "ThreadControl.h"
+#include "streamFuns.h"
 
 BAMoutput::BAMoutput (int iChunk, string tmpDir, Parameters &Pin) : P(Pin){//allocate bam array
 
@@ -23,7 +24,7 @@ BAMoutput::BAMoutput (int iChunk, string tmpDir, Parameters &Pin) : P(Pin){//all
     for (uint ii=0;ii<nBins;ii++) {
         binStart[ii]=bamArray+bamArraySize/nBins*ii;
         binBytes[ii]=0;
-        binStream[ii]=new ofstream((bamDir +"/"+to_string(ii)).c_str());    //open temporary files
+        binStream[ii]=&ofstrOpen((bamDir +"/"+to_string(ii)).c_str(), ERROR_OUT, P);    //open temporary files
         binTotalN[ii]=0;
         binTotalBytes[ii]=0;
     };

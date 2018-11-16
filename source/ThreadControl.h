@@ -12,7 +12,7 @@ public:
 
     pthread_t *threadArray;
     pthread_mutex_t mutexInRead, mutexOutSAM, mutexOutBAM1, mutexOutChimSAM, mutexOutChimJunction, mutexOutUnmappedFastx, mutexOutFilterBySJout;
-    pthread_mutex_t mutexStats, mutexLogMain, mutexBAMsortBins;
+    pthread_mutex_t mutexStats, mutexLogMain, mutexBAMsortBins, mutexError;
 
     uint chunkInN,chunkOutN;
 

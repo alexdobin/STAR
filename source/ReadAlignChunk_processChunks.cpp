@@ -228,9 +228,15 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
             chunkFstreamCat (*RA->chunkOutChimJunction, P.inOut->outChimJunction, P.runThreadN>1, g_threadChunks.mutexOutChimJunction);
         };
         if (P.outReadsUnmapped=="Fastx" ) {
+            if (P.runThreadN>1) 
+                pthread_mutex_lock(&g_threadChunks.mutexOutUnmappedFastx);
+
             for (uint ii=0;ii<P.readNmates;ii++) {
-                chunkFstreamCat (RA->chunkOutUnmappedReadsStream[ii],P.inOut->outUnmappedReadsStream[ii], P.runThreadN>1, g_threadChunks.mutexOutUnmappedFastx);
+                chunkFstreamCat (RA->chunkOutUnmappedReadsStream[ii],P.inOut->outUnmappedReadsStream[ii], false, g_threadChunks.mutexOutUnmappedFastx);
             };
+
+            if (P.runThreadN>1) 
+                pthread_mutex_unlock(&g_threadChunks.mutexOutUnmappedFastx);
         };
     };
     if (P.runThreadN>1) pthread_mutex_lock(&g_threadChunks.mutexLogMain);

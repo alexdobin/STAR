@@ -627,7 +627,7 @@ chimMultimapScoreRange          1
     int>=0: the score range for multi-mapping chimeras below the best chimeric score. Only works with --chimMultimapNmax > 1
 
 chimNonchimScoreDropMin         20
-    int>=0: to trigger chimeric detection, the drop in the best non-chimeric alignment score with respect to the read lenght has to be smaller than this value
+    int>=0: to trigger chimeric detection, the drop in the best non-chimeric alignment score with respect to the read length has to be smaller than this value
 
 chimOutJunctionFormat           0
     int: formatting type for the Chimeric.out.junction file
