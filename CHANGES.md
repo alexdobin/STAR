@@ -1,3 +1,6 @@
+STAR 2.6.1c 2018/11/16
+======================
+
 * Fixed the problem causing BAM sorting error with large number of threads and small ulimit -n (github.com/alexdobin/STAR/issues/512).
 * Fixed the bug causing inconsistent output for mate1/2 in the Unmapped files (github.com/alexdobin/STAR/issues/222).
 * Fixed the non-thread safe error/exit (github.com/alexdobin/STAR/issues/514), and non-safe file size check (github.com/alexdobin/STAR/issues/516)
