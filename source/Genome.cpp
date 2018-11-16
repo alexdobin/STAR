@@ -25,7 +25,7 @@
 //arbitrary number for ftok function
 #define SHM_projectID 23
 
-Genome::Genome (Parameters &Pin ): sharedMemory(NULL), pGe(Pin.pGe), P(Pin), shmStart(NULL) {
+Genome::Genome (Parameters &Pin ): pGe(Pin.pGe), sharedMemory(NULL), P(Pin), shmStart(NULL) {
     shmKey=ftok(pGe.gDir.c_str(),SHM_projectID);    
     
     sjdbOverhang = pGe.sjdbOverhang; //will be re-defined later if another value was used for the generated genome

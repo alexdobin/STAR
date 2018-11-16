@@ -56,7 +56,10 @@ void scanVCF(ifstream& vcf, Parameters& P, SNP& snp, vector <uint> &chrStart, ma
                     //this is a strange case in VCF when ALT allele(s) are equal to REF
                 } else {
                     snp.lociV.push_back(pos-1+chrStart[chrNameIndex[chr]]);
-                    array<char,3> nt1={convertNt01234( ref.at(0) ), convertNt01234( altV.at( atoi(&sample.at(0)) ).at(0) ), convertNt01234( altV.at( atoi(&sample.at(2)) ).at(0) )};
+                    array<char,3> nt1;
+                    nt1[0]=convertNt01234( ref.at(0) );
+                    nt1[1]=convertNt01234( altV.at( atoi(&sample.at(0)) ).at(0) );
+                    nt1[2]=convertNt01234( altV.at( atoi(&sample.at(2)) ).at(0) );
                     snp.nt.push_back(nt1);
                     snp.N++;
                 };
