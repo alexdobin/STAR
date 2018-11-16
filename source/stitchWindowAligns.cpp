@@ -93,7 +93,7 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
         };
         trA.gLength = tG2+1-trA.gStart;
 
-        //check exons lenghts including repeats, do not report a transcript with short exons
+        //check exons lengths including repeats, do not report a transcript with short exons
         for (uint isj=0;isj<trA.nExons-1;isj++) {//check exons for min length, if they are not annotated and precede a junction
             if ( trA.canonSJ[isj]>=0 ) {//junction
                 if (trA.sjAnnot[isj]==1) {//sjdb
