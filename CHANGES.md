@@ -1,3 +1,5 @@
+* Added Dockerfile for STAR in extras/docker
+
 STAR 2.6.1c 2018/11/16
 ======================
 
