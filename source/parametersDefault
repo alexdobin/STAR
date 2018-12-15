@@ -681,3 +681,9 @@ soloUMIlen                  10
 
 soloCBwhitelist             -
     string: file with whitelist of cell barcodes
+
+soloStrand                  Forward
+    string: strandedness of the solo libraries:
+                            Unstranded  ... no strand information
+                            Forward     ... read strand same as the original RNA molecule
+                            Reverse     ... read strand opposite to the original RNA molecule

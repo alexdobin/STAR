@@ -16,6 +16,12 @@ SoloCB::SoloCB(Parameters &Pin, int iChunk) : P(Pin), pSolo(P.pSolo) {
         strU_0 = &fstrOpen(P.outFileTmp+"/soloCB_U_0_"+std::to_string(iChunk),ERROR_OUT, P);
     //strU_1 = &ofstrOpen(P.outFileTmp+"/soloCB_U_1_"+std::to_string(iChunk),ERROR_OUT, P);
     
+    for (uint32 jj=0;jj<4;jj++) {
+        homoPolymer[jj]=0;
+        for (uint32 ii=0; ii<pSolo.umiL;ii++) {
+            homoPolymer[jj]=(homoPolymer[jj]<<2)+jj;
+        };
+    };
 };
 
 void SoloCB::addSoloCB(const SoloCB &soloCBin) {

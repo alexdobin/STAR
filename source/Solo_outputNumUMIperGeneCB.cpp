@@ -12,6 +12,7 @@ void Solo::outputNumUMIperGeneCB() {
     //find 99%ile
     uint32 nUMImax = nUperCB[2*30];//robust estimate of the max UMI
     uint32 nUMImin = nUMImax/10;
+    nUMImin=0; //full output
 
     ofstream &geneStr=ofstrOpen(P.outFileNamePrefix+"SoloGeneNames.txt",ERROR_OUT, P);
     for (uint32 ii=0; ii<Trans.nGe; ii++)

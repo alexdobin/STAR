@@ -253,7 +253,8 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <uint32>   (-1, -1, "soloCBlen", &pSolo.cbL));
     parArray.push_back(new ParameterInfoScalar <uint32>   (-1, -1, "soloUMIlen", &pSolo.umiL));
     parArray.push_back(new ParameterInfoScalar <string>   (-1, -1, "soloCBwhitelist", &pSolo.soloCBwhitelist));
-    
+    parArray.push_back(new ParameterInfoScalar <string>   (-1, -1, "soloStrand", &pSolo.strandStr));
+
 //     //SW parameters
 //     parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "swMode", &swMode));
 //     parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "swWinCoverageMinP", &swWinCoverageMinP));

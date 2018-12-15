@@ -14,7 +14,7 @@ void SoloCB::readCB(const uint64 &iReadAll, const string &readNameExtra, const u
     } else if (readTrGenes.size()>1) {
         stats.V[stats.nAmbigGene]++;
         if (nTr>1)
-                stats.V[stats.nAmbigGeneMultimap]++;
+            stats.V[stats.nAmbigGeneMultimap]++;
         return;
     };
     
@@ -25,13 +25,19 @@ void SoloCB::readCB(const uint64 &iReadAll, const string &readNameExtra, const u
     
     uint32 cbB, umiB;
     int32 cbI=-2;
-    if (convertNuclStrToInt32(readNameExtra.substr(0,pSolo.cbL),cbB) \
-        && convertNuclStrToInt32(readNameExtra.substr(pSolo.cbL,pSolo.umiL),umiB)) {
-        cbI=binarySearchExact(cbB,pSolo.cbWL.data(),pSolo.cbWL.size());
-    } else {
+    if (!(convertNuclStrToInt32(readNameExtra.substr(0,pSolo.cbL),cbB) \
+        && convertNuclStrToInt32(readNameExtra.substr(pSolo.cbL,pSolo.umiL),umiB))) {//convert and check for Ns
         stats.V[stats.nNinBarcode]++;
         return;
     };
+    
+    if (umiB==homoPolymer[0] || umiB==homoPolymer[1] || umiB==homoPolymer[2] || umiB==homoPolymer[3]) {
+        stats.V[stats.nUMIhomopolymer]++;
+        return;
+    };
+    
+    cbI=binarySearchExact(cbB,pSolo.cbWL.data(),pSolo.cbWL.size());
+
 
 //     if (cbI!=-1) {
 //         *strU_0 << cbI <<' '<< *readTrGenes.begin() <<' '<< umiB <<' '<< iReadAll  <<'\n';
@@ -59,6 +65,7 @@ void SoloCB::readCB(const uint64 &iReadAll, const string &readNameExtra, const u
                 if (cbI1>=0) {                        
                     if (cbI>=0) {//had another match already
                         stats.V[stats.nTooMany]++;
+                        cout << iReadAll << endl;
                         return;
                     };
                     cbI=cbI1;

@@ -19,10 +19,23 @@ void ParametersSolo::initialize(Parameters *pPin) {
         pP->readNmates=1; //output mates TODO: check that readNmatesIn==2
     } else  {
         ostringstream errOut;
-        errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in of --soloType="<<typeStr<<"\n";
+        errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in --soloType="<<typeStr<<"\n";
         errOut << "SOLUTION: use allowed option: None or 10XchromiumV2";
         exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     }; 
+    
+    if (strandStr=="Unstranded") {
+        strand=-1;
+    } else if (strandStr=="Forward") {
+        strand=0;
+    } else if (strandStr=="Reverse") {
+        strand=1;        
+    } else  {
+        ostringstream errOut;
+        errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in --soloStrand="<<strandStr<<"\n";
+        errOut << "SOLUTION: use allowed option: Unstranded OR Forward OR Reverse";
+        exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+    };
     
     umiMaskLow=(uint32) ( (((uint64)1)<<umiL) - 1);
     umiMaskHigh=~umiMaskLow;

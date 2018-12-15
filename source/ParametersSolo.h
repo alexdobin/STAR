@@ -16,6 +16,9 @@ public:
     uint32 bL; //total barcode length
     string soloCBwhitelist;
     
+    string strandStr;
+    int32 strand;
+    
     std::vector <uint32> cbWL;
 
     uint32 umiMaskLow, umiMaskHigh; //low/high half bit-mask or UMIs 

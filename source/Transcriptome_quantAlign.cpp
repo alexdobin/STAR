@@ -107,8 +107,10 @@ uint32 Transcriptome::quantAlign (Transcript &aG, Transcript *aTall, vector<uint
                     aTall[nAtr].Chr = tr1;
                     aTall[nAtr].Str = trStr[tr1]==1 ? aG.Str : 1-aG.Str; //TODO strandedness
                     ++nAtr;
-                    readTranscripts.push_back(tr1);
-                    readTrGenes.insert(trGene[tr1]);
+                    if (P.pSolo.strand==-1 || (int32) aTall[nAtr-1].Str == P.pSolo.strand) {//correct strand
+                        readTranscripts.push_back(tr1);
+                        readTrGenes.insert(trGene[tr1]);
+                    };
                 };
         };
     } while (trEmax[tr1]>=aGend && tr1>0);

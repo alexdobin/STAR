@@ -18,8 +18,8 @@ void collapseUMIwith1MMlowHalf(uint32 *rGU, uint32 umiMaskLow, uint32 nU0, uint3
 
             uint32 uuXor=rGU[iu] ^ rGU[iuu];
 
-            if (uuXor==0)
-                exit(1); //debug
+//             if (uuXor==0)
+//                 exit(1); //debug
 
             if ( uuXor > umiMaskLow)
                 break; //upper half is different
@@ -28,16 +28,18 @@ void collapseUMIwith1MMlowHalf(uint32 *rGU, uint32 umiMaskLow, uint32 nU0, uint3
                 continue;//>1MM
 
             //1MM UMI
-            if ( (rGU[iuu] & bitTop) == 0) {
-                rGU[iuu] |= bitTop;
+            if ( (rGU[iuu+1] & bitTop) == 0) {
+                rGU[iuu+1] |= bitTop;
                 --nU1;//subtract the duplicated UMIs
+            } else if ( (rGU[iu+1] & bitTop) == 0) {
+                rGU[iu+1] |= bitTop;
+                --nU1;//subtract the duplicated UMIs                
             };
-            if ( (rGU[iuu] & bitTop1) == 0 && (rGU[iu+1] & bitMaskTop2bits)>(2*(rGU[iuu+1] & bitMaskTop2bits)+1) ) {//iuu is duplicate of iu
-                rGU[iuu] |= bitTop1;
+            if ( (rGU[iuu+1] & bitTop1) == 0 && (rGU[iu+1] & bitMaskTop2bits)>(2*(rGU[iuu+1] & bitMaskTop2bits)-1) ) {//iuu is duplicate of iu
+                rGU[iuu+1] |= bitTop1;
                 --nU2;//subtract the duplicated UMIs
-            };
-            if ( (rGU[iu] & bitTop1) == 0 && (rGU[iuu+1] & bitMaskTop2bits)>(2*(rGU[iu+1] & bitMaskTop2bits)+1) ) {//iu is duplicate of iu
-                rGU[iu] |= bitTop1;
+            } else if ( (rGU[iu+1] & bitTop1) == 0 && (rGU[iuu+1] & bitMaskTop2bits)>(2*(rGU[iu+1] & bitMaskTop2bits)-1) ) {//iu is duplicate of iuu
+                rGU[iu+1] |= bitTop1;
                 --nU2;//subtract the duplicated UMIs
             };            
         };
@@ -99,7 +101,9 @@ void Solo::collapseUMI(uint32 iCB, uint32 &nGenes, uint32 &nUtot) {//iCB = CB to
             rGU1[iu] &= pSolo.umiMaskLow; //remove high
             rGU1[iu] <<= (pSolo.umiL); //move low to high
             rGU1[iu] |= high; //add high
+            rGU1[iu+1] &= ~(3<<30); //remove the duplication flags (top 2 bits)
         };
+        qsort(rGU1, nU0, 2*sizeof(uint32), funCompareNumbers<uint32>);
         collapseUMIwith1MMlowHalf(rGU1,pSolo.umiMaskLow, nU0, nU1, nU2);
                 
         nUg[3*iG]=nU0;
