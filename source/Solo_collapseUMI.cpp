@@ -101,7 +101,7 @@ void Solo::collapseUMI(uint32 iCB, uint32 &nGenes, uint32 &nUtot) {//iCB = CB to
             rGU1[iu] &= pSolo.umiMaskLow; //remove high
             rGU1[iu] <<= (pSolo.umiL); //move low to high
             rGU1[iu] |= high; //add high
-            rGU1[iu+1] &= ~(3<<30); //remove the duplication flags (top 2 bits)
+            //rGU1[iu+1] &= ~(3<<30); //remove the duplication flags (top 2 bits)
         };
         qsort(rGU1, nU0, 2*sizeof(uint32), funCompareNumbers<uint32>);
         collapseUMIwith1MMlowHalf(rGU1,pSolo.umiMaskLow, nU0, nU1, nU2);

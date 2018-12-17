@@ -24,55 +24,56 @@ void SoloCB::readCB(const uint64 &iReadAll, const string &readNameExtra, const u
     */
     
     uint32 cbB, umiB;
-    int32 cbI=-2;
-    if (!(convertNuclStrToInt32(readNameExtra.substr(0,pSolo.cbL),cbB) \
-        && convertNuclStrToInt32(readNameExtra.substr(pSolo.cbL,pSolo.umiL),umiB))) {//convert and check for Ns
-        stats.V[stats.nNinBarcode]++;
+    
+    if (convertNuclStrToInt32(readNameExtra.substr(pSolo.cbL,pSolo.umiL),umiB)!=-1) {//convert and check for Ns
+        stats.V[stats.nNinBarcode]++;//UMIs are not allowed to have MMs
         return;
     };
-    
     if (umiB==homoPolymer[0] || umiB==homoPolymer[1] || umiB==homoPolymer[2] || umiB==homoPolymer[3]) {
         stats.V[stats.nUMIhomopolymer]++;
         return;
     };
     
-    cbI=binarySearchExact(cbB,pSolo.cbWL.data(),pSolo.cbWL.size());
-
-
-//     if (cbI!=-1) {
-//         *strU_0 << cbI <<' '<< *readTrGenes.begin() <<' '<< umiB <<' '<< iReadAll  <<'\n';
-//         cbReadCount[cbI]++;
-//     } else {
-//         for (uint32 ii=0; ii<2*pSolo.cbL; ii+=2) {
-//             for (uint32 jj=1; jj<4; jj++) {
-//                 cbI=binarySearchExact(cbB^(jj<<ii),pSolo.cbWL.data(),pSolo.cbWL.size());
-//                 if (cbI>=0) {                        
-//                     *strU_1 << cbI <<' '<< readNameExtra.at(pSolo.cbL+pSolo.umiL+1+ii/2) <<' ';
-//                     cbReadCount[cbI]++;
-//                 };
-//             };
-//         };
-//         *strU_1 << *readTrGenes.begin() <<' '<< umiB <<' '<< iReadAll <<'\n';
-//     };   
+    int32 posN=convertNuclStrToInt32(readNameExtra.substr(0,pSolo.cbL),cbB);
+    if (posN==-2) {//>2 Ns
+        stats.V[stats.nNinBarcode]++;
+        return;
+    };
     
-    //simple procedure: accept only if one WL CB exists with 1MM
-    if (cbI>=0) {
-        stats.V[stats.nExactMatch]++;
-    } else {
-        for (uint32 ii=0; ii<2*pSolo.cbL; ii+=2) {
-            for (uint32 jj=1; jj<4; jj++) {
-                int32 cbI1=binarySearchExact(cbB^(jj<<ii),pSolo.cbWL.data(),pSolo.cbWL.size());
-                if (cbI1>=0) {                        
-                    if (cbI>=0) {//had another match already
-                        stats.V[stats.nTooMany]++;
-                        cout << iReadAll << endl;
-                        return;
+    int32 cbI=-2;    
+    if (posN>=0) {//one N
+        for (uint32 jj=0; jj<4; jj++) {
+            int32 cbI1=binarySearchExact(cbB^(jj<<(posN*2)),pSolo.cbWL.data(),pSolo.cbWL.size());
+            if (cbI1>=0) {                        
+                if (cbI>=0) {//had another match already
+                    stats.V[stats.nTooMany]++;
+                    return;//with N in CB, do not allow matching >1 in WL
+                };
+                cbI=cbI1;
+            };
+        };
+    } else {//posN==-1, no Ns
+        cbI=binarySearchExact(cbB,pSolo.cbWL.data(),pSolo.cbWL.size());
+
+        if (cbI>=0) {
+            stats.V[stats.nExactMatch]++;
+        } else {
+            for (uint32 ii=0; ii<2*pSolo.cbL; ii+=2) {
+                for (uint32 jj=1; jj<4; jj++) {
+                    int32 cbI1=binarySearchExact(cbB^(jj<<ii),pSolo.cbWL.data(),pSolo.cbWL.size());
+                    if (cbI1>=0) {                        
+                        if (cbI>=0) {//had another match already
+                            stats.V[stats.nTooMany]++;
+                            //cout << iReadAll << endl;
+                            return;    //simple procedure: accept only if one WL CB exists with 1MM
+                        };
+                        cbI=cbI1;
                     };
-                    cbI=cbI1;
                 };
             };
         };
     };
+    
     if (cbI<0) {
         stats.V[stats.nNoMatch]++;
         return;
