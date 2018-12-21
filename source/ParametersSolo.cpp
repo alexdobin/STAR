@@ -37,6 +37,10 @@ void ParametersSolo::initialize(Parameters *pPin) {
         exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
     
+    QSbase=33;//TODO make these user-definable
+    QSmax=33;
+    cbMinP=0.975;
+    
     umiMaskLow=(uint32) ( (((uint64)1)<<umiL) - 1);
     umiMaskHigh=~umiMaskLow;
     

@@ -471,7 +471,21 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                         {//chimeric alignment
                             attrN+=bamAttrArrayWrite(matesCIGAR[1-imate],"MC",attrOutArray+attrN);
                         };                        
+                        break;
+                        
+                    case ATTR_CR:
+                            attrN+=bamAttrArrayWrite(soloCB->cbSeq,"CR",attrOutArray+attrN);
                         break;                        
+                    case ATTR_CY:
+                            attrN+=bamAttrArrayWrite(soloCB->cbQual,"CY",attrOutArray+attrN);
+                        break;  
+                    case ATTR_UR:
+                            attrN+=bamAttrArrayWrite(soloCB->umiSeq,"UR",attrOutArray+attrN);
+                        break;  
+                    case ATTR_UY:
+                            attrN+=bamAttrArrayWrite(soloCB->umiQual,"UY",attrOutArray+attrN);
+                        break;  
+                        
                     default:
                         ostringstream errOut;
                         errOut <<"EXITING because of FATAL BUG: unknown/unimplemented SAM/BAM atrribute (tag): "<<outSAMattrOrder[ii] <<"\n";

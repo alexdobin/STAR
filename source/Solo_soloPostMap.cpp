@@ -15,24 +15,24 @@ void Solo::soloPostMap(ReadAlignChunk **RAchunk) {
     soloCBsum->statsOut(*soloStatsStream);
        
     //allocate arrays to store CB/gene/UMIs for all reads
-    nReadsMapped=soloCBsum->stats.V[soloCBsum->stats.nMatch];
-    rGeneUMI = new uint32[2*nReadsMapped]; 
+    nCB=0;nReadsMapped=0;
+    for (uint32 ii=0; ii<pSolo.cbWL.size(); ii++) {
+        if (soloCBsum->cbReadCountExact[ii]>0) {
+            nCB++;
+            nReadsMapped += soloCBsum->cbReadCount[ii];
+        };
+    };
 
-    nCB=0;
-    for (uint32 ii=0; ii<pSolo.cbWL.size()-1; ii++)
-        nCB += (soloCBsum->cbReadCount[ii]>0 ? 1 : 0 );
-
-    rCBp = new uint32*[nCB];
+    rGeneUMI = new uint32[2*nReadsMapped]; //big array for all CBs - each element is gene and UMI
+    rCBp = new uint32*[nCB+1];
     uint32 **rCBpa = new uint32*[pSolo.cbWL.size()];
-    rCBn = new uint32[nCB];
     indCB = new uint32[nCB];
     rCBp[0]=rGeneUMI;
     rCBpa[0]=rGeneUMI;
     nCB=0;//will count it again below
     for (uint32 ii=0; ii<pSolo.cbWL.size()-1; ii++) {
-        if (soloCBsum->cbReadCount[ii]>0) {
+        if (soloCBsum->cbReadCountExact[ii]>0) {//if no exact matches, this CB is not present
             indCB[nCB]=ii;
-            rCBn[nCB]=soloCBsum->cbReadCount[ii];
             rCBp[nCB+1] = rCBp[nCB] + 2*soloCBsum->cbReadCount[ii];
             ++nCB;
         };
@@ -45,7 +45,7 @@ void Solo::soloPostMap(ReadAlignChunk **RAchunk) {
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished allocating arrays for Solo " << nReadsMapped*2.0*8/1024/1024/1024 <<" GB" <<endl;
 
     for (int ii=0; ii<P.runThreadN; ii++) {//TODO: this can be parallelized
-        soloCBall[ii]->readCBgeneUMIfromFiles(rCBpa);
+        soloCBall[ii]->readCBgeneUMIfromFiles(rCBpa,soloCBsum->cbReadCountExact);
     };
     
     time(&rawTime);
@@ -56,7 +56,9 @@ void Solo::soloPostMap(ReadAlignChunk **RAchunk) {
     nGperCB = new uint32[nCB];
     for (uint32 iCB=0; iCB<nCB; iCB++) {
         nUperCB[2*iCB+1]=iCB;
-        collapseUMI(iCB,nGperCB[iCB],nUperCB[2*iCB]);
+        uint64 nr=(rCBpa[indCB[iCB]]-rCBp[iCB])/2; //number of reads that were matched to WL, rCBpa accumulated reference to the last element+1
+        soloCBsum->stats.V[soloCBsum->stats.nMatch] += nr;
+        collapseUMI(rCBp[iCB],nr,nGperCB[iCB],nUperCB[2*iCB]);
     };
     
     time(&rawTime);
@@ -64,8 +66,5 @@ void Solo::soloPostMap(ReadAlignChunk **RAchunk) {
 
     //output nU per gene per CB
     outputNumUMIperGeneCB();
-    
 
-    
-//     statsStream.close();
 };

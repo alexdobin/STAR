@@ -24,7 +24,7 @@ public:
     
     Solo(Parameters &Pin, Transcriptome &inTrans);
     void soloPostMap(ReadAlignChunk **RAchunk);
-    void collapseUMI(uint32 iCB, uint32 &nGenes, uint32 &nUtot);
+    void collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot);
     void outputNumUMIperGeneCB();    
 
 

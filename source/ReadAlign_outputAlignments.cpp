@@ -8,6 +8,10 @@ void ReadAlign::outputAlignments() {
 
     bool mateMapped[2]={false,false};
 
+    vector<int32> readGenes;
+    vector<uint32> readTranscripts={};
+    set<uint32> readTrGenes={};
+    
     if (unmapType==-1) {//output transcripts
 
         outFilterPassed=true;
@@ -55,8 +59,7 @@ void ReadAlign::outputAlignments() {
             bool outSAMfilterYes=true;
             if (P.outSAMfilter.yes) {
                 if (P.outSAMfilter.KeepOnlyAddedReferences) {
-                    for (uint itr=0;itr<nTr;itr++)
-                    {//check if transcripts map to chr other than added references
+                    for (uint itr=0;itr<nTr;itr++) {//check if transcripts map to chr other than added references
                         if (trMult[itr]->Chr<mapGen.genomeInsertChrIndFirst) {
                             outSAMfilterYes=false;
                             break;
@@ -166,21 +169,17 @@ void ReadAlign::outputAlignments() {
                 };
             };
 
-            vector<int32> readGenes;
             if ( P.quant.geCount.yes ) {
                 chunkTr->geneCountsAddAlign(nTr, trMult, readGenes);
             };
 
-            vector<uint32> readTranscripts={};
-            set<uint32> readTrGenes={};
             if ( P.quant.trSAM.yes ) {//NOTE: the transcripts are changed by this function (soft-clipping extended), cannot be reused
                 quantTranscriptome(chunkTr, nTrOut, trMult,  alignTrAll, readTranscripts, readTrGenes);
             };
-            
-            soloCB->readCB(iReadAll, readNameExtra.at(0), nTr, readGenes, readTranscripts, readTrGenes);
-            
         };
     };
+    
+    soloCB->readCB(iReadAll, readNameExtra.at(0), nTr, readGenes, readTranscripts, readTrGenes);
 
     if (unmapType>=0) {
         statsRA.unmappedAll++;

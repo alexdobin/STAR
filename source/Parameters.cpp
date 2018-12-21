@@ -965,6 +965,9 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
     
+    //solo
+    pSolo.initialize(this);
+    
     //outSAMattributes
     outSAMattrPresent.NH=false;//TODO re-write as class with constructor?
     outSAMattrPresent.HI=false;
@@ -982,6 +985,11 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     outSAMattrPresent.vW=false;
     outSAMattrPresent.ch=false;
     outSAMattrPresent.rB=false;
+    outSAMattrPresent.CR=false;
+    outSAMattrPresent.CY=false;
+    outSAMattrPresent.UR=false;
+    outSAMattrPresent.UY=false;
+
             
     //for quant SAM output only NH and HI flags
     outSAMattrPresentQuant=outSAMattrPresent;
@@ -1050,6 +1058,22 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             outSAMattrOrder.push_back(ATTR_MC);
             outSAMattrOrderQuant.push_back(ATTR_MC);
             outSAMattrPresent.MC=true;                        
+        } else if (vAttr1.at(ii)== "CR") {
+            outSAMattrOrder.push_back(ATTR_CR);
+            outSAMattrOrderQuant.push_back(ATTR_CR);
+            outSAMattrPresent.CR=true;                        
+        } else if (vAttr1.at(ii)== "CY") {
+            outSAMattrOrder.push_back(ATTR_CY);
+            outSAMattrOrderQuant.push_back(ATTR_CY);
+            outSAMattrPresent.CY=true;                        
+        } else if (vAttr1.at(ii)== "UR") {
+            outSAMattrOrder.push_back(ATTR_UR);
+            outSAMattrOrderQuant.push_back(ATTR_UR);
+            outSAMattrPresent.UR=true;                        
+        } else if (vAttr1.at(ii)== "UY") {
+            outSAMattrOrder.push_back(ATTR_UY);
+            outSAMattrOrderQuant.push_back(ATTR_UY);
+            outSAMattrPresent.UY=true;                                   
         } else if (vAttr1.at(ii)== "XS") {
             outSAMattrOrder.push_back(ATTR_XS);
             outSAMattrPresent.XS=true;
@@ -1101,6 +1125,13 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         outSAMattrOrderQuant.push_back(ATTR_vW);
         outSAMattrPresent.vW=true;
         inOut->logMain << "WARNING --waspOutputMode is set, therefore STAR will output vW attribute" <<endl;
+    };    
+    
+    if (pSolo.type==0 && (outSAMattrPresent.CR || outSAMattrPresent.CY || outSAMattrPresent.UR || outSAMattrPresent.UY) ) {
+            ostringstream errOut;
+            errOut <<"EXITING because of FATAL INPUT ERROR: --outSAMattributes contains CR/CY/UR/UY tags, but --soloType is not set\n";
+            errOut <<"SOLUTION: re-run STAR without these attribures, or with --soloType set\n";
+            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };    
     
     //chimeric
@@ -1407,9 +1438,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     } else {
         peOverlap.yes=false;
     };
-    
-    //solo
-    pSolo.initialize(this);
     
     //read parameters
     if (pReads.strandString=="Unstranded") {

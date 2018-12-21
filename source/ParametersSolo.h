@@ -23,7 +23,11 @@ public:
 
     uint32 umiMaskLow, umiMaskHigh; //low/high half bit-mask or UMIs 
     
+    char QSbase,QSmax;//quality score base and cutoff
+    float cbMinP;//for CBs with non-exact matching to WL, min posterior probability 
+    
     static const uint64 bufferSize=1048576;
+    
     void initialize(Parameters *pPin);
     
 private:

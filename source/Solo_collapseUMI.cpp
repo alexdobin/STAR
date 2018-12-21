@@ -13,8 +13,9 @@ void collapseUMIwith1MMlowHalf(uint32 *rGU, uint32 umiMaskLow, uint32 nU0, uint3
         uint32 iuu=iu+2;
         for (; iuu<2*nU0; iuu+=2) {//compare to all UMIs down
 
-            if ( (rGU[iuu+1] & bitTop & bitTop1) > 0)
-                continue;//this one was already found duplicated for both collapse types
+            //this is wrong - if iuu is duplicate, it will make iu duplicate
+            //if ( (rGU[iuu+1] & bitTop & bitTop1) > 0)
+            //    continue;//this one was already found duplicated for both collapse types
 
             uint32 uuXor=rGU[iu] ^ rGU[iuu];
 
@@ -45,10 +46,10 @@ void collapseUMIwith1MMlowHalf(uint32 *rGU, uint32 umiMaskLow, uint32 nU0, uint3
         };
     };
 };
-void Solo::collapseUMI(uint32 iCB, uint32 &nGenes, uint32 &nUtot) {//iCB = CB to collapse, nReads=number of reads for this CB
+void Solo::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot) {//iCB = CB to collapse, nReads=number of reads for this CB
+
+    uint32 nRumiMax=0;
     
-    uint32 *rGU=rCBp[iCB];
-    uint32 rN=rCBn[iCB];
     //sort 
     qsort(rGU,rN,2*sizeof(uint32),funCompareNumbers<uint32>); //sort by gene number
     
@@ -86,7 +87,8 @@ void Solo::collapseUMI(uint32 iCB, uint32 &nGenes, uint32 &nUtot) {//iCB = CB to
                 rGU1[iR1]=u1;
                 rGU1[iR1+1]=0;                
             };
-            rGU1[iR1+1]++;             
+            rGU1[iR1+1]++;         
+            if ( rGU1[iR1+1]>nRumiMax) nRumiMax=rGU1[iR1+1];
         };
         uint32 nU0=(iR1+2)/2;
         
@@ -124,4 +126,6 @@ void Solo::collapseUMI(uint32 iCB, uint32 &nGenes, uint32 &nUtot) {//iCB = CB to
             rGUp += 2;
         };
     };
+    cout << nRumiMax << '\n';
+
 };

@@ -254,6 +254,7 @@ outSAMattributes                Standard
                                 Unsupported/undocumented:
                                 rB          ... alignment block read/genomic coordinates
                                 vR          ... read coordinate of the variant
+                                CR,CY,UR,UY ... sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing
 
 outSAMattrIHstart               1
     int>=0:                     start value for the IH attribute. 0 may be required by some downstream software, such as Cufflinks or StringTie.
