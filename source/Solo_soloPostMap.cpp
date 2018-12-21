@@ -27,6 +27,8 @@ void Solo::soloPostMap(ReadAlignChunk **RAchunk) {
     rCBp = new uint32*[nCB+1];
     uint32 **rCBpa = new uint32*[pSolo.cbWL.size()];
     indCB = new uint32[nCB];
+    
+    uint32 nReadPerCBmax=0;
     rCBp[0]=rGeneUMI;
     rCBpa[0]=rGeneUMI;
     nCB=0;//will count it again below
@@ -48,17 +50,26 @@ void Solo::soloPostMap(ReadAlignChunk **RAchunk) {
         soloCBall[ii]->readCBgeneUMIfromFiles(rCBpa,soloCBsum->cbReadCountExact);
     };
     
+    for (uint32 iCB=0; iCB<nCB; iCB++) {
+        uint64 nr=(rCBpa[indCB[iCB]]-rCBp[iCB])/2;  //number of reads that were matched to WL, rCBpa accumulated reference to the last element+1
+        if (nr>nReadPerCBmax)
+            nReadPerCBmax=nr;
+        soloCBsum->stats.V[soloCBsum->stats.nMatch] += nr;        
+    };
+    
     time(&rawTime);
-    P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished reading reads from Solo files nCB="<<nCB <<endl;
+    P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished reading reads from Solo files nCB="<<nCB <<", nReadPerCBmax="<<nReadPerCBmax;
+    P.inOut->logMain <<", nMatch="<<soloCBsum->stats.V[soloCBsum->stats.nMatch]<<endl;
     
     //collapse each CB
     nUperCB = new uint32[2*nCB];
     nGperCB = new uint32[nCB];
+    uint32 umiArray[nReadPerCBmax*umiArrayStride];
+    
     for (uint32 iCB=0; iCB<nCB; iCB++) {
         nUperCB[2*iCB+1]=iCB;
         uint64 nr=(rCBpa[indCB[iCB]]-rCBp[iCB])/2; //number of reads that were matched to WL, rCBpa accumulated reference to the last element+1
-        soloCBsum->stats.V[soloCBsum->stats.nMatch] += nr;
-        collapseUMI(rCBp[iCB],nr,nGperCB[iCB],nUperCB[2*iCB]);
+        collapseUMI(rCBp[iCB],nr,nGperCB[iCB],nUperCB[2*iCB],umiArray);
     };
     
     time(&rawTime);

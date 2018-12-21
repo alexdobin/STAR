@@ -46,9 +46,9 @@ void collapseUMIwith1MMlowHalf(uint32 *rGU, uint32 umiMaskLow, uint32 nU0, uint3
         };
     };
 };
-void Solo::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot) {//iCB = CB to collapse, nReads=number of reads for this CB
+void Solo::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot, uint32 *umiArray) {//iCB = CB to collapse, nReads=number of reads for this CB
 
-    uint32 nRumiMax=0;
+    //uint32 nRumiMax=0;
     
     //sort 
     qsort(rGU,rN,2*sizeof(uint32),funCompareNumbers<uint32>); //sort by gene number
@@ -82,31 +82,30 @@ void Solo::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot) {/
         uint32 u1=-1;
         for (uint32 iR=0; iR<gReadS[iG+1]-gReadS[iG]; iR+=2) {//count and collapse identical UMIs
             if (rGU1[iR]!=u1) {
-                iR1 += 2;
+                iR1 += umiArrayStride;
                 u1=rGU1[iR];                
-                rGU1[iR1]=u1;
-                rGU1[iR1+1]=0;                
+                umiArray[iR1]=u1;
+                umiArray[iR1+1]=0;                
             };
-            rGU1[iR1+1]++;         
-            if ( rGU1[iR1+1]>nRumiMax) nRumiMax=rGU1[iR1+1];
+            umiArray[iR1+1]++;         
+            //if ( umiArray[iR1+1]>nRumiMax) nRumiMax=umiArray[iR1+1];
         };
         uint32 nU0=(iR1+2)/2;
         
         //collapse with 1MM
         uint32 nU1=nU0, nU2=nU0;//2 types of 1MM collapsing
 
-        collapseUMIwith1MMlowHalf(rGU1,pSolo.umiMaskLow, nU0, nU1, nU2);
+        collapseUMIwith1MMlowHalf(umiArray,pSolo.umiMaskLow, nU0, nU1, nU2);
         
         //exchange low and high half of UMIs, re-sort, and look for 1MM again
         for (uint32 iu=0; iu<2*nU0; iu+=2) {
-            uint32 high=rGU1[iu]>>(pSolo.umiL);
-            rGU1[iu] &= pSolo.umiMaskLow; //remove high
-            rGU1[iu] <<= (pSolo.umiL); //move low to high
-            rGU1[iu] |= high; //add high
-            //rGU1[iu+1] &= ~(3<<30); //remove the duplication flags (top 2 bits)
+            uint32 high=umiArray[iu]>>(pSolo.umiL);
+            umiArray[iu] &= pSolo.umiMaskLow; //remove high
+            umiArray[iu] <<= (pSolo.umiL); //move low to high
+            umiArray[iu] |= high; //add high
         };
-        qsort(rGU1, nU0, 2*sizeof(uint32), funCompareNumbers<uint32>);
-        collapseUMIwith1MMlowHalf(rGU1,pSolo.umiMaskLow, nU0, nU1, nU2);
+        qsort(umiArray, nU0, 2*sizeof(uint32), funCompareNumbers<uint32>);
+        collapseUMIwith1MMlowHalf(umiArray,pSolo.umiMaskLow, nU0, nU1, nU2);
                 
         nUg[3*iG]=nU0;
         nUg[3*iG+1]=nU1;
@@ -126,6 +125,6 @@ void Solo::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot) {/
             rGUp += 2;
         };
     };
-    cout << nRumiMax << '\n';
+    //cout << nRumiMax << '\n';
 
 };
