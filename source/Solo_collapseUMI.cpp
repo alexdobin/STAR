@@ -6,21 +6,13 @@
 void collapseUMIwith1MMlowHalf(uint32 *rGU, uint32 umiArrayStride, uint32 umiMaskLow, uint32 nU0, uint32 &nU1, uint32 &nU2) {
     
     const uint32 bitTop=1<<31;
-    const uint32 bitTop1=1<<30;
-    const uint32 bitMaskTop2bits=(~bitTop) & (~bitTop1);
+    const uint32 bitTopMask=~bitTop;
     
     for (uint32 iu=0; iu<umiArrayStride*nU0; iu+=umiArrayStride) {//each UMI
         uint32 iuu=iu+umiArrayStride;
         for (; iuu<umiArrayStride*nU0; iuu+=umiArrayStride) {//compare to all UMIs down
 
-            //this is wrong - if iuu is duplicate, it will make iu duplicate
-            //if ( (rGU[iuu+1] & bitTop & bitTop1) > 0)
-            //    continue;//this one was already found duplicated for both collapse types
-
             uint32 uuXor=rGU[iu] ^ rGU[iuu];
-
-//             if (uuXor==0)
-//                 exit(1); //debug
 
             if ( uuXor > umiMaskLow)
                 break; //upper half is different
@@ -29,28 +21,28 @@ void collapseUMIwith1MMlowHalf(uint32 *rGU, uint32 umiArrayStride, uint32 umiMas
                 continue;//>1MM
 
             //1MM UMI
-            if ( (rGU[iuu+1] & bitTop) == 0) {
-                rGU[iuu+1] |= bitTop;
+            if ( rGU[iuu+2] == 0) {
+                rGU[iuu+2] = 1;
                 --nU1;//subtract the duplicated UMIs
-            } else if ( (rGU[iu+1] & bitTop) == 0) {
-                rGU[iu+1] |= bitTop;
+            } else if ( rGU[iu+2] == 0) {
+                rGU[iu+2] = 1;
                 --nU1;//subtract the duplicated UMIs                
             };
-            if ( (rGU[iuu+1] & bitTop1) == 0 && (rGU[iu+1] & bitMaskTop2bits)>(2*(rGU[iuu+1] & bitMaskTop2bits)-1) ) {//iuu is duplicate of iu
-                rGU[iuu+1] |= bitTop1;
+            if ( (rGU[iuu+1] & bitTop) == 0 && (rGU[iu+1] & bitTopMask)>(2*(rGU[iuu+1] & bitTopMask)-1) ) {//iuu is duplicate of iu
+                rGU[iuu+1] |= bitTop;
                 --nU2;//subtract the duplicated UMIs
-            } else if ( (rGU[iu+1] & bitTop1) == 0 && (rGU[iuu+1] & bitMaskTop2bits)>(2*(rGU[iu+1] & bitMaskTop2bits)-1) ) {//iu is duplicate of iuu
-                rGU[iu+1] |= bitTop1;
+            } else if ( (rGU[iu+1] & bitTop) == 0 && (rGU[iuu+1] & bitTopMask)>(2*(rGU[iu+1] & bitTopMask)-1) ) {//iu is duplicate of iuu
+                rGU[iu+1] |= bitTop;
                 --nU2;//subtract the duplicated UMIs
             };            
         };
     };
 };
+
 void Solo::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot, uint32 *umiArray) {//iCB = CB to collapse, nReads=number of reads for this CB
 
     //uint32 nRumiMax=0;
     
-    //sort 
     qsort(rGU,rN,2*sizeof(uint32),funCompareNumbers<uint32>); //sort by gene number
     
     //compact reads per gene
@@ -85,7 +77,8 @@ void Solo::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot, ui
                 iR1 += umiArrayStride;
                 u1=rGU1[iR];                
                 umiArray[iR1]=u1;
-                umiArray[iR1+1]=0;                
+                umiArray[iR1+1]=0;
+                umiArray[iR1+2]=0; 
             };
             umiArray[iR1+1]++;         
             //if ( umiArray[iR1+1]>nRumiMax) nRumiMax=umiArray[iR1+1];
