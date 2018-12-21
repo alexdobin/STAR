@@ -3,15 +3,15 @@
 #include "TimeFunctions.h"
 #include "serviceFuns.cpp"
 
-void collapseUMIwith1MMlowHalf(uint32 *rGU, uint32 umiMaskLow, uint32 nU0, uint32 &nU1, uint32 &nU2) {
+void collapseUMIwith1MMlowHalf(uint32 *rGU, uint32 umiArrayStride, uint32 umiMaskLow, uint32 nU0, uint32 &nU1, uint32 &nU2) {
     
     const uint32 bitTop=1<<31;
     const uint32 bitTop1=1<<30;
     const uint32 bitMaskTop2bits=(~bitTop) & (~bitTop1);
     
-    for (uint32 iu=0; iu<2*nU0; iu+=2) {//each UMI
-        uint32 iuu=iu+2;
-        for (; iuu<2*nU0; iuu+=2) {//compare to all UMIs down
+    for (uint32 iu=0; iu<umiArrayStride*nU0; iu+=umiArrayStride) {//each UMI
+        uint32 iuu=iu+umiArrayStride;
+        for (; iuu<umiArrayStride*nU0; iuu+=umiArrayStride) {//compare to all UMIs down
 
             //this is wrong - if iuu is duplicate, it will make iu duplicate
             //if ( (rGU[iuu+1] & bitTop & bitTop1) > 0)
@@ -78,7 +78,7 @@ void Solo::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot, ui
         qsort(rGU1, (gReadS[iG+1]-gReadS[iG])/2, 2*sizeof(uint32), funCompareNumbers<uint32>);
 
         //exact collapse
-        uint32 iR1=-2; //number of distinct UMIs for this gene
+        uint32 iR1=-umiArrayStride; //number of distinct UMIs for this gene
         uint32 u1=-1;
         for (uint32 iR=0; iR<gReadS[iG+1]-gReadS[iG]; iR+=2) {//count and collapse identical UMIs
             if (rGU1[iR]!=u1) {
@@ -90,22 +90,22 @@ void Solo::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot, ui
             umiArray[iR1+1]++;         
             //if ( umiArray[iR1+1]>nRumiMax) nRumiMax=umiArray[iR1+1];
         };
-        uint32 nU0=(iR1+2)/2;
+        uint32 nU0=(iR1+umiArrayStride)/umiArrayStride;
         
         //collapse with 1MM
         uint32 nU1=nU0, nU2=nU0;//2 types of 1MM collapsing
 
-        collapseUMIwith1MMlowHalf(umiArray,pSolo.umiMaskLow, nU0, nU1, nU2);
+        collapseUMIwith1MMlowHalf(umiArray, umiArrayStride, pSolo.umiMaskLow, nU0, nU1, nU2);
         
         //exchange low and high half of UMIs, re-sort, and look for 1MM again
-        for (uint32 iu=0; iu<2*nU0; iu+=2) {
+        for (uint32 iu=0; iu<umiArrayStride*nU0; iu+=umiArrayStride) {
             uint32 high=umiArray[iu]>>(pSolo.umiL);
             umiArray[iu] &= pSolo.umiMaskLow; //remove high
             umiArray[iu] <<= (pSolo.umiL); //move low to high
             umiArray[iu] |= high; //add high
         };
-        qsort(umiArray, nU0, 2*sizeof(uint32), funCompareNumbers<uint32>);
-        collapseUMIwith1MMlowHalf(umiArray,pSolo.umiMaskLow, nU0, nU1, nU2);
+        qsort(umiArray, nU0, umiArrayStride*sizeof(uint32), funCompareNumbers<uint32>);
+        collapseUMIwith1MMlowHalf(umiArray, umiArrayStride, pSolo.umiMaskLow, nU0, nU1, nU2);
                 
         nUg[3*iG]=nU0;
         nUg[3*iG+1]=nU1;
