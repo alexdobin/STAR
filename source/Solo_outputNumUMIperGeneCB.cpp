@@ -15,13 +15,13 @@ void Solo::outputNumUMIperGeneCB() {
     
     //nUMImin=0; //full output
 
-    ofstream &geneStr=ofstrOpen(P.outFileNamePrefix+"SoloGeneNames.txt",ERROR_OUT, P);
+    ofstream &geneStr=ofstrOpen(P.outFileNamePrefix+pSolo.outFileNames[0]+pSolo.outFileNames[1],ERROR_OUT, P);
     for (uint32 ii=0; ii<Trans.nGe; ii++)
         geneStr << Trans.geID.at(ii) << '\n';
     geneStr.close();
 
-    ofstream &cbStr=ofstrOpen(P.outFileNamePrefix+"SoloCellBarcodes.txt",ERROR_OUT, P);
-    ofstream &cbGeneMatrix=ofstrOpen(P.outFileNamePrefix+"SoloGeneCounts.txt",ERROR_OUT, P);
+    ofstream &cbStr=ofstrOpen(P.outFileNamePrefix+pSolo.outFileNames[0]+pSolo.outFileNames[2],ERROR_OUT, P);
+    ofstream &cbGeneMatrix=ofstrOpen(P.outFileNamePrefix+pSolo.outFileNames[0]+pSolo.outFileNames[3],ERROR_OUT, P);
 
     for (auto const &cb : pSolo.cbWL)
         cbStr << convertNuclInt32toString(cb,pSolo.cbL)  <<'\n';    

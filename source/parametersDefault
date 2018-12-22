@@ -688,3 +688,11 @@ soloStrand                  Forward
                             Unstranded  ... no strand information
                             Forward     ... read strand same as the original RNA molecule
                             Reverse     ... read strand opposite to the original RNA molecule
+
+soloOutFileNames            Solo.out/ genes.tsv barcodes.tsv matrix.mtx matrixSJ.mtx
+    string(s)               file names for STARsolo output
+                            1st word    ... file name prefix
+                            2nd word    ... barcode sequences
+                            3rd word    ... gene IDs and names
+                            4th word    ... cell/gene counts matrix
+                            5th word    ... cell/splice junction counts matrix

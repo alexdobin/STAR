@@ -15,6 +15,7 @@ public:
     uint32 umiL; //umi length
     uint32 bL; //total barcode length
     string soloCBwhitelist;
+    vector<string> outFileNames;
     
     string strandStr;
     int32 strand;
