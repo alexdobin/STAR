@@ -196,7 +196,7 @@ char convertNt01234(const char R0) {//transform sequence  from ACGT into 0-1-2-3
 int32 convertNuclStrToInt32(const string S, uint32 &intOut) {
     intOut=0;
     int32 posN=-1;
-    for (uint ii=0; ii<S.size(); ii++) {
+    for (uint32 ii=0; ii<S.size(); ii++) {
         uint32 nt = (uint32) convertNt01234(S.at(ii));
         if (nt>3) {//N
             if (posN>=0)
@@ -204,7 +204,9 @@ int32 convertNuclStrToInt32(const string S, uint32 &intOut) {
             posN=ii;
             nt=0;
         };
-        intOut += nt<<(2*ii);
+        intOut = intOut << 2;
+        intOut +=nt;
+        //intOut += nt<<(2*ii);
     };
     return posN;
 };
@@ -213,8 +215,8 @@ string convertNuclInt32toString(uint32 nuclNum, const uint32 L) {
     string nuclOut(L,'N');
     string nuclChar="ACGT";
 
-    for (uint ii=0; ii<L; ii++) {
-        nuclOut[ii] = nuclChar[nuclNum & 3];
+    for (uint32 ii=1; ii<=L; ii++) {
+        nuclOut[L-ii] = nuclChar[nuclNum & 3];
         nuclNum = nuclNum >> 2;
     };
     return nuclOut;

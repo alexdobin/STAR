@@ -3,10 +3,13 @@
 #include "TimeFunctions.h"
 #include "serviceFuns.cpp"
 
-void collapseUMIwith1MMlowHalf(uint32 *rGU, uint32 umiArrayStride, uint32 umiMaskLow, uint32 nU0, uint32 &nU1, uint32 &nU2) {
+#define def_MarkNoColor  (uint32) -1
+
+void collapseUMIwith1MMlowHalf(uint32 *rGU, uint32 umiArrayStride, uint32 umiMaskLow, uint32 nU0, uint32 &nU1, uint32 &nU2, uint32 &nC, vector<array<uint32,2>> &vC) {
     
     const uint32 bitTop=1<<31;
     const uint32 bitTopMask=~bitTop;
+    
     
     for (uint32 iu=0; iu<umiArrayStride*nU0; iu+=umiArrayStride) {//each UMI
         uint32 iuu=iu+umiArrayStride;
@@ -21,13 +24,29 @@ void collapseUMIwith1MMlowHalf(uint32 *rGU, uint32 umiArrayStride, uint32 umiMas
                 continue;//>1MM
 
             //1MM UMI
-            if ( rGU[iuu+2] == 0) {
-                rGU[iuu+2] = 1;
-                --nU1;//subtract the duplicated UMIs
-            } else if ( rGU[iu+2] == 0) {
-                rGU[iu+2] = 1;
+            
+            //graph coloring
+            if ( rGU[iu+2] == def_MarkNoColor && rGU[iuu+2] == def_MarkNoColor ) {//no color
+                //new color
+                rGU[iu+2] = nC;
+                rGU[iuu+2] = nC;
+                ++nC;                
+                nU1 -= 2;//subtract the duplicated UMIs
+            } else if ( rGU[iu+2] == def_MarkNoColor ) {
+                rGU[iu+2] = rGU[iuu+2];
+                --nU1;//subtract the duplicated UMIs   
+            } else if ( rGU[iuu+2] == def_MarkNoColor ) {
+                rGU[iuu+2] = rGU[iu+2];
                 --nU1;//subtract the duplicated UMIs                
+            } else {//both color
+                if (rGU[iuu+2] != rGU[iu+2]) {//color conflict
+                    //uint32 p[2]={rGU[iu+2],rGU[iuu+2]};
+                    vC.push_back({rGU[iu+2],rGU[iuu+2]});
+                    //vC.push_back({rGU[iuu+2],rGU[iu+2]});
+                };
             };
+            
+            //directional collapse
             if ( (rGU[iuu+1] & bitTop) == 0 && (rGU[iu+1] & bitTopMask)>(2*(rGU[iuu+1] & bitTopMask)-1) ) {//iuu is duplicate of iu
                 rGU[iuu+1] |= bitTop;
                 --nU2;//subtract the duplicated UMIs
@@ -37,6 +56,48 @@ void collapseUMIwith1MMlowHalf(uint32 *rGU, uint32 umiArrayStride, uint32 umiMas
             };            
         };
     };
+};
+
+void graphDepthFirstSearch(uint32 n, vector<bool> &nodeVisited, vector<vector<uint32>> &nodeEdges) {
+    for (const auto &nn : nodeEdges[n]) {
+        if (!nodeVisited[nn]) {
+            nodeVisited[nn]=true;
+            graphDepthFirstSearch(nn,nodeVisited,nodeEdges);
+        };
+    };
+};
+
+uint32 graphNumberOfConnectedComponents(uint32 N, vector<array<uint32,2>> V) {//find number of connected components
+    //N=number of nodes
+    //V=edges, list of connected nodes, each pair of nodes listed once
+    //simple recursive DFS
+    
+    //sort
+//     qsort(V.data(),V.size(),2*sizeof(uint32),funCompareNumbers<uint32>); 
+    if (V.size()==0)
+        return N;
+    
+    vector<vector<uint32>> nodeEdges (N);
+    for (uint32 ii=0; ii<V.size(); ii++) {
+        nodeEdges[V[ii][0]].push_back(V[ii][1]);
+        nodeEdges[V[ii][1]].push_back(V[ii][0]);
+    };
+    
+    vector<bool> nodeVisited(N,false);
+    
+    uint32 nConnComp=0;
+    for (uint32 ii=0; ii<N; ii++) {
+        if (V[ii].size()==0) {//this node is not connected, no need to check. Save time beacuse this happens often
+            ++nConnComp;
+            continue;
+        };
+        if (!nodeVisited[ii]) {
+            nodeVisited[ii]=true;
+            ++nConnComp;
+            graphDepthFirstSearch(ii,nodeVisited,nodeEdges);
+        };
+    };
+    return nConnComp;
 };
 
 void Solo::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot, uint32 *umiArray) {//iCB = CB to collapse, nReads=number of reads for this CB
@@ -78,7 +139,7 @@ void Solo::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot, ui
                 u1=rGU1[iR];                
                 umiArray[iR1]=u1;
                 umiArray[iR1+1]=0;
-                umiArray[iR1+2]=0; 
+                umiArray[iR1+2]=def_MarkNoColor; //marks no color for graph
             };
             umiArray[iR1+1]++;         
             //if ( umiArray[iR1+1]>nRumiMax) nRumiMax=umiArray[iR1+1];
@@ -87,8 +148,10 @@ void Solo::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot, ui
         
         //collapse with 1MM
         uint32 nU1=nU0, nU2=nU0;//2 types of 1MM collapsing
-
-        collapseUMIwith1MMlowHalf(umiArray, umiArrayStride, pSolo.umiMaskLow, nU0, nU1, nU2);
+        uint32 nC=0; //graph colors
+        vector<array<uint32,2>> vC;//color connections
+        
+        collapseUMIwith1MMlowHalf(umiArray, umiArrayStride, pSolo.umiMaskLow, nU0, nU1, nU2, nC, vC);
         
         //exchange low and high half of UMIs, re-sort, and look for 1MM again
         for (uint32 iu=0; iu<umiArrayStride*nU0; iu+=umiArrayStride) {
@@ -98,12 +161,12 @@ void Solo::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot, ui
             umiArray[iu] |= high; //add high
         };
         qsort(umiArray, nU0, umiArrayStride*sizeof(uint32), funCompareNumbers<uint32>);
-        collapseUMIwith1MMlowHalf(umiArray, umiArrayStride, pSolo.umiMaskLow, nU0, nU1, nU2);
+        collapseUMIwith1MMlowHalf(umiArray, umiArrayStride, pSolo.umiMaskLow, nU0, nU1, nU2, nC, vC);
                 
         nUg[3*iG]=nU0;
-        nUg[3*iG+1]=nU1;
+        nUg[3*iG+1]=nU1+graphNumberOfConnectedComponents(nC,vC);
         nUg[3*iG+2]=nU2;
-        nUtot+=nU1;//TODO user makes the choice 
+        nUtot+=nUg[3*iG+1];
     };
 
     uint32 *rGUp=rGU;

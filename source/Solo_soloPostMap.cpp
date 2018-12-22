@@ -25,14 +25,14 @@ void Solo::soloPostMap(ReadAlignChunk **RAchunk) {
 
     rGeneUMI = new uint32[2*nReadsMapped]; //big array for all CBs - each element is gene and UMI
     rCBp = new uint32*[nCB+1];
-    uint32 **rCBpa = new uint32*[pSolo.cbWL.size()];
+    uint32 **rCBpa = new uint32*[pSolo.cbWL.size()+1];
     indCB = new uint32[nCB];
     
     uint32 nReadPerCBmax=0;
     rCBp[0]=rGeneUMI;
     rCBpa[0]=rGeneUMI;
     nCB=0;//will count it again below
-    for (uint32 ii=0; ii<pSolo.cbWL.size()-1; ii++) {
+    for (uint32 ii=0; ii<pSolo.cbWL.size(); ii++) {
         if (soloCBsum->cbReadCountExact[ii]>0) {//if no exact matches, this CB is not present
             indCB[nCB]=ii;
             rCBp[nCB+1] = rCBp[nCB] + 2*soloCBsum->cbReadCount[ii];

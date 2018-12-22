@@ -47,8 +47,7 @@ void ParametersSolo::initialize(Parameters *pPin) {
     //load the CB whitlist and create unordered_map
     ifstream & cbWlStream = ifstrOpen(soloCBwhitelist, ERROR_OUT, "SOLUTION: check the path and permissions of the CB whitelist file: " + soloCBwhitelist, *pP);
     string seq1;
-    while (!cbWlStream.eof()) {
-        cbWlStream >> seq1;
+    while (cbWlStream >> seq1) {
         if (seq1.size() != cbL) {
             ostringstream errOut;
             errOut << "EXITING because of FATAL ERROR in input CB whitelist file: "<< soloCBwhitelist <<" the total length of barcode sequence is "  << seq1.size() << " not equal to expected " <<bL <<"\n"  ;

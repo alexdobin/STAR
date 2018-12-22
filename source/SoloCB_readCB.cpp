@@ -54,8 +54,10 @@ void SoloCB::readCB(const uint64 &iReadAll, const string &readNameExtra, const u
     };
         
     if (posN>=0) {//one N
+        uint32 posNshift=2*(pSolo.cbL-1-posN);//shift bits for posN
         for (uint32 jj=0; jj<4; jj++) {
-            int32 cbI1=binarySearchExact(cbB^(jj<<(posN*2)),pSolo.cbWL.data(),pSolo.cbWL.size());
+            uint32 cbB1=cbB^(jj<<posNshift);
+            int32 cbI1=binarySearchExact(cbB1,pSolo.cbWL.data(),pSolo.cbWL.size());
             if (cbI1>=0) {                        
                 if (cbI>=0) {//had another match already
                     stats.V[stats.nTooMany]++;
@@ -89,7 +91,7 @@ void SoloCB::readCB(const uint64 &iReadAll, const string &readNameExtra, const u
                     //output all
                     cbI=cbI1;
                     ++ncbOut1;
-                    cbOutString += ' ' +to_string(cbI) + ' ' + cbQual.at(ii);
+                    cbOutString += ' ' +to_string(cbI) + ' ' + cbQual.at(pSolo.cbL-1-ii);
                     cbReadCount[cbI]++;//this read may be counted in many CBs. This is safe for allocating arrays later. The final number of reads per CB will be calculated later.                   
                 };
             };
