@@ -29,25 +29,28 @@ SoloCB::SoloCB(Parameters &Pin, int iChunk) : P(Pin), pSolo(P.pSolo) {
     };
 };
 
-void SoloCB::addSoloCB(const SoloCB &soloCBin) {
-    for (uint32 ii=0; ii<stats.nStats; ii++)
-        stats.V[ii] += soloCBin.stats.V[ii];
-    
+void SoloCB::addSoloCBcounts(const SoloCB &soloCBin) {   
     for (uint32 ii=0; ii<pSolo.cbWL.size(); ii++) {
         cbReadCount[ii] += soloCBin.cbReadCount[ii];
         cbReadCountExact[ii] += soloCBin.cbReadCountExact[ii];
     };
 };
 
+void SoloCB::addSoloCBstats(const SoloCB &soloCBin) {
+    for (uint32 ii=0; ii<stats.nStats; ii++)
+        stats.V[ii] += soloCBin.stats.V[ii];
+};
+
 void SoloCB::statsOut(ofstream &streamOut) {
+    //streamOut << setw(50) << "CELL BARCODES IN READS:\n"
     for (uint32 ii=0; ii<stats.nStats; ii++) {
-        streamOut << setw(25) << stats.names.at(ii) << setw(15) << stats.V[ii] << '\n';
+        streamOut << setw(50) << stats.names.at(ii) << setw(15) << stats.V[ii] << '\n';
     };
     streamOut.flush();
 };
 
 void SoloCB::readCBgeneUMIfromFiles(uint32 ** cbP, uint32 *cbReadCountExactTotal) {
-    
+        
     {//load exact matches
         strU_0->flush();
         strU_0->seekg(0,ios::beg);
@@ -69,6 +72,9 @@ void SoloCB::readCBgeneUMIfromFiles(uint32 ** cbP, uint32 *cbReadCountExactTotal
                 cbP[cb1][0]=g1;
                 cbP[cb1][1]=umi1;
                 cbP[cb1]+=2;
+                stats.V[stats.nMatch]++;
+            } else {
+                stats.V[stats.nMatch]++;
             };
         };
     };
@@ -99,6 +105,9 @@ void SoloCB::readCBgeneUMIfromFiles(uint32 ** cbP, uint32 *cbReadCountExactTotal
                 cbP[cb1][0]=g1;
                 cbP[cb1][1]=umi1;
                 cbP[cb1]+=2;
+                stats.V[stats.nMatch]++;                
+            } else {
+                stats.V[stats.nTooMany]++;
             };        
         };
     };

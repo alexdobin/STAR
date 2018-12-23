@@ -27,6 +27,9 @@ void Solo::outputNumUMIperGeneCB() {
         cbStr << convertNuclInt32toString(cb,pSolo.cbL)  <<'\n';    
     cbStr.flush();
 
+    //header
+    cbGeneMatrix <<"%%\n%\n" << Trans.nGe<< ' ' << pSolo.cbWL.size() <<' '<< nCellGeneEntries << '\n';
+    
     uint32 nCBout=0;
     for (; nCBout<nCB; nCBout++) {
         //if (nUperCB[2*nCBout]<nUMImin)
@@ -53,7 +56,8 @@ void Solo::outputNumUMIperGeneCB() {
     //*soloStatsStream << setw(50) << "Maximum number of UMIs per CB" << setw(15) << nUperCB[0] << '\n';
     //*soloStatsStream << setw(50) << "Robust maximum number of UMIs per CB" << setw(15) << nUMImax << '\n';
     //*soloStatsStream << setw(50) << "Number of CBs that passed min UMI threshold " << setw(15) << nCBout << '\n';
-
-    *soloStatsStream << setw(50) << "Total number of cell barcodes" << setw(15) << nCB << '\n';
+    //*soloStatsStream << setw(50) << "UMIs IN CELL BARCODES:\n"
+    //*soloStatsStream << setw(50) << "nDetectedCellBarcodes" << setw(15) << nCB << '\n';
+    
     soloStatsStream->flush();
 };

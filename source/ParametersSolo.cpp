@@ -39,8 +39,8 @@ void ParametersSolo::initialize(Parameters *pPin) {
     ///////////// finished parameters input
     
     //make output directory if needed
-    if ( uint32 slashPos = outFileNames[0].find_last_of('/') < outFileNames[0].size() ) {//need to create dir
-        string dir1=pP->outFileNamePrefix+outFileNames[0].substr(0,slashPos);
+    if ( outFileNames[0].find_last_of("/") < outFileNames[0].size() ) {//need to create dir
+        string dir1=pP->outFileNamePrefix+outFileNames[0].substr(0,outFileNames[0].find_last_of("/"));
         if (mkdir(dir1.c_str(),pP->runDirPerm)!=0 && errno!=EEXIST) {
             ostringstream errOut;
             errOut << "EXITING because of fatal OUTPUT FILE error: could not create Solo output directory"<<dir1<<"\n";
