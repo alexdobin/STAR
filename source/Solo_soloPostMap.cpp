@@ -65,21 +65,21 @@ void Solo::soloPostMap(ReadAlignChunk **RAchunk) {
     P.inOut->logMain <<", nMatch="<<soloCBsum->stats.V[soloCBsum->stats.nMatch]<<endl;
     
     //collapse each CB
-    nUperCB = new uint32[nCB];
+    nUperCB = new uint32[nCB];//record pair: nUMIs per CB and iCB, for sorting if needed
     nGperCB = new uint32[nCB];
     uint32 umiArray[nReadPerCBmax*umiArrayStride];
     
     for (uint32 iCB=0; iCB<nCB; iCB++) {
-        nUperCB[2*iCB+1]=iCB;
         uint64 nr=(rCBpa[indCB[iCB]]-rCBp[iCB])/2; //number of reads that were matched to WL, rCBpa accumulated reference to the last element+1
         collapseUMI(rCBp[iCB],nr,nGperCB[iCB],nUperCB[iCB],umiArray);
-        soloCBsum->stats.V[soloCBsum->stats.nCellBarcodes] += nUperCB[iCB];
+        soloCBsum->stats.V[soloCBsum->stats.nUMIs] += nUperCB[iCB];
+        if (nGperCB[iCB]>0)
+            ++soloCBsum->stats.V[soloCBsum->stats.nCellBarcodes];
         nCellGeneEntries += nGperCB[iCB];        
     };
     
     time(&rawTime);
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished collapsing UMIs" <<endl;
-    soloCBsum->stats.V[soloCBsum->stats.nCellBarcodes]=nCB;
     soloCBsum->statsOut(*soloStatsStream);
 
     //output nU per gene per CB

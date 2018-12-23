@@ -49,7 +49,6 @@ void SoloCB::readCB(const uint64 &iReadAll, const string &readNameExtra, const u
     if (cbI>=0) {//exact match
         cbReadCount[cbI]++;
         *strU_0 << cbI <<' '<< *readTrGenes.begin() <<' '<< umiB <<'\n';
-        stats.V[stats.nExactMatch]++;        
         return;        
     };
         

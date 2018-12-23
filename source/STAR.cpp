@@ -35,37 +35,29 @@
 
 
 
-void usage() {
-    printf("Usage: STAR  [options]... --genomeDir REFERENCE   --readFilesIn R1.fq R2.fq\n");
-    printf("Spliced Transcripts Alignment to a Reference (c) Alexander Dobin, 2009-2015\n\n");
+void usage(int usageType) {
+    cout << "Usage: STAR  [options]... --genomeDir REFERENCE   --readFilesIn R1.fq R2.fq\n";
+    cout <<"Spliced Transcripts Alignment to a Reference (c) Alexander Dobin, 2009-2019\n\n";
+    cout <<"For more details see:\n";
+    cout <<"<https://github.com/alexdobin/STAR>\n";
+    cout <<"<https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf>\n";
 
-    std::cout << parametersDefault;
-
-    printf("For more details see:\n");
-    printf("<https://github.com/alexdobin/STAR>\n");
-    printf("<https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf>\n");
-
+    if (usageType==0) {//brief
+        cout << "\nTo list all parameters, run STAR --help\n";
+    } else {//full
+        cout <<'\n'<< parametersDefault;
+    };
     exit(0);
 }
 
 
-int main(int argInN, char* argIn[]) {
-    
-    //debug
-//     uint nn=4000000000;
-//     uint* dummy=new uint[nn];
-//     std::cout <<"Allocated"<<endl;
-//     for (uint ii=0;ii<nn;ii++) {
-//         dummy[ii]=14829735431805718528LLU;;
-//     };
-//     std::cout <<"Filled "<<dummy[0]<<endl;
-//     delete[] dummy;     
-//     std::cout <<"Deleted"<<endl;
-    
+int main(int argInN, char* argIn[]) {   
     // If no argument is given, or the first argument is either '-h' or '--help', run usage()
-    if((argInN == 1) || (argInN == 2 && (strcmp("-h",argIn[1]) == 0 || strcmp ("--help",argIn[1]) == 0 ))) {
-        usage();
-    }
+    if (argInN == 1) {
+        usage(0);
+    } else if (argInN == 2 && (strcmp("-h",argIn[1]) == 0 || strcmp ("--help",argIn[1]) == 0 )) {
+        usage(1);
+    };
 
     time(&g_statsAll.timeStart);
 

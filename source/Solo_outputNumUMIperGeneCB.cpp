@@ -30,14 +30,7 @@ void Solo::outputNumUMIperGeneCB() {
     //header
     cbGeneMatrix <<"%%\n%\n" << Trans.nGe<< ' ' << pSolo.cbWL.size() <<' '<< nCellGeneEntries << '\n';
     
-    uint32 nCBout=0;
-    for (; nCBout<nCB; nCBout++) {
-        //if (nUperCB[2*nCBout]<nUMImin)
-        //    break;
-
-        uint32 icb=nUperCB[2*nCBout+1];
-        //cbStr << convertNuclInt32toString(pSolo.cbWL.at(indCB[icb]),16)  <<'\t'<<  nUperCB[2*nCBout]  <<'\t'<< nGperCB[icb] <<'\n';
-
+    for (uint32 icb=0; icb<nCB; icb++) {
         uint32 *rCBpp=rCBp[icb];
         for (uint32 ig=0; ig<nGperCB[icb]; ig++) {
             cbGeneMatrix << rCBpp[0]+1  <<'\t'<< indCB[icb]+1 <<'\t'<< rCBpp[1];

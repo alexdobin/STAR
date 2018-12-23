@@ -60,6 +60,7 @@ void SoloCB::readCBgeneUMIfromFiles(uint32 ** cbP, uint32 *cbReadCountExactTotal
             cbP[cb1][0]=g1;
             cbP[cb1][1]=umi1;
             cbP[cb1]+=2;
+            stats.V[stats.nExactMatch]++;        
         };
     };
     
@@ -72,9 +73,8 @@ void SoloCB::readCBgeneUMIfromFiles(uint32 ** cbP, uint32 *cbReadCountExactTotal
                 cbP[cb1][0]=g1;
                 cbP[cb1][1]=umi1;
                 cbP[cb1]+=2;
-                stats.V[stats.nMatch]++;
             } else {
-                stats.V[stats.nMatch]++;
+                stats.V[stats.nNoExactMatch]++;
             };
         };
     };
@@ -82,7 +82,7 @@ void SoloCB::readCBgeneUMIfromFiles(uint32 ** cbP, uint32 *cbReadCountExactTotal
     {//load 2MM
         strU_2->flush();
         strU_2->seekg(0,ios::beg);
-        uint32 ncb1, cb1, g1, umi1;
+        uint32 ncb1, cb1=0, g1, umi1;
         while (*strU_2 >> g1 >> umi1 >> ncb1) {
             float ptot=0.0,pmax=0.0;
             for (uint32 ii=0; ii<ncb1; ii++) {
@@ -105,7 +105,6 @@ void SoloCB::readCBgeneUMIfromFiles(uint32 ** cbP, uint32 *cbReadCountExactTotal
                 cbP[cb1][0]=g1;
                 cbP[cb1][1]=umi1;
                 cbP[cb1]+=2;
-                stats.V[stats.nMatch]++;                
             } else {
                 stats.V[stats.nTooMany]++;
             };        

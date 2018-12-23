@@ -13,9 +13,9 @@ public:
     fstream *strU_0 ,*strU_1, *strU_2; //uniqe mappers, CB matches whitelist with 0,1>=2 MM
 
     struct {
-        enum {nNoGene,nAmbigGene,nAmbigGeneMultimap,nNinBarcode,nUMIhomopolymer,nTooMany,nNoExactMatch,nNoMatch,nExactMatch,nMatch,nCellBarcodes,nUMIs,nStats};
+        enum {                 nNoGene,  nAmbigGene,  nAmbigGeneMultimap,  nNinBarcode,  nUMIhomopolymer,  nTooMany,  nNoExactMatch,  nNoMatch,  nExactMatch,  nMatch,  nCellBarcodes,  nUMIs, nStats};
         uint64 V[nStats];
-        vector<string> names={"nNoGene","nAmbigGene","nAmbigGeneMultimap","nNinBarcode","nUMIhomopolymer","nTooMany","nNoExactMatch","nNoMatch","nExactMatch","nCellBarcodes","nUMIs","nMatch"};
+        vector<string> names={"nNoGene","nAmbigGene","nAmbigGeneMultimap","nNinBarcode","nUMIhomopolymer","nTooMany","nNoExactMatch","nNoMatch","nExactMatch","nMatch","nCellBarcodes","nUMIs",};
     } stats;
         
     string cbSeq, umiSeq, cbQual, umiQual;
