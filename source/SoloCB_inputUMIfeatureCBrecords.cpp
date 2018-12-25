@@ -17,13 +17,13 @@ bool inputFeatureUmi(fstream *strIn, int32 featureType, uint32 &feature, uint32 
     return true;       
 };
 
-void SoloCB::inputUMIfeatureCBrecords(uint32 ** cbP, uint32 *cbReadCountExactTotal, array<vector<uint64>,2> sjAll) 
+void SoloCB::inputUMIfeatureCBrecords(uint32 ** cbP, uint32 *cbReadCountExactTotal) 
 {
     {//load exact matches
         strU_0->flush();
         strU_0->seekg(0,ios::beg);
         uint32 cb, feature, umi;
-        while (inputFeatureUmi(strU_0,featureType, feature, umi, sjAll)) {
+        while (inputFeatureUmi(strU_0,featureType, feature, umi, P.sjAll)) {
             *strU_0 >> cb;
             if (feature != (uint32)(-1)){
                 cbP[cb][0]=feature;
@@ -38,7 +38,7 @@ void SoloCB::inputUMIfeatureCBrecords(uint32 ** cbP, uint32 *cbReadCountExactTot
         strU_1->flush();
         strU_1->seekg(0,ios::beg);
         uint32 cb, feature, umi;
-        while (inputFeatureUmi(strU_1,featureType, feature, umi, sjAll)) {
+        while (inputFeatureUmi(strU_1,featureType, feature, umi, P.sjAll)) {
             *strU_1 >> cb;
             if (cbReadCountExactTotal[cb]>0) {
                 if (feature != (uint32)(-1)){
@@ -56,7 +56,7 @@ void SoloCB::inputUMIfeatureCBrecords(uint32 ** cbP, uint32 *cbReadCountExactTot
         strU_2->flush();
         strU_2->seekg(0,ios::beg);
         uint32 cb=0, feature, umi, ncb;
-        while (inputFeatureUmi(strU_2,featureType, feature, umi, sjAll)) {
+        while (inputFeatureUmi(strU_2,featureType, feature, umi, P.sjAll)) {
             if (feature == (uint32) (-1)) {
                 strU_2->ignore('\n',(uint32) (-1));//ignore until the end of the line
                 continue; //nothing to record

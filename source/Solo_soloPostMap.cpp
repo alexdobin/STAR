@@ -49,7 +49,7 @@ void Solo::soloPostMap(ReadAlignChunk **RAchunk)
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished allocating arrays for Solo " << nReadsMapped*2.0*8/1024/1024/1024 <<" GB" <<endl;
 
     for (int ii=0; ii<P.runThreadN; ii++) {//TODO: this can be parallelized
-        soloCBall[ii]->inputUMIfeatureCBrecords(rCBpa,soloCBsum->cbReadCountExact, sjAll);
+        soloCBall[ii]->inputUMIfeatureCBrecords(rCBpa,soloCBsum->cbReadCountExact);
     };
     
     for (uint32 iCB=0; iCB<nCB; iCB++) {

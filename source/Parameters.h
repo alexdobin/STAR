@@ -257,21 +257,6 @@ class Parameters {
         intScore scoreStitchSJshift;//Max negative score when
         double scoreGenomicLengthLog2scale;
 
-        //old variables: CLEAN-up needed
-        char outputBED[MAX_OUTPUT_FLAG]; //output flags
-
-        //SW search
-        uint swMode, swWinCoverageMinP;
-        //SW penalties
-        uint swPeoutFilterMatchNmin, swPenMismatch, swPenGapOpen, swPenGapExtend;
-        uint swHsize;
-
-        int annotScoreScale;//overall multiplication factor for the annotation
-        string annotSignalFile;//binary file with annotation signal
-
-        uint sjNovelN, *sjNovelStart, *sjNovelEnd; //novel junctions collapased and filtered        
-        
-        
         //quantification parameters
         //input
 
@@ -324,8 +309,9 @@ class Parameters {
         char Qsplit;
         uint maxNsplit, minLsplit, minLmap;
 
-        //limits
-
+        //not really parameters, but global variables:
+        array<vector<uint64>,2> sjAll;
+        uint64 sjNovelN, *sjNovelStart, *sjNovelEnd; //novel junctions collapased and filtered        
 
     ////////////////////// CLEAN-UP needed
     InOutStreams *inOut; //main input output streams
