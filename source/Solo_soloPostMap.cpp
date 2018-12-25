@@ -2,10 +2,13 @@
 #include "streamFuns.h"
 #include "TimeFunctions.h"
 
-void Solo::soloPostMap(ReadAlignChunk **RAchunk) {
+void Solo::soloPostMap(ReadAlignChunk **RAchunk) 
+{
+    if (pSolo.type==0  || !pSolo.featureYes[featureType])
+        return;
     
     for (int ii=0; ii<P.runThreadN; ii++) {
-        soloCBall[ii]=RAchunk[ii]->RA->soloCB;
+        soloCBall[ii]=RAchunk[ii]->RA->soloCB[featureType];
     };
 
     //summary statistics
@@ -46,7 +49,7 @@ void Solo::soloPostMap(ReadAlignChunk **RAchunk) {
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished allocating arrays for Solo " << nReadsMapped*2.0*8/1024/1024/1024 <<" GB" <<endl;
 
     for (int ii=0; ii<P.runThreadN; ii++) {//TODO: this can be parallelized
-        soloCBall[ii]->readCBgeneUMIfromFiles(rCBpa,soloCBsum->cbReadCountExact);
+        soloCBall[ii]->inputUMIfeatureCBrecords(rCBpa,soloCBsum->cbReadCountExact);
     };
     
     for (uint32 iCB=0; iCB<nCB; iCB++) {

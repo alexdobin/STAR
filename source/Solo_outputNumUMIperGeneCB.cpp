@@ -4,8 +4,8 @@
 #include "serviceFuns.cpp"
 #include "SequenceFuns.h"
 
-void Solo::outputNumUMIperGeneCB() {
-    
+void Solo::outputNumUMIperGeneCB() 
+{    
     //sort by nUtot per CB
     //qsort(nUperCB,nCB,2*sizeof(uint32),funCompareNumbersReverse<uint32>); //sort by gene number
 

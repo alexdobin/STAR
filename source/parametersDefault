@@ -672,7 +672,12 @@ waspOutputMode              None
 ### solo (single cell) parameters
 soloType                    None
     string(s): type of single-cell RNA-seq
-                            10XchromiumV2    ... 10X Genomics Chromium Verison 2 chemistry
+                            10XchromiumV2   ... 10X Genomics Chromium Verison 2 chemistry
+
+soloFeatures                Gene
+    string(s)               genomic features for which the UMI counts per Cell Barcode are collected
+                            Gene            ... genes: reads match the gene transcript
+                            SJ              ... splice junctions: reported in SJ.out.tab
 
 soloCBlen                   16
     int>0: cell barcode length

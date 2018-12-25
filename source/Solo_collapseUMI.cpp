@@ -5,12 +5,11 @@
 
 #define def_MarkNoColor  (uint32) -1
 
-void collapseUMIwith1MMlowHalf(uint32 *rGU, uint32 umiArrayStride, uint32 umiMaskLow, uint32 nU0, uint32 &nU1, uint32 &nU2, uint32 &nC, vector<array<uint32,2>> &vC) {
-    
+void collapseUMIwith1MMlowHalf(uint32 *rGU, uint32 umiArrayStride, uint32 umiMaskLow, uint32 nU0, uint32 &nU1, uint32 &nU2, uint32 &nC, vector<array<uint32,2>> &vC) 
+{   
     const uint32 bitTop=1<<31;
-    const uint32 bitTopMask=~bitTop;
-    
-    
+    const uint32 bitTopMask=~bitTop;   
+
     for (uint32 iu=0; iu<umiArrayStride*nU0; iu+=umiArrayStride) {//each UMI
         uint32 iuu=iu+umiArrayStride;
         for (; iuu<umiArrayStride*nU0; iuu+=umiArrayStride) {//compare to all UMIs down

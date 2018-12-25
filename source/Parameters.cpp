@@ -255,6 +255,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <string>   (-1, -1, "soloCBwhitelist", &pSolo.soloCBwhitelist));
     parArray.push_back(new ParameterInfoScalar <string>   (-1, -1, "soloStrand", &pSolo.strandStr));
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "soloOutFileNames", &pSolo.outFileNames));
+    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "soloFeatures", &pSolo.featureIn));
 
 //     //SW parameters
 //     parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "swMode", &swMode));

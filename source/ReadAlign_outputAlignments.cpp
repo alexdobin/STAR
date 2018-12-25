@@ -11,11 +11,10 @@ void ReadAlign::outputAlignments() {
     vector<int32> readGenes;
     vector<uint32> readTranscripts={};
     set<uint32> readTrGenes={};
+    vector<array<uint64,2>> readSJs={};
     
+    outFilterPassed=true;//only false if the alignment is held for outFilterBySJoutStage
     if (unmapType==-1) {//output transcripts
-
-        outFilterPassed=true;
-
         if (P.outFilterBySJoutStage==1) {//filtering by SJout
             for (uint iTr=0;iTr<nTr;iTr++) {//check transcript for unannotated junctions
                 for (uint iex=0;iex<trMult[iTr]->nExons-1;iex++) {//check all junctions
@@ -31,7 +30,6 @@ void ReadAlign::outputAlignments() {
                 statsRA.readN--;
                 statsRA.readBases -= readLength[0]+readLength[1];
 
-//                 if (P.runThreadN>1) pthread_mutex_lock(&g_threadChunks.mutexOutFilterBySJout);
                 for (uint im=0;im<P.readNmates;im++) {
                    chunkOutFilterBySJoutFiles[im] << readNameMates[im] <<" "<< iReadAll <<" "<< readFilter <<" "<< readFilesIndex;
                    if (!readNameExtra[im].empty())
@@ -43,13 +41,12 @@ void ReadAlign::outputAlignments() {
                         chunkOutFilterBySJoutFiles[im] << Qual0[im] <<"\n";
                     };
                 };
-//                 if (P.runThreadN>1) pthread_mutex_unlock(&g_threadChunks.mutexOutFilterBySJout);
             };
         };
-
+        
         if (P.outSJfilterReads=="All" || nTr==1) {
             uint sjReadStartN=chunkOutSJ1->N;
-            for (uint iTr=0;iTr<nTr;iTr++) {//write all transcripts
+            for (uint iTr=0;iTr<nTr;iTr++) {//report SJs for all transcripts
                 outputTranscriptSJ (*(trMult[iTr]), nTr, chunkOutSJ1, sjReadStartN);
             };
         };
@@ -179,7 +176,10 @@ void ReadAlign::outputAlignments() {
         };
     };
     
-    soloCB->readCB(iReadAll, readNameExtra.at(0), nTr, readGenes, readTranscripts, readTrGenes);
+    if (outFilterPassed) {//otherwise the alignment was held and will be counted at the 2nd stage
+        soloCB[0]->readCB(iReadAll, readNameExtra.at(0), nTr, readTrGenes, trMult[0]);
+        soloCB[1]->readCB(iReadAll, readNameExtra.at(0), nTr, readTrGenes, trMult[0]);
+    };
 
     if (unmapType>=0) {
         statsRA.unmappedAll++;

@@ -474,16 +474,16 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                         break;
                         
                     case ATTR_CR:
-                            attrN+=bamAttrArrayWrite(soloCB->cbSeq,"CR",attrOutArray+attrN);
+                            attrN+=bamAttrArrayWrite(soloCB[0]->cbSeq,"CR",attrOutArray+attrN);
                         break;                        
                     case ATTR_CY:
-                            attrN+=bamAttrArrayWrite(soloCB->cbQual,"CY",attrOutArray+attrN);
+                            attrN+=bamAttrArrayWrite(soloCB[0]->cbQual,"CY",attrOutArray+attrN);
                         break;  
                     case ATTR_UR:
-                            attrN+=bamAttrArrayWrite(soloCB->umiSeq,"UR",attrOutArray+attrN);
+                            attrN+=bamAttrArrayWrite(soloCB[0]->umiSeq,"UR",attrOutArray+attrN);
                         break;  
                     case ATTR_UY:
-                            attrN+=bamAttrArrayWrite(soloCB->umiQual,"UY",attrOutArray+attrN);
+                            attrN+=bamAttrArrayWrite(soloCB[0]->umiQual,"UY",attrOutArray+attrN);
                         break;  
                         
                     default:

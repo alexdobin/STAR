@@ -1,6 +1,8 @@
 #ifndef CODE_Transcriptome
 #define CODE_Transcriptome
 
+#include <set>
+
 #include "IncludeDefine.h"
 #include "Parameters.h"
 #include "Transcript.h"

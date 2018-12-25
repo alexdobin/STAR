@@ -23,18 +23,20 @@ public:
     
     ofstream *soloStatsStream;
     
-    Solo(Parameters &Pin, Transcriptome &inTrans);
+    Solo(int feTy, Parameters &Pin, Transcriptome &inTrans);
     void soloPostMap(ReadAlignChunk **RAchunk);
     void collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot, uint32 *umiArray);
     void outputNumUMIperGeneCB();    
 
 
-private:
-    static const uint32 umiArrayStride=3;
+private:   
+    const int32 featureType;
     
     Parameters &P;
     ParametersSolo &pSolo;
     Transcriptome &Trans;
+    
+    static const uint32 umiArrayStride=3;    
 };
 
 #endif

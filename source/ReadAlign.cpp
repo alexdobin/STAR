@@ -4,8 +4,8 @@
 #include "ReadAlign.h"
 
 ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk) 
-                    : mapGen(genomeIn), P(Pin), chunkTr(TrIn) {//allocate arrays                       
-      
+                    : mapGen(genomeIn), P(Pin), chunkTr(TrIn) 
+{                           
     readNmates=P.readNmates;
     
     winBin = new uintWinBin* [2];  
@@ -41,22 +41,11 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
 
 #ifdef COMPILE_FOR_LONG_READS
     swWinCov = new uint[P.alignWindowsPerReadNmax];
-
-//     if (P.swMode==1) {
-//         swWinGleft = new uint[P.alignWindowsPerReadNmax];
-//         swWinGright = new uint[P.alignWindowsPerReadNmax];
-//         swWinRleft = new uint[P.alignWindowsPerReadNmax];
-//         swWinRright = new uint[P.alignWindowsPerReadNmax];
-//         P.swHsize=5000000000LLU;
-//         swT = new char [P.swHsize];
-//     };
-
     scoreSeedToSeed = new intScore [P.seedPerWindowNmax*(P.seedPerWindowNmax+1)/2];
     scoreSeedBest = new intScore [P.seedPerWindowNmax];
     scoreSeedBestInd = new uint [P.seedPerWindowNmax];
     scoreSeedBestMM = new uint [P.seedPerWindowNmax];
     seedChain = new uint [P.seedPerWindowNmax];
-
 #endif
 
     WA=new uiWA*[P.alignWindowsPerReadNmax];
@@ -110,8 +99,9 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
     chunkOutChimJunction = new fstream;
     chimDet = new ChimericDetection(P, trAll, nWinTr, Read1, mapGen, chunkOutChimJunction, this);
     
-    soloCB = new SoloCB(P,iChunk);
-
+    soloCB = new SoloCB*[2];
+    soloCB[0] = new SoloCB(0,P,iChunk); //genes
+    soloCB[1] = new SoloCB(1,P,iChunk); //SJs
 };
 
 void ReadAlign::resetN () {//reset resets the counters to 0 for a new read

@@ -16,8 +16,7 @@
 #include <time.h>
 #include <random>
 
-class ReadAlign
-{
+class ReadAlign {
     public:
          //methods
         ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk);//allocate arrays
@@ -54,7 +53,7 @@ class ReadAlign
         
         ChimericDetection *chimDet;
         
-        SoloCB *soloCB; //counts reads per CB and outputs CB/UMI/gene into file, per thread
+        SoloCB **soloCB; //counts reads per CB per and outputs CB/UMI/gene into file, per thread
         
     private:
         Parameters& P; //pointer to the parameters, will be initialized on construction

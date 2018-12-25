@@ -7,7 +7,10 @@
 
 #include <stdlib.h>
 
-void ParametersSolo::initialize(Parameters *pPin) {
+const vector<string> ParametersSolo::featureNames={"Gene","SJ"};
+
+void ParametersSolo::initialize(Parameters *pPin) 
+{
     pP=pPin;
     
     if (typeStr=="None") {
@@ -36,6 +39,26 @@ void ParametersSolo::initialize(Parameters *pPin) {
         errOut << "SOLUTION: use allowed option: Unstranded OR Forward OR Reverse";
         exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
+    
+    for (auto &fin : featureIn) {
+        bool finGood=false;
+        for (uint32 ii=0; ii<featureNames.size(); ii++) {
+            if (fin==featureNames[ii]) {
+                finGood=true;
+                featureYes[ii]=true;
+                break;
+            };
+        };
+        if (!finGood) {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in --soloFeatures="<<fin<<"\n";
+            errOut << "SOLUTION: use allowed option: ";
+            for (auto &fname : featureNames)
+                errOut << fname <<"    ";
+            exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+        };
+    };
+
     ///////////// finished parameters input
     
     //make output directory if needed
@@ -82,20 +105,4 @@ void ParametersSolo::initialize(Parameters *pPin) {
     time_t rawTime;
     time(&rawTime);
     pP->inOut->logMain << timeMonthDayTime(rawTime) << "Finished reading CB whitelist sequences: " << cbWL.size() <<endl;
-    //*pP->inOut->logStdOut << timeMonthDayTime(rawTime) << "Finished reading CB whitelist sequences: " << cbWL.size() <<endl;
-    
-//     uint64 nn=0;
-//     for (uint ii=0; ii<1000000000; ii++){
-//         uint32 a=ii;//(uint32) rand(); 
-//         int32 acb=binarySearchExact(a,cbWL.data(),cbWL.size());
-//         
-//         if (acb>=0) {
-//             ++nn;
-//         };
-//         
-// //         nn+=cbWL.count(a);
-//     };
-//     time(&rawTime);
-//     *pP->inOut->logStdOut << timeMonthDayTime(rawTime) <<" "<< nn <<endl;
-// //     exit(1);
 };

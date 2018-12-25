@@ -1,7 +1,9 @@
 #ifndef CODE_SoloCB
 #define CODE_SoloCB
+#include <set>
 #include "IncludeDefine.h"
 #include "Parameters.h"
+#include "Transcript.h"
 
 class SoloCB {
 public:
@@ -10,27 +12,28 @@ public:
     
     uint32 *cbReadCount, *cbReadCountExact;
     
-    fstream *strU_0 ,*strU_1, *strU_2; //uniqe mappers, CB matches whitelist with 0,1>=2 MM
+    fstream *strU_0 ,*strU_1, *strU_2; //unique mappers, CB matches whitelist with 0,1>=2 MM
 
     struct {
-        enum {                 nNoGene,  nAmbigGene,  nAmbigGeneMultimap,  nNinBarcode,  nUMIhomopolymer,  nTooMany,  nNoExactMatch,  nNoMatch,  nExactMatch,  nMatch,  nCellBarcodes,  nUMIs, nStats};
+        enum {                 nUnmapped,  nNoFeature,  nAmbigFeature,  nAmbigFeatureMultimap,  nNinBarcode,  nUMIhomopolymer,  nTooMany,  nNoExactMatch,  nNoMatch,  nExactMatch,  nMatch,  nCellBarcodes,  nUMIs, nStats};
         uint64 V[nStats];
-        vector<string> names={"nNoGene","nAmbigGene","nAmbigGeneMultimap","nNinBarcode","nUMIhomopolymer","nTooMany","nNoExactMatch","nNoMatch","nExactMatch","nMatch","nCellBarcodes","nUMIs",};
+        vector<string> names={"nUnmapped","nNoFeature","nAmbigFeature","nAmbigFeatureMultimap","nNinBarcode","nUMIhomopolymer","nTooMany","nNoExactMatch","nNoMatch","nExactMatch","nMatch","nCellBarcodes","nUMIs",};
     } stats;
         
     string cbSeq, umiSeq, cbQual, umiQual;
     
-    SoloCB (Parameters &Pin, int iChunk);
-    void readCB(const uint64 &iReadAll, const string &readNameExtra, const uint nTr, const vector<int32> &readGenes, vector<uint32> &readTranscripts, set<uint32> &readTrGenes);
+    SoloCB (int32 feTy, Parameters &Pin, int iChunk);
+    void readCB(uint64 &iReadAll, string &readNameExtra, uint nTr, set<uint32> &readTrGenes, Transcript *alignOut);
     void addSoloCBcounts(const SoloCB &soloCBin);
     void addSoloCBstats(const SoloCB &soloCBin);
     void statsOut(ofstream &streamOut);
-    void readCBgeneUMIfromFiles(uint32 **cbP, uint32 *cbReadCountExact);
+    void inputUMIfeatureCBrecords(uint32 **cbP, uint32 *cbReadCountExact);
     
 private:
+    const int32 featureType;
+    
     Parameters &P;
     ParametersSolo &pSolo;
-
 };
 
 #endif

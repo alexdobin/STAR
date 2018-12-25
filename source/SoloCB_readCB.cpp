@@ -2,8 +2,24 @@
 #include "serviceFuns.cpp"
 #include "SequenceFuns.h"
 
-void SoloCB::readCB(const uint64 &iReadAll, const string &readNameExtra, const uint nTr, const vector<int32> &readGenes, vector<uint32> &readTranscripts, set<uint32> &readTrGenes) {
-    if (pSolo.type==0)
+uint32 outputReadCB(fstream *streamOut, int32 featureType, uint32 umiB, uint32 gene, vector<array<uint64,2>> &readSJs, string stringCB)
+{
+    if (featureType==0) {//genes
+        *streamOut << umiB <<' '<< gene <<' '<< stringCB <<'\n';
+        return 1;
+    } else if (featureType==1) {//sjs
+        for (auto &sj : readSJs) {
+            *streamOut << umiB <<' '<< sj[0] <<' '<< sj[1] <<' '<< stringCB <<'\n';
+        };
+        return readSJs.size();
+    };
+    
+    return 0; //this should not happen
+};
+
+void SoloCB::readCB(uint64 &iReadAll, string &readNameExtra, uint nTr, set<uint32> &readTrGenes, Transcript *alignOut) 
+{
+    if (pSolo.type==0  || !pSolo.featureYes[featureType])
         return;
     
     int32 cbI=-999;
@@ -25,17 +41,33 @@ void SoloCB::readCB(const uint64 &iReadAll, const string &readNameExtra, const u
         };
     };
     
-    //check genes, return if no gene
-    if (readTrGenes.size()==0) {
-        stats.V[stats.nNoGene]++;
-        return;
-    } else if (readTrGenes.size()>1) {
-        stats.V[stats.nAmbigGene]++;
-        if (nTr>1)
-            stats.V[stats.nAmbigGeneMultimap]++;
+    if (nTr==0) {
+        stats.V[stats.nUnmapped]++;
         return;
     };
     
+    vector<array<uint64,2>> readSJs;
+    if (featureType==0) {//genes
+        //check genes, return if no gene
+        if (readTrGenes.size()==0) {
+            stats.V[stats.nNoFeature]++;
+            return;
+        } else if (readTrGenes.size()>1) {
+            stats.V[stats.nAmbigFeature]++;
+            if (nTr>1)
+                stats.V[stats.nAmbigFeatureMultimap]++;
+            return;
+        };
+    } else if (featureType==1) {//SJs
+        alignOut->extractSpliceJunctions(readSJs);
+        if (readSJs.empty()) {
+            stats.V[stats.nNoFeature]++;        
+        } else if (nTr>1) {//record SJs from the read
+            stats.V[stats.nAmbigFeature]++;
+            stats.V[stats.nAmbigFeatureMultimap]++;
+        };
+    };
+
     //check UMIs, return if bad UMIs
     if (convertNuclStrToInt32(umiSeq,umiB)!=-1) {//convert and check for Ns
         stats.V[stats.nNinBarcode]++;//UMIs are not allowed to have MMs
@@ -47,9 +79,8 @@ void SoloCB::readCB(const uint64 &iReadAll, const string &readNameExtra, const u
     };
     
     if (cbI>=0) {//exact match
-        cbReadCount[cbI]++;
-        *strU_0 << cbI <<' '<< *readTrGenes.begin() <<' '<< umiB <<'\n';
-        return;        
+        cbReadCount[cbI] += outputReadCB(strU_0, featureType, umiB, *readTrGenes.begin(), readSJs, to_string(cbI));
+        return;
     };
         
     if (posN>=0) {//one N
@@ -66,8 +97,7 @@ void SoloCB::readCB(const uint64 &iReadAll, const string &readNameExtra, const u
             };
         };
         if (cbI>=0) {
-            cbReadCount[cbI]++;
-            *strU_1 << cbI <<' '<< *readTrGenes.begin() <<' '<< umiB <<'\n';
+            cbReadCount[cbI]+= outputReadCB(strU_1, featureType, umiB, *readTrGenes.begin(), readSJs, to_string(cbI));
         } else {//no match
             stats.V[stats.nNoMatch]++;
         };
@@ -79,14 +109,6 @@ void SoloCB::readCB(const uint64 &iReadAll, const string &readNameExtra, const u
             for (uint32 jj=1; jj<4; jj++) {
                 int32 cbI1=binarySearchExact(cbB^(jj<<(ii*2)),pSolo.cbWL.data(),pSolo.cbWL.size());
                 if (cbI1>=0) {//found match
-                    //simple procedure: accept only if one WL CB exists with 1MM
-                    //if (cbI>=0) {//had another match already
-                    //    stats.V[stats.nTooMany]++;
-                    //    //cout << iReadAll << endl;
-                    //    return;    
-                    //};
-                    //cbI=cbI1;
-
                     //output all
                     cbI=cbI1;
                     ++ncbOut1;
@@ -100,9 +122,9 @@ void SoloCB::readCB(const uint64 &iReadAll, const string &readNameExtra, const u
             stats.V[stats.nNoMatch]++;
             return;
         } else if (ncbOut1==1){//only one match
-            *strU_1 << cbI <<' '<< *readTrGenes.begin() <<' '<< umiB <<'\n';
+            cbReadCount[cbI] += outputReadCB(strU_1, featureType, umiB, *readTrGenes.begin(), readSJs, to_string(cbI));
         } else {//more than one match
-            *strU_2 << *readTrGenes.begin() <<' '<< umiB <<' '<< ncbOut1 <<  cbOutString <<'\n';
+            cbReadCount[cbI] += outputReadCB(strU_2, featureType, umiB, *readTrGenes.begin(), readSJs, to_string(ncbOut1) + to_string(cbI));
         };
     };
 

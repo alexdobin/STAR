@@ -35,4 +35,15 @@ void Transcript::add(Transcript *trIn) {
     nUnique+=trIn->nUnique;
 };
 
+void Transcript::extractSpliceJunctions(vector<array<uint64,2>> &sjOut)
+{
+    for (uint64 iex=0; iex<nExons-1; iex++) {//record all junctions
+        if (canonSJ[iex]>=0) {//only record junctions, not indels or mate gap
+            array<uint64,2> sj;
+            sj[0]=exons[iex][EX_G]+exons[iex][EX_L];//start
+            sj[1]=exons[iex+1][EX_G] - sj[0]; //gap
+            sjOut.push_back(sj);
+        };
+    };
+};
 

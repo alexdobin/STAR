@@ -363,8 +363,12 @@ int main(int argInN, char* argIn[]) {
     //no need for genome anymore, free the memory
     mainGenome.freeMemory();
 
-    Solo soloMain(P,*RAchunk[0]->chunkTr);
-    soloMain.soloPostMap(RAchunk);
+    //solo genes
+    Solo soloGenes(0,P,*RAchunk[0]->chunkTr);//solo for genes
+    soloGenes.soloPostMap(RAchunk);
+    //solo SJs
+    Solo soloSJ(1,P,*RAchunk[0]->chunkTr);//solo for genes
+    soloSJ.soloPostMap(RAchunk);
     
     if ( P.quant.geCount.yes ) {//output gene quantifications
         for (int ichunk=1; ichunk<P.runThreadN; ichunk++) {//sum counts from all chunks into 0th chunk
@@ -376,7 +380,6 @@ int main(int argInN, char* argIn[]) {
     if (P.runThreadN>1 && P.outSAMorder=="PairedKeepInputOrder") {//concatenate Aligned.* files
         RAchunk[0]->chunkFilesCat(P.inOut->outSAM, P.outFileTmp + "/Aligned.out.sam.chunk", g_threadChunks.chunkOutN);
     };
-
 
     if (P.outBAMcoord) {//sort BAM if needed
         *P.inOut->logStdOut << timeMonthDayTime() << " ..... started sorting BAM\n" <<flush;
