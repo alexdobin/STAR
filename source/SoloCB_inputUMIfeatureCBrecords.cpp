@@ -1,26 +1,29 @@
 #include "SoloCB.h"
+#include "binarySearch2.h"
 
-bool inputFeatureUmi(fstream *strIn, int32 featureType, uint32 &feature, uint32 &umi)
+bool inputFeatureUmi(fstream *strIn, int32 featureType, uint32 &feature, uint32 &umi, array<vector<uint64>,2> sjAll)
 {
     if (!(*strIn >> umi)) //end of file
         return false;
     
-    if (featureType==0) {
+    if (featureType==0) {//gene
         *strIn >> feature;
-    } else {
+    } else if (featureType==1) {//sj
+        uint32 sj[2];
+        *strIn >> sj[0] >> sj[1];
+        feature=(uint32) binarySearch2(sj[0],sj[1],sjAll[0].data(),sjAll[1].data(),sjAll[0].size());
     };
     
-    return true;
-        
+    return true;       
 };
 
-void SoloCB::inputUMIfeatureCBrecords(uint32 ** cbP, uint32 *cbReadCountExactTotal, vector<array<uint64,2>> sjAll) 
+void SoloCB::inputUMIfeatureCBrecords(uint32 ** cbP, uint32 *cbReadCountExactTotal, array<vector<uint64>,2> sjAll) 
 {
     {//load exact matches
         strU_0->flush();
         strU_0->seekg(0,ios::beg);
         uint32 cb, feature, umi;
-        while (inputFeatureUmi(strU_0,featureType, feature, umi)) {
+        while (inputFeatureUmi(strU_0,featureType, feature, umi, sjAll)) {
             *strU_0 >> cb;
             if (feature != (uint32)(-1)){
                 cbP[cb][0]=feature;
@@ -35,7 +38,7 @@ void SoloCB::inputUMIfeatureCBrecords(uint32 ** cbP, uint32 *cbReadCountExactTot
         strU_1->flush();
         strU_1->seekg(0,ios::beg);
         uint32 cb, feature, umi;
-        while (inputFeatureUmi(strU_1,featureType, feature, umi)) {
+        while (inputFeatureUmi(strU_1,featureType, feature, umi, sjAll)) {
             *strU_1 >> cb;
             if (cbReadCountExactTotal[cb]>0) {
                 if (feature != (uint32)(-1)){
@@ -53,7 +56,7 @@ void SoloCB::inputUMIfeatureCBrecords(uint32 ** cbP, uint32 *cbReadCountExactTot
         strU_2->flush();
         strU_2->seekg(0,ios::beg);
         uint32 cb=0, feature, umi, ncb;
-        while (inputFeatureUmi(strU_2,featureType, feature, umi)) {
+        while (inputFeatureUmi(strU_2,featureType, feature, umi, sjAll)) {
             if (feature == (uint32) (-1)) {
                 strU_2->ignore('\n',(uint32) (-1));//ignore until the end of the line
                 continue; //nothing to record

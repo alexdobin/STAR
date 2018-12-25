@@ -23,7 +23,7 @@ public:
     
     ofstream *soloStatsStream;
     
-    vector<array<uint64,2>> sjAll;
+    array<vector<uint64>,2> sjAll;
     
     Solo(int feTy, Parameters &Pin, Transcriptome &inTrans);
     void soloPostMap(ReadAlignChunk **RAchunk);

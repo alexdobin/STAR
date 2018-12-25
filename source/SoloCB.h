@@ -27,7 +27,7 @@ public:
     void addSoloCBcounts(const SoloCB &soloCBin);
     void addSoloCBstats(const SoloCB &soloCBin);
     void statsOut(ofstream &streamOut);
-    void inputUMIfeatureCBrecords(uint32 **cbP, uint32 *cbReadCountExact, vector<array<uint64,2>> sjAll);
+    void inputUMIfeatureCBrecords(uint32 **cbP, uint32 *cbReadCountExact, array<vector<uint64>,2>  sjAll);
     
 private:
     const int32 featureType;

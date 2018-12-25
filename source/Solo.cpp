@@ -14,13 +14,12 @@ Solo::Solo(int feTy, Parameters &Pin, Transcriptome &inTrans)
     
     if (featureType==1) {//read the SJ array
         ifstream sjStream((P.outFileNamePrefix+"SJ.out.tab").c_str());
-        
-        array<uint64,2> sj1;
-        while (sjStream >> sj1[0] >> sj1[1]) {
-            sjAll.push_back(sj1);            
+        uint64 sj[2];
+        while (sjStream >> sj[0] >> sj[1]) {
+            for (int ii=0; ii<2; ii++)
+                sjAll[ii].push_back(sj[ii]);
             sjStream.ignore ((uint32) (-1), '\n');
         };
-        
         sjStream.close();
     };
 };
