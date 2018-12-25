@@ -358,6 +358,9 @@ int main(int argInN, char* argIn[]) {
         P.limitBAMsortRAM=mainGenome.nGenome+mainGenome.SA.lengthByte+mainGenome.SAi.lengthByte;
     };
 
+    time(&g_statsAll.timeFinishMap);
+    *P.inOut->logStdOut << timeMonthDayTime(g_statsAll.timeFinishMap) << " ..... finished mapping\n" <<flush;
+
     //no need for genome anymore, free the memory
     mainGenome.freeMemory();
 

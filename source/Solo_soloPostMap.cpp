@@ -6,6 +6,10 @@ void Solo::soloPostMap(ReadAlignChunk **RAchunk)
 {
     if (pSolo.type==0  || !pSolo.featureYes[featureType])
         return;
+ 
+    time_t rawTime;
+    time(&rawTime);
+    P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Starting Solo post-map " << nReadsMapped*2.0*8/1024/1024/1024 <<" GB" <<endl;    
     
     for (int ii=0; ii<P.runThreadN; ii++) {
         soloCBall[ii]=RAchunk[ii]->RA->soloCB[featureType];
@@ -44,7 +48,6 @@ void Solo::soloPostMap(ReadAlignChunk **RAchunk)
     };
     
     //read and store the CB/gene/UMI from files
-    time_t rawTime;
     time(&rawTime);
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished allocating arrays for Solo " << nReadsMapped*2.0*8/1024/1024/1024 <<" GB" <<endl;
 

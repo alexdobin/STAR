@@ -304,7 +304,6 @@ class Parameters {
         //chimeric
         ParametersChimeric pCh;
 
-
         //splitting
         char Qsplit;
         uint maxNsplit, minLsplit, minLmap;

@@ -1,7 +1,7 @@
 #include "SoloCB.h"
 #include "binarySearch2.h"
 
-bool inputFeatureUmi(fstream *strIn, int32 featureType, uint32 &feature, uint32 &umi, array<vector<uint64>,2> sjAll)
+bool inputFeatureUmi(fstream *strIn, int32 featureType, uint32 &feature, uint32 &umi, array<vector<uint64>,2> &sjAll)
 {
     if (!(*strIn >> umi)) //end of file
         return false;
@@ -23,7 +23,7 @@ void SoloCB::inputUMIfeatureCBrecords(uint32 ** cbP, uint32 *cbReadCountExactTot
         strU_0->flush();
         strU_0->seekg(0,ios::beg);
         uint32 cb, feature, umi;
-        while (inputFeatureUmi(strU_0,featureType, feature, umi, P.sjAll)) {
+        while (inputFeatureUmi(strU_0, featureType, feature, umi, P.sjAll)) {
             *strU_0 >> cb;
             if (feature != (uint32)(-1)){
                 cbP[cb][0]=feature;
@@ -34,7 +34,7 @@ void SoloCB::inputUMIfeatureCBrecords(uint32 ** cbP, uint32 *cbReadCountExactTot
         };
     };
     
-    {//load 1MM
+    {//1 match
         strU_1->flush();
         strU_1->seekg(0,ios::beg);
         uint32 cb, feature, umi;
@@ -51,8 +51,8 @@ void SoloCB::inputUMIfeatureCBrecords(uint32 ** cbP, uint32 *cbReadCountExactTot
             };
         };
     };
-    
-    {//load 2MM
+     
+    {//2 matches
         strU_2->flush();
         strU_2->seekg(0,ios::beg);
         uint32 cb=0, feature, umi, ncb;
