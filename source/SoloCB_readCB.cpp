@@ -124,7 +124,7 @@ void SoloCB::readCB(uint64 &iReadAll, string &readNameExtra, uint nTr, set<uint3
         } else if (ncbOut1==1){//only one match
             cbReadCount[cbI] += outputReadCB(strU_1, featureType, umiB, *readTrGenes.begin(), readSJs, to_string(cbI));
         } else {//more than one match
-            cbReadCount[cbI] += outputReadCB(strU_2, featureType, umiB, *readTrGenes.begin(), readSJs, to_string(ncbOut1) + to_string(cbI));
+            cbReadCount[cbI] += outputReadCB(strU_2, featureType, umiB, *readTrGenes.begin(), readSJs, to_string(ncbOut1) + cbOutString);
         };
     };
 

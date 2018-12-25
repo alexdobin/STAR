@@ -18,17 +18,9 @@ SoloCB::SoloCB(int32 feTy, Parameters &Pin, int iChunk)
     };
     
     if (iChunk>=0) {
-//         vector<string> prefix={"soloGene","soloSJ"};
-//         constexpr string prefix1=prefix[soloFeature];
-        string prefix1="solo";
-//         if (soloFeature==1) {
-//             prefix=;
-//         } else if (soloFeature==1) {
-//             prefix=;
-//         };
-        strU_0 = &fstrOpen(P.outFileTmp+"/"+prefix1+"_U_0_"+std::to_string(iChunk),ERROR_OUT, P);
-        strU_1 = &fstrOpen(P.outFileTmp+"/"+prefix1+"_U_1_"+std::to_string(iChunk),ERROR_OUT, P);
-        strU_2 = &fstrOpen(P.outFileTmp+"/"+prefix1+"_U_2_"+std::to_string(iChunk),ERROR_OUT, P);        
+        strU_0 = &fstrOpen(P.outFileTmp+"/solo"+pSolo.featureNames[featureType]+"_0_"+std::to_string(iChunk),ERROR_OUT, P);
+        strU_1 = &fstrOpen(P.outFileTmp+"/solo"+pSolo.featureNames[featureType]+"_1_"+std::to_string(iChunk),ERROR_OUT, P);
+        strU_2 = &fstrOpen(P.outFileTmp+"/solo"+pSolo.featureNames[featureType]+"_2_"+std::to_string(iChunk),ERROR_OUT, P);        
     };
     
     for (uint32 jj=0;jj<4;jj++) {

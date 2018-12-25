@@ -33,8 +33,6 @@
 #include "htslib/htslib/sam.h"
 #include "parametersDefault.xxd"
 
-
-
 void usage(int usageType) {
     cout << "Usage: STAR  [options]... --genomeDir REFERENCE   --readFilesIn R1.fq R2.fq\n";
     cout <<"Spliced Transcripts Alignment to a Reference (c) Alexander Dobin, 2009-2019\n\n";
@@ -363,6 +361,10 @@ int main(int argInN, char* argIn[]) {
     //no need for genome anymore, free the memory
     mainGenome.freeMemory();
 
+    //aggregate output junctions
+    //collapse splice junctions from different threads/chunks, and output them
+    outputSJ(RAchunk,P);    
+    
     //solo genes
     Solo soloGenes(0,P,*RAchunk[0]->chunkTr);//solo for genes
     soloGenes.soloPostMap(RAchunk);
@@ -472,10 +474,6 @@ int main(int argInN, char* argIn[]) {
         signalFromBAM(P.outBAMfileCoordName, wigOutFileNamePrefix, P);
     };
 
-    //aggregate output junctions
-    //collapse splice junctions from different threads/chunks, and output them
-    outputSJ(RAchunk,P);
-
     g_statsAll.writeLines(P.inOut->outChimJunction, P.pCh.outJunctionFormat, "#", STAR_VERSION + string("   ") + P.commandLine);
     
     g_statsAll.progressReport(P.inOut->logProgress);
@@ -485,12 +483,8 @@ int main(int argInN, char* argIn[]) {
     *P.inOut->logStdOut << timeMonthDayTime(g_statsAll.timeFinish) << " ..... finished successfully\n" <<flush;
 
     P.inOut->logMain  << "ALL DONE!\n" << flush;
-    if (P.outTmpKeep=="None")
-    {
+    if (P.outTmpKeep=="None") {
         sysRemoveDir (P.outFileTmp);
-    } else
-    {
-        //nothing to do
     };
 
     P.closeReadsFiles();//this will kill the readFilesCommand processes if necessary

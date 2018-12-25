@@ -49,7 +49,7 @@ void Solo::soloPostMap(ReadAlignChunk **RAchunk)
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished allocating arrays for Solo " << nReadsMapped*2.0*8/1024/1024/1024 <<" GB" <<endl;
 
     for (int ii=0; ii<P.runThreadN; ii++) {//TODO: this can be parallelized
-        soloCBall[ii]->inputUMIfeatureCBrecords(rCBpa,soloCBsum->cbReadCountExact);
+        soloCBall[ii]->inputUMIfeatureCBrecords(rCBpa,soloCBsum->cbReadCountExact, sjAll);
     };
     
     for (uint32 iCB=0; iCB<nCB; iCB++) {
@@ -71,6 +71,7 @@ void Solo::soloPostMap(ReadAlignChunk **RAchunk)
     nUperCB = new uint32[nCB];//record pair: nUMIs per CB and iCB, for sorting if needed
     nGperCB = new uint32[nCB];
     uint32 umiArray[nReadPerCBmax*umiArrayStride];
+    nCellGeneEntries=0;
     
     for (uint32 iCB=0; iCB<nCB; iCB++) {
         uint64 nr=(rCBpa[indCB[iCB]]-rCBp[iCB])/2; //number of reads that were matched to WL, rCBpa accumulated reference to the last element+1
