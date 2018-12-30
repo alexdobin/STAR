@@ -10,7 +10,7 @@ public:
     
     uint32 homoPolymer[4];//homopolymer constants
     
-    uint32 *cbReadCount, *cbReadCountExact;
+    uint32 *cbReadCount;
     
     fstream *strU_0 ,*strU_1, *strU_2; //unique mappers, CB matches whitelist with 0,1>=2 MM
 
