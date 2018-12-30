@@ -78,13 +78,7 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
     chunkOutChimJunction = new fstream;
     chimDet = new ChimericDetection(P, trAll, nWinTr, Read1, mapGen, chunkOutChimJunction, this);
     //solo
-    soloCB = new SoloCB*[2];
-    soloCB[0] = new SoloCB(0,P,iChunk); //genes
-    if (P.pSolo.featureYes[1]) {
-        soloCB[1] = new SoloCB(1,P,iChunk); //SJs
-        delete[] soloCB[1]->cbReadCountExact;
-        soloCB[1]->cbReadCountExact=soloCB[0]->cbReadCountExact;//this will be calculated onces
-    };
+    soloRead = new SoloRead (P, iChunk);
 };
 
 void ReadAlign::resetN () {//reset resets the counters to 0 for a new read

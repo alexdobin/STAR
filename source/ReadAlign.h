@@ -1,5 +1,5 @@
-#ifndef CODE_READALIGN
-#define CODE_READALIGN
+#ifndef H_ReadAlign
+#define H_ReadAlign
 
 #include "IncludeDefine.h"
 #include "Parameters.h"
@@ -11,7 +11,7 @@
 #include "BAMoutput.h"
 #include "Quantifications.h"
 #include "ChimericDetection.h"
-#include "SoloCB.h"
+#include "SoloRead.h"
 
 #include <time.h>
 #include <random>
@@ -53,7 +53,7 @@ class ReadAlign {
         
         ChimericDetection *chimDet;
         
-        SoloCB **soloCB; //counts reads per CB per and outputs CB/UMI/gene into file, per thread
+        SoloRead *soloRead; //counts reads per CB per and outputs CB/UMI/gene into file, per thread
         
     private:
         Parameters& P; //pointer to the parameters, will be initialized on construction

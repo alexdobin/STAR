@@ -46,6 +46,7 @@ void ParametersSolo::initialize(Parameters *pPin)
             if (fin==featureNames[ii]) {
                 finGood=true;
                 featureYes[ii]=true;
+                features.push_back(ii);
                 break;
             };
         };
@@ -59,15 +60,16 @@ void ParametersSolo::initialize(Parameters *pPin)
             exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
     };
-    if (!featureYes[0]) {
-            ostringstream errOut;
-            errOut << "EXITING because of fatal PARAMETERS error: --soloFeatures has to contain"<<featureNames[0]<<"\n";
-            errOut << "SOLUTION: use allowed option: ";
-            errOut <<featureNames[0]<< "   OR   ";            
-            for (auto &fname : featureNames)
-                errOut << fname <<" ";
-            exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
-    };
+    nFeatures=features.size();
+//     if (!featureYes[0]) {
+//             ostringstream errOut;
+//             errOut << "EXITING because of fatal PARAMETERS error: --soloFeatures has to contain"<<featureNames[0]<<"\n";
+//             errOut << "SOLUTION: use allowed option: ";
+//             errOut <<featureNames[0]<< "   OR   ";            
+//             for (auto &fname : featureNames)
+//                 errOut << fname <<" ";
+//             exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+//     };
     ///////////// finished parameters input
     
     //make output directory if needed

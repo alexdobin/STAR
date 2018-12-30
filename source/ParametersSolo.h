@@ -15,27 +15,22 @@ public:
     string soloCBwhitelist;
     std::vector <uint32> cbWL;
     string strandStr;
-    int32 strand;    
-
+    int32 strand;
     //features
     const static vector<string> featureNames;
     vector<string> featureIn;
+    vector<uint32> features;
+    uint32 nFeatures;
     bool featureYes[2]; //which features are requested
     //filtering
     char QSbase,QSmax;//quality score base and cutoff
     float cbMinP;//for CBs with non-exact matching to WL, min posterior probability 
     //output
     vector<string> outFileNames;
-
-
-    
     //constants
     uint32 umiMaskLow, umiMaskHigh; //low/high half bit-mask or UMIs 
     
-    //static const uint64 bufferSize=1048576;
-    
     void initialize(Parameters *pPin);
-    
 private:
     Parameters *pP;
 };

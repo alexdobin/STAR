@@ -177,9 +177,7 @@ void ReadAlign::outputAlignments() {
     };
     
     if (outFilterPassed) {//otherwise the alignment was held and will be counted at the 2nd stage
-        bool readRecord=true;
-        readRecord=soloCB[0]->readCB(iReadAll, readNameExtra.at(0), nTr, readTrGenes, trMult[0], readRecord);
-        soloCB[1]->readCB(iReadAll, readNameExtra.at(0), nTr, readTrGenes, trMult[0], readRecord);
+        soloRead->record(readNameExtra.at(0), nTr, readTrGenes, trMult[0]);
     };
 
     if (unmapType>=0) {
