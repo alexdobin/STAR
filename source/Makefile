@@ -29,9 +29,10 @@ CFLAGS := -O3 -pipe -Wall -Wextra $(CFLAGS)
 
 ##########################################################################################################
 
-OBJECTS = ParametersSolo.o SoloRead.o \
+OBJECTS = ParametersSolo.o SoloRead.o SoloRead_record.o \
 	SoloReadBarcode.o SoloReadBarcode_getCBandUMI.o \
-	SoloReadFeature.o SoloReadFeature_record.o \
+	SoloReadFeature.o SoloReadFeature_record.o SoloReadFeature_inputRecords.o \
+	Solo.o SoloFeature.o SoloFeature_collapseUMI.o SoloFeature_outputResults.o SoloFeature_processRecords.o\
 	ReadAlign_outputAlignments.o  \
 	ReadAlign.o STAR.o \
 	SharedMemory.o PackedArray.o SuffixArrayFuns.o Parameters.o InOutStreams.o SequenceFuns.o Genome.o Stats.o \

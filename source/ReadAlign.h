@@ -23,7 +23,6 @@ class ReadAlign {
         int oneRead();
         
         //vars
-
         Genome &mapGen; //mapped-to-genome structure
 
         uint iRead;

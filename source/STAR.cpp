@@ -369,11 +369,8 @@ int main(int argInN, char* argIn[]) {
     outputSJ(RAchunk,P);    
     
     //solo genes
-    Solo soloGenes(0,P,*RAchunk[0]->chunkTr);//solo for genes
-    soloGenes.soloPostMap(RAchunk);
-    //solo SJs
-    Solo soloSJ(1,P,*RAchunk[0]->chunkTr);//solo for genes
-    soloSJ.soloPostMap(RAchunk);
+    Solo soloMain(RAchunk,P,*RAchunk[0]->chunkTr);//solo for genes
+    soloMain.processAndOutput();
     
     if ( P.quant.geCount.yes ) {//output gene quantifications
         for (int ichunk=1; ichunk<P.runThreadN; ichunk++) {//sum counts from all chunks into 0th chunk
