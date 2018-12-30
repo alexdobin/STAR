@@ -23,7 +23,7 @@ public:
     string cbSeq, umiSeq, cbQual, umiQual;
     
     SoloCB (int32 feTy, Parameters &Pin, int iChunk);
-    void readCB(uint64 &iReadAll, string &readNameExtra, uint nTr, set<uint32> &readTrGenes, Transcript *alignOut);
+    bool  readCB(uint64 &iReadAll, string &readNameExtra, uint nTr, set<uint32> &readTrGenes, Transcript *alignOut, bool readRecord);
     void addSoloCBcounts(const SoloCB &soloCBin);
     void addSoloCBstats(const SoloCB &soloCBin);
     void statsOut(ofstream &streamOut);

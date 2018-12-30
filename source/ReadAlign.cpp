@@ -7,33 +7,24 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
                     : mapGen(genomeIn), P(Pin), chunkTr(TrIn) 
 {                           
     readNmates=P.readNmates;
-    
     winBin = new uintWinBin* [2];  
-
     winBin[0] = new uintWinBin [P.winBinN];
     winBin[1] = new uintWinBin [P.winBinN];
     memset(winBin[0],255,sizeof(winBin[0][0])*P.winBinN);
     memset(winBin[1],255,sizeof(winBin[0][0])*P.winBinN);
-
     //RNGs
     rngMultOrder.seed(P.runRNGseed*(iChunk+1));
     rngUniformReal0to1=std::uniform_real_distribution<double> (0.0, 1.0);
-
     //transcriptome
     if ( P.quant.trSAM.yes ) {
         alignTrAll=new Transcript [P.alignTranscriptsPerReadNmax];
     };
-
-//     statsRA=new StatsAll;
-
     //split
     splitR=new uint*[3];
     splitR[0]=new uint[P.maxNsplit]; splitR[1]=new uint[P.maxNsplit]; splitR[2]=new uint[P.maxNsplit];
-
     //alignments
     PC=new uiPC[P.seedPerReadNmax];
     WC=new uiWC[P.alignWindowsPerReadNmax];
-
     nWA=new uint[P.alignWindowsPerReadNmax];
     nWAP=new uint[P.alignWindowsPerReadNmax];
     WALrec=new uint[P.alignWindowsPerReadNmax];
@@ -49,59 +40,51 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
 #endif
 
     WA=new uiWA*[P.alignWindowsPerReadNmax];
-    for (uint ii=0;ii<P.alignWindowsPerReadNmax;ii++) WA[ii]=new uiWA[P.seedPerWindowNmax];
-
+    for (uint ii=0;ii<P.alignWindowsPerReadNmax;ii++) 
+        WA[ii]=new uiWA[P.seedPerWindowNmax];
     WAincl = new bool [P.seedPerWindowNmax];
-
     trAll = new Transcript**[P.alignWindowsPerReadNmax+1];
-
     nWinTr = new uint[P.alignWindowsPerReadNmax];
-
     trArray = new Transcript[P.alignTranscriptsPerReadNmax];
     trArrayPointer =  new Transcript*[P.alignTranscriptsPerReadNmax];
-    for (uint ii=0;ii<P.alignTranscriptsPerReadNmax;ii++) trArrayPointer[ii]= &(trArray[ii]);
-
-
+    for (uint ii=0;ii<P.alignTranscriptsPerReadNmax;ii++) 
+        trArrayPointer[ii]= &(trArray[ii]);
     trInit = new Transcript;
-
     //read
     Read0 = new char*[2];
     Read0[0]  = new char [DEF_readSeqLengthMax+1];
     Read0[1]  = new char [DEF_readSeqLengthMax+1];
-
     Qual0 = new char*[2];
     Qual0[0]  = new char [DEF_readSeqLengthMax+1];
     Qual0[1]  = new char [DEF_readSeqLengthMax+1];
-
     readNameMates=new char* [P.readNmates];
     for (uint ii=0; ii<P.readNmates; ii++) {
         readNameMates[ii]=new char [DEF_readNameLengthMax];
     };
-
     readNameExtra.resize(P.readNmates);
-
+    readName = readNameMates[0];
+    Read1 = new char*[3];
+    Read1[0]=new char[DEF_readSeqLengthMax+1]; Read1[1]=new char[DEF_readSeqLengthMax+1]; Read1[2]=new char[DEF_readSeqLengthMax+1];
+    Qual1=new char*[2]; //modified QSs for scoring
+    Qual1[0]=new char[DEF_readSeqLengthMax+1]; Qual1[1]=new char[DEF_readSeqLengthMax+1];    
+    //outBAM
     outBAMoneAlignNbytes = new uint [P.readNmates+2]; //extra piece for chimeric reads
     outBAMoneAlign = new char* [P.readNmates+2]; //extra piece for chimeric reads
     for (uint ii=0; ii<P.readNmates+2; ii++) {
         outBAMoneAlign[ii]=new char [BAMoutput_oneAlignMaxBytes];
     };
-
-
-
-    readName = readNameMates[0];
-    Read1 = new char*[3];
-    Read1[0]=new char[DEF_readSeqLengthMax+1]; Read1[1]=new char[DEF_readSeqLengthMax+1]; Read1[2]=new char[DEF_readSeqLengthMax+1];
-    Qual1=new char*[2]; //modified QSs for scoring
-    Qual1[0]=new char[DEF_readSeqLengthMax+1]; Qual1[1]=new char[DEF_readSeqLengthMax+1];
-
     resetN();
-    
+    //chim
     chunkOutChimJunction = new fstream;
     chimDet = new ChimericDetection(P, trAll, nWinTr, Read1, mapGen, chunkOutChimJunction, this);
-    
+    //solo
     soloCB = new SoloCB*[2];
     soloCB[0] = new SoloCB(0,P,iChunk); //genes
-    soloCB[1] = new SoloCB(1,P,iChunk); //SJs
+    if (P.pSolo.featureYes[1]) {
+        soloCB[1] = new SoloCB(1,P,iChunk); //SJs
+        delete[] soloCB[1]->cbReadCountExact;
+        soloCB[1]->cbReadCountExact=soloCB[0]->cbReadCountExact;//this will be calculated onces
+    };
 };
 
 void ReadAlign::resetN () {//reset resets the counters to 0 for a new read
