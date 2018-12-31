@@ -58,8 +58,10 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, set<uint32> &re
     } else if (soloBar.cbMatch==1) {//1 match with 1MM
         cbReadCount[soloBar.cbI]+= outputReadCB(strU_1, featureType, soloBar.umiB, *readTrGenes.begin(), readSJs, to_string(soloBar.cbI));
         return;
-    } else {
-        cbReadCount[soloBar.cbI] += soloBar.cbMatch*outputReadCB(strU_2, featureType, soloBar.umiB, *readTrGenes.begin(), readSJs, to_string(soloBar.cbMatch) + soloBar.cbMatchString);
+    } else {//>1 matches
+        uint32 nfeat=outputReadCB(strU_2, featureType, soloBar.umiB, *readTrGenes.begin(), readSJs, to_string(soloBar.cbMatch) + soloBar.cbMatchString);
+        for (auto &cbi : soloBar.cbMatchInd)
+            cbReadCount[cbi] += nfeat;
         return;        
     };
 };

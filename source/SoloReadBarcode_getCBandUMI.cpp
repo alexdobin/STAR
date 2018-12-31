@@ -64,14 +64,16 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
     
     //look for 1MM, posN==-1, no Ns
     cbMatch=0;
+    cbMatchInd.clear();
     for (uint32 ii=0; ii<pSolo.cbL; ii++) {
         for (uint32 jj=1; jj<4; jj++) {
             int32 cbI1=binarySearchExact(cbB^(jj<<(ii*2)),pSolo.cbWL.data(),pSolo.cbWL.size());
             if (cbI1>=0) {//found match
                 //output all
                 cbI=cbI1;
+                cbMatchInd.push_back(cbI1);
                 ++cbMatch;
-                cbMatchString += ' ' +to_string(cbI) + ' ' + cbQual.at(pSolo.cbL-1-ii);
+                cbMatchString += ' ' +to_string(cbI1) + ' ' + cbQual.at(pSolo.cbL-1-ii);
             };
         };
     };

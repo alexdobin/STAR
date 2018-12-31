@@ -17,7 +17,7 @@ bool inputFeatureUmi(fstream *strIn, int32 featureType, uint32 &feature, uint32 
     return true;       
 };
 
-void SoloReadFeature::inputRecords(uint32 ** cbP, uint32 *cbReadCountExactTotal) 
+void SoloReadFeature::inputRecords(uint32 **cbP, uint32 *cbReadCountExactTotal) 
 {
     {//load exact matches
         strU_0->flush();
