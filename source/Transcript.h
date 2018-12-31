@@ -62,7 +62,7 @@ public:
     int variationAdjust(const Genome &mapGen, char *R);
     string generateCigarP(); //generates CIGAR
     void peOverlapSEtoPE(uint* mSta, Transcript &t);
-    void extractSpliceJunctions(vector<array<uint64,2>> &sjOut);
+    void extractSpliceJunctions(vector<array<uint64,2>> &sjOut, bool &annotYes);
     
 private:
         
