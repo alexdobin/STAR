@@ -11,6 +11,8 @@
 #include "ParametersChimeric.h"
 #include "ParametersSolo.h"
 #include "ParametersGenome.h"
+#include <vector>
+#include <array>
 
 class Parameters {
 
