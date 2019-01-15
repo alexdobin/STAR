@@ -959,6 +959,49 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         errOut <<"SOLUTION: re-run STAR with --waspOutputMode ... and --outSAMtype BAM ... \n";
         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
+
+    //quantification parameters
+    quant.yes=false;
+    quant.geCount.yes=false;
+    quant.trSAM.yes=false;
+    quant.trSAM.bamYes=false;
+    if (quant.mode.at(0) != "-") {
+        quant.yes=true;
+        for (uint32 ii=0; ii<quant.mode.size(); ii++) {
+            if (quant.mode.at(ii)=="TranscriptomeSAM") {
+                quant.trSAM.yes=true;
+
+                if (quant.trSAM.bamCompression>-2)
+                    quant.trSAM.bamYes=true;
+
+                if (quant.trSAM.bamYes) {
+                    if (outStd=="BAM_Quant") {
+                        outFileNamePrefix="-";
+                    } else {
+                        outQuantBAMfileName=outFileNamePrefix + "Aligned.toTranscriptome.out.bam";
+                    };
+                    inOut->outQuantBAMfile=bgzf_open(outQuantBAMfileName.c_str(),("w"+to_string((long long) quant.trSAM.bamCompression)).c_str());
+                };
+                if (quant.trSAM.ban=="IndelSoftclipSingleend") {
+                    quant.trSAM.indel=false;
+                    quant.trSAM.softClip=false;
+                    quant.trSAM.singleEnd=false;
+                } else if (quant.trSAM.ban=="Singleend") {
+                    quant.trSAM.indel=true;
+                    quant.trSAM.softClip=true;
+                    quant.trSAM.singleEnd=false;
+                };
+            } else if  (quant.mode.at(ii)=="GeneCounts") {
+                quant.geCount.yes=true;
+                quant.geCount.outFile=outFileNamePrefix + "ReadsPerGene.out.tab";
+            } else {
+                ostringstream errOut;
+                errOut << "EXITING because of fatal INPUT error: unrecognized option in --quant.mode=" << quant.mode.at(ii) << "\n";
+                errOut << "SOLUTION: use one of the allowed values of --quant.mode : TranscriptomeSAM or - .\n";
+                exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+            };
+        };
+    };
     
     //solo
     pSolo.initialize(this);
@@ -1258,49 +1301,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         errOut << "EXITING because of FATAL INPUT ERROR: --genomeLoad=" << pGe.gLoad << "\n" <<flush;
         errOut << "SOLUTION: use one of the allowed values of --genomeLoad : NoSharedMemory,LoadAndKeep,LoadAndRemove,LoadAndExit,Remove.\n" <<flush;
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-    };
-
-    //quantification parameters
-    quant.yes=false;
-    quant.geCount.yes=false;
-    quant.trSAM.yes=false;
-    quant.trSAM.bamYes=false;
-    if (quant.mode.at(0) != "-") {
-        quant.yes=true;
-        for (uint32 ii=0; ii<quant.mode.size(); ii++) {
-            if (quant.mode.at(ii)=="TranscriptomeSAM") {
-                quant.trSAM.yes=true;
-
-                if (quant.trSAM.bamCompression>-2)
-                    quant.trSAM.bamYes=true;
-
-                if (quant.trSAM.bamYes) {
-                    if (outStd=="BAM_Quant") {
-                        outFileNamePrefix="-";
-                    } else {
-                        outQuantBAMfileName=outFileNamePrefix + "Aligned.toTranscriptome.out.bam";
-                    };
-                    inOut->outQuantBAMfile=bgzf_open(outQuantBAMfileName.c_str(),("w"+to_string((long long) quant.trSAM.bamCompression)).c_str());
-                };
-                if (quant.trSAM.ban=="IndelSoftclipSingleend") {
-                    quant.trSAM.indel=false;
-                    quant.trSAM.softClip=false;
-                    quant.trSAM.singleEnd=false;
-                } else if (quant.trSAM.ban=="Singleend") {
-                    quant.trSAM.indel=true;
-                    quant.trSAM.softClip=true;
-                    quant.trSAM.singleEnd=false;
-                };
-            } else if  (quant.mode.at(ii)=="GeneCounts") {
-                quant.geCount.yes=true;
-                quant.geCount.outFile=outFileNamePrefix + "ReadsPerGene.out.tab";
-            } else {
-                ostringstream errOut;
-                errOut << "EXITING because of fatal INPUT error: unrecognized option in --quant.mode=" << quant.mode.at(ii) << "\n";
-                errOut << "SOLUTION: use one of the allowed values of --quant.mode : TranscriptomeSAM or - .\n";
-                exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-            };
-        };
     };
 
    //sjdb insert on the fly
