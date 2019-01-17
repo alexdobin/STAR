@@ -24,7 +24,11 @@ public:
     bool featureYes[2]; //which features are requested
     //filtering
     char QSbase,QSmax;//quality score base and cutoff
-    float cbMinP;//for CBs with non-exact matching to WL, min posterior probability 
+    float cbMinP;//for CBs with non-exact matching to WL, min posterior probability
+    //algorithms
+    vector <string> umiDedup;
+    vector <uint32> umiDedupColumns;
+    vector <bool> umiDedupYes;
     //output
     vector<string> outFileNames;
     //constants

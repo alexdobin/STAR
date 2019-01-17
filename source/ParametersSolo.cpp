@@ -61,15 +61,25 @@ void ParametersSolo::initialize(Parameters *pPin)
         };
     };
     nFeatures=features.size();
-//     if (!featureYes[0]) {
-//             ostringstream errOut;
-//             errOut << "EXITING because of fatal PARAMETERS error: --soloFeatures has to contain"<<featureNames[0]<<"\n";
-//             errOut << "SOLUTION: use allowed option: ";
-//             errOut <<featureNames[0]<< "   OR   ";            
-//             for (auto &fname : featureNames)
-//                 errOut << fname <<" ";
-//             exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
-//     };
+    
+    umiDedupYes.resize(3,false);
+    umiDedupColumns.resize(3);
+    for (uint32 ii=0; ii<umiDedup.size(); ii++) {
+        if (umiDedup[ii]=="1MM_NotCollapsed") {
+            umiDedupYes[0]=true; 
+            umiDedupColumns[ii]=0;
+        } else if (umiDedup[ii]=="1MM_All") {
+            umiDedupYes[1]=true;
+            umiDedupColumns[ii]=1;            
+        } else if (umiDedup[ii]=="1MM_Directional") {
+            umiDedupYes[2]=true;
+            umiDedupColumns[ii]=2;
+        } else {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in --soloUMIdedup="<<umiDedup[ii]<<"\n";
+            exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);            
+        };
+    };
     ///////////// finished parameters input
     
     //make output directory if needed
@@ -113,16 +123,6 @@ void ParametersSolo::initialize(Parameters *pPin)
     //int comp1 = [] (const void *a, const void *b) {uint32 aa=*(uint32*) a; uint32 bb=*(uint32*) b; if (a 
     qsort(cbWL.data(),cbWL.size(),sizeof(uint32),funCompareNumbers<uint32>);
     
-    if (!pP->quant.trSAM.yes) {
-        pP->quant.yes = true;
-        pP->quant.trSAM.yes = true;
-        pP->quant.trSAM.bamYes = false;
-        pP->quant.trSAM.bamCompression = -2;
-        pP->quant.trSAM.indel = true;
-        pP->quant.trSAM.softClip = true;
-        pP->inOut->logMain << "Turning on Genomic->Transcriptomic coordinate conversion for STARsolo\n";
-    };
-
     time_t rawTime;
     time(&rawTime);
     pP->inOut->logMain << timeMonthDayTime(rawTime) << "Finished reading CB whitelist sequences: " << cbWL.size() <<endl;

@@ -58,7 +58,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 *cbReadCountExactTotal)
         uint32 cb=0, feature, umi, ncb;
         while (inputFeatureUmi(strU_2,featureType, feature, umi, P.sjAll)) {
             if (feature == (uint32) (-1)) {
-                strU_2->ignore('\n',(uint32) (-1));//ignore until the end of the line
+                strU_2->ignore((uint32) (-1),'\n');//ignore until the end of the line
                 continue; //nothing to record
             };
             *strU_2 >> ncb;
@@ -70,7 +70,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 *cbReadCountExactTotal)
                 *strU_2 >> cbin >> qin;
                 if (cbReadCountExactTotal[cbin]>0) {//otherwise this cbin does not work
                     qin -= pSolo.QSbase;
-                    qin = qin < pSolo.QSbase ? qin : pSolo.QSbase;
+                    qin = qin < pSolo.QSmax ? qin : pSolo.QSmax;
                     pin=cbReadCountExactTotal[cbin]*pow(10.0,-qin/10.0);
                     ptot+=pin;
                     if (pin>pmax) {

@@ -31,14 +31,18 @@ void SoloFeature::outputResults()
     for (uint32 icb=0; icb<nCB; icb++) {
         uint32 *rCBpp=rCBp[icb];
         for (uint32 ig=0; ig<nGperCB[icb]; ig++) {
-            countMatrixStream << rCBpp[0]+1  <<'\t'<< indCB[icb]+1 <<'\t'<< rCBpp[1];
+            uint32 count1[3] = {1,1,1};
+            count1[0] = rCBpp[1];
             if (rCBpp[1]>1) {//3 counts recorded
-                countMatrixStream <<'\t'<< rCBpp[2] <<'\t'<< rCBpp[3];
+                count1[1]=rCBpp[2];
+                count1[2]=rCBpp[3];                
                 rCBpp += 4;
             } else {//1 recorded
-                countMatrixStream <<"\t1\t1";
                 rCBpp +=2;
             };
+            countMatrixStream << rCBpp[0]+1  <<'\t'<< indCB[icb]+1;
+            for (uint32 ii=0; ii<pSolo.umiDedupColumns.size(); ii++) 
+                countMatrixStream <<'\t'<< count1[pSolo.umiDedupColumns[ii]];            
             countMatrixStream << '\n';
         };
     };
