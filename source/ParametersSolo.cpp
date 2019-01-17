@@ -123,6 +123,17 @@ void ParametersSolo::initialize(Parameters *pPin)
     //int comp1 = [] (const void *a, const void *b) {uint32 aa=*(uint32*) a; uint32 bb=*(uint32*) b; if (a 
     qsort(cbWL.data(),cbWL.size(),sizeof(uint32),funCompareNumbers<uint32>);
     
+    if (!pP->quant.trSAM.yes) {
+        pP->quant.yes = true;
+        pP->quant.trSAM.yes = true;
+        pP->quant.trSAM.bamYes = false;
+        pP->quant.trSAM.bamCompression = -2;
+        pP->quant.trSAM.indel = true;
+        pP->quant.trSAM.softClip = true;
+        pP->inOut->logMain << "Turning on Genomic->Transcriptomic coordinate conversion for STARsolo\n";
+    };
+
+
     time_t rawTime;
     time(&rawTime);
     pP->inOut->logMain << timeMonthDayTime(rawTime) << "Finished reading CB whitelist sequences: " << cbWL.size() <<endl;
