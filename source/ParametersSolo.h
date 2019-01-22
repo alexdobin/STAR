@@ -9,8 +9,8 @@ public:
     //chemistry, library etc
     string typeStr;
     int type;
-    uint32 cbL; //cell barcode length
-    uint32 umiL; //umi length
+    uint32 cbS,cbL; //cell barcode start,length
+    uint32 umiS,umiL; //umi start,length
     uint32 bL; //total barcode length
     string soloCBwhitelist;
     std::vector <uint32> cbWL;

@@ -250,11 +250,11 @@ outSAMattributes                Standard
                                 All         ... NH HI AS nM NM MD jM jI MC ch
                                 vA          ... variant allele
                                 vG          ... genomic coordiante of the variant overlapped by the read
-                                vW          ... 0/1 - alignment does not pass / passes WASP filtering. Requires --waspOutputMode SAMtag .
+                                vW          ... 0/1 - alignment does not pass / passes WASP filtering. Requires --waspOutputMode SAMtag 
+                                CR,CY,UR,UY ... sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing
                                 Unsupported/undocumented:
                                 rB          ... alignment block read/genomic coordinates
                                 vR          ... read coordinate of the variant
-                                CR,CY,UR,UY ... sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing
 
 outSAMattrIHstart               1
     int>=0:                     start value for the IH attribute. 0 may be required by some downstream software, such as Cufflinks or StringTie.
@@ -672,15 +672,21 @@ waspOutputMode              None
 ### solo (single cell) parameters
 soloType                    None
     string(s): type of single-cell RNA-seq
-                            10XchromiumV2   ... 10X Genomics Chromium Verison 2 chemistry
+                            Droplet   ... one cell barcode and one UMI barcode in read2, e.g. Drop-seq and 10X Chromium
 
 soloFeatures                Gene
     string(s)               genomic features for which the UMI counts per Cell Barcode are collected
                             Gene            ... genes: reads match the gene transcript
                             SJ              ... splice junctions: reported in SJ.out.tab
 
+soloCBstart                 1
+    int>0: cell barcode start base
+
 soloCBlen                   16
     int>0: cell barcode length
+
+soloUMIstart                17
+    int>0: UMI start base
 
 soloUMIlen                  10
     int>0: UMI length

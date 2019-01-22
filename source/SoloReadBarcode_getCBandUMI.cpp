@@ -6,15 +6,17 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
 {
     if (pSolo.type==0)
         return;
+    cbI=-999;
     
     cbMatch=-1;
-    cbI=-999;
     cbMatchString="";
     
-    cbSeq=readNameExtra.substr(0,pSolo.cbL);
-    umiSeq=readNameExtra.substr(pSolo.cbL,pSolo.umiL);
-    cbQual=readNameExtra.substr(pSolo.cbL+pSolo.umiL+1,pSolo.cbL);
-    umiQual=readNameExtra.substr(pSolo.cbL+pSolo.umiL+1+pSolo.cbL,pSolo.umiL);
+    cbSeq=readNameExtra.substr(pSolo.cbS-1,pSolo.cbL);
+    umiSeq=readNameExtra.substr(pSolo.umiS-1,pSolo.umiL);
+    
+    uint32 qualStart = readNameExtra.find(' ',pSolo.cbL+pSolo.umiL);
+    cbQual=readNameExtra.substr(qualStart+pSolo.cbS,pSolo.cbL);
+    umiQual=readNameExtra.substr(qualStart+pSolo.umiS,pSolo.umiL);
     
     //check UMIs, return if bad UMIs
     if (convertNuclStrToInt32(umiSeq,umiB)!=-1) {//convert and check for Ns

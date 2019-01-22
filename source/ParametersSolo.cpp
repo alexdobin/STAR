@@ -16,14 +16,14 @@ void ParametersSolo::initialize(Parameters *pPin)
     if (typeStr=="None") {
         type=0;
         return;
-    } else if (typeStr=="10XchromiumV2") {
+    } else if (typeStr=="Droplet") {
         type=1;
         bL=cbL+umiL;
         pP->readNmates=1; //output mates TODO: check that readNmatesIn==2
     } else  {
         ostringstream errOut;
         errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in --soloType="<<typeStr<<"\n";
-        errOut << "SOLUTION: use allowed option: None or 10XchromiumV2";
+        errOut << "SOLUTION: use allowed option: None or Droplet";
         exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     }; 
     
@@ -63,7 +63,7 @@ void ParametersSolo::initialize(Parameters *pPin)
     nFeatures=features.size();
     
     umiDedupYes.resize(3,false);
-    umiDedupColumns.resize(3);
+    umiDedupColumns.resize(umiDedup.size());
     for (uint32 ii=0; ii<umiDedup.size(); ii++) {
         if (umiDedup[ii]=="1MM_NotCollapsed") {
             umiDedupYes[0]=true; 
@@ -92,7 +92,6 @@ void ParametersSolo::initialize(Parameters *pPin)
             exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
     };
-    
     
     QSbase=33;//TODO make these user-definable
     QSmax=33;
@@ -132,7 +131,6 @@ void ParametersSolo::initialize(Parameters *pPin)
         pP->quant.trSAM.softClip = true;
         pP->inOut->logMain << "Turning on Genomic->Transcriptomic coordinate conversion for STARsolo\n";
     };
-
 
     time_t rawTime;
     time(&rawTime);
