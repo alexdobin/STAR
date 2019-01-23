@@ -14,16 +14,17 @@ It follows CellRanger logic for cell barcode whitelisting and UMI deduplication,
 
 
 The STAR solo algorithm is turned on with:
-'''
+```
 --soloType Droplet 
-'''
+```
 
-Presently, users to provide the cell barcode whitelist:
-'''
+Presently, the cell barcode whitelist has to be provided with:
+``` 
 --soloCBwhitelist /path/to/cell/barcode/whitelist
-'''
+```
+
 The 10X Chromium whitelist file can be found inside the CellRanger distribution, 
-e.g. \url[10X-whitlist](https://kb.10xgenomics.com/hc/en-us/articles/115004506263-What-is-a-barcode-whitelist-).
+e.g. [10X-whitelist](https://kb.10xgenomics.com/hc/en-us/articles/115004506263-What-is-a-barcode-whitelist-).
 Please make sure that the whitelist is compatible with the specific version of the 10X chemistry (V1,V2,V3 etc).
 
 Importantly, in the --readFilesIn option, the 1st file has to be cDNA read, and the 2nd file has to be the barcode (cell+UMI) read, i.e.
@@ -33,7 +34,7 @@ Importantly, in the --readFilesIn option, the 1st file has to be cDNA read, and 
 
 Other parameters that control STARsolo output are listed below. Note that default parameters are compatible with 10X Chromium V2 protocol.
 
-'''
+```
 soloCBstart                 1
     int>0: cell barcode start base
 
@@ -70,7 +71,7 @@ soloOutFileNames            Solo.out/ genes.tsv barcodes.tsv matrix.mtx matrixSJ
                             3rd word    ... gene IDs and names
                             4th word    ... cell/gene counts matrix
                             5th word    ... cell/splice junction counts matrix
-'''
+```
 
 
 
