@@ -1,6 +1,10 @@
-* Added Dockerfile for STAR in extras/docker
+STAR 2.7.0a 2019/01/23
+======================
+* This release introduces STARsolo for: mapping, demultiplexing and gene quantification for single cell RNA-seq.
+* Multiple solo\* options control STARsolo algorithm. See the RELEASEnotes and the manualfor more information.
 
-STAR 2.6.1c 2018/11/16
+
+STAR 2.6.1d 2018/11/16
 ======================
 
 * Fixed the problem causing BAM sorting error with large number of threads and small ulimit -n (github.com/alexdobin/STAR/issues/512).

@@ -26,44 +26,36 @@
 #include "SjdbClass.h"
 #include "sjdbInsertJunctions.h"
 #include "Variation.h"
+#include "Solo.h"
+
 #include "bam_cat.h"
 
 #include "htslib/htslib/sam.h"
 #include "parametersDefault.xxd"
 
+void usage(int usageType) {
+    cout << "Usage: STAR  [options]... --genomeDir REFERENCE   --readFilesIn R1.fq R2.fq\n";
+    cout <<"Spliced Transcripts Alignment to a Reference (c) Alexander Dobin, 2009-2019\n\n";
+    cout <<"For more details see:\n";
+    cout <<"<https://github.com/alexdobin/STAR>\n";
+    cout <<"<https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf>\n";
 
-
-void usage() {
-    printf("Usage: STAR  [options]... --genomeDir REFERENCE   --readFilesIn R1.fq R2.fq\n");
-    printf("Spliced Transcripts Alignment to a Reference (c) Alexander Dobin, 2009-2015\n\n");
-
-    std::cout << parametersDefault;
-
-    printf("For more details see:\n");
-    printf("<https://github.com/alexdobin/STAR>\n");
-    printf("<https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf>\n");
-
+    if (usageType==0) {//brief
+        cout << "\nTo list all parameters, run STAR --help\n";
+    } else {//full
+        cout <<'\n'<< parametersDefault;
+    };
     exit(0);
 }
 
 
-int main(int argInN, char* argIn[]) {
-    
-    //debug
-//     uint nn=4000000000;
-//     uint* dummy=new uint[nn];
-//     std::cout <<"Allocated"<<endl;
-//     for (uint ii=0;ii<nn;ii++) {
-//         dummy[ii]=14829735431805718528LLU;;
-//     };
-//     std::cout <<"Filled "<<dummy[0]<<endl;
-//     delete[] dummy;     
-//     std::cout <<"Deleted"<<endl;
-    
+int main(int argInN, char* argIn[]) {   
     // If no argument is given, or the first argument is either '-h' or '--help', run usage()
-    if((argInN == 1) || (argInN == 2 && (strcmp("-h",argIn[1]) == 0 || strcmp ("--help",argIn[1]) == 0 ))) {
-        usage();
-    }
+    if (argInN == 1) {
+        usage(0);
+    } else if (argInN == 2 && (strcmp("-h",argIn[1]) == 0 || strcmp ("--help",argIn[1]) == 0 )) {
+        usage(1);
+    };
 
     time(&g_statsAll.timeStart);
 
@@ -166,6 +158,7 @@ int main(int argInN, char* argIn[]) {
 //         P1.inOut->logMain.open((P1.outFileNamePrefix + "Log.out").c_str());
 
         P1.wasp.outputMode="None"; //no WASP filtering on the 1st pass
+        P1.pSolo.type=0; //no solo in the first pass
         
         g_statsAll.resetN();
         time(&g_statsAll.timeStartMap);
@@ -299,7 +292,7 @@ int main(int argInN, char* argIn[]) {
 //                 outBAMwriteHeader(P.inOut->outBAMfileCoord,P.samHeader,mainGenome.chrName,mainGenome.chrLength);
 //             };
 
-        if ( P.quant.trSAM.yes ) {
+        if ( P.quant.trSAM.bamYes ) {
             samHeaderStream.str("");
             vector <uint> trlength;
             for (uint32 ii=0;ii<mainTranscriptome->trID.size();ii++) {
@@ -342,7 +335,6 @@ int main(int argInN, char* argIn[]) {
         outputSJ(RAchunk,P);//collapse novel junctions
         P.readFilesIndex=-1;
 
-
         P.outFilterBySJoutStage=2;
         if (P.outBAMcoord) {
             for (int it=0; it<P.runThreadN; it++) {//prepare the unmapped bin
@@ -367,13 +359,22 @@ int main(int argInN, char* argIn[]) {
         P.limitBAMsortRAM=mainGenome.nGenome+mainGenome.SA.lengthByte+mainGenome.SAi.lengthByte;
     };
 
+    time(&g_statsAll.timeFinishMap);
+    *P.inOut->logStdOut << timeMonthDayTime(g_statsAll.timeFinishMap) << " ..... finished mapping\n" <<flush;
+
     //no need for genome anymore, free the memory
     mainGenome.freeMemory();
 
-    if ( P.quant.geCount.yes )
-    {//output gene quantifications
-        for (int ichunk=1; ichunk<P.runThreadN; ichunk++)
-        {//sum counts from all chunks into 0th chunk
+    //aggregate output junctions
+    //collapse splice junctions from different threads/chunks, and output them
+    outputSJ(RAchunk,P);    
+    
+    //solo genes
+    Solo soloMain(RAchunk,P,*RAchunk[0]->chunkTr);//solo for genes
+    soloMain.processAndOutput();
+    
+    if ( P.quant.geCount.yes ) {//output gene quantifications
+        for (int ichunk=1; ichunk<P.runThreadN; ichunk++) {//sum counts from all chunks into 0th chunk
             RAchunk[0]->chunkTr->quants->addQuants(*(RAchunk[ichunk]->chunkTr->quants));
         };
         RAchunk[0]->chunkTr->quantsOutput();
@@ -382,7 +383,6 @@ int main(int argInN, char* argIn[]) {
     if (P.runThreadN>1 && P.outSAMorder=="PairedKeepInputOrder") {//concatenate Aligned.* files
         RAchunk[0]->chunkFilesCat(P.inOut->outSAM, P.outFileTmp + "/Aligned.out.sam.chunk", g_threadChunks.chunkOutN);
     };
-
 
     if (P.outBAMcoord) {//sort BAM if needed
         *P.inOut->logStdOut << timeMonthDayTime() << " ..... started sorting BAM\n" <<flush;
@@ -475,10 +475,6 @@ int main(int argInN, char* argIn[]) {
         signalFromBAM(P.outBAMfileCoordName, wigOutFileNamePrefix, P);
     };
 
-    //aggregate output junctions
-    //collapse splice junctions from different threads/chunks, and output them
-    outputSJ(RAchunk,P);
-
     g_statsAll.writeLines(P.inOut->outChimJunction, P.pCh.outJunctionFormat, "#", STAR_VERSION + string("   ") + P.commandLine);
     
     g_statsAll.progressReport(P.inOut->logProgress);
@@ -488,12 +484,8 @@ int main(int argInN, char* argIn[]) {
     *P.inOut->logStdOut << timeMonthDayTime(g_statsAll.timeFinish) << " ..... finished successfully\n" <<flush;
 
     P.inOut->logMain  << "ALL DONE!\n" << flush;
-    if (P.outTmpKeep=="None")
-    {
+    if (P.outTmpKeep=="None") {
         sysRemoveDir (P.outFileTmp);
-    } else
-    {
-        //nothing to do
     };
 
     P.closeReadsFiles();//this will kill the readFilesCommand processes if necessary

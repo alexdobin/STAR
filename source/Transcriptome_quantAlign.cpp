@@ -24,8 +24,6 @@ int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, ui
 
     aG.canonSJ[aG.nExons-1]=-999; //marks the last exons
     for (uint32 iab=0; iab<aG.nExons; iab++) {//scan through all blocks of the align
-
-//         g1+=aG.exons[iab][EX_L]-1;//last base of the block
         if (aG.exons[iab][EX_G]+aG.exons[iab][EX_L]>exSE1[2*ex1+1]+trS1+1) {//block extends past exon end
             return 0;
         };
@@ -44,33 +42,28 @@ int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, ui
             case -999: //last exon
                 if (trStr1==2) {//convert align coordinates if on the -strand
                     uint32 trlength=exLenCum1[exN1-1]+exSE1[2*exN1-1]-exSE1[2*exN1-2]+1; //transcript length
-                    for (uint32 iex=0; iex<aT.nExons; iex++)
-                    {
+                    for (uint32 iex=0; iex<aT.nExons; iex++) {
                         aT.exons[iex][EX_R]=aG.Lread-(aT.exons[iex][EX_R]+aT.exons[iex][EX_L]);
                         aT.exons[iex][EX_G]=trlength-(aT.exons[iex][EX_G]+aT.exons[iex][EX_L]);
                     };
-                    for (uint32 iex=0; iex<aT.nExons/2; iex++)
-                    {
+                    for (uint32 iex=0; iex<aT.nExons/2; iex++) {
                         swap(aT.exons[iex][EX_R],aT.exons[aT.nExons-1-iex][EX_R]);
                         swap(aT.exons[iex][EX_G],aT.exons[aT.nExons-1-iex][EX_G]);
                         swap(aT.exons[iex][EX_L],aT.exons[aT.nExons-1-iex][EX_L]);
                         swap(aT.exons[iex][EX_iFrag],aT.exons[aT.nExons-1-iex][EX_iFrag]);
                     };
-                    for (uint32 iex=0; iex<(aT.nExons-1)/2; iex++)
-                    {
+                    for (uint32 iex=0; iex<(aT.nExons-1)/2; iex++) {
                         swap(aT.canonSJ[iex],aT.canonSJ[aT.nExons-2-iex]);
                     };
-
                 };
-                for (uint32 iex=0; iex<aT.nExons; iex++)
-                {//no junctions in the transcritomic coordinates
+                for (uint32 iex=0; iex<aT.nExons; iex++) {//no junctions in the transcritomic coordinates
                     aT.sjAnnot[iex]=0;
                     aT.shiftSJ[iex][0]=0;
                     aT.shiftSJ[iex][1]=0;
                     aT.sjStr[iex]=0;
                 };
 
-                return 1; //reached the end of blocks, align is consistend with this transcript
+                return 1; //reached the end of blocks, align is consistent with this transcript
                 break;
             case -3: //mate connection
                 ex1=binarySearch1<uint32>(aG.exons[iab+1][EX_G]-trS1, exSE1, 2*exN1);
@@ -96,7 +89,7 @@ int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, ui
     return 0; //this should not happen
 };
 
-uint32 Transcriptome::quantAlign (Transcript &aG, Transcript *aTall) {
+uint32 Transcriptome::quantAlign (Transcript &aG, Transcript *aTall, vector<uint32> &readTranscripts, set<uint32> &readTrGenes) {
     uint32 nAtr=0; //number of alignments to the transcriptome
 
     //binary search through transcript starts
@@ -114,6 +107,10 @@ uint32 Transcriptome::quantAlign (Transcript &aG, Transcript *aTall) {
                     aTall[nAtr].Chr = tr1;
                     aTall[nAtr].Str = trStr[tr1]==1 ? aG.Str : 1-aG.Str; //TODO strandedness
                     ++nAtr;
+                    if (P.pSolo.strand==-1 || (int32) aTall[nAtr-1].Str == P.pSolo.strand) {//correct strand
+                        readTranscripts.push_back(tr1);
+                        readTrGenes.insert(trGene[tr1]);
+                    };
                 };
         };
     } while (trEmax[tr1]>=aGend && tr1>0);

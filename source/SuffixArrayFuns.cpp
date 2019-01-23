@@ -1,16 +1,19 @@
 #include "SuffixArrayFuns.h"
 #include "PackedArray.h"
 
-inline uint medianUint2(uint a, uint b) {
+inline uint medianUint2(uint a, uint b) 
+{
     // returns (a+b)/2
     return a/2 + b/2 + (a%2 + b%2)/2;
 };
 
-uint compareSeqToGenome(Genome &mapGen, char** s2, uint S, uint N, uint L, uint iSA, bool dirR, bool& compRes) {
-    // compare s to g, find the maximum identity length
-    // s2[0] read sequence; s2[1] complementary sequence
-    // S position to start search from in s2[0],s2[1]
-    //dirR forward or reverse direction search on read sequence
+uint compareSeqToGenome(Genome &mapGen, char** s2, uint S, uint N, uint L, uint iSA, bool dirR, bool& compRes) 
+{
+    /* compare s to g, find the maximum identity length
+     * s2[0] read sequence; s2[1] complementary sequence
+     * S position to start search from in s2[0],s2[1]
+     * dirR forward or reverse direction search on read sequence
+     */
 
     register int64 ii;
 
@@ -100,8 +103,8 @@ uint compareSeqToGenome(Genome &mapGen, char** s2, uint S, uint N, uint L, uint 
     };
 };
 
-uint findMultRange(Genome &mapGen, uint i3, uint L3, uint i1, uint L1, uint i1a, uint L1a, uint i1b, uint L1b, char** s, bool dirR, uint S) {
-    // given SA index i3 and identity length L3, return the index of the farthest element with the same length, starting from i1,L1 or i1a,L1a, or i1b,L1b
+uint findMultRange(Genome &mapGen, uint i3, uint L3, uint i1, uint L1, uint i1a, uint L1a, uint i1b, uint L1b, char** s, bool dirR, uint S) 
+{    // given SA index i3 and identity length L3, return the index of the farthest element with the same length, starting from i1,L1 or i1a,L1a, or i1b,L1b
 
     bool compRes;
 
@@ -127,10 +130,12 @@ uint findMultRange(Genome &mapGen, uint i3, uint L3, uint i1, uint L1, uint i1a,
     return i1a;
 };
 
-uint maxMappableLength(Genome &mapGen, char** s, uint S, uint N, uint i1, uint i2, bool dirR, uint& L, uint* indStartEnd) {
-    // find minimum mappable length of sequence s to the genome g with suffix array SA; length(s)=N; [i1 i2] is
-    // returns number of mappings (1=unique);range indStartEnd; min mapped length = L
-    // binary search in SA space
+uint maxMappableLength(Genome &mapGen, char** s, uint S, uint N, uint i1, uint i2, bool dirR, uint& L, uint* indStartEnd) 
+{
+    /* find minimum mappable length of sequence s to the genome g with suffix array SA; length(s)=N; [i1 i2] is
+     * returns number of mappings (1=unique);range indStartEnd; min mapped length = L
+     * binary search in SA space
+     */
 
     bool compRes;
 
@@ -201,15 +206,16 @@ int compareRefEnds (Genome &mapGen, uint64 SAstr,  uint64 gInsert, bool strG, bo
     };
 };
 
-uint compareSeqToGenome1(Genome &mapGen, char** s2, uint S, uint N, uint L, uint iSA, bool dirR, uint64 gInsert, int & compRes) {
-    // compare s to g, find the maximum identity length
-    // s2[0] read sequence; s2[1] complementary sequence
-    // S position to start search from in s2[0],s2[1]
-    // dirR: strand of the s
-
-    //different treatment of 5 (spacer) in the sequence and genome
-    // 5 is allowed in the sequence
-    // 5 in the genome is < than 5 in the sequence
+uint compareSeqToGenome1(Genome &mapGen, char** s2, uint S, uint N, uint L, uint iSA, bool dirR, uint64 gInsert, int & compRes) 
+{
+    /* compare s to g, find the maximum identity length
+     * s2[0] read sequence; s2[1] complementary sequence
+     * S position to start search from in s2[0],s2[1]
+     * dirR: strand of the s
+     * different treatment of 5 (spacer) in the sequence and genome
+     * 5 is allowed in the sequence
+     * 5 in the genome is < than 5 in the sequence
+     */
 
     //TODO no need for complementary sequence
 
@@ -278,17 +284,18 @@ uint compareSeqToGenome1(Genome &mapGen, char** s2, uint S, uint N, uint L, uint
 
 uint suffixArraySearch1(Genome &mapGen, char** s, uint S, uint N, uint64 gInsert, bool strR, uint i1, uint i2, uint L)
 {
-    // binary search in SA space
-    // s[0],s[1] - query sequence, complementary sequence
-    // S - start offset
-    // N - sequence length
-    // g - genome sequence
-    // gInsert - index where the sequence insertion happened
-    // SA - suffix array
-    // strR - strand of the query sequence
-    // i1,i2 = starting indices in SA
-    // L - starting length
-    // output: first SA index > searched string, i.e. g[SA[index-1]]<s<g[SA[index]]
+    /* binary search in SA space
+     * s[0],s[1] - query sequence, complementary sequence
+     * S - start offset
+     * N - sequence length
+     * g - genome sequence
+     * gInsert - index where the sequence insertion happened
+     * SA - suffix array
+     * strR - strand of the query sequence
+     * i1,i2 = starting indices in SA
+     * L - starting length
+     * output: first SA index > searched string, i.e. g[SA[index-1]]<s<g[SA[index]]
+     */
 
     int compRes;
 
@@ -375,7 +382,8 @@ uint funCalcSAiFromSA(char* gSeq, PackedArray& gSA, Genome &mapGen, uint iSA, in
 
 };
 
-int64 funCalcSAi(char *G, uint iL) {
+int64 funCalcSAi(char *G, uint iL) 
+{
     int64 ind1=0;
     for (uint iL1=0;iL1<=iL;iL1++) {
         uint g=(uint) G[iL1];

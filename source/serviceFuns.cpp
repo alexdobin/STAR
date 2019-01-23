@@ -9,7 +9,34 @@ template <class T>
         for (uint ii=0;ii<N;ii++) s+=a[ii];
         return s;
     };
+    
+template <class numT> int funCompareNumbers (const void *a, const void *b) {
+    numT va= *((numT*) a);
+    numT vb= *((numT*) b);
 
+    if (va>vb) {
+        return 1;
+    } else if (va==vb) {
+        return 0;
+    } else {
+        return -1;
+    };
+};
+
+template <class numT> int funCompareNumbersReverse (const void *a, const void *b) {
+    numT va= *((numT*) a);
+    numT vb= *((numT*) b);
+
+    if (va>vb) {
+        return -1;
+    } else if (va==vb) {
+        return 0;
+    } else {
+        return 1;
+    };
+};
+    
+    
 inline int funCompareUint1 (const void *a, const void *b) {
     uint va= *((uint*) a);
     uint vb= *((uint*) b);
@@ -40,24 +67,10 @@ inline int funCompareUint2 (const void *a, const void *b) {
 	};
 };
 
-
-
-inline int splitString(const std::string &s, char delim, std::vector<std::string> &elems) {
-    std::stringstream ss(s);
-    std::string item;
-    int maxL=0;
-    elems.clear();
-    while (std::getline(ss, item, delim)) {
-        maxL=max(maxL, (int)item.size());
-        elems.push_back(item);
-    };
-    return maxL;//returns mzx string size
-};
-
 template <class arrayType, int arraySize>
 inline int funCompareArrays (const void *a, const void *b) {
-    arrayType* va= (uint*) a;
-    arrayType* vb= (uint*) b;
+    arrayType* va= (arrayType*) a;
+    arrayType* vb= (arrayType*) b;
 
     for (int ii=0;ii<arraySize;ii++) {
         if (va[ii]>vb[ii]) {
@@ -69,6 +82,33 @@ inline int funCompareArrays (const void *a, const void *b) {
 
     return 0;
 
+};
+
+template <class Type, int Shift>
+inline int funCompareTypeShift (const void *a, const void *b) {
+    Type va= *( ((Type*) a)+Shift );
+    Type vb= *( ((Type*) b)+Shift );
+
+    if (va>vb) {
+		return 1;
+	} else if (va==vb) {
+		return 0;
+	} else {
+		return -1;
+	};
+
+};
+
+inline int splitString(const std::string &s, char delim, std::vector<std::string> &elems) {
+    std::stringstream ss(s);
+    std::string item;
+    int maxL=0;
+    elems.clear();
+    while (std::getline(ss, item, delim)) {
+        maxL=max(maxL, (int)item.size());
+        elems.push_back(item);
+    };
+    return maxL;//returns mzx string size
 };
 
 template <class argType>
@@ -143,5 +183,36 @@ inline int32 binarySearch1b(argType x, argType *X, int32 N)
     
     return i2;
 };
+
+template <class argType>
+inline int32 binarySearchExact(argType x, argType *X, int32 N) {
+    //binary search in the sorted list
+    //check the boundaries first
+    //returns -1 if no match found
+    //if X are not all distinct, no guarantee which element is returned
+    
+    if (x>X[N-1] || x<X[0]) 
+        return -1;
+
+    
+    int32 i1=0, i2=N-1, i3=N/2;
+    while (i2>i1+1) {//binary search
+        i3=(i1+i2)/2;
+        if (X[i3]>=x) {
+            i2=i3;
+        } else {
+            i1=i3;
+        };
+    };
+    
+    if (x==X[i2]) {
+        return i2;        
+    } else if (x==X[i1]) {
+        return i1;
+    } else {
+        return -1;
+    };
+};
+
 
 #endif

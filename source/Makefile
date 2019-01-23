@@ -13,7 +13,7 @@ CXX ?= g++
 
 # pre-defined flags
 LDFLAGS_shared := -pthread -Lhtslib -Bstatic -lhts -Bdynamic -lz
-LDFLAGS_static := -static -static-libgcc -pthread -Lhtslib -lhts -lz
+LDFLAGS_static := -static -static-libgcc -pthread -Lhtslib -lhts -lz 
 LDFLAGS_Mac :=-pthread -lz htslib/libhts.a
 LDFLAGS_Mac_static :=-pthread -lz -static-libgcc htslib/libhts.a
 LDFLAGS_gdb := $(LDFLAGS_shared)
@@ -29,32 +29,35 @@ CFLAGS := -O3 -pipe -Wall -Wextra $(CFLAGS)
 
 ##########################################################################################################
 
-OBJECTS = SharedMemory.o PackedArray.o SuffixArrayFuns.o STAR.o Parameters.o InOutStreams.o SequenceFuns.o Genome.o Stats.o \
-        Transcript.o Transcript_alignScore.o Transcript_generateCigarP.o Chain.o \
-        Transcript_variationAdjust.o Variation.o ReadAlign_waspMap.o \
-        ReadAlign.o ReadAlign_storeAligns.o ReadAlign_stitchPieces.o ReadAlign_multMapSelect.o ReadAlign_mapOneRead.o readLoad.o \
+OBJECTS = ParametersSolo.o SoloRead.o SoloRead_record.o \
+	SoloReadBarcode.o SoloReadBarcode_getCBandUMI.o \
+	SoloReadFeature.o SoloReadFeature_record.o SoloReadFeature_inputRecords.o \
+	Solo.o SoloFeature.o SoloFeature_collapseUMI.o SoloFeature_outputResults.o SoloFeature_processRecords.o\
+	ReadAlign_outputAlignments.o  \
+	ReadAlign.o STAR.o \
+	SharedMemory.o PackedArray.o SuffixArrayFuns.o Parameters.o InOutStreams.o SequenceFuns.o Genome.o Stats.o \
+	Transcript.o Transcript_alignScore.o Transcript_generateCigarP.o Chain.o \
+	Transcript_variationAdjust.o Variation.o ReadAlign_waspMap.o \
+	ReadAlign_storeAligns.o ReadAlign_stitchPieces.o ReadAlign_multMapSelect.o ReadAlign_mapOneRead.o readLoad.o \
 	ReadAlignChunk.o ReadAlignChunk_processChunks.o ReadAlignChunk_mapChunk.o \
 	OutSJ.o outputSJ.o blocksOverlap.o ThreadControl.o sysRemoveDir.o \
-        ReadAlign_maxMappableLength2strands.o binarySearch2.o\
-	ReadAlign_outputAlignments.o  \
+	ReadAlign_maxMappableLength2strands.o binarySearch2.o\
 	ReadAlign_outputTranscriptSAM.o ReadAlign_outputTranscriptSJ.o ReadAlign_outputTranscriptCIGARp.o ReadAlign_calcCIGAR.cpp \
-        ReadAlign_createExtendWindowsWithAlign.o ReadAlign_assignAlignToWindow.o ReadAlign_oneRead.o \
+	ReadAlign_createExtendWindowsWithAlign.o ReadAlign_assignAlignToWindow.o ReadAlign_oneRead.o \
 	ReadAlign_stitchWindowSeeds.o \
-        ReadAlign_peOverlapMergeMap.o ReadAlign_mappedFilter.o \
-        ReadAlign_chimericDetection.o ReadAlign_chimericDetectionOld.o ReadAlign_chimericDetectionOldOutput.o\
-        ChimericDetection.o ChimericDetection_chimericDetectionMult.o ReadAlign_chimericDetectionPEmerged.o \
-        ChimericSegment.cpp ChimericAlign.cpp ChimericAlign_chimericJunctionOutput.o ChimericAlign_chimericStitching.o \
-        stitchWindowAligns.o extendAlign.o stitchAlignToTranscript.o alignSmithWaterman.o \
-        Genome_genomeGenerate.o genomeParametersWrite.o genomeScanFastaFiles.o genomeSAindex.o \
-        Genome_insertSequences.o insertSeqSA.o funCompareUintAndSuffixes.o funCompareUintAndSuffixesMemcmp.o \
+	ReadAlign_peOverlapMergeMap.o ReadAlign_mappedFilter.o \
+	ReadAlign_chimericDetection.o ReadAlign_chimericDetectionOld.o ReadAlign_chimericDetectionOldOutput.o\
+	ChimericDetection.o ChimericDetection_chimericDetectionMult.o ReadAlign_chimericDetectionPEmerged.o \
+	ChimericSegment.cpp ChimericAlign.cpp ChimericAlign_chimericJunctionOutput.o ChimericAlign_chimericStitching.o \
+	stitchWindowAligns.o extendAlign.o stitchAlignToTranscript.o alignSmithWaterman.o \
+	Genome_genomeGenerate.o genomeParametersWrite.o genomeScanFastaFiles.o genomeSAindex.o \
+	Genome_insertSequences.o insertSeqSA.o funCompareUintAndSuffixes.o funCompareUintAndSuffixesMemcmp.o \
 	TimeFunctions.o ErrorWarning.o loadGTF.o streamFuns.o stringSubstituteAll.o \
-        Transcriptome.o Transcriptome_quantAlign.o ReadAlign_quantTranscriptome.o Quantifications.o Transcriptome_geneCountsAddAlign.o \
-        sjdbLoadFromFiles.o sjdbLoadFromStream.o sjdbPrepare.o sjdbBuildIndex.o sjdbInsertJunctions.o mapThreadsSpawn.o \
-        Parameters_openReadsFiles.cpp Parameters_closeReadsFiles.cpp Parameters_readSAMheader.o \
-        BAMoutput.o BAMfunctions.o ReadAlign_alignBAM.o BAMbinSortByCoordinate.o signalFromBAM.o bamRemoveDuplicates.o BAMbinSortUnmapped.o \
-        bam_cat.o \
-        serviceFuns.o \
-        GlobalVariables.cpp
+	Transcriptome.o Transcriptome_quantAlign.o ReadAlign_quantTranscriptome.o Quantifications.o Transcriptome_geneCountsAddAlign.o \
+	sjdbLoadFromFiles.o sjdbLoadFromStream.o sjdbPrepare.o sjdbBuildIndex.o sjdbInsertJunctions.o mapThreadsSpawn.o \
+	Parameters_openReadsFiles.cpp Parameters_closeReadsFiles.cpp Parameters_readSAMheader.o \
+	bam_cat.o serviceFuns.o GlobalVariables.cpp \
+	BAMoutput.o BAMfunctions.o ReadAlign_alignBAM.o BAMbinSortByCoordinate.o signalFromBAM.o bamRemoveDuplicates.o BAMbinSortUnmapped.o 
 
 SOURCES := $(wildcard *.cpp) $(wildcard *.c)
 

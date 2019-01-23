@@ -245,101 +245,75 @@ void Genome::genomeLoad(){//allocate and load Genome
 
     shmSize=SA.lengthByte + nGenome+L+L+SHM_startG+8;
     shmSize+= SAi.lengthByte;
-    if (P.annotScoreScale>0) shmSize+=nGenome;
-
 
     if ((pGe.gLoad=="LoadAndKeep" ||
          pGe.gLoad=="LoadAndRemove" ||
          pGe.gLoad=="LoadAndExit" ||
-         pGe.gLoad=="Remove") && sharedMemory == NULL)
-    {
+         pGe.gLoad=="Remove") && sharedMemory == NULL) {
+        
         bool unloadLast = pGe.gLoad=="LoadAndRemove";
-        try
-        {
+        try {
             sharedMemory = new SharedMemory(shmKey, unloadLast);
             sharedMemory->SetErrorStream(P.inOut->logStdOut);
 
             if (!sharedMemory->NeedsAllocation())
             P.inOut->logMain <<"Found genome in shared memory\n"<<flush;
 
-    if (pGe.gLoad=="Remove") {//kill the genome and exit
+            if (pGe.gLoad=="Remove") {//kill the genome and exit
                 if (sharedMemory->NeedsAllocation()) {//did not find genome in shared memory, nothing to kill
-            ostringstream errOut;
-            errOut << "EXITING: Did not find the genome in memory, did not remove any genomes from shared memory\n";
-            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_GENOME_FILES, P);
-        } else {
-                    sharedMemory->Clean();
-            P.inOut->logMain <<"DONE: removed the genome from shared memory\n"<<flush;
-                    return;
-        };
-            }
+                ostringstream errOut;
+                errOut << "EXITING: Did not find the genome in memory, did not remove any genomes from shared memory\n";
+                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_GENOME_FILES, P);
+                } else {
+                            sharedMemory->Clean();
+                    P.inOut->logMain <<"DONE: removed the genome from shared memory\n"<<flush;
+                            return;
+                };
+            };
 
             if (sharedMemory->NeedsAllocation()){
                 P.inOut->logMain <<"Allocating shared memory for genome\n"<<flush;
                 sharedMemory->Allocate(shmSize);
-            }
-        }
-        catch (const SharedMemoryException & exc)
-        {
+            };
+        } catch (const SharedMemoryException & exc){
             HandleSharedMemoryException(exc, shmSize);
-        }
+        };
 
         shmStart = (char*) sharedMemory->GetMapped();
         shmNG= (uint*) (shmStart+SHM_sizeG);
         shmNSA= (uint*) (shmStart+SHM_sizeSA);
 
-        if (!sharedMemory->IsAllocator())
-        {
+        if (!sharedMemory->IsAllocator()) {
             // genome is in shared memory or being loaded
             // wait for the process that will populate it
             // and record the sizes
-
-        uint iwait=0;
+            uint iwait=0;
             while (*shmNG != nGenome) {
-            iwait++;
-            P.inOut->logMain <<"Another job is still loading the genome, sleeping for 1 min\n" <<flush;
-            sleep(60);
-            if (iwait==100) {
-                ostringstream errOut;
-                errOut << "EXITING because of FATAL ERROR: waited too long for the other job to finish loading the genome" << strerror(errno) << "\n" <<flush;
+                iwait++;
+                P.inOut->logMain <<"Another job is still loading the genome, sleeping for 1 min\n" <<flush;
+                sleep(60);
+                if (iwait==100) {
+                    ostringstream errOut;
+                    errOut << "EXITING because of FATAL ERROR: waited too long for the other job to finish loading the genome" << strerror(errno) << "\n" <<flush;
                     errOut << "SOLUTION: remove the shared memory chunk by running STAR with --genomeLoad Remove, and restart STAR" <<flush;
                     exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_GENOME_LOADING_WAITED_TOO_LONG, P);
+                };
             };
-        };
-
-            if (nSAbyte!=*shmNSA)
-            {
+            if (nSAbyte!=*shmNSA){
                 ostringstream errOut;
                 errOut << "EXITING because of FATAL ERROR: the SA file size did not match what we found in shared memory" << "\n" << flush;
                 errOut << "SOLUTION: remove the shared memory chunk by running STAR with --genomeLoad Remove, and restart STAR" << flush;
                 exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INCONSISTENT_DATA, P);
-            }
-
+            };
             P.inOut->logMain << "Using shared memory for genome. key=0x" <<hex<<shmKey<<dec<< ";   shmid="<< sharedMemory->GetId() <<endl<<flush;
-        }
-
+        };
         G1=shmStart+SHM_startG;
         SA.pointArray(G1+nGenome+L+L);
         char* shmNext=SA.charArray+nSAbyte;
 
         SAi.pointArray(shmNext);
         shmNext += SAi.lengthByte;
-
-//     if (twoPass.pass1readsN==0) {//not 2-pass
-//         shmStartG=SHM_startSHM;
-//         shmStartSA=0;
-//     } else {//2-pass
-//         ostringstream errOut;
-//         errOut << "EXITING because of FATAL ERROR: 2-pass procedure cannot be used with genome already loaded im memory'  "\n" ;
-//         errOut << "SOLUTION: check shared memory settigns as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;
-//         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_SHM, P);
-//     };
-     if (P.annotScoreScale>0) {//optional allocation
-            shmNext += nGenome;
-        }
-    }
-    else if (pGe.gLoad=="NoSharedMemory") // simply allocate memory, do not use shared memory
-    {
+    } else if (pGe.gLoad=="NoSharedMemory") {// simply allocate memory, do not use shared memory
         genomeInsertL=0;
         genomeInsertChrIndFirst=nChrReal;
         if (pGe.gFastaFiles.at(0)!="-")

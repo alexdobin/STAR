@@ -56,6 +56,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "readMatesLengthsIn", &readMatesLengthsIn));
     parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "readMapNumber", &readMapNumber));
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readNameSeparator", &readNameSeparator));
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "readStrand", &pReads.strandString));
 
 
     //input from BAM
@@ -73,7 +74,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitOutSJoneRead", &limitOutSJoneRead));
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitBAMsortRAM", &limitBAMsortRAM));
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitSjdbInsertNsj", &limitSjdbInsertNsj));
-
+    parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitNreadsSoft", &limitNreadsSoft));
 
     //output
     parArray.push_back(new ParameterInfoScalar <string>     (-1, 2, "outFileNamePrefix", &outFileNamePrefix));
@@ -236,7 +237,6 @@ Parameters::Parameters() {//initalize parameters info
 
     //WASP
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "waspOutputMode", &wasp.outputMode)); 
-
     
     //quant
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "quantMode", &quant.mode));
@@ -248,10 +248,17 @@ Parameters::Parameters() {//initalize parameters info
     twoPass.pass1readsN_par=parArray.size()-1;
     parArray.push_back(new ParameterInfoScalar <string>   (-1, -1, "twopassMode", &twoPass.mode));
 
-
-//     //SW parameters
-//     parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "swMode", &swMode));
-//     parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "swWinCoverageMinP", &swWinCoverageMinP));
+    //solo
+    parArray.push_back(new ParameterInfoScalar <string>   (-1, -1, "soloType", &pSolo.typeStr));
+    parArray.push_back(new ParameterInfoScalar <uint32>   (-1, -1, "soloCBstart", &pSolo.cbS));
+    parArray.push_back(new ParameterInfoScalar <uint32>   (-1, -1, "soloUMIstart", &pSolo.umiS));    
+    parArray.push_back(new ParameterInfoScalar <uint32>   (-1, -1, "soloCBlen", &pSolo.cbL));
+    parArray.push_back(new ParameterInfoScalar <uint32>   (-1, -1, "soloUMIlen", &pSolo.umiL)); 
+    parArray.push_back(new ParameterInfoScalar <string>   (-1, -1, "soloCBwhitelist", &pSolo.soloCBwhitelist));
+    parArray.push_back(new ParameterInfoScalar <string>   (-1, -1, "soloStrand", &pSolo.strandStr));
+    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "soloOutFileNames", &pSolo.outFileNames));
+    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "soloFeatures", &pSolo.featureIn));
+    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "soloUMIdedup", &pSolo.umiDedup));
 
     parameterInputName.push_back("Default");
     parameterInputName.push_back("Command-Line-Initial");
@@ -418,12 +425,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 
 
     ///////////////////////////////////////// Old variables
-    outputBED[0]=0; outputBED[1]=0; //controls the format of starBED output. Will be replaced with HDF5 output
-
-    //annot scoring
-    annotScoreScale=0;
-    annotSignalFile="-";
-
     //splitting
     Qsplit=0;
     maxNsplit=10;
@@ -440,7 +441,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         runDirPerm=S_IRWXU;
     } else if (runDirPermIn=="All_RWX")
     {
-//         umask(0); //this should be defined by the user!
         runDirPerm= S_IRWXU | S_IRWXG | S_IRWXO;
     } else
     {
@@ -785,7 +785,8 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
     };
-
+    readNmatesIn=readNmates;
+    
     //two-pass
     if (parArray.at(twoPass.pass1readsN_par)->inputLevel>0  && twoPass.mode=="None")
     {
@@ -950,7 +951,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         errOut <<"SOLUTION: re-run STAR with --waspOutputMode ... and --varVCFfile /path/to/file.vcf\n";
         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
-
     
      if (wasp.yes && outSAMtype.at(0)!="BAM") {
         ostringstream errOut;
@@ -958,6 +958,52 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         errOut <<"SOLUTION: re-run STAR with --waspOutputMode ... and --outSAMtype BAM ... \n";
         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
+
+    //quantification parameters
+    quant.yes=false;
+    quant.geCount.yes=false;
+    quant.trSAM.yes=false;
+    quant.trSAM.bamYes=false;
+    if (quant.mode.at(0) != "-") {
+        quant.yes=true;
+        for (uint32 ii=0; ii<quant.mode.size(); ii++) {
+            if (quant.mode.at(ii)=="TranscriptomeSAM") {
+                quant.trSAM.yes=true;
+
+                if (quant.trSAM.bamCompression>-2)
+                    quant.trSAM.bamYes=true;
+
+                if (quant.trSAM.bamYes) {
+                    if (outStd=="BAM_Quant") {
+                        outFileNamePrefix="-";
+                    } else {
+                        outQuantBAMfileName=outFileNamePrefix + "Aligned.toTranscriptome.out.bam";
+                    };
+                    inOut->outQuantBAMfile=bgzf_open(outQuantBAMfileName.c_str(),("w"+to_string((long long) quant.trSAM.bamCompression)).c_str());
+                };
+                if (quant.trSAM.ban=="IndelSoftclipSingleend") {
+                    quant.trSAM.indel=false;
+                    quant.trSAM.softClip=false;
+                    quant.trSAM.singleEnd=false;
+                } else if (quant.trSAM.ban=="Singleend") {
+                    quant.trSAM.indel=true;
+                    quant.trSAM.softClip=true;
+                    quant.trSAM.singleEnd=false;
+                };
+            } else if  (quant.mode.at(ii)=="GeneCounts") {
+                quant.geCount.yes=true;
+                quant.geCount.outFile=outFileNamePrefix + "ReadsPerGene.out.tab";
+            } else {
+                ostringstream errOut;
+                errOut << "EXITING because of fatal INPUT error: unrecognized option in --quant.mode=" << quant.mode.at(ii) << "\n";
+                errOut << "SOLUTION: use one of the allowed values of --quant.mode : TranscriptomeSAM or - .\n";
+                exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+            };
+        };
+    };
+    
+    //solo
+    pSolo.initialize(this);
     
     //outSAMattributes
     outSAMattrPresent.NH=false;//TODO re-write as class with constructor?
@@ -976,6 +1022,11 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     outSAMattrPresent.vW=false;
     outSAMattrPresent.ch=false;
     outSAMattrPresent.rB=false;
+    outSAMattrPresent.CR=false;
+    outSAMattrPresent.CY=false;
+    outSAMattrPresent.UR=false;
+    outSAMattrPresent.UY=false;
+
             
     //for quant SAM output only NH and HI flags
     outSAMattrPresentQuant=outSAMattrPresent;
@@ -1044,6 +1095,22 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             outSAMattrOrder.push_back(ATTR_MC);
             outSAMattrOrderQuant.push_back(ATTR_MC);
             outSAMattrPresent.MC=true;                        
+        } else if (vAttr1.at(ii)== "CR") {
+            outSAMattrOrder.push_back(ATTR_CR);
+            outSAMattrOrderQuant.push_back(ATTR_CR);
+            outSAMattrPresent.CR=true;                        
+        } else if (vAttr1.at(ii)== "CY") {
+            outSAMattrOrder.push_back(ATTR_CY);
+            outSAMattrOrderQuant.push_back(ATTR_CY);
+            outSAMattrPresent.CY=true;                        
+        } else if (vAttr1.at(ii)== "UR") {
+            outSAMattrOrder.push_back(ATTR_UR);
+            outSAMattrOrderQuant.push_back(ATTR_UR);
+            outSAMattrPresent.UR=true;                        
+        } else if (vAttr1.at(ii)== "UY") {
+            outSAMattrOrder.push_back(ATTR_UY);
+            outSAMattrOrderQuant.push_back(ATTR_UY);
+            outSAMattrPresent.UY=true;                                   
         } else if (vAttr1.at(ii)== "XS") {
             outSAMattrOrder.push_back(ATTR_XS);
             outSAMattrPresent.XS=true;
@@ -1095,6 +1162,13 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         outSAMattrOrderQuant.push_back(ATTR_vW);
         outSAMattrPresent.vW=true;
         inOut->logMain << "WARNING --waspOutputMode is set, therefore STAR will output vW attribute" <<endl;
+    };    
+    
+    if (pSolo.type==0 && (outSAMattrPresent.CR || outSAMattrPresent.CY || outSAMattrPresent.UR || outSAMattrPresent.UY) ) {
+            ostringstream errOut;
+            errOut <<"EXITING because of FATAL INPUT ERROR: --outSAMattributes contains CR/CY/UR/UY tags, but --soloType is not set\n";
+            errOut <<"SOLUTION: re-run STAR without these attribures, or with --soloType set\n";
+            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };    
     
     //chimeric
@@ -1228,44 +1302,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
 
-    //quantification parameters
-    quant.yes=false;
-    quant.geCount.yes=false;
-    quant.trSAM.yes=false;
-    if (quant.mode.at(0) != "-") {
-        quant.yes=true;
-        for (uint32 ii=0; ii<quant.mode.size(); ii++) {
-            if (quant.mode.at(ii)=="TranscriptomeSAM") {
-                quant.trSAM.yes=true;
-                if (outStd=="BAM_Quant") {
-                    outFileNamePrefix="-";
-                } else {
-                    outQuantBAMfileName=outFileNamePrefix + "Aligned.toTranscriptome.out.bam";
-                };
-                inOut->outQuantBAMfile=bgzf_open(outQuantBAMfileName.c_str(),("w"+to_string((long long) quant.trSAM.bamCompression)).c_str());
-                if (quant.trSAM.ban=="IndelSoftclipSingleend")
-                {
-                    quant.trSAM.indel=false;
-                    quant.trSAM.softClip=false;
-                    quant.trSAM.singleEnd=false;
-                } else if (quant.trSAM.ban=="Singleend")
-                {
-                    quant.trSAM.indel=true;
-                    quant.trSAM.softClip=true;
-                    quant.trSAM.singleEnd=false;
-                };
-            } else if  (quant.mode.at(ii)=="GeneCounts") {
-                quant.geCount.yes=true;
-                quant.geCount.outFile=outFileNamePrefix + "ReadsPerGene.out.tab";
-            } else {
-                ostringstream errOut;
-                errOut << "EXITING because of fatal INPUT error: unrecognized option in --quant.mode=" << quant.mode.at(ii) << "\n";
-                errOut << "SOLUTION: use one of the allowed values of --quant.mode : TranscriptomeSAM or - .\n";
-                exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-            };
-        };
-    };
-
    //sjdb insert on the fly
 
     sjdbInsert.pass1=false;
@@ -1395,6 +1431,26 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         peOverlap.yes=true;
     } else {
         peOverlap.yes=false;
+    };
+    
+    //read parameters
+    if (pReads.strandString=="Unstranded") {
+        pReads.strand=0;
+    } else if (pReads.strandString=="Forward") {
+        pReads.strand=1;    
+    } else if (pReads.strandString=="Reverse") {
+        pReads.strand=2;    
+    } else  {
+        ostringstream errOut;
+        errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in of --readStrand="<<pReads.strandString<<"\n";
+        errOut << "SOLUTION: use allowed option: Unstranded or Forward or Reverse";
+        exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
+    
+    //
+    outSAMreadIDnumber=false;
+    if (outSAMreadID=="Number") {
+        outSAMreadIDnumber=true;
     };
     
     ////////////////////////////////////////////////

@@ -23,7 +23,7 @@ class Stats {
 
         uint chimericAll;
 
-        time_t timeStart, timeStartMap, timeLastReport, timeFinish;
+        time_t timeStart, timeStartMap, timeFinishMap, timeLastReport, timeFinish;
 
         Stats ();
         void resetN();

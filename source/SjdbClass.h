@@ -2,13 +2,16 @@
 #define DEF_SjdbClass
 
 #include "IncludeDefine.h"
+#include <set>
 
 class SjdbClass {
 public:
     vector <string> chr;
-    vector <uint> start,end;
+    vector <uint64> start,end;
     vector <char> str;
-    vector <uint8_t> priority;
+    vector <uint8> priority;
+    
+    vector<set<uint64>> gene;
 };
 
 #endif

@@ -55,7 +55,7 @@ ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome 
         RA->outBAMcoord=NULL;
     };
 
-    if ( P.quant.trSAM.yes ) {
+    if ( P.quant.trSAM.bamYes ) {
         chunkOutBAMquant = new BAMoutput (P.inOut->outQuantBAMfile,P);
         RA->outBAMquant = chunkOutBAMquant;
     } else {

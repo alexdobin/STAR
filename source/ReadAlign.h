@@ -1,5 +1,5 @@
-#ifndef CODE_READALIGN
-#define CODE_READALIGN
+#ifndef H_ReadAlign
+#define H_ReadAlign
 
 #include "IncludeDefine.h"
 #include "Parameters.h"
@@ -11,23 +11,22 @@
 #include "BAMoutput.h"
 #include "Quantifications.h"
 #include "ChimericDetection.h"
+#include "SoloRead.h"
 
 #include <time.h>
 #include <random>
 
-class ReadAlign
-{
+class ReadAlign {
     public:
          //methods
         ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk);//allocate arrays
         int oneRead();
         
         //vars
-
         Genome &mapGen; //mapped-to-genome structure
 
         uint iRead;
-        char** Read1;
+        char **Read1;
         
         Stats statsRA; //mapping statistics        
         
@@ -52,6 +51,8 @@ class ReadAlign
         ReadAlign *peMergeRA; //ReadAlign for merged PE mates
         
         ChimericDetection *chimDet;
+        
+        SoloRead *soloRead; //counts reads per CB per and outputs CB/UMI/gene into file, per thread
         
     private:
         Parameters& P; //pointer to the parameters, will be initialized on construction
@@ -184,7 +185,7 @@ class ReadAlign
         void stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R);//stitches all seeds in one window: iW
         void stitchPieces(char **R, uint Lread);
 
-        uint quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT);
+        uint quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT, vector<uint32> &readTranscripts, set<uint32> &readTrGenes);
         
         void copyRead(ReadAlign&);
         void waspMap();

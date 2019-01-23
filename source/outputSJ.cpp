@@ -117,23 +117,26 @@ void outputSJ(ReadAlignChunk** RAchunk, Parameters& P) {//collapses junctions fr
             };
         };
     };
-
+    
     //output junctions
+    P.sjAll[0].reserve(allSJ.N);
+    P.sjAll[1].reserve(allSJ.N);
+    
     if (P.outFilterBySJoutStage!=1) {//output file
         ofstream outSJfileStream((P.outFileNamePrefix+"SJ.out.tab").c_str());
         for (uint ii=0;ii<allSJ.N;ii++) {//write to file
             if ( P.outFilterBySJoutStage==2 || sjFilter[ii]  ) {
                 oneSJ.junctionPointer(allSJ.data,ii);
                 oneSJ.outputStream(outSJfileStream);//write to file
+                P.sjAll[0].push_back(*oneSJ.start);
+                P.sjAll[1].push_back(*oneSJ.gap);
             };
         };
         outSJfileStream.close();
     } else {//make sjNovel array in P
         P.sjNovelN=0;
-        for (uint ii=0;ii<allSJ.N;ii++)
-        {//count novel junctions
-            if (sjFilter[ii])
-            {//only those passing filter
+        for (uint ii=0;ii<allSJ.N;ii++) {//count novel junctions
+            if (sjFilter[ii]) {//only those passing filter
                 oneSJ.junctionPointer(allSJ.data,ii);
                 if (*oneSJ.annot==0) P.sjNovelN++;
             };

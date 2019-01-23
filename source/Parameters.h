@@ -9,7 +9,10 @@
 #include <unistd.h>
 #include <signal.h>
 #include "ParametersChimeric.h"
+#include "ParametersSolo.h"
 #include "ParametersGenome.h"
+#include <vector>
+#include <array>
 
 class Parameters {
 
@@ -62,13 +65,14 @@ class Parameters {
 
         uint readMapNumber;
         uint iReadAll;
-        uint readNmates;
+        uint readNmates, readNmatesIn;
         string readMatesLengthsIn;
 
         vector <string> readNameSeparator;
         vector <char> readNameSeparatorChar;
 
         string outSAMreadID;
+        bool outSAMreadIDnumber;
 
         vector <uint> clip5pNbases, clip3pNbases, clip3pAfterAdapterNbases;
         vector <double> clip3pAdapterMMp;
@@ -88,6 +92,11 @@ class Parameters {
         string alignSoftClipAtReferenceEnds;
         vector <int32> alignSJstitchMismatchNmax;
 
+        struct {
+            string strandString;
+            int32 strand;
+        } pReads;
+        
         struct {
             string in;
             bool ext[2][2];
@@ -134,7 +143,7 @@ class Parameters {
 
         int outSAMtlen;
         
-        struct {bool NH,HI,AS,NM,MD,nM,jM,jI,RG,XS,rB,vG,vA,vW,ch,MC;} outSAMattrPresent, outSAMattrPresentQuant;
+        struct {bool NH,HI,AS,NM,MD,nM,jM,jI,RG,XS,rB,vG,vA,vW,ch,MC,CR,CY,UR,UY;} outSAMattrPresent, outSAMattrPresentQuant;
 
         vector <int> outSAMattrOrder, outSAMattrOrderQuant;
         int outBAMcompression;
@@ -146,8 +155,7 @@ class Parameters {
         
 //         string bamRemoveDuplicatesType;
 //         uint bamRemoveDuplicatesMate2basesN;
-        struct
-        {
+        struct {
             string mode;
             bool yes;
             bool markMulti;
@@ -158,30 +166,26 @@ class Parameters {
         uint64 *outBAMsortingBinStart; //genomic starts for bins for sorting BAM files
         uint16 outSAMflagOR, outSAMflagAND;
 
-        struct
-        {
+        struct {
             vector <string> mode;
             bool yes;
             bool within;//output unmapped reads within SAM/BAM files
             bool keepPairs;//keep mates together
         } outSAMunmapped;
 
-        struct
-        {
+        struct {
             vector <string> mode;
             bool yes;
             bool KeepOnlyAddedReferences;
             bool KeepAllAddedReferences;            
         } outSAMfilter;
 
-        struct
-        {
+        struct {
             string mode;
             bool random;
         } outMultimapperOrder;
         
-        struct
-        {
+        struct {
             bool yes;
             uint NbasesMin;
             double MMp;
@@ -248,27 +252,13 @@ class Parameters {
         uint limitOutSJoneRead, limitOutSJcollapsed;
         uint limitBAMsortRAM;
         uint limitSjdbInsertNsj;
+        uint limitNreadsSoft;
 
         // penalties
         intScore scoreGap, scoreGapNoncan, scoreGapGCAG, scoreGapATAC, scoreDelBase, scoreDelOpen, scoreInsBase, scoreInsOpen;
         intScore scoreStitchSJshift;//Max negative score when
         double scoreGenomicLengthLog2scale;
 
-        //old variables: CLEAN-up needed
-        char outputBED[MAX_OUTPUT_FLAG]; //output flags
-
-        //SW search
-        uint swMode, swWinCoverageMinP;
-        //SW penalties
-        uint swPeoutFilterMatchNmin, swPenMismatch, swPenGapOpen, swPenGapExtend;
-        uint swHsize;
-
-        int annotScoreScale;//overall multiplication factor for the annotation
-        string annotSignalFile;//binary file with annotation signal
-
-        uint sjNovelN, *sjNovelStart, *sjNovelEnd; //novel junctions collapased and filtered        
-        
-        
         //quantification parameters
         //input
 
@@ -280,6 +270,7 @@ class Parameters {
           struct
           {
               bool yes;
+              bool bamYes;
               bool indel;
               bool softClip;
               bool singleEnd;
@@ -302,23 +293,26 @@ class Parameters {
             string vcfFile;
         } var;
         
-        struct
+        struct 
         {
             bool yes;
             bool SAMtag;
             string outputMode;
         } wasp;
 
+        //solo
+        ParametersSolo pSolo;
+        
         //chimeric
         ParametersChimeric pCh;
-
 
         //splitting
         char Qsplit;
         uint maxNsplit, minLsplit, minLmap;
 
-        //limits
-
+        //not really parameters, but global variables:
+        array<vector<uint64>,2> sjAll;
+        uint64 sjNovelN, *sjNovelStart, *sjNovelEnd; //novel junctions collapased and filtered        
 
     ////////////////////// CLEAN-UP needed
     InOutStreams *inOut; //main input output streams

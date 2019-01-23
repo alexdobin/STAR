@@ -1,7 +1,7 @@
-STAR 2.6
+STAR 2.7
 ========
 Spliced Transcripts Alignment to a Reference
-© Alexander Dobin, 2009-2018
+© Alexander Dobin, 2009-2019
 https://www.ncbi.nlm.nih.gov/pubmed/23104886
 
 AUTHOR/SUPPORT
@@ -35,9 +35,9 @@ Download the latest [release from](https://github.com/alexdobin/STAR/releases) a
 
 ```bash
 # Get latest STAR source from releases
-wget https://github.com/alexdobin/STAR/archive/2.6.0a.tar.gz
-tar -xzf 2.6.0a.tar.gz
-cd STAR-2.6.0a
+wget https://github.com/alexdobin/STAR/archive/2.7.0a.tar.gz
+tar -xzf 2.7.0a.tar.gz
+cd STAR-2.7.0a
 
 # Alternatively, get STAR source using git
 git clone https://github.com/alexdobin/STAR.git
@@ -56,18 +56,19 @@ Compile under Mac OS X
 ----------------------
 
 ```bash
-# Compile
-cd source
-make STARforMacStatic
+# 1. Install brew (http://brew.sh/)
+# 2. Install gcc with brew: 
+$ brew install gcc --without-multilib
+# 3. Build STAR:
+make STARforMacStatic CXX=/usr/local/Cellar/gcc/8.2.0/bin/g++-8
+# NOTE FOR FUTURE USERS: be sure to alter this path with whatever you have locally - gcc is v8.2.0 as of this writing
 ```
 
-All platforms
--------------
+All platforms - non-standard gcc
+--------------------------------
 
 If g++ compiler (true g++, not Clang sym-link) is not on the path, you will need to tell `make` where to find it:
-
 ```bash
-# Build STAR
 cd source
 make STARforMacStatic CXX=/path/to/gcc
 ```

@@ -153,6 +153,14 @@
 \optName{readNameSeparator}
   \optValue{/}
   \optLine{string(s): character(s) separating the part of the read names that will be trimmed in output (read name after space is always trimmed)} 
+\optName{readStrand}
+  \optValue{Unstranded}
+  \optLine{string: library strandedness type} 
+\begin{optOptTable}
+  \optOpt{Unstranded}   \optOptLine{unstranded library}
+  \optOpt{Forward}   \optOptLine{1st read strand same as RNA (i.e. 2nd cDNA synthesis strand)}
+  \optOpt{Reverse}   \optOptLine{1st read opposite to RNA (i.e. 1st cDNA synthesis strand)}
+\end{optOptTable}
 \optName{clip3pNbases}
   \optValue{0}
   \optLine{int(s): number(s) of bases to clip from 3p of each mate. If one value is given, it will be assumed the same for both mates.} 
@@ -192,6 +200,9 @@
 \optName{limitSjdbInsertNsj}
   \optValue{1000000}
   \optLine{int{\textgreater}=0: maximum number of junction to be inserted to the genome on the fly at the mapping stage, including those from annotations and those detected in the 1st step of the 2-pass run} 
+\optName{limitNreadsSoft}
+  \optValue{-1}
+  \optLine{int: soft limit on the number of reads} 
 \end{optTable}
 \optSection{Output: general}\label{Output:_general}
 \begin{optTable}
@@ -278,7 +289,8 @@
   \optOpt{All}   \optOptLine{NH HI AS nM NM MD jM jI MC ch}
   \optOpt{vA}   \optOptLine{variant allele}
   \optOpt{vG}   \optOptLine{genomic coordiante of the variant overlapped by the read}
-  \optOpt{vW}   \optOptLine{0/1 - alignment does not pass / passes WASP filtering. Requires --waspOutputMode SAMtag .}
+  \optOpt{vW}   \optOptLine{0/1 - alignment does not pass / passes WASP filtering. Requires --waspOutputMode SAMtag}
+  \optOpt{CR,CY,UR,UY}   \optOptLine{sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing}
 \end{optOptTable}
   \optLine{Unsupported/undocumented:} 
 \begin{optOptTable}
@@ -715,7 +727,7 @@
   \optLine{int{\textgreater}=0: the score range for multi-mapping chimeras below the best chimeric score. Only works with --chimMultimapNmax {\textgreater} 1} 
 \optName{chimNonchimScoreDropMin}
   \optValue{20}
-  \optLine{int{\textgreater}=0: to trigger chimeric detection, the drop in the best non-chimeric alignment score with respect to the read length has to be smaller than this value}
+  \optLine{int{\textgreater}=0: to trigger chimeric detection, the drop in the best non-chimeric alignment score with respect to the read length has to be smaller than this value} 
 \optName{chimOutJunctionFormat}
   \optValue{0}
   \optLine{int: formatting type for the Chimeric.out.junction file} 
@@ -736,7 +748,13 @@
 \end{optOptTable}
 \optName{quantTranscriptomeBAMcompression}
   \optValue{1 1}
-  \optLine{int: -1 to 10  transcriptome BAM compression level, -1=default compression (6?), 0=no compression, 10=maximum compression} 
+  \optLine{int: -2 to 10  transcriptome BAM compression level} 
+\begin{optOptTable}
+  \optOpt{-2}   \optOptLine{no BAM output}
+  \optOpt{-1}   \optOptLine{default compression (6?)}
+  \optOpt{0}   \optOptLine{no compression}
+  \optOpt{10}   \optOptLine{maximum compression}
+\end{optOptTable}
 \optName{quantTranscriptomeBan}
   \optValue{IndelSoftclipSingleend}
   \optLine{string: prohibit various alignment type} 
@@ -765,5 +783,62 @@
   \optLine{string: WASP allele-specific output type. This is re-implemenation of the original WASP mappability filtering by Bryce van de Geijn, Graham McVicker, Yoav Gilad {\&} Jonathan K Pritchard. Please cite the original WASP paper: Nature Methods 12, 1061–1063 (2015), https://www.nature.com/articles/nmeth.3582 .} 
 \begin{optOptTable}
   \optOpt{SAMtag}   \optOptLine{add WASP tags to the alignments that pass WASP filtering}
+\end{optOptTable}
+\end{optTable}
+\optSection{STARsolo (single cell RNA-seq) parameters}\label{STARsolo_(single_cell_RNA-seq)_parameters}
+\begin{optTable}
+\optName{soloType}
+  \optValue{None}
+  \optLine{string(s): type of single-cell RNA-seq} 
+\begin{optOptTable}
+  \optOpt{Droplet}   \optOptLine{one cell barcode and one UMI barcode in read2, e.g. Drop-seq and 10X Chromium}
+\end{optOptTable}
+\optName{soloCBwhitelist}
+  \optValue{-}
+  \optLine{string: file with whitelist of cell barcodes} 
+\optName{soloCBstart}
+  \optValue{1}
+  \optLine{int{\textgreater}0: cell barcode start base} 
+\optName{soloCBlen}
+  \optValue{16}
+  \optLine{int{\textgreater}0: cell barcode length} 
+\optName{soloUMIstart}
+  \optValue{17}
+  \optLine{int{\textgreater}0: UMI start base} 
+\optName{soloUMIlen}
+  \optValue{10}
+  \optLine{int{\textgreater}0: UMI length} 
+\optName{soloStrand}
+  \optValue{Forward}
+  \optLine{string: strandedness of the solo libraries:} 
+\begin{optOptTable}
+  \optOpt{Unstranded}   \optOptLine{no strand information}
+  \optOpt{Forward}   \optOptLine{read strand same as the original RNA molecule}
+  \optOpt{Reverse}   \optOptLine{read strand opposite to the original RNA molecule}
+\end{optOptTable}
+\optName{soloFeatures}
+  \optValue{Gene}
+  \optLine{string(s):              genomic features for which the UMI counts per Cell Barcode are collected} 
+\begin{optOptTable}
+  \optOpt{Gene}   \optOptLine{genes: reads match the gene transcript}
+  \optOpt{SJ}   \optOptLine{splice junctions: reported in SJ.out.tab}
+\end{optOptTable}
+\optName{soloUMIdedup}
+  \optValue{1MM{\textunderscore}All}
+  \optLine{string(s):              type of UMI deduplication (collapsing) algorithm} 
+\begin{optOptTable}
+  \optOpt{1MM{\textunderscore}All}   \optOptLine{all UMIs with 1 mismatch distance to each other are collapsed (i.e. counted once)}
+  \optOpt{1MM{\textunderscore}Directional}   \optOptLine{follows the "directional" method from the UMI-tools by Smith, Heger and Sudbery (Genome Research 2017).}
+  \optOpt{1MM{\textunderscore}NotCollapsed}   \optOptLine{UMIs with 1 mismatch distance to others are not collapsed (i.e. all counted)}
+\end{optOptTable}
+\optName{soloOutFileNames}
+  \optValue{Solo.out/ genes.tsv barcodes.tsv matrix.mtx matrixSJ.mtx}
+  \optLine{string(s)               file names for STARsolo output} 
+\begin{optOptTable}
+  \optOpt{1st word}   \optOptLine{file name prefix}
+  \optOpt{2nd word}   \optOptLine{barcode sequences}
+  \optOpt{3rd word}   \optOptLine{gene IDs and names}
+  \optOpt{4th word}   \optOptLine{cell/gene counts matrix}
+  \optOpt{5th word}   \optOptLine{cell/splice junction counts matrix}
 \end{optOptTable}
 \end{optTable}

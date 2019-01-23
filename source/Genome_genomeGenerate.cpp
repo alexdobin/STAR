@@ -245,11 +245,9 @@ void Genome::genomeGenerate() {
 
     GstrandMask = ~(1LLU<<GstrandBit);
     SA.defineBits(GstrandBit+1,nSA);
-    if (P.sjdbInsert.yes)
-    {//reserve space for junction insertion
+    if (P.sjdbInsert.yes)     {//reserve space for junction insertion
         SApass1.defineBits(GstrandBit+1,nSA+2*P.limitSjdbInsertNsj*sjdbLength);//TODO: this allocation is wasteful, get a better estimate of the number of junctions
-    } else
-    {//same as SA
+    } else {//same as SA
         SApass1.defineBits(GstrandBit+1,nSA);
     };
 

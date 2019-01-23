@@ -139,6 +139,12 @@ readMatesLengthsIn          NotEqual
 readNameSeparator           /
     string(s): character(s) separating the part of the read names that will be trimmed in output (read name after space is always trimmed)
 
+readStrand                  Unstranded
+    string: library strandedness type
+                            Unstranded  ... unstranded library
+                            Forward     ... 1st read strand same as RNA (i.e. 2nd cDNA synthesis strand)
+                            Reverse     ... 1st read opposite to RNA (i.e. 1st cDNA synthesis strand)
+
 clip3pNbases                 0
     int(s): number(s) of bases to clip from 3p of each mate. If one value is given, it will be assumed the same for both mates.
 
@@ -177,6 +183,8 @@ limitBAMsortRAM                         0
 limitSjdbInsertNsj                     1000000
     int>=0: maximum number of junction to be inserted to the genome on the fly at the mapping stage, including those from annotations and those detected in the 1st step of the 2-pass run
 
+limitNreadsSoft                        -1
+    int: soft limit on the number of reads
 
 ### Output: general
 outFileNamePrefix               ./
@@ -242,7 +250,8 @@ outSAMattributes                Standard
                                 All         ... NH HI AS nM NM MD jM jI MC ch
                                 vA          ... variant allele
                                 vG          ... genomic coordiante of the variant overlapped by the read
-                                vW          ... 0/1 - alignment does not pass / passes WASP filtering. Requires --waspOutputMode SAMtag .
+                                vW          ... 0/1 - alignment does not pass / passes WASP filtering. Requires --waspOutputMode SAMtag 
+                                CR,CY,UR,UY ... sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing
                                 Unsupported/undocumented:
                                 rB          ... alignment block read/genomic coordinates
                                 vR          ... read coordinate of the variant
@@ -634,7 +643,11 @@ quantMode                   -
                             GeneCounts       ... count reads per gene
 
 quantTranscriptomeBAMcompression    1       1
-    int: -1 to 10  transcriptome BAM compression level, -1=default compression (6?), 0=no compression, 10=maximum compression
+    int: -2 to 10  transcriptome BAM compression level
+                            -2  ... no BAM output
+                            -1  ... default compression (6?)
+                             0  ... no compression
+                             10 ... maximum compression
 
 quantTranscriptomeBan       IndelSoftclipSingleend
     string: prohibit various alignment type
@@ -656,4 +669,48 @@ waspOutputMode              None
     string: WASP allele-specific output type. This is re-implemenation of the original WASP mappability filtering by Bryce van de Geijn, Graham McVicker, Yoav Gilad & Jonathan K Pritchard. Please cite the original WASP paper: Nature Methods 12, 1061–1063 (2015), https://www.nature.com/articles/nmeth.3582 .
                             SAMtag      ... add WASP tags to the alignments that pass WASP filtering
 
+### STARsolo (single cell RNA-seq) parameters
+soloType                    None
+    string(s): type of single-cell RNA-seq
+                            Droplet   ... one cell barcode and one UMI barcode in read2, e.g. Drop-seq and 10X Chromium
+
+soloCBwhitelist             -
+    string: file with whitelist of cell barcodes
+
+soloCBstart                 1
+    int>0: cell barcode start base
+
+soloCBlen                   16
+    int>0: cell barcode length
+
+soloUMIstart                17
+    int>0: UMI start base
+
+soloUMIlen                  10
+    int>0: UMI length
+
+soloStrand                  Forward
+    string: strandedness of the solo libraries:
+                            Unstranded  ... no strand information
+                            Forward     ... read strand same as the original RNA molecule
+                            Reverse     ... read strand opposite to the original RNA molecule
+
+soloFeatures                Gene
+    string(s):              genomic features for which the UMI counts per Cell Barcode are collected
+                            Gene            ... genes: reads match the gene transcript
+                            SJ              ... splice junctions: reported in SJ.out.tab
+
+soloUMIdedup                1MM_All
+    string(s):              type of UMI deduplication (collapsing) algorithm
+                            1MM_All             ... all UMIs with 1 mismatch distance to each other are collapsed (i.e. counted once)
+                            1MM_Directional     ... follows the "directional" method from the UMI-tools by Smith, Heger and Sudbery (Genome Research 2017).
+                            1MM_NotCollapsed      ... UMIs with 1 mismatch distance to others are not collapsed (i.e. all counted)
+
+soloOutFileNames            Solo.out/ genes.tsv barcodes.tsv matrix.mtx matrixSJ.mtx
+    string(s)               file names for STARsolo output
+                            1st word    ... file name prefix
+                            2nd word    ... barcode sequences
+                            3rd word    ... gene IDs and names
+                            4th word    ... cell/gene counts matrix
+                            5th word    ... cell/splice junction counts matrix
 
