@@ -6,8 +6,8 @@ before_install:
 - sudo apt-get update -qq
 
 install:
-- sudo apt-get install -qq g++-4.7
-- export CXX="g++-4.7"
+- sudo apt-get install -qq g++-5.3
+- export CXX="g++-5.3"
 
 git:
   submodules: false
