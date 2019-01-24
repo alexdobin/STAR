@@ -9,8 +9,11 @@ STARsolo inputs the raw FASTQ reads files, and performs the following operations
 * mapping the reads to the reference genome using the standard STAR spliced read alignment algorithm
 * error correction and collapsing (deduplication) of Unique Molecular Identifiers (UMIa) 
 * quantification of per-cell gene expression by counting the number of reads per gene
+
 STARsolo output is designed to be a drop-in replacement for 10X CellRanger gene quantification output.
+
 It follows CellRanger logic for cell barcode whitelisting and UMI deduplication, and produces nearly identical gene counts in the same format.
+
 At the same time STARsolo is ~10 times faster than the CellRanger.
 
 The STAR solo algorithm is turned on with:
