@@ -1,7 +1,7 @@
 STAR 2.7.0a 2019/01/23
 ======================
 * This release introduces STARsolo for: mapping, demultiplexing and gene quantification for single cell RNA-seq.
-* Multiple solo\* options control STARsolo algorithm. See the RELEASEnotes and the manualfor more information.
+* Multiple solo\* options control STARsolo algorithm. See the RELEASEnotes and the manual for more information.
 * This release is compiled with gcc-5.3.0, and requires at least gcc-4.9.4
 
 
