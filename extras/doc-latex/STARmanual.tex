@@ -34,7 +34,7 @@
 
 \newcommand{\sechyperref}[1]{\hyperref[#1]{Section \ref{#1}. \nameref{#1}}}
 
-\title{STAR manual 2.6.1a}
+\title{STAR manual 2.7.0a}
 \author{Alexander Dobin\\
 dobin@cshl.edu}
 \maketitle
@@ -131,12 +131,10 @@ Examples of acceptable genome sequence files:
 \begin{itemize}
 \item \textbf{ENSEMBL:} files marked with .dna.primary.assembly, such as:
 \url{ftp://ftp.ensembl.org/pub/release-77/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz}
-\item \textbf{NCBI:} "no alternative - analysis set": \url{ftp://ftp.ncbi.nlm.nih.gov/genbank/genomes/Eukaryotes/vertebrates_mammals/Homo_sapiens/GRCh38/seqs_for_alignment_pipelines/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.gz}
+\item \textbf{GENCODE:} files marked with PRI (primary). Strongly recommended for mouse and human: \url{http://www.gencodegenes.org/}. 
 \end{itemize} 
 \subsubsection{Which annotations to use?}
 The use of the most comprehensive annotations for a given species is strongly recommended. Very importantly, chromosome names in the annotations GTF file have to match chromosome names in the FASTA genome sequence files. For example, one can use ENSEMBL FASTA files with ENSEMBL GTF files, and UCSC FASTA files with UCSC FASTA files. However, since UCSC uses \code{chr1, chr2, ...} naming convention, and ENSEMBL uses \code{1, 2, ...} naming, the ENSEMBL and UCSC FASTA and GTF files cannot be mixed together, unless chromosomes are  renamed to match between the FASTA anf GTF files.
-
-For mouse and human, the Gencode annotations are recommended: \url{http://www.gencodegenes.org/}.
 
 \subsubsection{Annotations in GFF format.}
 In addition to the aforementioned options, for GFF3 formatted annotations you need to use \opt{sjdbGTFtagExonParentTranscript} \optv{Parent}. In general, for \opt{sjdbGTFfile} files STAR only processes lines which have \opt{sjdbGTFfeatureExon} (=\optv{exon} by default) in the 3rd field (column). The exons are assigned to the transcripts using parent-child relationship defined by the \opt{sjdbGTFtagExonParentTranscript} (=\optv{transcript\_id} by default) GTF/GFF attribute.
@@ -491,6 +489,38 @@ The new algorithm can detect and output multimapping chimeras. Presently, the on
 This algorithm is activated with $>0$ value in \optv{chimMultimapNmax}, which defines the maximum number of chimeric multi-alignments.
 The \optv{chimMultimapScoreRange} ($=1$ by default) parameter defines the score range for multi-mapping chimeras below the best chimeric score, similar to the \optv{outFilterMultimapScoreRange} parameter for normal alignments.
 The \optv{chimNonchimScoreDropMin} ($=20$ by default) defines the threshold triggering chimeric detection: the drop in the best non-chimeric alignment score with respect to the read length has to be smaller than this value.
+
+\section{STARsolo: mapping, demultiplexing and gene quantification for single cell RNA-seq}
+
+STARsolo is a turnkey solution for analyzing droplet single cell RNA sequencing data (e.g. 10X Genomics Chromium System) built directly into STAR code.
+STARsolo inputs the raw FASTQ reads files, and performs the following operations:
+\begin{itemize}
+	\itemsep -0.5em
+	\item 
+	error correction and demultiplexing of cell barcodes using user-input whitelist
+	\item 
+	mapping the reads to the reference genome using the standard STAR spliced read alignment algorithm
+	\item
+	error correction and collapsing (deduplication) of Unique Molecular Identifiers (UMIa)
+	\item
+	quantification of per-cell gene expression by counting the number of reads per gene
+\end{itemize}
+STARsolo output is designed to be a drop-in replacement for 10X CellRanger gene quantification output.
+It follows CellRanger logic for cell barcode whitelisting and UMI deduplication, and produces nearly identical gene counts in the same format. At the same time STARsolo is ~10 times faster than the CellRanger.
+
+The STAR solo algorithm is turned on with: \opt{soloType} \optv{Droplet}. 
+
+Presently, the cell barcode whitelist has to be provided with:
+
+\opt{soloCBwhitelist} \optvr{/path/to/cell/barcode/whitelist}
+
+The 10X Chromium whitelist file can be found inside the CellRanger distribution, e.g. \url{https://kb.10xgenomics.com/hc/en-us/articles/115004506263-What-is-a-barcode-whitelist-}. Please make sure that the whitelist is compatible with the specific version of the 10X chemistry (V1,V2,V3 etc).
+
+Importantly, in the --readFilesIn option, the 1st FASTQ file has to be cDNA read, and the 2nd FASTQ file has to be the barcode (cell+UMI) read, i.e. 
+
+\opt{readFilesIn} \optvr{cDNAfragmentSequence.fastq.gz CellBarcodeUMIsequence.fastq.gz}.
+
+Other solo* options can be found in the Section \ref{STARsolo_(single_cell_RNA-seq)_parameters}.
 
 \section{Description of all options.}\label{Description_of_all_options}
 For each STAR version, the most up-to-date information about all STAR parameters can be found in the \code{parametersDefault} file in the STAR source directory. The parameters in the \code{parametersDefault}, as well as in the descriptions below, are grouped by function:
