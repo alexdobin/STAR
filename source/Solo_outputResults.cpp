@@ -26,7 +26,7 @@ void SoloFeature::outputNumUMIperGeneCB()
     ofstream &countMatrixStream=ofstrOpen(matrixFileName,ERROR_OUT, P);
 
     //header
-    countMatrixStream <<"%%\n%\n" << Trans.nGe<< ' ' << pSolo.cbWL.size() <<' '<< nCellGeneEntries << '\n';
+    countMatrixStream <<"%%MatrixMarket matrix coordinate integer general\n%\n" << Trans.nGe<< ' ' << pSolo.cbWL.size() <<' '<< nCellGeneEntries << '\n';
     
     for (uint32 icb=0; icb<nCB; icb++) {
         uint32 *rCBpp=rCBp[icb];
