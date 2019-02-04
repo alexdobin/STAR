@@ -2,7 +2,7 @@ FROM debian:stretch-slim
 
 MAINTAINER dobin@cshl.edu
 
-ENV STAR_VERSION 2.6.1d
+ENV STAR_VERSION 2.7.0a
 
 ENV PACKAGES gcc g++ make wget zlib1g-dev
 
