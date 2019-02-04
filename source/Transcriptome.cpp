@@ -45,13 +45,16 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
         P.inOut->logMain << "Loaded exon database, nEx="<<nEx<<endl;
         exinfo.close();
 
-        ifstream &geStream = ifstrOpen(trInfoDir+"/geneInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
+        ifstream &geStream = ifstrOpen(trInfoDir+"/geneInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotations.gtf option at the genome generation step or mapping step", P);
         geStream >> nGe;
         geID.resize(nGe);
         geName.resize(nGe);
         geBiotype.resize(nGe);        
         for (uint ii=0;ii<nGe;ii++) {
-            geStream >> geID[ii] >> geName[ii] >> geBiotype[ii];
+            string line1;
+            getline(geStream,line1);
+            istringstream stream1(line1);
+            stream1 >> geID[ii] >> geName[ii] >> geBiotype[ii];
         };
         geStream.close();
     };

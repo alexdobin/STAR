@@ -1,6 +1,5 @@
 #include "SoloReadFeature.h"
 #include "binarySearch2.h"
-#include <math.h>
 
 bool inputFeatureUmi(fstream *strIn, int32 featureType, uint32 &feature, uint32 &umi, array<vector<uint64>,2> &sjAll)
 {

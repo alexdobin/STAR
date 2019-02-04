@@ -75,7 +75,7 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     //collapse each CB
     nUperCB = new uint32[nCB];//record pair: nUMIs per CB and iCB, for sorting if needed
     nGperCB = new uint32[nCB];
-    uint32 umiArray[nReadPerCBmax*umiArrayStride];
+    uint32 *umiArray = new uint32[nReadPerCBmax*umiArrayStride];
     nCellGeneEntries=0;
     
     for (uint32 iCB=0; iCB<nCB; iCB++) {
