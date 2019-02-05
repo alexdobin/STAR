@@ -1,4 +1,4 @@
-STAR 2.7.0a 2019/01/23
+STAR 2.7.0b 2019/02/05
 ======================
 
 STARsolo: mapping, demultiplexing and gene quantification for single cell RNA-seq
@@ -32,6 +32,8 @@ Importantly, in the --readFilesIn option, the 1st file has to be cDNA read, and 
 ```
 --readFilesIn cDNAfragmentSequence.fastq.gz CellBarcodeUMIsequence.fastq.gz
 ```
+
+Important: the genome index has to be re-generated with the latest 2.7.0x release.
 
 Other parameters that control STARsolo output are listed below. Note that default parameters are compatible with 10X Chromium V2 protocol.
 

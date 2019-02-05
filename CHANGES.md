@@ -1,3 +1,9 @@
+STAR 2.7.0b 2019/02/04
+======================
+* #550: Added correct header for the STARsolo matrix.mtx file, needed for python scipy mmread compatibility.
+* #556: Fixed a problem with STARsolo genes.tsv file, which may also cause troubles with GTF files processing.
+* Important: 2.7.0 requires re-generation of the genome index.
+
 STAR 2.7.0a 2019/01/23
 ======================
 * This release introduces STARsolo for: mapping, demultiplexing and gene quantification for single cell RNA-seq.
