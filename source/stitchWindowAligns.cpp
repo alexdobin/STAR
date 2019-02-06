@@ -1,9 +1,9 @@
 #include "stitchWindowAligns.h"
-#include <math.h>
-#include <time.h>
 #include "blocksOverlap.h"
 #include "ErrorWarning.h"
 #include "binarySearch2.h"
+#include <cmath>
+#include <ctime>
 
 void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, uint tG2, Transcript trA, \
                         uint Lread, uiWA* WA, char* R, Genome &mapGen, \

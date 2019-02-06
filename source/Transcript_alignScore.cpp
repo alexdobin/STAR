@@ -1,5 +1,5 @@
+#include <cmath>
 #include "Transcript.h"
-#include <math.h>
 
 void Transcript::alignScore(char **Read1, char *G, Parameters &P) {//re-calculates score and number of mismatches
     maxScore=0;

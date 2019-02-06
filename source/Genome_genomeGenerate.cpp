@@ -1,8 +1,9 @@
+#include <cmath>
+
 #include "IncludeDefine.h"
 #include "Parameters.h"
 #include "SuffixArrayFuns.h"
 #include "PackedArray.h"
-#include <math.h>
 #include "TimeFunctions.h"
 #include "ErrorWarning.h"
 #include "loadGTF.h"
@@ -17,6 +18,7 @@
 #include "serviceFuns.cpp"
 #include "streamFuns.h"
 #include "SequenceFuns.h"
+
 
 char* globalG;
 uint globalL;

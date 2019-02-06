@@ -2,9 +2,9 @@ FROM debian:stretch-slim
 
 MAINTAINER dobin@cshl.edu
 
-ENV STAR_VERSION 2.7.0b
+ARG STAR_VERSION=2.7.0b 
 
-ENV PACKAGES gcc g++ make wget zlib1g-dev
+ENV PACKAGES gcc g++ make wget zlib1g-dev unzip
 
 RUN set -ex
 
@@ -12,8 +12,8 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends ${PACKAGES} && \
     apt-get clean && \
     cd /home && \
-    wget --no-check-certificate https://github.com/alexdobin/STAR/archive/${STAR_VERSION}.tar.gz && \
-    tar xzf ${STAR_VERSION}.tar.gz && \
+    wget --no-check-certificate https://github.com/alexdobin/STAR/archive/${STAR_VERSION}.zip && \
+    unzip ${STAR_VERSION}.zip && \
     cd STAR-${STAR_VERSION}/source && \
     make STARstatic && \
     mkdir /home/bin && \
