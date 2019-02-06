@@ -1,3 +1,7 @@
+* #559, #562 Fixed compilation problems.
+* Replaced tabs with spaces in STARsolo matrix.mtx output
+* #550 (again, previous merge failed): Added correct header for the STARsolo matrix.mtx file, needed for python scipy mmread compatibility.
+
 STAR 2.7.0b 2019/02/05
 ======================
 * #550: Added correct header for the STARsolo matrix.mtx file, needed for python scipy mmread compatibility.

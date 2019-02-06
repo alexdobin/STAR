@@ -1,5 +1,6 @@
 #include "SoloReadFeature.h"
 #include "binarySearch2.h"
+#include <cmath>
 
 bool inputFeatureUmi(fstream *strIn, int32 featureType, uint32 &feature, uint32 &umi, array<vector<uint64>,2> &sjAll)
 {
@@ -71,7 +72,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 *cbReadCountExactTotal)
                 if (cbReadCountExactTotal[cbin]>0) {//otherwise this cbin does not work
                     qin -= pSolo.QSbase;
                     qin = qin < pSolo.QSmax ? qin : pSolo.QSmax;
-                    pin=cbReadCountExactTotal[cbin]*pow(10.0,-qin/10.0);
+                    pin=cbReadCountExactTotal[cbin]*std::pow(10.0,-qin/10.0);
                     ptot+=pin;
                     if (pin>pmax) {
                         cb=cbin;

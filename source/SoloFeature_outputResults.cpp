@@ -26,12 +26,13 @@ void SoloFeature::outputResults()
     ofstream &countMatrixStream=ofstrOpen(matrixFileName,ERROR_OUT, P);
 
     //header
-    countMatrixStream <<"%%\n%\n" << Trans.nGe<< ' ' << pSolo.cbWL.size() <<' '<< nCellGeneEntries << '\n';
+    countMatrixStream <<"%%MatrixMarket matrix coordinate integer general\n%\n";
+    countMatrixStream << Trans.nGe<< ' ' << pSolo.cbWL.size() <<' '<< nCellGeneEntries << '\n';
     
     for (uint32 icb=0; icb<nCB; icb++) {
         uint32 *rCBpp=rCBp[icb];
         for (uint32 ig=0; ig<nGperCB[icb]; ig++) {
-            countMatrixStream << rCBpp[0]+1  <<'\t'<< indCB[icb]+1;
+            countMatrixStream << rCBpp[0]+1  <<' '<< indCB[icb]+1;
             uint32 count1[3] = {1,1,1};
             if (rCBpp[1]>1) {//3 counts recorded
                 count1[0] = rCBpp[1];                
@@ -42,17 +43,11 @@ void SoloFeature::outputResults()
                 rCBpp +=2;
             };
             for (uint32 ii=0; ii<pSolo.umiDedupColumns.size(); ii++) 
-                countMatrixStream <<'\t'<< count1[pSolo.umiDedupColumns[ii]];            
+                countMatrixStream <<' '<< count1[pSolo.umiDedupColumns[ii]];            
             countMatrixStream << '\n';
         };
     };
     countMatrixStream.flush();
        
-    //*statsStream << setw(50) << "Maximum number of UMIs per CB" << setw(15) << nUperCB[0] << '\n';
-    //*statsStream << setw(50) << "Robust maximum number of UMIs per CB" << setw(15) << nUMImax << '\n';
-    //*statsStream << setw(50) << "Number of CBs that passed min UMI threshold " << setw(15) << nCBout << '\n';
-    //*statsStream << setw(50) << "UMIs IN CELL BARCODES:\n"
-    //*statsStream << setw(50) << "nDetectedCellBarcodes" << setw(15) << nCB << '\n';
-    
     statsStream->flush();
 };
