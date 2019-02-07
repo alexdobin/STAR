@@ -1,3 +1,5 @@
+* This release is compiled with gcc-4.8.5, and requires at least gcc-4.8.5
+* Fixed another problem in STARsolo genes.tsv output.
 * #559, #562 Fixed compilation problems.
 * Replaced tabs with spaces in STARsolo matrix.mtx output
 * #550 (again, previous merge failed): Added correct header for the STARsolo matrix.mtx file, needed for python scipy mmread compatibility.
