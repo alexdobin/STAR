@@ -49,7 +49,8 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
         geStream >> nGe;
         geID.resize(nGe);
         geName.resize(nGe);
-        geBiotype.resize(nGe);        
+        geBiotype.resize(nGe);
+        geStream.ignore(999,'\n');
         for (uint ii=0;ii<nGe;ii++) {
             string line1;
             getline(geStream,line1);

@@ -10,7 +10,7 @@ void SoloFeature::outputResults()
         //output genes
         ofstream &geneStr=ofstrOpen(P.outFileNamePrefix+pSolo.outFileNames[0]+pSolo.outFileNames[1],ERROR_OUT, P);
         for (uint32 ii=0; ii<Trans.nGe; ii++)
-            geneStr << Trans.geID[ii] <<"\t"<< Trans.geName[ii] << '\n';
+            geneStr << Trans.geID[ii] <<"\t"<< (Trans.geName[ii].empty() ? Trans.geID[ii] : Trans.geName[ii]) << '\n';
         geneStr.close();
     };
     if (featureType==0 || !pSolo.featureYes[0]) {
@@ -27,7 +27,7 @@ void SoloFeature::outputResults()
 
     //header
     countMatrixStream <<"%%MatrixMarket matrix coordinate integer general\n%\n";
-    countMatrixStream << Trans.nGe<< ' ' << pSolo.cbWL.size() <<' '<< nCellGeneEntries << '\n';
+    countMatrixStream << Trans.nGe <<' '<< pSolo.cbWL.size() <<' '<< nCellGeneEntries << '\n';
     
     for (uint32 icb=0; icb<nCB; icb++) {
         uint32 *rCBpp=rCBp[icb];
