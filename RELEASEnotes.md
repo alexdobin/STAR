@@ -1,4 +1,4 @@
-STAR 2.7.0b 2019/02/05
+STAR 2.7.0c 2019/02/05
 ======================
 
 STARsolo: mapping, demultiplexing and gene quantification for single cell RNA-seq

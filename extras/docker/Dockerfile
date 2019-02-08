@@ -2,7 +2,7 @@ FROM debian:stretch-slim
 
 MAINTAINER dobin@cshl.edu
 
-ARG STAR_VERSION=master
+ARG STAR_VERSION=2.7.0c
 
 ENV PACKAGES gcc g++ make wget zlib1g-dev unzip
 
