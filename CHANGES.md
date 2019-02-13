@@ -1,3 +1,5 @@
+* Enforced genome version rules for 2.7.0
+
 STAR 2.7.0c 2019/02/08
 ======================
 * This release is compiled with gcc-4.8.5, and requires at least gcc-4.8.5

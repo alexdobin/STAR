@@ -23,8 +23,7 @@ class Parameters {
         string commandLine, commandLineFull;
 
         //version
-        uint versionSTAR;
-        vector <uint> versionGenome;
+        string versionGenome;
 
         //system parameters
         string sysShell; //shell for executing system commands

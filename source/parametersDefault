@@ -1,8 +1,6 @@
 ### versions
-versionSTAR             020201
-    int>0: STAR release numeric ID. Please do not change this value!
-versionGenome           020101 020200
-    int>0: oldest value of the Genome version compatible with this STAR release. Please do not change this value!
+versionGenome           2.7.0c_0213
+    string: latest genome index version compatible with this STAR release. Please do not change this value!
 
 ### Parameter Files
 parametersFiles          -

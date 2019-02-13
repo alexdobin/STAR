@@ -286,6 +286,7 @@ uint64 loadGTF(SjdbClass &sjdbLoci, Parameters &P, string dirOut, Genome &mapGen
 
     char strandChar[3]={'.','+','-'};
     uint64 sjdbN1=sjdbLoci.chr.size();
+    sjdbLoci.gene.resize(sjdbN1); //need to resize in case sjdbLoci was loaded from files without gene attribute. TODO make sure gene is always present
     for (uint64 ii=0;ii<sjN;ii++) {
         if ( ii==0 || (sjLoci[ii*sjStride]!=sjLoci[(ii-1)*sjStride]) 
                    || (sjLoci[ii*sjStride+1]!=sjLoci[(ii-1)*sjStride+1]) 

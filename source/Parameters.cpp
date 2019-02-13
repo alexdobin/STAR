@@ -20,8 +20,7 @@ Parameters::Parameters() {//initalize parameters info
     inOut = new InOutStreams;
 
     //versions
-    parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "versionSTAR", &versionSTAR));
-    parArray.push_back(new ParameterInfoVector <uint> (-1, -1, "versionGenome", &versionGenome));
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "versionGenome", &versionGenome));
 
     //parameters
     parArray.push_back(new ParameterInfoVector <string> (-1, 2, "parametersFiles", &parametersFiles));
