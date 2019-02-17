@@ -687,6 +687,11 @@ soloUMIstart                17
 soloUMIlen                  10
     int>0: UMI length
 
+soloBarcodeReadLength       1
+    int: length of the barcode read
+                            1   ... equal to sum of soloCBlen+soloUMIlen
+                            0  ... not defined, do not check
+
 soloStrand                  Forward
     string: strandedness of the solo libraries:
                             Unstranded  ... no strand information

@@ -18,7 +18,8 @@ void ParametersSolo::initialize(Parameters *pPin)
         return;
     } else if (typeStr=="Droplet") {
         type=1;
-        bL=cbL+umiL;
+        if (bL==1)
+            bL=cbL+umiL;
         pP->readNmates=1; //output mates TODO: check that readNmatesIn==2
     } else  {
         ostringstream errOut;

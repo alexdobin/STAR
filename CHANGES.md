@@ -1,3 +1,4 @@
+* Implemented --soloBarcodeReadLength option for barcode read length not equal to the UMI+CB length
 * Enforced genome version rules for 2.7.0
 
 STAR 2.7.0c 2019/02/08
