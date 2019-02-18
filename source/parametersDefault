@@ -1,5 +1,5 @@
 ### versions
-versionGenome           2.7.0c_0213
+versionGenome           2.7.0d
     string: latest genome index version compatible with this STAR release. Please do not change this value!
 
 ### Parameter Files
@@ -712,8 +712,8 @@ soloUMIdedup                1MM_All
 soloOutFileNames            Solo.out/ genes.tsv barcodes.tsv matrix.mtx matrixSJ.mtx
     string(s)               file names for STARsolo output
                             1st word    ... file name prefix
-                            2nd word    ... barcode sequences
-                            3rd word    ... gene IDs and names
+                            2nd word    ... gene IDs and names
+                            3rd word    ... barcode sequences
                             4th word    ... cell/gene counts matrix
                             5th word    ... cell/splice junction counts matrix
 
