@@ -808,6 +808,13 @@
 \optName{soloUMIlen}
   \optValue{10}
   \optLine{int{\textgreater}0: UMI length} 
+\optName{soloBarcodeReadLength}
+  \optValue{1}
+  \optLine{int: length of the barcode read} 
+\begin{optOptTable}
+  \optOpt{1}   \optOptLine{equal to sum of soloCBlen+soloUMIlen}
+  \optOpt{0}   \optOptLine{not defined, do not check}
+\end{optOptTable}
 \optName{soloStrand}
   \optValue{Forward}
   \optLine{string: strandedness of the solo libraries:} 
@@ -836,8 +843,8 @@
   \optLine{string(s)               file names for STARsolo output} 
 \begin{optOptTable}
   \optOpt{1st word}   \optOptLine{file name prefix}
-  \optOpt{2nd word}   \optOptLine{barcode sequences}
-  \optOpt{3rd word}   \optOptLine{gene IDs and names}
+  \optOpt{2nd word}   \optOptLine{gene IDs and names}
+  \optOpt{3rd word}   \optOptLine{barcode sequences}
   \optOpt{4th word}   \optOptLine{cell/gene counts matrix}
   \optOpt{5th word}   \optOptLine{cell/splice junction counts matrix}
 \end{optOptTable}
