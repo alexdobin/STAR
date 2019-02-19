@@ -7,7 +7,7 @@
 
 #include <stdlib.h>
 
-const vector<string> ParametersSolo::featureNames={"Gene","SJ"};
+const vector<string> ParametersSolo::featureNames={"Gene","SJ","GeneFull"};
 
 void ParametersSolo::initialize(Parameters *pPin) 
 {
@@ -61,6 +61,7 @@ void ParametersSolo::initialize(Parameters *pPin)
             exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
     };
+    
     nFeatures=features.size();
     
     umiDedupYes.resize(3,false);

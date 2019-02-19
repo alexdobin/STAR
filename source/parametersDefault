@@ -702,6 +702,7 @@ soloFeatures                Gene
     string(s):              genomic features for which the UMI counts per Cell Barcode are collected
                             Gene            ... genes: reads match the gene transcript
                             SJ              ... splice junctions: reported in SJ.out.tab
+                            GeneFull        ... full genes: count all reads overlapping genes' exons and introns
 
 soloUMIdedup                1MM_All
     string(s):              type of UMI deduplication (collapsing) algorithm
@@ -709,11 +710,12 @@ soloUMIdedup                1MM_All
                             1MM_Directional     ... follows the "directional" method from the UMI-tools by Smith, Heger and Sudbery (Genome Research 2017).
                             1MM_NotCollapsed      ... UMIs with 1 mismatch distance to others are not collapsed (i.e. all counted)
 
-soloOutFileNames            Solo.out/ genes.tsv barcodes.tsv matrix.mtx matrixSJ.mtx
+soloOutFileNames            Solo.out/ genes.tsv barcodes.tsv matrix.mtx matrixSJ.mtx matrixGeneFull.mtx
     string(s)               file names for STARsolo output
                             1st word    ... file name prefix
                             2nd word    ... gene IDs and names
                             3rd word    ... barcode sequences
-                            4th word    ... cell/gene counts matrix
-                            5th word    ... cell/splice junction counts matrix
+                            4th word    ... cell/Gene counts matrix
+                            5th word    ... cell/SJ counts matrix
+                            6th word    ... cell/GeneFull counts matrix
 
