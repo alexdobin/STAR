@@ -92,13 +92,17 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
         geneFull.eMax=new uint64[nGe];
         geneFull.g=new uint32[nGe];
         
+        for (uint ig=1;ig<nGe;ig++) {        
+            geneFull.s[ig]=-1;
+            geneFull.e[ig]=0;
+        };
+        
         for (uint ii=0;ii<exG.nEx;ii++) {
             uint64 s1,e1,str1,g1,t1;
             exinfo >> s1 >> e1 >> str1 >> g1 >> t1;            
             geneFull.s[g1]=min(geneFull.s[g1],s1);
-            geneFull.e[g1]=min(geneFull.e[g1],e1);
+            geneFull.e[g1]=max(geneFull.e[g1],e1);
             geneFull.str[g1] = (uint8) str1;
-            
         };        
         exinfo.close();
 

@@ -131,6 +131,8 @@ void ParametersSolo::initialize(Parameters *pPin)
         pP->quant.trSAM.bamCompression = -2;
         pP->quant.trSAM.indel = true;
         pP->quant.trSAM.softClip = true;
+        if (featureYes[2])
+            pP->quant.geneFull.yes=true;
         pP->inOut->logMain << "Turning on Genomic->Transcriptomic coordinate conversion for STARsolo\n";
     };
 
