@@ -261,11 +261,13 @@ class Parameters {
         //quantification parameters
         //input
 
-        struct {
+        struct
+        {
           bool yes; //if any quantification is done
           vector <string> mode; //quantification mode input string
 
-          struct {
+          struct
+          {
               bool yes;
               bool bamYes;
               bool indel;
@@ -275,24 +277,23 @@ class Parameters {
               string ban;
           } trSAM;
 
-          struct {
+          struct
+          {
               bool yes;
               string outFile;
           } geCount;
-          
-          struct {
-              bool yes;
-          } geneFull;
 
         } quant;
        
         //variation parameters
-        struct {
+        struct
+        {
             bool yes;
             string vcfFile;
         } var;
         
-        struct {
+        struct 
+        {
             bool yes;
             bool SAMtag;
             string outputMode;

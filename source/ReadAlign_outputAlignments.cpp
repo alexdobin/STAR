@@ -8,9 +8,10 @@ void ReadAlign::outputAlignments() {
 
     bool mateMapped[2]={false,false};
 
-    set<uint32> readGeneFull={},readGene={};
+    vector<int32> readGenes;
     vector<uint32> readTranscripts={};
-    vector<int32> readGeneExon={};
+    set<uint32> readTrGenes={};
+    vector<array<uint64,2>> readSJs={};
     
     outFilterPassed=true;//only false if the alignment is held for outFilterBySJoutStage
     if (unmapType==-1) {//output transcripts
@@ -166,21 +167,17 @@ void ReadAlign::outputAlignments() {
             };
 
             if ( P.quant.geCount.yes ) {
-                chunkTr->geneCountsAddAlign(nTr, trMult, readGeneExon);
-            };
-            
-            if ( P.quant.geneFull.yes ) {
-                chunkTr->geneFullAlignOverlap(nTr, trMult, P.pSolo.strand, readGeneFull);
+                chunkTr->geneCountsAddAlign(nTr, trMult, readGenes);
             };
 
             if ( P.quant.trSAM.yes ) {//NOTE: the transcripts are changed by this function (soft-clipping extended), cannot be reused
-                quantTranscriptome(chunkTr, nTrOut, trMult,  alignTrAll, readTranscripts, readGene);
+                quantTranscriptome(chunkTr, nTrOut, trMult,  alignTrAll, readTranscripts, readTrGenes);
             };
         };
     };
     
     if (outFilterPassed) {//otherwise the alignment was held and will be counted at the 2nd stage
-        soloRead->record(readNameExtra.at(0), nTr, readGene, readGeneFull, trMult[0]);
+        soloRead->record(readNameExtra.at(0), nTr, readTrGenes, trMult[0]);
     };
 
     if (unmapType>=0) {
