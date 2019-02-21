@@ -2,6 +2,7 @@
 #include "streamFuns.h"
 #include "GlobalVariables.h"
 #include "ErrorWarning.h"
+#include "serviceFuns.cpp"
 
 Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
 
@@ -84,6 +85,54 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
             exG.eMax[iex]=max(exG.eMax[iex-1],exG.e[iex]);
         };
     };
+    
+    if ( P.quant.geneFull.yes ) {
+        ifstream & exinfo = ifstrOpen(trInfoDir+"/exonGeTrInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
+        exinfo >> exG.nEx;
+        
+        geneFull.s=new uint64[nGe];
+        geneFull.e=new uint64[nGe];
+        geneFull.eMax=new uint64[nGe];
+        geneFull.g=new uint32[nGe];
+        
+        for (uint ig=1;ig<nGe;ig++) {        
+            geneFull.s[ig]=-1;
+            geneFull.e[ig]=0;
+        };
+        
+        for (uint ii=0;ii<exG.nEx;ii++) {
+            uint64 s1,e1,str1,g1,t1;
+            exinfo >> s1 >> e1 >> str1 >> g1 >> t1;            
+            geneFull.s[g1]=min(geneFull.s[g1],s1);
+            geneFull.e[g1]=max(geneFull.e[g1],e1);
+            geneFull.str[g1] = (uint8) str1;
+        };        
+        exinfo.close();
+
+        uint64 *gF=new uint64 [4*nGe];
+        for (uint ii=0;ii<exG.nEx;ii++) {
+            gF[4*ii]   = geneFull.s[ii];
+            gF[4*ii+1] = geneFull.e[ii];
+            gF[4*ii+2] = geneFull.str[ii];
+            gF[4*ii+3] = ii;
+        };
+        
+        qsort((void*) gF, nGe, sizeof(uint64)*4, funCompareArrays<uint64,2>);
+        
+        for (uint ii=0;ii<exG.nEx;ii++) {
+            geneFull.s[ii]   = gF[4*ii];
+            geneFull.e[ii]   = gF[4*ii+1];
+            geneFull.str[ii] = gF[4*ii+2];                        
+            geneFull.g[ii]   = gF[4*ii+3];
+        };
+        
+        //calculate eMax
+        geneFull.eMax[0]=geneFull.e[0];
+        for (uint iex=1;iex<nGe;iex++) {
+            geneFull.eMax[iex]=max(geneFull.eMax[iex-1],geneFull.e[iex]);
+        };
+    };
+    
 };
 
 void Transcriptome::quantsAllocate() {
