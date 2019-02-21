@@ -137,12 +137,6 @@ readMatesLengthsIn          NotEqual
 readNameSeparator           /
     string(s): character(s) separating the part of the read names that will be trimmed in output (read name after space is always trimmed)
 
-readStrand                  Unstranded
-    string: library strandedness type
-                            Unstranded  ... unstranded library
-                            Forward     ... 1st read strand same as RNA (i.e. 2nd cDNA synthesis strand)
-                            Reverse     ... 1st read opposite to RNA (i.e. 1st cDNA synthesis strand)
-
 clip3pNbases                 0
     int(s): number(s) of bases to clip from 3p of each mate. If one value is given, it will be assumed the same for both mates.
 

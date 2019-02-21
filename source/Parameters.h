@@ -91,10 +91,10 @@ class Parameters {
         string alignSoftClipAtReferenceEnds;
         vector <int32> alignSJstitchMismatchNmax;
 
-        struct {
-            string strandString;
-            int32 strand;
-        } pReads;
+        //         struct {
+        //             string strandString;
+        //             int32 strand;
+        //         } pReads;
         
         struct {
             string in;

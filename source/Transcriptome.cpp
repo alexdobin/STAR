@@ -5,8 +5,25 @@
 
 Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
 
+    if (!P.quant.yes)
+        return;
+    
     trInfoDir = P.pGe.sjdbGTFfile=="-" ? P.pGe.gDir : P.sjdbInsert.outDir; //if GTF file is given at the mapping stage, it's always used for transcript info
-
+    
+    ifstream &geStream = ifstrOpen(trInfoDir+"/geneInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotations.gtf option at the genome generation step or mapping step", P);
+    geStream >> nGe;
+    geID.resize(nGe);
+    geName.resize(nGe);
+    geBiotype.resize(nGe);
+    geStream.ignore(999,'\n');
+    for (uint ii=0;ii<nGe;ii++) {
+        string line1;
+        getline(geStream,line1);
+        istringstream stream1(line1);
+        stream1 >> geID[ii] >> geName[ii] >> geBiotype[ii];
+    };
+    geStream.close();    
+    
     if ( P.quant.trSAM.yes ) {//load exon-transcript structures
         //load tr and ex info
         ifstream & trinfo = ifstrOpen(trInfoDir+"/transcriptInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step",P);
@@ -44,20 +61,6 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
         };
         P.inOut->logMain << "Loaded exon database, nEx="<<nEx<<endl;
         exinfo.close();
-
-        ifstream &geStream = ifstrOpen(trInfoDir+"/geneInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotations.gtf option at the genome generation step or mapping step", P);
-        geStream >> nGe;
-        geID.resize(nGe);
-        geName.resize(nGe);
-        geBiotype.resize(nGe);
-        geStream.ignore(999,'\n');
-        for (uint ii=0;ii<nGe;ii++) {
-            string line1;
-            getline(geStream,line1);
-            istringstream stream1(line1);
-            stream1 >> geID[ii] >> geName[ii] >> geBiotype[ii];
-        };
-        geStream.close();
     };
     //load exon-gene structures
     if ( P.quant.geCount.yes ) {
