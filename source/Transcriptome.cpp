@@ -94,6 +94,7 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
         geneFull.e=new uint64[nGe];
         geneFull.eMax=new uint64[nGe];
         geneFull.g=new uint32[nGe];
+        geneFull.str=new uint8[nGe];
         
         for (uint ig=1;ig<nGe;ig++) {        
             geneFull.s[ig]=-1;
@@ -110,7 +111,7 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
         exinfo.close();
 
         uint64 *gF=new uint64 [4*nGe];
-        for (uint ii=0;ii<exG.nEx;ii++) {
+        for (uint ii=0;ii<nGe;ii++) {
             gF[4*ii]   = geneFull.s[ii];
             gF[4*ii+1] = geneFull.e[ii];
             gF[4*ii+2] = geneFull.str[ii];
@@ -119,7 +120,7 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
         
         qsort((void*) gF, nGe, sizeof(uint64)*4, funCompareArrays<uint64,2>);
         
-        for (uint ii=0;ii<exG.nEx;ii++) {
+        for (uint ii=0;ii<nGe;ii++) {
             geneFull.s[ii]   = gF[4*ii];
             geneFull.e[ii]   = gF[4*ii+1];
             geneFull.str[ii] = gF[4*ii+2];                        
