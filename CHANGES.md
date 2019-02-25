@@ -1,3 +1,7 @@
+STAR 2.7.0e 2019/02/25
+======================
+* Fixed problems with --quantMode GeneCounts and --parametersFiles options
+
 STAR 2.7.0d 2019/02/19
 ======================
 * Implemented --soloBarcodeReadLength option for barcode read length not equal to the UMI+CB length
