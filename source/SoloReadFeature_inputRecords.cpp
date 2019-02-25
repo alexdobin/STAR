@@ -7,7 +7,7 @@ bool inputFeatureUmi(fstream *strIn, int32 featureType, uint32 &feature, uint32 
     if (!(*strIn >> umi)) //end of file
         return false;
     
-    if (featureType==0) {//gene
+    if (featureType==0 || featureType==2) {//gene
         *strIn >> feature;
     } else if (featureType==1) {//sj
         uint32 sj[2];

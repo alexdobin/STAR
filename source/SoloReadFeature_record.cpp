@@ -4,7 +4,7 @@
 
 uint32 outputReadCB(fstream *streamOut, int32 featureType, uint32 umiB, uint32 gene, vector<array<uint64,2>> &readSJs, const string &stringCB)
 {
-    if (featureType==0) {//genes
+    if (featureType==0 || featureType==2) {//genes
         *streamOut << umiB <<' '<< gene <<' '<< stringCB <<'\n';
         return 1;
     } else if (featureType==1) {//sjs

@@ -1,10 +1,10 @@
 #include "Transcriptome.h"
 #include "serviceFuns.cpp"
 
-void Transcriptome::geneFullAlignOverlap(uint nA, Transcript **aAll, int32 strandType, set<uint32> &geneOverlap) {
-
+void Transcriptome::geneFullAlignOverlap(uint nA, Transcript **aAll, int32 strandType, set<uint32> &geneOverlap) 
+{
      for (uint32 iA=0; iA<nA; iA++) {
-         Transcript& a=aAll[0][iA];//one unique alignment only
+         Transcript &a = *aAll[iA];//one unique alignment only
 
          int64 gi1=-1;
 
@@ -15,8 +15,9 @@ void Transcriptome::geneFullAlignOverlap(uint nA, Transcript **aAll, int32 stran
 
              while (gi1>=0 && geneFull.eMax[gi1]>=a.exons[ib][EX_G]) {//these exons may overlap this block
                  if (geneFull.e[gi1]>=a.exons[ib][EX_G]) {//this gene overlaps the block
-                    if (strandType==-1 || strandType==geneFull.str[gi1])
-                        geneOverlap.insert(gi1);
+                     int32 str1 = geneFull.str[gi1]==1 ? a.Str : 1-a.Str;
+                     if (strandType==-1 || strandType==str1)
+                         geneOverlap.insert(geneFull.g[gi1]);
                  };
                  --gi1;// go to the previous gene
              };
