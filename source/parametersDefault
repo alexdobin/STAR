@@ -547,7 +547,7 @@ alignInsertionFlush     None
                         None    ... insertions are not flushed
                         Right   ... insertions are flushed to the right
 
-### Paired-End reads: presently unsupported/undocumented
+### Paired-End reads
 peOverlapNbasesMin          0
     int>=0:             minimum number of overlap bases to trigger mates merging and realignment
 
