@@ -1,3 +1,5 @@
+* Fixed problems with STARsolo and 2-pass.
+
 STAR 2.7.0e 2019/02/25
 ======================
 * Fixed problems with --quantMode GeneCounts and --parametersFiles options
