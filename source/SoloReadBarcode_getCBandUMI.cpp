@@ -20,7 +20,7 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
 
     //check UMIs, return if bad UMIs
     if (convertNuclStrToInt32(umiSeq,umiB)!=-1) {//convert and check for Ns
-        stats.V[stats.nNinBarcode]++;//UMIs are not allowed to have MMs
+        stats.V[stats.nNinBarcode]++;//UMIs are not allowed to have Ns
         return;
     };
     if (umiB==homoPolymer[0] || umiB==homoPolymer[1] || umiB==homoPolymer[2] || umiB==homoPolymer[3]) {
@@ -29,11 +29,11 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
     };
 
     //convert CB and check for Ns
-    int32 posN=convertNuclStrToInt32(cbSeq,cbB);
+    int64 posN=convertNuclStrToInt64(cbSeq,cbB);
     if (posN==-2) {//>2 Ns, might already be filtered by Illumina
         stats.V[stats.nNinBarcode]++;
         return;
-    } else if (posN==-1) {//no Ns, count only for feattureType==gene
+    } else if (posN==-1) {//no Ns, count only for featureType==gene
         cbI=binarySearchExact(cbB,pSolo.cbWL.data(),pSolo.cbWL.size());
         if (cbI>=0) {//exact match
             cbReadCountExact[cbI]++;//note that this simply counts reads per exact CB, no checks of genes or UMIs
@@ -45,7 +45,7 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
     if (posN>=0) {//one N
         uint32 posNshift=2*(pSolo.cbL-1-posN);//shift bits for posN
         for (uint32 jj=0; jj<4; jj++) {
-            uint32 cbB1=cbB^(jj<<posNshift);
+            uint64 cbB1=cbB^(jj<<posNshift);
             int32 cbI1=binarySearchExact(cbB1,pSolo.cbWL.data(),pSolo.cbWL.size());
             if (cbI1>=0) {
                 if (cbI>=0) {//had another match already

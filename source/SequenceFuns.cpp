@@ -219,6 +219,37 @@ string convertNuclInt32toString(uint32 nuclNum, const uint32 L) {
         nuclOut[L-ii] = nuclChar[nuclNum & 3];
         nuclNum = nuclNum >> 2;
     };
+
+    return nuclOut;
+};
+
+int64 convertNuclStrToInt64(const string S, uint64 &intOut) {
+    intOut=0;
+    int64 posN=-1;
+    for (uint64 ii=0; ii<S.size(); ii++) {
+        uint64 nt = (uint64) convertNt01234(S.at(ii));
+        if (nt>3) {//N
+            if (posN>=0)
+                return -2; //two Ns
+            posN=ii;
+            nt=0;
+        };
+        intOut = intOut << 2;
+        intOut +=nt;
+        //intOut += nt<<(2*ii);
+    };
+    return posN;
+};
+
+string convertNuclInt64toString(uint64 nuclNum, const uint32 L) {
+    string nuclOut(L,'N');
+    string nuclChar="ACGT";
+
+    for (uint64 ii=1; ii<=L; ii++) {
+        nuclOut[L-ii] = nuclChar[nuclNum & 3];
+        nuclNum = nuclNum >> 2;
+    };
+
     return nuclOut;
 };
 

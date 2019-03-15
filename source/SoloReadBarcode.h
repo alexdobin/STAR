@@ -8,7 +8,8 @@ class SoloReadBarcode {
 public:
     uint32 homoPolymer[4];//homopolymer constants
     string cbSeq, umiSeq, cbQual, umiQual;
-    uint32 cbB,umiB;
+    uint64 cbB;
+    uint32 umiB;
     int32  cbI;
     int32  cbMatch;//0=exact, 1=1 match with 1MM, 2= >1 matches with 1MM
     string cbMatchString;//CB matches and qualities

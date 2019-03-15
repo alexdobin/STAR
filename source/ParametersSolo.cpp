@@ -21,6 +21,13 @@ void ParametersSolo::initialize(Parameters *pPin)
         if (bL==1)
             bL=cbL+umiL;
         pP->readNmates=1; //output mates TODO: check that readNmatesIn==2
+
+        if (umiL > 16) {
+            ostringstream errOut;
+            errOut << "EXITING because of to high UMI length: --soloUMIlen="<<umiL<<"\n";
+            errOut << "SOLUTION: specify lower UMI length (max: 16)";
+            exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+        }
     } else  {
         ostringstream errOut;
         errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in --soloType="<<typeStr<<"\n";
@@ -111,17 +118,17 @@ void ParametersSolo::initialize(Parameters *pPin)
             errOut << "SOLUTION: make sure that the barcode read is the second in --readFilesIn and check that is has the correct formatting\n";
             exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_INPUT_FILES, *pP);
         };
-        uint32 cb1;
+        uint64 cb1;
         //convert to 2-bit format
-        if (convertNuclStrToInt32(seq1,cb1)) {
+        if (convertNuclStrToInt64(seq1,cb1)) {
             //cbWL.insert(cb1);
             cbWL.push_back(cb1);
         } else {
             pP->inOut->logMain << "WARNING: CB whitelist sequence contains non-ACGT and is ignored: " << seq1 <<endl;
         };
     };
-    //int comp1 = [] (const void *a, const void *b) {uint32 aa=*(uint32*) a; uint32 bb=*(uint32*) b; if (a
-    qsort(cbWL.data(),cbWL.size(),sizeof(uint32),funCompareNumbers<uint32>);
+
+    qsort(cbWL.data(),cbWL.size(),sizeof(uint64),funCompareNumbers<uint64>);
 
     if (!pP->quant.trSAM.yes) {
         pP->quant.yes = true;

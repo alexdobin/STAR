@@ -13,7 +13,7 @@ public:
     uint32 umiS,umiL; //umi start,length
     uint32 bL; //total barcode length
     string soloCBwhitelist;
-    std::vector <uint32> cbWL;
+    std::vector <uint64> cbWL;
     string strandStr;
     int32 strand;
     //features
