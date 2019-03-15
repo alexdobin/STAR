@@ -10,5 +10,4 @@ SoloRead::SoloRead(Parameters &Pin, int32 iChunkIn) :  iChunk(iChunkIn), P(Pin),
 
     for (uint32 ii=0; ii<pSolo.nFeatures; ii++)
         readFeat[ii] = new SoloReadFeature(pSolo.features[ii], P, iChunk);
-    
 };

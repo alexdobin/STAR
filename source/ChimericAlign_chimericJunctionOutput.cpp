@@ -10,6 +10,8 @@ void ChimericAlign::chimericJunctionOutput(fstream &outStream, uint chimN)
         <<"\t"<< al2->exons[0][EX_G] - mapGen.chrStart[al2->Chr]+1 <<"\t"<< al2->generateCigarP() <<"\t"<< chimN; 
         if (P.outSAMattrPresent.RG)
             outStream <<"\t"<< P.outSAMattrRG.at(RA->readFilesIndex);
+        if (P.pSolo.type>0)
+            outStream <<"\t"<< RA->soloRead->readBar->cbSeq <<"\t"<< RA->soloRead->readBar->umiSeq;
         outStream <<"\n"; //<<"\t"<< trChim[0].exons[0][EX_iFrag]+1 --- no need for that, since trChim[0] is always on the first mate
 };
         
