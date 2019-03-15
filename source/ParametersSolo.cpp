@@ -103,26 +103,28 @@ void ParametersSolo::initialize(Parameters *pPin)
     umiMaskHigh=~umiMaskLow;
     
     //load the CB whitlist and create unordered_map
-    ifstream & cbWlStream = ifstrOpen(soloCBwhitelist, ERROR_OUT, "SOLUTION: check the path and permissions of the CB whitelist file: " + soloCBwhitelist, *pP);
-    string seq1;
-    while (cbWlStream >> seq1) {
-        if (seq1.size() != cbL) {
-            ostringstream errOut;
-            errOut << "EXITING because of FATAL ERROR in input CB whitelist file: "<< soloCBwhitelist <<" the total length of barcode sequence is "  << seq1.size() << " not equal to expected " <<bL <<"\n"  ;
-            errOut << "SOLUTION: make sure that the barcode read is the second in --readFilesIn and check that is has the correct formatting\n";
-            exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_INPUT_FILES, *pP);
+    if (soloCBwhitelist!="-") {
+        ifstream & cbWlStream = ifstrOpen(soloCBwhitelist, ERROR_OUT, "SOLUTION: check the path and permissions of the CB whitelist file: " + soloCBwhitelist, *pP);
+        string seq1;
+        while (cbWlStream >> seq1) {
+            if (seq1.size() != cbL) {
+                ostringstream errOut;
+                errOut << "EXITING because of FATAL ERROR in input CB whitelist file: "<< soloCBwhitelist <<" the total length of barcode sequence is "  << seq1.size() << " not equal to expected " <<bL <<"\n"  ;
+                errOut << "SOLUTION: make sure that the barcode read is the second in --readFilesIn and check that is has the correct formatting\n";
+                exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_INPUT_FILES, *pP);
+            };
+            uint32 cb1;
+            //convert to 2-bit format
+            if (convertNuclStrToInt32(seq1,cb1)) {
+                //cbWL.insert(cb1);
+                cbWL.push_back(cb1);
+            } else {
+                pP->inOut->logMain << "WARNING: CB whitelist sequence contains non-ACGT and is ignored: " << seq1 <<endl;
+            };
         };
-        uint32 cb1;
-        //convert to 2-bit format
-        if (convertNuclStrToInt32(seq1,cb1)) {
-            //cbWL.insert(cb1);
-            cbWL.push_back(cb1);
-        } else {
-            pP->inOut->logMain << "WARNING: CB whitelist sequence contains non-ACGT and is ignored: " << seq1 <<endl;
-        };
+        //int comp1 = [] (const void *a, const void *b) {uint32 aa=*(uint32*) a; uint32 bb=*(uint32*) b; if (a 
+        qsort(cbWL.data(),cbWL.size(),sizeof(uint32),funCompareNumbers<uint32>);
     };
-    //int comp1 = [] (const void *a, const void *b) {uint32 aa=*(uint32*) a; uint32 bb=*(uint32*) b; if (a 
-    qsort(cbWL.data(),cbWL.size(),sizeof(uint32),funCompareNumbers<uint32>);
     
     if (!pP->quant.trSAM.yes) {
         pP->quant.yes = true;

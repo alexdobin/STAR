@@ -35,6 +35,9 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 *cbReadCountExactTotal)
         };
     };
     
+    if (pSolo.cbWL.size()==0) //no WL => no mismatch check
+        return;
+    
     {//1 match
         strU_1->flush();
         strU_1->seekg(0,ios::beg);

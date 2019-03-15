@@ -21,6 +21,19 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
         readBarSum->addCounts(*readBarAll[ii]);        
     };
        
+    if (pSolo.cbWL.size()==0) {//now we can define WL and counts
+        pSolo.cbWL.resize(readFeatSum->cbReadCountMap.size());
+        readFeatSum->cbReadCount = new uint32[pSolo.cbWL.size()];
+        readBarSum->cbReadCountExact = new uint32[pSolo.cbWL.size()];
+        
+        uint64 icb=0;
+        for (auto ii=readFeatSum->cbReadCountMap.cbegin(); ii!=readFeatSum->cbReadCountMap.cend(); ++ii) {
+            pSolo.cbWL[icb]=ii->first;
+            readFeatSum->cbReadCount[icb]=ii->second;
+            readBarSum->cbReadCountExact[icb]=ii->second;            
+        };
+    };
+    
     //allocate arrays to store CB/gene/UMIs for all reads
     nCB=0;nReadsMapped=0;
     for (uint32 ii=0; ii<pSolo.cbWL.size(); ii++) {

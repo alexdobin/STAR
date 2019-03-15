@@ -30,6 +30,17 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
     
     //convert CB and check for Ns
     int32 posN=convertNuclStrToInt32(cbSeq,cbB);
+    
+    if (pSolo.cbWL.size()==0) {//no whitelist - no search
+        if (posN!=-1) {//Ns are present, discard this read
+            stats.V[stats.nNinBarcode]++;
+        } else {//no Ns
+            cbI=cbB;//all possible barcodes are accepted
+            cbMatch=0;            
+        };
+        return;
+    };
+    
     if (posN==-2) {//>2 Ns, might already be filtered by Illumina
         stats.V[stats.nNinBarcode]++;
         return;

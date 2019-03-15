@@ -67,7 +67,12 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, set<uint32> &re
     };
     
     if (soloBar.cbMatch==0) {//exact match
-        cbReadCount[soloBar.cbI] += outputReadCB(strU_0, featureType, soloBar.umiB, *readGe->begin(), readSJs, to_string(soloBar.cbI));
+        uint32 n1 = outputReadCB(strU_0, featureType, soloBar.umiB, *readGe->begin(), readSJs, to_string(soloBar.cbI));
+        if (pSolo.cbWL.size()>0) {//WL
+            cbReadCount[soloBar.cbI] += n1;
+        } else {//no WL
+            cbReadCountMap[soloBar.cbI] += n1;
+        };
         return;
     } else if (soloBar.cbMatch==1) {//1 match with 1MM
         cbReadCount[soloBar.cbI]+= outputReadCB(strU_1, featureType, soloBar.umiB, *readGe->begin(), readSJs, to_string(soloBar.cbI));
