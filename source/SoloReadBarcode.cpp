@@ -9,7 +9,7 @@ SoloReadBarcode::SoloReadBarcode(Parameters &Pin) : P(Pin), pSolo(P.pSolo)
     for (uint32 ii=0; ii<stats.nStats; ii++)
         stats.V[ii]=0;    
     
-    if (pSolo.cbWL.size()>0) {
+    if (pSolo.cbWLyes) {
         cbReadCountExact = new uint32[pSolo.cbWL.size()];    
         for (uint32 ii=0; ii<pSolo.cbWL.size(); ii++) {
             cbReadCountExact[ii]=0;        
@@ -26,8 +26,10 @@ SoloReadBarcode::SoloReadBarcode(Parameters &Pin) : P(Pin), pSolo(P.pSolo)
 
 void SoloReadBarcode::addCounts(const SoloReadBarcode &rfIn)
 {   
-    for (uint32 ii=0; ii<pSolo.cbWL.size(); ii++) {
-        cbReadCountExact[ii] += rfIn.cbReadCountExact[ii];
+    if (pSolo.cbWLyes) {
+        for (uint32 ii=0; ii<pSolo.cbWL.size(); ii++) {
+            cbReadCountExact[ii] += rfIn.cbReadCountExact[ii];
+        };
     };
 };
 

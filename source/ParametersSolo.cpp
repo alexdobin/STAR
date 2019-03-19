@@ -103,7 +103,10 @@ void ParametersSolo::initialize(Parameters *pPin)
     umiMaskHigh=~umiMaskLow;
     
     //load the CB whitlist and create unordered_map
-    if (soloCBwhitelist!="-") {
+    if (soloCBwhitelist=="-") {
+        cbWLyes=false;
+    } else {
+        cbWLyes=true;
         ifstream & cbWlStream = ifstrOpen(soloCBwhitelist, ERROR_OUT, "SOLUTION: check the path and permissions of the CB whitelist file: " + soloCBwhitelist, *pP);
         string seq1;
         while (cbWlStream >> seq1) {

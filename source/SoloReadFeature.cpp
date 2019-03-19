@@ -26,7 +26,7 @@ SoloReadFeature::SoloReadFeature(int32 feTy, Parameters &Pin, int iChunk)
 
 void SoloReadFeature::addCounts(const SoloReadFeature &rfIn)
 {   
-    if (pSolo.cbWL.size()>0) {//WL
+    if (pSolo.cbWLyes) {//WL
         for (uint32 ii=0; ii<pSolo.cbWL.size(); ii++) {
             cbReadCount[ii] += rfIn.cbReadCount[ii];
         };

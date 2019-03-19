@@ -21,7 +21,7 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
         readBarSum->addCounts(*readBarAll[ii]);        
     };
        
-    if (pSolo.cbWL.size()==0) {//now we can define WL and counts
+    if (!pSolo.cbWLyes) {//now we can define WL and counts
         pSolo.cbWL.resize(readFeatSum->cbReadCountMap.size());
         readFeatSum->cbReadCount = new uint32[pSolo.cbWL.size()];
         readBarSum->cbReadCountExact = new uint32[pSolo.cbWL.size()];
@@ -31,6 +31,7 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
             pSolo.cbWL[icb]=ii->first;
             readFeatSum->cbReadCount[icb]=ii->second;
             readBarSum->cbReadCountExact[icb]=ii->second;            
+            ++icb;
         };
     };
     
