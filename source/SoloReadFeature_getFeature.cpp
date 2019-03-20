@@ -13,11 +13,11 @@ uint32 outputReadCB(fstream *streamOut, int32 featureType, uint32 umiB, uint32 g
         };
         return readSJs.size();
     };
-    
+
     return 0; //this should not happen
 };
 
-bool SoloReadFeature::recordFeature(SoloBarcodes &soloBar, uint nTr, set<uint32> &readTrGenes, Transcript *alignOut) 
+bool SoloReadFeature::recordFeature(SoloBarcodes &soloBar, uint nTr, set<uint32> &readTrGenes, Transcript *alignOut)
 {
     if (pSolo.type==0  || !pSolo.featureYes[featureType] || soloBar.cbMatch<0)
         return false;
@@ -27,7 +27,7 @@ bool SoloReadFeature::recordFeature(SoloBarcodes &soloBar, uint nTr, set<uint32>
         stats.V[stats.nUnmapped]++;
         return false;
     };
-    
+
     vector<array<uint64,2>> readSJs;
     if (featureType==0) {//genes
         //check genes, return if no gene
@@ -43,7 +43,7 @@ bool SoloReadFeature::recordFeature(SoloBarcodes &soloBar, uint nTr, set<uint32>
     } else if (featureType==1) {//SJs
         alignOut->extractSpliceJunctions(readSJs);
         if (readSJs.empty()) {
-            stats.V[stats.nNoFeature]++; 
+            stats.V[stats.nNoFeature]++;
             return false;
         } else if (nTr>1) {//record SJs from the read
             stats.V[stats.nAmbigFeature]++;
@@ -51,7 +51,7 @@ bool SoloReadFeature::recordFeature(SoloBarcodes &soloBar, uint nTr, set<uint32>
             return false;
         };
     };
-    
+
     if (soloBar.cbMatch==0) {//exact match
         cbReadCount[cbI] += outputReadCB(strU_0, featureType, soloBar.umiB, *readTrGenes.begin(), readSJs, to_string(soloBar.cbI));
         return true;
@@ -60,6 +60,6 @@ bool SoloReadFeature::recordFeature(SoloBarcodes &soloBar, uint nTr, set<uint32>
         return true;
     } else {
         cbReadCount[cbI] += outputReadCB(strU_2, featureType, soloBar.umiB, *readTrGenes.begin(), readSJs, to_string(soloBar.cbMatch) + cbOutString);
-        return true;        
+        return true;
     };
 };

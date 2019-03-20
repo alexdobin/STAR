@@ -32,7 +32,7 @@ int ReadAlign::mapOneRead() {
     trInit->readLength=readLength;
     trInit->readNmates=readNmates;
     trInit->readName=readName;
-    
+
     trBest=trInit;
 
     uint seedSearchStartLmax=min(P.seedSearchStartLmax,(uint) (P.seedSearchStartLmaxOverLread*(Lread-1)));
@@ -102,6 +102,6 @@ int ReadAlign::mapOneRead() {
 //         qsort((void*) PC, nP, sizeof(uint)*PC_SIZE, funCompareUint2);//sort PC by rStart and length
         stitchPieces(Read1, Lread);
     };
-    
+
     return 0;
 };

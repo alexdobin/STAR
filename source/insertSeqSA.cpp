@@ -107,37 +107,37 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
     time ( &rawtime );
     P.inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished qsort - old " <<endl;
     */
-    
+
     g_funCompareUintAndSuffixesMemcmp_G=seq1[0];
     g_funCompareUintAndSuffixesMemcmp_L=mapGen.pGe.gSuffixLengthMax/sizeof(uint64_t);
-    qsort((void*) indArray, nInd, 2*sizeof(uint64_t), funCompareUintAndSuffixesMemcmp);  
-    
+    qsort((void*) indArray, nInd, 2*sizeof(uint64_t), funCompareUintAndSuffixesMemcmp);
+
 //     qsort((void*) indArray, nInd, 2*sizeof(uint64), funCompareUint2);
     time ( &rawtime );
     P.inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished qsort" <<endl;
 
 
-    
+
     /*//new sorting, 2-step: qsort for indArray, bucket sort for suffixes
     qsort((void*) indArray, nInd, 2*sizeof(uint64), funCompareUint2);
     time ( &rawtime );
     P.inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished qsort"<<nInd<<endl;
-    
+
     sortSuffixesBucket(seq1[0], (void*) indArray, nInd, 2*sizeof(uint64));
     time ( &rawtime );
     P.inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished ordering suffixes"<<nInd<<endl;
     */
-    
-    /* //debug 
+
+    /* //debug
     for (int ii=0;ii<2*nInd;ii++)
     {
-        if (indArray[ii]!=indArray1[ii]) 
+        if (indArray[ii]!=indArray1[ii])
         {
             cout << ii <<"   "<< indArray[ii]  <<"   "<< indArray1[ii] <<endl;
         };
     };
     */
-    
+
     time ( &rawtime );
     P.inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished sorting SA indices"<<endl;
 

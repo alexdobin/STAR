@@ -117,11 +117,11 @@ void outputSJ(ReadAlignChunk** RAchunk, Parameters& P) {//collapses junctions fr
             };
         };
     };
-    
+
     //output junctions
     P.sjAll[0].reserve(allSJ.N);
     P.sjAll[1].reserve(allSJ.N);
-    
+
     if (P.outFilterBySJoutStage!=1) {//output file
         ofstream outSJfileStream((P.outFileNamePrefix+"SJ.out.tab").c_str());
         for (uint ii=0;ii<allSJ.N;ii++) {//write to file

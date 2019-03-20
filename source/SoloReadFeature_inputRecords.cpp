@@ -6,7 +6,7 @@ bool inputFeatureUmi(fstream *strIn, int32 featureType, uint32 &feature, uint32 
 {
     if (!(*strIn >> umi)) //end of file
         return false;
-    
+
     if (featureType==0) {//gene
         *strIn >> feature;
     } else if (featureType==1) {//sj
@@ -14,11 +14,11 @@ bool inputFeatureUmi(fstream *strIn, int32 featureType, uint32 &feature, uint32 
         *strIn >> sj[0] >> sj[1];
         feature=(uint32) binarySearch2(sj[0],sj[1],sjAll[0].data(),sjAll[1].data(),sjAll[0].size());
     };
-    
-    return true;       
+
+    return true;
 };
 
-void SoloReadFeature::inputRecords(uint32 **cbP, uint32 *cbReadCountExactTotal) 
+void SoloReadFeature::inputRecords(uint32 **cbP, uint32 *cbReadCountExactTotal)
 {
     {//load exact matches
         strU_0->flush();
@@ -34,7 +34,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 *cbReadCountExactTotal)
             };
         };
     };
-    
+
     {//1 match
         strU_1->flush();
         strU_1->seekg(0,ios::beg);
@@ -52,7 +52,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 *cbReadCountExactTotal)
             };
         };
     };
-     
+
     {//2 matches
         strU_2->flush();
         strU_2->seekg(0,ios::beg);
@@ -86,7 +86,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 *cbReadCountExactTotal)
                 cbP[cb]+=2;
             } else {
                 stats.V[stats.nTooMany]++;
-            };        
+            };
         };
     };
 };

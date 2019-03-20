@@ -37,14 +37,14 @@ uint64 loadGTF(SjdbClass &sjdbLoci, Parameters &P, string dirOut, Genome &mapGen
     //returns number of added junctions
     if (mapGen.sjdbOverhang==0 || mapGen.pGe.sjdbGTFfile=="-") //no GTF
         return 0;
-        
+
     time_t rawTime;
     time(&rawTime);
     P.inOut->logMain     << timeMonthDayTime(rawTime) <<" ..... processing annotations GTF\n" <<flush;
     *P.inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ..... processing annotations GTF\n" <<flush;
 
     vector<array<string,2>> geneAttr;
-    
+
     ifstream sjdbStreamIn ( mapGen.pGe.sjdbGTFfile.c_str() );
     if (sjdbStreamIn.fail()) {
         ostringstream errOut;
@@ -288,8 +288,8 @@ uint64 loadGTF(SjdbClass &sjdbLoci, Parameters &P, string dirOut, Genome &mapGen
     uint64 sjdbN1=sjdbLoci.chr.size();
     sjdbLoci.gene.resize(sjdbN1); //need to resize in case sjdbLoci was loaded from files without gene attribute. TODO make sure gene is always present
     for (uint64 ii=0;ii<sjN;ii++) {
-        if ( ii==0 || (sjLoci[ii*sjStride]!=sjLoci[(ii-1)*sjStride]) 
-                   || (sjLoci[ii*sjStride+1]!=sjLoci[(ii-1)*sjStride+1]) 
+        if ( ii==0 || (sjLoci[ii*sjStride]!=sjLoci[(ii-1)*sjStride])
+                   || (sjLoci[ii*sjStride+1]!=sjLoci[(ii-1)*sjStride+1])
                    || (sjLoci[ii*sjStride+2]!=sjLoci[(ii-1)*sjStride+2]) ) {
             uint64 chr1=mapGen.chrBin[sjLoci[ii*sjStride] >> mapGen.pGe.gChrBinNbits];
             sjdbLoci.chr.push_back(mapGen.chrName[chr1]);

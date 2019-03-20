@@ -49,7 +49,7 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
                 *outStream <<"\t"<< '0' <<"\t"<< Read0[imate] <<"\t"<< (readFileType==2 ? Qual0[imate]:"*") \
                         <<"\tNH:i:0" <<"\tHI:i:0" <<"\tAS:i:"<<trOut.maxScore <<"\tnM:i:"<<trOut.nMM<<"\tuT:A:" <<unmapType;
                 if (!P.outSAMattrRG.empty()) *outStream<< "\tRG:Z:" <<P.outSAMattrRG.at(readFilesIndex);
-                
+
                 if (P.readFilesTypeN==10 && !readNameExtra[imate].empty()) {//SAM files as input - output extra attributes
                     *outStream << "\t" <<readNameExtra[imate];
                 };
@@ -75,47 +75,47 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
     };
 
     uint samFlagCommon=0;//FLAG common for both mates
-    if (flagPaired) 
+    if (flagPaired)
     {//paired reads
         samFlagCommon=0x0001;
-        if (iExMate==trOut.nExons-1) 
+        if (iExMate==trOut.nExons-1)
         {//single mate
             if (mateChr>mapGen.nChrReal) samFlagCommon+=0x0008; //not mapped as pair
-        } else 
+        } else
         {//paired align
             if (P.alignEndsProtrude.concordantPair || \
                 ( (trOut.exons[0][EX_G] <= trOut.exons[iExMate+1][EX_G]+trOut.exons[0][EX_R]) && \
-                   (trOut.exons[iExMate][EX_G]+trOut.exons[iExMate][EX_L] <= trOut.exons[trOut.nExons-1][EX_G]+Lread-trOut.exons[trOut.nExons-1][EX_R]) )  )                
+                   (trOut.exons[iExMate][EX_G]+trOut.exons[iExMate][EX_L] <= trOut.exons[trOut.nExons-1][EX_G]+Lread-trOut.exons[trOut.nExons-1][EX_R]) )  )
             {//properly paired
                 samFlagCommon+=0x0002;
             };
         };
-    } else 
+    } else
     {//single end
         samFlagCommon=0;
     };
 
-    if (readFilter=='Y') samFlagCommon+=0x200; //not passing quality control    
+    if (readFilter=='Y') samFlagCommon+=0x200; //not passing quality control
 
     uint Str= trOut.Str;//note that Strand = the mate on the left
     uint leftMate=0; //the mate (0 or 1) which is on the left
     if (flagPaired) {
         leftMate=Str;
     };
-    
+
     if (P.outSAMattrPresent.MC) {
         calcCIGAR(trOut, nMates, iExMate, leftMate);
     };
-    
+
     uint samFLAG;
-    
+
     for (uint imate=0;imate<nMates;imate++) {
         samFLAG=samFlagCommon;
 
         uint iEx1 = (imate==0 ? 0 : iExMate+1);
         uint iEx2 = (imate==0 ? iExMate : trOut.nExons-1);
         uint Mate=trOut.exons[iEx1][EX_iFrag];
- 
+
         if (Mate==0) {
             samFLAG|= Str*0x10;
             if (nMates==2) samFLAG|= (1-Str)*0x20;
@@ -322,7 +322,7 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
                     if (nMates>1) {
                         *outStream<< "\tMC:Z:" <<matesCIGAR[1-imate];
                     };
-                    break;                    
+                    break;
                 case ATTR_ch:
                     //do nothing - this attribute only worlks for BAM output
                     break;
@@ -337,7 +337,7 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
         if (P.readFilesTypeN==10 && !readNameExtra[imate].empty()) {//SAM files as input - output extra attributes
              *outStream << "\t" << readNameExtra.at(imate);
         };
-        
+
         *outStream << "\n"; //done with one SAM line
     };//for (uint imate=0;imate<nMates;imate++)
 

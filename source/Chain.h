@@ -5,7 +5,7 @@
 #include "Parameters.h"
 #include "ErrorWarning.h"
 
-class OneChain 
+class OneChain
 {
     public:
         uint bN;
@@ -17,7 +17,7 @@ class Chain {
     public:
 // //         uint bN;//number of blocks
 // //         vector <uint> bStart1, bStart2, bLen; //blocks starts in 1/2, lengths
-        
+
         Chain(Parameters &Pin, string chainFileNameIn);
         void liftOverGTF(string gtfFileName, string outFileName);
     private:

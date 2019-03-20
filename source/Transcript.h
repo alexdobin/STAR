@@ -47,7 +47,7 @@ public:
     uint lDel; //total genomic deletion length
     uint lIns; //total genomic insertion length
 
-    uint nUnique, nAnchor; //number of unique pieces in the alignment, number of anchor pieces in the alignment   
+    uint nUnique, nAnchor; //number of unique pieces in the alignment, number of anchor pieces in the alignment
 
     vector <int32> varInd;
     vector <int32> varGenCoord, varReadCoord ;
@@ -63,9 +63,9 @@ public:
     string generateCigarP(); //generates CIGAR
     void peOverlapSEtoPE(uint* mSta, Transcript &t);
     void extractSpliceJunctions(vector<array<uint64,2>> &sjOut, bool &annotYes);
-    
+
 private:
-        
+
 };
 
 #endif

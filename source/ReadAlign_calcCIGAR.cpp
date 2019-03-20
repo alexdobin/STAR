@@ -8,7 +8,7 @@ void ReadAlign::calcCIGAR(Transcript const &trOut, uint nMates, uint iExMate, ui
         uint iEx2 = (imate==0 ? iExMate : trOut.nExons-1);
         uint Mate=trOut.exons[iEx1][EX_iFrag];
         uint Str= trOut.Str;
-        
+
         samStreamCIGAR.str(std::string());
 
         uint trimL;

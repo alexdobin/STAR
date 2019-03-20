@@ -5,15 +5,15 @@ SoloReadBarcode::SoloReadBarcode(Parameters &Pin) : P(Pin), pSolo(P.pSolo)
 {
     if (pSolo.type==0)
         return;
-    
+
     for (uint32 ii=0; ii<stats.nStats; ii++)
-        stats.V[ii]=0;    
-    
-    cbReadCountExact = new uint32[pSolo.cbWL.size()];    
+        stats.V[ii]=0;
+
+    cbReadCountExact = new uint32[pSolo.cbWL.size()];
     for (uint32 ii=0; ii<pSolo.cbWL.size(); ii++) {
-        cbReadCountExact[ii]=0;        
+        cbReadCountExact[ii]=0;
     };
-    
+
     for (uint32 jj=0;jj<4;jj++) {
         homoPolymer[jj]=0;
         for (uint32 ii=0; ii<pSolo.umiL;ii++) {
@@ -23,7 +23,7 @@ SoloReadBarcode::SoloReadBarcode(Parameters &Pin) : P(Pin), pSolo(P.pSolo)
 };
 
 void SoloReadBarcode::addCounts(const SoloReadBarcode &rfIn)
-{   
+{
     for (uint32 ii=0; ii<pSolo.cbWL.size(); ii++) {
         cbReadCountExact[ii] += rfIn.cbReadCountExact[ii];
     };

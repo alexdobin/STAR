@@ -167,27 +167,27 @@ void bamRemoveDuplicates(const string bamFileName, const string bamFileNameOut, 
         uint32 chrE=0;
         uint32 leftE=0;
         uint32 rightE=0;
-        uint32 chrS=0;        
-        
+        uint32 chrS=0;
+
         if (!bamFileEnd)
         {
             uint32* bamP=(uint32*) (bamRaw+bamE);//pointer to the 1st mate of the pair
-            
+
             bamA->data=((uint8_t*) bamP)+9*4+((bamP[3]<<24)>>24)+((bamP[4]<<16)>>16)*4+(bamP[5]+1)/2+bamP[5];//add length for: core, name, cigar, seq, qual
             bamA->l_data=((uint8_t*) bamP)+bamP[0]+1-bamA->data;
-                
+
             nMult=bam_aux2i(bam_aux_get(bamA,"NH"));
-        
-            if (nMult==1 || (nMult>1 && P.removeDuplicates.markMulti)) 
+
+            if (nMult==1 || (nMult>1 && P.removeDuplicates.markMulti))
             {
                 bamP[4] |= (0x400<<16);//mark all aligns as duplicate, will unmark. If multimappers, onyl mark if markMult=true
             };
-            
+
             chrE=bamP[1];
             leftE=bamP[2];
             rightE=bamP[7];
 
-            chrS=*(uint32*)(bamRaw+bamS+4*1);            
+            chrS=*(uint32*)(bamRaw+bamS+4*1);
         };
 
         if ( chrE !=chrS ||  (rightMax>0 && leftE>rightMax) || bamFileEnd ) {//found new group of reads to be processed, start collapsing procedure

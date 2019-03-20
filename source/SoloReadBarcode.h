@@ -6,7 +6,7 @@
 
 class SoloReadBarcode {
 public:
-    uint32 homoPolymer[4];//homopolymer constants       
+    uint32 homoPolymer[4];//homopolymer constants
     string cbSeq, umiSeq, cbQual, umiQual;
     uint32 cbB,umiB;
     int32  cbI;
@@ -20,14 +20,14 @@ public:
         uint64 V[nStats];
         vector<string> names={"nNinBarcode","nUMIhomopolymer","nTooMany","nNoMatch"};
     } stats;
-    
+
     SoloReadBarcode(Parameters &Pin);
     void getCBandUMI(string &readNameExtra);
     void addCounts(const SoloReadBarcode &rfIn);
     void addStats(const SoloReadBarcode &rfIn);
     void statsOut(ofstream &streamOut);
-    
-private:  
+
+private:
     Parameters &P;
     ParametersSolo &pSolo;
 };

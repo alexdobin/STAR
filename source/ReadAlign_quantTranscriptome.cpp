@@ -67,7 +67,7 @@ uint ReadAlign::quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript 
             };
         };
     };
-    
+
     //not used anymore, at Colin Dewey's request
     //     if (nAlignT==0 && P.outSAMunmapped=="Within") {//read could be mapped to genome, but not transcriptome - output as unmapped
     //         uint unmapType=5;

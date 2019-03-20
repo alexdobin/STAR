@@ -9,10 +9,10 @@
 
 const vector<string> ParametersSolo::featureNames={"Gene","SJ"};
 
-void ParametersSolo::initialize(Parameters *pPin) 
+void ParametersSolo::initialize(Parameters *pPin)
 {
     pP=pPin;
-    
+
     if (typeStr=="None") {
         type=0;
         return;
@@ -26,21 +26,21 @@ void ParametersSolo::initialize(Parameters *pPin)
         errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in --soloType="<<typeStr<<"\n";
         errOut << "SOLUTION: use allowed option: None or Droplet";
         exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
-    }; 
-    
+    };
+
     if (strandStr=="Unstranded") {
         strand=-1;
     } else if (strandStr=="Forward") {
         strand=0;
     } else if (strandStr=="Reverse") {
-        strand=1;        
+        strand=1;
     } else  {
         ostringstream errOut;
         errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in --soloStrand="<<strandStr<<"\n";
         errOut << "SOLUTION: use allowed option: Unstranded OR Forward OR Reverse";
         exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
-    
+
     for (auto &fin : featureIn) {
         bool finGood=false;
         for (uint32 ii=0; ii<featureNames.size(); ii++) {
@@ -55,34 +55,34 @@ void ParametersSolo::initialize(Parameters *pPin)
             ostringstream errOut;
             errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in --soloFeatures="<<fin<<"\n";
             errOut << "SOLUTION: use allowed option: ";
-            errOut <<featureNames[0]<< "   OR   ";            
+            errOut <<featureNames[0]<< "   OR   ";
             for (auto &fname : featureNames)
                 errOut << fname <<" ";
             exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
     };
     nFeatures=features.size();
-    
+
     umiDedupYes.resize(3,false);
     umiDedupColumns.resize(umiDedup.size());
     for (uint32 ii=0; ii<umiDedup.size(); ii++) {
         if (umiDedup[ii]=="1MM_NotCollapsed") {
-            umiDedupYes[0]=true; 
+            umiDedupYes[0]=true;
             umiDedupColumns[ii]=0;
         } else if (umiDedup[ii]=="1MM_All") {
             umiDedupYes[1]=true;
-            umiDedupColumns[ii]=1;            
+            umiDedupColumns[ii]=1;
         } else if (umiDedup[ii]=="1MM_Directional") {
             umiDedupYes[2]=true;
             umiDedupColumns[ii]=2;
         } else {
             ostringstream errOut;
             errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in --soloUMIdedup="<<umiDedup[ii]<<"\n";
-            exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);            
+            exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
     };
     ///////////// finished parameters input
-    
+
     //make output directory if needed
     if ( outFileNames[0].find_last_of("/") < outFileNames[0].size() ) {//need to create dir
         string dir1=pP->outFileNamePrefix+outFileNames[0].substr(0,outFileNames[0].find_last_of("/"));
@@ -93,14 +93,14 @@ void ParametersSolo::initialize(Parameters *pPin)
             exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
     };
-    
+
     QSbase=33;//TODO make these user-definable
     QSmax=33;
     cbMinP=0.975;
-    
+
     umiMaskLow=(uint32) ( (((uint64)1)<<umiL) - 1);
     umiMaskHigh=~umiMaskLow;
-    
+
     //load the CB whitlist and create unordered_map
     ifstream & cbWlStream = ifstrOpen(soloCBwhitelist, ERROR_OUT, "SOLUTION: check the path and permissions of the CB whitelist file: " + soloCBwhitelist, *pP);
     string seq1;
@@ -120,9 +120,9 @@ void ParametersSolo::initialize(Parameters *pPin)
             pP->inOut->logMain << "WARNING: CB whitelist sequence contains non-ACGT and is ignored: " << seq1 <<endl;
         };
     };
-    //int comp1 = [] (const void *a, const void *b) {uint32 aa=*(uint32*) a; uint32 bb=*(uint32*) b; if (a 
+    //int comp1 = [] (const void *a, const void *b) {uint32 aa=*(uint32*) a; uint32 bb=*(uint32*) b; if (a
     qsort(cbWL.data(),cbWL.size(),sizeof(uint32),funCompareNumbers<uint32>);
-    
+
     if (!pP->quant.trSAM.yes) {
         pP->quant.yes = true;
         pP->quant.trSAM.yes = true;

@@ -95,7 +95,7 @@ class Parameters {
         //             string strandString;
         //             int32 strand;
         //         } pReads;
-        
+
         struct {
             string in;
             bool ext[2][2];
@@ -106,13 +106,13 @@ class Parameters {
             int nBasesMax;
             bool concordantPair;
         } alignEndsProtrude;
-        
+
         struct {
             string in;
             bool flushRight;
         } alignInsertionFlush;
-        
-        
+
+
         //seed parameters
         uint seedMultimapNmax; //max number of multiple alignments per piece
         uint seedSearchLmax; //max length of the seed
@@ -141,7 +141,7 @@ class Parameters {
         int outSAMmapqUnique;
 
         int outSAMtlen;
-        
+
         struct {bool NH,HI,AS,NM,MD,nM,jM,jI,RG,XS,rB,vG,vA,vW,ch,MC,CR,CY,UR,UY;} outSAMattrPresent, outSAMattrPresentQuant;
 
         vector <int> outSAMattrOrder, outSAMattrOrderQuant;
@@ -151,7 +151,7 @@ class Parameters {
         uint32 outBAMcoordNbins;
         uint32 outBAMsortingBinsN;//user-defined number of bins for sorting
         string outBAMsortTmpDir;
-        
+
 //         string bamRemoveDuplicatesType;
 //         uint bamRemoveDuplicatesMate2basesN;
         struct {
@@ -160,7 +160,7 @@ class Parameters {
             bool markMulti;
             uint mate2basesN;
         } removeDuplicates;
-        
+
         int outBAMsortingThreadN, outBAMsortingThreadNactual;
         uint64 *outBAMsortingBinStart; //genomic starts for bins for sorting BAM files
         uint16 outSAMflagOR, outSAMflagAND;
@@ -176,14 +176,14 @@ class Parameters {
             vector <string> mode;
             bool yes;
             bool KeepOnlyAddedReferences;
-            bool KeepAllAddedReferences;            
+            bool KeepAllAddedReferences;
         } outSAMfilter;
 
         struct {
             string mode;
             bool random;
         } outMultimapperOrder;
-        
+
         struct {
             bool yes;
             uint NbasesMin;
@@ -284,15 +284,15 @@ class Parameters {
           } geCount;
 
         } quant;
-       
+
         //variation parameters
         struct
         {
             bool yes;
             string vcfFile;
         } var;
-        
-        struct 
+
+        struct
         {
             bool yes;
             bool SAMtag;
@@ -301,7 +301,7 @@ class Parameters {
 
         //solo
         ParametersSolo pSolo;
-        
+
         //chimeric
         ParametersChimeric pCh;
 
@@ -311,7 +311,7 @@ class Parameters {
 
         //not really parameters, but global variables:
         array<vector<uint64>,2> sjAll;
-        uint64 sjNovelN, *sjNovelStart, *sjNovelEnd; //novel junctions collapased and filtered        
+        uint64 sjNovelN, *sjNovelStart, *sjNovelEnd; //novel junctions collapased and filtered
 
     ////////////////////// CLEAN-UP needed
     InOutStreams *inOut; //main input output streams

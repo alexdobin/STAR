@@ -5,7 +5,7 @@
 void sjdbPrepare (SjdbClass &sjdbLoci, Parameters &P, uint nGenomeReal, string outDir, Genome &mapGen, char *Gsj) {
 
     char *G=mapGen.G;
-    
+
     uint *sjdbS=new uint [sjdbLoci.chr.size()];
     uint *sjdbE=new uint [sjdbLoci.chr.size()];
 

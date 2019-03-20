@@ -28,9 +28,9 @@ void genomeParametersWrite(string fileName, Parameters& P, string errorOut, Geno
     genomePar << "sjdbGTFtagExonParentGene\t" << mapGen.pGe.sjdbGTFtagExonParentGene <<"\n";
 
     genomePar << "sjdbInsertSave\t" << mapGen.pGe.sjdbInsertSave <<"\n";
-    
+
     genomePar << "genomeFileSizes\t" << mapGen.pGe.gFileSizes.at(0);
-    for (uint ii=1;ii<mapGen.pGe.gFileSizes.size();ii++) 
+    for (uint ii=1;ii<mapGen.pGe.gFileSizes.size();ii++)
         genomePar << " " << mapGen.pGe.gFileSizes.at(ii) ;
     genomePar << "\n";
 

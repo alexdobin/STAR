@@ -21,39 +21,39 @@ class ReadAlign {
          //methods
         ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk);//allocate arrays
         int oneRead();
-        
+
         //vars
         Genome &mapGen; //mapped-to-genome structure
 
         uint iRead;
         char **Read1;
-        
-        Stats statsRA; //mapping statistics        
-        
+
+        Stats statsRA; //mapping statistics
+
         istream* readInStream[MAX_N_MATES];
         BAMoutput *outBAMcoord, *outBAMunsorted, *outBAMquant;//sorted by coordinate, unsorted, transcriptomic BAM structure
         fstream chunkOutChimSAM, *chunkOutChimJunction, chunkOutUnmappedReadsStream[MAX_N_MATES], chunkOutFilterBySJoutFiles[MAX_N_MATES];
         OutSJ *chunkOutSJ, *chunkOutSJ1;
 
-        ostream* outSAMstream;        
+        ostream* outSAMstream;
         uint outBAMbytes; //number of bytes output to SAM/BAM with oneRead
         char *outBAMarray;//pointer to the (last+1) position of the SAM/BAM output array
-        
+
         uint outFilterMismatchNmaxTotal;
         uint Lread, readLength[MAX_N_MATES], readLengthOriginal[MAX_N_MATES], readLengthPair, readLengthPairOriginal;
         intScore maxScoreMate[MAX_N_MATES];
 
         uint readFilesIndex;
-        
+
         ReadAlign *waspRA; //ReadAlign for alternative WASP alignment
         int waspType, waspType1; //alignment ASE-WASP type and
 
         ReadAlign *peMergeRA; //ReadAlign for merged PE mates
-        
+
         ChimericDetection *chimDet;
-        
+
         SoloRead *soloRead; //counts reads per CB per and outputs CB/UMI/gene into file, per thread
-        
+
     private:
         Parameters& P; //pointer to the parameters, will be initialized on construction
 
@@ -130,7 +130,7 @@ class ReadAlign {
         uint storedLmin, uniqLmax, uniqLmaxInd, multLmax, multLmaxN, multNmin, multNminL, multNmax, multNmaxL;
         uint nTr, nTrMate; // number of transcripts called
         intScore maxScore;//maximum alignment score
-        
+
         Transcript trA, trA1, *trBest, *trInit; //transcript, best tr, next best tr, initialized tr
         Transcript ***trAll; //all transcripts for all windows
         uint *nWinTr; //number of recorded transcripts per window
@@ -142,19 +142,19 @@ class ReadAlign {
         Transcript trChim[MAX_N_CHIMERAS];
         //new chimeric detection
         bool chimRecord; //true if chimeric aligment was detected
-        
+
         Transcript *alignC, *extendC, *polyAtailC; //alignment rules/conditions
 
         Transcript* trMult[MAX_N_MULTMAP];//multimapping transcripts
         Transcript *alignTrAll;//alignments to transcriptome
-        
+
         struct {
             bool yes;
-            uint nOv;//number of overlapping bases 
+            uint nOv;//number of overlapping bases
             uint ovS;//first read base of the overlap
             uint mateStart[2];//mates starts in the merged read
         } peOv;//PE  mates overlap/merge/remap structure
-        
+
         void resetN();//resets the counters to 0
         void multMapSelect();
         int mapOneRead();
@@ -170,15 +170,15 @@ class ReadAlign {
         string outputTranscriptCIGARp(Transcript const &trOut);
         int createExtendWindowsWithAlign(uint a1, uint aStr); //extends and windows with one alignment
         void assignAlignToWindow(uint a1, uint aLength, uint aStr, uint aNrep, uint aFrag, uint aRstart,bool aAnchor, uint sjA); //assigns one alignment to a window
-        
+
         void mappedFilter();
         void chimericDetection();
         bool chimericDetectionOld();
         void chimericDetectionOldOutput();
-        bool chimericDetectionMult();        
+        bool chimericDetectionMult();
         void chimericDetectionPEmerged(ReadAlign &seRa);
 //         void chimericDetectionPEmergedTrim();
-                
+
         void outputAlignments();
         void calcCIGAR(Transcript const &trOut, uint nMates, uint iExMate, uint leftMate);
 
@@ -186,14 +186,14 @@ class ReadAlign {
         void stitchPieces(char **R, uint Lread);
 
         uint quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT, vector<uint32> &readTranscripts, set<uint32> &readTrGenes);
-        
+
         void copyRead(ReadAlign&);
         void waspMap();
         void peOverlapMergeMap();
         void peMergeMates();
         void peOverlapSEtoPE(ReadAlign &seRA);
 
-        
+
 };
 
 #endif

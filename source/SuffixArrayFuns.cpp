@@ -1,13 +1,13 @@
 #include "SuffixArrayFuns.h"
 #include "PackedArray.h"
 
-inline uint medianUint2(uint a, uint b) 
+inline uint medianUint2(uint a, uint b)
 {
     // returns (a+b)/2
     return a/2 + b/2 + (a%2 + b%2)/2;
 };
 
-uint compareSeqToGenome(Genome &mapGen, char** s2, uint S, uint N, uint L, uint iSA, bool dirR, bool& compRes) 
+uint compareSeqToGenome(Genome &mapGen, char** s2, uint S, uint N, uint L, uint iSA, bool dirR, bool& compRes)
 {
     /* compare s to g, find the maximum identity length
      * s2[0] read sequence; s2[1] complementary sequence
@@ -103,7 +103,7 @@ uint compareSeqToGenome(Genome &mapGen, char** s2, uint S, uint N, uint L, uint 
     };
 };
 
-uint findMultRange(Genome &mapGen, uint i3, uint L3, uint i1, uint L1, uint i1a, uint L1a, uint i1b, uint L1b, char** s, bool dirR, uint S) 
+uint findMultRange(Genome &mapGen, uint i3, uint L3, uint i1, uint L1, uint i1a, uint L1a, uint i1b, uint L1b, char** s, bool dirR, uint S)
 {    // given SA index i3 and identity length L3, return the index of the farthest element with the same length, starting from i1,L1 or i1a,L1a, or i1b,L1b
 
     bool compRes;
@@ -130,7 +130,7 @@ uint findMultRange(Genome &mapGen, uint i3, uint L3, uint i1, uint L1, uint i1a,
     return i1a;
 };
 
-uint maxMappableLength(Genome &mapGen, char** s, uint S, uint N, uint i1, uint i2, bool dirR, uint& L, uint* indStartEnd) 
+uint maxMappableLength(Genome &mapGen, char** s, uint S, uint N, uint i1, uint i2, bool dirR, uint& L, uint* indStartEnd)
 {
     /* find minimum mappable length of sequence s to the genome g with suffix array SA; length(s)=N; [i1 i2] is
      * returns number of mappings (1=unique);range indStartEnd; min mapped length = L
@@ -206,7 +206,7 @@ int compareRefEnds (Genome &mapGen, uint64 SAstr,  uint64 gInsert, bool strG, bo
     };
 };
 
-uint compareSeqToGenome1(Genome &mapGen, char** s2, uint S, uint N, uint L, uint iSA, bool dirR, uint64 gInsert, int & compRes) 
+uint compareSeqToGenome1(Genome &mapGen, char** s2, uint S, uint N, uint L, uint iSA, bool dirR, uint64 gInsert, int & compRes)
 {
     /* compare s to g, find the maximum identity length
      * s2[0] read sequence; s2[1] complementary sequence
@@ -382,7 +382,7 @@ uint funCalcSAiFromSA(char* gSeq, PackedArray& gSA, Genome &mapGen, uint iSA, in
 
 };
 
-int64 funCalcSAi(char *G, uint iL) 
+int64 funCalcSAi(char *G, uint iL)
 {
     int64 ind1=0;
     for (uint iL1=0;iL1<=iL;iL1++) {

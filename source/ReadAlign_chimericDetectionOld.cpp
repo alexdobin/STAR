@@ -5,17 +5,17 @@
 #include "blocksOverlap.h"
 
 bool ReadAlign::chimericDetectionOld() {
-  
+
     //////////////////// chimeras
     //stich windows => chimeras
     //stich only the best window with one of the lower score ones for now - do not stich 2 lower score windows
     //stitch only one window on each end of the read
-    
+
     if (nTr>P.pCh.mainSegmentMultNmax && nTr!=2)
     {//multimapping main segment, nTr==2 is a special case to be checked later
         return false;
     };
-    
+
     if ( !(P.pCh.segmentMin>0 && trBest->rLength >= P.pCh.segmentMin \
             && ( trBest->exons[trBest->nExons-1][EX_R] + trBest->exons[trBest->nExons-1][EX_L] + P.pCh.segmentMin <= Lread \
               || trBest->exons[0][EX_R] >= P.pCh.segmentMin ) \
@@ -23,7 +23,7 @@ bool ReadAlign::chimericDetectionOld() {
             //there sholud be unmapped space at the start/end, and the main window is not a multimapping window, and non non-canonical junctions, and consistend junction motif
         return false;
     };
-               
+
     int chimScoreBest=0,chimScoreNext=0;
     trChim[0]=*trBest;
     Transcript* trChim1=NULL;
@@ -227,14 +227,14 @@ bool ReadAlign::chimericDetectionOld() {
         if ( chimN==0 ) {//the chimera was rejected because of mismatches
             return false;
         };
-        
+
         if (chimMotif==0) {//non-canonical chimera
-            chimScoreBest += 1+P.pCh.scoreJunctionNonGTAG; //+1 
+            chimScoreBest += 1+P.pCh.scoreJunctionNonGTAG; //+1
             if ( !(chimScoreBest >= P.pCh.scoreMin && chimScoreBest+P.pCh.scoreDropMax >= (int) (readLength[0]+readLength[1])) ) {
                 return false;
             };
         };
-         
+
 
         //shift junction in trChim
         if (trChim[0].Str==1) {
@@ -298,15 +298,15 @@ bool ReadAlign::chimericDetectionOld() {
     if ( trChim[0].Str!=trChim[1].Str ||  trChim[0].Chr!=trChim[1].Chr \
             || (trChim[0].Str==0 ? chimJ1-chimJ0+1LLU : chimJ0-chimJ1+1LLU) > (chimMotif>=0 ? P.alignIntronMax :  P.alignMatesGapMax) ) {
         //chimera has to bw from different chr/strand, or far away
-                
+
         if (chimMotif>=0 && \
            (trChim[0].exons[e0][EX_L]<P.pCh.junctionOverhangMin+chimRepeat0 || trChim[1].exons[e1][EX_L]<P.pCh.junctionOverhangMin+chimRepeat1) ) {
-            //filter out linear junctions that are very close to chimeric junction            
+            //filter out linear junctions that are very close to chimeric junction
             return false;
         };
-        //cout <<" chim+";        
+        //cout <<" chim+";
         return true;
-    };    
-    
+    };
+
     return false; //no good chimeras found
 };

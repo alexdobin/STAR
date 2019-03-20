@@ -12,7 +12,7 @@ void ReadAlign::outputAlignments() {
     vector<uint32> readTranscripts={};
     set<uint32> readTrGenes={};
     vector<array<uint64,2>> readSJs={};
-    
+
     outFilterPassed=true;//only false if the alignment is held for outFilterBySJoutStage
     if (unmapType==-1) {//output transcripts
         if (P.outFilterBySJoutStage==1) {//filtering by SJout
@@ -43,7 +43,7 @@ void ReadAlign::outputAlignments() {
                 };
             };
         };
-        
+
         if (P.outSJfilterReads=="All" || nTr==1) {
             uint sjReadStartN=chunkOutSJ1->N;
             for (uint iTr=0;iTr<nTr;iTr++) {//report SJs for all transcripts
@@ -90,9 +90,9 @@ void ReadAlign::outputAlignments() {
                 errOut  << "EXITING because of a BUG: nTr=0 in outputAlignments.cpp";
                 exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_BUG, P);
             };
-            
+
             nTrOut=min(P.outSAMmultNmax,nTrOut); //number of to write to SAM/BAM files
-            
+
             //genes
             if ( P.quant.geCount.yes ) {
                 chunkTr->geneCountsAddAlign(nTr, trMult, readGenes);
@@ -101,8 +101,8 @@ void ReadAlign::outputAlignments() {
             //transcripts
             if ( P.quant.trSAM.yes ) {//NOTE: the transcripts are changed by this function (soft-clipping extended), cannot be reused
                 quantTranscriptome(chunkTr, nTrOut, trMult,  alignTrAll, readTranscripts, readTrGenes);
-            };            
-            
+            };
+
             //solo
             soloRead->record(readNameExtra.at(0), nTr, readTrGenes, trMult[0]);
 
@@ -127,7 +127,7 @@ void ReadAlign::outputAlignments() {
                 if ((P.outBAMunsorted || P.outBAMcoord) && outSAMfilterYes) {//BAM output
                     alignBAM(*(trMult[iTr]), nTr, iTr, mapGen.chrStart[trMult[iTr]->Chr], (uint) -1, (uint) -1, 0, -1, NULL, P.outSAMattrOrder,outBAMoneAlign, outBAMoneAlignNbytes);
 
-                    if (P.outBAMunsorted) {//unsorted 
+                    if (P.outBAMunsorted) {//unsorted
                         for (uint imate=0; imate<P.readNmates; imate++) {//output each mate
                             outBAMunsorted->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], (imate>0 || iTr>0) ? 0 : (outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1])*2*nTrOut);
                         };
@@ -149,8 +149,8 @@ void ReadAlign::outputAlignments() {
             };
 
             mateMapped[trBest->exons[0][EX_iFrag]]=true;
-            mateMapped[trBest->exons[trBest->nExons-1][EX_iFrag]]=true;            
-            
+            mateMapped[trBest->exons[trBest->nExons-1][EX_iFrag]]=true;
+
             if (P.readNmates>1 && !(mateMapped[0] && mateMapped[1]) ) {
                 unmapType=4;
             };
@@ -206,11 +206,11 @@ void ReadAlign::outputAlignments() {
             outBAMbytes+= outputTranscriptSAM(*trBest, 0, 0, (uint) -1, (uint) -1, 0, unmapType, mateMapped, outSAMstream);
         };
     };
-    
+
     if (unmapType>=0 && P.outReadsUnmapped=="Fastx" ){//output to fasta/q files
        for (uint im=0;im<P.readNmates;im++) {
            chunkOutUnmappedReadsStream[im] << readNameMates[im]  <<" "<<im<<":"<< readFilter <<": "<< readNameExtra[im];
-           if (P.readNmates>1) 
+           if (P.readNmates>1)
                chunkOutUnmappedReadsStream[im] <<" "<< int(mateMapped[0]) <<  int(mateMapped[1]);
            chunkOutUnmappedReadsStream[im] <<"\n";
            chunkOutUnmappedReadsStream[im] << Read0[im] <<"\n";

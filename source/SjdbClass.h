@@ -10,7 +10,7 @@ public:
     vector <uint64> start,end;
     vector <char> str;
     vector <uint8> priority;
-    
+
     vector<set<uint64>> gene;
 };
 

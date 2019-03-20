@@ -1,12 +1,12 @@
 #include "ChimericAlign.h"
 
 void ChimericAlign::chimericStitching(char *genSeq, char *readSeq) {
- 
+
     if (stitchingDone)
         return;
-    
+
     stitchingDone=true;
-    
+
     al1=new Transcript(*al1);
     al2=new Transcript(*al2);
 
@@ -38,7 +38,7 @@ void ChimericAlign::chimericStitching(char *genSeq, char *readSeq) {
         uint jRmax = roStart1+a2.exons[ex2][EX_L];
         jRmax = jRmax>roStart0 ? jRmax-roStart0-1 : 0;
         for (jR=0; jR<jRmax; jR++) {//scan through the exons to find a canonical junction, and check for mismatches
-        
+
             if (jR==a1.readLength[0]) jR++; //skip the inter-mate base
 
             char bR=readSeq[roStart0+jR];
@@ -174,4 +174,3 @@ void ChimericAlign::chimericStitching(char *genSeq, char *readSeq) {
         return;
     };
 };
-        

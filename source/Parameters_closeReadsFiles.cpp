@@ -4,9 +4,9 @@
 #include <sys/stat.h>
 void Parameters::closeReadsFiles() {
     for (uint imate=0; imate<readFilesIn.size(); imate++) {//open readIn files
-        if ( inOut->readIn[imate].is_open() ) 
+        if ( inOut->readIn[imate].is_open() )
             inOut->readIn[imate].close();
-        if (readFilesCommandPID[imate]>0) 
+        if (readFilesCommandPID[imate]>0)
             kill(readFilesCommandPID[imate],SIGKILL);
     };
 };

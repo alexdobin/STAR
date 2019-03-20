@@ -21,12 +21,12 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                 } else if (P.readFilesTypeN==10 && P.inOut->readIn[0].good() && P.outFilterBySJoutStage!=2) {//SAM input && not eof && not 2nd stage
 
                     string str1;
-                    
+
                     if (nextChar=='@') {//with SAM input linest that start with @ are headers
                         getline(P.inOut->readIn[0], str1); //read line and skip it
                         continue;
                     };
-                    
+
                     P.inOut->readIn[0] >> str1;
                     if (str1=="FILE") {
                         newFile=true;
@@ -68,13 +68,13 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                                 revComplementNucleotides(seq1);
                                 reverse(qual1.begin(),qual1.end());
                             };
-                            
+
                             getline(P.inOut->readIn[0],str1); //str1 is now all SAM attributes
                             chunkInSizeBytesTotal[imate1] += sprintf(chunkIn[imate1] + chunkInSizeBytesTotal[imate1], "%s\n%s\n+\n%s\n", str1.c_str(), seq1.c_str(), qual1.c_str());
                         };
                     };
                 } else if (nextChar=='@') {//fastq, not multi-line
-                    P.iReadAll++; //increment read number               
+                    P.iReadAll++; //increment read number
                     if (P.outFilterBySJoutStage!=2) {//not the 2nd stage of the 2-stage mapping, read ID from the 1st read
                         string readID;
                         P.inOut->readIn[0] >> readID;
@@ -86,15 +86,15 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                         if (P.inOut->readIn[0].peek()!='\n') {//2nd field exists
                             string field2;
                             P.inOut->readIn[0] >> field2;
-                            if (field2.length()>=3 && field2.at(1)==':' && field2.at(2)=='Y' && field2.at(3)==':' ) 
+                            if (field2.length()>=3 && field2.at(1)==':' && field2.at(2)=='Y' && field2.at(3)==':' )
                                 passFilterIllumina='Y';
                         };
-                        readID += ' '+ to_string(P.iReadAll)+' '+passFilterIllumina+' '+to_string(P.readFilesIndex);                       
-                        
+                        readID += ' '+ to_string(P.iReadAll)+' '+passFilterIllumina+' '+to_string(P.readFilesIndex);
+
                         //ignore the rest of the read name for both mates
                         for (uint imate=0; imate<P.readNmatesIn; imate++)
                             P.inOut->readIn[imate].ignore(DEF_readNameSeqLengthMax,'\n');
-                                                
+
                         if (P.pSolo.type==1) {//record barcode sequence
                             string seq1;
                             getline(P.inOut->readIn[1],seq1);
@@ -111,7 +111,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                             getline(P.inOut->readIn[1],seq1); //read qualities
                             readID += ' ' + seq1;
                         };
-                        
+
                         //copy the same readID to both mates
                         for (uint imate=0; imate<P.readNmates; imate++) {
                             chunkInSizeBytesTotal[imate] += 1 + readID.copy(chunkIn[imate] + chunkInSizeBytesTotal[imate], readID.size(),0);
@@ -157,7 +157,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                         };
                         chunkIn[imate][chunkInSizeBytesTotal[imate]]='\n';
                         chunkInSizeBytesTotal[imate] ++;
-                    }; 
+                    };
                 } else if (nextChar==' ' || nextChar=='\n' || !P.inOut->readIn[0].good()) {//end of stream
                     P.inOut->logMain << "Thread #" <<iThread <<" end of input stream, nextChar="<<int(nextChar) <<endl;
                     break;
@@ -172,7 +172,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
                     };
                 };
-                
+
                 if (newFile) {
                         P.inOut->readIn[0] >> P.readFilesIndex;
                         pthread_mutex_lock(&g_threadChunks.mutexLogMain);
@@ -229,14 +229,14 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
             chunkFstreamCat (*RA->chunkOutChimJunction, P.inOut->outChimJunction, P.runThreadN>1, g_threadChunks.mutexOutChimJunction);
         };
         if (P.outReadsUnmapped=="Fastx" ) {
-            if (P.runThreadN>1) 
+            if (P.runThreadN>1)
                 pthread_mutex_lock(&g_threadChunks.mutexOutUnmappedFastx);
 
             for (uint ii=0;ii<P.readNmates;ii++) {
                 chunkFstreamCat (RA->chunkOutUnmappedReadsStream[ii],P.inOut->outUnmappedReadsStream[ii], false, g_threadChunks.mutexOutUnmappedFastx);
             };
 
-            if (P.runThreadN>1) 
+            if (P.runThreadN>1)
                 pthread_mutex_unlock(&g_threadChunks.mutexOutUnmappedFastx);
         };
     };

@@ -49,7 +49,7 @@ void usage(int usageType) {
 }
 
 
-int main(int argInN, char* argIn[]) {   
+int main(int argInN, char* argIn[]) {
     // If no argument is given, or the first argument is either '-h' or '--help', run usage()
     if (argInN == 1) {
         usage(0);
@@ -65,17 +65,17 @@ int main(int argInN, char* argIn[]) {
     *(P.inOut->logStdOut) << timeMonthDayTime(g_statsAll.timeStart) << " ..... started STAR run\n" <<flush;
 
     //generate genome
-    if (P.runMode=="alignReads") 
+    if (P.runMode=="alignReads")
     {//continue
-    } else if (P.runMode=="genomeGenerate") 
+    } else if (P.runMode=="genomeGenerate")
     {
         Genome mainGenome(P);
         mainGenome.genomeGenerate();
         (void) sysRemoveDir (P.outFileTmp);
         P.inOut->logMain << "DONE: Genome generation, EXITING\n" << flush;
         exit(0);
-    } else if (P.runMode=="liftOver") 
-    {        
+    } else if (P.runMode=="liftOver")
+    {
         for (uint ii=0; ii<P.pGe.gChainFiles.size();ii++)
         {
             Chain chain(P,P.pGe.gChainFiles.at(ii));
@@ -85,17 +85,17 @@ int main(int argInN, char* argIn[]) {
         };
     } else {
         P.inOut->logMain << "EXITING because of INPUT ERROR: unknown value of input parameter runMode=" <<P.runMode<<endl<<flush;
-        exit(1);        
+        exit(1);
     };
 
     Genome mainGenome (P);
     mainGenome.genomeLoad();
-    
-    
+
+
     if (P.pGe.gLoad=="LoadAndExit" || P.pGe.gLoad=="Remove")
     {
         return 0;
-    };     
+    };
 
     //calculate genome-related parameters
     Transcriptome *mainTranscriptome=NULL;
@@ -159,7 +159,7 @@ int main(int argInN, char* argIn[]) {
 
         P1.wasp.outputMode="None"; //no WASP filtering on the 1st pass
         P1.pSolo.type=0; //no solo in the first pass
-        
+
         g_statsAll.resetN();
         time(&g_statsAll.timeStartMap);
         P.inOut->logProgress << timeMonthDayTime(g_statsAll.timeStartMap) <<"\tStarted 1st pass mapping\n" <<flush;
@@ -235,7 +235,7 @@ int main(int argInN, char* argIn[]) {
             };
             extrastream.close();
         };
-        
+
         if (P.outSAMheaderPG.at(0)!="-") {
             samHeaderStream << P.outSAMheaderPG.at(0);
             for (uint ii=1;ii<P.outSAMheaderPG.size(); ii++) {
@@ -265,7 +265,7 @@ int main(int argInN, char* argIn[]) {
 
 
         samHeaderStream <<  "@CO\t" <<"user command line: " << P.commandLine <<"\n";
-        
+
         samHeaderStream << P.samHeaderExtra;
 
         if (P.outSAMheaderHD.at(0)!="-") {
@@ -367,12 +367,12 @@ int main(int argInN, char* argIn[]) {
 
     //aggregate output junctions
     //collapse splice junctions from different threads/chunks, and output them
-    outputSJ(RAchunk,P);    
-    
+    outputSJ(RAchunk,P);
+
     //solo genes
     Solo soloMain(RAchunk,P,*RAchunk[0]->chunkTr);//solo for genes
     soloMain.processAndOutput();
-    
+
     if ( P.quant.geCount.yes ) {//output gene quantifications
         for (int ichunk=1; ichunk<P.runThreadN; ichunk++) {//sum counts from all chunks into 0th chunk
             RAchunk[0]->chunkTr->quants->addQuants(*(RAchunk[ichunk]->chunkTr->quants));
@@ -449,7 +449,7 @@ int main(int argInN, char* argIn[]) {
                     totalMem-=newMem;//"release" RAM
                 };
             };
-        
+
             //concatenate all BAM files, using bam_cat
             char **bamBinNames = new char* [nBins];
             vector <string> bamBinNamesV;
@@ -476,7 +476,7 @@ int main(int argInN, char* argIn[]) {
     };
 
     g_statsAll.writeLines(P.inOut->outChimJunction, P.pCh.outJunctionFormat, "#", STAR_VERSION + string("   ") + P.commandLine);
-    
+
     g_statsAll.progressReport(P.inOut->logProgress);
     P.inOut->logProgress  << "ALL DONE!\n"<<flush;
     P.inOut->logFinal.open((P.outFileNamePrefix + "Log.final.out").c_str());

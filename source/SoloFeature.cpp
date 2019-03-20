@@ -1,12 +1,12 @@
 #include "SoloFeature.h"
 #include "streamFuns.h"
 
-SoloFeature::SoloFeature(int feTy, Parameters &Pin, Transcriptome &inTrans) 
+SoloFeature::SoloFeature(int feTy, Parameters &Pin, Transcriptome &inTrans)
           :  featureType(feTy), P(Pin), pSolo(P.pSolo), Trans(inTrans)
 {
 
     readFeatSum = new SoloReadFeature(featureType,P,-1);
-    readBarSum = new SoloReadBarcode(P);    
+    readBarSum = new SoloReadBarcode(P);
     readFeatAll = new SoloReadFeature*[P.runThreadN];
     readBarAll = new SoloReadBarcode*[P.runThreadN];
 

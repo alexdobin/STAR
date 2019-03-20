@@ -32,8 +32,8 @@ public:
     //output
     vector<string> outFileNames;
     //constants
-    uint32 umiMaskLow, umiMaskHigh; //low/high half bit-mask or UMIs 
-    
+    uint32 umiMaskLow, umiMaskHigh; //low/high half bit-mask or UMIs
+
     void initialize(Parameters *pPin);
 private:
     Parameters *pP;

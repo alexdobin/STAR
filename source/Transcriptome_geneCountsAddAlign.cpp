@@ -2,7 +2,7 @@
 #include "serviceFuns.cpp"
 
 void Transcriptome::geneCountsAddAlign(uint nA, Transcript **aAll, vector<int32> &gene1) {
-     
+
     gene1.assign(quants->geneCounts.nType,-1);
 
      if (nA>1) {

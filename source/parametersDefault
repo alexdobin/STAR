@@ -242,8 +242,8 @@ outSAMattributes                Standard
                                 All         ... NH HI AS nM NM MD jM jI MC ch
                                 vA          ... variant allele
                                 vG          ... genomic coordiante of the variant overlapped by the read
-                                vW          ... 0/1 - alignment does not pass / passes WASP filtering. Requires --waspOutputMode SAMtag 
-                                CR,CY,UR,UY ... sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing
+                                vW          ... 0/1 - alignment does not pass / passes WASP filtering. Requires --waspOutputMode SAMtag
+                                CR CY UR UY ... sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing
                                 Unsupported/undocumented:
                                 rB          ... alignment block read/genomic coordinates
                                 vR          ... read coordinate of the variant
@@ -398,7 +398,7 @@ outFilterIntronMotifs           None
 				RemoveNoncanonicalUnannotated  ... filter out alignments that contain non-canonical unannotated junctions when using annotated splice junctions database. The annotated non-canonical junctions will be kept.
 
 outFilterIntronStrands          RemoveInconsistentStrands
-    string: filter alignments 
+    string: filter alignments
                 RemoveInconsistentStrands      ... remove alignments that have junctions with inconsistent strands
                 None                           ... no filtering
 
@@ -533,7 +533,7 @@ alignEndsType           Local
 alignEndsProtrude       0    ConcordantPair
     int, string:        allow protrusion of alignment ends, i.e. start (end) of the +strand mate downstream of the start (end) of the -strand mate
                         1st word: int: maximum number of protrusion bases allowed
-                        2nd word: string: 
+                        2nd word: string:
                                             ConcordantPair ... report alignments with non-zero protrusion as concordant pairs
                                             DiscordantPair ... report alignments with non-zero protrusion as discordant pairs
 

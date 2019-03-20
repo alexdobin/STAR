@@ -8,15 +8,15 @@
 #include "SoloFeature.h"
 
 
-class Solo {   
+class Solo {
 public:
 
     SoloFeature **soloFeat;
-    
+
     Solo(ReadAlignChunk **RAchunk, Parameters &Pin, Transcriptome &inTrans);
     void processAndOutput();
-    
-private:   
+
+private:
     ReadAlignChunk **RAchunk;
     Parameters &P;
     ParametersSolo &pSolo;
