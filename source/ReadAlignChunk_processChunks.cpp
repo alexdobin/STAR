@@ -232,7 +232,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
             if (P.runThreadN>1)
                 pthread_mutex_lock(&g_threadChunks.mutexOutUnmappedFastx);
 
-            for (uint ii=0;ii<P.readNmates;ii++) {
+            for (uint ii=0;ii<P.readNmatesIn;ii++) {
                 chunkFstreamCat (RA->chunkOutUnmappedReadsStream[ii],P.inOut->outUnmappedReadsStream[ii], false, g_threadChunks.mutexOutUnmappedFastx);
             };
 

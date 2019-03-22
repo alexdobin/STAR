@@ -219,6 +219,12 @@ void ReadAlign::outputAlignments() {
                 chunkOutUnmappedReadsStream[im] << Qual0[im] <<"\n";
             };
        };
+       if (P.pSolo.type>0) {//need to output 2nd (barcode) read
+           chunkOutUnmappedReadsStream[1] << readNameMates[0] <<"\n";
+           uint32 qualStart = readNameExtra[0].find(' ');
+           chunkOutUnmappedReadsStream[1] << readNameExtra[0].substr(0,qualStart) <<"\n+\n";
+           chunkOutUnmappedReadsStream[1] << readNameExtra[0].substr(qualStart+1) <<"\n";
+       };
     };
 };
 
