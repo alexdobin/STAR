@@ -184,6 +184,7 @@ void ReadAlign::outputAlignments() {
 
     if (unmapType>=0) {
         statsRA.unmappedAll++;
+        soloRead->record(readNameExtra.at(0), nTr, readTrGenes, trMult[0]);//record CBs and stats for unmapped reads
     };
 
     if ( P.outSAMunmapped.within && unmapType>=0 && unmapType<4 ) {//output unmapped within && unmapped read && both mates unmapped
