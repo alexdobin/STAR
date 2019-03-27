@@ -87,7 +87,7 @@ Parameters::Parameters() {//initalize parameters info
     //outSAM
     parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "outSAMtype", &outSAMtype));
     parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "outSAMmode", &outSAMmode));
-    parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "outSAMstrandField", &outSAMstrandField));
+    parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "outSAMstrandField", &outSAMstrandField.in));
     parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "outSAMattributes", &outSAMattributes));
     parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "outSAMunmapped", &outSAMunmapped.mode));
     parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "outSAMorder", &outSAMorder));
@@ -194,7 +194,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "alignWindowsPerReadNmax", &alignWindowsPerReadNmax));
     parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "alignTranscriptsPerWindowNmax", &alignTranscriptsPerWindowNmax));
     parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "alignEndsType", &alignEndsType.in));
-    parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "alignSoftClipAtReferenceEnds", &alignSoftClipAtReferenceEnds));
+    parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "alignSoftClipAtReferenceEnds", &alignSoftClipAtReferenceEnds.in));
 
     parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "alignEndsProtrude", &alignEndsProtrude.in));
     parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "alignInsertionFlush", &alignInsertionFlush.in));
@@ -964,6 +964,9 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     quant.geCount.yes=false;
     quant.trSAM.yes=false;
     quant.trSAM.bamYes=false;
+    quant.trSAM.indel=false;
+    quant.trSAM.softClip=false;
+    quant.trSAM.singleEnd=false; 
     if (quant.mode.at(0) != "-") {
         quant.yes=true;
         for (uint32 ii=0; ii<quant.mode.size(); ii++) {
@@ -995,13 +998,25 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                 quant.geCount.outFile=outFileNamePrefix + "ReadsPerGene.out.tab";
             } else {
                 ostringstream errOut;
-                errOut << "EXITING because of fatal INPUT error: unrecognized option in --quant.mode=" << quant.mode.at(ii) << "\n";
-                errOut << "SOLUTION: use one of the allowed values of --quant.mode : TranscriptomeSAM or - .\n";
+                errOut << "EXITING because of fatal INPUT error: unrecognized option in --quantMode=" << quant.mode.at(ii) << "\n";
+                errOut << "SOLUTION: use one of the allowed values of --quantMode : TranscriptomeSAM or GeneCounts or - .\n";
                 exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
             };
         };
     };
-
+    
+    outSAMstrandField.type=0; //none
+    if (outSAMstrandField.in=="None") {
+        outSAMstrandField.type=0;
+    } else if (outSAMstrandField.in=="intronMotif") {
+        outSAMstrandField.type=1;
+    } else {
+        ostringstream errOut;
+        errOut << "EXITING because of fatal INPUT error: unrecognized option in outSAMstrandField=" << outSAMstrandField.in << "\n";
+        errOut << "SOLUTION: use one of the allowed values of --outSAMstrandField : None or intronMotif \n";
+        exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
+    
     //solo
     pSolo.initialize(this);
 
@@ -1114,9 +1129,9 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         } else if (vAttr1.at(ii)== "XS") {
             outSAMattrOrder.push_back(ATTR_XS);
             outSAMattrPresent.XS=true;
-            if (outSAMstrandField!="intronMotif") {
+            if (outSAMstrandField.type!=1) {
                 inOut->logMain << "WARNING --outSAMattributes contains XS, therefore STAR will use --outSAMstrandField intronMotif" <<endl;
-                outSAMstrandField="intronMotif";
+                outSAMstrandField.type=1;
             };
         } else {
             ostringstream errOut;
@@ -1152,7 +1167,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
 
-    if (outSAMstrandField=="intronMotif" && !outSAMattrPresent.XS) {
+    if (outSAMstrandField.type==1 && !outSAMattrPresent.XS) {
         outSAMattrOrder.push_back(ATTR_XS);
         inOut->logMain << "WARNING --outSAMstrandField=intronMotif, therefore STAR will output XS attribute" <<endl;
     };
@@ -1433,6 +1448,18 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         peOverlap.yes=false;
     };
 
+    //alignSoftClipAtReferenceEnds.in
+    if (alignSoftClipAtReferenceEnds.in=="Yes") {
+        alignSoftClipAtReferenceEnds.yes=true;
+    } else if (alignSoftClipAtReferenceEnds.in=="No") {
+        alignSoftClipAtReferenceEnds.yes=false;
+    } else {
+        ostringstream errOut;
+        errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in of --alignSoftClipAtReferenceEnds="<<alignSoftClipAtReferenceEnds.in<<"\n";
+        errOut << "SOLUTION: use allowed option: Yes or No";
+        exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
+    
     //read parameters
     //     if (pReads.strandString=="Unstranded") {
     //         pReads.strand=0;

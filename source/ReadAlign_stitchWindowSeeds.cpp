@@ -230,7 +230,7 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R) {
         if (trA.intronMotifs[1]>0 && trA.intronMotifs[2]>0 && P.outFilterIntronStrands=="RemoveInconsistentStrands")
                 return;
 
-        if (sjN>0 && trA.sjMotifStrand==0 && P.outSAMstrandField=="intronMotif") {//strand not defined for a junction
+        if (sjN>0 && trA.sjMotifStrand==0 && P.outSAMstrandField.type==1) {//strand not defined for a junction
             return;
         };
 

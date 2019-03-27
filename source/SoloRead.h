@@ -10,7 +10,7 @@ public:
     SoloReadFeature **readFeat;
 
     SoloRead(Parameters &Pin, int32 iChunkIn);
-    void record(string &barcodeSeq, uint64 nTr, set<uint32> &readTrGenes, Transcript *alignOut);
+    void record(uint64 nTr, set<uint32> &readTrGenes, Transcript *alignOut);
 
 private:
     const int32 iChunk;
