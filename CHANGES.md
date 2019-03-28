@@ -1,3 +1,6 @@
+STAR 2.7.0f 2019/03/28
+======================
+
 * Fixed a problem in STARsolo with empty Unmapped.out.mate2 file. Issue #593.
 * Fixed a problem with CR CY UR UQ SAM tags in solo output. Issue #593.
 * Fixed problems with STARsolo and 2-pass.

@@ -336,10 +336,11 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
 
-    inOut->logMain << "STAR version=" << STAR_VERSION << "\n"<<flush;
-    inOut->logMain << "STAR compilation time,server,dir=" << COMPILATION_TIME_PLACE << "\n"<<flush;
-
-
+    inOut->logMain << "STAR version=" << STAR_VERSION << "\n";
+    inOut->logMain << "STAR compilation time,server,dir=" << COMPILATION_TIME_PLACE << "\n";
+    #ifdef COMPILE_FOR_LONG_READS
+           inOut->logMain << "Compiled for LONG reads" << "\n";
+    #endif
 
     //define what goes to cout
     if (outStd=="Log") {

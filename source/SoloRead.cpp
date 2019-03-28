@@ -2,10 +2,11 @@
 
 SoloRead::SoloRead(Parameters &Pin, int32 iChunkIn) :  iChunk(iChunkIn), P(Pin), pSolo(P.pSolo)
 {
+    readBar = new SoloReadBarcode(P);
+    
     if (pSolo.type==0)
         return;    
     
-    readBar = new SoloReadBarcode(P);
     readFeat = new SoloReadFeature*[pSolo.nFeatures];
 
     for (uint32 ii=0; ii<pSolo.nFeatures; ii++)
