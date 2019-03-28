@@ -34,7 +34,7 @@
 
 \newcommand{\sechyperref}[1]{\hyperref[#1]{Section \ref{#1}. \nameref{#1}}}
 
-\title{STAR manual 2.7.0e}
+\title{STAR manual 2.7.0f}
 \author{Alexander Dobin\\
 dobin@cshl.edu}
 \maketitle
@@ -253,7 +253,7 @@ STAR produces multiple output files. All files have standard name, however, you 
 \subsection{SAM.}
 \ofilen{Aligned.out.sam} - alignments in standard SAM format.
 \subsubsection{Multimappers.}
-The number of loci \code{Nmap} a read maps to is given by \code{NH:i:Nmap}  field. Value of 1 corresponds to unique mappers, while values \textgreater1 corresponds to multi-mappers. \code{HI} attrbiutes enumerates multiple alignments of a read starting with 1 (this can be changed with the \opt{outSAMattrIHstart} - setting it to 0 may be required for compatibility with downstream software such as Cufflinks or StringTie).
+The number of loci \code{Nmap} a read maps to is given by \code{NH:i:Nmap}  field. Value of 1 corresponds to unique mappers, while values \textgreater1 corresponds to multi-mappers. \code{HI} attrbiutes enumerates multiple alignments of a read starting with 1 (this can be changed with the \opt{outSAMattrIHstart} - setting it to 0 may be required for compatibility with downstream software such as Cufflinks).
 
 The mapping quality MAPQ (column 5) is 255 for uniquely mapping reads, and int(-10*log10(1-1/Nmap))  for multi-mapping reads. This scheme is same as the one used by TopHat and is compatible with Cufflinks. The default MAPQ=255 for the unique mappers maybe changed with \opt{outSAMmapqUnique}  parameter (integer 0 to 255) to ensure compatibility with downstream tools such as GATK.
 
@@ -522,6 +522,44 @@ Importantly, in the --readFilesIn option, the 1st FASTQ file has to be cDNA read
 
 Other solo* options can be found in the Section \ref{STARsolo_(single_cell_RNA-seq)_parameters}.
 
+\subsection{Feature statistics summaries.}
+Feature statistics summaries are recorded in the \optvr{Solo.out/} directory in files \optvr{<Feature>.stats} where  features are those used in the \opt{soloFeatures} option, e.g.  \optvr{Gene.stats}. The following metrics are recorded:
+\begin{itemize}[leftmargin=1.5in]
+	\itemsep -0.3em
+	\item[\optv{nNinBarcode:}] number of reads with more than 2 Ns in cell barcode (CB)
+	\item[\optv{nUMIhomopolymer:}] number of reads with homopolymer in CB 
+	\item[\optv{nTooMany:}] not used at the moment
+	\item[\optv{nNoMatch:}] number of reads with CBs that do not match whitelist even with one mismatch
+\end{itemize}
+All of the above reads are discarded from Solo output. Remaining reads are checked for overlap with features (e.g. genes):
+\begin{itemize}[leftmargin=2in]
+	\itemsep -0.3em
+	\item[\optv{nUnmapped:}] number of reads unmapped to the genome
+	\item[\optv{nNoFeature:}] number of reads that map to the genome but do not belong to a feature
+	\item[\optv{nAmbigFeature:}] number of reads that belong to more than one feature
+	\item[\optv{nAmbigFeatureMultimap:}] number of reads that belong to more than one feature and are also multimapping to the genome (this is a subset of the nAmbigFeature)
+	\item[\optv{nTooMany:}] number of reads with ambiguous CB (i.e. CB matches whitelist with one mismatch but with posterior probability <0.95)
+	\item[\optv{nNoExactMatch:}] number of reads with CB that matches a whitelist barcode with 1 mismatch, but this whitelist barcode does not get any other reads with exact matches of CB
+\end{itemize}
+All of the reads above are output in feature (e.g. gene) / cell count matrices.
+\begin{itemize}[leftmargin=1.5in]
+	\itemsep -0.3em
+	\item[\optv{nExactMatch:}] number of reads with CB that match the whitelist exactly
+	\item[\optv{nMatch:}] total number of reads that match CB with 0 or 1 mismatches (this is superset of nExactMatch)
+	\item[\optv{nCellBarcodes:}] number of distinct CBs detected
+	\item[\optv{nUMIs:}] number of distinct UMIs detected
+\end{itemize}
+
+These metrics can be grouped into more broad categories:
+\begin{itemize}
+	\itemsep -0.3em
+	\item[]\optv{nNinBarcode+nUMIhomopolymer+nNoMatch+nTooMany+nNoExactMatch} = number of reads with CBs that do not match whitelist.
+	\item[]\optv{nUnmapped+nAmbigFeature} = number of reads without defined feature (gene)
+	\item[]\optv{nMatch} = number of reads that are output as solo counts
+
+\end{itemize}
+The three categoties above summed together should be equal to the total number of reads.
+	
 \section{Description of all options.}\label{Description_of_all_options}
 For each STAR version, the most up-to-date information about all STAR parameters can be found in the \code{parametersDefault} file in the STAR source directory. The parameters in the \code{parametersDefault}, as well as in the descriptions below, are grouped by function:
 \begin{itemize}
