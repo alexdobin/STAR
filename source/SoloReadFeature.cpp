@@ -10,7 +10,7 @@ SoloReadFeature::SoloReadFeature(int32 feTy, Parameters &Pin, int iChunk)
     for (uint32 ii=0; ii<stats.nStats; ii++)
         stats.V[ii]=0;
 
-    if (pSolo.cbWL.size()>0) {
+    if (pSolo.cbWLyes) {
         cbReadCount = new uint32[pSolo.cbWL.size()];
         for (uint32 ii=0; ii<pSolo.cbWL.size(); ii++) {
             cbReadCount[ii]=0;

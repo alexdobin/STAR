@@ -1,6 +1,6 @@
 ### versions
 versionGenome           2.7.0d
-    string: latest genome index version compatible with this STAR release. Please do not change this value!
+    string: earliest genome index version compatible with this STAR release. Please do not change this value!
 
 ### Parameter Files
 parametersFiles          -
@@ -243,7 +243,7 @@ outSAMattributes                Standard
                                 vA          ... variant allele
                                 vG          ... genomic coordiante of the variant overlapped by the read
                                 vW          ... 0/1 - alignment does not pass / passes WASP filtering. Requires --waspOutputMode SAMtag
-                                CR,CY,UR,UY ... sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing
+                                CR CY UR UY ... sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing
                                 Unsupported/undocumented:
                                 rB          ... alignment block read/genomic coordinates
                                 vR          ... read coordinate of the variant

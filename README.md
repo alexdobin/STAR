@@ -35,9 +35,9 @@ Download the latest [release from](https://github.com/alexdobin/STAR/releases) a
 
 ```bash
 # Get latest STAR source from releases
-wget https://github.com/alexdobin/STAR/archive/2.7.0e.tar.gz
-tar -xzf 2.7.0e.tar.gz
-cd STAR-2.7.0e
+wget https://github.com/alexdobin/STAR/archive/2.7.0f.tar.gz
+tar -xzf 2.7.0f.tar.gz
+cd STAR-2.7.0f
 
 # Alternatively, get STAR source using git
 git clone https://github.com/alexdobin/STAR.git

@@ -88,13 +88,17 @@ class Parameters {
         uint alignIntronMin;//min length to call a gap an intron
         uint alignIntronMax;//max length to call
         uint alignMatesGapMax;//max gap between the mates (if paired-end)
-        string alignSoftClipAtReferenceEnds;
         vector <int32> alignSJstitchMismatchNmax;
 
         //         struct {
         //             string strandString;
         //             int32 strand;
         //         } pReads;
+
+        struct {
+            string in;
+            bool yes;
+        } alignSoftClipAtReferenceEnds;
 
         struct {
             string in;
@@ -133,12 +137,17 @@ class Parameters {
         //SAM output
         string outBAMfileCoordName, outBAMfileUnsortedName, outQuantBAMfileName;
         string samHeader, samHeaderHD, samHeaderSortedCoord, samHeaderExtra;
-        string outSAMmode, outSAMstrandField,  outSAMorder, outSAMprimaryFlag;
+        string outSAMmode,  outSAMorder, outSAMprimaryFlag;
         vector<string> outSAMattributes, outSAMheaderHD, outSAMheaderPG;
         vector<string> outSAMattrRGline,outSAMattrRGlineSplit,outSAMattrRG;
         uint outSAMmultNmax,outSAMattrIHstart;
         string outSAMheaderCommentFile;
         int outSAMmapqUnique;
+
+        struct {
+            string in;
+            uint32 type;
+        } outSAMstrandField;
 
         int outSAMtlen;
 

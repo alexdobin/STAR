@@ -79,7 +79,7 @@ ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome 
     };
     if (P.outReadsUnmapped=="Fastx" ) {
         chunkFstreamOpen(P.outFileTmp + "/Unmapped.out.mate1.thread",iChunk, RA->chunkOutUnmappedReadsStream[0]);
-        if (P.readNmates==2) chunkFstreamOpen(P.outFileTmp + "/Unmapped.out.mate2.thread",iChunk, RA->chunkOutUnmappedReadsStream[1]);
+        if (P.readNmatesIn==2) chunkFstreamOpen(P.outFileTmp + "/Unmapped.out.mate2.thread",iChunk, RA->chunkOutUnmappedReadsStream[1]);
     };
     if (P.outFilterType=="BySJout") {
         chunkFstreamOpen(P.outFileTmp + "/FilterBySJoutFiles.mate1.thread",iChunk, RA->chunkOutFilterBySJoutFiles[0]);

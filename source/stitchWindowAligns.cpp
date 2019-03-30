@@ -80,7 +80,7 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
         };
         };
 
-        if (P.alignSoftClipAtReferenceEnds=="No" &&  \
+        if (!P.alignSoftClipAtReferenceEnds.yes &&  \
                 ( (trA.exons[trA.nExons-1][EX_G] + Lread-trA.exons[trA.nExons-1][EX_R]) > (mapGen.chrStart[trA.Chr]+mapGen.chrLength[trA.Chr]) || \
                    trA.exons[0][EX_G]<(mapGen.chrStart[trA.Chr]+trA.exons[0][EX_R]) ) ) {
             return; //no soft clipping past the ends of the chromosome
@@ -128,7 +128,7 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
         if (trA.intronMotifs[1]>0 && trA.intronMotifs[2]>0 && P.outFilterIntronStrands=="RemoveInconsistentStrands")
                 return;
 
-        if (sjN>0 && trA.sjMotifStrand==0 && P.outSAMstrandField=="intronMotif") {//strand not defined for a junction
+        if (sjN>0 && trA.sjMotifStrand==0 && P.outSAMstrandField.type==1) {//strand not defined for a junction
             return;
         };
 

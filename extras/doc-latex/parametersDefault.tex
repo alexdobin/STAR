@@ -282,7 +282,7 @@
   \optOpt{vA}   \optOptLine{variant allele}
   \optOpt{vG}   \optOptLine{genomic coordiante of the variant overlapped by the read}
   \optOpt{vW}   \optOptLine{0/1 - alignment does not pass / passes WASP filtering. Requires --waspOutputMode SAMtag}
-  \optOpt{CR,CY,UR,UY}   \optOptLine{sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing}
+  \optOpt{CR CY UR UY}   \optOptLine{sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing}
 \end{optOptTable}
   \optLine{Unsupported/undocumented:} 
 \begin{optOptTable}
@@ -472,7 +472,7 @@
 \end{optOptTable}
 \optName{outFilterIntronStrands}
   \optValue{RemoveInconsistentStrands}
-  \optLine{string: filter alignments } 
+  \optLine{string: filter alignments} 
 \begin{optOptTable}
   \optOpt{RemoveInconsistentStrands}   \optOptLine{remove alignments that have junctions with inconsistent strands}
   \optOpt{None}   \optOptLine{no filtering}
@@ -615,7 +615,7 @@
   \optValue{0 ConcordantPair}
   \optLine{int, string:        allow protrusion of alignment ends, i.e. start (end) of the +strand mate downstream of the start (end) of the -strand mate} 
   \optLine{1st word: int: maximum number of protrusion bases allowed} 
-  \optLine{2nd word: string: } 
+  \optLine{2nd word: string:} 
 \begin{optOptTable}
   \optOpt{ConcordantPair}   \optOptLine{report alignments with non-zero protrusion as concordant pairs}
   \optOpt{DiscordantPair}   \optOptLine{report alignments with non-zero protrusion as discordant pairs}
@@ -635,7 +635,7 @@
   \optOpt{Right}   \optOptLine{insertions are flushed to the right}
 \end{optOptTable}
 \end{optTable}
-\optSection{Paired-End reads: presently unsupported/undocumented}\label{Paired-End_reads:_presently_unsupported/undocumented}
+\optSection{Paired-End reads}\label{Paired-End_reads}
 \begin{optTable}
 \optName{peOverlapNbasesMin}
   \optValue{0}

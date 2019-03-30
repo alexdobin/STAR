@@ -92,6 +92,9 @@ void ReadAlign::outputAlignments() {
 
             nTrOut=min(P.outSAMmultNmax,nTrOut); //number of to write to SAM/BAM files
 
+            soloRead->readBar->getCBandUMI(readNameExtra.at(0));
+            
+            //write to SAM/BAM
             for (uint iTr=0;iTr<nTrOut;iTr++) {//write all transcripts
                 //mate mapped = true if a mate was present in one of the trancsripts
                 //mateMapped[trMult[iTr]->exons[0][EX_iFrag]]=true;
@@ -160,11 +163,12 @@ void ReadAlign::outputAlignments() {
 
             if (P.outSJfilterReads=="All" || nTr==1) {
                 uint sjReadStartN=chunkOutSJ->N;
-                for (uint iTr=0;iTr<nTr;iTr++) {//write all transcripts
+                for (uint iTr=0;iTr<nTr;iTr++) {//write all transcripts junctions
                     outputTranscriptSJ (*(trMult[iTr]), nTr, chunkOutSJ, sjReadStartN);
                 };
             };
-
+            
+            //genes
             if ( P.quant.geCount.yes ) {
                 chunkTr->geneCountsAddAlign(nTr, trMult, readGeneExon);
             };
@@ -173,18 +177,20 @@ void ReadAlign::outputAlignments() {
                 chunkTr->geneFullAlignOverlap(nTr, trMult, P.pSolo.strand, readGeneFull);
             };
 
+            //transcripts
             if ( P.quant.trSAM.yes ) {//NOTE: the transcripts are changed by this function (soft-clipping extended), cannot be reused
                 quantTranscriptome(chunkTr, nTrOut, trMult,  alignTrAll, readTranscripts, readGene);
             };
+
+            //solo
+            soloRead->record(nTr, readGene, readGeneFull, trMult[0]); 
         };
     };
 
-    if (outFilterPassed) {//otherwise the alignment was held and will be counted at the 2nd stage
-        soloRead->record(readNameExtra.at(0), nTr, readGene, readGeneFull, trMult[0]);
-    };
-
-    if (unmapType>=0) {
+    if (unmapType>=0) {//unmapped reads
         statsRA.unmappedAll++;
+        soloRead->readBar->getCBandUMI(readNameExtra.at(0));
+        soloRead->record(nTr, readGene, readGeneFull, trMult[0]);         
     };
 
     if ( P.outSAMunmapped.within && unmapType>=0 && unmapType<4 ) {//output unmapped within && unmapped read && both mates unmapped
@@ -207,6 +213,7 @@ void ReadAlign::outputAlignments() {
             outBAMbytes+= outputTranscriptSAM(*trBest, 0, 0, (uint) -1, (uint) -1, 0, unmapType, mateMapped, outSAMstream);
         };
     };
+
     if (unmapType>=0 && P.outReadsUnmapped=="Fastx" ){//output to fasta/q files
        for (uint im=0;im<P.readNmates;im++) {
            chunkOutUnmappedReadsStream[im] << readNameMates[im]  <<" "<<im<<":"<< readFilter <<": "<< readNameExtra[im];
@@ -218,6 +225,12 @@ void ReadAlign::outputAlignments() {
                 chunkOutUnmappedReadsStream[im] << "+\n";
                 chunkOutUnmappedReadsStream[im] << Qual0[im] <<"\n";
             };
+       };
+       if (P.pSolo.type>0) {//need to output 2nd (barcode) read
+           chunkOutUnmappedReadsStream[1] << readNameMates[0] <<"\n";
+           uint32 qualStart = readNameExtra[0].find(' ');
+           chunkOutUnmappedReadsStream[1] << readNameExtra[0].substr(0,qualStart) <<"\n+\n";
+           chunkOutUnmappedReadsStream[1] << readNameExtra[0].substr(qualStart+1) <<"\n";
        };
     };
 };

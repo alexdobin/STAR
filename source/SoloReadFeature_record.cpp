@@ -54,7 +54,9 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, set<uint32> &re
             stats.V[stats.nAmbigFeatureMultimap]++;
             return;
         };
-        if (readGene.size()>1) {//for SJs, still check genes, return if multi-gene
+
+        //for SJs, still check genes, return if multi-gene
+        if (readGene.size()>1) {
             stats.V[stats.nAmbigFeature]++;
             return;
         };

@@ -3,6 +3,7 @@
 #include "binarySearch2.h"
 #include "serviceFuns.cpp"
 
+
 bool inputFeatureUmi(fstream *strIn, int32 featureType, uint32 &feature, uint32 &umi, array<vector<uint64>,2> &sjAll)
 {
     if (!(*strIn >> umi)) //end of file
@@ -27,10 +28,8 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 *cbReadCountExactTotal)
         uint32 cb, feature, umi;
         while (inputFeatureUmi(strU_0, featureType, feature, umi, P.sjAll)) {
             *strU_0 >> cb;
-
             if (!pSolo.cbWLyes) //if no-WL, the full cbInteger was recorded - now has to be placed in order
                 cb=binarySearchExact(cb,pSolo.cbWL.data(),pSolo.cbWL.size());
-
             if (feature != (uint32)(-1)){
                 cbP[cb][0]=feature;
                 cbP[cb][1]=umi;
@@ -42,7 +41,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 *cbReadCountExactTotal)
 
     if (!pSolo.cbWLyes) //no WL => no mismatch check
         return;
-
+    
     {//1 match
         strU_1->flush();
         strU_1->seekg(0,ios::beg);
