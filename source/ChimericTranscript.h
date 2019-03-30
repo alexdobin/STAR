@@ -11,7 +11,7 @@ class ChimericTranscript
         Transcript  **chTrs; //all chimeric transcripts
         uint        nCh;     //number of recorded (best) chimeric transcripts
         uint        nChSize;  //size of the chTrs array, will be increased if nCh > nChSize
-        
+
         ChimericTranscript(Parameters &Pin); //allocate
     private:
 };

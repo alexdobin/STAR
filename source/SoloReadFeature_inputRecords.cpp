@@ -7,7 +7,7 @@ bool inputFeatureUmi(fstream *strIn, int32 featureType, uint32 &feature, uint32 
 {
     if (!(*strIn >> umi)) //end of file
         return false;
-    
+
     if (featureType==0 || featureType==2) {//gene
         *strIn >> feature;
     } else if (featureType==1) {//sj
@@ -15,11 +15,11 @@ bool inputFeatureUmi(fstream *strIn, int32 featureType, uint32 &feature, uint32 
         *strIn >> sj[0] >> sj[1];
         feature=(uint32) binarySearch2(sj[0],sj[1],sjAll[0].data(),sjAll[1].data(),sjAll[0].size());
     };
-    
-    return true;       
+
+    return true;
 };
 
-void SoloReadFeature::inputRecords(uint32 **cbP, uint32 *cbReadCountExactTotal) 
+void SoloReadFeature::inputRecords(uint32 **cbP, uint32 *cbReadCountExactTotal)
 {
     {//load exact matches
         strU_0->flush();
@@ -27,10 +27,10 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 *cbReadCountExactTotal)
         uint32 cb, feature, umi;
         while (inputFeatureUmi(strU_0, featureType, feature, umi, P.sjAll)) {
             *strU_0 >> cb;
-            
+
             if (!pSolo.cbWLyes) //if no-WL, the full cbInteger was recorded - now has to be placed in order
                 cb=binarySearchExact(cb,pSolo.cbWL.data(),pSolo.cbWL.size());
-            
+
             if (feature != (uint32)(-1)){
                 cbP[cb][0]=feature;
                 cbP[cb][1]=umi;
@@ -39,10 +39,10 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 *cbReadCountExactTotal)
             };
         };
     };
-    
+
     if (!pSolo.cbWLyes) //no WL => no mismatch check
         return;
-    
+
     {//1 match
         strU_1->flush();
         strU_1->seekg(0,ios::beg);
@@ -60,7 +60,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 *cbReadCountExactTotal)
             };
         };
     };
-     
+
     {//2 matches
         strU_2->flush();
         strU_2->seekg(0,ios::beg);
@@ -94,7 +94,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 *cbReadCountExactTotal)
                 cbP[cb]+=2;
             } else {
                 stats.V[stats.nTooMany]++;
-            };        
+            };
         };
     };
 };

@@ -18,7 +18,7 @@ void ReadAlign::chimericDetectionPEmerged(ReadAlign &seRA) {
             return;
         };
 
-        //convert merged into PE   
+        //convert merged into PE
         for (uint ii=0; ii<2; ii++) {
             trChim[ii]=*trInit;
             trChim[ii].peOverlapSEtoPE(peOv.mateStart,seRA.trChim[ii]);
@@ -26,7 +26,7 @@ void ReadAlign::chimericDetectionPEmerged(ReadAlign &seRA) {
 
         uint segLen[2][2]; //segment length [trChim][mate]
         uint segEx[2];//last exon of the mate0 [trChim]
-        uint segLmin=-1LLU, i1=0,i2=0;    
+        uint segLmin=-1LLU, i1=0,i2=0;
         for (uint ii=0; ii<2; ii++) {
             segLen[ii][0]=0;
             segLen[ii][1]=0;
@@ -65,15 +65,15 @@ void ReadAlign::chimericDetectionPEmerged(ReadAlign &seRA) {
         };
 
         chimericDetectionOldOutput();
-    
+
     } else if (trBest->maxScore <= (int) (readLength[0]+readLength[1]) - (int) P.pCh.nonchimScoreDropMin) {//require big enough drop in the best score
         chimRecord=seRA.chimDet->chimericDetectionMult(seRA.nW, seRA.readLength);
-    };    
-    
+    };
+
     if ( chimRecord ) {
-        statsRA.chimericAll++;    
-    };    
-    
+        statsRA.chimericAll++;
+    };
+
     return;
 };
 

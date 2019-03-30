@@ -10,9 +10,9 @@ class ParametersChimeric
         uint segmentReadGapMax; //max read gap for stitching chimeric windows
         int scoreMin,scoreDropMax,scoreSeparation, scoreJunctionNonGTAG; //min chimeric score
         uint mainSegmentMultNmax;
-        
+
         uint multimapScoreRange, multimapNmax, nonchimScoreDropMin;
-        
+
         vector<int> outJunctionFormat;
 
         struct

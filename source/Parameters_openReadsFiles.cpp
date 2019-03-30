@@ -16,9 +16,9 @@ void Parameters::openReadsFiles() {
         for (uint ii=0;ii<readFilesIn.size();ii++) {//open readIn files
             readFilesCommandPID[ii]=0;//no command process IDs
             if ( inOut->readIn[ii].is_open() ) inOut->readIn[ii].close();
-            
+
             string rfName=(readFilesPrefix=="-" ? "" : readFilesPrefix)+readFilesIn.at(ii);
-            
+
             inOut->readIn[ii].open(rfName.c_str()); //try to open the Sequences file right away, exit if failed
             if (inOut->readIn[ii].fail()) {
                 ostringstream errOut;
@@ -118,7 +118,7 @@ void Parameters::openReadsFiles() {
         };
     };
     readFilesIndex=0;
-    
+
     if (readFilesTypeN==10) {//SAM file - skip header lines
         readSAMheader(readFilesCommandString, readFilesNames.at(0));
     };

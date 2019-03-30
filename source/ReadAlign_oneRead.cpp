@@ -69,7 +69,7 @@ int ReadAlign::oneRead() {//process one read: load, map, write
 
     //map the read
     mapOneRead();
-    
+
     peOverlapMergeMap();
     multMapSelect();
     mappedFilter();
@@ -77,11 +77,11 @@ int ReadAlign::oneRead() {//process one read: load, map, write
     if (!peOv.yes) {//if the alignment was not mates merged - otherwise the chimeric detection was already done
         chimericDetection();
     };
-    
+
     if (P.pCh.out.bam && chimRecord) {//chimeric alignment was recorded in main BAM files, and it contains the representative portion, so non-chimeric aligmnent is not output
         return 0;
     };
-    
+
     waspMap();
 
     #ifdef OFF_BEFORE_OUTPUT

@@ -8,9 +8,9 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
 
     if (!P.quant.yes)
         return;
-    
+
     trInfoDir = P.pGe.sjdbGTFfile=="-" ? P.pGe.gDir : P.sjdbInsert.outDir; //if GTF file is given at the mapping stage, it's always used for transcript info
-    
+
     ifstream &geStream = ifstrOpen(trInfoDir+"/geneInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotations.gtf option at the genome generation step or mapping step", P);
     geStream >> nGe;
     geID.resize(nGe);
@@ -23,8 +23,8 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
         istringstream stream1(line1);
         stream1 >> geID[ii] >> geName[ii] >> geBiotype[ii];
     };
-    geStream.close();    
-    
+    geStream.close();
+
     if ( P.quant.trSAM.yes ) {//load exon-transcript structures
         //load tr and ex info
         ifstream & trinfo = ifstrOpen(trInfoDir+"/transcriptInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step",P);
@@ -41,14 +41,14 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
             uint16 str1;
             trinfo >> trID[itr] >> trS[itr] >> trE[itr] >> trEmax[itr] >> str1 >> trExN[itr] >> trExI[itr] >> trGene[itr];
             trStr[itr]=str1;
-            
+
             if (!trinfo.good()) {
                 ostringstream errOut;
                 errOut <<"EXITING because of FATAL GENOME INDEX FILE error: transcriptInfo.tab is corrupt, or is incompatible with the current STAR version\n";
                 errOut <<"SOLUTION: re-generate genome index";
                 exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_GENOME_FILES, P);
             };
-            
+
         };
         P.inOut->logMain << "Loaded transcript database, nTr="<<nTr<<endl;
         trinfo.close();
@@ -85,29 +85,29 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
             exG.eMax[iex]=max(exG.eMax[iex-1],exG.e[iex]);
         };
     };
-    
+
     if ( P.quant.geneFull.yes ) {
         ifstream & exinfo = ifstrOpen(trInfoDir+"/exonGeTrInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
         exinfo >> exG.nEx;
-        
+
         geneFull.s=new uint64[nGe];
         geneFull.e=new uint64[nGe];
         geneFull.eMax=new uint64[nGe];
         geneFull.g=new uint32[nGe];
         geneFull.str=new uint8[nGe];
-        
-        for (uint ig=1;ig<nGe;ig++) {        
+
+        for (uint ig=1;ig<nGe;ig++) {
             geneFull.s[ig]=-1;
             geneFull.e[ig]=0;
         };
-        
+
         for (uint ii=0;ii<exG.nEx;ii++) {
             uint64 s1,e1,str1,g1,t1;
-            exinfo >> s1 >> e1 >> str1 >> g1 >> t1;            
+            exinfo >> s1 >> e1 >> str1 >> g1 >> t1;
             geneFull.s[g1]=min(geneFull.s[g1],s1);
             geneFull.e[g1]=max(geneFull.e[g1],e1);
             geneFull.str[g1] = (uint8) str1;
-        };        
+        };
         exinfo.close();
 
         uint64 *gF=new uint64 [4*nGe];
@@ -117,23 +117,23 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
             gF[4*ii+2] = geneFull.str[ii];
             gF[4*ii+3] = ii;
         };
-        
+
         qsort((void*) gF, nGe, sizeof(uint64)*4, funCompareArrays<uint64,2>);
-        
+
         for (uint ii=0;ii<nGe;ii++) {
             geneFull.s[ii]   = gF[4*ii];
             geneFull.e[ii]   = gF[4*ii+1];
-            geneFull.str[ii] = gF[4*ii+2];                        
+            geneFull.str[ii] = gF[4*ii+2];
             geneFull.g[ii]   = gF[4*ii+3];
         };
-        
+
         //calculate eMax
         geneFull.eMax[0]=geneFull.e[0];
         for (uint iex=1;iex<nGe;iex++) {
             geneFull.eMax[iex]=max(geneFull.eMax[iex-1],geneFull.e[iex]);
         };
     };
-    
+
 };
 
 void Transcriptome::quantsAllocate() {
@@ -149,13 +149,13 @@ void Transcriptome::quantsOutput() {
         qOut << "\t" <<g_statsAll.unmappedAll;
     };
     qOut << "\n";
-    
+
     qOut << "N_multimapping";
     for (int itype=0; itype<quants->geneCounts.nType; itype++){
         qOut << "\t" <<quants->geneCounts.cMulti;
     };
     qOut << "\n";
-    
+
     qOut << "N_noFeature";
     for (int itype=0; itype<quants->geneCounts.nType; itype++){
         qOut << "\t" <<quants->geneCounts.cNone[itype];

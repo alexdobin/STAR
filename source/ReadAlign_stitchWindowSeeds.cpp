@@ -46,7 +46,7 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R) {
 
                 //check the length of the iS2 exon. TODO: build the transcripts vs iS1, check the actual exon length
                 bool exonLongEnough = trA1.exons[0][EX_L] >= ( trA1.sjAnnot[0]==0 ? P.alignSJoverhangMin : P.alignSJDBoverhangMin );
-                
+
                 if (exonLongEnough && score2>0 && score2+scoreSeedBest[iS2] > scoreSeedBest[iS1] ) {
                     scoreSeedBest[iS1]=score2+scoreSeedBest[iS2];
                     scoreSeedBestMM[iS1]=trA1.nMM;
@@ -59,9 +59,9 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R) {
                                     P.alignEndsType.ext[WA[iW][iS1][WA_iFrag]][trA.Str], &trA1) ) {//if could extend
                     score2 += trA1.maxScore;
                 };
-                
+
                 bool exonLongEnough = (WA[iW][iS1][WA_Length]+trA1.extendL) >= P.alignSJoverhangMin; //TODO new parameter to control end exons length
-                
+
                 if (exonLongEnough && score2 > scoreSeedBest[iS1] ) {
                     scoreSeedBest[iS1]=score2;
                     scoreSeedBestInd[iS1]=iS1;
@@ -73,7 +73,7 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R) {
 
     intScore scoreBest=0;
     uint scoreBestInd=0;
-    
+
 
     for (uint iS1=0;iS1<nWA[iW];iS1++) {//find the best alignment
         trA1=*trInit;//initialize trA1
@@ -85,9 +85,9 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R) {
         {//extend to the right
             scoreSeedBest[iS1]+=trA1.maxScore;
         };
-        
+
         bool exonLongEnough = (WA[iW][iS1][WA_Length]+trA1.extendL) >= P.alignSJoverhangMin; //TODO new parameter to control end exons length
-        
+
         if (exonLongEnough && scoreSeedBest[iS1]>scoreBest) {//record new best transcript
             scoreBest=scoreSeedBest[iS1];
             scoreBestInd=iS1;
@@ -211,9 +211,9 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R) {
 
         //filter strand consistency
         uint sjN=0;
-        trA.intronMotifs[0]=0;trA.intronMotifs[1]=0;trA.intronMotifs[2]=0;        
+        trA.intronMotifs[0]=0;trA.intronMotifs[1]=0;trA.intronMotifs[2]=0;
         for (uint iex=0;iex<trA.nExons-1;iex++) {
-            if (trA.canonSJ[iex]>=0) 
+            if (trA.canonSJ[iex]>=0)
             {//junctions - others are indels
                 sjN++;
                 trA.intronMotifs[trA.sjStr[iex]]++;
@@ -228,8 +228,8 @@ void ReadAlign::stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R) {
             trA.sjMotifStrand=0;
 
         if (trA.intronMotifs[1]>0 && trA.intronMotifs[2]>0 && P.outFilterIntronStrands=="RemoveInconsistentStrands")
-                return;        
-        
+                return;
+
         if (sjN>0 && trA.sjMotifStrand==0 && P.outSAMstrandField=="intronMotif") {//strand not defined for a junction
             return;
         };

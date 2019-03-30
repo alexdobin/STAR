@@ -28,7 +28,7 @@ public:
     void junctionPointer(char* sjPoint, uint isj);
     void outputStream(ostream &outStream);
     void collapseOneSJ(char* isj1P, char* isjP, Parameters& P);
-    
+
 private:
     Genome &mapGen;
 };
@@ -47,7 +47,7 @@ public:
 
 private:
     Parameters &P;
-    Genome &mapGen;  
+    Genome &mapGen;
 };
 
 int compareSJ(const void* i1, const void* i2); //external functions

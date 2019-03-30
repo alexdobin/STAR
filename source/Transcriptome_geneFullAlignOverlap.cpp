@@ -1,7 +1,7 @@
 #include "Transcriptome.h"
 #include "serviceFuns.cpp"
 
-void Transcriptome::geneFullAlignOverlap(uint nA, Transcript **aAll, int32 strandType, set<uint32> &geneOverlap) 
+void Transcriptome::geneFullAlignOverlap(uint nA, Transcript **aAll, int32 strandType, set<uint32> &geneOverlap)
 {
      for (uint32 iA=0; iA<nA; iA++) {
          Transcript &a = *aAll[iA];//one unique alignment only

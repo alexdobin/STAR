@@ -40,8 +40,8 @@ public:
     void chunkFstreamOpen(string filePrefix, int iChunk, fstream &fstreamOut);
     void chunkFstreamCat (fstream &chunkOut, ofstream &allOut, bool mutexFlag, pthread_mutex_t &mutexVal);
     void chunkFilesCat(ostream *allOut, string filePrefix, uint &iC);
-    
-    Genome &mapGen;    
+
+    Genome &mapGen;
 private:
 };
 #endif

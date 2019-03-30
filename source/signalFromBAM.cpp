@@ -140,7 +140,7 @@ void signalFromBAM(const string bamFileName, const string sigFileName, Parameter
 
         //NH attribute
         uint8_t* aNHp=bam_aux_get(bamA,"NH");
-        uint32_t aNH; 
+        uint32_t aNH;
         if (aNHp==NULL) {
             aNH=1; //no NH tag: assume NH=1
             //continue; //do not process lines without NH field

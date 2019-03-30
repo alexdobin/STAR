@@ -4,15 +4,15 @@
 int Transcript::variationAdjust(const Genome &mapGen, char *R)
 {
     Variation &Var=*mapGen.Var;
-    
+
     if (!Var.yes)
     {//no variation
         return 0;
     };
-    
+
     int dScore=0;//change in the score
     uint nMM1=0;
-    
+
     //for each block, check whether it overlaps one or more SNPs
     for (uint ie=0; ie<nExons; ie++)
     {
@@ -24,10 +24,10 @@ int Transcript::variationAdjust(const Genome &mapGen, char *R)
             {//these SNPs overlap the block
                 varInd.push_back(isnp); //record snp index
                 varGenCoord.push_back(Var.snp.loci[isnp]-mapGen.chrStart[Chr]);
-                
+
                 varReadCoord.push_back(exons[ie][EX_R]+Var.snp.loci[isnp]-exons[ie][EX_G]);
                 char ntR=R[varReadCoord.back()];//nt of the read in the SNP position, already trnasformed to + genome strand
-                
+
                 uint8 igt;
                 if (ntR>3) {
                     igt=4;
@@ -45,7 +45,7 @@ int Transcript::variationAdjust(const Genome &mapGen, char *R)
                 //};
 
                 varAllele.push_back(igt);
-                
+
                 if (igt<3 && ntR != Var.snp.nt[isnp][0])
                 {//non-reference allele, correct nMM and score
                     ++nMM1;
@@ -55,12 +55,12 @@ int Transcript::variationAdjust(const Genome &mapGen, char *R)
             };
         };
     };
-    
+
     #define VAR_noScoreCorrection
     #ifndef VAR_noScoreCorrection
     if (nMM1>0)
     {//one or more mismtaches need to be corrected
-        uint nMMold=nMM;       
+        uint nMMold=nMM;
         alignScore(Read1, G, P);
         nMM-=nMM1;
         nMatch+=nMM1;
@@ -69,6 +69,6 @@ int Transcript::variationAdjust(const Genome &mapGen, char *R)
     #else
         //#warning VAR_noScoreCorrection set: no variation score correction
     #endif
-    
+
     return dScore;
 };

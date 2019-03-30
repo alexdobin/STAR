@@ -26,10 +26,10 @@
 #define SHM_projectID 23
 
 Genome::Genome (Parameters &Pin ): pGe(Pin.pGe), sharedMemory(NULL), P(Pin), shmStart(NULL) {
-    shmKey=ftok(pGe.gDir.c_str(),SHM_projectID);    
-    
+    shmKey=ftok(pGe.gDir.c_str(),SHM_projectID);
+
     sjdbOverhang = pGe.sjdbOverhang; //will be re-defined later if another value was used for the generated genome
-    sjdbLength = pGe.sjdbOverhang==0 ? 0 : pGe.sjdbOverhang*2+1;   
+    sjdbLength = pGe.sjdbOverhang==0 ? 0 : pGe.sjdbOverhang*2+1;
 };
 
 // Genome::~Genome()
@@ -96,14 +96,14 @@ void Genome::genomeLoad(){//allocate and load Genome
     uint L=200,K=6;
 
     Parameters P1;
-    
+
     //some initializations before reading the parameters
     GstrandBit=0;
 
     ifstream parFile((pGe.gDir+("/genomeParameters.txt")).c_str());
     if (parFile.good()) {
         P.inOut->logMain << "Reading genome generation parameters:\n";
-        
+
         //read genome internal parameters
         while (parFile.good()) {
             string word1;
@@ -122,10 +122,10 @@ void Genome::genomeLoad(){//allocate and load Genome
                 };
             };
         };
-        parFile.clear();        
+        parFile.clear();
         parFile.seekg(0,ios::beg);//rewind
 
-        
+
         P1.inOut = P.inOut;
         P1.scanAllLines(parFile,3,-1);
         parFile.close();
@@ -175,7 +175,7 @@ void Genome::genomeLoad(){//allocate and load Genome
     pGe.gChrBinNbits=P1.pGe.gChrBinNbits;
     genomeChrBinNbases=1LLU<<pGe.gChrBinNbits;
     pGe.gSAsparseD=P1.pGe.gSAsparseD;
-    
+
     if (P1.pGe.gFileSizes.size()>0)
     {//genomeFileSize was recorded in the genomeParameters file, copy the values to P
         pGe.gFileSizes = P1.pGe.gFileSizes;
@@ -220,9 +220,9 @@ void Genome::genomeLoad(){//allocate and load Genome
     /////////////////////////////////// at this point all array sizes should be known: calculate packed array lengths
     if (GstrandBit==0) {//not defined before
         GstrandBit = (uint) floor(log(nGenome)/log(2))+1;
-        if (GstrandBit<32) GstrandBit=32; //TODO: use simple access function for SA 
+        if (GstrandBit<32) GstrandBit=32; //TODO: use simple access function for SA
     };
-    
+
 
     GstrandMask = ~(1LLU<<GstrandBit);
     nSA=(nSAbyte*8)/(GstrandBit+1);
@@ -248,7 +248,7 @@ void Genome::genomeLoad(){//allocate and load Genome
          pGe.gLoad=="LoadAndRemove" ||
          pGe.gLoad=="LoadAndExit" ||
          pGe.gLoad=="Remove") && sharedMemory == NULL) {
-        
+
         bool unloadLast = pGe.gLoad=="LoadAndRemove";
         try {
             sharedMemory = new SharedMemory(shmKey, unloadLast);
@@ -522,7 +522,7 @@ void Genome::genomeLoad(){//allocate and load Genome
     } else {
         //redefine winBinNbits
         P.winBinNbits = (uint) floor( log2( max( max(4LLU,P.alignIntronMax), (P.alignMatesGapMax==0 ? 1000LLU : P.alignMatesGapMax) ) /4 ) + 0.5);
-        P.winBinNbits = max( P.winBinNbits, (uint) floor(log2(nGenome/40000+1)+0.5) ); 
+        P.winBinNbits = max( P.winBinNbits, (uint) floor(log2(nGenome/40000+1)+0.5) );
         //ISSUE - to be fixed in STAR3: if alignIntronMax>0 but alignMatesGapMax==0, winBinNbits will be defined by alignIntronMax
         P.inOut->logMain << "To accommodate alignIntronMax="<<P.alignIntronMax<<" redefined winBinNbits="<< P.winBinNbits <<endl;
 

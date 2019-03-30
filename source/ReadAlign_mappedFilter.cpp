@@ -16,6 +16,6 @@ void ReadAlign::mappedFilter() {//filter mapped read, add to stats
         statsRA.unmappedMulti++;
         unmapType=3;
     };
-    
-    return;        
+
+    return;
 };

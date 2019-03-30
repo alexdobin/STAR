@@ -2,11 +2,11 @@
 #include "BAMfunctions.h"
 
 void ReadAlign::chimericDetectionOldOutput() {
-    
+
     if (!chimRecord) {
         return;
     };
-    
+
     chimN=2; //this  is hard-coded for now
     //re-calculate the score for chimeric transcripts
     trChim[0].alignScore(Read1, mapGen.G, P);
@@ -57,7 +57,7 @@ void ReadAlign::chimericDetectionOldOutput() {
 //                     if (chimType==3) {
 //                         bamIrepr=bamN;
 //                     } else if (trChim[itr].exons[0][EX_iFrag]==trChim[1-itr].exons[0][EX_iFrag]) {
-//                         
+//
 //                    };
 //                     bamIrepr=( (itr%2)==(trChim[itr].Str) && chimType!=3) ? bamN+1 : bamN;//this is the mate that is chimerically split
                 } else {//"supplementary" chimeric segment
@@ -111,7 +111,7 @@ void ReadAlign::chimericDetectionOldOutput() {
     };
 
     if (P.pCh.out.samOld) {
-        for (uint iTr=0;iTr<chimN;iTr++) 
+        for (uint iTr=0;iTr<chimN;iTr++)
         {//write all chimeric pieces to Chimeric.out.sam/junction
             if (P.readNmates==2) {//PE: need mate info
                 uint iex=0;
@@ -129,13 +129,13 @@ void ReadAlign::chimericDetectionOldOutput() {
                 char mateStrand=(char) (trChim[1-iTr].Str!=trChim[1-iTr].exons[iex][EX_iFrag]);
 
                 outputTranscriptSAM(trChim[iTr], chimN, iTr, mateChr, mateStart, mateStrand, -1, NULL, &chunkOutChimSAM);
-            } else 
+            } else
             {
                 outputTranscriptSAM(trChim[iTr], chimN, iTr, -1, -1, -1, -1, NULL, &chunkOutChimSAM);
             };
         };
     };
-    
+
     if (P.pCh.out.junctions) {
         //junction + SAMp
         *chunkOutChimJunction << mapGen.chrName[trChim[0].Chr] <<"\t"<< chimJ0 - mapGen.chrStart[trChim[0].Chr]+1 <<"\t"<< (trChim[0].Str==0 ? "+":"-") \
@@ -147,6 +147,6 @@ void ReadAlign::chimericDetectionOldOutput() {
             *chunkOutChimJunction <<"\t"<< P.outSAMattrRG.at(readFilesIndex);
         *chunkOutChimJunction <<"\n"; //<<"\t"<< trChim[0].exons[0][EX_iFrag]+1 --- no need for that, since trChim[0] is always on the first mate
     };
-    
+
     return;
 };

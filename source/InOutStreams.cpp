@@ -25,7 +25,7 @@ InOutStreams::~InOutStreams() {
 
     //logStdOutFile.close(); //do not want to close these log files, as some destructors (e.g. ~SharedMemory) might still write there
     //logMain.close();
-    
+
     outSAMfile.close();
     outChimSAM.close();
     outChimJunction.close();

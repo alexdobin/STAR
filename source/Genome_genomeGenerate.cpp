@@ -161,33 +161,33 @@ void Genome::genomeGenerate() {
     memset(G1,GENOME_spacingChar,nG1alloc);//initialize to K-1 all bytes
 
     genomeScanFastaFiles(P,G,true,*this);    //load the genome sequence
-    
+
     if (pGe.gConsensusFile!="-") {//load consensus SNPs
         ifstream &consIn=ifstrOpen(pGe.gConsensusFile, ERROR_OUT, "SOLUTION: check path and permission for the --genomeConsensusFile file" + pGe.gConsensusFile, P);
-        
+
         map<string,uint> chrStartMap;
         for (uint ii=0;ii<nChrReal;ii++) {
             chrStartMap.insert(std::pair <string,uint> (chrName[ii], chrStart[ii]));
         };
-        
+
         uint nInserted=0, nWrongChr=0, nWrongRef=0, nRefN=0;
         while (consIn.good()) {
             string chr1, refIn, altIn, dummy;
             uint start1;
             char ref1,alt1;
-            
+
             consIn >> chr1 >> start1 >> dummy >> refIn >> altIn;
             consIn.ignore(numeric_limits<streamsize>::max(),'\n');
-            
+
             convertNucleotidesToNumbers(refIn.c_str(),&ref1,1);
             convertNucleotidesToNumbers(altIn.c_str(),&alt1,1);
             --start1;//VCF positions are 1-based
-            
+
             if (chrStartMap.count(chr1)==1) {//otherwise just skip
                 start1+=chrStartMap[chr1];
                 if (G[start1]>3)
                     ++nRefN;
-                
+
                 if (G[start1]==ref1 || G[start1]>3) {
                     G[start1]=alt1;
                     ++nInserted;
@@ -441,7 +441,7 @@ void Genome::genomeGenerate() {
         SjdbClass sjdbLoci;
 
         Genome mainGenome1(*this);
-        
+
         P.sjdbInsert.outDir=pGe.gDir;
         P.twoPass.pass2=false;
 
@@ -452,7 +452,7 @@ void Genome::genomeGenerate() {
     pGe.gFileSizes.clear();
     pGe.gFileSizes.push_back(nGenome);
     pGe.gFileSizes.push_back(SA.lengthByte);
-    
+
     //write genome parameters file
     genomeParametersWrite(pGe.gDir+("/genomeParameters.txt"), P, ERROR_OUT, *this);
 

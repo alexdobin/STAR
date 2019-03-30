@@ -23,7 +23,7 @@ void ReadAlign::chimericDetection() {
     if (P.outFilterBySJoutStage>1) {//no chimeric output for stage=2. REVISIT: NOT SURE why
         return;
     };
-    
+
     //output chains for out-of-STAR chimeric detection
     #ifdef OUTPUT_localChains
     {
@@ -48,10 +48,10 @@ void ReadAlign::chimericDetection() {
     } else if (trBest->maxScore <= (int) (readLength[0]+readLength[1]) - (int) P.pCh.nonchimScoreDropMin) {//require big enough drop in the best score
         chimRecord=chimDet->chimericDetectionMult(nW, readLength);
     };
-    
+
     if ( chimRecord ) {
-        statsRA.chimericAll++;    
-    };    
-    
+        statsRA.chimericAll++;
+    };
+
     return;
 };//END

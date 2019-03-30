@@ -10,13 +10,13 @@ Variation::Variation (Parameters &Pin, vector <uint> &chrStartIn, map <string,ui
         yes=false;
         return;
     };
-    
+
     yes=true;
-    
+
     //not used yet
     //varOutFileName=P.outFileNamePrefix+"Variation.out";
     //varOutStream.open(varOutFileName);
-    
+
     vcfFile=P.var.vcfFile;
     loadVCF(vcfFile);
 
@@ -29,28 +29,28 @@ void scanVCF(ifstream& vcf, Parameters& P, SNP& snp, vector <uint> &chrStart, ma
         string chr,id, ref, alt, dummy, sample;
         uint pos;
         nlines++;
-        
+
         vcf >> chr;
         if (!vcf.good()) {
             break;
         };
-        
+
         if (chr.at(0)!='#') {
             vcf >> pos >> id >> ref >> alt >> dummy >> dummy >> dummy >> dummy >> sample;
-            
+
             vector <string> altV(3);
-            
+
             if (ref.size()==1 && splitString(alt,',',altV)==1) {
                 altV.insert(altV.begin(),ref);//add ref to the beginning
-                
+
                 if (chrNameIndex.count(chr)==0) {//chr not in Genome
                     P.inOut->logMain << "WARNING: while processing varVCFfile file=" << P.var.vcfFile <<": chromosome '"<<chr<<"' not found in Genome fasta file\n";
                 } else if (sample.size()<3) {
-                    //undefined genotype 
+                    //undefined genotype
                 } else if (sample.size()>3 && sample.at(3)!=':') {
                     P.inOut->logMain << "WARNING: while processing varVCFfile file=" << P.var.vcfFile <<": more than 2 alleles per sample for line number "<<nlines<<"\n";
-                } else if (sample.at(0)=='0' && sample.at(2)=='0') {    
-                    //both alleles are reference, no need to do anything                    
+                } else if (sample.at(0)=='0' && sample.at(2)=='0') {
+                    //both alleles are reference, no need to do anything
                 } else if (altV.at( atoi(&sample.at(0)) ).at(0)==ref.at(0) && altV.at( atoi(&sample.at(2)) ).at(0)==ref.at(0)) {
                     //both alleles are reference, no need to do anything
                     //this is a strange case in VCF when ALT allele(s) are equal to REF
@@ -75,13 +75,13 @@ void Variation::loadVCF(string fileIn) {
     time(&rawTime);
     P.inOut->logMain     << timeMonthDayTime(rawTime) <<" ..... loading variations VCF\n" <<flush;
     *P.inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ..... loading variations VCF\n" <<flush;
-        
+
     ifstream & vcf = ifstrOpen(fileIn, ERROR_OUT, "SOLUTION: check the path and permissions of the VCF file: "+fileIn, P);
     scanVCF(vcf, P, snp, chrStart, chrNameIndex);
-    
+
     snp.loci=new uint[snp.N];
     for (uint ii=0;ii<snp.N;ii++)
-        snp.loci[ii]=snp.lociV[ii];   
+        snp.loci[ii]=snp.lociV[ii];
     snp.lociV.clear();
 
 
@@ -93,16 +93,16 @@ void Variation::loadVCF(string fileIn) {
         errOut <<"SOLUTION: check formatting of the VCF file; unzip VCF file or use process substitution.\n";
         exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
     };
-        
-    
+
+
     uint *s1=new uint[2*snp.N];
     for (uint ii=0;ii<snp.N; ii++) {
         s1[2*ii]=snp.loci[ii];
         s1[2*ii+1]=ii;
     };
-    
+
     qsort((void*)s1, snp.N, 2*sizeof(uint), funCompareUint1);
-    
+
     vector< array<char,3> > nt1=snp.nt;
     for (uint ii=0;ii<snp.N; ii++) {
         snp.loci[ii]=s1[2*ii];
@@ -128,10 +128,10 @@ void SNP::snpOnBlocks(uint blockStart, uint blockL, int blockShift, vector<vecto
     };
 };
 
-vector<vector<array<int,2>>> Variation::sjdbSnp(uint sjStart, uint sjEnd, uint sjdbOverhang1) {          
+vector<vector<array<int,2>>> Variation::sjdbSnp(uint sjStart, uint sjEnd, uint sjdbOverhang1) {
     vector<vector<array<int,2>>> snpV(2);
-    
-    if (!yes) {//no variation, return 1 empty element 
+
+    if (!yes) {//no variation, return 1 empty element
         vector<vector<array<int,2>>> snpV1(1);
         return snpV1;
     };
@@ -144,6 +144,6 @@ vector<vector<array<int,2>>> Variation::sjdbSnp(uint sjStart, uint sjEnd, uint s
     } else if (snpV.at(0) == snpV.at(1)) {
         snpV.pop_back();
     };
-     
+
     return snpV;
 };

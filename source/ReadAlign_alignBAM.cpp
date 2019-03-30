@@ -97,10 +97,10 @@ int bamAttrArrayWriteSAMtags(string &attrStr, char *attrArray) {//write bam reco
         pos2 = attrStr.find('\t',pos1);
         string attr1 = attrStr.substr(pos1, pos2-pos1);
         pos1=pos2+1;
-        
+
         if (attr1.empty())
             continue; //extra tab at the beginning, or consecutive tabs
-        
+
         switch (attr1.at(3)) {
             case 'i':
             {
@@ -111,25 +111,25 @@ int bamAttrArrayWriteSAMtags(string &attrStr, char *attrArray) {//write bam reco
             case 'A':
             {
                 char a1=attr1.at(5);
-                nattr += bamAttrArrayWrite(a1,attr1.c_str(),attrArray+nattr);                
+                nattr += bamAttrArrayWrite(a1,attr1.c_str(),attrArray+nattr);
                 break;
-            };                
+            };
                 break;
             case 'Z':
             {
                 string a1=attr1.substr(5);
-                nattr += bamAttrArrayWrite(a1,attr1.c_str(),attrArray+nattr);                
+                nattr += bamAttrArrayWrite(a1,attr1.c_str(),attrArray+nattr);
                 break;
             };
             case 'f':
             {
                 float a1=stof(attr1.substr(5));
-                nattr += bamAttrArrayWrite(a1,attr1.c_str(),attrArray+nattr);                
+                nattr += bamAttrArrayWrite(a1,attr1.c_str(),attrArray+nattr);
                 break;
-            };       
+            };
         };
     } while (pos2!= string::npos);
-    
+
     return nattr;
 };
 
@@ -193,7 +193,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
     uint iExMate=0; //last exon of the first mate
 
     uint16 samFLAG=0;
-    
+
 
     bool flagPaired = P.readNmates==2;
 
@@ -208,7 +208,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
     } else {
         nMates=0;
     };
-    
+
     uint tLen=0,leftMostMate=0;
     if (nMates>1 && P.outSAMtlen==2) {
         tLen=max(trOut.exons[trOut.nExons-1][EX_G]+trOut.exons[trOut.nExons-1][EX_L],trOut.exons[iExMate][EX_G]+trOut.exons[iExMate][EX_L])-min(trOut.exons[0][EX_G],trOut.exons[iExMate+1][EX_G]);
@@ -219,7 +219,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
     if (flagPaired) {
         leftMate=trOut.Str;
     };
-                
+
     if (P.outSAMattrPresent.MC) {
         calcCIGAR(trOut, nMates, iExMate, leftMate);
     };
@@ -280,7 +280,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
             attrN+=bamAttrArrayWrite((to_string((uint) alignType)).at(0), "uT",attrOutArray+attrN); //cast to uint is only necessary for old compilers
 
             if (!P.outSAMattrRG.empty()) attrN+=bamAttrArrayWrite(P.outSAMattrRG.at(readFilesIndex),"RG",attrOutArray+attrN);
-            
+
         } else {//this mate is mapped
             if (flagPaired) {//paired reads
                 samFLAG=0x0001;
@@ -425,7 +425,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                         attrN+=bamAttrArrayWrite(tagMD,"MD",attrOutArray+attrN);
                         break;
                     case ATTR_RG:
-                        attrN+=bamAttrArrayWrite(P.outSAMattrRG.at(readFilesIndex),"RG",attrOutArray+attrN);                    
+                        attrN+=bamAttrArrayWrite(P.outSAMattrRG.at(readFilesIndex),"RG",attrOutArray+attrN);
                         break;
                     case ATTR_rB:
                         {
@@ -434,58 +434,58 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                                 rb.push_back( (int32) trOut.exons[ii][EX_R]+1 );
                                 rb.push_back( (int32) trOut.exons[ii][EX_R]+trOut.exons[ii][EX_L]);
                                 rb.push_back( (int32) (trOut.exons[ii][EX_G]-mapGen.chrStart[trOut.Chr]+1) );
-                                rb.push_back( (int32) (trOut.exons[ii][EX_G]-mapGen.chrStart[trOut.Chr]+trOut.exons[ii][EX_L]) );                                
+                                rb.push_back( (int32) (trOut.exons[ii][EX_G]-mapGen.chrStart[trOut.Chr]+trOut.exons[ii][EX_L]) );
                             };
-                            attrN+=bamAttrArrayWrite(rb,"rB",attrOutArray+attrN);                    
+                            attrN+=bamAttrArrayWrite(rb,"rB",attrOutArray+attrN);
                         };
-                        break;                             
+                        break;
                     case ATTR_vG:
                     {
                         const vector <int32> &v1=trOut.varGenCoord;
                         if (v1.size()>0)
-                            attrN+=bamAttrArrayWrite(v1,"vG",attrOutArray+attrN);                                        
+                            attrN+=bamAttrArrayWrite(v1,"vG",attrOutArray+attrN);
                         break;
                     };
                     case ATTR_vA:
                     {
                         const vector <char> &v1=trOut.varAllele;
                         if (v1.size()>0)
-                            attrN+=bamAttrArrayWrite(v1,"vA",attrOutArray+attrN);                                        
+                            attrN+=bamAttrArrayWrite(v1,"vA",attrOutArray+attrN);
                         break;
                     };
                     case ATTR_vW:
                     {
                         if (waspType!=-1)
-                            attrN+=bamAttrArrayWrite( (int32) waspType, "vW", attrOutArray+attrN );                                        
+                            attrN+=bamAttrArrayWrite( (int32) waspType, "vW", attrOutArray+attrN );
                         break;
                     };
-                    
+
                     case ATTR_ch:
-                        if (alignType<=-10) 
+                        if (alignType<=-10)
                         {//chimeric alignment
                             attrN+=bamAttrArrayWrite('1',"ch",attrOutArray+attrN);
-                        };                        
+                        };
                         break;
                     case ATTR_MC:
-                        if (nMates>1) 
+                        if (nMates>1)
                         {//chimeric alignment
                             attrN+=bamAttrArrayWrite(matesCIGAR[1-imate],"MC",attrOutArray+attrN);
-                        };                        
+                        };
                         break;
-                        
+
                     case ATTR_CR:
                             attrN+=bamAttrArrayWrite(soloRead->readBar->cbSeq,"CR",attrOutArray+attrN);
-                        break;                        
+                        break;
                     case ATTR_CY:
                             attrN+=bamAttrArrayWrite(soloRead->readBar->cbQual,"CY",attrOutArray+attrN);
-                        break;  
+                        break;
                     case ATTR_UR:
                             attrN+=bamAttrArrayWrite(soloRead->readBar->umiSeq,"UR",attrOutArray+attrN);
-                        break;  
+                        break;
                     case ATTR_UY:
                             attrN+=bamAttrArrayWrite(soloRead->readBar->umiQual,"UY",attrOutArray+attrN);
-                        break;  
-                        
+                        break;
+
                     default:
                         ostringstream errOut;
                         errOut <<"EXITING because of FATAL BUG: unknown/unimplemented SAM/BAM atrribute (tag): "<<outSAMattrOrder[ii] <<"\n";
@@ -494,12 +494,12 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                 };
             };
         };
-            
+
         if (P.readFilesTypeN==10) {
 //             if (readNameExtra[Mate].size()<1)
-//                 cout << iReadAll <<" " <<readName <<endl; 
+//                 cout << iReadAll <<" " <<readName <<endl;
             attrN+=bamAttrArrayWriteSAMtags(readNameExtra[Mate],attrOutArray+attrN);
-        };        
+        };
 ////////////////////////////// prepare sequence and qualities
         char seqMate[DEF_readSeqLengthMax+1], qualMate[DEF_readSeqLengthMax+1];
         char *seqOut=NULL, *qualOut=NULL;

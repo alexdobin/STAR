@@ -51,7 +51,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readFilesIn", &readFilesIn));
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "readFilesPrefix", &readFilesPrefix));
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readFilesCommand", &readFilesCommand));
-    
+
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "readMatesLengthsIn", &readMatesLengthsIn));
     parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "readMapNumber", &readMapNumber));
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readNameSeparator", &readNameSeparator));
@@ -200,9 +200,9 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "alignInsertionFlush", &alignInsertionFlush.in));
 
     //peOverlap
-    parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "peOverlapNbasesMin", &peOverlap.NbasesMin));    
+    parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "peOverlapNbasesMin", &peOverlap.NbasesMin));
     parArray.push_back(new ParameterInfoScalar <double>     (-1, -1, "peOverlapMMp", &peOverlap.MMp));
-    
+
     //chimeric
     parArray.push_back(new ParameterInfoScalar <uint>       (-1, -1, "chimSegmentMin", &pCh.segmentMin));
     parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "chimScoreMin", &pCh.scoreMin));
@@ -229,14 +229,14 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "sjdbOverhang", &pGe.sjdbOverhang));
     pGe.sjdbOverhang_par=parArray.size()-1;
     parArray.push_back(new ParameterInfoScalar <int>    (-1, -1, "sjdbScore", &pGe.sjdbScore));
-    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "sjdbInsertSave", &pGe.sjdbInsertSave)); 
-    
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "sjdbInsertSave", &pGe.sjdbInsertSave));
+
     //variation
-    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "varVCFfile", &var.vcfFile)); 
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "varVCFfile", &var.vcfFile));
 
     //WASP
-    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "waspOutputMode", &wasp.outputMode)); 
-    
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "waspOutputMode", &wasp.outputMode));
+
     //quant
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "quantMode", &quant.mode));
     parArray.push_back(new ParameterInfoScalar <int>     (-1, -1, "quantTranscriptomeBAMcompression", &quant.trSAM.bamCompression));
@@ -250,10 +250,10 @@ Parameters::Parameters() {//initalize parameters info
     //solo
     parArray.push_back(new ParameterInfoScalar <string>   (-1, -1, "soloType", &pSolo.typeStr));
     parArray.push_back(new ParameterInfoScalar <uint32>   (-1, -1, "soloCBstart", &pSolo.cbS));
-    parArray.push_back(new ParameterInfoScalar <uint32>   (-1, -1, "soloUMIstart", &pSolo.umiS));    
+    parArray.push_back(new ParameterInfoScalar <uint32>   (-1, -1, "soloUMIstart", &pSolo.umiS));
     parArray.push_back(new ParameterInfoScalar <uint32>   (-1, -1, "soloCBlen", &pSolo.cbL));
     parArray.push_back(new ParameterInfoScalar <uint32>   (-1, -1, "soloUMIlen", &pSolo.umiL));
-    parArray.push_back(new ParameterInfoScalar <uint32>   (-1, -1, "soloBarcodeReadLength", &pSolo.bL)); 
+    parArray.push_back(new ParameterInfoScalar <uint32>   (-1, -1, "soloBarcodeReadLength", &pSolo.bL));
     parArray.push_back(new ParameterInfoScalar <string>   (-1, -1, "soloCBwhitelist", &pSolo.soloCBwhitelist));
     parArray.push_back(new ParameterInfoScalar <string>   (-1, -1, "soloStrand", &pSolo.strandStr));
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "soloOutFileNames", &pSolo.outFileNames));
@@ -520,7 +520,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
 
-    
+
     //remove duplicates parameters
     if (removeDuplicates.mode=="UniqueIdentical")
     {
@@ -535,9 +535,9 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             ostringstream errOut;
             errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in of --bamRemoveDuplicatesType="<<removeDuplicates.mode<<"\n";
             errOut << "SOLUTION: use allowed option: - or UniqueIdentical or UniqueIdenticalNotMulti";
-            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);        
-    };    
-    
+            exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
+
     if (runMode=="alignReads") {
         inOut->logProgress.open((outFileNamePrefix + "Log.progress.out").c_str());
     } else if (runMode=="inputAlignmentsFromBAM") {
@@ -676,7 +676,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         errOut <<"EXITING: fatal input ERROR: --outSAMorder=PairedKeepInputOrder is presently only compatible with SAM output, i.e. default --outSMAtype SAM\n";
         errOut <<"SOLUTION: re-run STAR without --outSAMorder=PairedKeepInputOrder, or with --outSAMorder=PairedKeepInputOrder --outSMAtype SAM .\n";
         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-    };    
+    };
     //SJ filtering
     for (int ii=0;ii<4;ii++) {
         if (outSJfilterOverhangMin.at(ii)<0) outSJfilterOverhangMin.at(ii)=numeric_limits<int32>::max();
@@ -723,7 +723,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     if (outSAMfilter.mode.at(0)=="KeepOnlyAddedReferences")
     {
         outSAMfilter.KeepOnlyAddedReferences=true;
-    } else if (outSAMfilter.mode.at(0)=="KeepAllAddedReferences")  
+    } else if (outSAMfilter.mode.at(0)=="KeepAllAddedReferences")
     {
         outSAMfilter.KeepAllAddedReferences=true;
     } else if (outSAMfilter.mode.at(0)=="None")
@@ -743,8 +743,8 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         errOut <<"SOLUTION: use default --outSAMfilter None, OR add references with --genomeFataFiles\n";
         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
-       
-    
+
+
     if (outMultimapperOrder.mode=="Old_2.4")
     {
         outMultimapperOrder.random=false;
@@ -770,7 +770,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         errOut <<"SOLUTION: specify one of the allowed values: Fastx or SAM\n";
         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
-        
+
     if (readFilesTypeN==1) {
         readNmates=readFilesIn.size(); //for now the number of mates is defined by the number of input files
     } else if (readFilesTypeN==10) {//find the number of mates from the SAM file
@@ -786,7 +786,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         };
     };
     readNmatesIn=readNmates;
-    
+
     //two-pass
     if (parArray.at(twoPass.pass1readsN_par)->inputLevel>0  && twoPass.mode=="None")
     {
@@ -838,8 +838,8 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             errOut <<"SOLUTION: please check the path and writing permissions \n";
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
-    };   
-    
+    };
+
     // openReadFiles depends on twoPass for reading SAM header
     if (runMode=="alignReads" && pGe.gLoad!="Remove" && pGe.gLoad!="LoadAndExit") {//open reads files to check if they are present
         openReadsFiles();
@@ -922,14 +922,14 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             //inOut->fastaOutSeqs.open("Seqs.out.fasta");
         };
     };
-    
+
     //variation
     var.yes=false;
     if (var.vcfFile!="-")
     {
         var.yes=true;
-    };         
-        
+    };
+
     //WASP
     wasp.yes=false;
     wasp.SAMtag=false;
@@ -951,7 +951,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         errOut <<"SOLUTION: re-run STAR with --waspOutputMode ... and --varVCFfile /path/to/file.vcf\n";
         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
-    
+
      if (wasp.yes && outSAMtype.at(0)!="BAM") {
         ostringstream errOut;
         errOut <<"EXITING because of FATAL INPUT ERROR: --waspOutputMode requires output to BAM file\n";
@@ -1001,10 +1001,10 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             };
         };
     };
-    
+
     //solo
     pSolo.initialize(this);
-    
+
     //outSAMattributes
     outSAMattrPresent.NH=false;//TODO re-write as class with constructor?
     outSAMattrPresent.HI=false;
@@ -1015,7 +1015,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     outSAMattrPresent.jM=false;
     outSAMattrPresent.jI=false;
     outSAMattrPresent.RG=false;
-    outSAMattrPresent.MC=false;    
+    outSAMattrPresent.MC=false;
     outSAMattrPresent.XS=false;
     outSAMattrPresent.vA=false;
     outSAMattrPresent.vG=false;
@@ -1027,7 +1027,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     outSAMattrPresent.UR=false;
     outSAMattrPresent.UY=false;
 
-            
+
     //for quant SAM output only NH and HI flags
     outSAMattrPresentQuant=outSAMattrPresent;
     outSAMattrPresentQuant.NH=true;
@@ -1075,10 +1075,10 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             outSAMattrPresent.vA=true;
         } else if (vAttr1.at(ii)== "vG") {
             outSAMattrOrder.push_back(ATTR_vG);
-            outSAMattrPresent.vG=true; 
+            outSAMattrPresent.vG=true;
         } else if (vAttr1.at(ii)== "vW") {
             outSAMattrOrder.push_back(ATTR_vW);
-            outSAMattrPresent.vW=true;              
+            outSAMattrPresent.vW=true;
         } else if (vAttr1.at(ii)== "RG") {
             outSAMattrOrder.push_back(ATTR_RG);
             outSAMattrOrderQuant.push_back(ATTR_RG);
@@ -1086,31 +1086,31 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         } else if (vAttr1.at(ii)== "rB") {
             outSAMattrOrder.push_back(ATTR_rB);
             outSAMattrOrderQuant.push_back(ATTR_rB);
-            outSAMattrPresent.rB=true;            
+            outSAMattrPresent.rB=true;
         } else if (vAttr1.at(ii)== "ch") {
             outSAMattrOrder.push_back(ATTR_ch);
             outSAMattrOrderQuant.push_back(ATTR_ch);
-            outSAMattrPresent.ch=true;      
+            outSAMattrPresent.ch=true;
         } else if (vAttr1.at(ii)== "MC") {
             outSAMattrOrder.push_back(ATTR_MC);
             outSAMattrOrderQuant.push_back(ATTR_MC);
-            outSAMattrPresent.MC=true;                        
+            outSAMattrPresent.MC=true;
         } else if (vAttr1.at(ii)== "CR") {
             outSAMattrOrder.push_back(ATTR_CR);
             outSAMattrOrderQuant.push_back(ATTR_CR);
-            outSAMattrPresent.CR=true;                        
+            outSAMattrPresent.CR=true;
         } else if (vAttr1.at(ii)== "CY") {
             outSAMattrOrder.push_back(ATTR_CY);
             outSAMattrOrderQuant.push_back(ATTR_CY);
-            outSAMattrPresent.CY=true;                        
+            outSAMattrPresent.CY=true;
         } else if (vAttr1.at(ii)== "UR") {
             outSAMattrOrder.push_back(ATTR_UR);
             outSAMattrOrderQuant.push_back(ATTR_UR);
-            outSAMattrPresent.UR=true;                        
+            outSAMattrPresent.UR=true;
         } else if (vAttr1.at(ii)== "UY") {
             outSAMattrOrder.push_back(ATTR_UY);
             outSAMattrOrderQuant.push_back(ATTR_UY);
-            outSAMattrPresent.UY=true;                                   
+            outSAMattrPresent.UY=true;
         } else if (vAttr1.at(ii)== "XS") {
             outSAMattrOrder.push_back(ATTR_XS);
             outSAMattrPresent.XS=true;
@@ -1125,21 +1125,21 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
     };
-    
+
     if  (!var.yes && (outSAMattrPresent.vA | outSAMattrPresent.vG)) {
         ostringstream errOut;
         errOut <<"EXITING because of fatal PARAMETER error: --outSAMattributes contains vA and/or vG tag(s), but --varVCFfile is not set\n";
         errOut <<"SOLUTION: re-run STAR with a --varVCFfile option, or without vA/vG tags in --outSAMattributes\n";
-        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);        
+        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
-    
+
     if (!wasp.yes && outSAMattrPresent.vW) {
         ostringstream errOut;
         errOut <<"EXITING because of fatal PARAMETER error: --outSAMattributes contains vW tag, but --waspOutputMode is not set\n";
         errOut <<"SOLUTION: re-run STAR with a --waspOutputMode option, or without vW tags in --outSAMattributes\n";
-        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);        
+        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
-    
+
     if (outSAMattrRG.size()>0 && !outSAMattrPresent.RG) {
         outSAMattrOrder.push_back(ATTR_RG);
         outSAMattrOrderQuant.push_back(ATTR_RG);
@@ -1162,15 +1162,15 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         outSAMattrOrderQuant.push_back(ATTR_vW);
         outSAMattrPresent.vW=true;
         inOut->logMain << "WARNING --waspOutputMode is set, therefore STAR will output vW attribute" <<endl;
-    };    
-    
+    };
+
     if (pSolo.type==0 && (outSAMattrPresent.CR || outSAMattrPresent.CY || outSAMattrPresent.UR || outSAMattrPresent.UY) ) {
             ostringstream errOut;
             errOut <<"EXITING because of FATAL INPUT ERROR: --outSAMattributes contains CR/CY/UR/UY tags, but --soloType is not set\n";
             errOut <<"SOLUTION: re-run STAR without these attribures, or with --soloType set\n";
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-    };    
-    
+    };
+
     //chimeric
     pCh.out.bam=false;
     pCh.out.junctions=false;
@@ -1187,7 +1187,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             } else if (type1=="HardClip") {
                 pCh.out.bamHardClip=true;
             } else if (type1=="SoftClip") {
-                pCh.out.bamHardClip=false;     
+                pCh.out.bamHardClip=false;
             } else {
                 ostringstream errOut;
                 errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented value for --chimOutType: "<<type1 <<"\n";
@@ -1203,7 +1203,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                 exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
 
-        if (pCh.multimapNmax>0 && (pCh.out.bam || pCh.out.samOld)) {       
+        if (pCh.multimapNmax>0 && (pCh.out.bam || pCh.out.samOld)) {
                 ostringstream errOut;
                 errOut <<"EXITING because of fatal PARAMETERS error: --chimMultimapNmax > 0 (new chimeric detection) presently only works with --chimOutType Junctions\n";
                 errOut <<"SOLUTION: re-run with --chimOutType Junctions\n";
@@ -1262,8 +1262,8 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         alignEndsType.ext[0][0]=true;
     } else if (alignEndsType.in=="Extend5pOfReads12" )
     {
-        alignEndsType.ext[0][0]=true;        
-        alignEndsType.ext[1][0]=true;  
+        alignEndsType.ext[0][0]=true;
+        alignEndsType.ext[1][0]=true;
     } else if (alignEndsType.in=="Extend3pOfRead1" )
     {
         alignEndsType.ext[0][1]=true;
@@ -1386,11 +1386,11 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     } else if (outSAMunmapped.mode.at(0)=="Within" && outSAMunmapped.mode.size()==1) {
         outSAMunmapped.yes=true;
         outSAMunmapped.within=true;
-        outSAMunmapped.keepPairs=false;   
+        outSAMunmapped.keepPairs=false;
     } else if (outSAMunmapped.mode.at(0)=="Within" && outSAMunmapped.mode.at(1)=="KeepPairs") {
         outSAMunmapped.yes=true;
         outSAMunmapped.within=true;
-        outSAMunmapped.keepPairs=true;   
+        outSAMunmapped.keepPairs=true;
     } else {
         ostringstream errOut;
         errOut << "EXITING because of fatal PARAMETERS error: unrecognized option for --outSAMunmapped=";
@@ -1413,7 +1413,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
     };
-    
+
     if (alignInsertionFlush.in=="None") {
         alignInsertionFlush.flushRight=false;
     } else if (alignInsertionFlush.in=="Right") {
@@ -1424,35 +1424,35 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         errOut << "SOLUTION: use allowed option: None or Right";
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
-        
-    
+
+
     //peOverlap
     if (peOverlap.NbasesMin>0) {
         peOverlap.yes=true;
     } else {
         peOverlap.yes=false;
     };
-    
+
     //read parameters
     //     if (pReads.strandString=="Unstranded") {
     //         pReads.strand=0;
     //     } else if (pReads.strandString=="Forward") {
-    //         pReads.strand=1;    
+    //         pReads.strand=1;
     //     } else if (pReads.strandString=="Reverse") {
-    //         pReads.strand=2;    
+    //         pReads.strand=2;
     //     } else  {
     //         ostringstream errOut;
     //         errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in of --readStrand="<<pReads.strandString<<"\n";
     //         errOut << "SOLUTION: use allowed option: Unstranded or Forward or Reverse";
     //         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     //     };
-    
+
     //
     outSAMreadIDnumber=false;
     if (outSAMreadID=="Number") {
         outSAMreadIDnumber=true;
     };
-    
+
     ////////////////////////////////////////////////
     inOut->logMain << "Finished loading and checking parameters\n" <<flush;
 };

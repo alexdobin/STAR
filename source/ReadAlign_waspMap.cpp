@@ -11,8 +11,8 @@ void ReadAlign::waspMap() {
         waspType=7;
         return;
     };
-        
-    
+
+
     waspRA->copyRead(*this);
 
     vector <char> vA=trBest->varAllele;
@@ -23,9 +23,9 @@ void ReadAlign::waspMap() {
             return;
         };
     };
-         
 
-    
+
+
     vector<vector<char>> vvA {{}}; //all combinations
     for (const auto& u : vA) {//cycle over vars, each time add new variant by adding 2 variants to each of the existing combinations
         (void) u; //to avoid unused warning
@@ -39,12 +39,12 @@ void ReadAlign::waspMap() {
         vvA=move(r);
     };
 
-    
+
     for (const auto& vA1 : vvA) {//cycle over all combinations
 
             if (vA1==vA)
                 continue; //this combination was already mapped as the real read
-    
+
             for (uint iv=0; iv<vA1.size(); ++iv) {//set all variants in this combination
 
                 //we assume the homo-vars are already excluded
@@ -63,7 +63,7 @@ void ReadAlign::waspMap() {
             waspRA->mapOneRead();
             waspRA->multMapSelect();
             waspRA->mappedFilter();
-                    
+
             if (waspRA->unmapType!=-1) {
                 waspType=4;
                 return;
@@ -74,7 +74,7 @@ void ReadAlign::waspMap() {
                 waspType=6;
                 return;
             } else {
-                for (uint ii=0; ii<trBest->nExons; ii++) {               
+                for (uint ii=0; ii<trBest->nExons; ii++) {
                     for (uint jj=0; jj<=2; jj++) {
                         if (trBest->exons[ii][jj]!=waspRA->trBest->exons[ii][jj]) {
                             waspType=6;
@@ -83,19 +83,19 @@ void ReadAlign::waspMap() {
                     };
                 };
             };
-    }; 
+    };
     waspType=1; //all combinations resulted in the same alignment
     return;
 };
 
-void ReadAlign::copyRead(ReadAlign &r) {//copy read information only   
+void ReadAlign::copyRead(ReadAlign &r) {//copy read information only
     Lread=r.Lread;
     readLength[0]=r.readLength[0];readLength[1]=r.readLength[1];
     readLengthOriginal[0]=r.readLengthOriginal[0];readLengthOriginal[1]=r.readLengthOriginal[1];
     readLengthPairOriginal=r.readLengthPairOriginal;
     outFilterMismatchNmaxTotal=r.outFilterMismatchNmaxTotal;
     readName=r.readName;
-    
+
     for (uint ii=0;ii<=2;ii++)
         memcpy(Read1[ii],r.Read1[ii],Lread);//need to copy since it will be changed
     Qual1=r.Qual1;

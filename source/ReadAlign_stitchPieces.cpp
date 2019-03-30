@@ -310,7 +310,7 @@ std::time(&timeStart);
                         WAincl[ia]=true;
                         break;
                     };
-                    
+
                 };
             };
             stitchWindowSeeds(iW, iW1, WAincl, R[trA.roStr==0 ? 0:2]);

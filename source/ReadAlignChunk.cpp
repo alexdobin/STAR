@@ -14,7 +14,7 @@ ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome 
     };
 
     RA = new ReadAlign(P, mapGen, chunkTr, iChunk);//new local copy of RA for each chunk
-    
+
     RA->iRead=0;
 
     chunkIn=new char* [P.readNmates];
@@ -70,10 +70,10 @@ ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome 
     RA->chunkOutSJ1=chunkOutSJ1;
 
     if (P.pCh.segmentMin>0) {
-       if (P.pCh.out.samOld) {        
+       if (P.pCh.out.samOld) {
             chunkFstreamOpen(P.outFileTmp + "/Chimeric.out.sam.thread", iChunk, RA->chunkOutChimSAM);
        };
-       if (P.pCh.out.junctions) {       
+       if (P.pCh.out.junctions) {
             chunkFstreamOpen(P.outFileTmp + "/Chimeric.out.junction.thread", iChunk, *RA->chunkOutChimJunction);
        };
     };
@@ -85,7 +85,7 @@ ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome 
         chunkFstreamOpen(P.outFileTmp + "/FilterBySJoutFiles.mate1.thread",iChunk, RA->chunkOutFilterBySJoutFiles[0]);
         if (P.readNmates==2) chunkFstreamOpen(P.outFileTmp + "/FilterBySJoutFiles.mate2.thread",iChunk, RA->chunkOutFilterBySJoutFiles[1]);
     };
-    
+
     if (P.wasp.yes) {
         RA->waspRA= new ReadAlign(Pin,genomeIn,TrIn,iChunk);
     };
@@ -94,7 +94,7 @@ ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome 
         delete RA->peMergeRA->chunkOutChimJunction;
         RA->peMergeRA->chunkOutChimJunction=RA->chunkOutChimJunction;//point to the same out-stream
         RA->peMergeRA->chimDet->ostreamChimJunction=RA->peMergeRA->chunkOutChimJunction;
-    };    
+    };
 };
 
 ///////////////

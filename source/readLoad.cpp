@@ -21,7 +21,7 @@ int readLoad(istream& readInStream, Parameters& P, uint iMate, uint& Lread, uint
     };
 
     readInStream >> iReadAll >> readFilter >> readFilesIndex; //extract read number
-    
+
     getline(readInStream, readNameExtra);
     if (!readNameExtra.empty()) {
         size_t n1=readNameExtra.find_first_not_of(" \t");
@@ -31,7 +31,7 @@ int readLoad(istream& readInStream, Parameters& P, uint iMate, uint& Lread, uint
             readNameExtra="";
         };
     };
-        
+
 //     readInStream.ignore(DEF_readNameSeqLengthMax,'\n');//ignore the resit of the line - just in case
 
     readInStream.getline(Seq,DEF_readSeqLengthMax+1); //extract sequence
@@ -43,7 +43,7 @@ int readLoad(istream& readInStream, Parameters& P, uint iMate, uint& Lread, uint
             ++Lread;
         };
     };
-    
+
     if (Lread<1) {
         ostringstream errOut;
         errOut << "EXITING because of FATAL ERROR in reads input: short read sequence line: " << Lread <<"\n";

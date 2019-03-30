@@ -3,11 +3,11 @@
 #include "Transcript.h"
 #include "ReadAlign.h"
 
-ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk) 
-                    : mapGen(genomeIn), P(Pin), chunkTr(TrIn) 
-{                           
+ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk)
+                    : mapGen(genomeIn), P(Pin), chunkTr(TrIn)
+{
     readNmates=P.readNmates;
-    winBin = new uintWinBin* [2];  
+    winBin = new uintWinBin* [2];
     winBin[0] = new uintWinBin [P.winBinN];
     winBin[1] = new uintWinBin [P.winBinN];
     memset(winBin[0],255,sizeof(winBin[0][0])*P.winBinN);
@@ -40,14 +40,14 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
 #endif
 
     WA=new uiWA*[P.alignWindowsPerReadNmax];
-    for (uint ii=0;ii<P.alignWindowsPerReadNmax;ii++) 
+    for (uint ii=0;ii<P.alignWindowsPerReadNmax;ii++)
         WA[ii]=new uiWA[P.seedPerWindowNmax];
     WAincl = new bool [P.seedPerWindowNmax];
     trAll = new Transcript**[P.alignWindowsPerReadNmax+1];
     nWinTr = new uint[P.alignWindowsPerReadNmax];
     trArray = new Transcript[P.alignTranscriptsPerReadNmax];
     trArrayPointer =  new Transcript*[P.alignTranscriptsPerReadNmax];
-    for (uint ii=0;ii<P.alignTranscriptsPerReadNmax;ii++) 
+    for (uint ii=0;ii<P.alignTranscriptsPerReadNmax;ii++)
         trArrayPointer[ii]= &(trArray[ii]);
     trInit = new Transcript;
     //read
@@ -66,7 +66,7 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
     Read1 = new char*[3];
     Read1[0]=new char[DEF_readSeqLengthMax+1]; Read1[1]=new char[DEF_readSeqLengthMax+1]; Read1[2]=new char[DEF_readSeqLengthMax+1];
     Qual1=new char*[2]; //modified QSs for scoring
-    Qual1[0]=new char[DEF_readSeqLengthMax+1]; Qual1[1]=new char[DEF_readSeqLengthMax+1];    
+    Qual1[0]=new char[DEF_readSeqLengthMax+1]; Qual1[1]=new char[DEF_readSeqLengthMax+1];
     //outBAM
     outBAMoneAlignNbytes = new uint [P.readNmates+2]; //extra piece for chimeric reads
     outBAMoneAlign = new char* [P.readNmates+2]; //extra piece for chimeric reads

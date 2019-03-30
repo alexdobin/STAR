@@ -6,8 +6,8 @@ void ReadAlign::outputVariation(Variation &Var, Transcript Tr, uint iTr, uint nT
     {
         return;
     };
-    
-    
-    
-         
+
+
+
+
 };

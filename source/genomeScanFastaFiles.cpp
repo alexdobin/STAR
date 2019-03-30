@@ -66,14 +66,14 @@ uint genomeScanFastaFiles (Parameters &P, char* G, bool flagRun, Genome &mapGen)
                             ++N;
                     };
                 };
-                
+
             };
         };
         fileIn.close();
     };
 
 
-    if (!flagRun) 
+    if (!flagRun)
         mapGen.chrLength.push_back(N-mapGen.chrStart.at(mapGen.chrStart.size()-1)); //true length of the last chr
 
     N = ( (N+1)/mapGen.genomeChrBinNbases+1)*mapGen.genomeChrBinNbases;

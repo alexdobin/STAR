@@ -130,15 +130,15 @@ void nuclPackBAM(char* ReadsIn, char* ReadsOut, uint Lread) {//pack nucleotides 
 void convertNucleotidesToNumbers(const char* R0, char* R1, const uint Lread) {//transform sequence  from ACGT into 0-1-2-3 code
     for (uint jj=0;jj<Lread;jj++) {
                     switch (int(R0[jj])){
-                        case (65): case(97):  
+                        case (65): case(97):
                             R1[jj]=char(0);break;//A
-                        case (67): case(99):  
+                        case (67): case(99):
                             R1[jj]=char(1);break;//C
-                        case (71): case(103): 
+                        case (71): case(103):
                             R1[jj]=char(2);break;//G
-                        case (84): case(116): 
+                        case (84): case(116):
                             R1[jj]=char(3);break;//T
-                        default:                              
+                        default:
                             R1[jj]=char(4);//anything else is converted to N
                     };
                 };
@@ -148,15 +148,15 @@ uint convertNucleotidesToNumbersRemoveControls(const char* R0, char* R1, const u
     uint iR1=0;
     for (uint jj=0;jj<Lread;jj++) {
         switch (int(R0[jj])){
-            case (65): case(97):  
+            case (65): case(97):
                 R1[jj]=char(0);break;//A
-            case (67): case(99):  
+            case (67): case(99):
                 R1[jj]=char(1);break;//C
-            case (71): case(103): 
+            case (71): case(103):
                 R1[jj]=char(2);break;//G
-            case (84): case(116): 
+            case (84): case(116):
                 R1[jj]=char(3);break;//T
-            default:                              
+            default:
                 if (int(R0[jj]) < 32) {//control characters are skipped
                     continue;
                 } else {//all non-control non-ACGT characters are convreted to N
@@ -169,25 +169,25 @@ uint convertNucleotidesToNumbersRemoveControls(const char* R0, char* R1, const u
 };
 
 
-char convertNt01234(const char R0) {//transform sequence  from ACGT into 0-1-2-3 code    
+char convertNt01234(const char R0) {//transform sequence  from ACGT into 0-1-2-3 code
     switch(R0)
     {
-        case('a'): 
+        case('a'):
         case('A'):
             return 0;
             break;
-        case('c'): 
+        case('c'):
         case('C'):
             return 1;
             break;
-        case('g'): 
+        case('g'):
         case('G'):
             return 2;
             break;
-        case('t'): 
+        case('t'):
         case('T'):
             return 3;
-            break;  
+            break;
         default:
             return 4;
     };

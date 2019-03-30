@@ -1,7 +1,7 @@
 #include "Transcript.h"
 #include "SequenceFuns.h"
 
-string Transcript::generateCigarP() 
+string Transcript::generateCigarP()
 {//generates CIGARp string for the transcript with "p" operation for PE reads
  //p is a special CIGAR operation to encode gap between mates. This gap is negative for overlapping mates.
 
