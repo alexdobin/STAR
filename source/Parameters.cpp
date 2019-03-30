@@ -1532,7 +1532,7 @@ int Parameters::scanOneLine (string &lineIn, int inputLevel, int inputLevelReque
 
     if (iPar==parArray.size()) {//string is not identified
         ostringstream errOut;
-        errOut << "EXITING: FATAL INPUT ERROR: unrecoginzed parameter name \""<< parIn << "\" in input \"" << parameterInputName.at(inputLevel) <<"\"\n";
+        errOut << "EXITING: FATAL INPUT ERROR: unrecognized parameter name \""<< parIn << "\" in input \"" << parameterInputName.at(inputLevel) <<"\"\n";
         errOut << "SOLUTION: use correct parameter name (check the manual)\n"<<flush;
         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     } else {//found the corresponding parameter

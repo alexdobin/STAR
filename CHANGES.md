@@ -1,3 +1,5 @@
+* Fixed a problem which may cause seg-faults for reads with many blocks. Issue #342.
+
 STAR 2.7.0f 2019/03/28
 ======================
 
