@@ -57,7 +57,7 @@ uint ReadAlign::quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript 
         nAlignT += Tr->quantAlign(*alignG[iag],alignT+nAlignT, readTranscripts, readTrGenes);
     };
 
-    if (P.quant.trSAM.bamCompression>-2) {//output Aligned.toTranscriptome.bam
+    if (P.quant.trSAM.bamYes) {//output Aligned.toTranscriptome.bam
         alignT[int(rngUniformReal0to1(rngMultOrder)*nAlignT)].primaryFlag=true;
 
         for (uint iatr=0;iatr<nAlignT;iatr++) {//write all transcripts

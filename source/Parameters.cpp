@@ -1395,24 +1395,24 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 
 
     //outSAMunmapped
+    outSAMunmapped.yes=false;
+    outSAMunmapped.within=false;
+    outSAMunmapped.keepPairs=false;
     if (outSAMunmapped.mode.at(0)=="None" && outSAMunmapped.mode.size()==1) {
-        outSAMunmapped.yes=false;
-        outSAMunmapped.within=false;
-        outSAMunmapped.keepPairs=false;
+        //nothing to do, all false
     } else if (outSAMunmapped.mode.at(0)=="Within" && outSAMunmapped.mode.size()==1) {
         outSAMunmapped.yes=true;
         outSAMunmapped.within=true;
-        outSAMunmapped.keepPairs=false;
     } else if (outSAMunmapped.mode.at(0)=="Within" && outSAMunmapped.mode.at(1)=="KeepPairs") {
         outSAMunmapped.yes=true;
         outSAMunmapped.within=true;
-        outSAMunmapped.keepPairs=true;
+        if (readNmates==2)
+            outSAMunmapped.keepPairs=true;
     } else {
         ostringstream errOut;
         errOut << "EXITING because of fatal PARAMETERS error: unrecognized option for --outSAMunmapped=";
         for (uint ii=0; ii<outSAMunmapped.mode.size(); ii++) errOut <<" "<< outSAMunmapped.mode.at(ii);
-        errOut << "\n";
-        errOut << "SOLUTION: use allowed options: None OR Within OR Within KeepPairs";
+        errOut << "\nSOLUTION: use allowed options: None OR Within OR Within KeepPairs";
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
 

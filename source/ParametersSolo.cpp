@@ -21,6 +21,7 @@ void ParametersSolo::initialize(Parameters *pPin)
         if (bL==1)
             bL=cbL+umiL;
         pP->readNmates=1; //output mates TODO: check that readNmatesIn==2
+        
     } else  {
         ostringstream errOut;
         errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in --soloType="<<typeStr<<"\n";
@@ -104,6 +105,11 @@ void ParametersSolo::initialize(Parameters *pPin)
 
     //load the CB whitlist and create unordered_map
     if (soloCBwhitelist=="-") {
+            ostringstream errOut;
+            errOut << "EXITING because of FATAL ERROR in INPUT parameters: --soloCBwhitelist is not defined\n";
+            errOut << "SOLUTION: in --soloCBwhitelist specify path to and name of the whitelist file, or None for CB demultiplexing without whitelist \n";
+            exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_INPUT_FILES, *pP);
+    } else if (soloCBwhitelist=="None") {
         cbWLyes=false;
     } else {
         cbWLyes=true;
