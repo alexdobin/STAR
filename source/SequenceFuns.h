@@ -24,4 +24,7 @@ uint qualitySplit(char*, char*, uint, char, uint, uint, uint**);
 int32 convertNuclStrToInt32(const string S, uint32 &intOut);
 string convertNuclInt32toString(const uint32 nuclNum, const uint32 L);
 
+int64 convertNuclStrToInt64(const string S, uint64 &intOut);
+string convertNuclInt64toString(const uint64 nuclNum, const uint32 L);
+
 #endif

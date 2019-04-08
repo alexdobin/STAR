@@ -29,7 +29,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 *cbReadCountExactTotal)
         while (inputFeatureUmi(strU_0, featureType, feature, umi, P.sjAll)) {
             *strU_0 >> cb;
             if (!pSolo.cbWLyes) //if no-WL, the full cbInteger was recorded - now has to be placed in order
-                cb=binarySearchExact(cb,pSolo.cbWL.data(),pSolo.cbWL.size());
+                cb=binarySearchExact<uint64>(cb,pSolo.cbWL.data(),pSolo.cbWL.size());
             if (feature != (uint32)(-1)){
                 cbP[cb][0]=feature;
                 cbP[cb][1]=umi;

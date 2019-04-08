@@ -17,7 +17,7 @@ void SoloFeature::outputResults()
         //output CBs
         ofstream &cbStr=ofstrOpen(P.outFileNamePrefix+pSolo.outFileNames[0]+pSolo.outFileNames[2],ERROR_OUT, P);
         for (auto const &cb : pSolo.cbWL)
-            cbStr << convertNuclInt32toString(cb,pSolo.cbL)  <<'\n';
+            cbStr << convertNuclInt64toString(cb,pSolo.cbL)  <<'\n';
         cbStr.flush();
     };
 
