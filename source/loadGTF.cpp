@@ -121,12 +121,12 @@ uint64 loadGTF(SjdbClass &sjdbLoci, Parameters &P, string dirOut, Genome &mapGen
             while (oneLineStream.good()) {
                 string attrName1("");
                 oneLineStream >> attrName1;
+                string attr1;
+                oneLineStream >> attr1;
+                attr1.erase(remove(attr1.begin(),attr1.end(),'"'),attr1.end());
+                attr1.erase(remove(attr1.begin(),attr1.end(),';'),attr1.end());
                 for (uint32 ii=0; ii<exAttrNames.size(); ii++) {
                     if (attrName1==exAttrNames[ii]) {
-                        string attr1;
-                        oneLineStream >> attr1;
-                        attr1.erase(remove(attr1.begin(),attr1.end(),'"'),attr1.end());
-                        attr1.erase(remove(attr1.begin(),attr1.end(),';'),attr1.end());
                         exAttr[ii]=attr1;
                     };
                 };
