@@ -12,7 +12,7 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Starting Solo post-map for " <<pSolo.featureNames[featureType] <<endl;
 
     for (int ii=0; ii<P.runThreadN; ii++) {//point to
-        readFeatAll[ii]=RAchunk[ii]->RA->soloRead->readFeat[featureType];
+        readFeatAll[ii]=RAchunk[ii]->RA->soloRead->readFeat[pSolo.featureInd[featureType]];
         readBarAll[ii]=RAchunk[ii]->RA->soloRead->readBar;
     };
 

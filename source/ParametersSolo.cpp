@@ -53,6 +53,7 @@ void ParametersSolo::initialize(Parameters *pPin)
         exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
 
+    featureInd.resize(featureNames.size(),-1);
     for (auto &fin : featureIn) {
         bool finGood=false;
         for (uint32 ii=0; ii<featureNames.size(); ii++) {
@@ -60,6 +61,7 @@ void ParametersSolo::initialize(Parameters *pPin)
                 finGood=true;
                 featureYes[ii]=true;
                 features.push_back(ii);
+                featureInd[ii]=features.size()-1;
                 break;
             };
         };

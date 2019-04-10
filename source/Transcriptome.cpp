@@ -96,8 +96,8 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
         geneFull.g=new uint32[nGe];
         geneFull.str=new uint8[nGe];
 
-        for (uint ig=1;ig<nGe;ig++) {
-            geneFull.s[ig]=-1;
+        for (uint ig=0;ig<nGe;ig++) {
+            geneFull.s[ig]=-1;//largest uint64
             geneFull.e[ig]=0;
         };
 

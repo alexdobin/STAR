@@ -20,7 +20,7 @@ public:
     //features
     const static vector<string> featureNames;
     vector<string> featureIn;
-    vector<uint32> features;
+    vector<uint32> features, featureInd;
     uint32 nFeatures;
     bool featureYes[3]; //which features are requested
     //filtering
