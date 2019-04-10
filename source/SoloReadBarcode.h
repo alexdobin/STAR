@@ -10,7 +10,7 @@ public:
     string cbSeq, umiSeq, cbQual, umiQual;
     uint64 cbB;
     uint32 umiB;
-    int32  cbI;
+    int64  cbI;
     int32  cbMatch;//0=exact, 1=1 match with 1MM, 2= >1 matches with 1MM
     string cbMatchString;//CB matches and qualities
     vector<uint32> cbMatchInd;//matches

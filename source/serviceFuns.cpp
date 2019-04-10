@@ -185,7 +185,7 @@ inline int32 binarySearch1b(argType x, argType *X, int32 N)
 };
 
 template <class argType>
-inline int32 binarySearchExact(argType x, argType *X, uint64 N) {
+inline int64 binarySearchExact(argType x, argType *X, uint64 N) {
     //binary search in the sorted list
     //check the boundaries first
     //returns -1 if no match found

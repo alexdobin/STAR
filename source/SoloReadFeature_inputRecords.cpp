@@ -25,7 +25,8 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 *cbReadCountExactTotal)
     {//load exact matches
         strU_0->flush();
         strU_0->seekg(0,ios::beg);
-        uint32 cb, feature, umi;
+        uint32 feature, umi;
+        int64 cb;
         while (inputFeatureUmi(strU_0, featureType, feature, umi, P.sjAll)) {
             *strU_0 >> cb;
             if (!pSolo.cbWLyes) //if no-WL, the full cbInteger was recorded - now has to be placed in order

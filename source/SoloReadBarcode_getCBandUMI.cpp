@@ -35,7 +35,7 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
         if (posN!=-1) {//Ns are present, discard this read
             stats.V[stats.nNinBarcode]++;
         } else {//no Ns
-            cbI=cbB;//all possible barcodes are accepted
+            cbI=(int64) cbB;//all possible barcodes are accepted. This will overflow if CB is longer than 31b
             cbMatch=0;
         };
         return;
@@ -45,7 +45,7 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
         stats.V[stats.nNinBarcode]++;
         return;
     } else if (posN==-1) {//no Ns, count only for featureType==gene
-        cbI=binarySearchExact(cbB,pSolo.cbWL.data(),pSolo.cbWL.size());
+        cbI=binarySearchExact<uint64>(cbB,pSolo.cbWL.data(),pSolo.cbWL.size());
         if (cbI>=0) {//exact match
             cbReadCountExact[cbI]++;//note that this simply counts reads per exact CB, no checks of genes or UMIs
             cbMatch=0;
@@ -57,7 +57,7 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
         uint32 posNshift=2*(pSolo.cbL-1-posN);//shift bits for posN
         for (uint32 jj=0; jj<4; jj++) {
             uint64 cbB1=cbB^(jj<<posNshift);
-            int32 cbI1=binarySearchExact(cbB1,pSolo.cbWL.data(),pSolo.cbWL.size());
+            int64 cbI1=binarySearchExact<uint64>(cbB1,pSolo.cbWL.data(),pSolo.cbWL.size());
             if (cbI1>=0) {
                 if (cbI>=0) {//had another match already
                     stats.V[stats.nTooMany]++;
@@ -80,7 +80,7 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
     cbMatchInd.clear();
     for (uint32 ii=0; ii<pSolo.cbL; ii++) {
         for (uint32 jj=1; jj<4; jj++) {
-            int32 cbI1=binarySearchExact(cbB^(jj<<(ii*2)),pSolo.cbWL.data(),pSolo.cbWL.size());
+            int64 cbI1=binarySearchExact<uint64>(cbB^(jj<<(ii*2)),pSolo.cbWL.data(),pSolo.cbWL.size());
             if (cbI1>=0) {//found match
                 //output all
                 cbI=cbI1;

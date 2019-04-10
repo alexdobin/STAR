@@ -26,8 +26,14 @@ void SoloFeature::outputResults()
     ofstream &countMatrixStream=ofstrOpen(matrixFileName,ERROR_OUT, P);
 
     //header
+    uint32 featureN=0;
+    if (featureType==0 || featureType==2) {//genes
+        featureN=Trans.nGe;
+    } else if (featureType==1) {//sj
+        featureN=P.sjAll[0].size();
+    };
     countMatrixStream <<"%%MatrixMarket matrix coordinate integer general\n%\n";
-    countMatrixStream << Trans.nGe <<' '<< pSolo.cbWL.size() <<' '<< nCellGeneEntries << '\n';
+    countMatrixStream << featureN <<' '<< pSolo.cbWL.size() <<' '<< nCellGeneEntries << '\n';
 
     for (uint32 icb=0; icb<nCB; icb++) {
         uint32 *rCBpp=rCBp[icb];

@@ -17,16 +17,22 @@ void ParametersSolo::initialize(Parameters *pPin)
         type=0;
         return;
     } else if (typeStr=="Droplet") {
+        if (umiL > 16) {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: UMI length is too long: --soloUMIlen="<<umiL<<"\n";
+            errOut << "SOLUTION: UMI length cannot be longer than 16";
+            exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+        };
+        if (cbL > 31) {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: CB length is too long: --soloCBlen="<<cbL<<"\n";
+            errOut << "SOLUTION: CB length cannot be longer than 31";
+            exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+        };
         type=1;
         if (bL==1)
             bL=cbL+umiL;
-        pP->readNmates=1; //output mates TODO: check that readNmatesIn==2
-        if (umiL > 16) {
-            ostringstream errOut;
-            errOut << "EXITING because of to high UMI length: --soloUMIlen="<<umiL<<"\n";
-            errOut << "SOLUTION: specify lower UMI length (max: 16)";
-            exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
-        }
+        pP->readNmates=1; //output mates TODO: check that readNmatesIn==2       
     } else  {
         ostringstream errOut;
         errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in --soloType="<<typeStr<<"\n";
@@ -147,10 +153,11 @@ void ParametersSolo::initialize(Parameters *pPin)
         pP->quant.trSAM.bamCompression = -2;
         pP->quant.trSAM.indel = true;
         pP->quant.trSAM.softClip = true;
-        if (featureYes[2])
-            pP->quant.geneFull.yes=true;
         pP->inOut->logMain << "Turning on Genomic->Transcriptomic coordinate conversion for STARsolo\n";
     };
+    
+    if (featureYes[2])
+        pP->quant.geneFull.yes=true;
 
     time_t rawTime;
     time(&rawTime);
