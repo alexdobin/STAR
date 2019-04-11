@@ -33,7 +33,7 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, set<uint32> &re
     set<uint32> *readGe;
     if (featureType==0) {
         readGe = &readGene;
-    } else if (featureType==1) {
+    } else if (featureType==2) {
         readGe = &readGeneFull;
     };
 
