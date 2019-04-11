@@ -8,7 +8,7 @@ void Transcriptome::geneFullAlignOverlap(uint nA, Transcript **aAll, int32 stran
 
          int64 gi1=-1;
 
-         for (int ib=a.nExons-1; ib>=0; ib--) {//scan through all blocks of the alignments
+         for (int64 ib=a.nExons-1; ib>=0; ib--) {//scan through all blocks of the alignments
 
              uint64 be1=a.exons[ib][EX_G]+a.exons[ib][EX_L]-1;//end of the block
              gi1=binarySearch1a<uint64>(be1, geneFull.s, (int32) nGe);
