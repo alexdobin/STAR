@@ -107,27 +107,25 @@ uint64 loadGTF(SjdbClass &sjdbLoci, Parameters &P, string dirOut, Genome &mapGen
             uint64 ex1,ex2;
             char str1;
             oneLineStream >> ex1 >> ex2 >> ddd2 >> str1 >> ddd2; //read all fields except the last
-
+            
             string oneLine1;
-            getline(oneLineStream, oneLine1);//get the last field
+            getline(oneLineStream, oneLine1);//get the last field     
             replace(oneLine1.begin(),oneLine1.end(),';',' ');//to separate attributes
             replace(oneLine1.begin(),oneLine1.end(),'=',' ');//for GFF3 processing
-            oneLineStream.str(oneLine1);
-            oneLineStream.clear();
-
+            replace(oneLine1.begin(),oneLine1.end(),'\"',' ');//now the only separator is space
+            
             //string trID(""), gID(""), attr1(""),gName(""),gBiotype("");
-            array<string,4> exAttrNames({mapGen.pGe.sjdbGTFtagExonParentTranscript,mapGen.pGe.sjdbGTFtagExonParentGene,"gene_name", "gene_biotype"}); //trID, gID, gName, gBiotype
-            array<string,4> exAttr; //trID, gID, gName, gBiotype
-            while (oneLineStream.good()) {
-                string attrName1("");
-                oneLineStream >> attrName1;
-                string attr1;
-                oneLineStream >> attr1;
-                attr1.erase(remove(attr1.begin(),attr1.end(),'"'),attr1.end());
-                attr1.erase(remove(attr1.begin(),attr1.end(),';'),attr1.end());
-                for (uint32 ii=0; ii<exAttrNames.size(); ii++) {
-                    if (attrName1==exAttrNames[ii]) {
-                        exAttr[ii]=attr1;
+            vector<vector<string>> exAttrNames({ {mapGen.pGe.sjdbGTFtagExonParentTranscript}, {mapGen.pGe.sjdbGTFtagExonParentGene}, mapGen.pGe.sjdbGTFtagExonParentGeneName, mapGen.pGe.sjdbGTFtagExonParentGeneType }); //trID, gID, gName, gBiotype
+            vector<string> exAttr; //trID, gID, gName, gBiotype
+            exAttr.resize(exAttrNames.size());
+            
+            for (uint32 ii=0; ii<exAttrNames.size(); ii++) {
+                for (auto &attr1 : exAttrNames[ii]) {//scan through possible names
+                    size_t pos1=oneLine1.find(" " + attr1 + " "); //attribute name is separated by spaces
+                    if (pos1!=string::npos)
+                        pos1=oneLine1.find_first_not_of(" ", pos1+attr1.size()+1);
+                    if (pos1!=string::npos) {
+                        exAttr[ii]=oneLine1.substr(pos1, oneLine1.find_first_of(" ",pos1)-pos1);
                     };
                 };
             };
@@ -135,27 +133,37 @@ uint64 loadGTF(SjdbClass &sjdbLoci, Parameters &P, string dirOut, Genome &mapGen
             if (exAttr[0]=="") {//no transcript ID
                 P.inOut->logMain << "WARNING: while processing pGe.sjdbGTFfile=" << mapGen.pGe.sjdbGTFfile <<": no transcript_id for line:\n";
                 P.inOut->logMain << oneLine <<"\n"<<flush;
-            } else {
-                transcriptIDnumber.insert(std::pair <string,uint64> (exAttr[0],(uint64) transcriptIDnumber.size()));//insert new element if necessary with a new numeric value
-                if (transcriptID.size() < transcriptIDnumber.size()) transcriptID.push_back(exAttr[0]);
-                if (str1=='+') {
-                   transcriptStrand[transcriptIDnumber[exAttr[0]]]=1;
-                } else if (str1=='-') {
-                   transcriptStrand[transcriptIDnumber[exAttr[0]]]=2;
-                } else {
-                   transcriptStrand[transcriptIDnumber[exAttr[0]]]=0;
-                };
+                exAttr[0]="tr_" + chr1 +"_"+ to_string(ex1) +"_"+ to_string(ex2) +"_"+ to_string(exonN); //unique name for the transcript
             };
-
+            
             if (exAttr[1]=="") {//no gene ID
                 P.inOut->logMain << "WARNING: while processing pGe.sjdbGTFfile=" << mapGen.pGe.sjdbGTFfile <<": no gene_id for line:\n";
                 P.inOut->logMain << oneLine <<"\n"<<flush;
-            } else {//add gene ID if necessary
-                geneIDnumber.insert(std::pair <string,uint64> (exAttr[1],(uint64) geneIDnumber.size()));//insert new element if necessary with a $
-                if (geneID.size() < geneIDnumber.size()) {//new gene is added
-                    geneID.push_back(exAttr[1]);
-                    geneAttr.push_back({exAttr[2],exAttr[3]});
-                };
+                exAttr[1]="MissingGeneID";
+            };
+            
+            if (exAttr[2]=="") {//no gene name
+                exAttr[2]=exAttr[1];
+            };
+            
+            if (exAttr[3]=="") {//no gene name
+                exAttr[3]="MissingGeneType";
+            };
+            
+            transcriptIDnumber.insert(std::pair <string,uint64> (exAttr[0],(uint64) transcriptIDnumber.size()));//insert new element if necessary with a new numeric value
+            if (transcriptID.size() < transcriptIDnumber.size()) transcriptID.push_back(exAttr[0]);
+            if (str1=='+') {
+               transcriptStrand[transcriptIDnumber[exAttr[0]]]=1;
+            } else if (str1=='-') {
+               transcriptStrand[transcriptIDnumber[exAttr[0]]]=2;
+            } else {
+               transcriptStrand[transcriptIDnumber[exAttr[0]]]=0;
+            };
+
+            geneIDnumber.insert(std::pair <string,uint64> (exAttr[1],(uint64) geneIDnumber.size()));//insert new element if necessary with a $
+            if (geneID.size() < geneIDnumber.size()) {//new gene is added
+                geneID.push_back(exAttr[1]);
+                geneAttr.push_back({exAttr[2],exAttr[3]});
             };
 
             exonLoci[GTF_exonTrID(exonN)]=transcriptIDnumber[exAttr[0]];

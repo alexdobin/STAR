@@ -18,9 +18,13 @@ class ParametersGenome {//"constant" genome parameters - user input
         vector <string> sjdbFileChrStartEnd;
         string sjdbGTFfile;
         string sjdbGTFchrPrefix;
+        
         string sjdbGTFfeatureExon;
         string sjdbGTFtagExonParentTranscript;
         string sjdbGTFtagExonParentGene;
+        vector<string> sjdbGTFtagExonParentGeneName;
+        vector<string> sjdbGTFtagExonParentGeneType;
+        
         string sjdbInsertSave;
         uint sjdbOverhang;
         int sjdbOverhang_par;

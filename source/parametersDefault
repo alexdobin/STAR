@@ -85,10 +85,16 @@ sjdbGTFfeatureExon                      exon
     string: feature type in GTF file to be used as exons for building transcripts
 
 sjdbGTFtagExonParentTranscript          transcript_id
-    string: tag name to be used as exons' transcript-parents (default "transcript_id" works for GTF files)
+    string: GTF attribute name for parent transcript ID (default "transcript_id" works for GTF files)
 
 sjdbGTFtagExonParentGene                gene_id
-    string: tag name to be used as exons' gene-parents (default "gene_id" works for GTF files)
+    string: GTF attribute name for parent gene ID (default "gene_id" works for GTF files)
+
+sjdbGTFtagExonParentGeneName            gene_name
+    string(s): GTF attrbute name for parent gene name
+
+sjdbGTFtagExonParentGeneType            gene_type gene_biotype
+    string(s): GTF attrbute name for parent gene type
 
 sjdbOverhang                            100
     int>0: length of the donor/acceptor sequence on each side of the junctions, ideally = (mate_length - 1)
