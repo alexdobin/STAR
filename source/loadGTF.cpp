@@ -112,6 +112,7 @@ uint64 loadGTF(SjdbClass &sjdbLoci, Parameters &P, string dirOut, Genome &mapGen
             getline(oneLineStream, oneLine1);//get the last field     
             replace(oneLine1.begin(),oneLine1.end(),';',' ');//to separate attributes
             replace(oneLine1.begin(),oneLine1.end(),'=',' ');//for GFF3 processing
+            replace(oneLine1.begin(),oneLine1.end(),'\t',' ');//replace tabs
             replace(oneLine1.begin(),oneLine1.end(),'\"',' ');//now the only separator is space
             
             //string trID(""), gID(""), attr1(""),gName(""),gBiotype("");

@@ -207,6 +207,13 @@ void Genome::genomeGenerate() {
     nGenome=N;
     uint N2 = N*2;
 
+    if (pGe.gSAindexNbases > log2(nGenome)/2-1) {
+        ostringstream warnOut; 
+        warnOut << "--genomeSAindexNbases " << pGe.gSAindexNbases << " is too large for the genome size=" << nGenome;
+        warnOut << ", which may cause seg-fault at the mapping step. Re-run genome generation with recommended --genomeSAindexNbases " << int(log2(nGenome)/2-1);
+        warningMessage(warnOut.str(),P.inOut->logMain,std::cerr,P);
+    };
+    
     ofstream & chrN = ofstrOpen(pGe.gDir+"/chrName.txt",ERROR_OUT, P);
     ofstream & chrS = ofstrOpen(pGe.gDir+"/chrStart.txt",ERROR_OUT, P);
     ofstream & chrL = ofstrOpen(pGe.gDir+"/chrLength.txt",ERROR_OUT, P);
