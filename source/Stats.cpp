@@ -130,8 +130,11 @@ void Stats::reportFinal(ofstream &streamOut) {
                <<setw(w1)<< "Number of reads mapped to too many loci |\t"      << unmappedMulti <<"\n" \
                <<setw(w1)<< "% of reads mapped to too many loci |\t"           << (readN>0 ? double(unmappedMulti)/double(readN)*100 : 0) <<'%' <<"\n" \
                <<setw(w1)<< "UNMAPPED READS:\n" \
+               <<setw(w1)<< "Number of reads unmapped: too many mismatches |\t"<< unmappedMismatch<<"\n" \
                <<setw(w1)<< "% of reads unmapped: too many mismatches |\t"     << (readN>0 ? double(unmappedMismatch)/double(readN)*100 : 0) <<'%' <<"\n" \
+               <<setw(w1)<< "Number of reads unmapped: too short |\t"          << unmappedShort <<"\n" \
                <<setw(w1)<< "% of reads unmapped: too short |\t"               << (readN>0 ? double(unmappedShort)/double(readN)*100 : 0) <<'%' <<"\n" \
+               <<setw(w1)<< "Number of reads unmapped: other |\t"              << unmappedOther <<"\n" \
                <<setw(w1)<< "% of reads unmapped: other |\t"                   << (readN>0 ? double(unmappedOther)/double(readN)*100 :0) <<'%'<<"\n" \
                <<setw(w1)<< "CHIMERIC READS:\n" \
                <<setw(w1)<< "Number of chimeric reads |\t"                     << chimericAll <<"\n" \

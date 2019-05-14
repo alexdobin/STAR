@@ -35,9 +35,9 @@ Download the latest [release from](https://github.com/alexdobin/STAR/releases) a
 
 ```bash
 # Get latest STAR source from releases
-wget https://github.com/alexdobin/STAR/archive/2.7.0f.tar.gz
-tar -xzf 2.7.0f.tar.gz
-cd STAR-2.7.0f
+wget https://github.com/alexdobin/STAR/archive/2.7.1a.tar.gz
+tar -xzf 2.7.1a.tar.gz
+cd STAR-2.7.1a
 
 # Alternatively, get STAR source using git
 git clone https://github.com/alexdobin/STAR.git
@@ -74,7 +74,6 @@ make STARforMacStatic CXX=/path/to/gcc
 ```
 
 If employing STAR only on a single machine or a homogeneously setup cluster, you may aim at helping the compiler to optimize in way that is tailored to your platform. The flags LDFLAGSextra and CXXFLAGSextra are appended to the default optimizations specified in source/Makefile.
-
 ```
 # platform-specific optimization for gcc/g++
 make CXXFLAGSextra=-march=native
@@ -82,6 +81,14 @@ make CXXFLAGSextra=-march=native
 make LDFLAGSextra=-flto CXXFLAGSextra="-flto -march=native"
 ```
 
+FreeBSD ports
+=============
+
+STAR can be installed on FreeBSD via the FreeBSD ports system.
+To install via the binary package, simply run:
+```
+pkg install star
+```
 
 LIMITATIONS
 ===========

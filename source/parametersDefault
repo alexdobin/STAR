@@ -1,5 +1,5 @@
 ### versions
-versionGenome           2.7.0d
+versionGenome           2.7.1a
     string: earliest genome index version compatible with this STAR release. Please do not change this value!
 
 ### Parameter Files

@@ -146,7 +146,10 @@ void ParametersSolo::initialize(Parameters *pPin)
         };
     };
 
-    qsort(cbWL.data(),cbWL.size(),sizeof(uint64),funCompareNumbers<uint64>);
+    std::sort(cbWL.begin(),cbWL.end());
+    auto un1=std::unique(cbWL.begin(),cbWL.end());
+    cbWL.resize(std::distance(cbWL.begin(),un1));
+    //qsort(cbWL.data(),cbWL.size(),sizeof(uint64),funCompareNumbers<uint64>);
 
     if (!pP->quant.trSAM.yes) {
         pP->quant.yes = true;

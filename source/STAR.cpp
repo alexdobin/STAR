@@ -147,6 +147,8 @@ int main(int argInN, char* argIn[]) {
         P1.quant.yes=false;
         P1.quant.trSAM.yes=false;
         P1.quant.geCount.yes=false;
+        P1.outSAMunmapped.within=false;
+        P1.quant.trSAM.bamYes=false;
 
         P1.outFilterBySJoutStage=0;
 

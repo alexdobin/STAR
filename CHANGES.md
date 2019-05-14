@@ -1,7 +1,11 @@
-* Implemented Cell Barcodes longer than 16 bases (but shorter than 31 bases). Many thanks to Gert Hulselmans who implemented this option (#588).
+* Implemented --soloFeatures GeneFull which counts reads overlapping full genes, i.e. includes reads that overlap introns. This can be combined with other features, e.g. --soloFeatures Gene SJ GeneFull .
 * Implemented --soloCBwhitelist None option for solo* demultiplexing without CB whitelist. In this case error correction for CBs is not performed.
-* Implemented --soloFeatures GeneFull which counts reads overlapping full genes, i.e. includes reads that overlap introns. This can be combined with other features, e.g. --soloFeatures Gene SJ GeneFull
-* Fixed a problem which may cause seg-faults for reads with many blocks. Issue #342.
+* Implemented Cell Barcodes longer than 16 bases (but shorter than 31 bases). Many thanks to Gert Hulselmans for implementing this feature (#588).
+* Implemented --sjdbGTFtagExonParentGeneName and --sjdbGTFtagExonParentGeneType options to load gene name and biotype attributes from the GTF file.
+* Fixed problems created by missing gene/transcript ID, name and biotype attributes in GTF files (issues #613, #628).
+* Added warning for incorrectly scaled --genomeSAindexNbases parameter (issue #614).
+* Added numbers of unmapped reads to the Log.final.out file (pull #622).
+* Fixed a problem which may cause seg-faults for reads with many blocks (issue #342).
 
 STAR 2.7.0f 2019/03/28
 ======================

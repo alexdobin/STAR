@@ -92,10 +92,16 @@
   \optLine{string: feature type in GTF file to be used as exons for building transcripts} 
 \optName{sjdbGTFtagExonParentTranscript}
   \optValue{transcript{\textunderscore}id}
-  \optLine{string: tag name to be used as exons' transcript-parents (default "transcript{\textunderscore}id" works for GTF files)} 
+  \optLine{string: GTF attribute name for parent transcript ID (default "transcript{\textunderscore}id" works for GTF files)} 
 \optName{sjdbGTFtagExonParentGene}
   \optValue{gene{\textunderscore}id}
-  \optLine{string: tag name to be used as exons' gene-parents (default "gene{\textunderscore}id" works for GTF files)} 
+  \optLine{string: GTF attribute name for parent gene ID (default "gene{\textunderscore}id" works for GTF files)} 
+\optName{sjdbGTFtagExonParentGeneName}
+  \optValue{gene{\textunderscore}name}
+  \optLine{string(s): GTF attrbute name for parent gene name} 
+\optName{sjdbGTFtagExonParentGeneType}
+  \optValue{gene{\textunderscore}type gene{\textunderscore}biotype}
+  \optLine{string(s): GTF attrbute name for parent gene type} 
 \optName{sjdbOverhang}
   \optValue{100}
   \optLine{int{\textgreater}0: length of the donor/acceptor sequence on each side of the junctions, ideally = (mate{\textunderscore}length - 1)} 
@@ -821,6 +827,7 @@
 \begin{optOptTable}
   \optOpt{Gene}   \optOptLine{genes: reads match the gene transcript}
   \optOpt{SJ}   \optOptLine{splice junctions: reported in SJ.out.tab}
+  \optOpt{GeneFull}   \optOptLine{full genes: count all reads overlapping genes' exons and introns}
 \end{optOptTable}
 \optName{soloUMIdedup}
   \optValue{1MM{\textunderscore}All}
@@ -831,13 +838,14 @@
   \optOpt{1MM{\textunderscore}NotCollapsed}   \optOptLine{UMIs with 1 mismatch distance to others are not collapsed (i.e. all counted)}
 \end{optOptTable}
 \optName{soloOutFileNames}
-  \optValue{Solo.out/ genes.tsv barcodes.tsv matrix.mtx matrixSJ.mtx}
+  \optValue{Solo.out/ genes.tsv barcodes.tsv matrix.mtx matrixSJ.mtx matrixGeneFull.mtx}
   \optLine{string(s)               file names for STARsolo output} 
 \begin{optOptTable}
   \optOpt{1st word}   \optOptLine{file name prefix}
   \optOpt{2nd word}   \optOptLine{gene IDs and names}
   \optOpt{3rd word}   \optOptLine{barcode sequences}
-  \optOpt{4th word}   \optOptLine{cell/gene counts matrix}
-  \optOpt{5th word}   \optOptLine{cell/splice junction counts matrix}
+  \optOpt{4th word}   \optOptLine{cell/Gene counts matrix}
+  \optOpt{5th word}   \optOptLine{cell/SJ counts matrix}
+  \optOpt{6th word}   \optOptLine{cell/GeneFull counts matrix}
 \end{optOptTable}
 \end{optTable}
