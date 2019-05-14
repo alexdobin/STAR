@@ -34,7 +34,7 @@
 
 \newcommand{\sechyperref}[1]{\hyperref[#1]{Section \ref{#1}. \nameref{#1}}}
 
-\title{STAR manual 2.7.0f}
+\title{STAR manual 2.7.1a}
 \author{Alexander Dobin\\
 dobin@cshl.edu}
 \maketitle
@@ -269,17 +269,35 @@ The \opt{outSAMmultNmax} parameter limits the number of output alignments (SAM l
 The SAM attributes can be specified by the user using \opt{outSAMattributes} \optvr{A1 A2 A3 ...} option which accept a list of 2-character SAM attributes. The implemented attributes are: \optv{NH HI NM MD AS nM jM jI XS}. By default, STAR outputs \optv{NH HI AS nM} attributes.
 \begin{itemize}
 \item[]
-\optv{NH HI NM MD} have standard meaning as defined in the SAM format specifications.
+\optv{NH HI NM MD} : have standard meaning as defined in the SAM format specifications.
 \item[]
-\optv{AS} id the local alignment score (paired for paired-end reads). 
+\optv{AS} : id the local alignment score (paired for paired-end reads). 
 \item[]
-\optv{nM} is the number of mismatches per (paired) alignment, not to be confused with \optv{NM}, which is the number of mismatches in each mate.
+\optv{nM} : is the number of mismatches per (paired) alignment, not to be confused with \optv{NM}, which is the number of mismatches in each mate.
 \item[]
-\optv{jM:B:c,M1,M2,...} intron motifs for all junctions (i.e. N in CIGAR): 0: non-canonical; 1: GT/AG, 2: CT/AC, 3: GC/AG, 4: CT/GC, 5: AT/AC, 6: GT/AT. If splice junctions database is used, and a junction is annotated, 20 is added to its motif value.
+\optv{jM:B:c,M1,M2,...} : intron motifs for all junctions (i.e. N in CIGAR): 0: non-canonical; 1: GT/AG, 2: CT/AC, 3: GC/AG, 4: CT/GC, 5: AT/AC, 6: GT/AT. If splice junctions database is used, and a junction is annotated, 20 is added to its motif value.
 \item[]
-\optv{jI:B:I,Start1,End1,Start2,End2,...} Start and End of introns for all junctions (1-based).
+\optv{jI:B:I,Start1,End1,Start2,End2,...} : Start and End of introns for all junctions (1-based).
 \item[]
-\optv{jM jI} attributes require samtools 0.1.18 or later, and were reported to be incompatible with some downstream tools such as Cufflinks.
+\optv{jM jI} : attributes require samtools 0.1.18 or later, and were reported to be incompatible with some downstream tools such as Cufflinks.
+\item[]
+\optv{vA} : variant allele
+\item[]
+\optv{vG} : genomic coordiante of the variant overlapped by the read
+\item[]
+\optv{vW} : 0/1 - alignment does not pass / passes WASP filtering. Requires --waspOutputMode SAMtag
+\item[]
+\optv{CR CY UR UY} : sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing, not error corrected
+\item[]
+\optv{uT} : for unmapped reads, reason for not mapping:
+           \begin{itemize}[noitemsep,topsep=-3pt]
+           	\item[] 0 : no acceptable seed/windows, "Unmapped other" in the Log.final.out
+           	\item[] 1 : best alignment shorter than min allowed mapped length, "Unmapped: too short" in the Log.final.out
+           	\item[] 2 : best alignment has more mismatches than max allowed number of mismatches, "Unmapped: too many mismatches" in the Log.final.out
+			\item[] 3 : read maps to more loci than the max number of multimappng loci, "Multimapping: mapped to too many loci" in the Log.final.out
+		    \item[] 4 : unmapped mate of a mapped paired-end read
+           \end{itemize}
+
 \end{itemize}
 
 \subsubsection{Compatibility with Cufflinks/Cuffdiff.}

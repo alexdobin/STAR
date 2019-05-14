@@ -1,3 +1,8 @@
+STAR 2.7.1a 2019/05/14
+======================
+**This version requires re-generation of the genome indexes**
+
+* Implemented collapsing of duplicate cell barcodes in the whitelist.
 * Implemented --soloFeatures GeneFull which counts reads overlapping full genes, i.e. includes reads that overlap introns. This can be combined with other features, e.g. --soloFeatures Gene SJ GeneFull .
 * Implemented --soloCBwhitelist None option for solo* demultiplexing without CB whitelist. In this case error correction for CBs is not performed.
 * Implemented Cell Barcodes longer than 16 bases (but shorter than 31 bases). Many thanks to Gert Hulselmans for implementing this feature (#588).
