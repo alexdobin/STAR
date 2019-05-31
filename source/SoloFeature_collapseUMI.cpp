@@ -57,11 +57,12 @@ void collapseUMIwith1MMlowHalf(uint32 *rGU, uint32 umiArrayStride, uint32 umiMas
     };
 };
 
-void graphDepthFirstSearch(uint32 n, vector<bool> &nodeVisited, vector<vector<uint32>> &nodeEdges) {
+void graphDepthFirstSearch(uint32 n, vector<bool> &nodeVisited, vector<vector<uint32>> &nodeEdges, vector <uint32> &nodeColor) {
     for (const auto &nn : nodeEdges[n]) {
         if (!nodeVisited[nn]) {
             nodeVisited[nn]=true;
-            graphDepthFirstSearch(nn,nodeVisited,nodeEdges);
+            nodeColor[nn]=nodeColor[n];
+            graphDepthFirstSearch(nn,nodeVisited,nodeEdges,nodeColor);
         };
     };
 };
@@ -83,19 +84,21 @@ uint32 graphNumberOfConnectedComponents(uint32 N, vector<array<uint32,2>> V) {//
     };
 
     vector<bool> nodeVisited(N,false);
-
+    vector<uint32> nodeColor(N); //new color (connected component) for each node (each original color)
+    
     uint32 nConnComp=0;
     for (uint32 ii=0; ii<N; ii++) {
         //if (V[ii].size()==0) {//this node is not connected, no need to check. Save time beacuse this happens often
         //wrong: should be
         if (nodeEdges[ii].size()==0) {//this node is not connected, no need to check. Save time beacuse this happens often
-           ++nConnComp;
-           continue;
+            ++nConnComp;
+            continue;
         };
         if (!nodeVisited[ii]) {
             nodeVisited[ii]=true;
             ++nConnComp;
-            graphDepthFirstSearch(ii,nodeVisited,nodeEdges);
+            nodeColor[ii]=ii;
+            graphDepthFirstSearch(ii,nodeVisited,nodeEdges,nodeColor);
         };
     };
     return nConnComp;
