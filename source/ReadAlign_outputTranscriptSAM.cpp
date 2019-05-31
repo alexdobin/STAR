@@ -323,12 +323,23 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
                         *outStream<< "\tMC:Z:" <<matesCIGAR[1-imate];
                     };
                     break;
+                    
+                //do nothing - this attributes only work for BAM output
                 case ATTR_ch:
-                    //do nothing - this attribute only worlks for BAM output
+                case ATTR_CR:
+                case ATTR_CY:
+                case ATTR_UR:
+                case ATTR_UY:
+                case ATTR_CB:
+                case ATTR_UB:
+                case ATTR_rB:
+                case ATTR_vG:
+                case ATTR_vA:
+                case ATTR_vW:
                     break;
                 default:
                     ostringstream errOut;
-                    errOut <<"EXITING because of FATAL BUG: unknown/unimplemented SAM atrribute (tag): "<<P.outSAMattrOrder[ii] <<"\n";
+                    errOut <<"EXITING because of FATAL error: unknown/unimplemented SAM atrribute (tag): "<<P.outSAMattrOrder[ii] <<"\n";
                     errOut <<"SOLUTION: contact Alex Dobin at dobin@cshl.edu\n";
                     exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
             };

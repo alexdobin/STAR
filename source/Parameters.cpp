@@ -1023,9 +1023,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
     
-    //solo
-    pSolo.initialize(this);
-
     //outSAMattributes
     outSAMattrPresent.NH=false;//TODO re-write as class with constructor?
     outSAMattrPresent.HI=false;
@@ -1038,15 +1035,19 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     outSAMattrPresent.RG=false;
     outSAMattrPresent.MC=false;
     outSAMattrPresent.XS=false;
+    outSAMattrPresent.ch=false;
+
     outSAMattrPresent.vA=false;
     outSAMattrPresent.vG=false;
     outSAMattrPresent.vW=false;
-    outSAMattrPresent.ch=false;
     outSAMattrPresent.rB=false;
+    
     outSAMattrPresent.CR=false;
     outSAMattrPresent.CY=false;
     outSAMattrPresent.UR=false;
     outSAMattrPresent.UY=false;
+    outSAMattrPresent.CB=false;
+    outSAMattrPresent.UB=false;
 
 
     //for quant SAM output only NH and HI flags
@@ -1132,6 +1133,14 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             outSAMattrOrder.push_back(ATTR_UY);
             outSAMattrOrderQuant.push_back(ATTR_UY);
             outSAMattrPresent.UY=true;
+        } else if (vAttr1.at(ii)== "CB") {
+            outSAMattrOrder.push_back(ATTR_CB);
+            outSAMattrOrderQuant.push_back(ATTR_CB);
+            outSAMattrPresent.CB=true;
+        } else if (vAttr1.at(ii)== "UB") {
+            outSAMattrOrder.push_back(ATTR_UB);
+            outSAMattrOrderQuant.push_back(ATTR_UB);
+            outSAMattrPresent.UB=true;
         } else if (vAttr1.at(ii)== "XS") {
             outSAMattrOrder.push_back(ATTR_XS);
             outSAMattrPresent.XS=true;
@@ -1185,13 +1194,9 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         inOut->logMain << "WARNING --waspOutputMode is set, therefore STAR will output vW attribute" <<endl;
     };
 
-    if (pSolo.type==0 && (outSAMattrPresent.CR || outSAMattrPresent.CY || outSAMattrPresent.UR || outSAMattrPresent.UY) ) {
-            ostringstream errOut;
-            errOut <<"EXITING because of FATAL INPUT ERROR: --outSAMattributes contains CR/CY/UR/UY tags, but --soloType is not set\n";
-            errOut <<"SOLUTION: re-run STAR without these attribures, or with --soloType set\n";
-            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-    };
-
+    //solo
+    pSolo.initialize(this);
+    
     //chimeric
     pCh.out.bam=false;
     pCh.out.junctions=false;

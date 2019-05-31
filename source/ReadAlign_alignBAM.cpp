@@ -486,10 +486,15 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                             attrN+=bamAttrArrayWrite(soloRead->readBar->umiQual,"UY",attrOutArray+attrN);
                         break;
 
+                    //following attributes are not processed here
+                    case ATTR_CB:
+                    case ATTR_UB:
+                        break;
+                        
                     default:
                         ostringstream errOut;
                         errOut <<"EXITING because of FATAL BUG: unknown/unimplemented SAM/BAM atrribute (tag): "<<outSAMattrOrder[ii] <<"\n";
-                        errOut <<"SOLUTION: contact Alex Dobin at dobin@cshl.edu\n";
+                        errOut <<"SOLUTION: please make sure that SAM attributes in --outSAMattributes are compatible with the --outSAMtype option\n";
                         exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
                 };
             };

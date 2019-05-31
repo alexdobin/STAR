@@ -26,6 +26,8 @@ public:
     ofstream *statsStream;
 
     array<vector<uint64>,2> sjAll;
+    
+    vector<array<uint32,2>> readInfo; //corrected CB/UMI information for each read
 
     SoloFeature(int feTy, Parameters &Pin, Transcriptome &inTrans);
     void processRecords(ReadAlignChunk **RAchunk);

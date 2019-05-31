@@ -25,7 +25,7 @@ class ReadAlign {
         //vars
         Genome &mapGen; //mapped-to-genome structure
 
-        uint iRead;
+        uint64 iRead, iReadAll;
         char **Read1;
 
         Stats statsRA; //mapping statistics
@@ -87,7 +87,7 @@ class ReadAlign {
         Transcript** trArrayPointer; //linear array of transcripts to store all of them from all windows
 
         //read
-        uint iReadAll, iMate;
+        uint64 iMate;
         char readFilter; //Illumina not passed Y/N
         bool revertStrand; //what to do with the strand, according to strandType and iMate
         uint clip3pNtotal[MAX_N_MATES], clip5pNtotal[MAX_N_MATES], clip3pAdapterN[MAX_N_MATES]; //total number of trimmed bases from 5p,3p

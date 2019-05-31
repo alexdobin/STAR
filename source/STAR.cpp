@@ -34,7 +34,7 @@
 #include "parametersDefault.xxd"
 
 void usage(int usageType) {
-    cout << "Usage: STAR  [options]... --genomeDir REFERENCE   --readFilesIn R1.fq R2.fq\n";
+    cout << "Usage: STAR  [options]... --genomeDir /path/to/genome/index/   --readFilesIn R1.fq R2.fq\n";
     cout <<"Spliced Transcripts Alignment to a Reference (c) Alexander Dobin, 2009-2019\n\n";
     cout <<"For more details see:\n";
     cout <<"<https://github.com/alexdobin/STAR>\n";
@@ -371,8 +371,8 @@ int main(int argInN, char* argIn[]) {
     //collapse splice junctions from different threads/chunks, and output them
     outputSJ(RAchunk,P);
 
-    //solo genes
-    Solo soloMain(RAchunk,P,*RAchunk[0]->chunkTr);//solo for genes
+    //solo counts
+    Solo soloMain(RAchunk,P,*RAchunk[0]->chunkTr);
     soloMain.processAndOutput();
 
     if ( P.quant.geCount.yes ) {//output gene quantifications

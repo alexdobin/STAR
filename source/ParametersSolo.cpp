@@ -15,6 +15,15 @@ void ParametersSolo::initialize(Parameters *pPin)
 
     if (typeStr=="None") {
         type=0;
+    
+        //SAM attributes
+        if (pP->outSAMattrPresent.CR || pP->outSAMattrPresent.CY || pP->outSAMattrPresent.UR || pP->outSAMattrPresent.UY  || pP->outSAMattrPresent.CB  || pP->outSAMattrPresent.UB) {
+            ostringstream errOut;
+            errOut <<"EXITING because of FATAL INPUT ERROR: --outSAMattributes contains CR/CY/UR/UY tags, but --soloType is not set\n";
+            errOut <<"SOLUTION: re-run STAR without these attribures, or with --soloType set\n";
+            exitWithError(errOut.str(), std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+        };        
+        
         return;
     } else if (typeStr=="Droplet") {
         if (umiL > 16) {
@@ -150,7 +159,12 @@ void ParametersSolo::initialize(Parameters *pPin)
     auto un1=std::unique(cbWL.begin(),cbWL.end());
     cbWL.resize(std::distance(cbWL.begin(),un1));
     //qsort(cbWL.data(),cbWL.size(),sizeof(uint64),funCompareNumbers<uint64>);
+    
+    time_t rawTime;
+    time(&rawTime);
+    pP->inOut->logMain << timeMonthDayTime(rawTime) << "Finished reading, sorting and deduplicating CB whitelist sequences: " << cbWL.size() <<endl;
 
+    
     if (!pP->quant.trSAM.yes) {
         pP->quant.yes = true;
         pP->quant.trSAM.yes = true;
@@ -164,7 +178,16 @@ void ParametersSolo::initialize(Parameters *pPin)
     if (featureYes[2])
         pP->quant.geneFull.yes=true;
 
-    time_t rawTime;
-    time(&rawTime);
-    pP->inOut->logMain << timeMonthDayTime(rawTime) << "Finished reading CB whitelist sequences: " << cbWL.size() <<endl;
+    samAttrYes=false;
+    samAttrFeature=-1;
+    if (pP->outSAMattrPresent.CB || pP->outSAMattrPresent.UB) {
+        samAttrYes=true;
+        samAttrFeature=0;//hard-coded for now to follow Cell Ranger - error correction only done for feature=Gene
+        if (!pP->outBAMcoord) {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: CB and/or UB attributes in --outSAMattributes can only be output in the sorted BAM file.\n";
+            errOut << "SOLUTION: re-run STAR with --outSAMtype BAM SortedByCoordinate ...\n";
+            exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+        };
+    };  
 };

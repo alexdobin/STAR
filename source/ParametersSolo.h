@@ -34,6 +34,9 @@ public:
     vector<string> outFileNames;
     //constants
     uint32 umiMaskLow, umiMaskHigh; //low/high half bit-mask or UMIs
+    
+    bool samAttrYes;//post-processed SAM attributes: error-corrected CB and UMI
+    int32 samAttrFeature;//which feature to use for error correction
 
     void initialize(Parameters *pPin);
 private:

@@ -57,17 +57,16 @@ void collapseUMIwith1MMlowHalf(uint32 *rGU, uint32 umiArrayStride, uint32 umiMas
     };
 };
 
-void graphDepthFirstSearch(uint32 n, vector<bool> &nodeVisited, vector<vector<uint32>> &nodeEdges, vector <uint32> &nodeColor) {
+void graphDepthFirstSearch(uint32 n, vector<vector<uint32>> &nodeEdges, vector <uint32> &nodeColor) {
     for (const auto &nn : nodeEdges[n]) {
-        if (!nodeVisited[nn]) {
-            nodeVisited[nn]=true;
+        if (nodeColor[nn]==(uint32)-1) {//node not visited
             nodeColor[nn]=nodeColor[n];
-            graphDepthFirstSearch(nn,nodeVisited,nodeEdges,nodeColor);
+            graphDepthFirstSearch(nn,nodeEdges,nodeColor);
         };
     };
 };
 
-uint32 graphNumberOfConnectedComponents(uint32 N, vector<array<uint32,2>> V) {//find number of connected components
+uint32 graphNumberOfConnectedComponents(uint32 N, vector<array<uint32,2>> V, vector<uint32> &nodeColor) {//find number of connected components
     //N=number of nodes
     //V=edges, list of connected nodes, each pair of nodes listed once
     //simple recursive DFS
@@ -83,8 +82,7 @@ uint32 graphNumberOfConnectedComponents(uint32 N, vector<array<uint32,2>> V) {//
         nodeEdges[V[ii][1]].push_back(V[ii][0]);
     };
 
-    vector<bool> nodeVisited(N,false);
-    vector<uint32> nodeColor(N); //new color (connected component) for each node (each original color)
+    nodeColor.resize(N,(uint32)-1); //new color (connected component) for each node (each original color)
     
     uint32 nConnComp=0;
     for (uint32 ii=0; ii<N; ii++) {
@@ -94,19 +92,16 @@ uint32 graphNumberOfConnectedComponents(uint32 N, vector<array<uint32,2>> V) {//
             ++nConnComp;
             continue;
         };
-        if (!nodeVisited[ii]) {
-            nodeVisited[ii]=true;
+        if (nodeColor[ii]==(uint32)-1) {//node not visited
             ++nConnComp;
             nodeColor[ii]=ii;
-            graphDepthFirstSearch(ii,nodeVisited,nodeEdges,nodeColor);
+            graphDepthFirstSearch(ii,nodeEdges,nodeColor);
         };
     };
     return nConnComp;
 };
 
-void SoloFeature::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot, uint32 *umiArray) {//iCB = CB to collapse, nReads=number of reads for this CB
-
-    rGUarrayStride=2; //
+void SoloFeature::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot, uint32 *umiArray) {
     
     qsort(rGU,rN,rGUarrayStride*sizeof(uint32),funCompareNumbers<uint32>); //sort by gene number
 
@@ -154,10 +149,10 @@ void SoloFeature::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nU
 
         //collapse with 1MM
         uint32 nU1=nU0, nU2=nU0;//2 types of 1MM collapsing
-        uint32 nC=0; //graph colors
-        vector<array<uint32,2>> vC;//color connections
+        uint32 graphN=0; //number of nodes
+        vector<array<uint32,2>> graphConn;//node connections
 
-        collapseUMIwith1MMlowHalf(umiArray, umiArrayStride, pSolo.umiMaskLow, nU0, nU1, nU2, nC, vC);
+        collapseUMIwith1MMlowHalf(umiArray, umiArrayStride, pSolo.umiMaskLow, nU0, nU1, nU2, graphN, graphConn);
 
         //exchange low and high half of UMIs, re-sort, and look for 1MM again
         for (uint32 iu=0; iu<umiArrayStride*nU0; iu+=umiArrayStride) {
@@ -167,10 +162,11 @@ void SoloFeature::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nU
             umiArray[iu] |= high; //add high
         };
         qsort(umiArray, nU0, umiArrayStride*sizeof(uint32), funCompareNumbers<uint32>);
-        collapseUMIwith1MMlowHalf(umiArray, umiArrayStride, pSolo.umiMaskLow, nU0, nU1, nU2, nC, vC);
+        collapseUMIwith1MMlowHalf(umiArray, umiArrayStride, pSolo.umiMaskLow, nU0, nU1, nU2, graphN, graphConn);
 
         nUg[3*iG]=nU0;
-        nUg[3*iG+1]=nU1+graphNumberOfConnectedComponents(nC,vC);
+        vector<uint32> graphComponents;//for each node (color) - connected component number
+        nUg[3*iG+1]=nU1+graphNumberOfConnectedComponents(graphN, graphConn,graphComponents);
         nUg[3*iG+2]=nU2;
         nUtot+=nUg[3*iG+1];
     };

@@ -14,6 +14,8 @@ public:
 
     uint32 *cbReadCount;
     map <uint32,uint32> cbReadCountMap;
+    
+    bool readInfoYes;
 
     fstream *strU_0 ,*strU_1, *strU_2; //unique mappers, CB matches whitelist with 0,1>=2 MM
 
@@ -30,7 +32,7 @@ public:
     void addCounts(const SoloReadFeature &soloCBin);
     void addStats(const SoloReadFeature &soloCBin);
     void statsOut(ofstream &streamOut);
-    void inputRecords(uint32 **cbP, uint32 *cbReadCountExact);
+    void inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbReadCountExact);
 
 private:
     const int32 featureType;

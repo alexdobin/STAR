@@ -16,6 +16,10 @@ SoloReadFeature::SoloReadFeature(int32 feTy, Parameters &Pin, int iChunk)
             cbReadCount[ii]=0;
         };
     };
+    
+    readInfoYes=false;
+    if (featureType==pSolo.samAttrFeature)
+        readInfoYes=true;    
 
     if (iChunk>=0) {
         strU_0 = &fstrOpen(P.outFileTmp+"/solo"+pSolo.featureNames[featureType]+"_0_"+std::to_string(iChunk),ERROR_OUT, P);

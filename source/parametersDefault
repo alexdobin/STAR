@@ -250,6 +250,7 @@ outSAMattributes                Standard
                                 vG          ... genomic coordiante of the variant overlapped by the read
                                 vW          ... 0/1 - alignment does not pass / passes WASP filtering. Requires --waspOutputMode SAMtag
                                 CR CY UR UY ... sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing
+                                CB UB       ... error-corrected cell barcodes and UMIs for solo* demultiplexing. Requires --outSAMtype BAM SortedByCoordinate.
                                 Unsupported/undocumented:
                                 rB          ... alignment block read/genomic coordinates
                                 vR          ... read coordinate of the variant

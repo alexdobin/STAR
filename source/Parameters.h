@@ -151,7 +151,7 @@ class Parameters {
 
         int outSAMtlen;
 
-        struct {bool NH,HI,AS,NM,MD,nM,jM,jI,RG,XS,rB,vG,vA,vW,ch,MC,CR,CY,UR,UY;} outSAMattrPresent, outSAMattrPresentQuant;
+        struct {bool NH,HI,AS,NM,MD,nM,jM,jI,RG,XS,rB,vG,vA,vW,ch,MC,CR,CY,UR,UY,CB,UB;} outSAMattrPresent, outSAMattrPresentQuant;
 
         vector <int> outSAMattrOrder, outSAMattrOrderQuant;
         int outBAMcompression;
