@@ -86,9 +86,11 @@ uint32 graphNumberOfConnectedComponents(uint32 N, vector<array<uint32,2>> V) {//
 
     uint32 nConnComp=0;
     for (uint32 ii=0; ii<N; ii++) {
-        if (V[ii].size()==0) {//this node is not connected, no need to check. Save time beacuse this happens often
-            ++nConnComp;
-            continue;
+        //if (V[ii].size()==0) {//this node is not connected, no need to check. Save time beacuse this happens often
+        //wrong: should be
+        if (nodeEdges[ii].size()==0) {//this node is not connected, no need to check. Save time beacuse this happens often
+           ++nConnComp;
+           continue;
         };
         if (!nodeVisited[ii]) {
             nodeVisited[ii]=true;
@@ -127,8 +129,10 @@ void SoloFeature::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nU
     for (uint32 iG=0; iG<nGenes; iG++) {//collapse UMIs for each gene
         uint32 *rGU1=rGU+gReadS[iG];
 
-        qsort(rGU1, (gReadS[iG+1]-gReadS[iG])/rGUarrayStride, rGUarrayStride*sizeof(uint32), funCompareNumbers<uint32>);
-
+//         qsort(rGU1+1, (gReadS[iG+1]-gReadS[iG])/rGUarrayStride, rGUarrayStride*sizeof(uint32), funCompareNumbers<uint32>);
+        //        +1 to point to UMIs
+        qsort(rGU1, (gReadS[iG+1]-gReadS[iG])/rGUarrayStride, rGUarrayStride*sizeof(uint32), funCompareTypeShift<uint32,1>);
+        
         //exact collapse
         uint32 iR1=-umiArrayStride; //number of distinct UMIs for this gene
         uint32 u1=-1;
