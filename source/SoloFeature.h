@@ -40,6 +40,7 @@ private:
     Transcriptome &Trans;
 
     static const uint32 umiArrayStride=3;
+    uint32 rGUarrayStride;
 };
 
 #endif
