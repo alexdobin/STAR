@@ -179,14 +179,14 @@ void ReadAlign::outputAlignments() {
             };
 
             //solo
-            soloRead->record(nTr, readGene, readGeneFull, trMult[0]); 
+            soloRead->record(nTr, readGene, readGeneFull, trMult[0], iReadAll); 
         };
     };
 
     if (unmapType>=0) {//unmapped reads
         statsRA.unmappedAll++;
         soloRead->readBar->getCBandUMI(readNameExtra.at(0));
-        soloRead->record(nTr, readGene, readGeneFull, trMult[0]);         
+        soloRead->record(nTr, readGene, readGeneFull, trMult[0], iReadAll);         
     };
 
     if ( P.outSAMunmapped.within && unmapType>=0 && unmapType<4 ) {//output unmapped within && unmapped read && both mates unmapped

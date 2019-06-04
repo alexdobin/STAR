@@ -9,6 +9,9 @@ bool inputFeatureUmi(fstream *strIn, int32 featureType, bool readInfoYes, uint32
     if (!(*strIn >> umi)) //end of file
         return false;
 
+    if (readInfoYes)
+        *strIn >> iread;
+    
     if (featureType==0 || featureType==2) {//gene
         *strIn >> feature;
     } else if (featureType==1) {//sj
@@ -16,9 +19,6 @@ bool inputFeatureUmi(fstream *strIn, int32 featureType, bool readInfoYes, uint32
         *strIn >> sj[0] >> sj[1];
         feature=(uint32) binarySearch2(sj[0],sj[1],sjAll[0].data(),sjAll[1].data(),sjAll[0].size());
     };
-    
-//     if (readInfoYes)
-//         *strIn >> iread;
 
     return true;
 };
@@ -39,9 +39,9 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
                 
                 cbP[cb][0]=feature;
                 cbP[cb][1]=umi;
-//                 if (readInfoYes) {
-//                     cbP[cb][2]=iread;
-//                 };
+                if (readInfoYes) {
+                    cbP[cb][2]=iread;
+                };
                 cbP[cb]+=cbPstride;
                 stats.V[stats.nExactMatch]++;
             };
@@ -61,6 +61,9 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
                 if (feature != (uint32)(-1)){
                     cbP[cb][0]=feature;
                     cbP[cb][1]=umi;
+                    if (readInfoYes) {
+                        cbP[cb][2]=iread;
+                    };
                     cbP[cb]+=cbPstride;
                 };
             } else {
@@ -99,6 +102,9 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
             if (ptot>0.0 && pmax>=pSolo.cbMinP*ptot) {
                 cbP[cb][0]=feature;
                 cbP[cb][1]=umi;
+                if (readInfoYes) {
+                    cbP[cb][2]=iread;
+                };                
                 cbP[cb]+=cbPstride;
             } else {
                 stats.V[stats.nTooMany]++;
