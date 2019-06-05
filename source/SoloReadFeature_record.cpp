@@ -8,13 +8,13 @@ uint32 outputReadCB(fstream *streamOut, int32 featureType, uint32 umiB, uint32 g
     uint64 nout=1;
     if (featureType==0 || featureType==2) {//genes
         *streamOut << umiB <<' ';//UMI
-        if ( iRead < (uint64)-1 )
+        if ( iRead != (uint64)-1 )
             *streamOut << iRead <<' ';//iRead
         *streamOut << gene <<' '<< stringCB <<'\n';;
     } else if (featureType==1) {//sjs
         for (auto &sj : readSJs) {
             *streamOut << umiB <<' ';//UMI
-            if ( iRead < (uint64)-1 )
+            if ( iRead != (uint64)-1 )
                 *streamOut << iRead <<' ';//iRead            
             *streamOut << sj[0] <<' '<< sj[1] <<' '<< stringCB <<'\n';;
         };
