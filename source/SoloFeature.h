@@ -27,11 +27,12 @@ public:
 
     array<vector<uint64>,2> sjAll;
     
-    vector<array<uint32,2>> readInfo; //corrected CB/UMI information for each read
+    typedef struct{uint64 cb; uint32 umi;} readInfoStruct;
+    vector<readInfoStruct> readInfo; //corrected CB/UMI information for each read
 
     SoloFeature(int feTy, Parameters &Pin, Transcriptome &inTrans);
     void processRecords(ReadAlignChunk **RAchunk);
-    void collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot, uint32 *umiArray);
+    void collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot, uint32 *umiArray, uint64 cellBarcode);
     void outputResults();
 
 private:
@@ -42,7 +43,8 @@ private:
     Transcriptome &Trans;
 
     static const uint32 umiArrayStride=3;
-    uint32 rGUarrayStride;
+    enum {rguG, rguU, rguR};
+    uint32 rguStride;
 };
 
 #endif

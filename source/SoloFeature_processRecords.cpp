@@ -19,10 +19,10 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     };
     ++nReadsInput;
     
-    rGUarrayStride=2;
+    rguStride=2;
     if (pSolo.samAttrFeature==featureType) {
-        rGUarrayStride=3; //to keep readI column
-        readInfo.resize(nReadsInput,{(uint32)-1,(uint32)-1});
+        rguStride=3; //to keep readI column
+        readInfo.resize(nReadsInput,{(uint64)-1,(uint32)-1});
         time(&rawTime);
         P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Allocated and initialized readInfo array, nReadsInput = " << nReadsInput <<endl;        
     };
@@ -55,7 +55,7 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
         };
     };
 
-    rGeneUMI = new uint32[rGUarrayStride*nReadsMapped]; //big array for all CBs - each element is gene and UMI
+    rGeneUMI = new uint32[rguStride*nReadsMapped]; //big array for all CBs - each element is gene and UMI
     rCBp = new uint32*[nCB+1];
     uint32 **rCBpa = new uint32*[pSolo.cbWL.size()+1];
     indCB = new uint32[nCB];
@@ -67,7 +67,7 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     for (uint32 ii=0; ii<pSolo.cbWL.size(); ii++) {
         if (readBarSum->cbReadCountExact[ii]>0) {//if no exact matches, this CB is not present
             indCB[nCB]=ii;
-            rCBp[nCB+1] = rCBp[nCB] + rGUarrayStride*readFeatSum->cbReadCount[ii];
+            rCBp[nCB+1] = rCBp[nCB] + rguStride*readFeatSum->cbReadCount[ii];
             ++nCB;
         };
         rCBpa[ii+1]=rCBp[nCB];
@@ -75,14 +75,14 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
 
     //read and store the CB/gene/UMI from files
     time(&rawTime);
-    P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished allocating arrays for Solo " << nReadsMapped*rGUarrayStride*4.0/1024/1024/1024 <<" GB" <<endl;
+    P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished allocating arrays for Solo " << nReadsMapped*rguStride*4.0/1024/1024/1024 <<" GB" <<endl;
 
     for (int ii=0; ii<P.runThreadN; ii++) {//TODO: this can be parallelized
-        readFeatAll[ii]->inputRecords(rCBpa, rGUarrayStride, readBarSum->cbReadCountExact);
+        readFeatAll[ii]->inputRecords(rCBpa, rguStride, readBarSum->cbReadCountExact);
     };
 
     for (uint32 iCB=0; iCB<nCB; iCB++) {
-        uint64 nr=(rCBpa[indCB[iCB]]-rCBp[iCB])/rGUarrayStride;  //number of reads that were matched to WL, rCBpa accumulated reference to the last element+1
+        uint64 nr=(rCBpa[indCB[iCB]]-rCBp[iCB])/rguStride;  //number of reads that were matched to WL, rCBpa accumulated reference to the last element+1
         if (nr>nReadPerCBmax)
             nReadPerCBmax=nr;
         readFeatSum->stats.V[readFeatSum->stats.nMatch] += nr;
@@ -104,8 +104,8 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     nCellGeneEntries=0;
 
     for (uint32 iCB=0; iCB<nCB; iCB++) {
-        uint64 nr=(rCBpa[indCB[iCB]]-rCBp[iCB])/rGUarrayStride; //number of reads that were matched to WL, rCBpa accumulated reference to the last element+1
-        collapseUMI(rCBp[iCB],nr,nGperCB[iCB],nUperCB[iCB],umiArray);
+        uint64 nr=(rCBpa[indCB[iCB]]-rCBp[iCB])/rguStride; //number of reads that were matched to WL, rCBpa accumulated reference to the last element+1
+        collapseUMI(rCBp[iCB],nr,nGperCB[iCB],nUperCB[iCB],umiArray,pSolo.cbWL[indCB[iCB]]);
         readFeatSum->stats.V[readFeatSum->stats.nUMIs] += nUperCB[iCB];
         if (nGperCB[iCB]>0)
             ++readFeatSum->stats.V[readFeatSum->stats.nCellBarcodes];

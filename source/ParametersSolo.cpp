@@ -191,3 +191,10 @@ void ParametersSolo::initialize(Parameters *pPin)
         };
     };  
 };
+
+void ParametersSolo::umiSwapHalves(uint32 &umi) {
+    uint32 high=umi>>(umiL);
+    umi &= umiMaskLow; //remove high
+    umi <<= (umiL); //move low to high
+    umi |= high; //add high
+};

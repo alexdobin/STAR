@@ -101,40 +101,36 @@ uint32 graphNumberOfConnectedComponents(uint32 N, vector<array<uint32,2>> V, vec
     return nConnComp;
 };
 
-void SoloFeature::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot, uint32 *umiArray) {
+void SoloFeature::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot, uint32 *umiArray, uint64 cellBarcode) {
     
-    qsort(rGU,rN,rGUarrayStride*sizeof(uint32),funCompareNumbers<uint32>); //sort by gene number
+    qsort(rGU,rN,rguStride*sizeof(uint32),funCompareNumbers<uint32>); //sort by gene number
 
     //compact reads per gene
     uint32 gid1=-1;//current gID
     nGenes=0; //number of genes
     uint32 *gID = new uint32[min(Trans.nGe,rN)+1]; //gene IDS
     uint32 *gReadS = new uint32[min(Trans.nGe,rN)+1]; //start of gene reads TODO: allocate this array in the 2nd half of rGU
-    for (uint32 iR=0; iR<rN*rGUarrayStride; iR+=rGUarrayStride) {
-        if (rGU[iR]!=gid1) {//record gene boundary
+    for (uint32 iR=0; iR<rN*rguStride; iR+=rguStride) {
+        if (rGU[iR+rguG]!=gid1) {//record gene boundary
             gReadS[nGenes]=iR;
-            gid1=rGU[iR];
+            gid1=rGU[iR+rguG];
             gID[nGenes]=gid1;
             ++nGenes;
         };
-        //rGU[iR]=rGU[iR+1]; //shift UMIs
-        //rGU[iR+1] storage this will be used later for counting
     };
-    gReadS[nGenes]=rGUarrayStride*rN;//so that gReadS[nGenes]-gReadS[nGenes-1] is the number of reads for nGenes, see below in qsort
+    gReadS[nGenes]=rguStride*rN;//so that gReadS[nGenes]-gReadS[nGenes-1] is the number of reads for nGenes, see below in qsort
 
     uint32 *nUg = new uint32[nGenes*3];//3 types of counts
     nUtot=0;
     for (uint32 iG=0; iG<nGenes; iG++) {//collapse UMIs for each gene
         uint32 *rGU1=rGU+gReadS[iG];
 
-//         qsort(rGU1+1, (gReadS[iG+1]-gReadS[iG])/rGUarrayStride, rGUarrayStride*sizeof(uint32), funCompareNumbers<uint32>);
-        //        +1 to point to UMIs
-        qsort(rGU1, (gReadS[iG+1]-gReadS[iG])/rGUarrayStride, rGUarrayStride*sizeof(uint32), funCompareTypeShift<uint32,1>);
+        qsort(rGU1, (gReadS[iG+1]-gReadS[iG])/rguStride, rguStride*sizeof(uint32), funCompareTypeShift<uint32,rguU>);
         
         //exact collapse
         uint32 iR1=-umiArrayStride; //number of distinct UMIs for this gene
         uint32 u1=-1;
-        for (uint32 iR=1; iR<gReadS[iG+1]-gReadS[iG]; iR+=rGUarrayStride) {//count and collapse identical UMIs
+        for (uint32 iR=rguU; iR<gReadS[iG+1]-gReadS[iG]; iR+=rguStride) {//count and collapse identical UMIs
             if (rGU1[iR]!=u1) {
                 iR1 += umiArrayStride;
                 u1=rGU1[iR];
@@ -156,19 +152,55 @@ void SoloFeature::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nU
 
         //exchange low and high half of UMIs, re-sort, and look for 1MM again
         for (uint32 iu=0; iu<umiArrayStride*nU0; iu+=umiArrayStride) {
-            uint32 high=umiArray[iu]>>(pSolo.umiL);
-            umiArray[iu] &= pSolo.umiMaskLow; //remove high
-            umiArray[iu] <<= (pSolo.umiL); //move low to high
-            umiArray[iu] |= high; //add high
+            pSolo.umiSwapHalves(umiArray[iu]);
         };
         qsort(umiArray, nU0, umiArrayStride*sizeof(uint32), funCompareNumbers<uint32>);
         collapseUMIwith1MMlowHalf(umiArray, umiArrayStride, pSolo.umiMaskLow, nU0, nU1, nU2, graphN, graphConn);
 
-        nUg[3*iG]=nU0;
         vector<uint32> graphComponents;//for each node (color) - connected component number
-        nUg[3*iG+1]=nU1+graphNumberOfConnectedComponents(graphN, graphConn,graphComponents);
+        uint32 nConnComp=graphNumberOfConnectedComponents(graphN, graphConn, graphComponents);
+        nUg[3*iG]=nU0;        
+        nUg[3*iG+1]=nU1+nConnComp;
         nUg[3*iG+2]=nU2;
         nUtot+=nUg[3*iG+1];
+        
+        if (readInfo.size()>0) {//fill in readInfo: CB,UMI
+            const uint32 bitTopMask=~(1>>31);
+            vector<array<uint32,2>> umiBest(graphN,{0,0});
+            uint32 umiCorrN=0;//number of umi to error-correct
+            for (uint32 iu=0; iu<umiArrayStride*nU0; iu+=umiArrayStride)  {
+                //switch low/high to recover original UMIs
+                pSolo.umiSwapHalves(umiArray[iu]);
+                //find best UMI (highest count) for each connected component
+                if (umiArray[iu+2]==def_MarkNoColor)
+                    continue;
+                uint32 color1=graphComponents[umiArray[iu+2]];
+                uint32 count1=umiArray[iu+1] & bitTopMask;
+                if (umiBest[color1][0] < count1) {
+                    umiBest[color1][0] = count1;
+                    umiBest[color1][1] = umiArray[iu];
+                };              
+                //reuse umiArray: now the stride is 2, and it contains only UMI that may be error corrected and the colors
+                umiArray[umiCorrN*2]=umiArray[iu];
+                umiArray[umiCorrN*2+1]=color1;
+                ++umiCorrN;
+            };
+ 
+            //sort UMIs
+            qsort(umiArray, umiCorrN, 2*sizeof(uint32), funCompareNumbers<uint32>);
+
+            uint32 iUmi=0;
+            for (uint32 iR=0; iR<gReadS[iG+1]-gReadS[iG]; iR+=rguStride) {//cycle over reads
+                uint64 iread1 = rGU1[iR+rguR];
+                readInfo[iread1].cb = cellBarcode;
+                if (rGU1[iR]==umiArray[iUmi*2]) {//correct UMI
+                    readInfo[iread1].umi=umiBest[umiArray[iUmi*2+1]][1];
+                    ++iUmi;
+                } else {//no UMI correction
+                    readInfo[iread1].umi=rGU1[iR+rguU];
+                };
+            };
+        };
     };
 
     uint32 *rGUp=rGU;//first place where rGU is overwritten with gene counts. Before it's intact though sorted differently.
@@ -183,6 +215,4 @@ void SoloFeature::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nU
             rGUp += 2;
         };
     };
-    //cout << nRumiMax << '\n';
-
 };

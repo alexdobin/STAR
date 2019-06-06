@@ -39,6 +39,7 @@ public:
     int32 samAttrFeature;//which feature to use for error correction
 
     void initialize(Parameters *pPin);
+    void umiSwapHalves(uint32 &umi);
 private:
     Parameters *pP;
 };
