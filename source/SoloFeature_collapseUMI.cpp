@@ -5,7 +5,7 @@
 
 #define def_MarkNoColor  (uint32) -1
 
-void collapseUMIwith1MMlowHalf(uint32 *rGU, uint32 umiArrayStride, uint32 umiMaskLow, uint32 nU0, uint32 &nU1, uint32 &nU2, uint32 &nC, vector<array<uint32,2>> &vC)
+void collapseUMIwith1MMlowHalf(uint32 *umiArr, uint32 umiArrayStride, uint32 umiMaskLow, uint32 nU0, uint32 &nU1, uint32 &nU2, uint32 &nC, vector<array<uint32,2>> &vC)
 {
     const uint32 bitTop=1<<31;
     const uint32 bitTopMask=~bitTop;
@@ -14,7 +14,7 @@ void collapseUMIwith1MMlowHalf(uint32 *rGU, uint32 umiArrayStride, uint32 umiMas
         uint32 iuu=iu+umiArrayStride;
         for (; iuu<umiArrayStride*nU0; iuu+=umiArrayStride) {//compare to all UMIs down
 
-            uint32 uuXor=rGU[iu] ^ rGU[iuu];
+            uint32 uuXor=umiArr[iu] ^ umiArr[iuu];
 
             if ( uuXor > umiMaskLow)
                 break; //upper half is different
@@ -25,32 +25,32 @@ void collapseUMIwith1MMlowHalf(uint32 *rGU, uint32 umiArrayStride, uint32 umiMas
             //1MM UMI
 
             //graph coloring
-            if ( rGU[iu+2] == def_MarkNoColor && rGU[iuu+2] == def_MarkNoColor ) {//no color
+            if ( umiArr[iu+2] == def_MarkNoColor && umiArr[iuu+2] == def_MarkNoColor ) {//no color
                 //new color
-                rGU[iu+2] = nC;
-                rGU[iuu+2] = nC;
+                umiArr[iu+2] = nC;
+                umiArr[iuu+2] = nC;
                 ++nC;
                 nU1 -= 2;//subtract the duplicated UMIs
-            } else if ( rGU[iu+2] == def_MarkNoColor ) {
-                rGU[iu+2] = rGU[iuu+2];
+            } else if ( umiArr[iu+2] == def_MarkNoColor ) {
+                umiArr[iu+2] = umiArr[iuu+2];
                 --nU1;//subtract the duplicated UMIs
-            } else if ( rGU[iuu+2] == def_MarkNoColor ) {
-                rGU[iuu+2] = rGU[iu+2];
+            } else if ( umiArr[iuu+2] == def_MarkNoColor ) {
+                umiArr[iuu+2] = umiArr[iu+2];
                 --nU1;//subtract the duplicated UMIs
             } else {//both color
-                if (rGU[iuu+2] != rGU[iu+2]) {//color conflict
-                    //uint32 p[2]={rGU[iu+2],rGU[iuu+2]};
-                    vC.push_back({rGU[iu+2],rGU[iuu+2]});
-                    //vC.push_back({rGU[iuu+2],rGU[iu+2]});
+                if (umiArr[iuu+2] != umiArr[iu+2]) {//color conflict
+                    //uint32 p[2]={umiArr[iu+2],umiArr[iuu+2]};
+                    vC.push_back({umiArr[iu+2],umiArr[iuu+2]});
+                    //vC.push_back({umiArr[iuu+2],umiArr[iu+2]});
                 };
             };
 
             //directional collapse
-            if ( (rGU[iuu+1] & bitTop) == 0 && (rGU[iu+1] & bitTopMask)>(2*(rGU[iuu+1] & bitTopMask)-1) ) {//iuu is duplicate of iu
-                rGU[iuu+1] |= bitTop;
+            if ( (umiArr[iuu+1] & bitTop) == 0 && (umiArr[iu+1] & bitTopMask)>(2*(umiArr[iuu+1] & bitTopMask)-1) ) {//iuu is duplicate of iu
+                umiArr[iuu+1] |= bitTop;
                 --nU2;//subtract the duplicated UMIs
-            } else if ( (rGU[iu+1] & bitTop) == 0 && (rGU[iuu+1] & bitTopMask)>(2*(rGU[iu+1] & bitTopMask)-1) ) {//iu is duplicate of iuu
-                rGU[iu+1] |= bitTop;
+            } else if ( (umiArr[iu+1] & bitTop) == 0 && (umiArr[iuu+1] & bitTopMask)>(2*(umiArr[iu+1] & bitTopMask)-1) ) {//iu is duplicate of iuu
+                umiArr[iu+1] |= bitTop;
                 --nU2;//subtract the duplicated UMIs
             };
         };
@@ -70,9 +70,9 @@ uint32 graphNumberOfConnectedComponents(uint32 N, vector<array<uint32,2>> V, vec
     //N=number of nodes
     //V=edges, list of connected nodes, each pair of nodes listed once
     //simple recursive DFS
+   
+    nodeColor.resize(N,(uint32)-1); //new color (connected component) for each node (each original color)
 
-    //sort
-//     qsort(V.data(),V.size(),2*sizeof(uint32),funCompareNumbers<uint32>);
     if (V.size()==0)
         return N;
 
@@ -81,18 +81,12 @@ uint32 graphNumberOfConnectedComponents(uint32 N, vector<array<uint32,2>> V, vec
         nodeEdges[V[ii][0]].push_back(V[ii][1]);
         nodeEdges[V[ii][1]].push_back(V[ii][0]);
     };
-
-    nodeColor.resize(N,(uint32)-1); //new color (connected component) for each node (each original color)
     
     uint32 nConnComp=0;
     for (uint32 ii=0; ii<N; ii++) {
-        //if (V[ii].size()==0) {//this node is not connected, no need to check. Save time beacuse this happens often
-        //wrong: should be
         if (nodeEdges[ii].size()==0) {//this node is not connected, no need to check. Save time beacuse this happens often
             ++nConnComp;
-            continue;
-        };
-        if (nodeColor[ii]==(uint32)-1) {//node not visited
+        } else if (nodeColor[ii]==(uint32)-1) {//node not visited
             ++nConnComp;
             nodeColor[ii]=ii;
             graphDepthFirstSearch(ii,nodeEdges,nodeColor);
@@ -157,14 +151,20 @@ void SoloFeature::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nU
         qsort(umiArray, nU0, umiArrayStride*sizeof(uint32), funCompareNumbers<uint32>);
         collapseUMIwith1MMlowHalf(umiArray, umiArrayStride, pSolo.umiMaskLow, nU0, nU1, nU2, graphN, graphConn);
 
-        vector<uint32> graphComponents;//for each node (color) - connected component number
-        uint32 nConnComp=graphNumberOfConnectedComponents(graphN, graphConn, graphComponents);
+        vector<uint32> graphComp;//for each node (color) - connected component number
+        uint32 nConnComp=graphNumberOfConnectedComponents(graphN, graphConn, graphComp);
         nUg[3*iG]=nU0;        
         nUg[3*iG+1]=nU1+nConnComp;
         nUg[3*iG+2]=nU2;
         nUtot+=nUg[3*iG+1];
         
         if (readInfo.size()>0) {//fill in readInfo: CB,UMI
+            
+            for (uint32 ii=0; ii<graphComp.size(); ii++) {//for non-conflicting colors, need to fill the colors correctly
+                if (graphComp[ii]==(uint32)-1)
+                    graphComp[ii]=ii;
+            };
+            
             const uint32 bitTopMask=~(1>>31);
             vector<array<uint32,2>> umiBest(graphN,{0,0});
             uint32 umiCorrN=0;//number of umi to error-correct
@@ -174,7 +174,7 @@ void SoloFeature::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nU
                 //find best UMI (highest count) for each connected component
                 if (umiArray[iu+2]==def_MarkNoColor)
                     continue;
-                uint32 color1=graphComponents[umiArray[iu+2]];
+                uint32 color1=graphComp[umiArray[iu+2]];
                 uint32 count1=umiArray[iu+1] & bitTopMask;
                 if (umiBest[color1][0] < count1) {
                     umiBest[color1][0] = count1;
