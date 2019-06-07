@@ -44,39 +44,39 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, set<uint32> &re
         readGe = &readGeneFull;
     };
 
-    bool featYes=true;
+    bool readFeatYes=true;
     if (featureType==0 || featureType==2) {//genes
         //check genes, return if no gene of multimapping
         if (readGe->size()==0) {
             stats.V[stats.nNoFeature]++;
-            featYes=false;
+            readFeatYes=false;
         };
         if (readGe->size()>1) {
             stats.V[stats.nAmbigFeature]++;
             if (nTr>1)
                 stats.V[stats.nAmbigFeatureMultimap]++;
-            featYes=false;
+            readFeatYes=false;
         };
     } else if (featureType==1) {//SJs
         if (nTr>1) {//reject all multimapping junctions
             stats.V[stats.nAmbigFeatureMultimap]++;
-            featYes=false;
+            readFeatYes=false;
         } else {//for SJs, still check genes, return if multi-gene
             if (readGene.size()>1) {
                 stats.V[stats.nAmbigFeature]++;
-                featYes=false;
+                readFeatYes=false;
             } else {//one gene or no gene
                 bool sjAnnot;
                 alignOut->extractSpliceJunctions(readSJs, sjAnnot);
                 if ( readSJs.empty() || (sjAnnot && readGene.size()==0) ) {//no junctions, or annotated junction but no gene (i.e. read does not fully match transcript)
                     stats.V[stats.nNoFeature]++;
-                    featYes=false;
+                    readFeatYes=false;
                 };
             };
         };
     };
     
-    if (!featYes)
+    if (!readFeatYes)
         return;
     
     if (!readInfoYes)
