@@ -186,8 +186,11 @@ void SoloFeature::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nU
                 ++umiCorrN;
             };
  
-            //sort UMIs
-            qsort(umiArray, umiCorrN, 2*sizeof(uint32), funCompareNumbers<uint32>);
+            if (umiCorrN==0) {
+                umiArray[0]=(uint32)-1;//to make sure that no UMI can match this first element
+            } else {//sort UMIs
+                qsort(umiArray, umiCorrN, 2*sizeof(uint32), funCompareNumbers<uint32>);
+            };
 
             uint32 iUmi=0;
             for (uint32 iR=0; iR<gReadS[iG+1]-gReadS[iG]; iR+=rguStride) {//cycle over reads
