@@ -44,36 +44,40 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, set<uint32> &re
         readGe = &readGeneFull;
     };
 
+    bool featYes=true;
     if (featureType==0 || featureType==2) {//genes
         //check genes, return if no gene of multimapping
         if (readGe->size()==0) {
             stats.V[stats.nNoFeature]++;
-            return;
+            featYes=false;
         };
         if (readGe->size()>1) {
             stats.V[stats.nAmbigFeature]++;
             if (nTr>1)
                 stats.V[stats.nAmbigFeatureMultimap]++;
-            return;
+            featYes=false;
         };
     } else if (featureType==1) {//SJs
         if (nTr>1) {//reject all multimapping junctions
             stats.V[stats.nAmbigFeatureMultimap]++;
-            return;
-        };
-
-        //for SJs, still check genes, return if multi-gene
-        if (readGene.size()>1) {
-            stats.V[stats.nAmbigFeature]++;
-            return;
-        };
-        bool sjAnnot;
-        alignOut->extractSpliceJunctions(readSJs, sjAnnot);
-        if ( readSJs.empty() || (sjAnnot && readGene.size()==0) ) {//no junctions, or annotated junction buy no gene (i.e. read does not fully match transcript)
-            stats.V[stats.nNoFeature]++;
-            return;
+            featYes=false;
+        } else {//for SJs, still check genes, return if multi-gene
+            if (readGene.size()>1) {
+                stats.V[stats.nAmbigFeature]++;
+                featYes=false;
+            } else {//one gene or no gene
+                bool sjAnnot;
+                alignOut->extractSpliceJunctions(readSJs, sjAnnot);
+                if ( readSJs.empty() || (sjAnnot && readGene.size()==0) ) {//no junctions, or annotated junction but no gene (i.e. read does not fully match transcript)
+                    stats.V[stats.nNoFeature]++;
+                    featYes=false;
+                };
+            };
         };
     };
+    
+    if (!featYes)
+        return;
     
     if (!readInfoYes)
         iRead=(uint64)-1;

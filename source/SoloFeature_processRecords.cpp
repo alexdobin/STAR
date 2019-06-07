@@ -20,7 +20,7 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     ++nReadsInput;
     
     rguStride=2;
-    if (pSolo.samAttrFeature==featureType) {
+    if (pSolo.samAttrYes && pSolo.samAttrFeature==featureType) {
         rguStride=3; //to keep readI column
         readInfo.resize(nReadsInput,{(uint64)-1,(uint32)-1});
         time(&rawTime);

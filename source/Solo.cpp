@@ -2,7 +2,7 @@
 #include "TimeFunctions.h"
 
 Solo::Solo(ReadAlignChunk **RAchunkIn, Parameters &Pin, Transcriptome &inTrans)
-          :  RAchunk(RAchunkIn), P(Pin), pSolo(P.pSolo), Trans(inTrans)
+          :  RAchunk(RAchunkIn), P(Pin), Trans(inTrans), pSolo(P.pSolo)
 {
     if (pSolo.type==0 )
         return;

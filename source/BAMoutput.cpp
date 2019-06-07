@@ -93,12 +93,6 @@ void BAMoutput::coordOneAlign (char *bamIn, uint bamSize, uint iRead) {
         };
     };
 
-//     if ( alignG == (uint32) -1 ) {//unmapped alignment, last bin
-//         iBin=nBins-1;
-//     } else {
-//         iBin=(alignG + chrStart)/binGlen;
-//     };
-
     //write buffer is filled
     if (binBytes[iBin]+bamSize+sizeof(uint) > ( (iBin>0 || nBins>1) ? binSize : binSize1) ) {//write out this buffer
         if ( nBins>1 || iBin==(P.outBAMcoordNbins-1) ) {//normal writing, bins have already been determined

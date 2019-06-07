@@ -2,8 +2,9 @@
 #include "ErrorWarning.h"
 #include "serviceFuns.cpp"
 #include "BAMfunctions.h"
+#include "SequenceFuns.h"
 
-void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, string dirBAMsort, Parameters &P, Genome &mapGen) {
+void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, string dirBAMsort, Parameters &P, Genome &mapGen, SoloFeature &soloFeat) {
 
     if (binS==0) return; //nothing to do for empty bins
     //allocate arrays
@@ -61,9 +62,29 @@ void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, st
 
     outBAMwriteHeader(bgzfBin,P.samHeaderSortedCoord,mapGen.chrNameAll,mapGen.chrLengthAll);
     //send ordered aligns to bgzf one-by-one
+    char bam1[BAM_ATTR_MaxSize];
     for (uint ia=0;ia<binN;ia++) {
-        char* ib=bamIn+startPos[ia*3+2];
-        bgzf_write(bgzfBin,ib, *((uint32*) ib)+sizeof(uint32) );
+        char* bam0=bamIn+startPos[ia*3+2];
+        uint32 size1=*((uint32*) bam0)+sizeof(uint32);
+        if (soloFeat.pSolo.samAttrYes) {//add extra tags to the BAM record
+            uint64 iread = * ((uint64*) (bam0+size1));
+            iread = iread >> 32; //iRead was encoded in the upper 32 bitsls
+            //cout << iread <<" "<< convertNuclInt64toString(soloFeat.readInfo[iread].cb,  soloFeat.pSolo.cbL) <<" "<< convertNuclInt64toString(soloFeat.readInfo[iread].umi, soloFeat.pSolo.umiL)<<endl;
+            
+            if (soloFeat.readInfo[iread].cb + 1 == 0)
+                continue;
+            
+            string cb  = convertNuclInt64toString(soloFeat.readInfo[iread].cb,  soloFeat.pSolo.cbL);
+            string umi = convertNuclInt64toString(soloFeat.readInfo[iread].umi, soloFeat.pSolo.umiL);
+            memcpy(bam1, bam0, size1);
+            
+            size1 += bamAttrArrayWrite(cb,  "CB", bam1+size1);
+            size1 += bamAttrArrayWrite(umi, "UB", bam1+size1);
+            uint32 *bam1i = (uint32*) bam1;
+            bam1i[0] = size1-sizeof(uint32);
+            bam0=bam1;
+        };
+        bgzf_write(bgzfBin, bam0, size1);
     };
 
     bgzf_flush(bgzfBin);

@@ -2,7 +2,7 @@
 #include "streamFuns.h"
 
 SoloFeature::SoloFeature(int feTy, Parameters &Pin, Transcriptome &inTrans)
-          :  featureType(feTy), P(Pin), pSolo(P.pSolo), Trans(inTrans)
+            :featureType(feTy), P(Pin), Trans(inTrans), pSolo(P.pSolo)
 {
 
     readFeatSum = new SoloReadFeature(featureType,P,-1);

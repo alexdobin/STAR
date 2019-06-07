@@ -179,10 +179,9 @@ void ParametersSolo::initialize(Parameters *pPin)
         pP->quant.geneFull.yes=true;
 
     samAttrYes=false;
-    samAttrFeature=-1;
+    samAttrFeature=0;//hard-coded for now to follow Cell Ranger - error correction only done for feature=Gene
     if (pP->outSAMattrPresent.CB || pP->outSAMattrPresent.UB) {
         samAttrYes=true;
-        samAttrFeature=0;//hard-coded for now to follow Cell Ranger - error correction only done for feature=Gene
         if (!pP->outBAMcoord) {
             ostringstream errOut;
             errOut << "EXITING because of fatal PARAMETERS error: CB and/or UB attributes in --outSAMattributes can only be output in the sorted BAM file.\n";

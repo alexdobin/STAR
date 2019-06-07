@@ -8,7 +8,18 @@
 #include "SoloRead.h"
 
 class SoloFeature {
+private:
+    const int32 featureType;
+
+    Parameters &P;
+    Transcriptome &Trans;
+
+    static const uint32 umiArrayStride=3;
+    enum {rguG, rguU, rguR};
+    uint32 rguStride;
+    
 public:
+    ParametersSolo &pSolo;
 
     SoloReadFeature *readFeatSum, **readFeatAll;
     SoloReadBarcode *readBarSum, **readBarAll;
@@ -34,17 +45,6 @@ public:
     void processRecords(ReadAlignChunk **RAchunk);
     void collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot, uint32 *umiArray, uint64 cellBarcode);
     void outputResults();
-
-private:
-    const int32 featureType;
-
-    Parameters &P;
-    ParametersSolo &pSolo;
-    Transcriptome &Trans;
-
-    static const uint32 umiArrayStride=3;
-    enum {rguG, rguU, rguR};
-    uint32 rguStride;
 };
 
 #endif

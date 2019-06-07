@@ -89,22 +89,100 @@ void outBAMwriteHeader (BGZF* fp, const string &samh, const vector <string> &chr
     bgzf_flush(fp);
 };
 
-template <class TintType>
-TintType bamAttributeInt(const char *bamAux, const char *attrName) {//not tested!!!
-    const char *attrStart=strstr(bamAux,attrName);
-    if (attrStart==NULL) return (TintType) -1;
-    switch (attrStart[2]) {
-        case ('c'):
-            return (TintType) *(int8_t*)(attrStart+3);
-        case ('s'):
-            return (TintType) *(int16_t*)(attrStart+3);
-        case ('i'):
-            return (TintType) *(int32_t*)(attrStart+3);
-        case ('C'):
-            return (TintType) *(uint8_t*)(attrStart+3);
-        case ('S'):
-            return (TintType) *(uint16_t*)(attrStart+3);
-        case ('I'):
-            return (TintType) *(uint32_t*)(attrStart+3);
-    };
+// calculate bin given an alignment covering [beg,end) (zero-based, half-close-half-open)
+int reg2bin(int beg, int end)
+{
+    --end;
+    if (beg>>14 == end>>14) return ((1<<15)-1)/7 + (beg>>14);
+    if (beg>>17 == end>>17) return ((1<<12)-1)/7 + (beg>>17);
+    if (beg>>20 == end>>20) return ((1<<9)-1)/7 + (beg>>20);
+    if (beg>>23 == end>>23) return ((1<<6)-1)/7 + (beg>>23);
+    if (beg>>26 == end>>26) return ((1<<3)-1)/7 + (beg>>26);
+    return 0;
 };
+
+int bamAttrArrayWrite(int32 attr, const char* tagName, char* attrArray ) {
+    attrArray[0]=tagName[0];attrArray[1]=tagName[1];
+    attrArray[2]='i';
+    *( (int32*) (attrArray+3))=attr;
+    return 3+sizeof(int32);
+};
+int bamAttrArrayWrite(float attr, const char* tagName, char* attrArray ) {
+    attrArray[0]=tagName[0];attrArray[1]=tagName[1];
+    attrArray[2]='f';
+    *( (float*) (attrArray+3))=attr;
+    return 3+sizeof(int32);
+};
+int bamAttrArrayWrite(char attr, const char* tagName, char* attrArray ) {
+    attrArray[0]=tagName[0];attrArray[1]=tagName[1];
+    attrArray[2]='A';
+    attrArray[3]=attr;
+    return 3+sizeof(char);
+};
+int bamAttrArrayWrite(string &attr, const char* tagName, char* attrArray ) {
+    attrArray[0]=tagName[0];attrArray[1]=tagName[1];
+    attrArray[2]='Z';
+    memcpy(attrArray+3,attr.c_str(),attr.size()+1);//copy string data including \0
+    return 3+attr.size()+1;
+};
+int bamAttrArrayWrite(const vector<char> &attr, const char* tagName, char* attrArray ) {
+    attrArray[0]=tagName[0];attrArray[1]=tagName[1];
+    attrArray[2]='B';
+    attrArray[3]='c';
+    *( (int32*) (attrArray+4))=attr.size();
+    memcpy(attrArray+4+sizeof(int32),attr.data(),attr.size());//copy array data
+    return 4+sizeof(int32)+attr.size();
+};
+int bamAttrArrayWrite(const vector<int32> &attr, const char* tagName, char* attrArray ) {
+    attrArray[0]=tagName[0];attrArray[1]=tagName[1];
+    attrArray[2]='B';
+    attrArray[3]='i';
+    *( (int32*) (attrArray+4))=attr.size();
+    memcpy(attrArray+4+sizeof(int32),attr.data(),sizeof(int32)*attr.size());//copy array data
+    return 4+sizeof(int32)+sizeof(int32)*attr.size();
+};
+
+int bamAttrArrayWriteSAMtags(string &attrStr, char *attrArray) {//write bam record into attrArray for string attribute attString
+    size_t pos1=0, pos2=0;
+    int nattr=0;
+    do {//cycle over multiple tags separated by tab
+        pos2 = attrStr.find('\t',pos1);
+        string attr1 = attrStr.substr(pos1, pos2-pos1);
+        pos1=pos2+1;
+
+        if (attr1.empty())
+            continue; //extra tab at the beginning, or consecutive tabs
+
+        switch (attr1.at(3)) {
+            case 'i':
+            {
+                int32 a1=stol(attr1.substr(5));
+                nattr += bamAttrArrayWrite(a1,attr1.c_str(),attrArray+nattr);
+                break;
+            };
+            case 'A':
+            {
+                char a1=attr1.at(5);
+                nattr += bamAttrArrayWrite(a1,attr1.c_str(),attrArray+nattr);
+                break;
+            };
+                break;
+            case 'Z':
+            {
+                string a1=attr1.substr(5);
+                nattr += bamAttrArrayWrite(a1,attr1.c_str(),attrArray+nattr);
+                break;
+            };
+            case 'f':
+            {
+                float a1=stof(attr1.substr(5));
+                nattr += bamAttrArrayWrite(a1,attr1.c_str(),attrArray+nattr);
+                break;
+            };
+        };
+    } while (pos2!= string::npos);
+
+    return nattr;
+};
+
+
