@@ -444,7 +444,7 @@ int main(int argInN, char* argIn[]) {
                             boolWait=false;
                             totalMem+=newMem;
                         };
-                        sleep(0.1);
+                        usleep(100000);
                     };
                     BAMbinSortByCoordinate(ibin,binN,binS,P.runThreadN,P.outBAMsortTmpDir, P, mainGenome);
                     #pragma omp critical
