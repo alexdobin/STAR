@@ -6,10 +6,11 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
 {
     if (pSolo.type==0)
         return;
-    cbI=-999;
+    //int64 cbI=-999;
 
     cbMatch=-1;
     cbMatchString="";
+    cbMatchInd.clear();
 
     cbSeq=readNameExtra.substr(pSolo.cbS-1,pSolo.cbL);
     umiSeq=readNameExtra.substr(pSolo.umiS-1,pSolo.umiL);
@@ -35,7 +36,9 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
         if (posN!=-1) {//Ns are present, discard this read
             stats.V[stats.nNinBarcode]++;
         } else {//no Ns
-            cbI=(int64) cbB;//all possible barcodes are accepted. This will overflow if CB is longer than 31b
+            //cbI=(int64) cbB;
+            cbMatchInd.push_back(cbB);//all possible barcodes are accepted. This will overflow if CB is longer than 31b
+            cbMatchString = to_string(cbB);
             cbMatch=0;
         };
         return;
@@ -45,15 +48,18 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
         stats.V[stats.nNinBarcode]++;
         return;
     } else if (posN==-1) {//no Ns, count only for featureType==gene
-        cbI=binarySearchExact<uint64>(cbB,pSolo.cbWL.data(),pSolo.cbWL.size());
+        int64 cbI=binarySearchExact<uint64>(cbB,pSolo.cbWL.data(),pSolo.cbWL.size());
         if (cbI>=0) {//exact match
             cbReadCountExact[cbI]++;//note that this simply counts reads per exact CB, no checks of genes or UMIs
+            cbMatchInd.push_back((uint64) cbI);
+            cbMatchString = to_string(cbMatchInd[0]);
             cbMatch=0;
             return;
         };
     };
 
     if (posN>=0) {//one N
+        int64 cbI=-1;
         uint32 posNshift=2*(pSolo.cbL-1-posN);//shift bits for posN
         for (uint32 jj=0; jj<4; jj++) {
             uint64 cbB1=cbB^(jj<<posNshift);
@@ -67,6 +73,8 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
             };
         };
         if (cbI>=0) {
+            cbMatchInd.push_back((uint64) cbI);
+            cbMatchString = to_string(cbMatchInd[0]);
             cbMatch=1;
             return;
         } else {//no match
@@ -75,15 +83,13 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
         };
     };
 
-    //look for 1MM, posN==-1, no Ns
+    //look for 1MM; posN==-1, no Ns
     cbMatch=0;
-    cbMatchInd.clear();
     for (uint32 ii=0; ii<pSolo.cbL; ii++) {
         for (uint32 jj=1; jj<4; jj++) {
             int64 cbI1=binarySearchExact<uint64>(cbB^(jj<<(ii*2)),pSolo.cbWL.data(),pSolo.cbWL.size());
             if (cbI1>=0) {//found match
                 //output all
-                cbI=cbI1;
                 cbMatchInd.push_back(cbI1);
                 ++cbMatch;
                 cbMatchString += ' ' +to_string(cbI1) + ' ' + cbQual.at(pSolo.cbL-1-ii);
@@ -93,5 +99,7 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
     if (cbMatch==0) {//no matches
         stats.V[stats.nNoMatch]++;
         cbMatch=-1;
-    };// else cbMatch contains number of matches (1 or >1), and cbMatchString contains matches for >1 case
+    } else if (cbMatch==1) {//1 match, no need to record the quality
+        cbMatchString = to_string(cbMatchInd[0]);
+    };// else cbMatch contains number of matches, and cbMatchString has CBs and qualities
 };

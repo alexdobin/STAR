@@ -2,21 +2,26 @@
 #include "serviceFuns.cpp"
 #include "SequenceFuns.h"
 
-uint32 outputReadCB(fstream *streamOut, int32 featureType, uint32 umiB, uint32 gene, vector<array<uint64,2>> &readSJs, const string &stringCB, const uint64 iRead)
+uint32 outputReadCB(fstream *streamOut, int32 featureType, uint32 umiB, uint32 gene, vector<array<uint64,2>> &readSJs, const int32 cbMatch, const string &stringCB, const uint64 iRead)
 {   
-    //feature
+    //format of the temp output file
+    // UMI [iRead] type feature* stringCB
+    //             0=exact match, 1=one non-exact match, 2=multipe non-exact matches
+    //                   gene or sj[0] sj[1]
+    //                           CB or nCB {CB Qual, ...}
+    
     uint64 nout=1;
     if (featureType==0 || featureType==2) {//genes
         *streamOut << umiB <<' ';//UMI
         if ( iRead != (uint64)-1 )
             *streamOut << iRead <<' ';//iRead
-        *streamOut << gene <<' '<< stringCB <<'\n';;
+        *streamOut << cbMatch <<' '<< gene <<' '<< stringCB <<'\n';;
     } else if (featureType==1) {//sjs
         for (auto &sj : readSJs) {
             *streamOut << umiB <<' ';//UMI
             if ( iRead != (uint64)-1 )
                 *streamOut << iRead <<' ';//iRead            
-            *streamOut << sj[0] <<' '<< sj[1] <<' '<< stringCB <<'\n';;
+            *streamOut << cbMatch <<' '<< sj[0] <<' '<< sj[1] <<' '<< stringCB <<'\n';;
         };
         nout=readSJs.size();
     };
@@ -82,21 +87,29 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, set<uint32> &re
     if (!readInfoYes)
         iRead=(uint64)-1;
 
-    if (soloBar.cbMatch==0) {//exact match
-        uint32 n1 = outputReadCB(strU_0, featureType, soloBar.umiB, *readGe->begin(), readSJs, to_string(soloBar.cbI), iRead);
-        if (pSolo.cbWL.size()>0) {//WL
-            cbReadCount[soloBar.cbI] += n1;
-        } else {//no WL
-            cbReadCountMap[soloBar.cbI] += n1;
-        };
-        return;
-    } else if (soloBar.cbMatch==1) {//1 match with 1MM
-        cbReadCount[soloBar.cbI]+= outputReadCB(strU_1, featureType, soloBar.umiB, *readGe->begin(), readSJs, to_string(soloBar.cbI), iRead);
-        return;
-    } else {//>1 matches
-        uint32 nfeat=outputReadCB(strU_2, featureType, soloBar.umiB, *readGe->begin(), readSJs, to_string(soloBar.cbMatch) + soloBar.cbMatchString, iRead);
+    uint32 nfeat = outputReadCB(streamReads, featureType, soloBar.umiB, *readGe->begin(), readSJs, soloBar.cbMatch, soloBar.cbMatchString, iRead);
+    if (pSolo.cbWL.size()>0) {//WL
         for (auto &cbi : soloBar.cbMatchInd)
             cbReadCount[cbi] += nfeat;
-        return;
+    } else {//no WL
+        cbReadCountMap[soloBar.cbMatchInd[0]] += nfeat;
     };
+    
+//     if (soloBar.cbMatch==0) {//exact match
+//         uint32 n1 = outputReadCB(strU_0, featureType, soloBar.umiB, *readGe->begin(), readSJs, to_string(soloBar.cbI), iRead);
+//         if (pSolo.cbWL.size()>0) {//WL
+//             cbReadCount[soloBar.cbI] += n1;
+//         } else {//no WL
+//             cbReadCountMap[soloBar.cbI] += n1;
+//         };
+//         return;
+//     } else if (soloBar.cbMatch==1) {//1 match with 1MM
+//         cbReadCount[soloBar.cbI]+= outputReadCB(strU_1, featureType, soloBar.umiB, *readGe->begin(), readSJs, to_string(soloBar.cbI), iRead);
+//         return;
+//     } else {//>1 matches
+//         uint32 nfeat=outputReadCB(strU_2, featureType, soloBar.umiB, *readGe->begin(), readSJs, to_string(soloBar.cbMatch) + soloBar.cbMatchString, iRead);
+//         for (auto &cbi : soloBar.cbMatchInd)
+//             cbReadCount[cbi] += nfeat;
+//         return;
+//     };
 };

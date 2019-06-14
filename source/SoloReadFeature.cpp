@@ -22,10 +22,8 @@ SoloReadFeature::SoloReadFeature(int32 feTy, Parameters &Pin, int iChunk)
         readInfoYes=true;    
 
     if (iChunk>=0) {
-        strU_0 = &fstrOpen(P.outFileTmp+"/solo"+pSolo.featureNames[featureType]+"_0_"+std::to_string(iChunk),ERROR_OUT, P);
-        strU_1 = &fstrOpen(P.outFileTmp+"/solo"+pSolo.featureNames[featureType]+"_1_"+std::to_string(iChunk),ERROR_OUT, P);
-        strU_2 = &fstrOpen(P.outFileTmp+"/solo"+pSolo.featureNames[featureType]+"_2_"+std::to_string(iChunk),ERROR_OUT, P);
-    };
+        streamReads = &fstrOpen(P.outFileTmp+"/solo"+pSolo.featureNames[featureType]+std::to_string(iChunk),ERROR_OUT, P);
+     };
 };
 
 void SoloReadFeature::addCounts(const SoloReadFeature &rfIn)
