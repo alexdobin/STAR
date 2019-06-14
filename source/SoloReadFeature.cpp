@@ -18,7 +18,7 @@ SoloReadFeature::SoloReadFeature(int32 feTy, Parameters &Pin, int iChunk)
     };
     
     readInfoYes=false;
-    if (featureType==pSolo.samAttrFeature)
+    if (pSolo.samAttrYes && featureType==pSolo.samAttrFeature) //pSolo.samAttrFeature=0 by default, so need to check samAttrYes
         readInfoYes=true;    
 
     if (iChunk>=0) {
