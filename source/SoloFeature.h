@@ -35,7 +35,8 @@ public:
     uint32 nCellGeneEntries;//total number of non-zero cell/gene combinations (entries in the output matrix)
 
     ofstream *statsStream;
-
+    ofstream *streamTranscriptsOut;
+    
     array<vector<uint64>,2> sjAll;
     
     typedef struct{uint64 cb; uint32 umi;} readInfoStruct;

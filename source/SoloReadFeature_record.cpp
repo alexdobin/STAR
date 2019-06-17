@@ -2,7 +2,7 @@
 #include "serviceFuns.cpp"
 #include "SequenceFuns.h"
 
-uint32 outputReadCB(fstream *streamOut, int32 featureType, uint32 umiB, uint32 gene, vector<array<uint64,2>> &readSJs, const int32 cbMatch, const string &stringCB, const uint64 iRead)
+uint32 outputReadCB(fstream *streamOut, int32 featureType, uint32 umiB, uint32 gene, vector<array<uint64,2>> &readSJs, const int32 cbMatch, const string &stringCB, const uint64 iRead, const vector<array<uint32,2>> &readTranscripts)
 {   
     //format of the temp output file
     // UMI [iRead] type feature* stringCB
@@ -15,21 +15,30 @@ uint32 outputReadCB(fstream *streamOut, int32 featureType, uint32 umiB, uint32 g
         *streamOut << umiB <<' ';//UMI
         if ( iRead != (uint64)-1 )
             *streamOut << iRead <<' ';//iRead
-        *streamOut << cbMatch <<' '<< gene <<' '<< stringCB <<'\n';;
+        *streamOut << gene <<' '<< cbMatch <<' '<< stringCB <<'\n';;
     } else if (featureType==1) {//sjs
         for (auto &sj : readSJs) {
             *streamOut << umiB <<' ';//UMI
             if ( iRead != (uint64)-1 )
                 *streamOut << iRead <<' ';//iRead            
-            *streamOut << cbMatch <<' '<< sj[0] <<' '<< sj[1] <<' '<< stringCB <<'\n';;
+            *streamOut << sj[0] <<' '<< sj[1] <<' '<< cbMatch <<' '<< stringCB <<'\n';;
         };
         nout=readSJs.size();
+    } else if (featureType==3) {//transcript,distToTTS structure
+        *streamOut << umiB <<' ';//UMI
+        if ( iRead != (uint64)-1 )
+            *streamOut << iRead <<' ';//iRead
+        *streamOut << readTranscripts.size()<<' ';
+        for (auto &tt: readTranscripts) {
+            *streamOut << tt[0] <<' '<< tt[1] <<' ';
+        };
+        *streamOut << cbMatch <<' '<< stringCB <<'\n';
     };
     
     return nout;
 };
 
-void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, set<uint32> &readGene, set<uint32> &readGeneFull, Transcript *alignOut, uint64 iRead)
+void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, set<uint32> &readGene, set<uint32> &readGeneFull, Transcript *alignOut, uint64 iRead, const vector<array<uint32,2>> &readTranscripts)
 {
     if (pSolo.type==0 || soloBar.cbMatch<0)
         return;
@@ -79,6 +88,11 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, set<uint32> &re
                 };
             };
         };
+    } else if (featureType==3) {//transcripts
+        if (readTranscripts.size()==0) {
+            stats.V[stats.nNoFeature]++;
+            readFeatYes=false;
+        };
     };
     
     if (!readFeatYes)
@@ -87,7 +101,7 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, set<uint32> &re
     if (!readInfoYes)
         iRead=(uint64)-1;
 
-    uint32 nfeat = outputReadCB(streamReads, featureType, soloBar.umiB, *readGe->begin(), readSJs, soloBar.cbMatch, soloBar.cbMatchString, iRead);
+    uint32 nfeat = outputReadCB(streamReads, featureType, soloBar.umiB, *readGe->begin(), readSJs, soloBar.cbMatch, soloBar.cbMatchString, iRead, readTranscripts);
     if (pSolo.cbWL.size()>0) {//WL
         for (auto &cbi : soloBar.cbMatchInd)
             cbReadCount[cbi] += nfeat;

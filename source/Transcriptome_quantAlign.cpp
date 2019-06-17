@@ -89,7 +89,7 @@ int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, ui
     return 0; //this should not happen
 };
 
-uint32 Transcriptome::quantAlign (Transcript &aG, Transcript *aTall, vector<uint32> &readTranscripts, set<uint32> &readTrGenes) {
+uint32 Transcriptome::quantAlign (Transcript &aG, Transcript *aTall, vector<array<uint32,2>> &readTranscripts, set<uint32> &readTrGenes) {
     uint32 nAtr=0; //number of alignments to the transcriptome
 
     //binary search through transcript starts
@@ -106,17 +106,12 @@ uint32 Transcriptome::quantAlign (Transcript &aG, Transcript *aTall, vector<uint
                 if (aStatus==1) {//align conforms with the transcript
                     aTall[nAtr].Chr = tr1;
                     aTall[nAtr].Str = trStr[tr1]==1 ? aG.Str : 1-aG.Str; //TODO strandedness
-                    ++nAtr;
-                    if (P.pSolo.strand==-1 || (int32) aTall[nAtr-1].Str == P.pSolo.strand) {//correct strand
-                        readTranscripts.push_back(tr1);
+                    if (P.pSolo.strand==-1 || (int32) aTall[nAtr].Str == P.pSolo.strand) {//correct strand
+                        uint32 distTTS=trLen[tr1]-(aTall[nAtr].exons[aTall[nAtr].nExons-1][EX_G] + aTall[nAtr].exons[aTall[nAtr].nExons-1][EX_L]);
+                        readTranscripts.push_back({tr1,distTTS});
                         readTrGenes.insert(trGene[tr1]);
-//                         {//find the distance to 3'
-//                             uint64 distTTS=trLen[tr1]-(aTall[nAtr].exons[aTall[nAtr].nExons-1][EX_G] + aTall[nAtr].exons[aTall[nAtr].nExons-1][EX_L]);
-//                             cout <<"\t"<< distTTS;
-//     //                         if (distTTS>100000)
-//     //                             cerr << distTTS <<"\t"<< trLen[tr1] << "\n";
-//                         };                        
                     };
+                    ++nAtr;
                 };
         };
     } while (trEmax[tr1]>=aGend && tr1>0);

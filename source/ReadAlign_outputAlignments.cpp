@@ -9,7 +9,7 @@ void ReadAlign::outputAlignments() {
     bool mateMapped[2]={false,false};
 
     set<uint32> readGeneFull={},readGene={};
-    vector<uint32> readTranscripts={};
+    vector<array<uint32,2>> readTranscripts={};
     vector<int32> readGeneExon={};
 
     outFilterPassed=true;//only false if the alignment is held for outFilterBySJoutStage
@@ -179,14 +179,14 @@ void ReadAlign::outputAlignments() {
             };
 
             //solo
-            soloRead->record(nTr, readGene, readGeneFull, trMult[0], iReadAll); 
+            soloRead->record(nTr, readGene, readGeneFull, trMult[0], iReadAll, readTranscripts); 
         };
     };
 
     if (unmapType>=0) {//unmapped reads
         statsRA.unmappedAll++;
         soloRead->readBar->getCBandUMI(readNameExtra.at(0));
-        soloRead->record(nTr, readGene, readGeneFull, trMult[0], iReadAll);         
+        soloRead->record(nTr, readGene, readGeneFull, trMult[0], iReadAll, readTranscripts);         
     };
 
     if ( P.outSAMunmapped.within && unmapType>=0 && unmapType<4 ) {//output unmapped within && unmapped read && both mates unmapped

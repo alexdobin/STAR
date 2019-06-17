@@ -28,11 +28,11 @@ public:
     string cbSeq, umiSeq, cbQual, umiQual;
 
     SoloReadFeature (int32 feTy, Parameters &Pin, int iChunk);
-    void record(SoloReadBarcode &soloBar, uint nTr, set<uint32> &readGene, set<uint32> &readGeneFull, Transcript *alignOut, uint64 iRead);
+    void record(SoloReadBarcode &soloBar, uint nTr, set<uint32> &readGene, set<uint32> &readGeneFull, Transcript *alignOut, uint64 iRead, const vector<array<uint32,2>> &readTranscripts);
     void addCounts(const SoloReadFeature &soloCBin);
     void addStats(const SoloReadFeature &soloCBin);
     void statsOut(ofstream &streamOut);
-    void inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbReadCountExact);
+    void inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbReadCountExact, ofstream *streamTranscriptsOut);
 
 private:
     const int32 featureType;

@@ -78,7 +78,7 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished allocating arrays for Solo " << nReadsMapped*rguStride*4.0/1024/1024/1024 <<" GB" <<endl;
 
     for (int ii=0; ii<P.runThreadN; ii++) {//TODO: this can be parallelized
-        readFeatAll[ii]->inputRecords(rCBpa, rguStride, readBarSum->cbReadCountExact);
+        readFeatAll[ii]->inputRecords(rCBpa, rguStride, readBarSum->cbReadCountExact, streamTranscriptsOut);
     };
 
     for (uint32 iCB=0; iCB<nCB; iCB++) {
@@ -96,7 +96,12 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     time(&rawTime);
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished reading reads from Solo files nCB="<<nCB <<", nReadPerCBmax="<<nReadPerCBmax;
     P.inOut->logMain <<", nMatch="<<readFeatSum->stats.V[readFeatSum->stats.nMatch]<<endl;
-
+    
+    if (featureType==3) {
+        streamTranscriptsOut->flush();
+        return; //not implemented yet
+    };
+    
     //collapse each CB
     nUperCB = new uint32[nCB];//record pair: nUMIs per CB and iCB, for sorting if needed
     nGperCB = new uint32[nCB];

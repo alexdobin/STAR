@@ -7,7 +7,7 @@
 
 #include <stdlib.h>
 
-const vector<string> ParametersSolo::featureNames={"Gene","SJ","GeneFull"};
+const vector<string> ParametersSolo::featureNames={"Gene","SJ","GeneFull","Transcript3p"};
 
 void ParametersSolo::initialize(Parameters *pPin)
 {
@@ -62,6 +62,7 @@ void ParametersSolo::initialize(Parameters *pPin)
         exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
 
+    featureYes=new bool [featureNames.size()];
     featureInd.resize(featureNames.size(),-1);
     for (auto &fin : featureIn) {
         bool finGood=false;
