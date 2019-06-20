@@ -101,7 +101,7 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
         streamTranscriptsOut->flush();
         return; //not implemented yet
     };
-    
+        
     //collapse each CB
     nUperCB = new uint32[nCB];//record pair: nUMIs per CB and iCB, for sorting if needed
     nGperCB = new uint32[nCB];

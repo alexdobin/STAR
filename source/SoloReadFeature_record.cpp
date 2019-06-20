@@ -51,10 +51,8 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, set<uint32> &re
 
     vector<array<uint64,2>> readSJs;
 
-    set<uint32> *readGe;
-    if (featureType==0) {
-        readGe = &readGene;
-    } else if (featureType==2) {
+    set<uint32> *readGe=&readGene; //for featureType==0
+    if (featureType==2) {
         readGe = &readGeneFull;
     };
 
