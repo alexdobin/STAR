@@ -1,3 +1,4 @@
+* Changed multimaping chimeras detection algorithm to improve sensitivty and reduce non-canonical junctions.
 * Fixed the problem with ALT=* in STAR-WASP.
 * Implemented extras/scripts/soloBasicCellFilter.awk script to perform basic filtering of the STARsolo count matrices.
 

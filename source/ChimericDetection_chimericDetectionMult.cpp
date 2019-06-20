@@ -9,7 +9,7 @@ int chimericAlignScore (ChimericSegment & seg1, ChimericSegment & seg2)
     bool diffMates=(seg1.roE < seg1.align.readLength[0] && seg2.roS >= seg1.align.readLength[0]) || (seg2.roE < seg1.align.readLength[0] && seg1.roS >= seg1.align.readLength[0]);
 
     //segment lengths && (different mates || small gap between segments)
-    if (seg1.roE > seg1.P.pCh.segmentMin + seg1.roS + chimOverlap && seg2.roE > seg1.P.pCh.segmentMin + seg2.roS + chimOverlap  \
+    if (seg1.roE > seg1.P.pCh.segmentMin + seg1.roS && seg2.roE > seg1.P.pCh.segmentMin + seg2.roS \
         && ( diffMates || ( (seg1.roE + seg1.P.pCh.segmentReadGapMax + 1) >= seg2.roS && (seg2.roE + seg1.P.pCh.segmentReadGapMax + 1) >= seg1.roS ) ) )
     {
        chimScore = seg1.align.maxScore + seg2.align.maxScore - (int)chimOverlap; //subtract overlap to avoid double counting
@@ -62,8 +62,7 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength) {
 
                     int chimScore=chimericAlignScore(seg1,seg2);
 
-                    if  (chimScore>0)
-                    {//candidate chimera
+                    if  (chimScore>0) {//candidate chimera
                         ChimericAlign chAl(seg1, seg2, chimScore, outGen, RA);
 
                         if (!chAl.chimericCheck())
@@ -73,11 +72,13 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength) {
                             chimAligns.push_back(chAl);//add this chimeric alignment
 
                         if ( chimScore > chimScoreBest && chimScore >= P.pCh.scoreMin && chimScore >= (int)(readLength[0]+readLength[1]) - P.pCh.scoreDropMax ) {
-                            chimAligns.back().chimericStitching(outGen.G, Read1[0]);
+                            //stitch and re-calculate shimScore for the best chimeras for now - to make chimScoreBest accurate
+                            //re-calculated chimScoreBest includes non-canonical penalty, so the re-calculated score is lower, in some cases it goes to 0 if some checks are not passed
+                            //stitching will be done later for all chimeras
+                            chimAligns.back().chimericStitching(outGen.G, Read1);
                             if (chimAligns.back().chimScore > chimScoreBest)
                                 chimScoreBest=chimAligns.back().chimScore;
                         };
-
                     };
                 };//cycle over window2 aligns
             };//cycle over window2
@@ -88,7 +89,8 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength) {
         return chimRecord;
 
     chimN=0;
-    for (auto cAit=chimAligns.begin(); cAit<chimAligns.end(); cAit++) {//scan all chimeras, find the number within score range
+    for (auto cAit=chimAligns.begin(); cAit<chimAligns.end(); cAit++) {
+        //scan all chimeras, find the number within score range - this is just the initial estimate
         if (cAit->chimScore >= chimScoreBest - (int)P.pCh.multimapScoreRange)
             ++chimN;
     };
@@ -97,8 +99,8 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength) {
 
     chimN=0;
     for (auto cAit=chimAligns.begin(); cAit<chimAligns.end(); cAit++) {//re-scan all chimeras: stitch and re-check the score
-        if (cAit->chimScore >= chimScoreBest-(int)P.pCh.multimapScoreRange) {
-            cAit->chimericStitching(outGen.G, Read1[0]);
+        if (cAit->chimScore >= chimScoreBest-2*(int)P.pCh.multimapScoreRange) {
+            cAit->chimericStitching(outGen.G, Read1);
             if (cAit->chimScore >= chimScoreBest - (int)P.pCh.multimapScoreRange)
                 ++chimN;
         };
