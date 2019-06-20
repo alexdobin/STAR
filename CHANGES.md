@@ -1,3 +1,4 @@
+* Fixed the problem with ALT=* in STAR-WASP.
 * Implemented extras/scripts/soloBasicCellFilter.awk script to perform basic filtering of the STARsolo count matrices.
 
 STAR 2.7.1a 2019/05/15

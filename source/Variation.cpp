@@ -40,7 +40,7 @@ void scanVCF(ifstream& vcf, Parameters& P, SNP& snp, vector <uint> &chrStart, ma
 
             vector <string> altV(3);
 
-            if (ref.size()==1 && splitString(alt,',',altV)==1) {
+            if (ref.size()==1 && splitString(alt,',',altV)==1) {//only SNVs allowed - ref=1-char, alt could be comma separated list of 1-char. splitString returns the max lenght of the split strings
                 altV.insert(altV.begin(),ref);//add ref to the beginning
 
                 if (chrNameIndex.count(chr)==0) {//chr not in Genome
@@ -55,13 +55,15 @@ void scanVCF(ifstream& vcf, Parameters& P, SNP& snp, vector <uint> &chrStart, ma
                     //both alleles are reference, no need to do anything
                     //this is a strange case in VCF when ALT allele(s) are equal to REF
                 } else {
-                    snp.lociV.push_back(pos-1+chrStart[chrNameIndex[chr]]);
                     array<char,3> nt1;
                     nt1[0]=convertNt01234( ref.at(0) );
                     nt1[1]=convertNt01234( altV.at( atoi(&sample.at(0)) ).at(0) );
                     nt1[2]=convertNt01234( altV.at( atoi(&sample.at(2)) ).at(0) );
-                    snp.nt.push_back(nt1);
-                    snp.N++;
+                    if (nt1[0]<4 && nt1[1]<4 && nt1[2]<4) {//only record if variant is ACGT
+                        snp.lociV.push_back(pos-1+chrStart[chrNameIndex[chr]]);
+                        snp.nt.push_back(nt1);
+                        snp.N++;
+                    };
                 };
             };
         };
