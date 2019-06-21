@@ -6,6 +6,7 @@
 #include "Parameters.h"
 #include "Transcript.h"
 #include "SoloReadBarcode.h"
+#include "SoloCommon.h"
 
 class SoloReadFeature {
 public:
@@ -32,7 +33,7 @@ public:
     void addCounts(const SoloReadFeature &soloCBin);
     void addStats(const SoloReadFeature &soloCBin);
     void statsOut(ofstream &streamOut);
-    void inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbReadCountExact, ofstream *streamTranscriptsOut);
+    void inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbReadCountExact, ofstream *streamTranscriptsOut, vector<readInfoStruct> &readInfo);
 
 private:
     const int32 featureType;

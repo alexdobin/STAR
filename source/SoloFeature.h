@@ -5,6 +5,7 @@
 #include "Transcriptome.h"
 #include <fstream>
 
+#include "SoloCommon.h"
 #include "SoloRead.h"
 
 class SoloFeature {
@@ -39,7 +40,6 @@ public:
     
     array<vector<uint64>,2> sjAll;
     
-    typedef struct{uint64 cb; uint32 umi;} readInfoStruct;
     vector<readInfoStruct> readInfo; //corrected CB/UMI information for each read
 
     SoloFeature(int feTy, Parameters &Pin, Transcriptome &inTrans);

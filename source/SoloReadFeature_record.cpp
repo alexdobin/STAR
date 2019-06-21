@@ -11,7 +11,9 @@ uint32 outputReadCB(fstream *streamOut, int32 featureType, uint32 umiB, uint32 g
     //                           CB or nCB {CB Qual, ...}
     
     uint64 nout=1;
-    if (featureType==0 || featureType==2) {//genes
+    if (featureType==-1) {//no feature, output for readInfo
+        *streamOut << umiB <<' '<< iRead <<' '<< -1 <<' '<< cbMatch <<' '<< stringCB <<'\n';;
+    } else if (featureType==0 || featureType==2) {//genes
         *streamOut << umiB <<' ';//UMI
         if ( iRead != (uint64)-1 )
             *streamOut << iRead <<' ';//iRead
@@ -93,13 +95,13 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, set<uint32> &re
         };
     };
     
-    if (!readFeatYes)
+    if (!readFeatYes && !readInfoYes) //no feature, and no readInfo requested
         return;
     
     if (!readInfoYes)
         iRead=(uint64)-1;
 
-    uint32 nfeat = outputReadCB(streamReads, featureType, soloBar.umiB, *readGe->begin(), readSJs, soloBar.cbMatch, soloBar.cbMatchString, iRead, readTranscripts);
+    uint32 nfeat = outputReadCB(streamReads, (readFeatYes ? featureType : -1), soloBar.umiB, *readGe->begin(), readSJs, soloBar.cbMatch, soloBar.cbMatchString, iRead, readTranscripts);
     if (pSolo.cbWL.size()>0) {//WL
         for (auto &cbi : soloBar.cbMatchInd)
             cbReadCount[cbi] += nfeat;

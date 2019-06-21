@@ -2,6 +2,7 @@
 #include "SoloReadFeature.h"
 #include "binarySearch2.h"
 #include "serviceFuns.cpp"
+#include "SoloCommon.h"
 
 bool inputFeatureUmi(fstream *strIn, int32 featureType, bool readInfoYes, array<vector<uint64>,2> &sjAll, uint32 &iread, int32 &cbmatch, uint32 &feature, uint32 &umi, vector<uint32> &featVecU32)
 {
@@ -33,7 +34,7 @@ bool inputFeatureUmi(fstream *strIn, int32 featureType, bool readInfoYes, array<
     return true;
 };
 
-void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbReadCountExactTotal, ofstream *streamTranscriptsOut)
+void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbReadCountExactTotal, ofstream *streamTranscriptsOut, vector<readInfoStruct> &readInfo)
 {   
     streamReads->flush();
     streamReads->seekg(0,ios::beg);
@@ -42,7 +43,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
     int64 cb;
     vector<uint32> trIdDist;
     while (inputFeatureUmi(streamReads, featureType, readInfoYes, P.sjAll, iread, cbmatch, feature, umi, trIdDist)) {
-        if (feature == (uint32)(-1)) {//no feature => no record, this can happen for SJs
+        if (feature == (uint32)(-1) && !readInfoYes) {//no feature => no record, this can happen for SJs
             streamReads->ignore((uint32)-1, '\n');
             //stats.V[stats.nNoFeature]++; //need separate category for this
             continue;
@@ -69,12 +70,16 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
                     *streamTranscriptsOut <<' '<< tt;
                 *streamTranscriptsOut << '\n';
             } else {//single-number feature
-                cbP[cb][0]=feature;
-                cbP[cb][1]=umi;
-                if (readInfoYes) {
-                    cbP[cb][2]=iread;
+                if (feature != (uint32)(-1)) {
+                    cbP[cb][0]=feature;
+                    cbP[cb][1]=umi;
+                    if (readInfoYes) {
+                        cbP[cb][2]=iread;
+                    };
+                    cbP[cb]+=cbPstride;
+                } else {//no feature - record readInfo
+                    readInfo[iread].cb=cb;
                 };
-                cbP[cb]+=cbPstride;
             };
         } else {//multiple matches
             float ptot=0.0,pmax=0.0;
@@ -103,12 +108,16 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
                         *streamTranscriptsOut <<' '<< tt;
                     *streamTranscriptsOut << '\n';
                 } else {//single-number feature
-                    cbP[cb][0]=feature;
-                    cbP[cb][1]=umi;
-                    if (readInfoYes) {
-                        cbP[cb][2]=iread;
-                    };
-                    cbP[cb]+=cbPstride;
+                    if (feature != (uint32)(-1)) {
+                        cbP[cb][0]=feature;
+                        cbP[cb][1]=umi;
+                        if (readInfoYes) {
+                            cbP[cb][2]=iread;
+                        };
+                        cbP[cb]+=cbPstride;
+                    } else {//no feature - record readInfo
+                        readInfo[iread].cb=cb;
+                    };    
                 };
             } else {
                 stats.V[stats.nTooMany]++;
