@@ -110,7 +110,7 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
 
     for (uint32 iCB=0; iCB<nCB; iCB++) {
         uint64 nr=(rCBpa[indCB[iCB]]-rCBp[iCB])/rguStride; //number of reads that were matched to WL, rCBpa accumulated reference to the last element+1
-        collapseUMI(rCBp[iCB],nr,nGperCB[iCB],nUperCB[iCB],umiArray,pSolo.cbWL[indCB[iCB]]);
+        collapseUMI(rCBp[iCB],nr,nGperCB[iCB],nUperCB[iCB],umiArray,indCB[iCB]);
         readFeatSum->stats.V[readFeatSum->stats.nUMIs] += nUperCB[iCB];
         if (nGperCB[iCB]>0)
             ++readFeatSum->stats.V[readFeatSum->stats.nCellBarcodes];
