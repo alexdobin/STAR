@@ -118,6 +118,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
                         cbP[cb]+=cbPstride;
                     } else {//no feature - record readInfo
                         readInfo[iread].cb=cb;
+                        readInfo[iread].umi=umi;
                     };    
                 };
             } else {
