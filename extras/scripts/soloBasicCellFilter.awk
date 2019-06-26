@@ -1,7 +1,17 @@
+# usage awk -v exactCells=... -v maxCells=... -v maxPercentile=... -v maxMinRatio=... -f soloBasicCellFilter.awk 
 BEGIN {
-    maxCells=3000;
-    maxPercentile=0.99;
-    maxMinRatio=10;
+    # default values - if variables were not defined by the user
+    if (exactCells==0)
+        exactCells=0;
+    if (maxCells==0)
+        maxCells=3000;
+    if (maxPercentile==0)
+        maxPercentile=0.99;
+    if (maxMinRatio==0)
+        maxMinRatio=10;
+
+    print "Parameters: " "exactCells=" exactCells, "maxCells=" maxCells, "maxPercentile=", maxPercentile, "maxMinRatio=", maxMinRatio;
+
     nHeaderLines=3;
     fOutCB=ARGV[1] ".filtered";
     fOutMat=ARGV[2] ".filtered";
@@ -28,6 +38,9 @@ END {
     nMax=cellTotSort[-int((1-maxPercentile)*maxCells)+length(cellTot)];
     nMin=nMax/maxMinRatio;
 
+    if (exactCells>0)
+        nMin=length(cellTot)<exactCells ? cellTotSort[1] : cellTotSort[length(cellTot)-exactCells];
+
     nCell=0;
     for (ii=1; ii<=length(CB); ii++) {
         if (cellTot[ii]>=nMin) {
@@ -38,7 +51,11 @@ END {
         };
     };
 
-    print cellTotSort[length(cellTotSort)]+0,nMax,nMin,nCell;
+    if (exactCells==0) {
+        print "maxUMIperCell=" cellTotSort[length(cellTotSort)]+0,"Robust maxUMIperCel=" nMax,"minUMIperCell=" nMin, "Filtered N cells=", nCell;
+    } else {
+        print "total N cells=" length(cellTot), "exactCells=" exactCells, "minUMIperCell=" nMin;
+    };
 
     nMat=0;
     for (ii=nHeaderLines+1; ii<=nLines; ii++) {
