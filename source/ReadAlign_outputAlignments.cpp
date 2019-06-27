@@ -8,9 +8,11 @@ void ReadAlign::outputAlignments() {
 
     bool mateMapped[2]={false,false};
 
-    set<uint32> readGeneFull={},readGene={};
-    vector<array<uint32,2>> readTranscripts={};
-    vector<int32> readGeneExon={};
+    //empty annotations
+    readGeneFull={};
+    readGene={};
+    readTranscripts={};
+    readGeneExon={};
 
     outFilterPassed=true;//only false if the alignment is held for outFilterBySJoutStage
     if (unmapType==-1) {//output transcripts
@@ -93,6 +95,21 @@ void ReadAlign::outputAlignments() {
             nTrOut=min(P.outSAMmultNmax,nTrOut); //number of to write to SAM/BAM files
 
             soloRead->readBar->getCBandUMI(readNameExtra.at(0));
+            //genes
+            if ( P.quant.geCount.yes ) {
+                chunkTr->geneCountsAddAlign(nTr, trMult, readGeneExon);
+            };
+            //GeneFull
+            if ( P.quant.geneFull.yes ) {
+                chunkTr->geneFullAlignOverlap(nTr, trMult, P.pSolo.strand, readGeneFull);
+            };
+            //transcripts
+            if ( P.quant.trSAM.yes ) {//NOTE: the transcripts are changed by this function (soft-clipping extended), cannot be reused
+                quantTranscriptome(chunkTr, nTrOut, trMult,  alignTrAll, readTranscripts, readGene);
+            };
+
+            //solo
+            soloRead->record(nTr, readGene, readGeneFull, trMult[0], iReadAll, readTranscripts);             
             
             //write to SAM/BAM
             for (uint iTr=0;iTr<nTrOut;iTr++) {//write all transcripts
@@ -163,23 +180,6 @@ void ReadAlign::outputAlignments() {
                     outputTranscriptSJ (*(trMult[iTr]), nTr, chunkOutSJ, sjReadStartN);
                 };
             };
-            
-            //genes
-            if ( P.quant.geCount.yes ) {
-                chunkTr->geneCountsAddAlign(nTr, trMult, readGeneExon);
-            };
-
-            if ( P.quant.geneFull.yes ) {
-                chunkTr->geneFullAlignOverlap(nTr, trMult, P.pSolo.strand, readGeneFull);
-            };
-
-            //transcripts
-            if ( P.quant.trSAM.yes ) {//NOTE: the transcripts are changed by this function (soft-clipping extended), cannot be reused
-                quantTranscriptome(chunkTr, nTrOut, trMult,  alignTrAll, readTranscripts, readGene);
-            };
-
-            //solo
-            soloRead->record(nTr, readGene, readGeneFull, trMult[0], iReadAll, readTranscripts); 
         };
     };
 

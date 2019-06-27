@@ -165,12 +165,12 @@ void SoloFeature::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nU
                     graphComp[ii]=ii;
             };
             
-            const uint32 bitTopMask=~(1>>31);
+            const uint32 bitTopMask=~(1<<31);
             vector<array<uint32,2>> umiBest(graphN,{0,0});
             uint32 umiCorrN=0;//number of umi to error-correct
             for (uint32 iu=0; iu<umiArrayStride*nU0; iu+=umiArrayStride)  {
                 //switch low/high to recover original UMIs
-                pSolo.umiSwapHalves(umiArray[iu]);
+                pSolo.umiSwapHalves(umiArray[iu]);//halves were swapped, need to reurn back to UMIs
                 //find best UMI (highest count) for each connected component
                 if (umiArray[iu+2]==def_MarkNoColor)
                     continue;
@@ -196,9 +196,12 @@ void SoloFeature::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nU
             for (uint32 iR=0; iR<gReadS[iG+1]-gReadS[iG]; iR+=rguStride) {//cycle over reads
                 uint64 iread1 = rGU1[iR+rguR];
                 readInfo[iread1].cb = cellBarcode;
-                if (rGU1[iR]==umiArray[iUmi*2]) {//correct UMI
-                    readInfo[iread1].umi=umiBest[umiArray[iUmi*2+1]][1];
+                
+                if (iUmi < umiCorrN && rGU1[iR+rguU]>umiArray[iUmi*2]) //advance in the umiArray sorted list
                     ++iUmi;
+
+                if (iUmi < umiCorrN && rGU1[iR+rguU]==umiArray[iUmi*2]) {//correct UMI
+                    readInfo[iread1].umi=umiBest[umiArray[iUmi*2+1]][1];
                 } else {//no UMI correction
                     readInfo[iread1].umi=rGU1[iR+rguU];
                 };

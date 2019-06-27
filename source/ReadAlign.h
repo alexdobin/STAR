@@ -154,6 +154,11 @@ class ReadAlign {
             uint ovS;//first read base of the overlap
             uint mateStart[2];//mates starts in the merged read
         } peOv;//PE  mates overlap/merge/remap structure
+        
+        //read annotations
+        set<uint32> readGeneFull,readGene;
+        vector<array<uint32,2>> readTranscripts;
+        vector<int32> readGeneExon;
 
         void resetN();//resets the counters to 0
         void multMapSelect();

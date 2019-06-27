@@ -340,7 +340,8 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                             attrN+=bamAttrArrayWrite(matesCIGAR[1-imate],"MC",attrOutArray+attrN);
                         };
                         break;
-
+                        
+                    //solo
                     case ATTR_CR:
                         attrN+=bamAttrArrayWrite(soloRead->readBar->cbSeq,"CR",attrOutArray+attrN);
                         break;
@@ -353,7 +354,16 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                     case ATTR_UY:
                         attrN+=bamAttrArrayWrite(soloRead->readBar->umiQual,"UY",attrOutArray+attrN);
                         break;
-
+                    case ATTR_GX:
+                        if (readGene.size()==1) //only output if read maps to a single gene
+                            attrN+=bamAttrArrayWrite(chunkTr->geID[*readGene.begin()],"GX",attrOutArray+attrN);
+                        break;
+                    case ATTR_GN:
+                        if (readGene.size()==1) //only output if read maps to a single gene
+                            attrN+=bamAttrArrayWrite(chunkTr->geName[*readGene.begin()],"GN",attrOutArray+attrN);
+                        break;                        
+                        
+                        
                     //following attributes are not processed here
                     case ATTR_CB:
                     case ATTR_UB:

@@ -1048,7 +1048,8 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     outSAMattrPresent.UY=false;
     outSAMattrPresent.CB=false;
     outSAMattrPresent.UB=false;
-
+    outSAMattrPresent.GX=false;
+    outSAMattrPresent.GN=false;
 
     //for quant SAM output only NH and HI flags
     outSAMattrPresentQuant=outSAMattrPresent;
@@ -1141,6 +1142,14 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             outSAMattrOrder.push_back(ATTR_UB);
             outSAMattrOrderQuant.push_back(ATTR_UB);
             outSAMattrPresent.UB=true;
+        } else if (vAttr1.at(ii)== "GX") {
+            outSAMattrOrder.push_back(ATTR_GX);
+            outSAMattrOrderQuant.push_back(ATTR_GX);
+            outSAMattrPresent.GX=true;            
+        } else if (vAttr1.at(ii)== "GN") {
+            outSAMattrOrder.push_back(ATTR_GN);
+            outSAMattrOrderQuant.push_back(ATTR_GN);
+            outSAMattrPresent.GN=true;            
         } else if (vAttr1.at(ii)== "XS") {
             outSAMattrOrder.push_back(ATTR_XS);
             outSAMattrPresent.XS=true;

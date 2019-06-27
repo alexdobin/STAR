@@ -52,7 +52,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
         if (cbmatch<=1) {//single match
             *streamReads >> cb;
 
-            if (cbmatch==1 && cbReadCountExactTotal[cb]==0) {//single 1MM match, no exact matches to this CB
+            if ( cbmatch==1 && cbReadCountExactTotal[cb]==0 && feature!=(uint32)(-1) ) {//single 1MM match, no exact matches to this CB
                 stats.V[stats.nNoExactMatch]++;
                 continue;
             };
@@ -60,8 +60,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
             if (!pSolo.cbWLyes) //if no-WL, the full cbInteger was recorded - now has to be placed in order
                 cb=binarySearchExact<uint64>(cb,pSolo.cbWL.data(),pSolo.cbWL.size());
             
-            if (cbmatch==0)
-                stats.V[stats.nExactMatch]++;
+            
             //record feature
             if (featureType==3) {//variable length feature
                 //for now - output all in file
@@ -69,6 +68,8 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
                 for (auto &tt: trIdDist)
                     *streamTranscriptsOut <<' '<< tt;
                 *streamTranscriptsOut << '\n';
+                if (cbmatch==0)
+                    stats.V[stats.nExactMatch]++;
             } else {//single-number feature
                 if (feature != (uint32)(-1)) {
                     cbP[cb][0]=feature;
@@ -77,6 +78,8 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
                         cbP[cb][2]=iread;
                     };
                     cbP[cb]+=cbPstride;
+                    if (cbmatch==0)
+                        stats.V[stats.nExactMatch]++;
                 } else {//no feature - record readInfo
                     readInfo[iread].cb=cb;
                     readInfo[iread].umi=umi;
@@ -121,7 +124,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
                         readInfo[iread].umi=umi;
                     };    
                 };
-            } else {
+            } else if (feature != (uint32)(-1)) {
                 stats.V[stats.nTooMany]++;
             };
         };
