@@ -15,15 +15,13 @@ void ParametersSolo::initialize(Parameters *pPin)
 
     if (typeStr=="None") {
         type=0;
-    
-        //SAM attributes
+        //solo SAM attributes not allowed
         if (pP->outSAMattrPresent.CR || pP->outSAMattrPresent.CY || pP->outSAMattrPresent.UR || pP->outSAMattrPresent.UY  || pP->outSAMattrPresent.CB  || pP->outSAMattrPresent.UB) {
             ostringstream errOut;
             errOut <<"EXITING because of FATAL INPUT ERROR: --outSAMattributes contains CR/CY/UR/UY tags, but --soloType is not set\n";
             errOut <<"SOLUTION: re-run STAR without these attribures, or with --soloType set\n";
             exitWithError(errOut.str(), std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };        
-        
         return;
     } else if (typeStr=="Droplet") {
         if (umiL > 16) {
@@ -126,7 +124,7 @@ void ParametersSolo::initialize(Parameters *pPin)
     umiMaskLow=(uint32) ( (((uint64)1)<<umiL) - 1);
     umiMaskHigh=~umiMaskLow;
 
-    //load the CB whitlist and create unordered_map
+    //load the CB whitlist
     if (soloCBwhitelist=="-") {
             ostringstream errOut;
             errOut << "EXITING because of FATAL ERROR in INPUT parameters: --soloCBwhitelist is not defined\n";
