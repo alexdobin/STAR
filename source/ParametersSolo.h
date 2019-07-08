@@ -1,6 +1,7 @@
 #ifndef CODE_ParametersSolo
 #define CODE_ParametersSolo
 #include "IncludeDefine.h"
+#include "SoloBarcode.h"
 
 class Parameters;
 
@@ -9,12 +10,22 @@ public:
     //chemistry, library etc
     string typeStr;
     int type;
+    
+    //simple barcodes
     uint32 cbS,cbL; //cell barcode start,length
     uint32 umiS,umiL; //umi start,length
     uint32 bL; //total barcode length
     string soloCBwhitelist;
     std::vector <uint64> cbWL;
     bool cbWLyes;
+    
+    //complex barcodes
+    vector<SoloBarcode> cbV;
+    SoloBarcode         umiV;   //single UMI
+    bool adapterYes;             //anchor?  
+    string adapterSeq;           //anchor sequence
+    uint32 adapterMismatchesNmax;//max number of mismatches in the anchor
+    
     string strandStr;
     int32 strand;
     //features

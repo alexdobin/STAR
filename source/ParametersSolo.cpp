@@ -23,7 +23,8 @@ void ParametersSolo::initialize(Parameters *pPin)
             exitWithError(errOut.str(), std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };        
         return;
-    } else if (typeStr=="Droplet") {
+    } else if (typeStr=="CB_UMI_Simple") {
+        type=1;        
         if (umiL > 16) {
             ostringstream errOut;
             errOut << "EXITING because of fatal PARAMETERS error: UMI length is too long: --soloUMIlen="<<umiL<<"\n";
@@ -36,14 +37,16 @@ void ParametersSolo::initialize(Parameters *pPin)
             errOut << "SOLUTION: CB length cannot be longer than 31";
             exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
-        type=1;
         if (bL==1)
             bL=cbL+umiL;
         pP->readNmates=1; //output mates TODO: check that readNmatesIn==2       
+    } else if (typeStr=="CB_UMI_Complex") {
+        type=2;
     } else  {
         ostringstream errOut;
         errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in --soloType="<<typeStr<<"\n";
-        errOut << "SOLUTION: use allowed option: None or Droplet";
+        errOut << "SOLUTION: use allowed option: None OR CB_UMI_Simple OR CB_UMI_Complex\n";
+        errOut << "Obsolete option Droplet should be replaced with CB_UMI_Simple";
         exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
 
