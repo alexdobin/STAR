@@ -54,7 +54,7 @@ void bamSortByCoordinate (Parameters &P, ReadAlignChunk **RAchunk, Genome &mainG
                 if (binS==0) continue; //empty bin
 
                 if (ibin == nBins-1) {//last bin for unmapped reads
-                    BAMbinSortUnmapped(ibin,P.runThreadN,P.outBAMsortTmpDir, P, mainGenome);
+                    BAMbinSortUnmapped(ibin,P.runThreadN,P.outBAMsortTmpDir, P, mainGenome, soloFeat);
                 } else {
                     uint newMem=binS+binN*24;
                     bool boolWait=true;

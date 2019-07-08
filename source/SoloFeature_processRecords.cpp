@@ -99,6 +99,10 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     
     if (featureType==3) {
         streamTranscriptsOut->flush();
+        ofstream &outStr=ofstrOpen(P.outFileNamePrefix+pSolo.outFileNames[0]+"transcripts.tsv",ERROR_OUT, P);        
+        for (uint32 ii=0; ii<Trans.nTr; ii++)
+            outStr << Trans.trID[ii] <<"\t"<< Trans.trLen[ii] <<"\t"<< Trans.geName[Trans.trGene[ii]] << '\n';
+        outStr.close();
         return; //not implemented yet
     };
         

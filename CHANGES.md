@@ -1,3 +1,6 @@
+* Fixed a problem in STARsolo with unmapped reads counts in Solo.out/*.stats files.
+* Fixed a bug in STARsolo with counting reads for splice junctions. Solo.out/matrixSJ.mtx output is slighlty changed.
+* Implemented CB/UB/GX/GN BAM tags for STARsolo.
 * Fixed the problem with ALT=* in STAR-WASP.
 * Implemented extras/scripts/soloBasicCellFilter.awk script to perform basic filtering of the STARsolo count matrices.
 

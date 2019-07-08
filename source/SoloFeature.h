@@ -46,6 +46,8 @@ public:
     void processRecords(ReadAlignChunk **RAchunk);
     void collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot, uint32 *umiArray, uint64 cellBarcode);
     void outputResults();
+    void addBAMtags(char *&bam0, uint32 &size0, char* bam1);
+
 };
 
 #endif

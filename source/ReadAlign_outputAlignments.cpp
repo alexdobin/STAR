@@ -168,7 +168,7 @@ void ReadAlign::outputAlignments() {
                             outBAMunsorted->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], imate>0 ? 0 : outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1]);
                         };
                         if (P.outBAMcoord) {//KeepPairs option does not affect for sorted BAM since we do not want multiple entries for the same unmapped read
-                            outBAMcoord->coordOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], iReadAll);
+                            outBAMcoord->coordOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], iReadAll<<32);
                         };
                     };
                 };
@@ -186,7 +186,7 @@ void ReadAlign::outputAlignments() {
     if (unmapType>=0) {//unmapped reads
         statsRA.unmappedAll++;
         soloRead->readBar->getCBandUMI(readNameExtra.at(0));
-        soloRead->record(nTr, readGene, readGeneFull, trMult[0], iReadAll, readTranscripts);         
+        soloRead->record(0, readGene, readGeneFull, trMult[0], iReadAll, readTranscripts);         
     };
 
     if ( P.outSAMunmapped.within && unmapType>=0 && unmapType<4 ) {//output unmapped within && unmapped read && both mates unmapped
@@ -200,7 +200,7 @@ void ReadAlign::outputAlignments() {
                     outBAMquant->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], imate>0 ? 0 : outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1]);
                 };
                 if (P.outBAMcoord) {
-                    outBAMcoord->coordOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], iReadAll);
+                    outBAMcoord->coordOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], iReadAll<<32);
                 };
             };
         };

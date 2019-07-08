@@ -5,6 +5,7 @@
 #include "Parameters.h"
 #include "Variation.h"
 #include "Genome.h"
+#include <set>
 
 class Transcript {
 public:
@@ -52,6 +53,9 @@ public:
     vector <int32> varInd;
     vector <int32> varGenCoord, varReadCoord ;
     vector <char> varAllele;
+    
+    //annotations
+    std::set <uint32> alignGenes;
 
     Transcript(); //resets to 0
     void reset(); //reset to 0

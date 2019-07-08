@@ -45,22 +45,19 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, set<uint32> &re
     if (pSolo.type==0 || soloBar.cbMatch<0)
         return;
 
-    //unmapped
-    if (nTr==0) {
-        stats.V[stats.nUnmapped]++;
-        return;
-    };
-
     vector<array<uint64,2>> readSJs;
-
     set<uint32> *readGe=&readGene; //for featureType==0
-    if (featureType==2) {
-        readGe = &readGeneFull;
-    };
 
     bool readFeatYes=true;
-    if (featureType==0 || featureType==2) {//genes
+    //calculate feature
+    if (nTr==0) {//unmapped
+        stats.V[stats.nUnmapped]++;
+        readFeatYes=false;
+    } else if (featureType==0 || featureType==2) {//genes
         //check genes, return if no gene of multimapping
+        if (featureType==2) {
+            readGe = &readGeneFull;
+        };
         if (readGe->size()==0) {
             stats.V[stats.nNoFeature]++;
             readFeatYes=false;

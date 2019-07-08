@@ -62,28 +62,12 @@ void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, st
 
     outBAMwriteHeader(bgzfBin,P.samHeaderSortedCoord,mapGen.chrNameAll,mapGen.chrLengthAll);
     //send ordered aligns to bgzf one-by-one
-    char bam1[BAM_ATTR_MaxSize];
+    char bam1[BAM_ATTR_MaxSize];//temp array
     for (uint ia=0;ia<binN;ia++) {
         char* bam0=bamIn+startPos[ia*3+2];
-        uint32 size1=*((uint32*) bam0)+sizeof(uint32);
-        if (soloFeat.pSolo.samAttrYes) {//add extra tags to the BAM record
-            uint64 iread = * ((uint64*) (bam0+size1));
-            iread = iread >> 32; //iRead was encoded in the upper 32 bitsls
-            //cout << iread <<" "<< convertNuclInt64toString(soloFeat.readInfo[iread].cb,  soloFeat.pSolo.cbL) <<" "<< convertNuclInt64toString(soloFeat.readInfo[iread].umi, soloFeat.pSolo.umiL)<<endl;
-            
-            if (soloFeat.readInfo[iread].cb + 1 != 0) {//otherwise do not add CB/UB tags            
-                string cb  = convertNuclInt64toString(soloFeat.pSolo.cbWL[soloFeat.readInfo[iread].cb],  soloFeat.pSolo.cbL);
-                string umi = convertNuclInt64toString(soloFeat.readInfo[iread].umi, soloFeat.pSolo.umiL);
-                memcpy(bam1, bam0, size1);
-
-                size1 += bamAttrArrayWrite(cb,  "CB", bam1+size1);
-                size1 += bamAttrArrayWrite(umi, "UB", bam1+size1);
-                uint32 *bam1i = (uint32*) bam1;
-                bam1i[0] = size1-sizeof(uint32);
-                bam0=bam1;
-            };
-        };
-        bgzf_write(bgzfBin, bam0, size1);
+        uint32 size0=*((uint32*) bam0)+sizeof(uint32);
+        soloFeat.addBAMtags(bam0,size0,bam1);
+        bgzf_write(bgzfBin, bam0, size0);
     };
 
     bgzf_flush(bgzfBin);

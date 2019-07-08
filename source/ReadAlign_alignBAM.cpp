@@ -147,7 +147,16 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
             attrN+=bamAttrArrayWriteInt(trOut.nMM,"nM",attrOutArray+attrN,P);
             attrN+=bamAttrArrayWrite((to_string((uint) alignType)).at(0), "uT",attrOutArray+attrN); //cast to uint is only necessary for old compilers
 
-            if (!P.outSAMattrRG.empty()) attrN+=bamAttrArrayWrite(P.outSAMattrRG.at(readFilesIndex),"RG",attrOutArray+attrN);
+            if (P.outSAMattrPresent.RG)
+                attrN+=bamAttrArrayWrite(P.outSAMattrRG.at(readFilesIndex),"RG",attrOutArray+attrN);
+            if (P.outSAMattrPresent.CR)
+                attrN+=bamAttrArrayWrite(soloRead->readBar->cbSeq,"CR",attrOutArray+attrN);
+            if (P.outSAMattrPresent.CY)
+                attrN+=bamAttrArrayWrite(soloRead->readBar->cbQual,"CY",attrOutArray+attrN);
+            if (P.outSAMattrPresent.UR)
+                attrN+=bamAttrArrayWrite(soloRead->readBar->umiSeq,"UR",attrOutArray+attrN);
+            if (P.outSAMattrPresent.UY)
+                attrN+=bamAttrArrayWrite(soloRead->readBar->umiQual,"UY",attrOutArray+attrN);            
 
         } else {//this mate is mapped
             if (flagPaired) {//paired reads
@@ -355,12 +364,12 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                         attrN+=bamAttrArrayWrite(soloRead->readBar->umiQual,"UY",attrOutArray+attrN);
                         break;
                     case ATTR_GX:
-                        if (readGene.size()==1) //only output if read maps to a single gene
-                            attrN+=bamAttrArrayWrite(chunkTr->geID[*readGene.begin()],"GX",attrOutArray+attrN);
+                        if (readGene.size()==1 && trOut.alignGenes.size()==1) //only output if read maps to a single gene
+                            attrN+=bamAttrArrayWrite(chunkTr->geID[*trOut.alignGenes.begin()],"GX",attrOutArray+attrN);
                         break;
                     case ATTR_GN:
-                        if (readGene.size()==1) //only output if read maps to a single gene
-                            attrN+=bamAttrArrayWrite(chunkTr->geName[*readGene.begin()],"GN",attrOutArray+attrN);
+                        if (readGene.size()==1 && trOut.alignGenes.size()==1) //only output if read maps to a single gene
+                            attrN+=bamAttrArrayWrite(chunkTr->geName[*trOut.alignGenes.begin()],"GN",attrOutArray+attrN);
                         break;                        
                         
                         

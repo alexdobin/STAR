@@ -89,7 +89,7 @@ int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, ui
     return 0; //this should not happen
 };
 
-uint32 Transcriptome::quantAlign (Transcript &aG, Transcript *aTall, vector<array<uint32,2>> &readTranscripts, set<uint32> &readTrGenes) {
+uint32 Transcriptome::quantAlign (Transcript &aG, Transcript *aTall, vector<array<uint32,2>> &readTranscripts, set<uint32> &readGenes) {
     uint32 nAtr=0; //number of alignments to the transcriptome
 
     //binary search through transcript starts
@@ -109,7 +109,8 @@ uint32 Transcriptome::quantAlign (Transcript &aG, Transcript *aTall, vector<arra
                     if (P.pSolo.strand==-1 || (int32) aTall[nAtr].Str == P.pSolo.strand) {//correct strand
                         uint32 distTTS=trLen[tr1]-(aTall[nAtr].exons[aTall[nAtr].nExons-1][EX_G] + aTall[nAtr].exons[aTall[nAtr].nExons-1][EX_L]);
                         readTranscripts.push_back({tr1,distTTS});
-                        readTrGenes.insert(trGene[tr1]);
+                        readGenes.insert(trGene[tr1]);//genes for all alignments
+                        aG.alignGenes.insert(trGene[tr1]);//genes for each alignmentset
                     };
                     ++nAtr;
                 };

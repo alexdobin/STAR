@@ -4,11 +4,13 @@
 #include "serviceFuns.cpp"
 #include <random>
 
-uint ReadAlign::quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT, vector<array<uint32,2>> &readTranscripts, set<uint32> &readTrGenes) {
+uint ReadAlign::quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT, vector<array<uint32,2>> &readTranscripts, set<uint32> &readGenes) {
     uint nAlignT=0;
     for (uint iag=0; iag<nAlignG; iag++) {//transform all alignments
 
         Transcript *align1=alignG[iag];
+        
+        align1->alignGenes={};
         
         if (!P.quant.trSAM.indel && (align1->nDel>0 || align1->nIns>0) ) {
             //prevent indels if requested
@@ -62,7 +64,7 @@ uint ReadAlign::quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript 
             align1 = &align2;
         };
 
-        nAlignT += Tr->quantAlign(*align1,alignT+nAlignT, readTranscripts, readTrGenes);
+        nAlignT += Tr->quantAlign(*align1,alignT+nAlignT, readTranscripts, readGenes);
     };
 
     if (P.quant.trSAM.bamYes) {//output Aligned.toTranscriptome.bam

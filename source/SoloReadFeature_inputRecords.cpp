@@ -52,7 +52,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
         if (cbmatch<=1) {//single match
             *streamReads >> cb;
 
-            if ( cbmatch==1 && cbReadCountExactTotal[cb]==0 && feature!=(uint32)(-1) ) {//single 1MM match, no exact matches to this CB
+            if ( cbmatch==1 && cbReadCountExactTotal[cb]==0 ) {//single 1MM match, no exact matches to this CB
                 stats.V[stats.nNoExactMatch]++;
                 continue;
             };
@@ -62,7 +62,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
             
             
             //record feature
-            if (featureType==3) {//variable length feature
+            if (featureType==3) {//variable length feature, separate treatment, feature always defined (i.e. !=-1)
                 //for now - output all in file
                 *streamTranscriptsOut << cb <<' '<< umi <<' '<< trIdDist.size()/2;
                 for (auto &tt: trIdDist)
