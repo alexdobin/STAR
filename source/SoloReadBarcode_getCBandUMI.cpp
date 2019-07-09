@@ -91,7 +91,7 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
     
     uint32 bLength = readNameExtra.find(' ',pSolo.cbL+pSolo.umiL);
     string bSeq=readNameExtra.substr(0,bLength);
-    string bQual=readNameExtra.substr(bLength+1,2*bLength);
+    string bQual=readNameExtra.substr(bLength+1,bLength);
 
     if (pSolo.type==1) {
         cbSeq=bSeq.substr(pSolo.cbS-1,pSolo.cbL);

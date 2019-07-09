@@ -671,10 +671,11 @@ waspOutputMode              None
 ### STARsolo (single cell RNA-seq) parameters
 soloType                    None
     string(s): type of single-cell RNA-seq
-                            Droplet   ... one cell barcode and one UMI barcode in read2, e.g. Drop-seq and 10X Chromium
+                            CB_UMI_Simple   ... one UMI and one Cell Barcode of fixed length in read2, e.g. Drop-seq and 10X Chromium
+                            CB_UMI_Complex  ... one UMI of fixed length, but multiple Cell Barcodes of varying length, as well as adapters sequences are allowed in read2 only, E.g. inDrop.
 
 soloCBwhitelist             -
-    string: file with whitelist of cell barcodes
+    string(s): file(s) with whitelist(s) of cell barcodes. Only one file allowed with 
 
 soloCBstart                 1
     int>0: cell barcode start base
@@ -691,7 +692,13 @@ soloUMIlen                  10
 soloBarcodeReadLength       1
     int: length of the barcode read
                             1   ... equal to sum of soloCBlen+soloUMIlen
-                            0  ... not defined, do not check
+                            0   ... not defined, do not check
+
+soloAdapterSequence         -
+    string:                 adapter sequence to anchor barcodes.
+
+soloAdapterMismatchesNmax   1
+    int>0:                  maximum number of mismatches allowed in adapter sequence.
 
 soloStrand                  Forward
     string: strandedness of the solo libraries:

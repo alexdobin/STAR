@@ -15,16 +15,17 @@ public:
     uint32 cbS,cbL; //cell barcode start,length
     uint32 umiS,umiL; //umi start,length
     uint32 bL; //total barcode length
-    string soloCBwhitelist;
-    std::vector <uint64> cbWL;
+    vector<string> soloCBwhitelist;
+    vector <uint64> cbWL;
     bool cbWLyes;
     
     //complex barcodes
     vector<SoloBarcode> cbV;
-    SoloBarcode         umiV;   //single UMI
-    bool adapterYes;             //anchor?  
-    string adapterSeq;           //anchor sequence
+    SoloBarcode umiV; //single UMI
+    bool adapterYes; //anchor?  
+    string adapterSeq; //anchor sequence
     uint32 adapterMismatchesNmax;//max number of mismatches in the anchor
+    vector<vector<vector<uint64>>> cbWLv;
     
     string strandStr;
     int32 strand;

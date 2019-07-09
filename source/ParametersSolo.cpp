@@ -127,44 +127,83 @@ void ParametersSolo::initialize(Parameters *pPin)
     umiMaskLow=(uint32) ( (((uint64)1)<<umiL) - 1);
     umiMaskHigh=~umiMaskLow;
 
-    //load the CB whitlist
-    if (soloCBwhitelist=="-") {
+    //load the CB whitelist
+    if (type==1) {//simple whitelist
+        if (soloCBwhitelist.size()>1) {
             ostringstream errOut;
-            errOut << "EXITING because of FATAL ERROR in INPUT parameters: --soloCBwhitelist is not defined\n";
-            errOut << "SOLUTION: in --soloCBwhitelist specify path to and name of the whitelist file, or None for CB demultiplexing without whitelist \n";
+            errOut << "EXITING because of FATAL ERROR in INPUT parameters: --soloCBwhitelist contains more than one file which is not allowed with --soloType CB_UMI_Simple \n";
+            errOut << "SOLUTION: in --soloCBwhitelist specify only one whitelist file \n";
             exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_INPUT_FILES, *pP);
-    } else if (soloCBwhitelist=="None") {
-        cbWLyes=false;
-    } else {
-        cbWLyes=true;
-        ifstream & cbWlStream = ifstrOpen(soloCBwhitelist, ERROR_OUT, "SOLUTION: check the path and permissions of the CB whitelist file: " + soloCBwhitelist, *pP);
-        string seq1;
-        while (cbWlStream >> seq1) {
-            if (seq1.size() != cbL) {
+        } else if (soloCBwhitelist[0]=="-") {
                 ostringstream errOut;
-                errOut << "EXITING because of FATAL ERROR in input CB whitelist file: "<< soloCBwhitelist <<" the total length of barcode sequence is "  << seq1.size() << " not equal to expected " <<bL <<"\n"  ;
-                errOut << "SOLUTION: make sure that the barcode read is the second in --readFilesIn and check that is has the correct formatting\n";
+                errOut << "EXITING because of FATAL ERROR in INPUT parameters: --soloCBwhitelist is not defined\n";
+                errOut << "SOLUTION: in --soloCBwhitelist specify path to and name of the whitelist file, or None for CB demultiplexing without whitelist \n";
                 exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_INPUT_FILES, *pP);
+        } else if (soloCBwhitelist[0]=="None") {
+            cbWLyes=false;
+        } else {
+            cbWLyes=true;
+            ifstream & cbWlStream = ifstrOpen(soloCBwhitelist[0], ERROR_OUT, "SOLUTION: check the path and permissions of the CB whitelist file: " + soloCBwhitelist[0], *pP);
+            string seq1;
+            while (cbWlStream >> seq1) {
+                if (seq1.size() != cbL) {
+                    ostringstream errOut;
+                    errOut << "EXITING because of FATAL ERROR in input CB whitelist file: "<< soloCBwhitelist[0] <<" the total length of barcode sequence is "  << seq1.size() << " not equal to expected " <<bL <<"\n"  ;
+                    errOut << "SOLUTION: make sure that the barcode read is the second in --readFilesIn and check that is has the correct formatting\n";
+                    exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_INPUT_FILES, *pP);
+                };
+                uint64 cb1;
+                if (convertNuclStrToInt64(seq1,cb1)) {//convert to 2-bit format
+                    cbWL.push_back(cb1);
+                } else {
+                    pP->inOut->logMain << "WARNING: CB whitelist sequence contains non-ACGT base and is ignored: " << seq1 <<endl;
+                };
             };
-            uint64 cb1;
-            //convert to 2-bit format
-            if (convertNuclStrToInt64(seq1,cb1)) {
-                //cbWL.insert(cb1);
-                cbWL.push_back(cb1);
-            } else {
-                pP->inOut->logMain << "WARNING: CB whitelist sequence contains non-ACGT and is ignored: " << seq1 <<endl;
+        };
+
+        std::sort(cbWL.begin(),cbWL.end());//sort
+        auto un1=std::unique(cbWL.begin(),cbWL.end());//collapse identical
+        cbWL.resize(std::distance(cbWL.begin(),un1));        
+        
+        pP->inOut->logMain << "Number of CBs in the whitelist = " << cbWL.size() <<endl;
+        
+        
+    } else if (type==2) {
+        cbWLyes=true; //for complex barcodes, no-whitelist option is not allowed for now
+        cbWLv.resize(soloCBwhitelist.size());
+        for (uint32 icb=0; icb<soloCBwhitelist.size(); icb++) {//cycle over WL files
+            ifstream & cbWlStream = ifstrOpen(soloCBwhitelist[icb], ERROR_OUT, "SOLUTION: check the path and permissions of the CB whitelist file: " + soloCBwhitelist[icb], *pP);
+            
+            string seq1;
+            while (cbWlStream >> seq1) {//cycle over one WL file
+                uint64 cb1;
+                if (!convertNuclStrToInt64(seq1,cb1)) {//convert to 2-bit format
+                    pP->inOut->logMain << "WARNING: CB whitelist sequence contains non-ACGT base and is ignored: " << seq1 <<endl;
+                    
+                };
+                
+                uint32 len1=seq1.size();
+                if (len1>cbWLv.back().size())
+                    cbWLv[icb].resize(len1);//add new possible lengths to this CB
+                cbWLv[icb].at(len1).push_back(cb1);
+            };
+            
+            uint32 lenMin=(uint32)-1;
+            for (uint32 ilen=1; ilen<cbWLv[icb].size(); ilen++) {//scan through different lengths for this CB
+                if (cbWLv[icb][ilen].size()>0) {
+                    if (ilen<lenMin)
+                        lenMin=ilen;
+                    std::sort(cbWLv[icb][ilen].begin(),cbWLv[icb][ilen].end());//sort
+                    auto un1=std::unique(cbWLv[icb][ilen].begin(),cbWLv[icb][ilen].end());//collapse identical
+                    cbWLv[icb][ilen].resize(std::distance(cbWLv[icb][ilen].begin(),un1));        
+                };
             };
         };
     };
 
-    std::sort(cbWL.begin(),cbWL.end());
-    auto un1=std::unique(cbWL.begin(),cbWL.end());
-    cbWL.resize(std::distance(cbWL.begin(),un1));
-    //qsort(cbWL.data(),cbWL.size(),sizeof(uint64),funCompareNumbers<uint64>);
-    
     time_t rawTime;
     time(&rawTime);
-    pP->inOut->logMain << timeMonthDayTime(rawTime) << "Finished reading, sorting and deduplicating CB whitelist sequences: " << cbWL.size() <<endl;
+    pP->inOut->logMain << timeMonthDayTime(rawTime) << "Finished reading, sorting and deduplicating CB whitelist sequences." <<endl;
 
     
     if (!pP->quant.trSAM.yes) {
