@@ -28,6 +28,7 @@ public:
     void addStats(const SoloReadBarcode &rfIn);
     void statsOut(ofstream &streamOut);
     void matchCBtoWL(string &cbSeq1, string &cbQual1, uint64 &cbB1, int32 &cbMatch1, vector<uint64> &cbMatchInd1, string &cbMatchString1);
+    bool convertCheckUMI();
 
 private:
     Parameters &P;

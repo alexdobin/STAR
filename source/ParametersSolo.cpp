@@ -167,8 +167,7 @@ void ParametersSolo::initialize(Parameters *pPin)
         
         pP->inOut->logMain << "Number of CBs in the whitelist = " << cbWL.size() <<endl;
         
-        
-    } else if (type==2) {
+    } else if (type==2) {//complex barcodes: multiple whitelist (one for each CB), varying CB length
         cbWLyes=true; //for complex barcodes, no-whitelist option is not allowed for now
         cbWLv.resize(soloCBwhitelist.size());
         for (uint32 icb=0; icb<soloCBwhitelist.size(); icb++) {//cycle over WL files

@@ -1,9 +1,7 @@
-#include "SoloBarcode.h"
-
-bool SoloBarcode::extractBarcode(string &seqIn, string &qualIn, const uint32 aStart, string &bSeq, string &bQual)
+bool SoloBarcode::barcodePosition(string &seqIn, string &qualIn, const int32 aStart, string &bSeq, string &bQual)
 {//input: sequence seqIn, anchor start aStart
  //output: start position of the barcode
-    int32 bStart=0, bEnd=0, aPos=0;
+    int32 bStart, bEnd, aPos;
     switch (posAnchor) {
         case 0: //read start
             aPos=0;
@@ -15,7 +13,7 @@ bool SoloBarcode::extractBarcode(string &seqIn, string &qualIn, const uint32 aSt
             aPos=aStart;
             break;
         case 3: //adapter end
-            aPos=(int32)aStart+adapterLength-1;
+            aPos=aStart+adapterLength-1;
             break;
     };
     
@@ -38,10 +36,10 @@ bool SoloBarcode::extractBarcode(string &seqIn, string &qualIn, const uint32 aSt
             break;
     };
                 
-    if (bStart<0 || bEnd>(int32)seqIn.size()) //something went wrong
+    if (bStart<0 || bEnd>seqIn.size()) //something went wrong
         return false;
 
     bSeq =seqIn.substr(bStart,bEnd-bStart+1);
     bQual=qualIn.substr(bStart,bEnd-bStart+1);
-    return true;
+
 };

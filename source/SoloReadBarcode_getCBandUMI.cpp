@@ -77,8 +77,20 @@ void SoloReadBarcode::matchCBtoWL(string &cbSeq1, string &cbQual1, uint64 &cbB1,
     } else if (cbMatch1==1) {//1 match, no need to record the quality
         cbMatchString1 = to_string(cbMatchInd1[0]);
     };// else cbMatch contains number of matches, and cbMatchString has CBs and qualities
-};   
+};
 
+bool SoloReadBarcode::convertCheckUMI()
+{//check UMIs, return if bad UMIs
+    if (convertNuclStrToInt32(umiSeq,umiB)!=-1) {//convert and check for Ns
+        stats.V[stats.nNinBarcode]++;//UMIs are not allowed to have Ns
+        return false;
+    };
+    if (umiB==homoPolymer[0] || umiB==homoPolymer[1] || umiB==homoPolymer[2] || umiB==homoPolymer[3]) {
+        stats.V[stats.nUMIhomopolymer]++;
+        return false;
+    };
+    return true;
+};
 void SoloReadBarcode::getCBandUMI(string &readNameExtra)
 {
     if (pSolo.type==0)
@@ -98,7 +110,14 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
         umiSeq=bSeq.substr(pSolo.umiS-1,pSolo.umiL);
         cbQual=bQual.substr(pSolo.cbS-1,pSolo.cbL);
         umiQual=bQual.substr(pSolo.umiS-1,pSolo.umiL);
+        
+        if (!convertCheckUMI())
+            return;
+        
+        matchCBtoWL(cbSeq, cbQual, cbB, cbMatch, cbMatchInd, cbMatchString);
+
     } else if (pSolo.type==2) {
+        
         uint32 adapterStart=0;
         if (pSolo.adapterYes) {
             if (localAlignHammingDist(bSeq, pSolo.adapterSeq, adapterStart) > pSolo.adapterMismatchesNmax) {
@@ -106,32 +125,33 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
                 return; //no adapter found
             };
         };
-        umiSeq="";
-        umiQual="";
+
         if (!pSolo.umiV.extractBarcode(bSeq, bQual, adapterStart, umiSeq, umiQual)) {
             //TODO: add stats
             return;
         };
 
+        if (!convertCheckUMI())
+            return;        
+        
         cbSeq="";
         cbQual="";
-        for (auto &cb : pSolo.cbV) {
-            if (!cb.extractBarcode(bSeq, bQual, adapterStart, umiSeq, umiQual)) {
+        for (auto &cb : pSolo.cbV) {//cycle over multiple barcodes
+            
+            string cbSeq1, cbQual1;
+            if (!cb.extractBarcode(bSeq, bQual, adapterStart, cbSeq1, cbQual1)) {
                 //TODO: add stats
                 return;
             };
+            cbSeq += cbSeq1 + "_";
+            cbQual += cbQual1 + "_";
+            
+            
+
         };
-    };
-    
-    //check UMIs, return if bad UMIs
-    if (convertNuclStrToInt32(umiSeq,umiB)!=-1) {//convert and check for Ns
-        stats.V[stats.nNinBarcode]++;//UMIs are not allowed to have Ns
-        return;
-    };
-    if (umiB==homoPolymer[0] || umiB==homoPolymer[1] || umiB==homoPolymer[2] || umiB==homoPolymer[3]) {
-        stats.V[stats.nUMIhomopolymer]++;
-        return;
+        cbSeq.pop_back();//remove last "_" from file
+        cbQual.pop_back();
     };
 
-    matchCBtoWL(cbSeq, cbQual, cbB, cbMatch, cbMatchInd, cbMatchString);
+
 };

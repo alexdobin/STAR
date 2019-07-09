@@ -10,7 +10,7 @@ public:
     int32 posAnchor;//0=read start; 1=read end; 2=adapter start; 3=adapter end
     int32 pos;//position with respect to anchor
     uint32 adapterLength;//length of the adapter
-    std::vector <uint64> whiteList;//whitelist
+    std::vector <uint64> wl;//whitelist
     
     bool extractBarcode(string &seqIn, string &qualIn, const uint32 aStart, string &bSeq, string &bQual);
 };
