@@ -95,7 +95,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                         for (uint imate=0; imate<P.readNmatesIn; imate++)
                             P.inOut->readIn[imate].ignore(DEF_readNameSeqLengthMax,'\n');
 
-                        if (P.pSolo.type==1) {//record barcode sequence
+                        if (P.pSolo.type>0) {//record barcode sequence
                             string seq1;
                             getline(P.inOut->readIn[1],seq1);
                             if (seq1.size() != P.pSolo.bL && P.pSolo.bL > 0) {

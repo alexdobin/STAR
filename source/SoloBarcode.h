@@ -10,9 +10,15 @@ public:
     int32 posAnchor;//0=read start; 1=read end; 2=adapter start; 3=adapter end
     int32 pos;//position with respect to anchor
     uint32 adapterLength;//length of the adapter
-    std::vector <uint64> wl;//whitelist
+    
+    vector<vector<uint64>> wl;//whitelists, one for each length
+    uint64 wlFactor, wlModulo;//factor and modulo for converting each whitelist index into global index
+    vector<uint32> wlAdd;//additive for each length
+    uint32 minLen;//minimum length for this barcode
+    uint32 totalSize;//total size of all whitelists
     
     bool extractBarcode(string &seqIn, string &qualIn, const uint32 aStart, string &bSeq, string &bQual);
+    void sortWhiteList();
 };
 
 #endif

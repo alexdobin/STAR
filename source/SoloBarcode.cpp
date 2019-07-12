@@ -1,45 +1,18 @@
-bool SoloBarcode::barcodePosition(string &seqIn, string &qualIn, const int32 aStart, string &bSeq, string &bQual)
-{//input: sequence seqIn, anchor start aStart
- //output: start position of the barcode
-    int32 bStart, bEnd, aPos;
-    switch (posAnchor) {
-        case 0: //read start
-            aPos=0;
-            break;
-        case 1: //read end
-            aPos=seqIn.size()-1;
-            break;
-        case 2: //adapter start
-            aPos=aStart;
-            break;
-        case 3: //adapter end
-            aPos=aStart+adapterLength-1;
-            break;
+#include "SoloBarcode.h"
+void SoloBarcode::sortWhiteList()
+{
+    totalSize=0;
+    minLen=(uint32)-1;
+    wlAdd.resize( wl.size() );
+    for (uint32 ilen=1; ilen < wl.size(); ilen++) {//scan through different lengths for this CB
+        wlAdd[ilen]=totalSize;
+        if (wl[ilen].size()>0) {
+            if (ilen<minLen)
+                minLen=ilen;
+            std::sort(wl[ilen].begin(),wl[ilen].end());//sort
+            auto un1=std::unique(wl[ilen].begin(),wl[ilen].end());//collapse identical
+            wl[ilen].resize(std::distance(wl[ilen].begin(),un1)); 
+            totalSize += wl[ilen].size();            
+        };
     };
-    
-    switch (posType) {
-        case 0: //start
-            bStart=aPos+pos;
-            if (length>0) {
-                bEnd=bStart+length-1;
-            } else {//extend to the end of the sequence
-                bEnd=seqIn.size()-1;
-            };
-            break;
-        case 1: //end
-            bEnd=aPos+pos;
-            if (length>0) {
-                bStart=bEnd+1-length;
-            } else {//extend to the start of the sequence
-                bStart=0;
-            };
-            break;
-    };
-                
-    if (bStart<0 || bEnd>seqIn.size()) //something went wrong
-        return false;
-
-    bSeq =seqIn.substr(bStart,bEnd-bStart+1);
-    bQual=qualIn.substr(bStart,bEnd-bStart+1);
-
 };

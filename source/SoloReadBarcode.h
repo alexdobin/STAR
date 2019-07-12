@@ -8,7 +8,6 @@ class SoloReadBarcode {
 public:
     uint32 homoPolymer[4];//homopolymer constants
     string cbSeq, umiSeq, cbQual, umiQual;
-    uint64 cbB;
     uint32 umiB;
     //int64  cbI;
     int32  cbMatch;//-1: no match, 0: exact, 1: 1 match with 1MM, >1: # of matches with 1MM
@@ -27,7 +26,7 @@ public:
     void addCounts(const SoloReadBarcode &rfIn);
     void addStats(const SoloReadBarcode &rfIn);
     void statsOut(ofstream &streamOut);
-    void matchCBtoWL(string &cbSeq1, string &cbQual1, uint64 &cbB1, int32 &cbMatch1, vector<uint64> &cbMatchInd1, string &cbMatchString1);
+    void matchCBtoWL(string &cbSeq1, string &cbQual1, vector<uint64> &cbWL, int32 &cbMatch1, vector<uint64> &cbMatchInd1, string &cbMatchString1);
     bool convertCheckUMI();
 
 private:

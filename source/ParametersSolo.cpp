@@ -42,6 +42,14 @@ void ParametersSolo::initialize(Parameters *pPin)
         pP->readNmates=1; //output mates TODO: check that readNmatesIn==2       
     } else if (typeStr=="CB_UMI_Complex") {
         type=2;
+        pP->readNmates=1;
+        bL=0;
+        if (CBmatchWLtype>1) {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: --soloCBmatchWLtype "<< CBmatchWLtype << "does not work with --soloType CB_UMI_Complex\n";
+            errOut << "SOLUTION: use allowed option: with --soloType CB_UMI_Complex use --soloCBmatchWLtype 0 (exact matches only) OR 1 (one match with 1 mismatched base)\n";
+            exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+        };
     } else  {
         ostringstream errOut;
         errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in --soloType="<<typeStr<<"\n";
@@ -169,8 +177,23 @@ void ParametersSolo::initialize(Parameters *pPin)
         
     } else if (type==2) {//complex barcodes: multiple whitelist (one for each CB), varying CB length
         cbWLyes=true; //for complex barcodes, no-whitelist option is not allowed for now
-        cbWLv.resize(soloCBwhitelist.size());
-        for (uint32 icb=0; icb<soloCBwhitelist.size(); icb++) {//cycle over WL files
+        //TODO read all CB information into cbV
+        cbV.resize(soloCBwhitelist.size());
+        //debug: hardcode cbV: same as simple
+        cbV[0].length=16;
+        cbV[0].posType=0;
+        cbV[0].posAnchor=0;
+        cbV[0].pos=0;
+        
+        umiV.length=10;
+        umiV.posType=0;
+        umiV.posAnchor=0;
+        umiV.pos=16;
+
+        adapterYes=false;
+        
+        uint64 factor1=1;
+        for (uint32 icb=0; icb<cbV.size(); icb++) {//cycle over WL files
             ifstream & cbWlStream = ifstrOpen(soloCBwhitelist[icb], ERROR_OUT, "SOLUTION: check the path and permissions of the CB whitelist file: " + soloCBwhitelist[icb], *pP);
             
             string seq1;
@@ -178,23 +201,27 @@ void ParametersSolo::initialize(Parameters *pPin)
                 uint64 cb1;
                 if (!convertNuclStrToInt64(seq1,cb1)) {//convert to 2-bit format
                     pP->inOut->logMain << "WARNING: CB whitelist sequence contains non-ACGT base and is ignored: " << seq1 <<endl;
-                    
+                    continue;
                 };
                 
                 uint32 len1=seq1.size();
-                if (len1>cbWLv.back().size())
-                    cbWLv[icb].resize(len1);//add new possible lengths to this CB
-                cbWLv[icb].at(len1).push_back(cb1);
+                if (len1>=cbV[icb].wl.size())
+                    cbV[icb].wl.resize(len1+1);//add new possible lengths to this CB
+                cbV[icb].wl.at(len1).push_back(cb1);
             };
             
-            uint32 lenMin=(uint32)-1;
-            for (uint32 ilen=1; ilen<cbWLv[icb].size(); ilen++) {//scan through different lengths for this CB
-                if (cbWLv[icb][ilen].size()>0) {
-                    if (ilen<lenMin)
-                        lenMin=ilen;
-                    std::sort(cbWLv[icb][ilen].begin(),cbWLv[icb][ilen].end());//sort
-                    auto un1=std::unique(cbWLv[icb][ilen].begin(),cbWLv[icb][ilen].end());//collapse identical
-                    cbWLv[icb][ilen].resize(std::distance(cbWLv[icb][ilen].begin(),un1));        
+            cbV[icb].sortWhiteList();
+            cbV[icb].wlFactor=factor1;
+            factor1 *= cbV[icb].totalSize;
+            cbV[icb].wlModulo=factor1;
+        };
+        
+        cbWL.resize(factor1);//this is the total size of the WL
+        for (uint32 ii=0; ii<factor1; ii++) {//fill cbWL
+            for (auto &cb : cbV) {
+                icb=ii%cb.wlFactor;
+                for (auto &wll : cb.wl) {
+                    cbWL[ii] += 
                 };
             };
         };

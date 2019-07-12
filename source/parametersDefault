@@ -729,3 +729,9 @@ soloOutFileNames            Solo.out/ genes.tsv barcodes.tsv matrix.mtx matrixSJ
                             6th word    ... cell/GeneFull counts matrix
                             7th word    ... 3' transcript counts (reserved)
 
+soloCBmatchWLtype           2
+    int:                    how to match the Cell Barcodes to the WhiteList
+                            0 ... only exact matches allowed
+                            1 ... only one match in WhiteList with 1 mismatched base allowed
+                            2 ... multiple matches in WhiteList with 1 mismatched base allowed, posterior probability calculation (CellRanger-like) is used choose one of the matches
+

@@ -10,6 +10,8 @@ public:
     //chemistry, library etc
     string typeStr;
     int type;
+    string strandStr;
+    int32 strand;    
     
     //simple barcodes
     uint32 cbS,cbL; //cell barcode start,length
@@ -26,9 +28,7 @@ public:
     string adapterSeq; //anchor sequence
     uint32 adapterMismatchesNmax;//max number of mismatches in the anchor
     vector<vector<vector<uint64>>> cbWLv;
-    
-    string strandStr;
-    int32 strand;
+
     //features
     const static vector<string> featureNames;
     vector<string> featureIn;
@@ -42,6 +42,7 @@ public:
     vector <string> umiDedup;
     vector <uint32> umiDedupColumns;
     vector <bool> umiDedupYes;
+    int32 CBmatchWLtype;
     //output
     vector<string> outFileNames;
     //constants
