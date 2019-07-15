@@ -34,8 +34,8 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
 
     if (!pSolo.cbWLyes) {//now we can define WL and counts
         pSolo.cbWL.resize(readFeatSum->cbReadCountMap.size());
-        readFeatSum->cbReadCount = new uint32[pSolo.cbWL.size()];
-        readBarSum->cbReadCountExact = new uint32[pSolo.cbWL.size()];
+        readFeatSum->cbReadCount = new uint32[pSolo.cbWLsize];
+        readBarSum->cbReadCountExact = new uint32[pSolo.cbWLsize];
 
         uint64 icb=0;
         for (auto ii=readFeatSum->cbReadCountMap.cbegin(); ii!=readFeatSum->cbReadCountMap.cend(); ++ii) {
@@ -48,7 +48,7 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
 
     //allocate arrays to store CB/gene/UMIs for all reads
     nCB=0;nReadsMapped=0;
-    for (uint32 ii=0; ii<pSolo.cbWL.size(); ii++) {
+    for (uint32 ii=0; ii<pSolo.cbWLsize; ii++) {
         if (readBarSum->cbReadCountExact[ii]>0) {
             nCB++;
             nReadsMapped += readFeatSum->cbReadCount[ii];
@@ -57,14 +57,14 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
 
     rGeneUMI = new uint32[rguStride*nReadsMapped]; //big array for all CBs - each element is gene and UMI
     rCBp = new uint32*[nCB+1];
-    uint32 **rCBpa = new uint32*[pSolo.cbWL.size()+1];
+    uint32 **rCBpa = new uint32*[pSolo.cbWLsize+1];
     indCB = new uint32[nCB];
 
     uint32 nReadPerCBmax=0;
     rCBp[0]=rGeneUMI;
     rCBpa[0]=rGeneUMI;
     nCB=0;//will count it again below
-    for (uint32 ii=0; ii<pSolo.cbWL.size(); ii++) {
+    for (uint32 ii=0; ii<pSolo.cbWLsize; ii++) {
         if (readBarSum->cbReadCountExact[ii]>0) {//if no exact matches, this CB is not present
             indCB[nCB]=ii;
             rCBp[nCB+1] = rCBp[nCB] + rguStride*readFeatSum->cbReadCount[ii];

@@ -700,6 +700,12 @@ soloAdapterSequence         -
 soloAdapterMismatchesNmax   1
     int>0:                  maximum number of mismatches allowed in adapter sequence.
 
+soloCBmatchWLtype           2
+    int:                    how to match the Cell Barcodes to the WhiteList
+                            0 ... only exact matches allowed
+                            1 ... only one match in WhiteList with 1 mismatched base allowed
+                            2 ... multiple matches in WhiteList with 1 mismatched base allowed, posterior probability calculation (CellRanger-like) is used choose one of the matches
+
 soloStrand                  Forward
     string: strandedness of the solo libraries:
                             Unstranded  ... no strand information
@@ -728,10 +734,4 @@ soloOutFileNames            Solo.out/ genes.tsv barcodes.tsv matrix.mtx matrixSJ
                             5th word    ... cell/SJ counts matrix
                             6th word    ... cell/GeneFull counts matrix
                             7th word    ... 3' transcript counts (reserved)
-
-soloCBmatchWLtype           2
-    int:                    how to match the Cell Barcodes to the WhiteList
-                            0 ... only exact matches allowed
-                            1 ... only one match in WhiteList with 1 mismatched base allowed
-                            2 ... multiple matches in WhiteList with 1 mismatched base allowed, posterior probability calculation (CellRanger-like) is used choose one of the matches
 

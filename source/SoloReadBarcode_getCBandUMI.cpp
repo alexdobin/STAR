@@ -29,7 +29,6 @@ void SoloReadBarcode::matchCBtoWL(string &cbSeq1, string &cbQual1, vector<uint64
     } else if (posN==-1) {//no Ns, count only for featureType==gene
         int64 cbI=binarySearchExact<uint64>(cbB1,cbWL.data(),cbWL.size());
         if (cbI>=0) {//exact match
-            cbReadCountExact[cbI]++;//note that this simply counts reads per exact CB, no checks of genes or UMIs
             cbMatchInd1.push_back((uint64) cbI);
             cbMatchString1 = to_string(cbMatchInd1[0]);
             cbMatch1=0;
@@ -126,6 +125,8 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
             return;
         
         matchCBtoWL(cbSeq, cbQual, pSolo.cbWL, cbMatch, cbMatchInd, cbMatchString);
+        if (cbMatch==0) //exact match
+            cbReadCountExact[cbMatchInd[0]]++;//note that this simply counts reads per exact CB, no checks of genes or UMIs
 
     } else if (pSolo.type==2) {
         
@@ -179,6 +180,8 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
         cbQual.pop_back();
         
         if (cbMatchGood) {
+            if (cbMatch==0) //exact match
+                cbReadCountExact[cbMatchInd[0]]++;//note that this simply counts reads per exact CB, no checks of genes or UMIs
             cbMatchString=to_string(cbMatchInd[0]);
         } else {
             cbMatch=-1;

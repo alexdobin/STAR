@@ -320,12 +320,12 @@ uint32 localAlignHammingDist(const string &text, const string &query, uint32 &po
     uint32 distBest=query.size();
     for (uint32 ii=0; ii<text.size()-query.size()+1; ii++) {
         uint32 dist1=0;
-        for (uint32 jj=0; ii<query.size()+1; ii++) {
-            if (text[jj+ii]!=query[ii])
+        for (uint32 jj=0; jj<query.size(); jj++) {
+            if (text[jj+ii]!=query[jj])
                 ++dist1;
         };
         if (dist1<distBest) {
-            dist1=distBest;
+            distBest=dist1;
             pos=ii;
         };
     };

@@ -11,8 +11,8 @@ SoloReadFeature::SoloReadFeature(int32 feTy, Parameters &Pin, int iChunk)
         stats.V[ii]=0;
 
     if (pSolo.cbWLyes) {
-        cbReadCount = new uint32[pSolo.cbWL.size()];
-        for (uint32 ii=0; ii<pSolo.cbWL.size(); ii++) {
+        cbReadCount = new uint32[pSolo.cbWLsize];
+        for (uint32 ii=0; ii<pSolo.cbWLsize; ii++) {
             cbReadCount[ii]=0;
         };
     };
@@ -29,7 +29,7 @@ SoloReadFeature::SoloReadFeature(int32 feTy, Parameters &Pin, int iChunk)
 void SoloReadFeature::addCounts(const SoloReadFeature &rfIn)
 {
     if (pSolo.cbWLyes) {//WL
-        for (uint32 ii=0; ii<pSolo.cbWL.size(); ii++) {
+        for (uint32 ii=0; ii<pSolo.cbWLsize; ii++) {
             cbReadCount[ii] += rfIn.cbReadCount[ii];
         };
     } else {

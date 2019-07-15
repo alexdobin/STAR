@@ -58,7 +58,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
             };
 
             if (!pSolo.cbWLyes) //if no-WL, the full cbInteger was recorded - now has to be placed in order
-                cb=binarySearchExact<uint64>(cb,pSolo.cbWL.data(),pSolo.cbWL.size());
+                cb=binarySearchExact<uint64>(cb,pSolo.cbWL.data(),pSolo.cbWLsize);
 
             //record feature
             if (featureType==3) {//variable length feature, separate treatment, feature always defined (i.e. !=-1)

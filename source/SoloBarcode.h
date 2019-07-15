@@ -12,10 +12,12 @@ public:
     uint32 adapterLength;//length of the adapter
     
     vector<vector<uint64>> wl;//whitelists, one for each length
-    uint64 wlFactor, wlModulo;//factor and modulo for converting each whitelist index into global index
+    uint64 wlFactor;//factor and modulo for converting each whitelist index into global index
     vector<uint32> wlAdd;//additive for each length
     uint32 minLen;//minimum length for this barcode
     uint32 totalSize;//total size of all whitelists
+    
+    uint64 ilen, icb;//indexes
     
     bool extractBarcode(string &seqIn, string &qualIn, const uint32 aStart, string &bSeq, string &bQual);
     void sortWhiteList();

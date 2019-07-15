@@ -16,8 +16,12 @@ void SoloFeature::outputResults()
     if (featureType==0 || !pSolo.featureYes[0]) {
         //output CBs
         ofstream &cbStr=ofstrOpen(P.outFileNamePrefix+pSolo.outFileNames[0]+pSolo.outFileNames[2],ERROR_OUT, P);
-        for (auto const &cb : pSolo.cbWL)
-            cbStr << convertNuclInt64toString(cb,pSolo.cbL)  <<'\n';
+        if (pSolo.type==1) {//simple WL
+            for (auto const &cb : pSolo.cbWL)
+                cbStr << convertNuclInt64toString(cb,pSolo.cbL)  <<'\n';
+        } else if (pSolo.type==2) {//multiple/multilength WL
+            pSolo.outputComplexWL(cbStr);
+        };
         cbStr.flush();
     };
 
@@ -33,7 +37,7 @@ void SoloFeature::outputResults()
         featureN=P.sjAll[0].size();
     };
     countMatrixStream <<"%%MatrixMarket matrix coordinate integer general\n%\n";
-    countMatrixStream << featureN <<' '<< pSolo.cbWL.size() <<' '<< nCellGeneEntries << '\n';
+    countMatrixStream << featureN <<' '<< pSolo.cbWLsize <<' '<< nCellGeneEntries << '\n';
 
     for (uint32 icb=0; icb<nCB; icb++) {
         uint32 *rCBpp=rCBp[icb];

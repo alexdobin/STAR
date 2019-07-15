@@ -172,28 +172,49 @@ void ParametersSolo::initialize(Parameters *pPin)
         std::sort(cbWL.begin(),cbWL.end());//sort
         auto un1=std::unique(cbWL.begin(),cbWL.end());//collapse identical
         cbWL.resize(std::distance(cbWL.begin(),un1));        
-        
-        pP->inOut->logMain << "Number of CBs in the whitelist = " << cbWL.size() <<endl;
+        cbWLsize=cbWL.size();
+        pP->inOut->logMain << "Number of CBs in the whitelist = " << cbWLsize <<endl;
         
     } else if (type==2) {//complex barcodes: multiple whitelist (one for each CB), varying CB length
         cbWLyes=true; //for complex barcodes, no-whitelist option is not allowed for now
-        //TODO read all CB information into cbV
-        cbV.resize(soloCBwhitelist.size());
-        //debug: hardcode cbV: same as simple
-        cbV[0].length=16;
-        cbV[0].posType=0;
-        cbV[0].posAnchor=0;
-        cbV[0].pos=0;
-        
-        umiV.length=10;
-        umiV.posType=0;
-        umiV.posAnchor=0;
-        umiV.pos=16;
-
         adapterYes=false;
+        if (adapterSeq!="-")
+            adapterYes=true;
         
-        uint64 factor1=1;
+        //TODO read all CB information into cbV
+        //cbV.resize(soloCBwhitelist.size());
+        //debug: hardcode cbV: same as simple
+//         cbV[0].length=16;
+//         cbV[0].posType=0;
+//         cbV[0].posAnchor=0;
+//         cbV[0].pos=0;
+//         
+//         umiV.length=10;
+//         umiV.posType=0;
+//         umiV.posAnchor=0;
+//         umiV.pos=16;
+
+        //hard-coded inDrop
+        cbV.resize(2);
+        cbV[0].length=0;
+        cbV[0].posType=1;
+        cbV[0].posAnchor=2;
+        cbV[0].pos=-1;//CB ends one base before the start of the anchor
+        cbV[1].length=8;
+        cbV[1].posType=0;
+        cbV[1].posAnchor=3;
+        cbV[1].pos=1;//CB starts 1 base after the end of the anchor  
+        umiV.length=6;
+        umiV.posType=0;
+        umiV.posAnchor=3;
+        umiV.pos=9;    
+        ///////////////////
+        
+        umiV.adapterLength=adapterSeq.size();//one adapter for all
+        cbWLsize=1;
         for (uint32 icb=0; icb<cbV.size(); icb++) {//cycle over WL files
+            cbV[icb].adapterLength=adapterSeq.size();//one adapter for all
+            
             ifstream & cbWlStream = ifstrOpen(soloCBwhitelist[icb], ERROR_OUT, "SOLUTION: check the path and permissions of the CB whitelist file: " + soloCBwhitelist[icb], *pP);
             
             string seq1;
@@ -211,19 +232,8 @@ void ParametersSolo::initialize(Parameters *pPin)
             };
             
             cbV[icb].sortWhiteList();
-            cbV[icb].wlFactor=factor1;
-            factor1 *= cbV[icb].totalSize;
-            cbV[icb].wlModulo=factor1;
-        };
-        
-        cbWL.resize(factor1);//this is the total size of the WL
-        for (uint32 ii=0; ii<factor1; ii++) {//fill cbWL
-            for (auto &cb : cbV) {
-                icb=ii%cb.wlFactor;
-                for (auto &wll : cb.wl) {
-                    cbWL[ii] += 
-                };
-            };
+            cbV[icb].wlFactor=cbWLsize;
+            cbWLsize *= cbV[icb].totalSize;
         };
     };
 
@@ -263,4 +273,33 @@ void ParametersSolo::umiSwapHalves(uint32 &umi) {
     umi &= umiMaskLow; //remove high
     umi <<= (umiL); //move low to high
     umi |= high; //add high
+};
+
+void ParametersSolo::outputComplexWL(ofstream &cbStr) {
+    for (auto &cb : cbV) {//initialize
+        cb.icb=0;
+        cb.ilen=cb.minLen;
+    };
+
+    for (uint32 ii=0; ii<cbWLsize; ii++) {//cycle over full WL
+        for (uint64 ii=0; ii<cbV.size(); ii++) {//check for overflow and re-calculate all indexes
+            SoloBarcode &cb=cbV[ii];
+            if (cb.icb == cb.wl[cb.ilen].size()) {//advance length
+                cb.ilen++;
+                cb.icb=0;//reset icb
+            };
+            if (cb.ilen == cb.wl.size()){//advance barcode
+                cbV[ii+1].icb++;
+                cb.ilen=cb.minLen;//reset length
+            };
+        };
+        
+        string cbOut="";
+        for (auto &cb : cbV) 
+            cbOut += convertNuclInt64toString(cb.wl[cb.ilen][cb.icb], cb.ilen) + "_";
+        cbOut.pop_back();
+        cbStr << cbOut << "\n";
+        
+        cbV[0].icb++;//shift by one for the next CB
+    };
 };
