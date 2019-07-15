@@ -6,8 +6,8 @@ class SoloBarcode {//complex barcodes
 public:
     uint32 mate;//0 or 1
     //array: 0=start, 1=end
-    array<int32,2> anchorType;//0=read start; 1=read end; 2=adapter start; 3=adapter end
-    array<int32,2> anchorDist;//distance to anchor
+    int32 anchorType[2];//0=read start; 1=read end; 2=adapter start; 3=adapter end
+    int32 anchorDist[2];//distance to anchor
     
     uint32 adapterLength;//length of the adapter
     

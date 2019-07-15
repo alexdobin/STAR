@@ -133,13 +133,15 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
         uint32 adapterStart=0;
         if (pSolo.adapterYes) {
             if (localAlignHammingDist(bSeq, pSolo.adapterSeq, adapterStart) > pSolo.adapterMismatchesNmax) {
-                //TODO: add stats
+                //TODO: add stats category: noAdapter
+                stats.V[stats.nNoMatch]++;
                 return; //no adapter found
             };
         };
 
         if (!pSolo.umiV.extractBarcode(bSeq, bQual, adapterStart, umiSeq, umiQual)) {
-            //TODO: add stats
+            //TODO: add stats category" noUMI
+            stats.V[stats.nNoMatch]++;
             return;
         };
 
@@ -154,7 +156,8 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
             
             string cbSeq1, cbQual1;
             if (!cb.extractBarcode(bSeq, bQual, adapterStart, cbSeq1, cbQual1)) {
-                //TODO: add stats
+                //TODO: add stats category: NoCB
+                stats.V[stats.nNoMatch]++;
                 return;
             };
             cbSeq  += cbSeq1 + "_";
@@ -184,6 +187,7 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
                 cbReadCountExact[cbMatchInd[0]]++;//note that this simply counts reads per exact CB, no checks of genes or UMIs
             cbMatchString=to_string(cbMatchInd[0]);
         } else {
+            stats.V[stats.nNoMatch]++; //TODO: add stats category NoCB
             cbMatch=-1;
         };
     };

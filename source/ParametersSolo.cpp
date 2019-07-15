@@ -192,6 +192,7 @@ void ParametersSolo::initialize(Parameters *pPin)
             errOut << "SOLUTION: make sure that the number of CB whitelists and CB positions are the same\n";
             exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_INPUT_FILES, *pP);
         };
+        cbV.resize(cbPositionStr.size());
         for (uint32 ii=0; ii<cbPositionStr.size(); ii++) {
             cbV[ii].extractPositionsFromString(cbPositionStr[ii]);
         };
