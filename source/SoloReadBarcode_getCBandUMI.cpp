@@ -13,7 +13,8 @@ void SoloReadBarcode::matchCBtoWL(string &cbSeq1, string &cbQual1, vector<uint64
 
     if (!pSolo.cbWLyes) {//no whitelist - no search
         if (posN!=-1) {//Ns are present, discard this read
-            stats.V[stats.nNinBarcode]++;
+            cbMatch1=-2;
+            //stats.V[stats.nNinBarcode]++;
         } else {//no Ns
             //cbI=(int64) cbB1;
             cbMatchInd1.push_back(cbB1);//all possible barcodes are accepted. This will overflow if CB is longer than 31b
@@ -24,7 +25,8 @@ void SoloReadBarcode::matchCBtoWL(string &cbSeq1, string &cbQual1, vector<uint64
     };
 
     if (posN==-2) {//>2 Ns, might already be filtered by Illumina
-        stats.V[stats.nNinBarcode]++;
+        cbMatch1=-2;
+        //stats.V[stats.nNinBarcode]++;
         return;
     } else if (posN==-1) {//no Ns, count only for featureType==gene
         int64 cbI=binarySearchExact<uint64>(cbB1,cbWL.data(),cbWL.size());
@@ -47,7 +49,8 @@ void SoloReadBarcode::matchCBtoWL(string &cbSeq1, string &cbQual1, vector<uint64
             int64 cbI1=binarySearchExact<uint64>(cbB11,cbWL.data(),cbWL.size());
             if (cbI1>=0) {
                 if (cbI>=0) {//had another match already
-                    stats.V[stats.nTooMany]++;
+                    //stats.V[stats.nTooMany]++;
+                    cbMatch1=-3;
                     return;//with N in CB, do not allow matching >1 in WL
                 };
                 cbI=cbI1;
@@ -59,7 +62,8 @@ void SoloReadBarcode::matchCBtoWL(string &cbSeq1, string &cbQual1, vector<uint64
             cbMatch1=1;
             return;
         } else {//no match
-            stats.V[stats.nNoMatch]++;
+            //stats.V[stats.nNoMatch]++;
+            cbMatch1=-1;
             return;
         };
     };
@@ -78,16 +82,34 @@ void SoloReadBarcode::matchCBtoWL(string &cbSeq1, string &cbQual1, vector<uint64
         };
     };
     if (cbMatch1==0) {//no matches
-        stats.V[stats.nNoMatch]++;
+        //stats.V[stats.nNoMatch]++;
         cbMatch1=-1;
     } else if (cbMatch1==1) {//1 match, no need to record the quality
         cbMatchString1 = to_string(cbMatchInd1[0]);
     } else if (pSolo.CBmatchWLtype==1) {//>1 matches, but this is not allowed
-        stats.V[stats.nTooMany]++;
-        cbMatch1=-1;
+        //stats.V[stats.nTooMany]++;
+        cbMatch1=-3;
         cbMatchInd1.clear();
         cbMatchString1="";
     };// else cbMatch contains number of matches, and cbMatchString has CBs and qualities
+};
+
+void SoloReadBarcode::addStats(const int32 cbMatch1)
+{
+    if (cbMatch1>0) {
+        return;
+    };
+    
+    switch (cbMatch1) {
+        case -1 :
+            stats.V[stats.nNoMatch]++;
+            break;
+        case -2 :
+            stats.V[stats.nNinBarcode]++;
+            break;
+        case -3 :
+            stats.V[stats.nTooMany]++;
+    };
 };
 
 bool SoloReadBarcode::convertCheckUMI()
@@ -125,6 +147,7 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
             return;
         
         matchCBtoWL(cbSeq, cbQual, pSolo.cbWL, cbMatch, cbMatchInd, cbMatchString);
+        addStats(cbMatch);
         if (cbMatch==0) //exact match
             cbReadCountExact[cbMatchInd[0]]++;//note that this simply counts reads per exact CB, no checks of genes or UMIs
 

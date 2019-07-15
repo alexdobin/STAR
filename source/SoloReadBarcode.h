@@ -28,7 +28,8 @@ public:
     void statsOut(ofstream &streamOut);
     void matchCBtoWL(string &cbSeq1, string &cbQual1, vector<uint64> &cbWL, int32 &cbMatch1, vector<uint64> &cbMatchInd1, string &cbMatchString1);
     bool convertCheckUMI();
-
+    void addStats(const int32 cbMatch1);
+    
 private:
     Parameters &P;
     ParametersSolo &pSolo;
