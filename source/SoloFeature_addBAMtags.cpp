@@ -13,7 +13,7 @@ void SoloFeature::addBAMtags(char *&bam0, uint32 &size0, char *bam1)
     //cout << iread <<" "<< convertNuclInt64toString(readInfo[iread].cb,  pSolo.cbL) <<" "<< convertNuclInt64toString(readInfo[iread].umi, pSolo.umiL)<<endl;
 
     if (readInfo[iread].cb + 1 != 0) {//otherwise do not add CB/UB tags            
-        string cb  = convertNuclInt64toString(pSolo.cbWL[readInfo[iread].cb],  pSolo.cbL);
+        string cb  = pSolo.cbWLstr[readInfo[iread].cb];
         string umi = convertNuclInt64toString(readInfo[iread].umi, pSolo.umiL);
         memcpy(bam1, bam0, size0);
 

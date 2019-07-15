@@ -16,12 +16,8 @@ void SoloFeature::outputResults()
     if (featureType==0 || !pSolo.featureYes[0]) {
         //output CBs
         ofstream &cbStr=ofstrOpen(P.outFileNamePrefix+pSolo.outFileNames[0]+pSolo.outFileNames[2],ERROR_OUT, P);
-        if (pSolo.type==1) {//simple WL
-            for (auto const &cb : pSolo.cbWL)
-                cbStr << convertNuclInt64toString(cb,pSolo.cbL)  <<'\n';
-        } else if (pSolo.type==2) {//multiple/multilength WL
-            pSolo.outputComplexWL(cbStr);
-        };
+        for (uint64 ii=0; ii<pSolo.cbWLsize; ii++)
+             cbStr << pSolo.cbWLstr[ii] <<'\n';
         cbStr.flush();
     };
 

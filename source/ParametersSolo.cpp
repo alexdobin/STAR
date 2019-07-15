@@ -175,40 +175,50 @@ void ParametersSolo::initialize(Parameters *pPin)
         cbWLsize=cbWL.size();
         pP->inOut->logMain << "Number of CBs in the whitelist = " << cbWLsize <<endl;
         
+        cbWLstr.resize(cbWLsize);
+        for (uint64 ii=0; ii<cbWLsize; ii++)
+             cbWLstr[ii] = convertNuclInt64toString(cbWL[ii],cbL);        
+        
     } else if (type==2) {//complex barcodes: multiple whitelist (one for each CB), varying CB length
         cbWLyes=true; //for complex barcodes, no-whitelist option is not allowed for now
+        
         adapterYes=false;
         if (adapterSeq!="-")
             adapterYes=true;
         
-        //TODO read all CB information into cbV
-        //cbV.resize(soloCBwhitelist.size());
-        //debug: hardcode cbV: same as simple
-//         cbV[0].length=16;
-//         cbV[0].posType=0;
-//         cbV[0].posAnchor=0;
-//         cbV[0].pos=0;
-//         
-//         umiV.length=10;
-//         umiV.posType=0;
-//         umiV.posAnchor=0;
-//         umiV.pos=16;
+        if (cbPositionStr.size() != soloCBwhitelist.size()) {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETER error: number of barcodes in --soloCBposition : "<< cbPositionStr.size() <<" is not equal to the number of WhiteLists in --soloCBwhitelist : " << soloCBwhitelist.size() <<"\n"  ;
+            errOut << "SOLUTION: make sure that the number of CB whitelists and CB positions are the same\n";
+            exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_INPUT_FILES, *pP);
+        };
+        for (uint32 ii=0; ii<cbPositionStr.size(); ii++) {
+            cbV[ii].extractPositionsFromString(cbPositionStr[ii]);
+        };
+        
+        umiV.extractPositionsFromString(umiPositionStr);
+        
+        /* debug
+        cbV[0].length=16;
+        cbV[0].anchorType=0;
+        cbV[0].anchorDist=0;
+        cbV[0].pos=0;
+        
+        umiV.length=10;
+        umiV.anchorType=0;
+        umiV.anchorDist=0;
+        umiV.pos=16;
 
         //hard-coded inDrop
         cbV.resize(2);
-        cbV[0].length=0;
-        cbV[0].posType=1;
-        cbV[0].posAnchor=2;
-        cbV[0].pos=-1;//CB ends one base before the start of the anchor
-        cbV[1].length=8;
-        cbV[1].posType=0;
-        cbV[1].posAnchor=3;
-        cbV[1].pos=1;//CB starts 1 base after the end of the anchor  
-        umiV.length=6;
-        umiV.posType=0;
-        umiV.posAnchor=3;
-        umiV.pos=9;    
+        cbV[0].anchorType={0,2};
+        cbV[0].anchorDist={0,-1};//CB ends one base before the start of the anchor
+        cbV[1].anchorType={3,3};
+        cbV[1].anchorDist={1,8};//CB starts 1 base after the end of the anchor  
+        umiV.anchorType={3,3};
+        umiV.anchorDist={9,14};
         ///////////////////
+        */
         
         umiV.adapterLength=adapterSeq.size();//one adapter for all
         cbWLsize=1;
@@ -235,6 +245,8 @@ void ParametersSolo::initialize(Parameters *pPin)
             cbV[icb].wlFactor=cbWLsize;
             cbWLsize *= cbV[icb].totalSize;
         };
+        
+        complexWLstrings();
     };
 
     time_t rawTime;
@@ -275,7 +287,10 @@ void ParametersSolo::umiSwapHalves(uint32 &umi) {
     umi |= high; //add high
 };
 
-void ParametersSolo::outputComplexWL(ofstream &cbStr) {
+void ParametersSolo::complexWLstrings() {
+    
+    cbWLstr.resize(cbWLsize);
+    
     for (auto &cb : cbV) {//initialize
         cb.icb=0;
         cb.ilen=cb.minLen;
@@ -294,11 +309,9 @@ void ParametersSolo::outputComplexWL(ofstream &cbStr) {
             };
         };
         
-        string cbOut="";
         for (auto &cb : cbV) 
-            cbOut += convertNuclInt64toString(cb.wl[cb.ilen][cb.icb], cb.ilen) + "_";
-        cbOut.pop_back();
-        cbStr << cbOut << "\n";
+            cbWLstr[ii] += convertNuclInt64toString(cb.wl[cb.ilen][cb.icb], cb.ilen) + "_";
+        cbWLstr[ii].pop_back();
         
         cbV[0].icb++;//shift by one for the next CB
     };

@@ -266,7 +266,9 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <string>   (-1, -1, "soloAdapterSequence",&pSolo.adapterSeq));
     parArray.push_back(new ParameterInfoScalar <uint32>   (-1, -1, "soloAdapterMismatchesNmax", &pSolo.adapterMismatchesNmax));
     parArray.push_back(new ParameterInfoScalar <int32>    (-1, -1, "soloCBmatchWLtype", &pSolo.CBmatchWLtype));
-    
+    parArray.push_back(new ParameterInfoVector <string>   (-1, -1, "soloCBposition",&pSolo.cbPositionStr));
+    parArray.push_back(new ParameterInfoScalar <string>   (-1, -1, "soloUMIposition",&pSolo.umiPositionStr));
+
     parameterInputName.push_back("Default");
     parameterInputName.push_back("Command-Line-Initial");
     parameterInputName.push_back("Command-Line");

@@ -1,4 +1,5 @@
 #include "SoloBarcode.h"
+#include "serviceFuns.cpp"
 void SoloBarcode::sortWhiteList()
 {
     totalSize=0;
@@ -15,4 +16,14 @@ void SoloBarcode::sortWhiteList()
             totalSize += wl[ilen].size();            
         };
     };
+};
+
+void SoloBarcode::extractPositionsFromString(string &strIn)
+{
+    vector<string> p(4);
+    splitString(strIn,'_',p);
+    anchorType[0] = std::stoi(p[0]);
+    anchorType[1] = std::stoi(p[2]);
+    anchorDist[0] = std::stoi(p[1]);
+    anchorDist[1] = std::stoi(p[3]);
 };

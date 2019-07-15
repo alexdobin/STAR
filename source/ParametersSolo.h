@@ -13,24 +13,30 @@ public:
     string strandStr;
     int32 strand;   
     
-    //whitelist - general
-    uint64 cbWLsize;
-    bool cbWLyes;
+
     
     //simple barcodes
     uint32 cbS,cbL; //cell barcode start,length
     uint32 umiS,umiL; //umi start,length
     uint32 bL; //total barcode length
-    vector<string> soloCBwhitelist;
-    vector <uint64> cbWL;
+
+    vector<string> cbPositionStr;
+    string umiPositionStr;
     
-    //complex barcodes
+    //complex barcodes    
     vector<SoloBarcode> cbV;
     SoloBarcode umiV; //single UMI
     bool adapterYes; //anchor?  
     string adapterSeq; //anchor sequence
     uint32 adapterMismatchesNmax;//max number of mismatches in the anchor
-
+    
+    //whitelist - general
+    uint64 cbWLsize;
+    bool cbWLyes;
+    vector<string> soloCBwhitelist;
+    vector <uint64> cbWL;    
+    vector<string> cbWLstr;
+    
     //features
     const static vector<string> featureNames;
     vector<string> featureIn;
@@ -55,7 +61,7 @@ public:
 
     void initialize(Parameters *pPin);
     void umiSwapHalves(uint32 &umi);
-    void outputComplexWL(ofstream &cbStr);
+    void complexWLstrings();
 private:
     Parameters *pP;
 };

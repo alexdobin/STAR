@@ -694,6 +694,21 @@ soloBarcodeReadLength       1
                             1   ... equal to sum of soloCBlen+soloUMIlen
                             0   ... not defined, do not check
 
+soloCBposition              -
+    strings(s)              position of Cell Barcode(s) on the barcode read.
+                            Presently only works with --soloType CB_UMI_Complex, and barcodes are assumed to be on Read2.
+                            Format for each barcode: startAnchor_startDistance_endAnchor_endDistance
+                            start(end)Anchor defines the anchor base for the CB: 0: read start; 1: read end; 2: adapter start; 3: adapter end
+                            start(end)Distance is the distance from the CB start(end) to the Anchor base
+                            String for different barcodes are separated by space.
+                            Example: inDrop (Zilionis et al, Nat. Protocols, 2017):
+                            --soloCBposition  0_0_2_-1  3_1_3_8
+
+soloUMIposition             -
+    string                  position of the UMI on the barcode read, same as soloCBposition
+                            Example: inDrop (Zilionis et al, Nat. Protocols, 2017):
+                            --soloCBposition  3_9_3_14
+
 soloAdapterSequence         -
     string:                 adapter sequence to anchor barcodes.
 
