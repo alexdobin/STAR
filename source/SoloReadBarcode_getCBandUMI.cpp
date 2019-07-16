@@ -97,6 +97,7 @@ void SoloReadBarcode::matchCBtoWL(string &cbSeq1, string &cbQual1, vector<uint64
 void SoloReadBarcode::addStats(const int32 cbMatch1)
 {
     if (cbMatch1>0) {
+        cbReadCountExact[cbMatchInd[0]]++;//note that this simply counts reads per exact CB, no checks of genes or UMIs
         return;
     };
     
@@ -105,17 +106,19 @@ void SoloReadBarcode::addStats(const int32 cbMatch1)
             stats.V[stats.nNoMatch]++;
             break;
         case -2 :
-            stats.V[stats.nNinBarcode]++;
+            stats.V[stats.nNinCB]++;
             break;
         case -3 :
             stats.V[stats.nTooMany]++;
+        case -10 :
+            stats.V[stats.nMismatchesInMultCB]++;            
     };
 };
 
 bool SoloReadBarcode::convertCheckUMI()
 {//check UMIs, return if bad UMIs
     if (convertNuclStrToInt32(umiSeq,umiB)!=-1) {//convert and check for Ns
-        stats.V[stats.nNinBarcode]++;//UMIs are not allowed to have Ns
+        stats.V[stats.nNinUMI]++;//UMIs are not allowed to have Ns
         return false;
     };
     if (umiB==homoPolymer[0] || umiB==homoPolymer[1] || umiB==homoPolymer[2] || umiB==homoPolymer[3]) {
@@ -147,24 +150,19 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
             return;
         
         matchCBtoWL(cbSeq, cbQual, pSolo.cbWL, cbMatch, cbMatchInd, cbMatchString);
-        addStats(cbMatch);
-        if (cbMatch==0) //exact match
-            cbReadCountExact[cbMatchInd[0]]++;//note that this simply counts reads per exact CB, no checks of genes or UMIs
-
+        
     } else if (pSolo.type==2) {
         
         uint32 adapterStart=0;
         if (pSolo.adapterYes) {
             if (localAlignHammingDist(bSeq, pSolo.adapterSeq, adapterStart) > pSolo.adapterMismatchesNmax) {
-                //TODO: add stats category: noAdapter
-                stats.V[stats.nNoMatch]++;
+                stats.V[stats.nNoAdapter]++;
                 return; //no adapter found
             };
         };
 
         if (!pSolo.umiV.extractBarcode(bSeq, bQual, adapterStart, umiSeq, umiQual)) {
-            //TODO: add stats category" noUMI
-            stats.V[stats.nNoMatch]++;
+            stats.V[stats.nNoUMI]++;
             return;
         };
 
@@ -179,8 +177,7 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
             
             string cbSeq1, cbQual1;
             if (!cb.extractBarcode(bSeq, bQual, adapterStart, cbSeq1, cbQual1)) {
-                //TODO: add stats category: NoCB
-                stats.V[stats.nNoMatch]++;
+                stats.V[stats.nNoCB]++;
                 return;
             };
             cbSeq  += cbSeq1 + "_";
@@ -193,10 +190,13 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
             
             int32 cbMatch1;
             vector<uint64> cbMatchInd1={};
-//             cbMatchInd1.reserve(4);
             matchCBtoWL(cbSeq1, cbQual1, cb.wl[cbSeq1.size()], cbMatch1, cbMatchInd1, cbMatchString); //cbMatchString is not used for now, multiple matches are not allowed
-            if (cbMatch1<0 || (cbMatch1>0 && cbMatch>0)) {//this barcode has >1 1MM match, or previous barcode had a mismatch
+            if (cbMatch1<0) {
                 cbMatchGood=false;
+                cbMatch = cbMatch1;
+            } else if (cbMatch1>0 && cbMatch>0) {//this barcode has >1 1MM match, or previous barcode had a mismatch
+                cbMatchGood=false;
+                cbMatch = -10; //marks mismatches in multiple barcodes
             } else {
                 cbMatchInd[0] += cb.wlFactor*(cbMatchInd1[0]+cb.wlAdd[cbSeq1.size()]);
             };
@@ -206,12 +206,9 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
         cbQual.pop_back();
         
         if (cbMatchGood) {
-            if (cbMatch==0) //exact match
-                cbReadCountExact[cbMatchInd[0]]++;//note that this simply counts reads per exact CB, no checks of genes or UMIs
             cbMatchString=to_string(cbMatchInd[0]);
-        } else {
-            stats.V[stats.nNoMatch]++; //TODO: add stats category NoCB
-            cbMatch=-1;
         };
     };
+    
+    addStats(cbMatch);
 };

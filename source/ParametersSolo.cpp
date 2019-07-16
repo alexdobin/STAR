@@ -23,7 +23,7 @@ void ParametersSolo::initialize(Parameters *pPin)
             exitWithError(errOut.str(), std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };        
         return;
-    } else if (typeStr=="CB_UMI_Simple") {
+    } else if (typeStr=="CB_UMI_Simple" || typeStr=="Droplet") {
         type=1;        
         if (umiL > 16) {
             ostringstream errOut;

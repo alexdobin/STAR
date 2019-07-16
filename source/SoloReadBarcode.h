@@ -16,9 +16,9 @@ public:
     uint32 *cbReadCountExact;
 
     struct {
-        enum {                 nNinBarcode,  nUMIhomopolymer,  nTooMany,  nNoMatch,  nStats};
+        enum {                nNoAdapter, nNoUMI, nNoCB, nNinCB, nNinUMI, nUMIhomopolymer,  nTooMany,  nNoMatch, nMismatchesInMultCB, nStats};
         uint64 V[nStats];
-        vector<string> names={"nNinBarcode","nUMIhomopolymer","nTooMany","nNoMatch"};
+        vector<string> names={"nNoAdapter", "nNoUMI", "nNoCB", "nNinCB", "nNinUMI", "nUMIhomopolymer","nTooMany","nNoMatch", "nMismatchesInMultCB"};
     } stats;
 
     SoloReadBarcode(Parameters &Pin);
