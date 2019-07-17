@@ -332,6 +332,9 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
                 case ATTR_UY:
                 case ATTR_CB:
                 case ATTR_UB:
+                case ATTR_sM:
+                case ATTR_sS:
+                case ATTR_sQ:
                 case ATTR_rB:
                 case ATTR_vG:
                 case ATTR_vA:

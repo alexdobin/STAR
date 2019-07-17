@@ -96,8 +96,10 @@ void SoloReadBarcode::matchCBtoWL(string &cbSeq1, string &cbQual1, vector<uint64
 
 void SoloReadBarcode::addStats(const int32 cbMatch1)
 {
-    if (cbMatch1>0) {
+    if (cbMatch1==0) {
         cbReadCountExact[cbMatchInd[0]]++;//note that this simply counts reads per exact CB, no checks of genes or UMIs
+        return;
+    } else if (cbMatch1>0) {
         return;
     };
     
@@ -110,11 +112,16 @@ void SoloReadBarcode::addStats(const int32 cbMatch1)
             break;
         case -3 :
             stats.V[stats.nTooMany]++;
-        case -10 :
+            break;
+        case -11 :            
+            stats.V[stats.nNoCB]++;
+            break;
+        case -12 :
             stats.V[stats.nMismatchesInMultCB]++;            
     };
 };
 
+///////////////////////////////////////////////////////////////////////////////////////
 bool SoloReadBarcode::convertCheckUMI()
 {//check UMIs, return if bad UMIs
     if (convertNuclStrToInt32(umiSeq,umiB)!=-1) {//convert and check for Ns
@@ -127,6 +134,8 @@ bool SoloReadBarcode::convertCheckUMI()
     };
     return true;
 };
+
+//////////////////////////////////////////////////////////////////////////////////////
 void SoloReadBarcode::getCBandUMI(string &readNameExtra)
 {
     if (pSolo.type==0)
@@ -137,8 +146,8 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
     cbMatchInd.clear();
     
     uint32 bLength = readNameExtra.find(' ',pSolo.bL);
-    string bSeq=readNameExtra.substr(0,bLength);
-    string bQual=readNameExtra.substr(bLength+1,bLength);
+    bSeq=readNameExtra.substr(0,bLength);
+    bQual=readNameExtra.substr(bLength+1,bLength);
 
     if (pSolo.type==1) {
         cbSeq=bSeq.substr(pSolo.cbS-1,pSolo.cbL);
@@ -153,40 +162,43 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
         
     } else if (pSolo.type==2) {
         
+        cbSeq="";
+        cbQual="";
+        
         uint32 adapterStart=0;
         if (pSolo.adapterYes) {
             if (localAlignHammingDist(bSeq, pSolo.adapterSeq, adapterStart) > pSolo.adapterMismatchesNmax) {
                 stats.V[stats.nNoAdapter]++;
+                cbMatch=-21;
                 return; //no adapter found
             };
         };
 
         if (!pSolo.umiV.extractBarcode(bSeq, bQual, adapterStart, umiSeq, umiQual)) {
             stats.V[stats.nNoUMI]++;
+            cbMatch=-22;
             return;
         };
 
         if (!convertCheckUMI())
             return;        
         
-        cbSeq="";
-        cbQual="";
         bool cbMatchGood=true;
         cbMatchInd={0};
         for (auto &cb : pSolo.cbV) {//cycle over multiple barcodes
             
             string cbSeq1, cbQual1;
-            if (!cb.extractBarcode(bSeq, bQual, adapterStart, cbSeq1, cbQual1)) {
-                stats.V[stats.nNoCB]++;
-                return;
+            if (!cb.extractBarcode(bSeq, bQual, adapterStart, cbSeq1, cbQual1) 
+                || cbSeq1.size() < cb.minLen || cbSeq1.size() >= cb.wl.size() || cb.wl[cbSeq1.size()].size()==0) {
+                //no match possible for this barcode, or no match for previous barcodes
+                cbMatchGood=false;
+                cbMatch=-11;
             };
             cbSeq  += cbSeq1 + "_";
             cbQual += cbQual1 + "_";
             
-            if (!cbMatchGood || cbSeq1.size() < cb.minLen || cbSeq1.size() >= cb.wl.size() || cb.wl[cbSeq1.size()].size()==0) {//no match possible for this barcode, or no match for previous barcodes
-                cbMatchGood=false;
-                continue; //continue - to be able to record full cbSeq, cbQual
-            };
+            if (!cbMatchGood)
+                continue; //continue - to be able to record full cbSeq, cbQual, but no need to match to the WL
             
             int32 cbMatch1;
             vector<uint64> cbMatchInd1={};
@@ -196,7 +208,7 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
                 cbMatch = cbMatch1;
             } else if (cbMatch1>0 && cbMatch>0) {//this barcode has >1 1MM match, or previous barcode had a mismatch
                 cbMatchGood=false;
-                cbMatch = -10; //marks mismatches in multiple barcodes
+                cbMatch = -12; //marks mismatches in multiple barcodes
             } else {
                 cbMatchInd[0] += cb.wlFactor*(cbMatchInd1[0]+cb.wlAdd[cbSeq1.size()]);
             };

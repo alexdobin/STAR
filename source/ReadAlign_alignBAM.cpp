@@ -156,7 +156,13 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
             if (P.outSAMattrPresent.UR)
                 attrN+=bamAttrArrayWrite(soloRead->readBar->umiSeq,"UR",attrOutArray+attrN);
             if (P.outSAMattrPresent.UY)
-                attrN+=bamAttrArrayWrite(soloRead->readBar->umiQual,"UY",attrOutArray+attrN);            
+                attrN+=bamAttrArrayWrite(soloRead->readBar->umiQual,"UY",attrOutArray+attrN);
+            if (P.outSAMattrPresent.sM)
+                attrN+=bamAttrArrayWrite(soloRead->readBar->cbMatch,"sM",attrOutArray+attrN);
+            if (P.outSAMattrPresent.sS)
+                attrN+=bamAttrArrayWrite(soloRead->readBar->bSeq,"sS",attrOutArray+attrN);
+            if (P.outSAMattrPresent.sQ)
+                attrN+=bamAttrArrayWrite(soloRead->readBar->bQual,"sQ",attrOutArray+attrN);
 
         } else {//this mate is mapped
             if (flagPaired) {//paired reads
@@ -372,6 +378,15 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                             attrN+=bamAttrArrayWrite(chunkTr->geName[*trOut.alignGenes.begin()],"GN",attrOutArray+attrN);
                         break;                        
                         
+                    case ATTR_sM:
+                        attrN+=bamAttrArrayWrite(soloRead->readBar->cbMatch,"sM",attrOutArray+attrN);
+                        break;
+                    case ATTR_sS:
+                        attrN+=bamAttrArrayWrite(soloRead->readBar->bSeq,"sS",attrOutArray+attrN);
+                        break;
+                    case ATTR_sQ:
+                        attrN+=bamAttrArrayWrite(soloRead->readBar->bQual,"sQ",attrOutArray+attrN);
+                        break;
                         
                     //following attributes are not processed here
                     case ATTR_CB:

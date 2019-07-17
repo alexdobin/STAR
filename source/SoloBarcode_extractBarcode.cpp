@@ -22,6 +22,8 @@ bool SoloBarcode::extractBarcode(string &seqIn, string &qualIn, const uint32 ada
         pos[ii]+=anchorDist[ii];
     };
                 
+    bSeq="";
+    bQual="";
     if (pos[0]<0 || pos[1]>(int32)seqIn.size() || pos[0]>pos[1]) //something went wrong
         return false;
 
