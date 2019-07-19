@@ -96,6 +96,9 @@ void SoloReadBarcode::matchCBtoWL(string &cbSeq1, string &cbQual1, vector<uint64
 
 void SoloReadBarcode::addStats(const int32 cbMatch1)
 {
+    if (!pSolo.cbWLyes) //no stats if no WL
+        return;
+    
     if (cbMatch1==0) {
         cbReadCountExact[cbMatchInd[0]]++;//note that this simply counts reads per exact CB, no checks of genes or UMIs
         return;
@@ -203,16 +206,16 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
             int32 cbMatch1;
             vector<uint64> cbMatchInd1={};
             matchCBtoWL(cbSeq1, cbQual1, cb.wl[cbSeq1.size()], cbMatch1, cbMatchInd1, cbMatchString); //cbMatchString is not used for now, multiple matches are not allowed
-            if (cbMatch1<0) {
+            if (cbMatch1<0) {//no match
                 cbMatchGood=false;
                 cbMatch = cbMatch1;
             } else if (cbMatch1>0 && cbMatch>0) {//this barcode has >1 1MM match, or previous barcode had a mismatch
                 cbMatchGood=false;
                 cbMatch = -12; //marks mismatches in multiple barcodes
-            } else {
+            } else {//good match
                 cbMatchInd[0] += cb.wlFactor*(cbMatchInd1[0]+cb.wlAdd[cbSeq1.size()]);
+                cbMatch=max(cbMatch,cbMatch1);//1 wins over 0
             };
-            cbMatch=max(cbMatch,cbMatch1);//1 wins over 0
         };
         cbSeq.pop_back();//remove last "_" from file
         cbQual.pop_back();

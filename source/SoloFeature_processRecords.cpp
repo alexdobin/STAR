@@ -1,6 +1,7 @@
 #include "SoloFeature.h"
 #include "streamFuns.h"
 #include "TimeFunctions.h"
+#include "SequenceFuns.h"
 
 void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
 {
@@ -33,7 +34,15 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     };
 
     if (!pSolo.cbWLyes) {//now we can define WL and counts
-        pSolo.cbWL.resize(readFeatSum->cbReadCountMap.size());
+        pSolo.cbWLsize=readFeatSum->cbReadCountMap.size();
+        pSolo.cbWL.resize(pSolo.cbWLsize);
+        pSolo.cbWLstr.resize(pSolo.cbWLsize);
+        uint64 ii=0;
+        for (auto &cb : readFeatSum->cbReadCountMap) {
+            pSolo.cbWL[ii] = cb.first;
+            pSolo.cbWLstr[ii] = convertNuclInt64toString(pSolo.cbWL[ii],pSolo.cbL); 
+            ii++;
+        };
         readFeatSum->cbReadCount = new uint32[pSolo.cbWLsize];
         readBarSum->cbReadCountExact = new uint32[pSolo.cbWLsize];
 
