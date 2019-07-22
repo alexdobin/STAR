@@ -1,3 +1,6 @@
+* Fixed a bug causing rare seg-faults with for --peOverlap* options and chimeric detection.
+* Implemented SAM attributes sS and sQ to output sequence and quality of the entire barcode read, and sM to output the barcode match status.
+* Implemented complex barcodes in STARsolo with --soloType CB_UMI_Complex, --soloCBmatchWLtype --soloAdapterSequence, --soloAdapterMismatchesNmax, --soloCBposition,--soloUMIposition
 * Fixed a problem in STARsolo with unmapped reads counts in Solo.out/*.stats files.
 * Fixed a bug in STARsolo with counting reads for splice junctions. Solo.out/matrixSJ.mtx output is slighlty changed.
 * Implemented CB/UB/GX/GN BAM tags for STARsolo.

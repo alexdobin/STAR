@@ -4,9 +4,6 @@
 
 void SoloFeature::addBAMtags(char *&bam0, uint32 &size0, char *bam1)
 {//add extra tags to the BAM record
-
-    if (!pSolo.samAttrYes)
-            return;
     
     uint64 iread = * ((uint64*) (bam0+size0));
     iread = iread >> 32; //iRead was encoded in the upper 32 bitsls

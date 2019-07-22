@@ -10,10 +10,9 @@ public:
     //chemistry, library etc
     string typeStr;
     int type;
+    bool yes;
     string strandStr;
     int32 strand;   
-    
-
     
     //simple barcodes
     uint32 cbS,cbL; //cell barcode start,length

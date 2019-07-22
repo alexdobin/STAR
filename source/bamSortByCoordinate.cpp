@@ -5,7 +5,7 @@
 #include "ErrorWarning.h"
 #include "bam_cat.h"
 
-void bamSortByCoordinate (Parameters &P, ReadAlignChunk **RAchunk, Genome &mainGenome, SoloFeature &soloFeat) {
+void bamSortByCoordinate (Parameters &P, ReadAlignChunk **RAchunk, Genome &mainGenome, Solo &solo) {
     if (P.outBAMcoord) {//sort BAM if needed
         *P.inOut->logStdOut << timeMonthDayTime() << " ..... started sorting BAM\n" <<flush;
         P.inOut->logMain << timeMonthDayTime() << " ..... started sorting BAM\n" <<flush;
@@ -54,7 +54,7 @@ void bamSortByCoordinate (Parameters &P, ReadAlignChunk **RAchunk, Genome &mainG
                 if (binS==0) continue; //empty bin
 
                 if (ibin == nBins-1) {//last bin for unmapped reads
-                    BAMbinSortUnmapped(ibin,P.runThreadN,P.outBAMsortTmpDir, P, mainGenome, soloFeat);
+                    BAMbinSortUnmapped(ibin,P.runThreadN,P.outBAMsortTmpDir, P, mainGenome, solo);
                 } else {
                     uint newMem=binS+binN*24;
                     bool boolWait=true;
@@ -66,7 +66,7 @@ void bamSortByCoordinate (Parameters &P, ReadAlignChunk **RAchunk, Genome &mainG
                         };
                         sleep(0.1);
                     };
-                    BAMbinSortByCoordinate(ibin,binN,binS,P.runThreadN,P.outBAMsortTmpDir, P, mainGenome, soloFeat);
+                    BAMbinSortByCoordinate(ibin,binN,binS,P.runThreadN,P.outBAMsortTmpDir, P, mainGenome, solo);
                     #pragma omp critical
                     totalMem-=newMem;//"release" RAM
                 };

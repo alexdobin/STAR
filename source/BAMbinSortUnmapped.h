@@ -3,10 +3,10 @@
 #include "IncludeDefine.h"
 #include "Parameters.h"
 #include "Genome.h"
-#include "SoloFeature.h"
+#include "Solo.h"
 
 #include SAMTOOLS_BGZF_H
 
-void BAMbinSortUnmapped(uint32 iBin, uint nThreads, string dirBAMsort, Parameters &P, Genome &mapGen, SoloFeature &soloFeat);
+void BAMbinSortUnmapped(uint32 iBin, uint nThreads, string dirBAMsort, Parameters &P, Genome &mapGen, Solo &solo);
 
 #endif

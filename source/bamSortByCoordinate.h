@@ -4,8 +4,8 @@
 #include "Parameters.h"
 #include "ReadAlignChunk.h"
 #include "Genome.h"
-#include "SoloFeature.h"
+#include "Solo.h"
 
-void bamSortByCoordinate(Parameters &P, ReadAlignChunk **RAchunk, Genome &mainGenome, SoloFeature &soloFeat) ;
+void bamSortByCoordinate(Parameters &P, ReadAlignChunk **RAchunk, Genome &mainGenome, Solo &solo) ;
 
 #endif

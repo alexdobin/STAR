@@ -2,7 +2,7 @@
 #include "ErrorWarning.h"
 #include "BAMfunctions.h"
 
-void BAMbinSortUnmapped(uint32 iBin, uint nThreads, string dirBAMsort, Parameters &P, Genome &mapGen, SoloFeature &soloFeat) {
+void BAMbinSortUnmapped(uint32 iBin, uint nThreads, string dirBAMsort, Parameters &P, Genome &mapGen, Solo &solo) {
 
     BGZF *bgzfBin;
     bgzfBin=bgzf_open((dirBAMsort+"/b"+to_string((uint) iBin)).c_str(),("w"+to_string((long long) P.outBAMcompression)).c_str());
@@ -53,7 +53,9 @@ void BAMbinSortUnmapped(uint32 iBin, uint nThreads, string dirBAMsort, Parameter
             //add extra tags to the BAM record
             char* bam0=bamIn[it];
             uint32 size0=bamSize.at(it);
-            soloFeat.addBAMtags(bam0,size0,bam1);
+            
+            if (solo.pSolo.samAttrYes)
+                solo.soloFeat[solo.pSolo.samAttrFeature]->addBAMtags(bam0,size0,bam1);            
             
             bgzf_write(bgzfBin, bam0, size0);
             bamInStream[it].read(bamIn[it],sizeof(int32));//read record size

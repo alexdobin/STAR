@@ -129,10 +129,12 @@ bool SoloReadBarcode::convertCheckUMI()
 {//check UMIs, return if bad UMIs
     if (convertNuclStrToInt32(umiSeq,umiB)!=-1) {//convert and check for Ns
         stats.V[stats.nNinUMI]++;//UMIs are not allowed to have Ns
+        cbMatch=-23;
         return false;
     };
     if (umiB==homoPolymer[0] || umiB==homoPolymer[1] || umiB==homoPolymer[2] || umiB==homoPolymer[3]) {
         stats.V[stats.nUMIhomopolymer]++;
+        cbMatch=-24;        
         return false;
     };
     return true;
@@ -167,6 +169,8 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
         
         cbSeq="";
         cbQual="";
+        umiSeq="";
+        umiQual="";
         
         uint32 adapterStart=0;
         if (pSolo.adapterYes) {
@@ -183,19 +187,21 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
             return;
         };
 
-        if (!convertCheckUMI())
-            return;        
-        
         bool cbMatchGood=true;
+        if (!convertCheckUMI())
+            cbMatchGood=false;//CB matching will not be done, just extract the sequences
+
         cbMatchInd={0};
         for (auto &cb : pSolo.cbV) {//cycle over multiple barcodes
             
             string cbSeq1, cbQual1;
-            if (!cb.extractBarcode(bSeq, bQual, adapterStart, cbSeq1, cbQual1) 
-                || cbSeq1.size() < cb.minLen || cbSeq1.size() >= cb.wl.size() || cb.wl[cbSeq1.size()].size()==0) {
-                //no match possible for this barcode, or no match for previous barcodes
-                cbMatchGood=false;
-                cbMatch=-11;
+            if ( !cb.extractBarcode(bSeq, bQual, adapterStart, cbSeq1, cbQual1) 
+                 || cbSeq1.size() < cb.minLen || cbSeq1.size() >= cb.wl.size() || cb.wl[cbSeq1.size()].size()==0 ) {
+                //barcode cannot be extracted
+                if (cbMatchGood) {
+                    cbMatch=-11;
+                    cbMatchGood=false;
+                };
             };
             cbSeq  += cbSeq1 + "_";
             cbQual += cbQual1 + "_";

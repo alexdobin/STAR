@@ -13,8 +13,11 @@ void ParametersSolo::initialize(Parameters *pPin)
 {
     pP=pPin;
 
+    yes = true;
     if (typeStr=="None") {
-        type=0;
+        type = 0;
+        yes = false;
+        samAttrYes = false;
         //solo SAM attributes not allowed
         if (pP->outSAMattrPresent.CR || pP->outSAMattrPresent.CY || pP->outSAMattrPresent.UR || pP->outSAMattrPresent.UY  || pP->outSAMattrPresent.CB  || pP->outSAMattrPresent.UB) {
             ostringstream errOut;
