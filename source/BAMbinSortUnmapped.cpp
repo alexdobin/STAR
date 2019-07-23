@@ -37,8 +37,10 @@ void BAMbinSortUnmapped(uint32 iBin, uint nThreads, string dirBAMsort, Parameter
         bamInStream[it].read(bamIn[it],sizeof(int32));//read BAM record size
         if (bamInStream[it].good()) {
             bamSize[it]=((*(uint32*)bamIn[it])+sizeof(int32));//true record size +=4 (4 bytes for uint-iRead)
-            bamInStream[it].read(bamIn[it]+sizeof(int32),bamSize.at(it)-sizeof(int32)+sizeof(uint));//read the rest of the record, including last uint = iRead
-            startPos[*(uint*)(bamIn[it]+bamSize.at(it))]=it;//startPos[iRead]=it : record the order of the files to output
+            bamInStream[it].read(bamIn[it]+sizeof(int32),bamSize.at(it)-sizeof(int32)+sizeof(uint64));//read the rest of the record, including last uint = iRead
+            uint64 iRead=*(uint*)(bamIn[it]+bamSize.at(it));
+            iRead = iRead >> 32; //iRead is recorded in top 32bits
+            startPos[iRead]=it;//startPos[iRead]=it : record the order of the files to output
         } else {//nothing to do here, file is empty, do not record it
         };
     };

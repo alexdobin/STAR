@@ -1,11 +1,11 @@
-* Fixed a bug causing rare seg-faults with for --peOverlap* options and chimeric detection.
 * Implemented SAM attributes sS and sQ to output sequence and quality of the entire barcode read, and sM to output the barcode match status.
-* Implemented complex barcodes in STARsolo with --soloType CB_UMI_Complex, --soloCBmatchWLtype --soloAdapterSequence, --soloAdapterMismatchesNmax, --soloCBposition,--soloUMIposition
+* Implemented complex barcodes in STARsolo with --soloType CB_UMI_Complex, --soloCBmatchWLtype --soloAdapterSequence, --soloAdapterMismatchesNmax, --soloCBposition,--soloUMIposition .
+* Implemented CB/UB/GX/GN BAM tags for STARsolo.
+* Implemented extras/scripts/soloBasicCellFilter.awk script to perform basic filtering of the STARsolo count matrices.
+* Fixed a bug causing rare seg-faults with for --peOverlap* options and chimeric detection.
 * Fixed a problem in STARsolo with unmapped reads counts in Solo.out/*.stats files.
 * Fixed a bug in STARsolo with counting reads for splice junctions. Solo.out/matrixSJ.mtx output is slighlty changed.
-* Implemented CB/UB/GX/GN BAM tags for STARsolo.
-* Fixed the problem with ALT=* in STAR-WASP.
-* Implemented extras/scripts/soloBasicCellFilter.awk script to perform basic filtering of the STARsolo count matrices.
+* Fixed the problem with ALT=* in VCF files for STAR-WASP.
 
 STAR 2.7.1a 2019/05/15
 ======================
