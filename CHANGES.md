@@ -1,3 +1,4 @@
+STAR 2.6.1e 2019/07/25
 * Fixed a bug causing rare seg-faults with for --peOverlap* options and chimeric detection.
 
 STAR 2.6.1c 2018/11/16
