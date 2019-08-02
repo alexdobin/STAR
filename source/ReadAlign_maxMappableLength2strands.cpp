@@ -58,12 +58,7 @@ uint ReadAlign::maxMappableLength2strands(uint pieceStartIn, uint pieceLengthIn,
         maxL=0;
         Nrep = maxMappableLength(mapGen, Read1, pieceStart, pieceLength, iSA1 & mapGen.SAiMarkNmask, iSA2, dirR, maxL, indStartEnd);
     #else
-        if (Lind < P.pGe.gSAindexNbases && (iSA1 & mapGen.SAiMarkNmaskC)==0 ) {//no need for SA search
-            indStartEnd[0]=iSA1;
-            indStartEnd[1]=iSA2;
-            Nrep=indStartEnd[1]-indStartEnd[0]+1;
-            maxL=Lind;
-        } else if (iSA1==iSA2) {//unique align already, just find maxL
+        if (iSA1==iSA2) {//unique align already, just find maxL
             if ((iSA1 & mapGen.SAiMarkNmaskC)!=0) {
                 ostringstream errOut;
                 errOut  << "BUG: in ReadAlign::maxMappableLength2strands";
@@ -75,7 +70,8 @@ uint ReadAlign::maxMappableLength2strands(uint pieceStartIn, uint pieceLengthIn,
             maxL=compareSeqToGenome(mapGen, Read1, pieceStart, pieceLength, Lind, iSA1, dirR, comparRes);
         } else {//SA search, pieceLength>maxL
         if ( (iSA1 & mapGen.SAiMarkNmaskC)==0 ) {//no N in the prefix
-                maxL=Lind;
+                bool cres;
+                maxL=compareSeqToGenome(mapGen, Read1, pieceStart, pieceLength, 0, iSA2, dirR, cres);
             } else {
                 maxL=0;
             };
