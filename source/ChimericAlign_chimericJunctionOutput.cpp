@@ -10,6 +10,7 @@ void ChimericAlign::chimericJunctionOutput(fstream &outStream, uint chimN, int m
         <<"\t"<< al2->exons[0][EX_G] - mapGen.chrStart[al2->Chr]+1 <<"\t"<< al2->generateCigarP() <<"\t"<< chimN
         << "\t" << maxNonChimAlignScore
         << "\t" << chimScore
+        << "\t" << chimScoreBest
         << "\t" << PEmerged_flag;
 
         if (P.outSAMattrPresent.RG)
