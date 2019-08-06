@@ -19,7 +19,7 @@ int chimericAlignScore (ChimericSegment & seg1, ChimericSegment & seg2)
 };
 
 /////////////////////////////////////////////////////////////
-bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength) {
+bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int maxNonChimAlignScore) {
 
     chimRecord=false;
 
@@ -39,8 +39,6 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength) {
 
     chimAligns.clear();
     chimScoreBest=0;
-
-    int bestNonchimAlignScore = RA->trBest->maxScore;
 
     for (uint iW1=0; iW1<nW; iW1++) {//cycle windows
         for (uint iA1=0; iA1<nWinTr[iW1]; iA1++) {//cycle aligns in the window

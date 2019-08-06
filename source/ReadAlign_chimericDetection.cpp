@@ -46,7 +46,7 @@ void ReadAlign::chimericDetection() {
         chimRecord=chimericDetectionOld();
         chimericDetectionOldOutput();
     } else if (trBest->maxScore <= (int) (readLength[0]+readLength[1]) - (int) P.pCh.nonchimScoreDropMin) {//require big enough drop in the best score
-        chimRecord=chimDet->chimericDetectionMult(nW, readLength);
+        chimRecord=chimDet->chimericDetectionMult(nW, readLength, trBest->maxScore);
     };
 
     if ( chimRecord ) {
