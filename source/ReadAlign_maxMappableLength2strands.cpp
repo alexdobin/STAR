@@ -11,6 +11,10 @@ uint ReadAlign::maxMappableLength2strands(uint pieceStartIn, uint pieceLengthIn,
 
     bool dirR = iDir==0;
 
+    // defaults:  (from genomeParameters.txt)
+    // gSAsparseD = 1
+    // gSAindexNbases = 14
+
     for (uint iDist=0; iDist<min(pieceLengthIn,P.pGe.gSAsparseD); iDist++) {//cycle through different distances
         uint pieceStart;
         uint pieceLength=pieceLengthIn-iDist;
@@ -74,7 +78,7 @@ uint ReadAlign::maxMappableLength2strands(uint pieceStartIn, uint pieceLengthIn,
             bool comparRes;
             maxL=compareSeqToGenome(mapGen, Read1, pieceStart, pieceLength, Lind, iSA1, dirR, comparRes);
         } else {//SA search, pieceLength>maxL
-        if ( (iSA1 & mapGen.SAiMarkNmaskC)==0 ) {//no N in the prefix
+            if ( (iSA1 & mapGen.SAiMarkNmaskC)==0 ) {//no N in the prefix
                 maxL=Lind;
             } else {
                 maxL=0;

@@ -149,7 +149,7 @@ uint maxMappableLength(Genome &mapGen, char** s, uint S, uint N, uint i1, uint i
     L= min(L1,L2);
 
     L1a=L1;L1b=L1;i1a=i1;i1b=i1;
-    L2a=L2;L2b=L2;i2a=i2;i2b=i2;
+    L2a=L2;L2b=L2;i2a=i2;i2b=i2;   // track boundaries of best matching suffix array ranges
 
     i3=i1;L3=L1; //in case i1+1>=i2 an not iteration of the loope below is ever made
     while (i1+1<i2) {//main binary search loop
