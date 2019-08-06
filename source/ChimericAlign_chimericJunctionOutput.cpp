@@ -1,7 +1,7 @@
 #include "ChimericAlign.h"
 #include "ReadAlign.h"
 
-void ChimericAlign::chimericJunctionOutput(fstream &outStream, uint chimN, int maxNonChimAlignScore, bool PEmerged_flag)
+void ChimericAlign::chimericJunctionOutput(fstream &outStream, uint chimN, int maxNonChimAlignScore, bool PEmerged_flag, int chimScoreBest)
 {
     outStream << mapGen.chrName[al1->Chr] <<"\t"<< chimJ1 - mapGen.chrStart[al1->Chr]+1 <<"\t"<< (al1->Str==0 ? "+":"-") \
         <<"\t"<< mapGen.chrName[al2->Chr] <<"\t"<< chimJ2 - mapGen.chrStart[al2->Chr]+1 <<"\t"<< (al2->Str==0 ? "+":"-") \
