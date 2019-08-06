@@ -67,7 +67,7 @@ void ReadAlign::chimericDetectionPEmerged(ReadAlign &seRA) {
         chimericDetectionOldOutput();
 
     } else if (trBest->maxScore <= (int) (readLength[0]+readLength[1]) - (int) P.pCh.nonchimScoreDropMin) {//require big enough drop in the best score
-        chimRecord=seRA.chimDet->chimericDetectionMult(seRA.nW, seRA.readLength, trBest->maxScore);
+        chimRecord=seRA.chimDet->chimericDetectionMult(seRA.nW, seRA.readLength, trBest->maxScore, true);
     };
 
     if ( chimRecord ) {

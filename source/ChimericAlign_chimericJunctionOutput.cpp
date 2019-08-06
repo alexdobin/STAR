@@ -1,7 +1,7 @@
 #include "ChimericAlign.h"
 #include "ReadAlign.h"
 
-void ChimericAlign::chimericJunctionOutput(fstream &outStream, uint chimN, int maxNonChimAlignScore)
+void ChimericAlign::chimericJunctionOutput(fstream &outStream, uint chimN, int maxNonChimAlignScore, bool PEmerged_flag)
 {
     outStream << mapGen.chrName[al1->Chr] <<"\t"<< chimJ1 - mapGen.chrStart[al1->Chr]+1 <<"\t"<< (al1->Str==0 ? "+":"-") \
         <<"\t"<< mapGen.chrName[al2->Chr] <<"\t"<< chimJ2 - mapGen.chrStart[al2->Chr]+1 <<"\t"<< (al2->Str==0 ? "+":"-") \
@@ -9,8 +9,9 @@ void ChimericAlign::chimericJunctionOutput(fstream &outStream, uint chimN, int m
         <<"\t"<< al1->exons[0][EX_G] - mapGen.chrStart[al1->Chr]+1 <<"\t"<< al1->generateCigarP() \
         <<"\t"<< al2->exons[0][EX_G] - mapGen.chrStart[al2->Chr]+1 <<"\t"<< al2->generateCigarP() <<"\t"<< chimN
         << "\t" << maxNonChimAlignScore
-        << "\t" << chimScore;
-        
+        << "\t" << chimScore
+        << "\t" << PEmerged;
+
         if (P.outSAMattrPresent.RG)
             outStream <<"\t"<< P.outSAMattrRG.at(RA->readFilesIndex);
         if (P.pSolo.type>0)
