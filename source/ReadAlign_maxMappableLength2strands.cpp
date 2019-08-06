@@ -39,7 +39,7 @@ uint ReadAlign::maxMappableLength2strands(uint pieceStartIn, uint pieceLengthIn,
         //find SA boundaries
         uint Lind=Lmax;
         while (Lind>0) {//check the precense of the prefix for Lind
-            iSA1=mapGen.SAi[mapGen.genomeSAindexStart[Lind-1]+ind1];
+            iSA1=mapGen.SAi[mapGen.genomeSAindexStart[Lind-1]+ind1]; // starting point for suffix array search.
             if ((iSA1 & mapGen.SAiMarkAbsentMaskC) == 0) {//prefix exists
                 break;
             } else {//this prefix does not exist, reduce Lind
@@ -48,6 +48,7 @@ uint ReadAlign::maxMappableLength2strands(uint pieceStartIn, uint pieceLengthIn,
             };
         };
 
+        // define lower bound for suffix array range search.
         if (mapGen.genomeSAindexStart[Lind-1]+ind1+1 < mapGen.genomeSAindexStart[Lind]) {//we are not at the end of the SA
             iSA2=((mapGen.SAi[mapGen.genomeSAindexStart[Lind-1]+ind1+1] & mapGen.SAiMarkNmask) & mapGen.SAiMarkAbsentMask) - 1;
         } else {
@@ -63,6 +64,7 @@ uint ReadAlign::maxMappableLength2strands(uint pieceStartIn, uint pieceLengthIn,
         Nrep = maxMappableLength(mapGen, Read1, pieceStart, pieceLength, iSA1 & mapGen.SAiMarkNmask, iSA2, dirR, maxL, indStartEnd);
     #else
         if (Lind < P.pGe.gSAindexNbases && (iSA1 & mapGen.SAiMarkNmaskC)==0 ) {//no need for SA search
+            // very short seq, already found hits in suffix array w/o having to search the genome for extensions.
             indStartEnd[0]=iSA1;
             indStartEnd[1]=iSA2;
             Nrep=indStartEnd[1]-indStartEnd[0]+1;

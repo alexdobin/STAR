@@ -132,7 +132,7 @@ uint findMultRange(Genome &mapGen, uint i3, uint L3, uint i1, uint L1, uint i1a,
 
 uint maxMappableLength(Genome &mapGen, char** s, uint S, uint N, uint i1, uint i2, bool dirR, uint& L, uint* indStartEnd)
 {
-    /* find minimum mappable length of sequence s to the genome g with suffix array SA; length(s)=N; [i1 i2] is
+    /* find minimum mappable length of sequence s to the genome g with suffix array SA; length(s)=N; [i1 i2] is initial suffix array search bounds.
      * returns number of mappings (1=unique);range indStartEnd; min mapped length = L
      * binary search in SA space
      */
@@ -151,6 +151,16 @@ uint maxMappableLength(Genome &mapGen, char** s, uint S, uint N, uint i1, uint i
     L1a=L1;L1b=L1;i1a=i1;i1b=i1;
     L2a=L2;L2b=L2;i2a=i2;i2b=i2;   // track boundaries of best matching suffix array ranges
 
+
+    //  suffix array
+    // ---------------------------
+    //   i1, L1
+    //
+    //   i3, L3
+    //
+    //   i2, L2
+    // --------------------------
+
     i3=i1;L3=L1; //in case i1+1>=i2 an not iteration of the loope below is ever made
     while (i1+1<i2) {//main binary search loop
         i3=medianUint2(i1,i2);
@@ -161,6 +171,8 @@ uint maxMappableLength(Genome &mapGen, char** s, uint S, uint N, uint i1, uint i
         if (compRes) { //move 1 to 3
             if (L3>L1) {
                L1b=L1a; L1a=L1; i1b=i1a; i1a=i1;
+               // L1b, i1b - captures history of last time the max score shifted.
+               // L1a, i1a - tracks current shift.
             };
             i1=i3;L1=L3;
         }
