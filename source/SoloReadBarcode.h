@@ -3,6 +3,7 @@
 #include <set>
 #include "IncludeDefine.h"
 #include "Parameters.h"
+#include "SoloReadBarcodeStats.h"
 
 class SoloReadBarcode {
 public:
@@ -15,11 +16,7 @@ public:
     vector<uint64> cbMatchInd;//matches
     uint32 *cbReadCountExact;
 
-    struct {
-        enum {                nNoAdapter, nNoUMI, nNoCB, nNinCB, nNinUMI, nUMIhomopolymer,  nTooMany,  nNoMatch, nMismatchesInMultCB, nStats};
-        uint64 V[nStats];
-        vector<string> names={"nNoAdapter", "nNoUMI", "nNoCB", "nNinCB", "nNinUMI", "nUMIhomopolymer","nTooMany","nNoMatch", "nMismatchesInMultCB"};
-    } stats;
+    SoloReadBarcodeStats stats;
 
     SoloReadBarcode(Parameters &Pin);
     void getCBandUMI(string &readNameExtra);

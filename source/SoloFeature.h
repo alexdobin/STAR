@@ -35,7 +35,7 @@ public:
     uint32 *nGperCB;//number of genes (with >0 UMIs) per CB
     uint32 nCellGeneEntries;//total number of non-zero cell/gene combinations (entries in the output matrix)
 
-    ofstream *statsStream;
+    string outputPrefix;
     ofstream *streamTranscriptsOut;
     
     array<vector<uint64>,2> sjAll;
@@ -47,7 +47,7 @@ public:
     void collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot, uint32 *umiArray, uint64 cellBarcode);
     void outputResults();
     void addBAMtags(char *&bam0, uint32 &size0, char* bam1);
-
+    void statsOutput();
 };
 
 #endif

@@ -66,6 +66,7 @@ class Parameters {
         uint iReadAll;
         uint readNmates, readNmatesIn;
         string readMatesLengthsIn;
+        uint32 readQualityScoreBase;
 
         vector <string> readNameSeparator;
         vector <char> readNameSeparatorChar;

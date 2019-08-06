@@ -7,6 +7,7 @@
 #include "Transcript.h"
 #include "SoloReadBarcode.h"
 #include "SoloCommon.h"
+#include "SoloReadFeatureStats.h"
 
 class SoloReadFeature {
 public:
@@ -20,13 +21,9 @@ public:
 
     fstream *streamReads;
 
-    struct {
-        enum {                 nUnmapped,  nNoFeature,  nAmbigFeature,  nAmbigFeatureMultimap,  nTooMany,  nNoExactMatch,  nExactMatch,  nMatch,  nCellBarcodes,  nUMIs, nStats};
-        uint64 V[nStats];
-        vector<string> names={"nUnmapped","nNoFeature","nAmbigFeature","nAmbigFeatureMultimap","nTooMany","nNoExactMatch","nExactMatch","nMatch","nCellBarcodes","nUMIs",};
-    } stats;
-
     string cbSeq, umiSeq, cbQual, umiQual;
+    
+    SoloReadFeatureStats stats;
 
     SoloReadFeature (int32 feTy, Parameters &Pin, int iChunk);
     void record(SoloReadBarcode &soloBar, uint nTr, set<uint32> &readGene, set<uint32> &readGeneFull, Transcript *alignOut, uint64 iRead, const vector<array<uint32,2>> &readTranscripts);

@@ -133,11 +133,16 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     time(&rawTime);
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished collapsing UMIs" <<endl;
 
+    ofstream *statsStream = &ofstrOpen(outputPrefix+pSolo.outFileNames[5],ERROR_OUT, P);
     *statsStream << setw(50)<< "Barcodes:\n";
     readBarSum->statsOut(*statsStream);
     *statsStream << setw(50)<< pSolo.featureNames[featureType] <<":\n";
     readFeatSum->statsOut(*statsStream);
+    statsStream->flush();
 
+    //summary stats output
+    statsOutput();
+    
     //output nU per gene per CB
     outputResults();
 

@@ -1,5 +1,6 @@
 #include "SoloFeature.h"
 #include "streamFuns.h"
+#include "ErrorWarning.h"
 
 SoloFeature::SoloFeature(int feTy, Parameters &Pin, Transcriptome &inTrans)
             :featureType(feTy), P(Pin), Trans(inTrans), pSolo(P.pSolo)
@@ -13,9 +14,18 @@ SoloFeature::SoloFeature(int feTy, Parameters &Pin, Transcriptome &inTrans)
     if (pSolo.type==0)
         return;
 
-    statsStream = &ofstrOpen(P.outFileNamePrefix+pSolo.outFileNames[0]+pSolo.featureNames[featureType]+".stats",ERROR_OUT, P);
+    outputPrefix=P.outFileNamePrefix+pSolo.outFileNames[0];
+    if (featureType!=0) {//
+        outputPrefix += pSolo.featureNames[featureType] +'/';
+        if (outputPrefix.back()=='/' && mkdir(outputPrefix.c_str(),P.runDirPerm)!=0 && errno!=EEXIST) {//create directory
+            ostringstream errOut;
+            errOut << "EXITING because of fatal OUTPUT FILE error: could not create Solo output directory"<<outputPrefix<<"\n";
+            errOut << "SOLUTION: check the path and permisssions";
+            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
+        };
+    };
     
     if (featureType==3) {//for now - open output file
-        streamTranscriptsOut = &ofstrOpen(P.outFileNamePrefix+pSolo.outFileNames[0]+"transcriptCbUmiIndexDistance.txt",ERROR_OUT, P);
+        streamTranscriptsOut = &ofstrOpen(outputPrefix+"transcriptCbUmiIndexDistance.txt",ERROR_OUT, P);
     };
 };

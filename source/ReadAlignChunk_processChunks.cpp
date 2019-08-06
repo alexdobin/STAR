@@ -3,6 +3,7 @@
 #include "ThreadControl.h"
 #include "ErrorWarning.h"
 #include "SequenceFuns.h"
+#include "GlobalVariables.h"
 
 void ReadAlignChunk::processChunks() {//read-map-write chunks
     noReadsLeft=false; //true if there no more reads left in the file
@@ -110,6 +111,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                             P.inOut->readIn[1].ignore(DEF_readNameSeqLengthMax,'\n');//skip to the end of 3rd ("+") line
                             getline(P.inOut->readIn[1],seq1); //read qualities
                             readID += ' ' + seq1;
+                            g_statsAll.qualHistCalc(1, seq1.c_str(), seq1.size());
                         };
 
                         //copy the same readID to both mates
@@ -124,6 +126,10 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                             P.inOut->readIn[imate].getline(chunkIn[imate] + chunkInSizeBytesTotal[imate], DEF_readNameSeqLengthMax+1 );
                             chunkInSizeBytesTotal[imate] += P.inOut->readIn[imate].gcount();
                             chunkIn[imate][chunkInSizeBytesTotal[imate]-1]='\n';
+                            
+                            if (iline==3 && P.outFilterBySJoutStage!=2) {
+                                g_statsAll.qualHistCalc(imate, chunkIn[imate] + chunkInSizeBytesTotal[imate] - P.inOut->readIn[imate].gcount(), P.inOut->readIn[imate].gcount());
+                            };
                         };
                     };
                 } else if (nextChar=='>') {//fasta, can be multiline, which is converted to single line

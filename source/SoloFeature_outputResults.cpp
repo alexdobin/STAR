@@ -3,26 +3,27 @@
 #include "TimeFunctions.h"
 #include "serviceFuns.cpp"
 #include "SequenceFuns.h"
+#include "ErrorWarning.h"
 
 void SoloFeature::outputResults()
-{
-    if (featureType==0) {//this only need to be done once
+{    
+    if (featureType==0) {//this onlys need to be done once
         //output genes
-        ofstream &geneStr=ofstrOpen(P.outFileNamePrefix+pSolo.outFileNames[0]+pSolo.outFileNames[1],ERROR_OUT, P);
+        ofstream &geneStr=ofstrOpen(outputPrefix+pSolo.outFileNames[1],ERROR_OUT, P);
         for (uint32 ii=0; ii<Trans.nGe; ii++)
             geneStr << Trans.geID[ii] <<"\t"<< (Trans.geName[ii].empty() ? Trans.geID[ii] : Trans.geName[ii]) << '\n';
         geneStr.close();
     };
     if (featureType==0 || !pSolo.featureYes[0]) {
         //output CBs
-        ofstream &cbStr=ofstrOpen(P.outFileNamePrefix+pSolo.outFileNames[0]+pSolo.outFileNames[2],ERROR_OUT, P);
+        ofstream &cbStr=ofstrOpen(outputPrefix+pSolo.outFileNames[2],ERROR_OUT, P);
         for (uint64 ii=0; ii<pSolo.cbWLsize; ii++)
              cbStr << pSolo.cbWLstr[ii] <<'\n';
         cbStr.flush();
     };
 
     //output counting matrix
-    string matrixFileName=P.outFileNamePrefix+pSolo.outFileNames[0]+pSolo.outFileNames[3+featureType];
+    string matrixFileName=outputPrefix+pSolo.outFileNames[3];
     ofstream &countMatrixStream=ofstrOpen(matrixFileName,ERROR_OUT, P);
 
     //header
@@ -54,6 +55,4 @@ void SoloFeature::outputResults()
         };
     };
     countMatrixStream.flush();
-
-    statsStream->flush();
 };
