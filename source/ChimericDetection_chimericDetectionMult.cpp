@@ -62,7 +62,7 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int max
 
                     int chimScore=chimericAlignScore(seg1,seg2);
 
-                    if (chimScore>0
+                    if (chimScore > maxNonChimAlignScore
                           &&
                         chimScore >= (int)(readLength[0]+readLength[1]) - P.pCh.scoreDropMax
                           &&
@@ -78,7 +78,8 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int max
 
                         chAl.chimericStitching(outGen.G, Read1[0]);
                         // rescore after stitching.
-                        if (chAl.chimScore > 0) { // survived stitching.
+                        if (chAl.chimScore > maxNonChimAlignScore) { // survived stitching.
+                            // rescore the stitched alignment.
                             chimScore=chimericAlignScore(chAl.seg1,chAl.seg2);
                             chAl.chimScore = chimScore;
                             chimAligns.push_back(chAl);//add this chimeric alignment
@@ -101,6 +102,8 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int max
         if (cAit->chimScore >= chimScoreBest - (int)P.pCh.multimapScoreRange)
             ++chimN;
     };
+
+    /*
     if (chimN > 2*P.pCh.multimapNmax) //too many loci (considering 2* more candidates for stitching below)
         return chimRecord;
 
@@ -112,6 +115,8 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int max
                 ++chimN;
         };
     };
+    */
+
     if (chimN > P.pCh.multimapNmax) //too many loci
         return chimRecord;
 
