@@ -12,10 +12,7 @@ int chimericAlignScore (ChimericSegment & seg1, ChimericSegment & seg2)
     if (seg1.roE > seg1.P.pCh.segmentMin + seg1.roS + chimOverlap && seg2.roE > seg1.P.pCh.segmentMin + seg2.roS + chimOverlap  \
         && ( diffMates || ( (seg1.roE + seg1.P.pCh.segmentReadGapMax + 1) >= seg2.roS && (seg2.roE + seg1.P.pCh.segmentReadGapMax + 1) >= seg1.roS ) ) )
     {
-       //chimScore = seg1.align.maxScore + seg2.align.maxScore - (int)chimOverlap; //subtract overlap to avoid double counting
-
-       chimScore = seg1.align.maxScore + seg2.align.maxScore;  // need to double count overlapping bases since all other scores are also containing the overlapping bases.
-       
+       chimScore = seg1.align.maxScore + seg2.align.maxScore - (int)chimOverlap; //subtract overlap to avoid double counting
     };
 
     return chimScore;
@@ -72,16 +69,20 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int max
                         if (!chAl.chimericCheck())
                             continue; //check chimeric alignment
 
-                        if (chimScore>=chimScoreBest-(int)P.pCh.multimapScoreRange)
-                            chimAligns.push_back(chAl);//add this chimeric alignment
+                        if (chimScore>=chimScoreBest-(int)P.pCh.multimapScoreRange) {
+                            chAl.chimericStitching(outGen.G, Read1[0]);
 
-                        if ( chimScore > chimScoreBest && chimScore >= P.pCh.scoreMin && chimScore >= (int)(readLength[0]+readLength[1]) - P.pCh.scoreDropMax ) {
-                            chimAligns.back().chimericStitching(outGen.G, Read1[0]);
-                            if (chimAligns.back().chimScore > chimScoreBest)
-                                chimScoreBest=chimAligns.back().chimScore;
-                        };
-
-                    };
+                            if (chimScore >= P.pCh.scoreMin && chimScore >= (int)(readLength[0]+readLength[1]) - P.pCh.scoreDropMax ) {
+                                // rescore after stitching.
+                                chimScore=chimericAlignScore(chAl.seg1,chAl.seg2);
+                                chAl.chimScore = chimScore
+                                chimAligns.push_back(chAl);//add this chimeric alignment
+                                
+                                if (chimAligns.back().chimScore > chimScoreBest)
+                                    chimScoreBest=chimAligns.back().chimScore;
+                            }; // endif add chimeric alignment vector
+                        }; // endif in range of best chimeric score so far.
+                    }; // endif chim score > 0
                 };//cycle over window2 aligns
             };//cycle over window2
         };//cycle over window1 aligns
