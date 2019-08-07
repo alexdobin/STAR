@@ -75,9 +75,9 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int max
                             if (chimScore >= P.pCh.scoreMin && chimScore >= (int)(readLength[0]+readLength[1]) - P.pCh.scoreDropMax ) {
                                 // rescore after stitching.
                                 chimScore=chimericAlignScore(chAl.seg1,chAl.seg2);
-                                chAl.chimScore = chimScore
+                                chAl.chimScore = chimScore;
                                 chimAligns.push_back(chAl);//add this chimeric alignment
-                                
+
                                 if (chimAligns.back().chimScore > chimScoreBest)
                                     chimScoreBest=chimAligns.back().chimScore;
                             }; // endif add chimeric alignment vector
