@@ -1,7 +1,7 @@
 #include <cmath>
 #include "Transcript.h"
 
-void Transcript::alignScore(char **Read1, char *G, Parameters &P) {//re-calculates score and number of mismatches
+intScore Transcript::alignScore(char **Read1, char *G, Parameters &P) {//re-calculates score and number of mismatches
     maxScore=0;
     nMM=0;
     nMatch=0;
@@ -52,4 +52,5 @@ void Transcript::alignScore(char **Read1, char *G, Parameters &P) {//re-calculat
         maxScore += int(ceil( log2( (double) ( max(1LLU,exons[nExons-1][EX_G]+exons[nExons-1][EX_L] - exons[0][EX_G]) ) ) \
                  * P.scoreGenomicLengthLog2scale - 0.5));
     };
+    return maxScore;
 };

@@ -78,12 +78,10 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int max
                         if (!chAl.chimericCheck())
                             continue; //check chimeric alignment
 
-                        chAl.chimericStitching(outGen.G, Read1[0]);
+                        //re-calculated chimScoreBest includes non-canonical penalty, so the re-calculated score is lower, in some cases it goes to 0 if some checks are not passed
+                        chAl.chimericStitching(outGen.G, Read1);
                         // rescore after stitching.
                         if (chAl.chimScore > maxNonChimAlignScore) { // survived stitching.
-                            // rescore the stitched alignment.
-                            chimScore=chimericAlignScore(chAl.seg1,chAl.seg2);
-                            chAl.chimScore = chimScore;
                             chimAligns.push_back(chAl);//add this chimeric alignment
 
                             if (chimAligns.back().chimScore > chimScoreBest)
@@ -100,7 +98,8 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int max
         return chimRecord;
 
     chimN=0;
-    for (auto cAit=chimAligns.begin(); cAit<chimAligns.end(); cAit++) {//scan all chimeras, find the number within score range
+    for (auto cAit=chimAligns.begin(); cAit<chimAligns.end(); cAit++) {
+        //scan all chimeras, find the number within score range
         if (cAit->chimScore >= chimScoreBest - (int)P.pCh.multimapScoreRange)
             ++chimN;
     };
