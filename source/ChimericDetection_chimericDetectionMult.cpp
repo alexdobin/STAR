@@ -19,7 +19,7 @@ int chimericAlignScore (ChimericSegment & seg1, ChimericSegment & seg2)
 };
 
 /////////////////////////////////////////////////////////////
-bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int maxNonChimAlignScore, bool PEmerged_flag, int maxPossibleAlignScore) {
+bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int maxNonChimAlignScore, bool PEmerged_flag) {
 
     chimRecord=false;
 
@@ -39,6 +39,8 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int max
 
     chimAligns.clear();
     chimScoreBest=0;
+
+    int maxPossibleAlignScore = (int)(readLength[0]+readLength[1])
 
     for (uint iW1=0; iW1<nW; iW1++) {//cycle windows
         for (uint iA1=0; iA1<nWinTr[iW1]; iA1++) {//cycle aligns in the window
@@ -64,7 +66,7 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int max
 
                     if (chimScore > maxNonChimAlignScore
                           &&
-                        chimScore >= (int)(readLength[0]+readLength[1]) - P.pCh.scoreDropMax
+                        chimScore >= maxPossibleAlignScore - P.pCh.scoreDropMax
                           &&
                         chimScore >= P.pCh.scoreMin
                           &&

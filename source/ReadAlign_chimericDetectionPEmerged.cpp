@@ -72,7 +72,7 @@ void ReadAlign::chimericDetectionPEmerged(ReadAlign &seRA) {
 
         // new chimeric detection routine
 
-        chimRecord=seRA.chimDet->chimericDetectionMult(seRA.nW, seRA.readLength, trBest->maxScore, true, readLength[0]+readLength[1]);
+        chimRecord=seRA.chimDet->chimericDetectionMult(seRA.nW, seRA.readLength, trBest->maxScore, true);
     };
 
     if ( chimRecord ) {
