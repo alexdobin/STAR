@@ -42,16 +42,30 @@ public:
     vector<uint32> features, featureInd;
     uint32 nFeatures;
     bool *featureYes; //which features are requested
+    
     //filtering
     char QSbase,QSmax;//quality score base and cutoff
     float cbMinP;//for CBs with non-exact matching to WL, min posterior probability
+    
+    //cell filtering
+    struct {
+        vector<string> type;
+        double cr2maxPercentile;
+        double cr2expectedCells;
+        double cr2ratio;
+        uint64 cer2maxCellInd;
+        uint64 topCells;
+    } cellFilter;
+    
     //algorithms
     vector <string> umiDedup;
     vector <uint32> umiDedupColumns;
     vector <bool> umiDedupYes;
     int32 CBmatchWLtype;
+    
     //output
     vector<string> outFileNames;
+    
     //constants
     uint32 umiMaskLow, umiMaskHigh; //low/high half bit-mask or UMIs
     

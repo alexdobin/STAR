@@ -271,6 +271,7 @@ void ParametersSolo::initialize(Parameters *pPin)
     if (featureYes[2])
         pP->quant.geneFull.yes=true;
 
+    //SAM attributes
     samAttrYes=false;
     samAttrFeature=0;//hard-coded for now to follow Cell Ranger - error correction only done for feature=Gene
     if (pP->outSAMattrPresent.CB || pP->outSAMattrPresent.UB) {
@@ -281,7 +282,21 @@ void ParametersSolo::initialize(Parameters *pPin)
             errOut << "SOLUTION: re-run STAR with --outSAMtype BAM SortedByCoordinate ...\n";
             exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
-    };  
+    };
+    
+    //cell filtering
+    if (cellFilter.type[0]=="CellRanger2.2") {
+        cellFilter.cr2expectedCells=to_double(cellFilter.type[1]);
+        cellFilter.cr2maxPercentile=to_double(cellFilter.type[2]);
+        cellFilter.cr2maxMinRatio=to_double(cellFilter.type[3]);
+        cellFilter.cer2maxCellInd=(uint64) (cellFilter.cr2expectedCells*(1.0-cellFilter.cr2maxPercentile)+0.5);//cell number for robust max
+    } else if (cellFilter.type[0]=="TopCells") {
+        cellFilter.exactCells=to_int(cellFilter.type[1]);
+    } else if (cellFilter.type[0]=="None") {
+    } else {
+        exitWithError("EXITING because of fatal PARAMETERS error: unrecognized option in --soloCellFilterType=" + cellFilter.type[0] + "\nSOLUTION: use allowed options: CellRanger2.2 or None\n",
+                       std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+    };
 };
 
 void ParametersSolo::umiSwapHalves(uint32 &umi) {

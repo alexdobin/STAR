@@ -116,15 +116,15 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     };
         
     //collapse each CB
-    nUperCB = new uint32[nCB];//record pair: nUMIs per CB and iCB, for sorting if needed
+    nUMIperCB.resize(nCB);
     nGperCB = new uint32[nCB];
     uint32 *umiArray = new uint32[nReadPerCBmax*umiArrayStride];
     nCellGeneEntries=0;
 
     for (uint32 iCB=0; iCB<nCB; iCB++) {
         uint64 nr=(rCBpa[indCB[iCB]]-rCBp[iCB])/rguStride; //number of reads that were matched to WL, rCBpa accumulated reference to the last element+1
-        collapseUMI(rCBp[iCB],nr,nGperCB[iCB],nUperCB[iCB],umiArray,indCB[iCB]);
-        readFeatSum->stats.V[readFeatSum->stats.nUMIs] += nUperCB[iCB];
+        collapseUMI(rCBp[iCB],nr,nGperCB[iCB],nUMIperCB[iCB],umiArray,indCB[iCB]);
+        readFeatSum->stats.V[readFeatSum->stats.nUMIs] += nUMIperCB[iCB];
         if (nGperCB[iCB]>0)
             ++readFeatSum->stats.V[readFeatSum->stats.nCellBarcodes];
         nCellGeneEntries += nGperCB[iCB];
@@ -139,11 +139,11 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     *statsStream << setw(50)<< pSolo.featureNames[featureType] <<":\n";
     readFeatSum->statsOut(*statsStream);
     statsStream->flush();
-
-    //summary stats output
-    statsOutput();
     
     //output nU per gene per CB
     outputResults();
+    
+    //summary stats output
+    statsOutput();
 
 };

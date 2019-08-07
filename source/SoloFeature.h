@@ -35,6 +35,8 @@ public:
     uint32 *nGperCB;//number of genes (with >0 UMIs) per CB
     uint32 nCellGeneEntries;//total number of non-zero cell/gene combinations (entries in the output matrix)
 
+    vector<uint32> nUMIperCB;
+    
     string outputPrefix;
     ofstream *streamTranscriptsOut;
     

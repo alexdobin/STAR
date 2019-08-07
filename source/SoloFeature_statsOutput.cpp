@@ -8,7 +8,7 @@ void SoloFeature::statsOutput()
     ofstream &strOut=ofstrOpen(outputPrefix+pSolo.outFileNames[4], ERROR_OUT, P);
     //Sequencing
     strOut << "Number of Reads," << g_statsAll.readN <<'\n';
-    strOut << "Reads With Valid Barcodes," << 1.0 - double( readBarSum->stats.numInvalidBarcodes() + readBarSum->stats.numInvalidBarcodes() )/g_statsAll.readN <<'\n';
+    strOut << "Reads With Valid Barcodes," << 1.0 - double( readBarSum->stats.numInvalidBarcodes() + readFeatSum->stats.numInvalidBarcodes() )/g_statsAll.readN <<'\n';
     strOut << "Sequencing Saturation," << readFeatSum->stats.numSequencingSaturation() <<'\n';
     
     //quality scores
