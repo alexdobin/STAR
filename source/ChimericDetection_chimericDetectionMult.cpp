@@ -19,7 +19,7 @@ int chimericAlignScore (ChimericSegment & seg1, ChimericSegment & seg2)
 };
 
 /////////////////////////////////////////////////////////////
-bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int maxNonChimAlignScore, bool PEmerged_flag) {
+bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int maxNonChimAlignScore, bool PEmerged_flag, int maxPossibleAlignScore) {
 
     chimRecord=false;
 
@@ -108,7 +108,7 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int max
 
     for (auto cAit=chimAligns.begin(); cAit<chimAligns.end(); cAit++) {//output chimeras within score range
         if (cAit->chimScore >= chimScoreBest-(int)P.pCh.multimapScoreRange)
-            cAit->chimericJunctionOutput(*ostreamChimJunction, chimN, maxNonChimAlignScore, PEmerged_flag, chimScoreBest);
+            cAit->chimericJunctionOutput(*ostreamChimJunction, chimN, maxNonChimAlignScore, PEmerged_flag, chimScoreBest, maxPossibleAlignScore);
     };
 
     if (chimN>0)

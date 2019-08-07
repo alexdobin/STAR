@@ -23,7 +23,7 @@ class ChimericAlign
         int chimMotif, chimStr, chimScore;
 
         ChimericAlign(ChimericSegment &seg1in, ChimericSegment &seg2in, int chimScoreIn, Genome &genomeIn, ReadAlign *RAin); //allocate
-        void chimericJunctionOutput(fstream &outStream, uint chimN, int maxNonChimAlignScore, bool PEmerged_flag, int chimScoreBest);
+        void chimericJunctionOutput(fstream &outStream, uint chimN, int maxNonChimAlignScore, bool PEmerged_flag, int chimScoreBest, int maxPossibleAlignScore);
         void chimericStitching(char *genSeq, char *readSeq);
         bool chimericCheck();
 

@@ -10,6 +10,8 @@ void ReadAlign::chimericDetectionPEmerged(ReadAlign &seRA) {
 
     if (P.pCh.multimapNmax==0) {
 
+        // runs old chimeric detection routines.
+
         seRA.multMapSelect(); //this needs to be done for ChimericDetectionOld, may not need it for the new algorithm
         seRA.mappedFilter();
 
@@ -67,7 +69,10 @@ void ReadAlign::chimericDetectionPEmerged(ReadAlign &seRA) {
         chimericDetectionOldOutput();
 
     } else if (trBest->maxScore <= (int) (readLength[0]+readLength[1]) - (int) P.pCh.nonchimScoreDropMin) {//require big enough drop in the best score
-        chimRecord=seRA.chimDet->chimericDetectionMult(seRA.nW, seRA.readLength, trBest->maxScore, true);
+
+        // new chimeric detection routine
+
+        chimRecord=seRA.chimDet->chimericDetectionMult(seRA.nW, seRA.readLength, trBest->maxScore, true, readLength[0]+readLength[1]);
     };
 
     if ( chimRecord ) {
