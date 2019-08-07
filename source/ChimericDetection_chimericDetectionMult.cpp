@@ -12,7 +12,10 @@ int chimericAlignScore (ChimericSegment & seg1, ChimericSegment & seg2)
     if (seg1.roE > seg1.P.pCh.segmentMin + seg1.roS + chimOverlap && seg2.roE > seg1.P.pCh.segmentMin + seg2.roS + chimOverlap  \
         && ( diffMates || ( (seg1.roE + seg1.P.pCh.segmentReadGapMax + 1) >= seg2.roS && (seg2.roE + seg1.P.pCh.segmentReadGapMax + 1) >= seg1.roS ) ) )
     {
-       chimScore = seg1.align.maxScore + seg2.align.maxScore - (int)chimOverlap; //subtract overlap to avoid double counting
+       //chimScore = seg1.align.maxScore + seg2.align.maxScore - (int)chimOverlap; //subtract overlap to avoid double counting
+
+       chimScore = seg1.align.maxScore + seg2.align.maxScore;  // need to double count overlapping bases since all other scores are also containing the overlapping bases.
+       
     };
 
     return chimScore;
