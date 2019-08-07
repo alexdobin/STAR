@@ -62,27 +62,32 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int max
 
                     int chimScore=chimericAlignScore(seg1,seg2);
 
-                    if  (chimScore>0)
+                    if (chimScore>0
+                          &&
+                        chimScore >= (int)(readLength[0]+readLength[1]) - P.pCh.scoreDropMax
+                          &&
+                        chimScore >= P.pCh.scoreMin
+                          &&
+                        chimScore>=chimScoreBest-(int)P.pCh.multimapScoreRange
+                       )
                     {//candidate chimera
                         ChimericAlign chAl(seg1, seg2, chimScore, outGen, RA);
 
                         if (!chAl.chimericCheck())
                             continue; //check chimeric alignment
 
-                        if (chimScore>=chimScoreBest-(int)P.pCh.multimapScoreRange) {
-                            chAl.chimericStitching(outGen.G, Read1[0]);
+                        chAl.chimericStitching(outGen.G, Read1[0]);
+                        // rescore after stitching.
+                        if (chAl.chimScore > 0) { // survived stitching.
+                            chimScore=chimericAlignScore(chAl.seg1,chAl.seg2);
+                            chAl.chimScore = chimScore;
+                            chimAligns.push_back(chAl);//add this chimeric alignment
 
-                            if (chimScore >= P.pCh.scoreMin && chimScore >= (int)(readLength[0]+readLength[1]) - P.pCh.scoreDropMax ) {
-                                // rescore after stitching.
-                                chimScore=chimericAlignScore(chAl.seg1,chAl.seg2);
-                                chAl.chimScore = chimScore;
-                                chimAligns.push_back(chAl);//add this chimeric alignment
+                            if (chimAligns.back().chimScore > chimScoreBest)
+                                chimScoreBest=chimAligns.back().chimScore;
+                        }; // endif stitched chimera survived.
 
-                                if (chimAligns.back().chimScore > chimScoreBest)
-                                    chimScoreBest=chimAligns.back().chimScore;
-                            }; // endif add chimeric alignment vector
-                        }; // endif in range of best chimeric score so far.
-                    }; // endif chim score > 0
+                    }; // endif meets chim score criteria
                 };//cycle over window2 aligns
             };//cycle over window2
         };//cycle over window1 aligns
