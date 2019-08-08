@@ -30,17 +30,22 @@ void SoloFeature::outputResults(bool cellFilterYes)
 
     //output CBs
     ofstream &cbStr=ofstrOpen(outputPrefix1+pSolo.outFileNames[2],ERROR_OUT, P);
-    
+    uint64 nCellGeneEntries=0;//total number of non-zero cell/gene combinations (entries in the output matrix)
     if (cellFilterYes) {
         for (uint32 icb=0; icb<nCB; icb++) {
-            if (cellFilterVec[icb])
+            if (cellFilterVec[icb]) {
                 cbStr << pSolo.cbWLstr[indCB[icb]] <<'\n';
+                nCellGeneEntries += nGenePerCB[icb];
+            };
         };
     } else {
         for (uint64 ii=0; ii<pSolo.cbWLsize; ii++)
              cbStr << pSolo.cbWLstr[ii] <<'\n';
+        for (uint32 icb=0; icb<nCB; icb++) {
+            nCellGeneEntries += nGenePerCB[icb];
+        };
     };
-    cbStr.flush();
+    cbStr.flush();   
 
     //output counting matrix
     string matrixFileName=outputPrefix1+pSolo.outFileNames[3];
@@ -68,7 +73,7 @@ void SoloFeature::outputResults(bool cellFilterYes)
         } else {
             cbInd1=indCB[icb]+1;
         };
-        for (uint32 ig=0; ig<nGperCB[icb]; ig++) {
+        for (uint32 ig=0; ig<nGenePerCB[icb]; ig++) {
             
             //feature index, CB index
             countMatrixStream << rCBpp[0]+1  <<' '<< cbInd1;

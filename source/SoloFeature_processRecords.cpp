@@ -117,17 +117,18 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
         
     //collapse each CB
     nUMIperCB.resize(nCB);
-    nGperCB = new uint32[nCB];
+    nGenePerCB.resize(nCB);
+    nReadPerCB.resize(nCB);
     uint32 *umiArray = new uint32[nReadPerCBmax*umiArrayStride];
-    nCellGeneEntries=0;
-
-    for (uint32 iCB=0; iCB<nCB; iCB++) {
-        uint64 nr=(rCBpa[indCB[iCB]]-rCBp[iCB])/rguStride; //number of reads that were matched to WL, rCBpa accumulated reference to the last element+1
-        collapseUMI(rCBp[iCB],nr,nGperCB[iCB],nUMIperCB[iCB],umiArray,indCB[iCB]);
-        readFeatSum->stats.V[readFeatSum->stats.nUMIs] += nUMIperCB[iCB];
-        if (nGperCB[iCB]>0)
+    
+    for (uint32 icb=0; icb<nCB; icb++) {//main collapse cycle
+        nGenePerCB[icb] =( rCBpa[indCB[icb]]-rCBp[icb] ) / rguStride; //number of reads that were matched to WL, rCBpa accumulated reference to the last element+1
+        
+        collapseUMI(rCBp[icb], nGenePerCB[icb], nGenePerCB[icb], nUMIperCB[icb], umiArray,indCB[icb]);
+        
+        readFeatSum->stats.V[readFeatSum->stats.nUMIs] += nUMIperCB[icb];
+        if (nGenePerCB[icb]>0)
             ++readFeatSum->stats.V[readFeatSum->stats.nCellBarcodes];
-        nCellGeneEntries += nGperCB[iCB];
     };
 
     time(&rawTime);

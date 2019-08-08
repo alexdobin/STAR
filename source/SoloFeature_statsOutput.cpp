@@ -30,5 +30,23 @@ void SoloFeature::statsOutput()
     strOut << "Reads Mapped to Transcriptome: Unique+Multipe Genes," << double( readFeatSum->stats.numMappedToTranscriptome() )/g_statsAll.readN <<'\n';
     strOut << "Reads Mapped to Transcriptome: Unique Genes," << double( readFeatSum->stats.numMappedToTranscriptomeUnique() )/g_statsAll.readN <<'\n';
     
+    if (pSolo.cellFilter.type[0]=="CellRanger2.2") {
+        strOut << "Estimated Number of Cells," << filteredCells.nCells <<'\n';
+        
+        strOut << "Reads in Cells Mapped to Unique Genes," << filteredCells.nReadInCells <<'\n';
+        strOut << "Fraction of Reads in Cells," << double(filteredCells.nReadInCells) / readFeatSum->stats.numMappedToTranscriptomeUnique() <<'\n';
+        strOut << "Mean Reads per Cell," << filteredCells.meanReadPerCell <<'\n';
+        strOut << "Median Reads per Cell," << filteredCells.medianReadPerCell <<'\n';
+                
+        strOut << "UMIs in Cells," << filteredCells.nUMIinCells <<'\n';
+        strOut << "Mean UMI per Cell," << filteredCells.meanUMIperCell <<'\n';
+        strOut << "Median UMI per Cell," << filteredCells.medianUMIperCell <<'\n';    
+        
+        strOut << "Mean Genes per Cell," << filteredCells.meanGenePerCell <<'\n';
+        strOut << "Median Genes per Cell," << filteredCells.medianGenePerCell <<'\n';    
+        
+    };
+    
+    
     strOut.close();
 };

@@ -31,11 +31,16 @@ public:
     uint32 *indCB;//index of detected CBs in the whitelist
     uint32 *rCBn;//number of reads for detected CBs in the whitelist
     uint32 **rCBp;//array of pointers to each CB sub-array
-    uint32 *nGperCB;//number of genes (with >0 UMIs) per CB
-    uint32 nCellGeneEntries;//total number of non-zero cell/gene combinations (entries in the output matrix)
 
     vector<uint32> nUMIperCB;//number of UMIs per CB
+    vector<uint32> nGenePerCB;//number of genes (with >0 UMIs) per CB
+    vector<uint64> nReadPerCB;//number of reads per CB
+    
     vector<bool> cellFilterVec;
+    struct {
+        uint64 nCells, nReadInCells, medianReadPerCell, meanReadPerCell, nUMIinCells, medianUMIperCell, meanUMIperCell, nGeneInCells, medianGenePerCell, meanGenePerCell, nGeneDetected;
+        vector<uint32> nUMIperCell, nReadPerCell, nGenePerCell;
+    } filteredCells;
     
     string outputPrefix;
     ofstream *streamTranscriptsOut;
