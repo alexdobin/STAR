@@ -52,8 +52,8 @@ public:
         vector<string> type;
         double cr2maxPercentile;
         double cr2expectedCells;
-        double cr2ratio;
-        uint64 cer2maxCellInd;
+        double cr2maxMinRatio;
+        uint64 cr2maxCellInd;
         uint64 topCells;
     } cellFilter;
     

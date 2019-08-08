@@ -31,11 +31,11 @@ public:
     uint32 *indCB;//index of detected CBs in the whitelist
     uint32 *rCBn;//number of reads for detected CBs in the whitelist
     uint32 **rCBp;//array of pointers to each CB sub-array
-    uint32 *nUperCB;//number of UMIs per CB
     uint32 *nGperCB;//number of genes (with >0 UMIs) per CB
     uint32 nCellGeneEntries;//total number of non-zero cell/gene combinations (entries in the output matrix)
 
-    vector<uint32> nUMIperCB;
+    vector<uint32> nUMIperCB;//number of UMIs per CB
+    vector<bool> cellFilterVec;
     
     string outputPrefix;
     ofstream *streamTranscriptsOut;
@@ -47,9 +47,10 @@ public:
     SoloFeature(int feTy, Parameters &Pin, Transcriptome &inTrans);
     void processRecords(ReadAlignChunk **RAchunk);
     void collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot, uint32 *umiArray, uint64 cellBarcode);
-    void outputResults();
+    void outputResults(bool cellFilterYes);
     void addBAMtags(char *&bam0, uint32 &size0, char* bam1);
     void statsOutput();
+    void cellFiltering();
 };
 
 #endif

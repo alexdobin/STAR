@@ -15,14 +15,12 @@ SoloFeature::SoloFeature(int feTy, Parameters &Pin, Transcriptome &inTrans)
         return;
 
     outputPrefix=P.outFileNamePrefix+pSolo.outFileNames[0];
-    if (featureType!=0) {//
-        outputPrefix += pSolo.featureNames[featureType] +'/';
-        if (outputPrefix.back()=='/' && mkdir(outputPrefix.c_str(),P.runDirPerm)!=0 && errno!=EEXIST) {//create directory
-            ostringstream errOut;
-            errOut << "EXITING because of fatal OUTPUT FILE error: could not create Solo output directory"<<outputPrefix<<"\n";
-            errOut << "SOLUTION: check the path and permisssions";
-            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
-        };
+    outputPrefix += pSolo.featureNames[featureType] +'/';
+    if (mkdir(outputPrefix.c_str(),P.runDirPerm)!=0 && errno!=EEXIST) {//create directory
+        ostringstream errOut;
+        errOut << "EXITING because of fatal OUTPUT FILE error: could not create Solo output directory"<<outputPrefix<<"\n";
+        errOut << "SOLUTION: check the path and permisssions";
+        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
     };
     
     if (featureType==3) {//for now - open output file
