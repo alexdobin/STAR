@@ -310,18 +310,8 @@ int main(int argInN, char* argIn[]) {
 
     };
 
-    if (P.pCh.segmentMin>0) {
-        if (P.pCh.out.junctions) {
-            P.inOut->outChimJunction.open((P.outFileNamePrefix + "Chimeric.out.junction").c_str());
-        };
-        if (P.pCh.out.samOld) {
-            P.inOut->outChimSAM.open((P.outFileNamePrefix + "Chimeric.out.sam").c_str());
-            P.inOut->outChimSAM << P.samHeader;
-        };
-        pthread_mutex_init(&g_threadChunks.mutexOutChimSAM, NULL);
-        pthread_mutex_init(&g_threadChunks.mutexOutChimJunction, NULL);
-    };
-
+    //initialize chimeric parameters here
+    
     // P.inOut->logMain << "mlock value="<<mlockall(MCL_CURRENT|MCL_FUTURE) <<"\n"<<flush;
 
     // prepare chunks and spawn mapping threads

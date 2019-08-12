@@ -29,7 +29,7 @@ CFLAGS := -O3 -pipe -Wall -Wextra $(CFLAGS)
 
 ##########################################################################################################
 
-OBJECTS = ParametersSolo.o SoloRead.o SoloRead_record.o \
+OBJECTS = ParametersChimeric_initialize.o ParametersSolo.o SoloRead.o SoloRead_record.o \
 	SoloReadBarcode.o SoloReadBarcode_getCBandUMI.o \
 	SoloReadFeature.o SoloReadFeature_record.o SoloReadFeature_inputRecords.o \
 	Solo.o SoloFeature.o SoloFeature_collapseUMI.o SoloFeature_outputResults.o SoloFeature_processRecords.o\
