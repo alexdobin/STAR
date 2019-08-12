@@ -19,7 +19,7 @@ int chimericAlignScore (ChimericSegment & seg1, ChimericSegment & seg2)
 };
 
 /////////////////////////////////////////////////////////////
-bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength) {
+bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int maxNonChimAlignScore, bool PEmerged_flag) {
 
     chimRecord=false;
 
@@ -39,6 +39,8 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength) {
 
     chimAligns.clear();
     chimScoreBest=0;
+
+    int maxPossibleAlignScore = (int)(readLength[0]+readLength[1]);
 
     for (uint iW1=0; iW1<nW; iW1++) {//cycle windows
         for (uint iA1=0; iA1<nWinTr[iW1]; iA1++) {//cycle aligns in the window
@@ -62,23 +64,31 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength) {
 
                     int chimScore=chimericAlignScore(seg1,seg2);
 
-                    if  (chimScore>0)
+                    if (chimScore > maxNonChimAlignScore
+                          &&
+                        chimScore >= maxPossibleAlignScore - P.pCh.scoreDropMax
+                          &&
+                        chimScore >= P.pCh.scoreMin
+                          &&
+                        chimScore>=chimScoreBest-(int)P.pCh.multimapScoreRange
+                       )
                     {//candidate chimera
                         ChimericAlign chAl(seg1, seg2, chimScore, outGen, RA);
 
                         if (!chAl.chimericCheck())
                             continue; //check chimeric alignment
 
-                        if (chimScore>=chimScoreBest-(int)P.pCh.multimapScoreRange)
+                        //re-calculated chimScoreBest includes non-canonical penalty, so the re-calculated score is lower, in some cases it goes to 0 if some checks are not passed
+                        chAl.chimericStitching(outGen.G, Read1);
+                        // rescore after stitching.
+                        if (chAl.chimScore > maxNonChimAlignScore) { // survived stitching.
                             chimAligns.push_back(chAl);//add this chimeric alignment
 
-                        if ( chimScore > chimScoreBest && chimScore >= P.pCh.scoreMin && chimScore >= (int)(readLength[0]+readLength[1]) - P.pCh.scoreDropMax ) {
-                            chimAligns.back().chimericStitching(outGen.G, Read1[0]);
                             if (chimAligns.back().chimScore > chimScoreBest)
                                 chimScoreBest=chimAligns.back().chimScore;
-                        };
+                        }; // endif stitched chimera survived.
 
-                    };
+                    }; // endif meets chim score criteria
                 };//cycle over window2 aligns
             };//cycle over window2
         };//cycle over window1 aligns
@@ -88,10 +98,13 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength) {
         return chimRecord;
 
     chimN=0;
-    for (auto cAit=chimAligns.begin(); cAit<chimAligns.end(); cAit++) {//scan all chimeras, find the number within score range
+    for (auto cAit=chimAligns.begin(); cAit<chimAligns.end(); cAit++) {
+        //scan all chimeras, find the number within score range
         if (cAit->chimScore >= chimScoreBest - (int)P.pCh.multimapScoreRange)
             ++chimN;
     };
+
+    /*
     if (chimN > 2*P.pCh.multimapNmax) //too many loci (considering 2* more candidates for stitching below)
         return chimRecord;
 
@@ -103,12 +116,14 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength) {
                 ++chimN;
         };
     };
+    */
+
     if (chimN > P.pCh.multimapNmax) //too many loci
         return chimRecord;
 
     for (auto cAit=chimAligns.begin(); cAit<chimAligns.end(); cAit++) {//output chimeras within score range
         if (cAit->chimScore >= chimScoreBest-(int)P.pCh.multimapScoreRange)
-            cAit->chimericJunctionOutput(*ostreamChimJunction, chimN);
+            cAit->chimericJunctionOutput(*ostreamChimJunction, chimN, maxNonChimAlignScore, PEmerged_flag, chimScoreBest, maxPossibleAlignScore);
     };
 
     if (chimN>0)

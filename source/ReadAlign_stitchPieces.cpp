@@ -40,6 +40,8 @@ void ReadAlign::stitchPieces(char **R, uint Lread) {
 
     nW=0; //number of windows
     for (uint iP=0; iP<nP; iP++) {//scan through all anchor pieces, create alignment windows
+        // np is number of pieces (stored seed alignments)
+
 
 //          if (PC[iP][PC_Nrep]<=P.winAnchorMultimapNmax || PC[iP][PC_Length]>=readLength[PC[iP][PC_iFrag]] ) {//proceed if piece is an anchor, i.e. maps few times or is long enough
        if (PC[iP][PC_Nrep]<=P.winAnchorMultimapNmax ) {//proceed if piece is an anchor, i.e. maps few times
@@ -48,7 +50,7 @@ void ReadAlign::stitchPieces(char **R, uint Lread) {
             uint aLength= PC[iP][PC_Length];
 
             for (uint iSA=PC[iP][PC_SAstart]; iSA<=PC[iP][PC_SAend]; iSA++) {//scan through all alignments of this piece
-
+                // going through ordered positions in the suffix array from PC_SAstart to PC_SAend
                 uint a1 = mapGen.SA[iSA];
                 uint aStr = a1 >> mapGen.GstrandBit;
                 a1 &= mapGen.GstrandMask; //remove strand bit
@@ -169,13 +171,13 @@ void ReadAlign::stitchPieces(char **R, uint Lread) {
                         assignAlignToWindow(a1D, aLengthD, aStr, aNrep, aFrag, aRstart, aAnchor, isj1);
                         assignAlignToWindow(a1A, aLengthA, aStr, aNrep, aFrag, aRstart+aLengthD, aAnchor, isj1);
 
-                    } else {//align does not cross the junction
+                  } else {//align does not cross the junction
                         continue; //do not check this align, continue to the next one
-                    };
+                  };
 
-                } else {//this is a normal genomic read
+              } else {//this is a normal genomic read
                     assignAlignToWindow(a1, aLength, aStr, aNrep, aFrag, aRstart, aAnchor, -1);
-                };
+              };
         };
 
 //         for (uint ii=0;ii<nW;ii++) {//check of some pieces created too many aligns in some windows, and remove those from WA (ie shift nWA indices
@@ -346,4 +348,3 @@ std::time(&timeStart);
     };
 
 };//end of function
-
