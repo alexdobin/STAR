@@ -37,6 +37,7 @@ public:
     vector<string> cbWLstr;
     
     //features
+    struct { enum{Gene,GeneFull,SJ,Transcript3p}; } featureTypeInd;
     const static vector<string> featureNames;
     vector<string> featureIn;
     vector<uint32> features, featureInd;

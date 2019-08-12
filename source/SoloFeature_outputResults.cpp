@@ -20,7 +20,7 @@ void SoloFeature::outputResults(bool cellFilterYes)
                        std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
     };
             
-    if (featureType==0 || featureType==1 ) {//this onlys need to be done once
+    if ( featureType==pSolo.featureTypeInd.Gene || featureType==pSolo.featureTypeInd.GeneFull ) {//this onlys need to be done once
         //output genes
         ofstream &geneStr=ofstrOpen(outputPrefix1+pSolo.outFileNames[1],ERROR_OUT, P);
         for (uint32 ii=0; ii<Trans.nGe; ii++)
@@ -31,14 +31,14 @@ void SoloFeature::outputResults(bool cellFilterYes)
     //output CBs
     ofstream &cbStr=ofstrOpen(outputPrefix1+pSolo.outFileNames[2],ERROR_OUT, P);
     uint64 nCellGeneEntries=0;//total number of non-zero cell/gene combinations (entries in the output matrix)
-    if (cellFilterYes) {
+    if (cellFilterYes) {//filtered cells
         for (uint32 icb=0; icb<nCB; icb++) {
             if (cellFilterVec[icb]) {
                 cbStr << pSolo.cbWLstr[indCB[icb]] <<'\n';
                 nCellGeneEntries += nGenePerCB[icb];
             };
         };
-    } else {
+    } else {//unfiltered cells
         for (uint64 ii=0; ii<pSolo.cbWLsize; ii++)
              cbStr << pSolo.cbWLstr[ii] <<'\n';
         for (uint32 icb=0; icb<nCB; icb++) {
@@ -53,14 +53,21 @@ void SoloFeature::outputResults(bool cellFilterYes)
 
     //header
     uint32 featureN=0;
-    if (featureType==0 || featureType==2) {//genes
+    if ( featureType==pSolo.featureTypeInd.Gene || featureType==pSolo.featureTypeInd.GeneFull ) {//genes
         featureN=Trans.nGe;
-    } else if (featureType==1) {//sj
+    } else if ( featureType==pSolo.featureTypeInd.SJ ) {//sj
         featureN=P.sjAll[0].size();
     };
     countMatrixStream <<"%%MatrixMarket matrix coordinate integer general\n%\n";
-    countMatrixStream << featureN <<' '<< pSolo.cbWLsize <<' '<< nCellGeneEntries << '\n';
+    countMatrixStream << featureN <<' '<< (cellFilterYes ? filteredCells.nCells : pSolo.cbWLsize) <<' '<< nCellGeneEntries << '\n';
 
+    bool *geneDetected=NULL;
+    if (cellFilterYes) {
+        geneDetected = new bool[Trans.nGe];
+        memset((void*) geneDetected, 0, Trans.nGe);
+    };
+    
+                
     uint32  cbInd1=0;
     for (uint32 icb=0; icb<nCB; icb++) {
         uint32 *rCBpp=rCBp[icb];
@@ -74,6 +81,9 @@ void SoloFeature::outputResults(bool cellFilterYes)
             cbInd1=indCB[icb]+1;
         };
         for (uint32 ig=0; ig<nGenePerCB[icb]; ig++) {
+            
+            if (cellFilterYes)
+                geneDetected[rCBpp[0]]=true;
             
             //feature index, CB index
             countMatrixStream << rCBpp[0]+1  <<' '<< cbInd1;
@@ -95,4 +105,12 @@ void SoloFeature::outputResults(bool cellFilterYes)
         };
     };
     countMatrixStream.flush();
+    
+    if (cellFilterYes) {
+        filteredCells.nGeneDetected=0;
+        for (uint32 ii=0; ii<Trans.nGe; ii++) {
+            if (geneDetected[ii])
+                filteredCells.nGeneDetected++;
+        };
+    };
 };

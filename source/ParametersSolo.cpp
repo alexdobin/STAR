@@ -7,7 +7,7 @@
 
 #include <stdlib.h>
 
-const vector<string> ParametersSolo::featureNames={"Gene","SJ","GeneFull","Transcript3p"};
+const vector<string> ParametersSolo::featureNames={"Gene","GeneFull","SJ","Transcript3p"};
 
 void ParametersSolo::initialize(Parameters *pPin)
 {

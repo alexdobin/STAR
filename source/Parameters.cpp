@@ -366,13 +366,15 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
 
+    /*
     inOut->logMain << "##### DEFAULT parameters:\n" <<flush;
     for (uint ii=0; ii<parArray.size(); ii++) {
         if (parArray[ii]->inputLevel==0) {
             inOut->logMain << setw(PAR_NAME_PRINT_WIDTH) << parArray[ii]->nameString <<"    "<< *(parArray[ii]) << endl;
         };
     };
-
+    */
+    
     inOut->logMain <<"##### Command Line:\n"<<commandLine <<endl ;
 
     inOut->logMain << "##### Initial USER parameters from Command Line:\n";
@@ -425,14 +427,15 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     commandLineFull=clFull.str();
     inOut->logMain << "\n-------------------------------\n##### Final effective command line:\n" <<  clFull.str() << "\n";
 
-//     parOut.close();
+    /*
+    //     parOut.close();
     inOut->logMain << "\n##### Final parameters after user input--------------------------------:\n" << flush;
-//     parOut.open("Parameters.all.out");
+    //     parOut.open("Parameters.all.out");
     for (uint ii=0; ii<parArray.size(); ii++) {
         inOut->logMain << setw(PAR_NAME_PRINT_WIDTH) << parArray[ii]->nameString <<"    "<< *(parArray[ii]) << endl;
     };
-//     parOut.close();
-
+    //     parOut.close();
+    */
     inOut->logMain << "----------------------------------------\n\n" << flush;
 
 

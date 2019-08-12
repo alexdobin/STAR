@@ -23,7 +23,7 @@ SoloFeature::SoloFeature(int feTy, Parameters &Pin, Transcriptome &inTrans)
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
     };
     
-    if (featureType==3) {//for now - open output file
+    if (featureType==pSolo.featureTypeInd.Transcript3p) {//for now - open output file
         streamTranscriptsOut = &ofstrOpen(outputPrefix+"transcriptCbUmiIndexDistance.txt",ERROR_OUT, P);
     };
 };

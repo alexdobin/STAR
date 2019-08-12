@@ -122,9 +122,9 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     uint32 *umiArray = new uint32[nReadPerCBmax*umiArrayStride];
     
     for (uint32 icb=0; icb<nCB; icb++) {//main collapse cycle
-        nGenePerCB[icb] =( rCBpa[indCB[icb]]-rCBp[icb] ) / rguStride; //number of reads that were matched to WL, rCBpa accumulated reference to the last element+1
+        nReadPerCB[icb] =( rCBpa[indCB[icb]]-rCBp[icb] ) / rguStride; //number of reads that were matched to WL, rCBpa accumulated reference to the last element+1
         
-        collapseUMI(rCBp[icb], nGenePerCB[icb], nGenePerCB[icb], nUMIperCB[icb], umiArray,indCB[icb]);
+        collapseUMI(rCBp[icb], nReadPerCB[icb], nGenePerCB[icb], nUMIperCB[icb], umiArray,indCB[icb]);
         
         readFeatSum->stats.V[readFeatSum->stats.nUMIs] += nUMIperCB[icb];
         if (nGenePerCB[icb]>0)
@@ -144,7 +144,7 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     //output nU per gene per CB
     outputResults(false); //unfiltered
     
-    if (pSolo.cellFilter.type[0]!="None") {
+    if (pSolo.cellFilter.type[0]!="None" && featureType==0) {
         cellFiltering();
         outputResults(true);
     };

@@ -44,7 +44,7 @@ void SoloFeature::statsOutput()
         
         strOut << "Mean Genes per Cell," << filteredCells.meanGenePerCell <<'\n';
         strOut << "Median Genes per Cell," << filteredCells.medianGenePerCell <<'\n';    
-        
+        strOut << "Total Genes Detected," << filteredCells.nGeneDetected <<'\n';    
     };
     
     
