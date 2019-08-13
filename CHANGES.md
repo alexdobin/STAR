@@ -1,4 +1,6 @@
-* Chimeric read reporting now requires that the chimeric read alignment score higher than the alternative non-chimeric alignment to the reference gneome.  The Chimeric.out.junction file now includes the scores of the chimeric alignments and non-chimeric alternative alignments, in addition to the PEmerged bool attribute. (bhaas, Aug 2019)
+STAR 2.7.2a 2019/08/13
+======================
+* Chimeric read reporting now requires that the chimeric read alignment score higher than the alternative non-chimeric alignment to the reference genome.  The Chimeric.out.junction file now includes the scores of the chimeric alignments and non-chimeric alternative alignments, in addition to the PEmerged bool attribute. (bhaas, Aug 2019)
 * Fixed the problem with ALT=* in STAR-WASP.
 * Implemented extras/scripts/soloBasicCellFilter.awk script to perform basic filtering of the STARsolo count matrices.
 
