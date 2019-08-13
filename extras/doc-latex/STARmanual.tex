@@ -364,24 +364,35 @@ SINATRA-0006:3:3:6387:5665#0    23632554   47M29S  133729451       47S29M40p76M
 
 The first 9 columns give information about the chimeric junction:
 \begin{itemize}[leftmargin=1in]
-\item[column 1:] chromosome of the donor
-\item[column 2:] first base of the intron of the donor (1-based)
-\item[column 3:] strand of the donor
-\item[column 4:] chromosome of the acceptor
-\item[column 5:] first base of the intron of the acceptor (1-based)
-\item[column 6:] strand of the acceptor
-\item[column 7:] junction type: -1=encompassing junction (between the mates), 1=GT/AG, 2=CT/AC
-\item[column 8:] repeat length to the left of the junction
-\item[column 9:] repeat length to the right of the junction
+\item[column 1:] \textbf{chr_donorA} - chromosome of the donor
+\item[column 2:] \textbf{brkpt_donorA} - first base of the intron of the donor (1-based)
+\item[column 3:] \textbf{strand_donorA} - strand of the donor
+\item[column 4:] \textbf{chr_acceptorB} - chromosome of the acceptor
+\item[column 5:] \textbf{brkpt_acceptorB} - first base of the intron of the acceptor (1-based)
+\item[column 6:] \textbf{strand_acceptorB} - strand of the acceptor
+\item[column 7:] \textbf{junction_type} : -1=encompassing junction (between the mates), 1=GT/AG, 2=CT/AC
+\item[column 8:] \textbf{repeat_left_lenA} - repeat length to the left of the junction
+\item[column 9:] \textbf{repeat_right_lenB} - repeat length to the right of the junction
 \end{itemize}
 
 Columns 10-14 describe the alignments of the two chimeric segments, it is SAM like. Alignments are given with respect to the (+) strand
 \begin{itemize}[leftmargin=1in]
-\item[column 10:] read name
-\item[column 11:] first base of the first segment (on the + strand)
-\item[column 12:] CIGAR of the first segment
-\item[column 13:] first base of the second segment
-\item[column 14:] CIGAR of the second segment
+\item[column 10:] \textbf{read_name} - name of the RNA-seq fragment
+\item[column 11:] \textbf{start_alnA} - first base of the first segment (on the + strand)
+\item[column 12:] \textbf{cigar_alnA} - CIGAR of the first segment
+\item[column 13:] \textbf{start_alnB} - first base of the second segment
+\item[column 14:] \textbf{cigar_alnB} - CIGAR of the second segment
+\end{itemize}
+
+Columns 15-20 provide alignment score information and relevant metadata
+\begin{itemize}[leftmarge=1in]
+\item[column 15:] \textbf{num_chim_aln} - number of sufficiently scoring chimeric alignments reported for this RNA-seq fragment.
+\item[column 16:] \textbf{max_poss_aln_score} - maximum possible alignment score for this fragment's read(s).
+\item[column 17:] \textbf{non_chim_aln_score} - best non-chimeric alignment score
+\item[column 18:] \textbf{this_chim_aln_score} - score for this individual chimeric alignment
+\item[column 19:] \textbf{bestall_chim_aln_score} - the highest chimeric alignment score encountered for this RNA-seq fragment among the \textbf{num_chim_aln} reported chimeric alignments.
+\item[column 20:] \textbf{PEmerged_bool} - boolean indicating that overlapping PE reads were first merged into a single contiguous sequence before alignment.
+\item[column 21:] \textbf{readgrp} - read group assignment for the read as indicated in the BAM file
 \end{itemize}
 
 Unlike standard SAM, both mates are recorded in one line here. The gap of length \code{L}  between the mates is marked by the \code{p} in the CIGAR string.
