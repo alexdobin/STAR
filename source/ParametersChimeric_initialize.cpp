@@ -10,33 +10,6 @@ void ParametersChimeric::initialize(Parameters *pPin)
     
     pP=pPin;
     
-    if (out.junctions) {
-        pP->inOut->outChimJunction.open((pP->outFileNamePrefix + "Chimeric.out.junction").c_str());
-        
-        if (multimapNmax>0)
-            pP->inOut->outChimJunction <<
-                                        "chr_donorA" <<"\t"<<
-                                        "brkpt_donorA" <<"\t"<<
-                                        "strand_donorA" <<"\t"<<
-                                        "chr_acceptorB" <<"\t"<<
-                                        "brkpt_acceptorB" <<"\t"<<
-                                        "strand_acceptorB" <<"\t"<<
-                                        "junction_type" <<"\t"<<
-                                        "repeat_left_lenA" <<"\t"<<
-                                        "repeat_right_lenB" <<"\t"<<
-                                        "read_name" <<"\t"<<
-                                        "start_alnA" <<"\t"<<
-                                        "cigar_alnA" <<"\t"<<
-                                        "start_alnB" <<"\t"<<
-                                        "cigar_alnB" <<"\t"<<
-                                        "num_chim_aln" <<"\t"<<
-                                        "max_poss_aln_score" <<"\t"<<
-                                        "non_chim_aln_score" <<"\t"<<
-                                        "this_chim_aln_score" <<"\t"<<
-                                        "bestall_chim_aln_score" <<"\t"<<
-                                        "PEmerged_bool" <<"\t"<<
-                                        "readgrp" <<"\n";
-    };
     if (out.samOld) {
         pP->inOut->outChimSAM.open((pP->outFileNamePrefix + "Chimeric.out.sam").c_str());
         pP->inOut->outChimSAM << pP->samHeader;
@@ -66,6 +39,37 @@ void ParametersChimeric::initialize(Parameters *pPin)
             exitWithError(errOut.str(), std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
     };
+
+    if (out.junctions) {
+        pP->inOut->outChimJunction.open((pP->outFileNamePrefix + "Chimeric.out.junction").c_str());
+        
+        if (multimapNmax>0)
+            // column headers for Chimeric.out.junction file
+            pP->inOut->outChimJunction <<
+                                        "chr_donorA" <<"\t"<<
+                                        "brkpt_donorA" <<"\t"<<
+                                        "strand_donorA" <<"\t"<<
+                                        "chr_acceptorB" <<"\t"<<
+                                        "brkpt_acceptorB" <<"\t"<<
+                                        "strand_acceptorB" <<"\t"<<
+                                        "junction_type" <<"\t"<<
+                                        "repeat_left_lenA" <<"\t"<<
+                                        "repeat_right_lenB" <<"\t"<<
+                                        "read_name" <<"\t"<<
+                                        "start_alnA" <<"\t"<<
+                                        "cigar_alnA" <<"\t"<<
+                                        "start_alnB" <<"\t"<<
+                                        "cigar_alnB" <<"\t"<<
+                                        "num_chim_aln" <<"\t"<<
+                                        "max_poss_aln_score" <<"\t"<<
+                                        "non_chim_aln_score" <<"\t"<<
+                                        "this_chim_aln_score" <<"\t"<<
+                                        "bestall_chim_aln_score" <<"\t"<<
+                                        "PEmerged_bool" <<"\t"<<
+                                        "readgrp" <<"\n";
+    };
+    
+
 
     if (out.bam && !pP->outBAMunsorted && !pP->outBAMcoord) {
             ostringstream errOut;
