@@ -1,3 +1,16 @@
+STAR 2.7.2a 2019/08/13
+======================
+
+Chimeric read alignment reporting updates
+-----------------------------------------
+The chimeric read alignment reporting has been changed to improve on the specificity of chimeric read detection.
+Only those chimeric read aligments with alignment scores that exceed the corresponding score of the non-chimeric
+alignment to the reference genome are now reported.
+The Chimeric.junction.out file formatting has been updated to include column headers and the alignment scores for
+both chimeric alignments and the non-chimeric alternative. See the latest STAR manual for full details.
+
+
+
 STAR 2.7.0c 2019/02/05
 ======================
 
