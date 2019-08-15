@@ -12,13 +12,13 @@ bool inputFeatureUmi(fstream *strIn, int32 featureType, bool readInfoYes, array<
     if (readInfoYes)
         *strIn >> iread;
         
-    if (featureType==0 || featureType==2) {//gene
+    if (featureType==SoloFeatureTypes::Gene || featureType==SoloFeatureTypes::GeneFull) {//Gene, GeneFull
         *strIn >> feature;
-    } else if (featureType==1) {//sj
+    } else if (featureType==SoloFeatureTypes::SJ) {//sj
         uint32 sj[2];
         *strIn >> sj[0] >> sj[1];
         feature=(uint32) binarySearch2(sj[0],sj[1],sjAll[0].data(),sjAll[1].data(),sjAll[0].size());
-    } else if (featureType==3) {
+    } else if (featureType==SoloFeatureTypes::Transcript3p) {
         feature=0;
         uint32 ntr, in1;
         *strIn >> ntr;
@@ -61,7 +61,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
                 cb=binarySearchExact<uint64>(cb,pSolo.cbWL.data(),pSolo.cbWLsize);
 
             //record feature
-            if (featureType==3) {//variable length feature, separate treatment, feature always defined (i.e. !=-1)
+            if (featureType==SoloFeatureTypes::Transcript3p) {//variable length feature, separate treatment, feature always defined (i.e. !=-1)
                 //for now - output all in file
                 *streamTranscriptsOut << cb <<' '<< umi <<' '<< trIdDist.size()/2;
                 for (auto &tt: trIdDist)
@@ -104,7 +104,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
             };
             if (ptot>0.0 && pmax>=pSolo.cbMinP*ptot) {
                 //record feature
-                if (featureType==3) {//variable length feature
+                if (featureType==SoloFeatureTypes::Transcript3p) {//variable length feature
                     //for now - output all in file
                     *streamTranscriptsOut << cb <<' '<< umi <<' '<< trIdDist.size()/2;
                     for (auto &tt: trIdDist)

@@ -11,7 +11,7 @@ void SoloFeature::cellFiltering()
         return;
     
     //sort nUperCB
-    vector<uint32> nUMIperCBsorted=nUMIperCB;
+    nUMIperCBsorted=nUMIperCB;
     qsort(nUMIperCBsorted.data(), nCB, sizeof(uint32), funCompareNumbersReverse<uint32>); //sort by gene number
 
     uint32 nUMImax=0, nUMImin=0;

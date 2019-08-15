@@ -10,7 +10,7 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
 
     time_t rawTime;
     time(&rawTime);
-    P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Starting Solo post-map for " <<pSolo.featureNames[featureType] <<endl;
+    P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Starting Solo post-map for " <<SoloFeatureTypes::Names[featureType] <<endl;
   
     uint64 nReadsInput=0;
     for (int ii=0; ii<P.runThreadN; ii++) {//point to
@@ -106,7 +106,7 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished reading reads from Solo files nCB="<<nCB <<", nReadPerCBmax="<<nReadPerCBmax;
     P.inOut->logMain <<", nMatch="<<readFeatSum->stats.V[readFeatSum->stats.nMatch]<<endl;
     
-    if (featureType==3) {
+    if (featureType==SoloFeatureTypes::Transcript3p) {
         streamTranscriptsOut->flush();
         ofstream &outStr=ofstrOpen(P.outFileNamePrefix+pSolo.outFileNames[0]+"transcripts.tsv",ERROR_OUT, P);        
         for (uint32 ii=0; ii<Trans.nTr; ii++)
@@ -137,14 +137,14 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     ofstream *statsStream = &ofstrOpen(outputPrefix+pSolo.outFileNames[5],ERROR_OUT, P);
     *statsStream << setw(50)<< "Barcodes:\n";
     readBarSum->statsOut(*statsStream);
-    *statsStream << setw(50)<< pSolo.featureNames[featureType] <<":\n";
+    *statsStream << setw(50)<< SoloFeatureTypes::Names[featureType] <<":\n";
     readFeatSum->statsOut(*statsStream);
     statsStream->flush();
     
     //output nU per gene per CB
     outputResults(false); //unfiltered
     
-    if (pSolo.cellFilter.type[0]!="None" && featureType==0) {
+    if (pSolo.cellFilter.type[0]!="None" && (featureType==SoloFeatureTypes::Gene || featureType==SoloFeatureTypes::GeneFull)) {
         cellFiltering();
         outputResults(true);
     };

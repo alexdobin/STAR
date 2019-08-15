@@ -32,7 +32,7 @@ public:
     uint32 *rCBn;//number of reads for detected CBs in the whitelist
     uint32 **rCBp;//array of pointers to each CB sub-array
 
-    vector<uint32> nUMIperCB;//number of UMIs per CB
+    vector<uint32> nUMIperCB, nUMIperCBsorted;//number of UMIs per CB, and the same sorted (descendant)
     vector<uint32> nGenePerCB;//number of genes (with >0 UMIs) per CB
     vector<uint64> nReadPerCB;//number of reads per CB
     
@@ -49,7 +49,7 @@ public:
     
     vector<readInfoStruct> readInfo; //corrected CB/UMI information for each read
 
-    SoloFeature(int feTy, Parameters &Pin, Transcriptome &inTrans);
+    SoloFeature(int32 feTy, Parameters &Pin, Transcriptome &inTrans);
     void processRecords(ReadAlignChunk **RAchunk);
     void collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot, uint32 *umiArray, uint64 cellBarcode);
     void outputResults(bool cellFilterYes);

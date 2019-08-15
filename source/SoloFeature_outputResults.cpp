@@ -4,6 +4,7 @@
 #include "serviceFuns.cpp"
 #include "SequenceFuns.h"
 #include "ErrorWarning.h"
+#include "SoloFeatureTypes.h"
 
 void SoloFeature::outputResults(bool cellFilterYes)
 {    
@@ -20,7 +21,7 @@ void SoloFeature::outputResults(bool cellFilterYes)
                        std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
     };
             
-    if ( featureType==pSolo.featureTypeInd.Gene || featureType==pSolo.featureTypeInd.GeneFull ) {//this onlys need to be done once
+    if ( featureType==SoloFeatureTypes::Gene || featureType==SoloFeatureTypes::GeneFull ) {//this onlys need to be done once
         //output genes
         ofstream &geneStr=ofstrOpen(outputPrefix1+pSolo.outFileNames[1],ERROR_OUT, P);
         for (uint32 ii=0; ii<Trans.nGe; ii++)
@@ -53,9 +54,9 @@ void SoloFeature::outputResults(bool cellFilterYes)
 
     //header
     uint32 featureN=0;
-    if ( featureType==pSolo.featureTypeInd.Gene || featureType==pSolo.featureTypeInd.GeneFull ) {//genes
+    if ( featureType==SoloFeatureTypes::Gene || featureType==SoloFeatureTypes::GeneFull ) {//genes
         featureN=Trans.nGe;
-    } else if ( featureType==pSolo.featureTypeInd.SJ ) {//sj
+    } else if ( featureType==SoloFeatureTypes::SJ ) {//sj
         featureN=P.sjAll[0].size();
     };
     countMatrixStream <<"%%MatrixMarket matrix coordinate integer general\n%\n";

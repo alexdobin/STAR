@@ -46,7 +46,16 @@ void SoloFeature::statsOutput()
         strOut << "Median Genes per Cell," << filteredCells.medianGenePerCell <<'\n';    
         strOut << "Total Genes Detected," << filteredCells.nGeneDetected <<'\n';    
     };
-    
-    
     strOut.close();
+    
+    //output UMI per cell, sorted
+    ofstream &strOutUMIperCell = ofstrOpen(outputPrefix+pSolo.outFileNames[6], ERROR_OUT, P);
+    
+    for (auto & n : nUMIperCBsorted) {
+        if (n==0)
+            break;
+        strOutUMIperCell << n <<'\n';
+    };
+    
+    strOutUMIperCell.close();
 };

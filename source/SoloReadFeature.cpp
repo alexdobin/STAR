@@ -1,5 +1,6 @@
 #include "SoloReadFeature.h"
 #include "streamFuns.h"
+#include "SoloFeatureTypes.h"
 
 SoloReadFeature::SoloReadFeature(int32 feTy, Parameters &Pin, int iChunk)
              : featureType(feTy), P(Pin), pSolo(P.pSolo)
@@ -19,7 +20,7 @@ SoloReadFeature::SoloReadFeature(int32 feTy, Parameters &Pin, int iChunk)
         readInfoYes=true;    
 
     if (iChunk>=0) {
-        streamReads = &fstrOpen(P.outFileTmp+"/solo"+pSolo.featureNames[featureType]+'_'+std::to_string(iChunk),ERROR_OUT, P);
+        streamReads = &fstrOpen(P.outFileTmp+"/solo"+SoloFeatureTypes::Names[featureType]+'_'+std::to_string(iChunk),ERROR_OUT, P);
     };    
 };
 

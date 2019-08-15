@@ -7,8 +7,6 @@
 
 #include <stdlib.h>
 
-const vector<string> ParametersSolo::featureNames={"Gene","GeneFull","SJ","Transcript3p"};
-
 void ParametersSolo::initialize(Parameters *pPin)
 {
     pP=pPin;
@@ -74,12 +72,12 @@ void ParametersSolo::initialize(Parameters *pPin)
         exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
 
-    featureYes=new bool [featureNames.size()];
-    featureInd.resize(featureNames.size(),-1);
+    featureInd={-1};
+    featureYes={false};
     for (auto &fin : featureIn) {
         bool finGood=false;
-        for (uint32 ii=0; ii<featureNames.size(); ii++) {
-            if (fin==featureNames[ii]) {
+        for (uint32 ii=0; ii<SoloFeatureTypes::Names.size(); ii++) {
+            if (fin==SoloFeatureTypes::Names[ii]) {
                 finGood=true;
                 featureYes[ii]=true;
                 features.push_back(ii);
@@ -91,9 +89,9 @@ void ParametersSolo::initialize(Parameters *pPin)
             ostringstream errOut;
             errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in --soloFeatures="<<fin<<"\n";
             errOut << "SOLUTION: use allowed option: ";
-            errOut <<featureNames[0]<< "   OR   ";
-            for (auto &fname : featureNames)
-                errOut << fname <<" ";
+            errOut <<SoloFeatureTypes::Names[0];
+            for (auto &fname : SoloFeatureTypes::Names)
+                errOut <<"   OR   "<< fname;
             exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
     };

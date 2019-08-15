@@ -747,7 +747,7 @@ soloUMIdedup                1MM_All
                             1MM_Directional     ... follows the "directional" method from the UMI-tools by Smith, Heger and Sudbery (Genome Research 2017).
                             1MM_NotCollapsed    ... UMIs with 1 mismatch distance to others are not collapsed (i.e. all counted)
 
-soloOutFileNames            Solo.out/ features.tsv barcodes.tsv matrix.mtx Summary.csv Stats.txt
+soloOutFileNames            Solo.out/ features.tsv barcodes.tsv matrix.mtx Summary.csv Stats.txt UMIperCellSorted.txt
     string(s)               file names for STARsolo output:
                             file_name_prefix   gene_names   barcode_sequences   cell_feature_count_matrix   summary_stats_csv   all_stats
 

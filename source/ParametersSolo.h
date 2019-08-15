@@ -2,6 +2,7 @@
 #define CODE_ParametersSolo
 #include "IncludeDefine.h"
 #include "SoloBarcode.h"
+#include "SoloFeatureTypes.h"
 
 class Parameters;
 
@@ -37,12 +38,12 @@ public:
     vector<string> cbWLstr;
     
     //features
-    struct { enum{Gene,GeneFull,SJ,Transcript3p}; } featureTypeInd;
-    const static vector<string> featureNames;
-    vector<string> featureIn;
-    vector<uint32> features, featureInd;
-    uint32 nFeatures;
-    bool *featureYes; //which features are requested
+    vector<string> featureIn;//string of requested features
+    vector<uint32> features;
+    uint32 nFeatures;//=features.size(), number of requested features
+    
+    array<bool,SoloFeatureTypes::N> featureYes; //which features are requested
+    array<int32,SoloFeatureTypes::N> featureInd;//index of each feature - skips unrequested features
     
     //filtering
     char QSbase,QSmax;//quality score base and cutoff
