@@ -862,7 +862,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         //check sizes of the mate files, if not the same, assume mates are not the same length
         if (readNmates==1) {
             readMatesEqualLengths=true;
-        } else if (readNmates > 2){
+        } else if (readNmates > 2 && pSolo.typeStr=="None"){
             ostringstream errOut;
             errOut <<"EXITING: because of fatal input ERROR: number of read mates files > 2: " <<readNmates << "\n";
             errOut <<"SOLUTION:specify only one or two files in the --readFilesIn option. If file names contain spaces, use quotes: \"file name\"\n";
@@ -885,7 +885,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                 inOut->outUnmappedReadsStream[imate].open(ff.str().c_str());
             };
         };
-
 
         if (outFilterType=="Normal") {
             outFilterBySJoutStage=0;
@@ -920,15 +919,15 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     chunkOutBAMsizeBytes= (uint) int((1.0/BUFFER_InSizeFraction-1.0)*chunkInSizeBytesArray*2.0);
     chunkInSizeBytes=chunkInSizeBytesArray-2*(DEF_readSeqLengthMax+1)-2*DEF_readNameLengthMax;//to prevent overflow
 
-    //basic trimming
-    if (clip5pNbases.size()==1 && readNmates==2) clip5pNbases.push_back(clip5pNbases[0]);
-    if (clip3pNbases.size()==1 && readNmates==2) clip3pNbases.push_back(clip3pNbases[0]);
-    if (clip3pAfterAdapterNbases.size()==1 && readNmates==2) clip3pAfterAdapterNbases.push_back(clip3pAfterAdapterNbases[0]);
+    //basic trimming: same adapter for both mates
+    if (clip5pNbases.size()==1 && readNmates>=2) clip5pNbases.push_back(clip5pNbases[0]);
+    if (clip3pNbases.size()==1 && readNmates>=2) clip3pNbases.push_back(clip3pNbases[0]);
+    if (clip3pAfterAdapterNbases.size()==1 && readNmates>=2) clip3pAfterAdapterNbases.push_back(clip3pAfterAdapterNbases[0]);
 
-    //adapter clipping
-    if (clip3pAdapterSeq.size()==1 && readNmates==2) clip3pAdapterSeq.push_back(clip3pAdapterSeq[0]);
-    if (clip3pAdapterMMp.size()==1 && readNmates==2) clip3pAdapterMMp.push_back(clip3pAdapterMMp[0]);
-    for (uint imate=0;imate<readNmates;imate++) {
+    //adapter clipping: same adapter for both mates
+    if (clip3pAdapterSeq.size()==1 && readNmates>=2) clip3pAdapterSeq.push_back(clip3pAdapterSeq[0]);
+    if (clip3pAdapterMMp.size()==1 && readNmates>=2) clip3pAdapterMMp.push_back(clip3pAdapterMMp[0]);
+    for (uint imate=0;imate<min(2LLU,readNmates);imate++) {
         if (clip3pAdapterSeq.at(imate).at(0)=='-') {// no clipping
             clip3pAdapterSeq.at(imate).assign("");
         } else {//clipping

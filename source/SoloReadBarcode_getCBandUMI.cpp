@@ -154,7 +154,7 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
     bSeq=readNameExtra.substr(0,bLength);
     bQual=readNameExtra.substr(bLength+1,bLength);
 
-    if (pSolo.type==1) {
+    if (pSolo.type==pSolo.SoloTypes::CB_UMI_Simple) {
         cbSeq=bSeq.substr(pSolo.cbS-1,pSolo.cbL);
         umiSeq=bSeq.substr(pSolo.umiS-1,pSolo.umiL);
         cbQual=bQual.substr(pSolo.cbS-1,pSolo.cbL);
@@ -165,7 +165,7 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
         
         matchCBtoWL(cbSeq, cbQual, pSolo.cbWL, cbMatch, cbMatchInd, cbMatchString);
         
-    } else if (pSolo.type==2) {
+    } else if (pSolo.type==pSolo.SoloTypes::CB_UMI_Complex) {
         
         cbSeq="";
         cbQual="";
@@ -228,6 +228,16 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
         
         if (cbMatchGood) {
             cbMatchString=to_string(cbMatchInd[0]);
+        };
+    } else if (pSolo.type==pSolo.SoloTypes::CB_samTagOut) {
+        //CB only, on read 3
+        cbSeq=bSeq.substr(pSolo.cbS-1,pSolo.cbL);
+        cbQual=bQual.substr(pSolo.cbS-1,pSolo.cbL);
+        matchCBtoWL(cbSeq, cbQual, pSolo.cbWL, cbMatch, cbMatchInd, cbMatchString);
+        if (cbMatch==0 || cbMatch==1) {
+            cbSeqCorrected=pSolo.cbWLstr[cbMatchInd[0]];
+        } else {
+            cbSeqCorrected="";
         };
     };
     

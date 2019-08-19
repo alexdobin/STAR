@@ -7,7 +7,9 @@ SoloReadFeature::SoloReadFeature(int32 feTy, Parameters &Pin, int iChunk)
 {
     if (pSolo.type==0)
         return;
-
+//     if (pSolo.type==pSolo.SoloTypes::CB_samTagOut)
+//         return;
+    
     if (pSolo.cbWLyes) {
         cbReadCount = new uint32[pSolo.cbWLsize];
         for (uint32 ii=0; ii<pSolo.cbWLsize; ii++) {

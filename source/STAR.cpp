@@ -157,7 +157,7 @@ int main(int argInN, char* argIn[]) {
 //         P1.inOut->logMain.open((P1.outFileNamePrefix + "Log.out").c_str());
 
         P1.wasp.outputMode="None"; //no WASP filtering on the 1st pass
-        P1.pSolo.type=0; //no solo in the first pass
+        P1.pSolo.type=P1.pSolo.SoloTypes::None; //no solo in the first pass
 
         g_statsAll.resetN();
         time(&g_statsAll.timeStartMap);

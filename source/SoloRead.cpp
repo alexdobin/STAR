@@ -5,7 +5,9 @@ SoloRead::SoloRead(Parameters &Pin, int32 iChunkIn) :  iChunk(iChunkIn), P(Pin),
     readBar = new SoloReadBarcode(P);
     
     if (pSolo.type==0)
-        return;    
+        return;
+    if (pSolo.type==pSolo.SoloTypes::CB_samTagOut)
+        return;
     
     readFeat = new SoloReadFeature*[pSolo.nFeatures];
 

@@ -13,7 +13,7 @@ void ParametersSolo::initialize(Parameters *pPin)
 
     yes = true;
     if (typeStr=="None") {
-        type = 0;
+        type = SoloTypes::None;
         yes = false;
         samAttrYes = false;
         //solo SAM attributes not allowed
@@ -25,7 +25,7 @@ void ParametersSolo::initialize(Parameters *pPin)
         };        
         return;
     } else if (typeStr=="CB_UMI_Simple" || typeStr=="Droplet") {
-        type=1;        
+        type=SoloTypes::CB_UMI_Simple;        
         if (umiL > 16) {
             ostringstream errOut;
             errOut << "EXITING because of fatal PARAMETERS error: UMI length is too long: --soloUMIlen="<<umiL<<"\n";
@@ -40,17 +40,25 @@ void ParametersSolo::initialize(Parameters *pPin)
         };
         if (bL==1)
             bL=cbL+umiL;
-        pP->readNmates=1; //output mates TODO: check that readNmatesIn==2       
     } else if (typeStr=="CB_UMI_Complex") {
-        type=2;
-        pP->readNmates=1;
+        type=SoloTypes::CB_UMI_Complex;
         bL=0;
         if (CBmatchWLtype>1) {
             ostringstream errOut;
-            errOut << "EXITING because of fatal PARAMETERS error: --soloCBmatchWLtype "<< CBmatchWLtype << "does not work with --soloType CB_UMI_Complex\n";
-            errOut << "SOLUTION: use allowed option: with --soloType CB_UMI_Complex use --soloCBmatchWLtype 0 (exact matches only) OR 1 (one match with 1 mismatched base)\n";
+            errOut << "EXITING because of fatal PARAMETERS error: --soloCBmatchWLtype "<< CBmatchWLtype << " does not work with --soloType CB_UMI_Complex\n";
+            errOut << "SOLUTION: use allowed option: with --soloType CB_UMI_Complex, use --soloCBmatchWLtype 0 (exact matches only) OR 1 (one match with 1 mismatched base)\n";
             exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
+    } else if (typeStr=="CB_samTagOut") {
+        type=SoloTypes::CB_samTagOut;
+        if (CBmatchWLtype>1) {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: --soloCBmatchWLtype "<< CBmatchWLtype << " does not work with --soloType CB_samTagOut\n";
+            errOut << "SOLUTION: use allowed option: with --soloType CB_samTagOut, use --soloCBmatchWLtype 0 (exact matches only) OR 1 (one match with 1 mismatched base)\n";
+            exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+        };      
+        if (bL==1)
+            bL=cbL;
     } else  {
         ostringstream errOut;
         errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in --soloType="<<typeStr<<"\n";
@@ -58,6 +66,14 @@ void ParametersSolo::initialize(Parameters *pPin)
         errOut << "Obsolete option Droplet should be replaced with CB_UMI_Simple";
         exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
+
+    if (pP->readNmatesIn<2) {
+        exitWithError("solo* options require 2 reads or 3 reads, where the last read is the barcode read.\n"
+                      "SOLUTION: specify 2 or 3 files in --readFilesIn",std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+    };
+    pP->readNmates=pP->readNmatesIn-1; //output mates TODO: check that readNmatesIn==2       
+    barcodeRead=pP->readNmates;//TODO make this flexible
+
 
     if (strandStr=="Unstranded") {
         strand=-1;
@@ -137,7 +153,7 @@ void ParametersSolo::initialize(Parameters *pPin)
     umiMaskHigh=~umiMaskLow;
 
     //load the CB whitelist
-    if (type==1) {//simple whitelist
+    if (type==SoloTypes::CB_UMI_Simple || SoloTypes::CB_samTagOut) {//simple whitelist
         if (soloCBwhitelist.size()>1) {
             ostringstream errOut;
             errOut << "EXITING because of FATAL ERROR in INPUT parameters: --soloCBwhitelist contains more than one file which is not allowed with --soloType CB_UMI_Simple \n";
@@ -180,7 +196,7 @@ void ParametersSolo::initialize(Parameters *pPin)
         for (uint64 ii=0; ii<cbWLsize; ii++)
              cbWLstr[ii] = convertNuclInt64toString(cbWL[ii],cbL);        
         
-    } else if (type==2) {//complex barcodes: multiple whitelist (one for each CB), varying CB length
+    } else if (type==SoloTypes::CB_UMI_Complex) {//complex barcodes: multiple whitelist (one for each CB), varying CB length
         cbWLyes=true; //for complex barcodes, no-whitelist option is not allowed for now
         
         adapterYes=false;
@@ -272,7 +288,7 @@ void ParametersSolo::initialize(Parameters *pPin)
     //SAM attributes
     samAttrYes=false;
     samAttrFeature=0;//hard-coded for now to follow Cell Ranger - error correction only done for feature=Gene
-    if (pP->outSAMattrPresent.CB || pP->outSAMattrPresent.UB) {
+    if ( (pP->outSAMattrPresent.CB || pP->outSAMattrPresent.UB) && type!=SoloTypes::CB_samTagOut) {
         samAttrYes=true;
         if (!pP->outBAMcoord) {
             ostringstream errOut;

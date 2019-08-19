@@ -124,7 +124,7 @@ typedef uint8_t uint8;
 #endif
 
 //input reads
-#define MAX_N_MATES 2
+#define MAX_N_MATES 3
 #define DEF_readNameLengthMax 50000
 #if defined COMPILE_FOR_LONG_READS
     #define DEF_readSeqLengthMax 500000

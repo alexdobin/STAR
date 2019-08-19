@@ -112,7 +112,7 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
         for (uint32 ii=0; ii<Trans.nTr; ii++)
             outStr << Trans.trID[ii] <<"\t"<< Trans.trLen[ii] <<"\t"<< Trans.geName[Trans.trGene[ii]] << '\n';
         outStr.close();
-        return; //not implemented yet
+        return; //the rest not implemented yet
     };
         
     //collapse each CB

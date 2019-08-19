@@ -153,6 +153,8 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                 attrN+=bamAttrArrayWrite(soloRead->readBar->cbSeq,"CR",attrOutArray+attrN);
             if (P.outSAMattrPresent.CY)
                 attrN+=bamAttrArrayWrite(soloRead->readBar->cbQual,"CY",attrOutArray+attrN);
+            if (P.outSAMattrPresent.CB && soloRead->readBar->cbSeqCorrected!="")
+                attrN+=bamAttrArrayWrite(soloRead->readBar->cbSeqCorrected,"CB",attrOutArray+attrN);            
             if (P.outSAMattrPresent.UR)
                 attrN+=bamAttrArrayWrite(soloRead->readBar->umiSeq,"UR",attrOutArray+attrN);
             if (P.outSAMattrPresent.UY)
@@ -163,7 +165,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                 attrN+=bamAttrArrayWrite(soloRead->readBar->bSeq,"sS",attrOutArray+attrN);
             if (P.outSAMattrPresent.sQ)
                 attrN+=bamAttrArrayWrite(soloRead->readBar->bQual,"sQ",attrOutArray+attrN);
-
+            
         } else {//this mate is mapped
             if (flagPaired) {//paired reads
                 samFLAG=0x0001;
@@ -390,6 +392,9 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                         
                     //following attributes are not processed here
                     case ATTR_CB:
+                        if (soloRead->readBar->cbSeqCorrected!="")
+                        attrN+=bamAttrArrayWrite(soloRead->readBar->cbSeqCorrected,"CB",attrOutArray+attrN);                        
+                        break;
                     case ATTR_UB:
                         break;
                         
