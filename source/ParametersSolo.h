@@ -1,5 +1,8 @@
 #ifndef CODE_ParametersSolo
 #define CODE_ParametersSolo
+
+#include <array>
+
 #include "IncludeDefine.h"
 #include "SoloBarcode.h"
 #include "SoloFeatureTypes.h"
@@ -34,7 +37,7 @@ public:
     uint32 adapterMismatchesNmax;//max number of mismatches in the anchor
     
     //whitelist - general
-    uint64 cbWLsize;
+ CTTCGAGTCCTTTATTGGGGAGTCTGTTCATTACCAACAGAGTACTGTGAATATATGCCTGATGTTGCTAAATGTAGACAATGGTTAGAGAAGAATTTT   uint64 cbWLsize;
     bool cbWLyes;
     vector<string> soloCBwhitelist;
     vector <uint64> cbWL;    
