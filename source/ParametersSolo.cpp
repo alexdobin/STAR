@@ -153,7 +153,7 @@ void ParametersSolo::initialize(Parameters *pPin)
     umiMaskHigh=~umiMaskLow;
 
     //load the CB whitelist
-    if (type==SoloTypes::CB_UMI_Simple || SoloTypes::CB_samTagOut) {//simple whitelist
+    if (type==SoloTypes::CB_UMI_Simple || type==SoloTypes::CB_samTagOut) {//simple whitelist
         if (soloCBwhitelist.size()>1) {
             ostringstream errOut;
             errOut << "EXITING because of FATAL ERROR in INPUT parameters: --soloCBwhitelist contains more than one file which is not allowed with --soloType CB_UMI_Simple \n";

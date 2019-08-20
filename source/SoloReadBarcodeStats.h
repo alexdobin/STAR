@@ -5,11 +5,11 @@
 class SoloReadBarcodeStats {
 public:
     vector<string> names;
-    enum {                           nNoAdapter,  nNoUMI,    nNoCB,   nNinCB,   nNinUMI,   nUMIhomopolymer,  nTooMany,  nNoMatch,   nMismatchesInMultCB, nStats};
+    enum {      nNoAdapter,  nNoUMI,    nNoCB,   nNinCB,   nNinUMI,   nUMIhomopolymer,  nTooMany,  nNoMatch,   nMismatchesInMultCB,  nExactMatch,    nMismatchOneWL,   nMismatchToMultWL, nStats};
     uint64 V[nStats];    
     SoloReadBarcodeStats() 
     {
-        names={"nNoAdapter", "nNoUMI", "nNoCB", "nNinCB", "nNinUMI", "nUMIhomopolymer","nTooMany","nNoMatch", "nMismatchesInMultCB"};
+        names={"nNoAdapter", "nNoUMI", "nNoCB", "nNinCB", "nNinUMI", "nUMIhomopolymer","nTooMany","nNoMatch", "nMismatchesInMultCB", "nExactMatch", "nMismatchOneWL", "nMismatchToMultWL"};
         for (uint32 ii=0; ii<nStats; ii++)
             V[ii]=0;
     };
@@ -17,7 +17,7 @@ public:
     uint64 numInvalidBarcodes()
     {
         uint64 n=0;
-        for (uint32 ii=0; ii<nStats; ii++)
+        for (uint32 ii=0; ii<9; ii++) //first eight number record all invalid barcodes
             n += V[ii];
         
         return n;

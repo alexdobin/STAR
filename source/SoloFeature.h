@@ -23,7 +23,7 @@ public:
     ParametersSolo &pSolo;
 
     SoloReadFeature *readFeatSum, **readFeatAll;
-    SoloReadBarcode *readBarSum, **readBarAll;
+    SoloReadBarcode *readBarSum;
 
     uint64 nReadsMapped, nCB; //total number of mapped reads
 
@@ -49,7 +49,7 @@ public:
     
     vector<readInfoStruct> readInfo; //corrected CB/UMI information for each read
 
-    SoloFeature(int32 feTy, Parameters &Pin, Transcriptome &inTrans);
+    SoloFeature(int32 feTy, Parameters &Pin, Transcriptome &inTrans, SoloReadBarcode *readBarSumIn);
     void processRecords(ReadAlignChunk **RAchunk);
     void collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot, uint32 *umiArray, uint64 cellBarcode);
     void outputResults(bool cellFilterYes);

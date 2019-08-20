@@ -5,7 +5,7 @@
 
 void SoloFeature::statsOutput()
 {
-    ofstream &strOut=ofstrOpen(outputPrefix+pSolo.outFileNames[4], ERROR_OUT, P);
+    ofstream &strOut=ofstrOpen(outputPrefix+"Summary.csv", ERROR_OUT, P);
     //Sequencing
     strOut << "Number of Reads," << g_statsAll.readN <<'\n';
     strOut << "Reads With Valid Barcodes," << 1.0 - double( readBarSum->stats.numInvalidBarcodes() + readFeatSum->stats.numInvalidBarcodes() )/g_statsAll.readN <<'\n';
@@ -49,7 +49,7 @@ void SoloFeature::statsOutput()
     strOut.close();
     
     //output UMI per cell, sorted
-    ofstream &strOutUMIperCell = ofstrOpen(outputPrefix+pSolo.outFileNames[6], ERROR_OUT, P);
+    ofstream &strOutUMIperCell = ofstrOpen(outputPrefix+"UMIperCellSorted.txt", ERROR_OUT, P);
     
     for (auto & n : nUMIperCBsorted) {
         if (n==0)

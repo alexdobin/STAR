@@ -99,14 +99,19 @@ void SoloReadBarcode::addStats(const int32 cbMatch1)
     if (!pSolo.cbWLyes) //no stats if no WL
         return;
     
-    if (cbMatch1==0) {
-        cbReadCountExact[cbMatchInd[0]]++;//note that this simply counts reads per exact CB, no checks of genes or UMIs
-        return;
-    } else if (cbMatch1>0) {
+    if (cbMatch1>1) {
+        stats.V[stats.nMismatchToMultWL]++;
         return;
     };
     
     switch (cbMatch1) {
+        case 0:
+            cbReadCountExact[cbMatchInd[0]]++;//note that this simply counts reads per exact CB, no checks of genes or UMIs
+            stats.V[stats.nExactMatch]++;
+            break;
+        case 1:
+            stats.V[stats.nMismatchOneWL]++;
+            break;
         case -1 :
             stats.V[stats.nNoMatch]++;
             break;
@@ -121,6 +126,7 @@ void SoloReadBarcode::addStats(const int32 cbMatch1)
             break;
         case -12 :
             stats.V[stats.nMismatchesInMultCB]++;            
+            break;
     };
 };
 

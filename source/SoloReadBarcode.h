@@ -16,6 +16,8 @@ public:
     string cbMatchString;//CB matches and qualities
     vector<uint64> cbMatchInd;//matches
     uint32 *cbReadCountExact;
+    map <uint32,uint32> cbReadCountMap;//count read per CB for no WL
+
 
     SoloReadBarcodeStats stats;
 

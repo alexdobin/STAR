@@ -15,7 +15,6 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     uint64 nReadsInput=0;
     for (int ii=0; ii<P.runThreadN; ii++) {//point to
         readFeatAll[ii]= RAchunk[ii]->RA->soloRead->readFeat[pSolo.featureInd[featureType]];
-        readBarAll[ii] = RAchunk[ii]->RA->soloRead->readBar;
         nReadsInput = max(nReadsInput,RAchunk[ii]->RA->iReadAll);
     };
     ++nReadsInput;
@@ -30,7 +29,6 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
 
     for (int ii=0; ii<P.runThreadN; ii++) {
         readFeatSum->addCounts(*readFeatAll[ii]);
-        readBarSum->addCounts(*readBarAll[ii]);
     };
 
     if (!pSolo.cbWLyes) {//now we can define WL and counts
@@ -99,7 +97,6 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
 
     for (int ii=0; ii<P.runThreadN; ii++) {
         readFeatSum->addStats(*readFeatAll[ii]);
-        readBarSum->addStats(*readBarAll[ii]);
     };
 
     time(&rawTime);
@@ -134,12 +131,10 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     time(&rawTime);
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished collapsing UMIs" <<endl;
 
-    ofstream *statsStream = &ofstrOpen(outputPrefix+pSolo.outFileNames[5],ERROR_OUT, P);
-    *statsStream << setw(50)<< "Barcodes:\n";
-    readBarSum->statsOut(*statsStream);
-    *statsStream << setw(50)<< SoloFeatureTypes::Names[featureType] <<":\n";
+    ofstream *statsStream = &ofstrOpen(outputPrefix+"Features.stats",ERROR_OUT, P);
+    //*statsStream << setw(50)<< SoloFeatureTypes::Names[featureType] <<"\n";
     readFeatSum->statsOut(*statsStream);
-    statsStream->flush();
+    statsStream->close();
     
     //output nU per gene per CB
     outputResults(false); //unfiltered

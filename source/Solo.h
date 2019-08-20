@@ -17,6 +17,8 @@ private:
 public:
     ParametersSolo &pSolo;
     SoloFeature **soloFeat;
+    
+    SoloReadBarcode *readBarSum, **readBarAll;
 
     Solo(ReadAlignChunk **RAchunk, Parameters &Pin, Transcriptome &inTrans);
     void processAndOutput();
