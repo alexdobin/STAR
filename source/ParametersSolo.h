@@ -37,7 +37,7 @@ public:
     uint32 adapterMismatchesNmax;//max number of mismatches in the anchor
     
     //whitelist - general
- CTTCGAGTCCTTTATTGGGGAGTCTGTTCATTACCAACAGAGTACTGTGAATATATGCCTGATGTTGCTAAATGTAGACAATGGTTAGAGAAGAATTTT   uint64 cbWLsize;
+    uint64 cbWLsize;
     bool cbWLyes;
     vector<string> soloCBwhitelist;
     vector <uint64> cbWL;    
