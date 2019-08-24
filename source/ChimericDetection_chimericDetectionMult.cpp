@@ -86,7 +86,12 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int max
 
                             if (chimAligns.back().chimScore > chimScoreBest)
                                 chimScoreBest=chimAligns.back().chimScore;
-                        }; // endif stitched chimera survived.
+                        } // endif stitched chimera survived.
+                        else {
+                            // al1, al2 allocated during stitching
+                            delete chAl.al1;
+                            delete chAl.al2;
+                        };
 
                     }; // endif meets chim score criteria
                 };//cycle over window2 aligns
