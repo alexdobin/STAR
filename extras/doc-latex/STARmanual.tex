@@ -521,7 +521,7 @@ Previous STAR chimeric detection algorithm only detected uniquely mapping chimer
 The new algorithm can detect and output multimapping chimeras. Presently, the only output into Chimeric.out.junction is supported.
 This algorithm is activated with $>0$ value in \optv{chimMultimapNmax}, which defines the maximum number of chimeric multi-alignments.
 The \optv{chimMultimapScoreRange} ($=1$ by default) parameter defines the score range for multi-mapping chimeras below the best chimeric score, similar to the \optv{outFilterMultimapScoreRange} parameter for normal alignments.
-The \optv{chimNonchimScoreDropMin} ($=20$ by default) defines the threshold triggering chimeric detection: the drop in the best non-chimeric alignment score with respect to the read length has to be smaller than this value.
+The \optv{chimNonchimScoreDropMin} ($=20$ by default) defines the threshold triggering chimeric detection: the drop in the best non-chimeric alignment score with respect to the read length has to be greater than this value.
 
 \section{STARsolo: mapping, demultiplexing and gene quantification for single cell RNA-seq}
 
