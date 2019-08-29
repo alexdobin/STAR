@@ -1,3 +1,10 @@
+STAR 2.7.2b 2019/08/29
+======================
+Bug fixes in chimeric detection, contributed by Meng Xiao He (@mengxiao)
+* Fix memory leak in handling chimeric multimappers: #721
+* Ensure chimeric alignment score requirements are consistently checked: #722,#723.
+
+
 STAR 2.7.2a 2019/08/13
 ======================
 * Chimeric read reporting now requires that the chimeric read alignment score higher than the alternative non-chimeric alignment to the reference genome.  The Chimeric.out.junction file now includes the scores of the chimeric alignments and non-chimeric alternative alignments, in addition to the PEmerged bool attribute. (bhaas, Aug 2019)
