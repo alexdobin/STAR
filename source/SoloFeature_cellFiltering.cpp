@@ -20,10 +20,11 @@ void SoloFeature::cellFiltering()
         nUMImax = nUMIperCBsorted[min(nCB-1,pSolo.cellFilter.cr2maxCellInd)];//robust estimate of the max UMI
         nUMImin = int(nUMImax/pSolo.cellFilter.cr2maxMinRatio+0.5);
     } else if (pSolo.cellFilter.type[0]=="TopCells") {
-        nUMImin = nUMIperCB[max(nCB-1,pSolo.cellFilter.topCells)];
+        nUMImin = nUMIperCBsorted[max(nCB-1,pSolo.cellFilter.topCells)];
     };
 
     cellFilterVec.resize(nCB,false);
+    memset(&filteredCells,0,sizeof(filteredCells));
     for (uint32 icb=0; icb<nCB; icb++) {
         if (nUMIperCB[icb]>=nUMImin) {
             cellFilterVec[icb]=true;
