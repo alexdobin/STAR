@@ -52,7 +52,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
         if (cbmatch<=1) {//single match
             *streamReads >> cb;
 
-            if ( cbmatch==1 && cbReadCountExactTotal[cb]==0 && feature!=(uint32)(-1) ) {//single 1MM match, no exact matches to this CB
+            if ( pSolo.CBmatchWL.oneExact && cbmatch==1 && cbReadCountExactTotal[cb]==0 && feature!=(uint32)(-1) ) {//single 1MM match, no exact matches to this CB
                 stats.V[stats.nNoExactMatch]++;
                 continue;
             };
@@ -101,6 +101,17 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
                         pmax=pin;
                     };
                 };
+//                 //try adding pseudocounts
+//                 //if (cbReadCountExactTotal[cbin]>0) {//otherwise this cbin does not work
+//                     qin -= pSolo.QSbase;
+//                     qin = qin < pSolo.QSmax ? qin : pSolo.QSmax;
+//                     pin=(cbReadCountExactTotal[cbin]+1)*std::pow(10.0,-qin/10.0);
+//                     ptot+=pin;
+//                     if (pin>pmax) {
+//                         cb=cbin;
+//                         pmax=pin;
+//                     };
+//                 //};
             };
             if (ptot>0.0 && pmax>=pSolo.cbMinP*ptot) {
                 //record feature

@@ -69,7 +69,19 @@ public:
     vector <string> umiDedup;
     vector <uint32> umiDedupColumns;
     vector <bool> umiDedupYes;
-    int32 CBmatchWLtype;
+    
+    struct {
+        string type;
+        bool mm1; //1 mismatch allowed
+        bool mm1_multi; //1 mismatch, multiple matches to WL allowed
+        bool oneExact; //CBs require at least one exact match
+        bool mm1_multi_pc; //use psedocounts while calculating probabilities of multi-matches
+    } CBmatchWL;
+    
+    struct {
+        vector<string> type;
+        bool MultiGeneUMI;
+    } umiFiltering;
     
     //output
     vector<string> outFileNames;

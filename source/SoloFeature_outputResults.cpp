@@ -90,13 +90,14 @@ void SoloFeature::outputResults(bool cellFilterYes)
             countMatrixStream << rCBpp[0]+1  <<' '<< cbInd1;
             
             //count(s)
-            uint32 count1[3] = {1,1,1};
+            array<uint32,3> count1;
             if (rCBpp[1]>1) {//3 counts recorded
                 count1[0] = rCBpp[1];
                 count1[1] = rCBpp[2];
                 count1[2] = rCBpp[3];
                 rCBpp += 4;
             } else {//1 recorded
+                count1 = {1,1,1};
                 rCBpp += 2;
             };
             for (uint32 ii=0; ii<pSolo.umiDedupColumns.size(); ii++)

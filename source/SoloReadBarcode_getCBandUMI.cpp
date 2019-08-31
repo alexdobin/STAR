@@ -38,7 +38,7 @@ void SoloReadBarcode::matchCBtoWL(string &cbSeq1, string &cbQual1, vector<uint64
         };
     };
     
-    if (pSolo.CBmatchWLtype==0) //only exact matches allowed
+    if (!pSolo.CBmatchWL.mm1) //only exact matches allowed
         return;
 
     if (posN>=0) {//one N
@@ -86,7 +86,7 @@ void SoloReadBarcode::matchCBtoWL(string &cbSeq1, string &cbQual1, vector<uint64
         cbMatch1=-1;
     } else if (cbMatch1==1) {//1 match, no need to record the quality
         cbMatchString1 = to_string(cbMatchInd1[0]);
-    } else if (pSolo.CBmatchWLtype==1) {//>1 matches, but this is not allowed
+    } else if (!pSolo.CBmatchWL.mm1_multi) {//>1 matches, but this is not allowed
         //stats.V[stats.nTooMany]++;
         cbMatch1=-3;
         cbMatchInd1.clear();

@@ -56,9 +56,16 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     //allocate arrays to store CB/gene/UMIs for all reads
     nCB=0;nReadsMapped=0;
     for (uint32 ii=0; ii<pSolo.cbWLsize; ii++) {
-        if (readBarSum->cbReadCountExact[ii]>0) {
+        if (readFeatSum->cbReadCount[ii]>0) {
             nCB++;
             nReadsMapped += readFeatSum->cbReadCount[ii];
+        };
+    };
+    
+    //pseudocounts
+    if (pSolo.CBmatchWL.mm1_multi_pc) {
+        for (uint32 ii=0; ii<pSolo.cbWLsize; ii++) {
+            readBarSum->cbReadCountExact[ii]++;
         };
     };
 
@@ -72,7 +79,7 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     rCBpa[0]=rGeneUMI;
     nCB=0;//will count it again below
     for (uint32 ii=0; ii<pSolo.cbWLsize; ii++) {
-        if (readBarSum->cbReadCountExact[ii]>0) {//if no exact matches, this CB is not present
+        if (readFeatSum->cbReadCount[ii]>0) {
             indCB[nCB]=ii;
             rCBp[nCB+1] = rCBp[nCB] + rguStride*readFeatSum->cbReadCount[ii];
             ++nCB;

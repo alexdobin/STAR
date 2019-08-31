@@ -43,20 +43,8 @@ void ParametersSolo::initialize(Parameters *pPin)
     } else if (typeStr=="CB_UMI_Complex") {
         type=SoloTypes::CB_UMI_Complex;
         bL=0;
-        if (CBmatchWLtype>1) {
-            ostringstream errOut;
-            errOut << "EXITING because of fatal PARAMETERS error: --soloCBmatchWLtype "<< CBmatchWLtype << " does not work with --soloType CB_UMI_Complex\n";
-            errOut << "SOLUTION: use allowed option: with --soloType CB_UMI_Complex, use --soloCBmatchWLtype 0 (exact matches only) OR 1 (one match with 1 mismatched base)\n";
-            exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
-        };
     } else if (typeStr=="CB_samTagOut") {
-        type=SoloTypes::CB_samTagOut;
-        if (CBmatchWLtype>1) {
-            ostringstream errOut;
-            errOut << "EXITING because of fatal PARAMETERS error: --soloCBmatchWLtype "<< CBmatchWLtype << " does not work with --soloType CB_samTagOut\n";
-            errOut << "SOLUTION: use allowed option: with --soloType CB_samTagOut, use --soloCBmatchWLtype 0 (exact matches only) OR 1 (one match with 1 mismatched base)\n";
-            exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
-        };      
+        type=SoloTypes::CB_samTagOut;     
         if (bL==1)
             bL=cbL;
     } else  {
@@ -117,7 +105,7 @@ void ParametersSolo::initialize(Parameters *pPin)
     umiDedupYes.resize(3,false);
     umiDedupColumns.resize(umiDedup.size());
     for (uint32 ii=0; ii<umiDedup.size(); ii++) {
-        if (umiDedup[ii]=="1MM_NotCollapsed") {
+        if (umiDedup[ii]=="Exact") {
             umiDedupYes[0]=true;
             umiDedupColumns[ii]=0;
         } else if (umiDedup[ii]=="1MM_All") {
@@ -129,6 +117,7 @@ void ParametersSolo::initialize(Parameters *pPin)
         } else {
             ostringstream errOut;
             errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in --soloUMIdedup="<<umiDedup[ii]<<"\n";
+            errOut << "SOLUTION: used allowed options: Exact -or- 1MM_All -or- 1MM_Directional";
             exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
     };
@@ -311,8 +300,54 @@ void ParametersSolo::initialize(Parameters *pPin)
         exitWithError("EXITING because of fatal PARAMETERS error: unrecognized option in --soloCellFilterType=" + cellFilter.type[0] + "\nSOLUTION: use allowed options: CellRanger2.2 or None\n",
                        std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
+    
+    //umi filtering
+    umiFiltering.MultiGeneUMI=false;
+    if (umiFiltering.type[0]=="MultiGeneUMI") {
+        umiFiltering.MultiGeneUMI=true;
+    } else if (umiFiltering.type[0]=="-") {
+        //nothing to do
+    } else {
+        exitWithError("EXITING because of fatal PARAMETERS error: unrecognized option in --soloUMIfiltering=" + umiFiltering.type[0] + "\nSOLUTION: use allowed options: - OR MultiGeneUMI\n",
+                      std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+    };
+    
+    //CBmatchWL
+    if ( (typeStr=="CB_UMI_Complex" || typeStr=="CB_samTagOut") && (CBmatchWL.type!="Exact" && CBmatchWL.type!="1MM") ) {
+        ostringstream errOut;
+        errOut << "EXITING because of fatal PARAMETERS error: --soloCBmatchWLtype "<< CBmatchWL.type << " does not work with --soloType " << typeStr << "\n";
+        errOut << "SOLUTION: use allowed option: use --soloCBmatchWLtype Exact (exact matches only) OR 1MM (one match with 1 mismatched base)\n";
+        exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+    };
+    
+    if (CBmatchWL.type=="Exact") {
+        CBmatchWL.mm1=false;
+        CBmatchWL.mm1_multi=false;
+        CBmatchWL.mm1_multi_pc=false;        
+        CBmatchWL.oneExact=true;
+    } else if (CBmatchWL.type=="1MM") {
+        CBmatchWL.mm1=true;
+        CBmatchWL.mm1_multi=false;
+        CBmatchWL.mm1_multi_pc=false;
+        CBmatchWL.oneExact=true;        
+    } else if (CBmatchWL.type=="1MM_multi") {
+        CBmatchWL.mm1=true;
+        CBmatchWL.mm1_multi=true;
+        CBmatchWL.mm1_multi_pc=false;
+        CBmatchWL.oneExact=true;    
+    } else if (CBmatchWL.type=="1MM_multi_pseudocounts") {
+        CBmatchWL.mm1=true;
+        CBmatchWL.mm1_multi=true;
+        CBmatchWL.mm1_multi_pc=true;
+        CBmatchWL.oneExact=false;    
+    } else {
+        exitWithError("EXITING because of fatal PARAMETERS error: unrecognized option in --soloCBmatchWL.type " +CBmatchWL.type + "\nSOLUTION: use allowed options: Exact -or- 1MM -or- 1MM_multi -or- 1MM_multi_pseudocounts\n",
+                      std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+    };
+    
 };
 
+/////////////////////////////////
 void ParametersSolo::umiSwapHalves(uint32 &umi) {
     uint32 high=umi>>(umiL);
     umi &= umiMaskLow; //remove high
