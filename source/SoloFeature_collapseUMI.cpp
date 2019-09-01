@@ -173,7 +173,7 @@ void SoloFeature::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nU
             nUtot+=nU0;
             if (nU0==1 && readInfo.size()>0) {//fill in readInfo: CB,UMI
                 for (uint32 iR=0; iR<gReadS[iG+1]-gReadS[iG]; iR+=rguStride) {//cycle over reads
-                    if (rGU1[iR]==umiArray[0]) {//other UMIs were filtered out
+                    if (rGU1[iR+rguU]==umiArray[0]) {//other UMIs were filtered out
                         uint64 iread1 = rGU1[iR+rguR];
                         readInfo[iread1].cb = cellBarcode;
                         readInfo[iread1].umi = umiArray[0];

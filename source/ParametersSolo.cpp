@@ -62,7 +62,7 @@ void ParametersSolo::initialize(Parameters *pPin)
     pP->readNmates=pP->readNmatesIn-1; //output mates TODO: check that readNmatesIn==2       
     barcodeRead=pP->readNmates;//TODO make this flexible
 
-
+    ///////////////////////////////////////////////// soloStrand
     if (strandStr=="Unstranded") {
         strand=-1;
     } else if (strandStr=="Forward") {
@@ -76,6 +76,7 @@ void ParametersSolo::initialize(Parameters *pPin)
         exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
 
+    //////////////////////////////////// features
     featureInd={-1};
     featureYes={false};
     for (auto &fin : featureIn) {
@@ -99,9 +100,11 @@ void ParametersSolo::initialize(Parameters *pPin)
             exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
     };
-
     nFeatures=features.size();
-
+    if (featureYes[SoloFeatureTypes::GeneFull])
+        pP->quant.geneFull.yes=true;
+    
+    ////////////////////////////////////////////umiDedup
     umiDedupYes.resize(3,false);
     umiDedupColumns.resize(umiDedup.size());
     for (uint32 ii=0; ii<umiDedup.size(); ii++) {
@@ -270,9 +273,6 @@ void ParametersSolo::initialize(Parameters *pPin)
         pP->quant.trSAM.softClip = true;
         pP->inOut->logMain << "Turning on Genomic->Transcriptomic coordinate conversion for STARsolo\n";
     };
-    
-    if (featureYes[2])
-        pP->quant.geneFull.yes=true;
 
     //SAM attributes
     samAttrYes=false;
