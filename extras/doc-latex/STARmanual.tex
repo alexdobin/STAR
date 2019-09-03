@@ -34,7 +34,7 @@
 
 \newcommand{\sechyperref}[1]{\hyperref[#1]{Section \ref{#1}. \nameref{#1}}}
 
-\title{STAR manual 2.7.1a}
+\title{STAR manual 2.7.2b}
 \author{Alexander Dobin\\
 dobin@cshl.edu}
 \maketitle
@@ -364,24 +364,35 @@ SINATRA-0006:3:3:6387:5665#0    23632554   47M29S  133729451       47S29M40p76M
 
 The first 9 columns give information about the chimeric junction:
 \begin{itemize}[leftmargin=1in]
-\item[column 1:] chromosome of the donor
-\item[column 2:] first base of the intron of the donor (1-based)
-\item[column 3:] strand of the donor
-\item[column 4:] chromosome of the acceptor
-\item[column 5:] first base of the intron of the acceptor (1-based)
-\item[column 6:] strand of the acceptor
-\item[column 7:] junction type: -1=encompassing junction (between the mates), 1=GT/AG, 2=CT/AC
-\item[column 8:] repeat length to the left of the junction
-\item[column 9:] repeat length to the right of the junction
+\item[column 1:] \textbf{chr\_donorA} : chromosome of the donor
+\item[column 2:] \textbf{brkpt\_donorA} : first base of the intron of the donor (1-based)
+\item[column 3:] \textbf{strand\_donorA} : strand of the donor
+\item[column 4:] \textbf{chr\_acceptorB} : chromosome of the acceptor
+\item[column 5:] \textbf{brkpt\_acceptorB} : first base of the intron of the acceptor (1-based)
+\item[column 6:] \textbf{strand\_acceptorB} : strand of the acceptor
+\item[column 7:] \textbf{junction\_type} : -1=encompassing junction (between the mates), 1=GT/AG, 2=CT/AC
+\item[column 8:] \textbf{repeat\_left\_lenA} : repeat length to the left of the junction
+\item[column 9:] \textbf{repeat\_right\_lenB} : repeat length to the right of the junction
 \end{itemize}
 
 Columns 10-14 describe the alignments of the two chimeric segments, it is SAM like. Alignments are given with respect to the (+) strand
 \begin{itemize}[leftmargin=1in]
-\item[column 10:] read name
-\item[column 11:] first base of the first segment (on the + strand)
-\item[column 12:] CIGAR of the first segment
-\item[column 13:] first base of the second segment
-\item[column 14:] CIGAR of the second segment
+\item[column 10:] \textbf{read\_name} : name of the RNA-seq fragment
+\item[column 11:] \textbf{start\_alnA} : first base of the first segment (on the + strand)
+\item[column 12:] \textbf{cigar\_alnA} : CIGAR of the first segment
+\item[column 13:] \textbf{start\_alnB} : first base of the second segment
+\item[column 14:] \textbf{cigar\_alnB} : CIGAR of the second segment
+\end{itemize}
+
+Columns 15-20 provide alignment score information and relevant metadata. These columns are only output for multimapping chimeriuc algorithm \opt{chimMultimapNmax} \optv{>0}.
+\begin{itemize}[leftmargin=1in]
+\item[column 15:] \textbf{num\_chim\_aln} : number of sufficiently scoring chimeric alignments reported for this RNA-seq fragment.
+\item[column 16:] \textbf{max\_poss\_aln\_score} : maximum possible alignment score for this fragment's read(s).
+\item[column 17:] \textbf{non\_chim\_aln\_score} : best non-chimeric alignment score
+\item[column 18:] \textbf{this\_chim\_aln\_score} : score for this individual chimeric alignment
+\item[column 19:] \textbf{bestall\_chim\_aln\_score} : the highest chimeric alignment score encountered for this RNA-seq fragment among the \textbf{num\_chim\_aln} reported chimeric alignments.
+\item[column 20:] \textbf{PEmerged\_bool} : boolean indicating that overlapping PE reads were first merged into a single contiguous sequence before alignment.
+\item[column 21:] \textbf{readgrp} : read group assignment for the read as indicated in the BAM file
 \end{itemize}
 
 Unlike standard SAM, both mates are recorded in one line here. The gap of length \code{L}  between the mates is marked by the \code{p} in the CIGAR string.
@@ -416,8 +427,12 @@ Note that line 4 and 6 here are BCR/ABL fusions. You would need to filter these 
 
 
 \section{Output in transcript coordinates.}
-With \opt{quantMode} \optv{TranscriptomeSAM} option STAR will output alignments translated into transcript coordinates in the \ofilen{Aligned.toTranscriptome.out.bam} file (in addition to alignments in genomic coordinates in \ofilen{Aligned.*.sam/bam} files). These transcriptomic alignments can be used with various transcript quantification software that require reads to be mapped to transcriptome, such as RSEM or eXpress. For example, RSEM command line would look as follows: \codelines{rsem-calculate-expression ...  --bam Aligned.toTranscriptome.out.bam /path/to/RSEM/reference RSEM}.
-Note, that STAR first aligns reads to entire genome, and only then searches for concordance between alignments and transcripts. I believe this approach might offer certain advantages compared to the alignment to transcriptome only, by not forcing the alignments to annotated transcripts.
+With \opt{quantMode} \optv{TranscriptomeSAM} option STAR will output alignments translated into transcript coordinates in the \ofilen{Aligned.toTranscriptome.out.bam} file (in addition to alignments in genomic coordinates in \ofilen{Aligned.*.sam/bam} files). These transcriptomic alignments can be used with various transcript quantification software that require reads to be mapped to transcriptome, such as RSEM or eXpress. For example, RSEM command line would look as follows: \codelines{rsem-calculate-expression ...  --bam Aligned.toTranscriptome.out.bam /path/to/RSEM/reference RSEM}
+
+Note, that STAR first aligns reads to entire genome, and only then searches for concordance between alignments and transcripts.This approach offers certain advantages compared to the alignment to transcriptome only, by not forcing the alignments to annotated transcripts. Note that \opt{outFilterMultimapNmax} filter only applies to genomic alignments. If an alignment passes this filter, it is converted to all possible transcriptomic alignments and all of them are output.
+
+
+
 
 By default, the output satisfies RSEM requirements: soft-clipping or indels are not allowed. Use \opt{quantTranscriptomeBan} \optv{Singleend} to allow insertions, deletions ans soft-clips in the transcriptomic alignments, which can be used by some expression quantification software (e.g. eXpress). 
 
@@ -506,7 +521,7 @@ Previous STAR chimeric detection algorithm only detected uniquely mapping chimer
 The new algorithm can detect and output multimapping chimeras. Presently, the only output into Chimeric.out.junction is supported.
 This algorithm is activated with $>0$ value in \optv{chimMultimapNmax}, which defines the maximum number of chimeric multi-alignments.
 The \optv{chimMultimapScoreRange} ($=1$ by default) parameter defines the score range for multi-mapping chimeras below the best chimeric score, similar to the \optv{outFilterMultimapScoreRange} parameter for normal alignments.
-The \optv{chimNonchimScoreDropMin} ($=20$ by default) defines the threshold triggering chimeric detection: the drop in the best non-chimeric alignment score with respect to the read length has to be smaller than this value.
+The \optv{chimNonchimScoreDropMin} ($=20$ by default) defines the threshold triggering chimeric detection: the drop in the best non-chimeric alignment score with respect to the read length has to be greater than this value.
 
 \section{STARsolo: mapping, demultiplexing and gene quantification for single cell RNA-seq}
 

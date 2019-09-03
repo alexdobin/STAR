@@ -1,11 +1,13 @@
 #include "ChimericAlign.h"
 
-void ChimericAlign::chimericStitching(char *genSeq, char *readSeq) {
+void ChimericAlign::chimericStitching(char *genSeq, char **Read1) {
 
     if (stitchingDone)
         return;
 
     stitchingDone=true;
+
+    char *readSeq=Read1[0]; //only direct read sequence is used - reverse complemented if necessary in the algorithm
 
     al1=new Transcript(*al1);
     al2=new Transcript(*al2);
@@ -168,9 +170,12 @@ void ChimericAlign::chimericStitching(char *genSeq, char *readSeq) {
         chimRepeat1=jR;
     };//chimeric junction is within a mate
 
-    if (chimMotif>=0 && (a1.exons[ex1][EX_L]<P.pCh.junctionOverhangMin+chimRepeat1 || a2.exons[ex2][EX_L]<P.pCh.junctionOverhangMin+chimRepeat2) ) {
+    if (chimMotif>=0 && (a1.exons[ex1][EX_L]<P.pCh.junctionOverhangMin || a2.exons[ex2][EX_L]<P.pCh.junctionOverhangMin) ) {
         //filter out cases where linear junctions that are very close to chimeric junction
         chimScore=0;
         return;
     };
+
+    //re-calculate chimScore for adjusted transcripts
+    chimScore=a1.alignScore(Read1,genSeq,P) + a2.alignScore(Read1,genSeq,P) + (chimMotif==0 ? P.pCh.scoreJunctionNonGTAG : 0);
 };

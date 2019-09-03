@@ -19,9 +19,7 @@ int chimericAlignScore (ChimericSegment & seg1, ChimericSegment & seg2)
 };
 
 /////////////////////////////////////////////////////////////
-bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength) {
-
-    chimRecord=false;
+bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int maxNonChimAlignScore, bool PEmerged_flag) {
 
 //     for (uint ii=0;ii<chimAligns.size();ii++) {//deallocate aligns
 //         if (chimAligns.at(ii).stitchingDone) {//al1,al2 were allocated
@@ -39,6 +37,13 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength) {
 
     chimAligns.clear();
     chimScoreBest=0;
+
+    int maxPossibleAlignScore = (int)(readLength[0]+readLength[1]);
+    int minScoreToConsider = P.pCh.scoreMin;
+    if (maxNonChimAlignScore >= minScoreToConsider)
+        minScoreToConsider = maxNonChimAlignScore + 1;
+    if ((maxPossibleAlignScore - P.pCh.scoreDropMax) > minScoreToConsider)
+        minScoreToConsider = maxPossibleAlignScore - P.pCh.scoreDropMax;
 
     for (uint iW1=0; iW1<nW; iW1++) {//cycle windows
         for (uint iA1=0; iA1<nWinTr[iW1]; iA1++) {//cycle aligns in the window
@@ -62,57 +67,54 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength) {
 
                     int chimScore=chimericAlignScore(seg1,seg2);
 
-                    if  (chimScore>0)
-                    {//candidate chimera
+                    if (chimScore >= minScoreToConsider) {//candidate chimera
                         ChimericAlign chAl(seg1, seg2, chimScore, outGen, RA);
 
                         if (!chAl.chimericCheck())
                             continue; //check chimeric alignment
 
-                        if (chimScore>=chimScoreBest-(int)P.pCh.multimapScoreRange)
+                        //re-calculated chimScoreBest includes non-canonical penalty, so the re-calculated score is lower, in some cases it goes to 0 if some checks are not passed
+                        chAl.chimericStitching(outGen.G, Read1);
+                        // rescore after stitching.
+                        if (chAl.chimScore >= minScoreToConsider) { // survived stitching.
                             chimAligns.push_back(chAl);//add this chimeric alignment
 
-                        if ( chimScore > chimScoreBest && chimScore >= P.pCh.scoreMin && chimScore >= (int)(readLength[0]+readLength[1]) - P.pCh.scoreDropMax ) {
-                            chimAligns.back().chimericStitching(outGen.G, Read1[0]);
-                            if (chimAligns.back().chimScore > chimScoreBest)
+                            if (chimAligns.back().chimScore > chimScoreBest) {
                                 chimScoreBest=chimAligns.back().chimScore;
+                                if ((chimScoreBest - (int)P.pCh.multimapScoreRange) > minScoreToConsider)
+                                    // best score increased, so subsequent alignment candidates must score higher
+                                    minScoreToConsider = chimScoreBest - (int)P.pCh.multimapScoreRange;
+                            }
+                        } // endif stitched chimera survived.
+                        else {
+                            // al1, al2 allocated during stitching
+                            delete chAl.al1;
+                            delete chAl.al2;
                         };
 
-                    };
+                    }; // endif meets chim score criteria
                 };//cycle over window2 aligns
             };//cycle over window2
         };//cycle over window1 aligns
     };//cycle over window1
 
     if (chimScoreBest==0)
-        return chimRecord;
+        return false;
 
     chimN=0;
-    for (auto cAit=chimAligns.begin(); cAit<chimAligns.end(); cAit++) {//scan all chimeras, find the number within score range
-        if (cAit->chimScore >= chimScoreBest - (int)P.pCh.multimapScoreRange)
+    for (auto cAit=chimAligns.begin(); cAit<chimAligns.end(); cAit++) {
+        //scan all chimeras, find the number within score range
+        if (cAit->chimScore >= minScoreToConsider)
             ++chimN;
     };
-    if (chimN > 2*P.pCh.multimapNmax) //too many loci (considering 2* more candidates for stitching below)
-        return chimRecord;
 
-    chimN=0;
-    for (auto cAit=chimAligns.begin(); cAit<chimAligns.end(); cAit++) {//re-scan all chimeras: stitch and re-check the score
-        if (cAit->chimScore >= chimScoreBest-(int)P.pCh.multimapScoreRange) {
-            cAit->chimericStitching(outGen.G, Read1[0]);
-            if (cAit->chimScore >= chimScoreBest - (int)P.pCh.multimapScoreRange)
-                ++chimN;
-        };
-    };
     if (chimN > P.pCh.multimapNmax) //too many loci
-        return chimRecord;
+        return false;
 
     for (auto cAit=chimAligns.begin(); cAit<chimAligns.end(); cAit++) {//output chimeras within score range
-        if (cAit->chimScore >= chimScoreBest-(int)P.pCh.multimapScoreRange)
-            cAit->chimericJunctionOutput(*ostreamChimJunction, chimN);
+        if (cAit->chimScore >= minScoreToConsider)
+            cAit->chimericJunctionOutput(*ostreamChimJunction, chimN, maxNonChimAlignScore, PEmerged_flag, chimScoreBest, maxPossibleAlignScore);
     };
 
-    if (chimN>0)
-        chimRecord=true;
-
-    return chimRecord;
+    return chimN > 0;
 };//END

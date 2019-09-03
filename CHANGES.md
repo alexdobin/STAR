@@ -1,6 +1,19 @@
 * Implemented SAM attributes sS and sQ to output sequence and quality of the entire barcode read, and sM to output the barcode match status.
 * Implemented complex barcodes in STARsolo with --soloType CB_UMI_Complex, --soloCBmatchWLtype --soloAdapterSequence, --soloAdapterMismatchesNmax, --soloCBposition,--soloUMIposition .
 * Implemented CB/UB/GX/GN BAM tags for STARsolo.
+
+
+STAR 2.7.2b 2019/08/29
+======================
+Bug fixes in chimeric detection, contributed by Meng Xiao He (@mengxiao)
+* Fix memory leak in handling chimeric multimappers: #721
+* Ensure chimeric alignment score requirements are consistently checked: #722,#723.
+
+
+STAR 2.7.2a 2019/08/13
+======================
+* Chimeric read reporting now requires that the chimeric read alignment score higher than the alternative non-chimeric alignment to the reference genome.  The Chimeric.out.junction file now includes the scores of the chimeric alignments and non-chimeric alternative alignments, in addition to the PEmerged bool attribute. (bhaas, Aug 2019)
+* Fixed the problem with ALT=* in STAR-WASP.
 * Implemented extras/scripts/soloBasicCellFilter.awk script to perform basic filtering of the STARsolo count matrices.
 * Fixed a bug causing rare seg-faults with for --peOverlap* options and chimeric detection.
 * Fixed a problem in STARsolo with unmapped reads counts in Solo.out/*.stats files.

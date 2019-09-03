@@ -3,6 +3,8 @@
 
 #include "IncludeDefine.h"
 
+class Parameters;
+
 class ParametersChimeric
 {//
     public:
@@ -29,7 +31,11 @@ class ParametersChimeric
             bool samOld;
             bool junctions;
         } out;
+        
+        void initialize(Parameters *pPin);
+        
     private:
+        Parameters *pP;
 };
 
 #endif
