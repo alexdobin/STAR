@@ -27,35 +27,41 @@ void SoloFeature::statsOutput()
     strOut << "Reads Mapped to Genome: Unique+Multiple," << double(g_statsAll.mappedReadsU+g_statsAll.mappedReadsM)/g_statsAll.readN <<'\n';
     strOut << "Reads Mapped to Genome: Unique," << double(g_statsAll.mappedReadsU)/g_statsAll.readN <<'\n';
     
-    strOut << "Reads Mapped to Transcriptome: Unique+Multipe Genes," << double( readFeatSum->stats.numMappedToTranscriptome() )/g_statsAll.readN <<'\n';
-    strOut << "Reads Mapped to Transcriptome: Unique Genes," << double( readFeatSum->stats.numMappedToTranscriptomeUnique() )/g_statsAll.readN <<'\n';
+    string mapfeat=SoloFeatureTypes::Names[featureType];
+    if (featureType==SoloFeatureTypes::Gene || featureType==SoloFeatureTypes::GeneFull)
+        mapfeat="Transcriptome";
     
-    if (pSolo.cellFilter.type[0]=="CellRanger2.2") {
-        strOut << "Estimated Number of Cells," << filteredCells.nCells <<'\n';
-        
-        strOut << "Reads in Cells Mapped to Unique Genes," << filteredCells.nReadInCells <<'\n';
-        strOut << "Fraction of Reads in Cells," << double(filteredCells.nReadInCells) / readFeatSum->stats.numMappedToTranscriptomeUnique() <<'\n';
-        strOut << "Mean Reads per Cell," << filteredCells.meanReadPerCell <<'\n';
-        strOut << "Median Reads per Cell," << filteredCells.medianReadPerCell <<'\n';
-                
-        strOut << "UMIs in Cells," << filteredCells.nUMIinCells <<'\n';
-        strOut << "Mean UMI per Cell," << filteredCells.meanUMIperCell <<'\n';
-        strOut << "Median UMI per Cell," << filteredCells.medianUMIperCell <<'\n';    
-        
-        strOut << "Mean Genes per Cell," << filteredCells.meanGenePerCell <<'\n';
-        strOut << "Median Genes per Cell," << filteredCells.medianGenePerCell <<'\n';    
-        strOut << "Total Genes Detected," << filteredCells.nGeneDetected <<'\n';    
+    strOut << "Reads Mapped to "<< mapfeat << ": Unique+Multipe " << SoloFeatureTypes::Names[featureType] <<"s," << double( readFeatSum->stats.numMappedToTranscriptome() )/g_statsAll.readN <<'\n';
+    strOut << "Reads Mapped to "<< mapfeat << ": Unique " << SoloFeatureTypes::Names[featureType] <<"s," << double( readFeatSum->stats.numMappedToTranscriptomeUnique() )/g_statsAll.readN <<'\n';
+    
+    if (pSolo.cellFilter.type[0]!="None" && (featureType==SoloFeatureTypes::Gene || featureType==SoloFeatureTypes::GeneFull)) {
+        if (pSolo.cellFilter.type[0]=="CellRanger2.2") {
+            strOut << "Estimated Number of Cells," << filteredCells.nCells <<'\n';
+
+            strOut << "Reads in Cells Mapped to Unique " << SoloFeatureTypes::Names[featureType] << "s," << filteredCells.nReadInCells <<'\n';
+            strOut << "Fraction of Reads in Cells," << double(filteredCells.nReadInCells) / readFeatSum->stats.numMappedToTranscriptomeUnique() <<'\n';
+            strOut << "Mean Reads per Cell," << filteredCells.meanReadPerCell <<'\n';
+            strOut << "Median Reads per Cell," << filteredCells.medianReadPerCell <<'\n';
+
+            strOut << "UMIs in Cells," << filteredCells.nUMIinCells <<'\n';
+            strOut << "Mean UMI per Cell," << filteredCells.meanUMIperCell <<'\n';
+            strOut << "Median UMI per Cell," << filteredCells.medianUMIperCell <<'\n';    
+
+            strOut << "Mean "   << SoloFeatureTypes::Names[featureType] << "s per Cell," << filteredCells.meanGenePerCell <<'\n';
+            strOut << "Median " << SoloFeatureTypes::Names[featureType] << "s per Cell," << filteredCells.medianGenePerCell <<'\n';    
+            strOut << "Total "  << SoloFeatureTypes::Names[featureType] << "s Detected," << filteredCells.nGeneDetected <<'\n';    
+        };
+
+        //output UMI per cell, sorted
+        ofstream &strOutUMIperCell = ofstrOpen(outputPrefix+"UMIperCellSorted.txt", ERROR_OUT, P);
+
+        for (auto & n : nUMIperCBsorted) {
+            if (n==0)
+                break;
+            strOutUMIperCell << n <<'\n';
+        };
+        strOutUMIperCell.close();
     };
+    
     strOut.close();
-    
-    //output UMI per cell, sorted
-    ofstream &strOutUMIperCell = ofstrOpen(outputPrefix+"UMIperCellSorted.txt", ERROR_OUT, P);
-    
-    for (auto & n : nUMIperCBsorted) {
-        if (n==0)
-            break;
-        strOutUMIperCell << n <<'\n';
-    };
-    
-    strOutUMIperCell.close();
 };
