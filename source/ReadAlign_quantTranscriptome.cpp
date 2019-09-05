@@ -64,7 +64,7 @@ uint ReadAlign::quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript 
             align1 = &align2;
         };
 
-        nAlignT += Tr->quantAlign(*align1,alignT+nAlignT, readTranscripts, readGenes);
+        nAlignT += Tr->quantAlign(*align1,alignT+nAlignT);
     };
 
     if (P.quant.trSAM.bamYes) {//output Aligned.toTranscriptome.bam

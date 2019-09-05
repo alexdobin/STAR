@@ -99,10 +99,14 @@ void ReadAlign::outputAlignments() {
             if ( P.quant.geCount.yes ) {
                 chunkTr->geneCountsAddAlign(nTr, trMult, readGeneExon);
             };
-            //GeneFull
+            //solo-GeneFull
             if ( P.quant.geneFull.yes ) {
                 chunkTr->geneFullAlignOverlap(nTr, trMult, P.pSolo.strand, readGeneFull);
             };
+            //solo-Gene
+            if ( P.quant.gene.yes ) {
+                chunkTr->classifyAlign(trMult, nTrOut, readTranscripts, readGene, readGeneVsTranscripts);
+            };            
             //transcripts
             if ( P.quant.trSAM.yes ) {//NOTE: the transcripts are changed by this function (soft-clipping extended), cannot be reused
                 quantTranscriptome(chunkTr, nTrOut, trMult,  alignTrAll, readTranscripts, readGene);

@@ -12,6 +12,7 @@
 #include "Quantifications.h"
 #include "ChimericDetection.h"
 #include "SoloRead.h"
+#include "AlignVsTranscript.h"
 
 #include <time.h>
 #include <random>
@@ -159,6 +160,8 @@ class ReadAlign {
         set<uint32> readGeneFull,readGene;
         vector<array<uint32,2>> readTranscripts;
         vector<int32> readGeneExon;
+        array<uint32, AlignVsTranscript::N> readGeneVsTranscripts;//first element is gene, then counts of transcript types
+
 
         void resetN();//resets the counters to 0
         void multMapSelect();

@@ -7,6 +7,7 @@
 #include "Parameters.h"
 #include "Transcript.h"
 #include "Quantifications.h"
+#include "AlignVsTranscript.h"
 
 class Transcriptome {
 public:
@@ -43,12 +44,13 @@ public:
 
     //methods:
     Transcriptome (Parameters &Pin); //create transcriptome structure, load and initialize parameters
-    uint32 quantAlign (Transcript &aG, Transcript *aTall, vector<array<uint32,2>> &readTranscripts, set<uint32> &readGene);//transform coordinates for all aligns from genomic in RA to transcriptomic in RAtr
+    uint32 quantAlign (Transcript &aG, Transcript *aTall);//transform coordinates for all aligns from genomic in RA to transcriptomic in RAtr
     void geneCountsAddAlign(uint nA, Transcript **aAll, vector<int32> &gene1); //add one alignment to gene counts
     void quantsAllocate(); //allocate quants structure
     void quantsOutput(); //output quantification files
     void geneFullAlignOverlap(uint nA, Transcript **aAll, int32 strandType, set<uint32> &geneOverlap);
-
+    void classifyAlign (Transcript **alignG, uint64 nAlignG, vector<array<uint32,2>> &readTranscripts, set<uint32> &readGenes, array<uint32, AlignVsTranscript::N> readGeneVsTranscripts);
+    
 private:
     Parameters &P; //normal "genomic" parameters
 

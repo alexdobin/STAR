@@ -101,8 +101,14 @@ void ParametersSolo::initialize(Parameters *pPin)
         };
     };
     nFeatures=features.size();
-    if (featureYes[SoloFeatureTypes::GeneFull])
+    if (featureYes[SoloFeatureTypes::Gene]) {
+        pP->quant.gene.yes=true;
+        pP->quant.yes = true;
+    };
+    if (featureYes[SoloFeatureTypes::GeneFull]) {
         pP->quant.geneFull.yes=true;
+        pP->quant.yes = true;
+    };
     
     ////////////////////////////////////////////umiDedup
     umiDedupYes.resize(3,false);
@@ -264,15 +270,15 @@ void ParametersSolo::initialize(Parameters *pPin)
     pP->inOut->logMain << timeMonthDayTime(rawTime) << "Finished reading, sorting and deduplicating CB whitelist sequences." <<endl;
 
     
-    if (!pP->quant.trSAM.yes) {
-        pP->quant.yes = true;
-        pP->quant.trSAM.yes = true;
-        pP->quant.trSAM.bamYes = false;
-        pP->quant.trSAM.bamCompression = -2;
-        pP->quant.trSAM.indel = true;
-        pP->quant.trSAM.softClip = true;
-        pP->inOut->logMain << "Turning on Genomic->Transcriptomic coordinate conversion for STARsolo\n";
-    };
+//     if (!pP->quant.trSAM.yes) {
+//         pP->quant.yes = true;
+//         pP->quant.trSAM.yes = true;
+//         pP->quant.trSAM.bamYes = false;
+//         pP->quant.trSAM.bamCompression = -2;
+//         pP->quant.trSAM.indel = true;
+//         pP->quant.trSAM.softClip = true;
+//         pP->inOut->logMain << "Turning on Genomic->Transcriptomic coordinate conversion for STARsolo\n";
+//     };
 
     //SAM attributes
     samAttrYes=false;

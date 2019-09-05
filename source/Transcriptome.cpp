@@ -25,7 +25,7 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
     };
     geStream.close();
 
-    if ( P.quant.trSAM.yes ) {//load exon-transcript structures
+    if ( P.quant.trSAM.yes || P.quant.gene.yes ) {//load exon-transcript structures
         //load tr and ex info
         ifstream & trinfo = ifstrOpen(trInfoDir+"/transcriptInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step",P);
         trinfo >> nTr;

@@ -294,6 +294,10 @@ class Parameters {
               bool yes;
           } geneFull;
 
+          struct {
+              bool yes;
+          } gene;
+          
         } quant;
 
         //variation parameters
