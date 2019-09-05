@@ -8,6 +8,7 @@
 #include "SoloReadBarcode.h"
 #include "SoloCommon.h"
 #include "SoloReadFeatureStats.h"
+#include "ReadAnnotations.h"
 
 class SoloReadFeature {
 public:
@@ -26,7 +27,7 @@ public:
     SoloReadFeatureStats stats;
 
     SoloReadFeature (int32 feTy, Parameters &Pin, int iChunk);
-    void record(SoloReadBarcode &soloBar, uint nTr, set<uint32> &readGene, set<uint32> &readGeneFull, Transcript *alignOut, uint64 iRead, const vector<array<uint32,2>> &readTranscripts);
+    void record(SoloReadBarcode &soloBar, uint nTr, Transcript *alignOut, uint64 iRead, ReadAnnotations &readAnnot);
     void addCounts(const SoloReadFeature &soloCBin);
     void addStats(const SoloReadFeature &soloCBin);
     void statsOut(ofstream &streamOut);

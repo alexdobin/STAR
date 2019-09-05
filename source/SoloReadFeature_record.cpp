@@ -1,8 +1,9 @@
 #include "SoloReadFeature.h"
 #include "serviceFuns.cpp"
 #include "SequenceFuns.h"
+#include "ReadAnnotations.h"
 
-uint32 outputReadCB(fstream *streamOut, int32 featureType, uint32 umiB, uint32 gene, vector<array<uint64,2>> &readSJs, const int32 cbMatch, const string &stringCB, const uint64 iRead, const vector<array<uint32,2>> &readTranscripts)
+uint32 outputReadCB(fstream *streamOut, int32 featureType, uint32 umiB, uint32 gene, vector<array<uint64,2>> &readSJs, const int32 cbMatch, const string &stringCB, const uint64 iRead, ReadAnnotations &readAnnot)
 {   
     //format of the temp output file
     // UMI [iRead] type feature* stringCB
@@ -13,11 +14,13 @@ uint32 outputReadCB(fstream *streamOut, int32 featureType, uint32 umiB, uint32 g
     uint64 nout=1;
     if (featureType==-1) {//no feature, output for readInfo
         *streamOut << umiB <<' '<< iRead <<' '<< -1 <<' '<< cbMatch <<' '<< stringCB <<'\n';;
+        
     } else if (featureType==SoloFeatureTypes::Gene || featureType==SoloFeatureTypes::GeneFull) {//Gene, GeneFull
         *streamOut << umiB <<' ';//UMI
         if ( iRead != (uint64)-1 )
             *streamOut << iRead <<' ';//iRead
         *streamOut << gene <<' '<< cbMatch <<' '<< stringCB <<'\n';;
+        
     } else if (featureType==SoloFeatureTypes::SJ) {//sjs
         for (auto &sj : readSJs) {
             *streamOut << umiB <<' ';//UMI
@@ -26,12 +29,13 @@ uint32 outputReadCB(fstream *streamOut, int32 featureType, uint32 umiB, uint32 g
             *streamOut << sj[0] <<' '<< sj[1] <<' '<< cbMatch <<' '<< stringCB <<'\n';;
         };
         nout=readSJs.size();
+        
     } else if (featureType==SoloFeatureTypes::Transcript3p) {//transcript,distToTTS structure
         *streamOut << umiB <<' ';//UMI
         if ( iRead != (uint64)-1 )
             *streamOut << iRead <<' ';//iRead
-        *streamOut << readTranscripts.size()<<' ';
-        for (auto &tt: readTranscripts) {
+        *streamOut << readAnnot.transcriptConcordant.size()<<' ';
+        for (auto &tt: readAnnot.transcriptConcordant) {
             *streamOut << tt[0] <<' '<< tt[1] <<' ';
         };
         *streamOut << cbMatch <<' '<< stringCB <<'\n';
@@ -40,23 +44,24 @@ uint32 outputReadCB(fstream *streamOut, int32 featureType, uint32 umiB, uint32 g
     return nout;
 };
 
-void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, set<uint32> &readGene, set<uint32> &readGeneFull, Transcript *alignOut, uint64 iRead, const vector<array<uint32,2>> &readTranscripts)
+void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript *alignOut, uint64 iRead, ReadAnnotations &readAnnot)
 {
     if (pSolo.type==0 || soloBar.cbMatch<0)
         return;
 
     vector<array<uint64,2>> readSJs;
-    set<uint32> *readGe=&readGene; //for featureType==0
+    set<uint32> *readGe=&readAnnot.geneConcordant; //for featureType==0
 
     bool readFeatYes=true;
     //calculate feature
     if (nTr==0) {//unmapped
         stats.V[stats.nUnmapped]++;
         readFeatYes=false;
+        
     } else if (featureType==SoloFeatureTypes::Gene || featureType==SoloFeatureTypes::GeneFull) {//genes
         //check genes, return if no gene of multimapping
         if (featureType==SoloFeatureTypes::GeneFull) {
-            readGe = &readGeneFull;
+            readGe = &readAnnot.geneFull;
         };
         if (readGe->size()==0) {
             stats.V[stats.nNoFeature]++;
@@ -68,25 +73,27 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, set<uint32> &re
                 stats.V[stats.nAmbigFeatureMultimap]++;
             readFeatYes=false;
         };
+        
     } else if (featureType==SoloFeatureTypes::SJ) {//SJs
         if (nTr>1) {//reject all multimapping junctions
             stats.V[stats.nAmbigFeatureMultimap]++;
             readFeatYes=false;
         } else {//for SJs, still check genes, return if multi-gene
-            if (readGene.size()>1) {
+            if (readAnnot.geneConcordant.size()>1) {
                 stats.V[stats.nAmbigFeature]++;
                 readFeatYes=false;
             } else {//one gene or no gene
                 bool sjAnnot;
                 alignOut->extractSpliceJunctions(readSJs, sjAnnot);
-                if ( readSJs.empty() || (sjAnnot && readGene.size()==0) ) {//no junctions, or annotated junction but no gene (i.e. read does not fully match transcript)
+                if ( readSJs.empty() || (sjAnnot && readAnnot.geneConcordant.size()==0) ) {//no junctions, or annotated junction but no gene (i.e. read does not fully match transcript)
                     stats.V[stats.nNoFeature]++;
                     readFeatYes=false;
                 };
             };
         };
+        
     } else if (featureType==SoloFeatureTypes::Transcript3p) {//transcripts
-        if (readTranscripts.size()==0) {
+        if (readAnnot.transcriptConcordant.size()==0) {
             stats.V[stats.nNoFeature]++;
             readFeatYes=false;
         };
@@ -98,7 +105,7 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, set<uint32> &re
     if (!readInfoYes)
         iRead=(uint64)-1;
 
-    uint32 nfeat = outputReadCB(streamReads, (readFeatYes ? featureType : -1), soloBar.umiB, *readGe->begin(), readSJs, soloBar.cbMatch, soloBar.cbMatchString, iRead, readTranscripts);
+    uint32 nfeat = outputReadCB(streamReads, (readFeatYes ? featureType : -1), soloBar.umiB, *readGe->begin(), readSJs, soloBar.cbMatch, soloBar.cbMatchString, iRead, readAnnot);
     if (pSolo.cbWLsize>0) {//WL
         for (auto &cbi : soloBar.cbMatchInd)
             cbReadCount[cbi] += nfeat;

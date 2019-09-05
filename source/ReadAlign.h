@@ -12,7 +12,7 @@
 #include "Quantifications.h"
 #include "ChimericDetection.h"
 #include "SoloRead.h"
-#include "AlignVsTranscript.h"
+#include "ReadAnnotations.h"
 
 #include <time.h>
 #include <random>
@@ -157,12 +157,9 @@ class ReadAlign {
         } peOv;//PE  mates overlap/merge/remap structure
         
         //read annotations
-        set<uint32> readGeneFull,readGene;
-        vector<array<uint32,2>> readTranscripts;
-        vector<int32> readGeneExon;
-        array<uint32, AlignVsTranscript::N> readGeneVsTranscripts;//first element is gene, then counts of transcript types
+        ReadAnnotations readAnnot;
 
-
+        /////////////////////////////////////////////////////////////////// METHODS
         void resetN();//resets the counters to 0
         void multMapSelect();
         int mapOneRead();
@@ -193,7 +190,7 @@ class ReadAlign {
         void stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R);//stitches all seeds in one window: iW
         void stitchPieces(char **R, uint Lread);
 
-        uint quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT, vector<array<uint32,2>> &readTranscripts, set<uint32> &readGenes);
+        uint quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT);
 
         void copyRead(ReadAlign&);
         void waspMap();

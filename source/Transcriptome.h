@@ -8,6 +8,7 @@
 #include "Transcript.h"
 #include "Quantifications.h"
 #include "AlignVsTranscript.h"
+#include "ReadAnnotations.h"
 
 class Transcriptome {
 public:
@@ -49,7 +50,7 @@ public:
     void quantsAllocate(); //allocate quants structure
     void quantsOutput(); //output quantification files
     void geneFullAlignOverlap(uint nA, Transcript **aAll, int32 strandType, set<uint32> &geneOverlap);
-    void classifyAlign (Transcript **alignG, uint64 nAlignG, vector<array<uint32,2>> &readTranscripts, set<uint32> &readGenes, array<uint32, AlignVsTranscript::N> readGeneVsTranscripts);
+    void classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnnotations &readAnnot);
     
 private:
     Parameters &P; //normal "genomic" parameters

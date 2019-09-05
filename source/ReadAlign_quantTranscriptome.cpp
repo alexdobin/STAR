@@ -4,7 +4,7 @@
 #include "serviceFuns.cpp"
 #include <random>
 
-uint ReadAlign::quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT, vector<array<uint32,2>> &readTranscripts, set<uint32> &readGenes) {
+uint ReadAlign::quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT) {
     uint nAlignT=0;
     for (uint iag=0; iag<nAlignG; iag++) {//transform all alignments
 

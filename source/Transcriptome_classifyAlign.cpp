@@ -2,6 +2,7 @@
 #include "ReadAlign.h"
 #include "serviceFuns.cpp"
 #include "AlignVsTranscript.h"
+#include "ReadAnnotations.h"
 
 int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, uint32 *exLenCum1, uint16 exN1) 
 {
@@ -87,10 +88,12 @@ int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, ui
     return (uint32)-1; //this should not happen
 };
 
-void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, vector<array<uint32,2>> &readTranscripts, set<uint32> &readGenes, array<uint32, AlignVsTranscript::N> readGeneVsTranscripts) 
+void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnnotations &readAnnot) 
 {
-    readGeneVsTranscripts={{}};
-    
+    readAnnot.geneVelocyto={{}};
+    readAnnot.transcriptConcordant={};
+    readAnnot.geneConcordant={};
+
     for (uint iag=0; iag<nAlignG; iag++) {
         
         Transcript &aG=*alignG[iag];
@@ -113,23 +116,23 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, vector<a
             if (aStatus==AlignVsTranscript::Concordant) {//align conforms with the transcript
 
                 //TODO!!!FIX THIS//uint32 distTTS=trLen[tr1]-(aTall[nAtr].exons[aTall[nAtr].nExons-1][EX_G] + aTall[nAtr].exons[aTall[nAtr].nExons-1][EX_L]);
-                //readTranscripts.push_back({tr1,distTTS});
+                //readAnnot.transcriptConcordant.push_back({tr1,distTTS});
 
-                readGenes.insert(trGene[tr1]);//genes for all alignments
-                //if (readGenes.size()>1)
+                readAnnot.geneConcordant.insert(trGene[tr1]);//genes for all alignments
+                //if (readAnnot.geneConcordants.size()>1)
                 //   break; //multi-gene align
                 aG.alignGenes.insert(trGene[tr1]);//genes for each alignment
             };
                        
-            if (readGeneVsTranscripts[0]==(uint32)-1)
-                readGeneVsTranscripts[0]=trGene[tr1];
-            if (readGeneVsTranscripts[0]!=trGene[tr1])
-                readGeneVsTranscripts[0]==(uint32)-1; //marks multi-gene align
+            if (readAnnot.geneVelocyto[0]==(uint32)-1)
+                readAnnot.geneVelocyto[0]=trGene[tr1];
+            if (readAnnot.geneVelocyto[0]!=trGene[tr1])
+                readAnnot.geneVelocyto[0]==(uint32)-1; //marks multi-gene align
             
-            readGeneVsTranscripts[aStatus]++;
+            readAnnot.geneVelocyto[aStatus]++;
             
         } while (trEmax[tr1]>=aGend && tr1>0);
-        //if (readGenes.size()>1)
+        //if (readAnnot.geneConcordants.size()>1)
         //   break; //multi-gene 
     };
 };
