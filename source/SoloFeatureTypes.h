@@ -3,8 +3,8 @@
 
 namespace SoloFeatureTypes
 {
-    enum {Gene=0, GeneFull=1, SJ=2, Transcript3p=3, N=4};
-    const static vector<string> Names={"Gene","GeneFull","SJ","Transcript3p"};
+    enum {Gene=0, GeneFull=1, SJ=2, Transcript3p=3, VelocytoSpliced=4, VelocytoUnspliced=5, VelocytoAmbiguous=6, N=7};
+    const static vector<string> Names={"Gene","GeneFull","SJ","Transcript3p","VelocytoSpliced","VelocytoUnspliced","VelocytoAmbiguous",};
 };
 
 #endif

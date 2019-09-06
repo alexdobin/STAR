@@ -8,7 +8,7 @@ public:
             set<uint32> geneFull, geneConcordant;
             vector<array<uint32,2>> transcriptConcordant;
             vector<int32> geneExonOverlap;
-            array<uint32, 3> geneVelocyto;//first element is gene, then counts of transcript types
+            array<uint32,2> geneVelocyto;//first element is gene, then counts of transcript types
 };
 
 #endif
