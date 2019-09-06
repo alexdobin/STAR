@@ -19,7 +19,9 @@ SoloReadFeature::SoloReadFeature(int32 feTy, Parameters &Pin, int iChunk)
     
     readInfoYes=false;
     if (pSolo.samAttrYes && featureType==pSolo.samAttrFeature) //pSolo.samAttrFeature=0 by default, so need to check samAttrYes
-        readInfoYes=true;    
+        readInfoYes=true;
+    if (pSolo.featureYes[SoloFeatureTypes::Velocyto] && featureType==0) //turn readInfo on for Gene needed by Velocyto
+        readInfoYes=true;
 
     if (iChunk>=0) {
         streamReads = &fstrOpen(P.outFileTmp+"/solo"+SoloFeatureTypes::Names[featureType]+'_'+std::to_string(iChunk),ERROR_OUT, P);

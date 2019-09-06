@@ -76,6 +76,15 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript *ali
                 };
                 break;
                 
+            case SoloFeatureTypes::Velocyto :
+                //different record: iRead, gene, type
+                if (readAnnot.geneVelocyto[1]>0) {
+                    *streamReads << iRead <<' '<< readAnnot.geneVelocyto[0] <<' '<< readAnnot.geneVelocyto[1] <<'\n';
+                } else {
+                    stats.V[stats.nNoFeature]++;
+                };
+                return; //no need to go with downstream processing
+                
 //             case SoloFeatureTypes::VelocytoSpliced :
 //                 if (readAnnot.geneVelocyto[1]==1) {
 //                     reFe.gene=readAnnot.geneVelocyto[0];

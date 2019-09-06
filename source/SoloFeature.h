@@ -25,7 +25,7 @@ public:
     SoloReadFeature *readFeatSum, **readFeatAll;
     SoloReadBarcode *readBarSum;
 
-    uint64 nReadsMapped, nCB; //total number of mapped reads
+    uint64 nReadsMapped, nCB, nReadsInput; //total number of mapped reads
 
     uint32 *rGeneUMI;//mapped reads sorted by CB
     uint32 *indCB;//index of detected CBs in the whitelist
@@ -51,6 +51,7 @@ public:
 
     SoloFeature(int32 feTy, Parameters &Pin, Transcriptome &inTrans, SoloReadBarcode *readBarSumIn);
     void processRecords(ReadAlignChunk **RAchunk);
+    void countCBgeneUMI();
     void collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot, uint32 *umiArray, uint64 cellBarcode);
     void outputResults(bool cellFilterYes);
     void addBAMtags(char *&bam0, uint32 &size0, char* bam1);
