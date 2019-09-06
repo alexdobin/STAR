@@ -76,31 +76,31 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript *ali
                 };
                 break;
                 
-            case SoloFeatureTypes::VelocytoSpliced :
-                if (readAnnot.geneVelocyto[1]==1) {
-                    reFe.gene=readAnnot.geneVelocyto[0];
-                } else {
-                    readFeatYes=false;
-                    stats.V[stats.nNoFeature]++;
-                };
-                break;
-                
-            case SoloFeatureTypes::VelocytoUnspliced :
-                if (readAnnot.geneVelocyto[1]==2) {
-                    reFe.gene=readAnnot.geneVelocyto[0];
-                } else {
-                    readFeatYes=false;
-                    stats.V[stats.nNoFeature]++;
-                };
-                break;                
-                
-            case SoloFeatureTypes::VelocytoAmbiguous :
-                if (readAnnot.geneVelocyto[1]==3) {
-                    reFe.gene=readAnnot.geneVelocyto[0];
-                } else {
-                    readFeatYes=false;
-                    stats.V[stats.nNoFeature]++;                    
-                };
+//             case SoloFeatureTypes::VelocytoSpliced :
+//                 if (readAnnot.geneVelocyto[1]==1) {
+//                     reFe.gene=readAnnot.geneVelocyto[0];
+//                 } else {
+//                     readFeatYes=false;
+//                     stats.V[stats.nNoFeature]++;
+//                 };
+//                 break;
+//                 
+//             case SoloFeatureTypes::VelocytoUnspliced :
+//                 if (readAnnot.geneVelocyto[1]==2) {
+//                     reFe.gene=readAnnot.geneVelocyto[0];
+//                 } else {
+//                     readFeatYes=false;
+//                     stats.V[stats.nNoFeature]++;
+//                 };
+//                 break;                
+//                 
+//             case SoloFeatureTypes::VelocytoAmbiguous :
+//                 if (readAnnot.geneVelocyto[1]==3) {
+//                     reFe.gene=readAnnot.geneVelocyto[0];
+//                 } else {
+//                     readFeatYes=false;
+//                     stats.V[stats.nNoFeature]++;                    
+//                 };
                 
         };//switch (featureType)
     };//if (nTr==0)
@@ -138,9 +138,9 @@ uint32 outputReadCB(fstream *streamOut, const uint64 iRead, const int32 featureT
             
         case SoloFeatureTypes::Gene :
         case SoloFeatureTypes::GeneFull :
-        case SoloFeatureTypes::VelocytoSpliced :
-        case SoloFeatureTypes::VelocytoUnspliced :
-        case SoloFeatureTypes::VelocytoAmbiguous :
+//         case SoloFeatureTypes::VelocytoSpliced :
+//         case SoloFeatureTypes::VelocytoUnspliced :
+//         case SoloFeatureTypes::VelocytoAmbiguous :
             //just gene id
             *streamOut << soloBar.umiB <<' ';//UMI
             if ( iRead != (uint64)-1 )

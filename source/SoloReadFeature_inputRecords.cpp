@@ -15,9 +15,9 @@ bool inputFeatureUmi(fstream *strIn, int32 featureType, bool readInfoYes, array<
     switch (featureType) {
         case SoloFeatureTypes::Gene :
         case SoloFeatureTypes::GeneFull :
-        case SoloFeatureTypes::VelocytoSpliced :
-        case SoloFeatureTypes::VelocytoUnspliced :
-        case SoloFeatureTypes::VelocytoAmbiguous :
+//         case SoloFeatureTypes::VelocytoSpliced :
+//         case SoloFeatureTypes::VelocytoUnspliced :
+//         case SoloFeatureTypes::VelocytoAmbiguous :
             *strIn >> feature;
             break;
 
