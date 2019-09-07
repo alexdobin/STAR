@@ -15,7 +15,7 @@ Solo::Solo(ReadAlignChunk **RAchunkIn, Parameters &Pin, Transcriptome &inTrans)
 
     soloFeat = new SoloFeature*[pSolo.nFeatures];
     for (uint32 ii=0; ii<pSolo.nFeatures; ii++)
-        soloFeat[ii] = new SoloFeature(pSolo.features[ii], P, Trans, readBarSum);
+        soloFeat[ii] = new SoloFeature(pSolo.features[ii], P, Trans, readBarSum, soloFeat);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////
