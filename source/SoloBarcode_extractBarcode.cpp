@@ -1,4 +1,5 @@
 #include "SoloBarcode.h"
+#include <array>
 
 bool SoloBarcode::extractBarcode(string &seqIn, string &qualIn, const uint32 adapterStart, string &bSeq, string &bQual)
 {//input: sequence seqIn, adapter start adapterStart
