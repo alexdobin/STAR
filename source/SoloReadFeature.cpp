@@ -10,18 +10,14 @@ SoloReadFeature::SoloReadFeature(int32 feTy, Parameters &Pin, int iChunk)
 //     if (pSolo.type==pSolo.SoloTypes::CB_samTagOut)
 //         return;
     
+    readInfoYes=pSolo.readInfoYes[featureType];
+    
     if (pSolo.cbWLyes) {
         cbReadCount = new uint32[pSolo.cbWLsize];
         for (uint32 ii=0; ii<pSolo.cbWLsize; ii++) {
             cbReadCount[ii]=0;
         };
     };
-    
-    readInfoYes=false;
-    if (pSolo.samAttrYes && featureType==pSolo.samAttrFeature) //pSolo.samAttrFeature=0 by default, so need to check samAttrYes
-        readInfoYes=true;
-    if (pSolo.featureYes[SoloFeatureTypes::Velocyto] && featureType==0) //turn readInfo on for Gene needed by Velocyto
-        readInfoYes=true;
 
     if (iChunk>=0) {
         streamReads = &fstrOpen(P.outFileTmp+"/solo"+SoloFeatureTypes::Names[featureType]+'_'+std::to_string(iChunk),ERROR_OUT, P);

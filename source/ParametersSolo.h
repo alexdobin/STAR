@@ -49,6 +49,7 @@ public:
     uint32 nFeatures;//=features.size(), number of requested features
     
     array<bool,SoloFeatureTypes::N> featureYes; //which features are requested
+    array<bool,SoloFeatureTypes::N> readInfoYes;//which features will readInfo (for now only Gene)
     array<int32,SoloFeatureTypes::N> featureInd;//index of each feature - skips unrequested features
     
     //filtering

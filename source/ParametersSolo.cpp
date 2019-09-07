@@ -282,7 +282,7 @@ void ParametersSolo::initialize(Parameters *pPin)
 
     //SAM attributes
     samAttrYes=false;
-    samAttrFeature=0;//hard-coded for now to follow Cell Ranger - error correction only done for feature=Gene
+    samAttrFeature=SoloFeatureTypes::Gene;//hard-coded for now to follow Cell Ranger - error correction only done for feature=Gene
     if ( (pP->outSAMattrPresent.CB || pP->outSAMattrPresent.UB) && type!=SoloTypes::CB_samTagOut) {
         samAttrYes=true;
         if (!pP->outBAMcoord) {
@@ -292,6 +292,12 @@ void ParametersSolo::initialize(Parameters *pPin)
             exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
     };
+    
+    readInfoYes={false};
+    if (samAttrYes) //pSolo.samAttrFeature=0 by default, so need to check samAttrYes
+        readInfoYes[samAttrFeature]=true;
+    if (featureYes[SoloFeatureTypes::Velocyto]) //turn readInfo on for Gene needed by Velocyto
+        readInfoYes[SoloFeatureTypes::Gene]=true;    
     
     //cell filtering
     if (cellFilter.type[0]=="CellRanger2.2") {
