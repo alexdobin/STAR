@@ -3,6 +3,7 @@
 #include "binarySearch2.h"
 #include "serviceFuns.cpp"
 #include "SoloCommon.h"
+#include "SoloFeature.h"
 
 bool inputFeatureUmi(fstream *strIn, int32 featureType, bool readInfoYes, array<vector<uint64>,2> &sjAll, uint32 &iread, int32 &cbmatch, uint32 &feature, uint32 &umi, vector<uint32> &featVecU32)
 {
@@ -36,6 +37,7 @@ bool inputFeatureUmi(fstream *strIn, int32 featureType, bool readInfoYes, array<
                 *strIn >> in1;
                 featVecU32[ii]=in1;
             };
+            break;
         };
 
     *strIn >> cbmatch;
@@ -43,10 +45,27 @@ bool inputFeatureUmi(fstream *strIn, int32 featureType, bool readInfoYes, array<
     return true;
 };
 
-void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbReadCountExactTotal, ofstream *streamTranscriptsOut, vector<readInfoStruct> &readInfo)
+void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbReadCountTotal, 
+                                   ofstream *streamTranscriptsOut, vector<readInfoStruct> &readInfo, SoloFeature **soloFeatAll)
 {   
     streamReads->flush();
     streamReads->seekg(0,ios::beg);
+    
+    switch (featureType) {//for non-standard prcoessing
+        case SoloFeatureTypes::Velocyto :
+            uint32 iread, feature, vtype;
+            while (*streamReads >> iread) {//until the end of file
+                *streamReads >> feature >> vtype; //vType=1,2,3, cannot be zero
+                uint64 cb=soloFeatAll[pSolo.featureInd[SoloFeatureTypes::Gene]]->readInfo[iread].cb;
+                if (cb+1!=0) {
+                    cbP[cb][0]=feature | (vtype << 30); //encode vType in the top 2 bits;
+                    cbP[cb][1]=soloFeatAll[pSolo.featureInd[SoloFeatureTypes::Gene]]->readInfo[iread].umi;
+                };
+            };
+            return;
+    };
+    
+    
     uint32 feature, umi, iread;
     int32 cbmatch;
     int64 cb;
@@ -61,7 +80,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
         if (cbmatch<=1) {//single match
             *streamReads >> cb;
 
-            if ( pSolo.CBmatchWL.oneExact && cbmatch==1 && cbReadCountExactTotal[cb]==0 && feature!=(uint32)(-1) ) {//single 1MM match, no exact matches to this CB
+            if ( pSolo.CBmatchWL.oneExact && cbmatch==1 && cbReadCountTotal[cb]==0 && feature!=(uint32)(-1) ) {//single 1MM match, no exact matches to this CB
                 stats.V[stats.nNoExactMatch]++;
                 continue;
             };
@@ -100,27 +119,16 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
                 char  qin;
                 float pin;
                 *streamReads >> cbin >> qin;
-                if (cbReadCountExactTotal[cbin]>0) {//otherwise this cbin does not work
+                if (cbReadCountTotal[cbin]>0) {//otherwise this cbin does not work
                     qin -= pSolo.QSbase;
                     qin = qin < pSolo.QSmax ? qin : pSolo.QSmax;
-                    pin=cbReadCountExactTotal[cbin]*std::pow(10.0,-qin/10.0);
+                    pin=cbReadCountTotal[cbin]*std::pow(10.0,-qin/10.0);
                     ptot+=pin;
                     if (pin>pmax) {
                         cb=cbin;
                         pmax=pin;
                     };
                 };
-//                 //try adding pseudocounts
-//                 //if (cbReadCountExactTotal[cbin]>0) {//otherwise this cbin does not work
-//                     qin -= pSolo.QSbase;
-//                     qin = qin < pSolo.QSmax ? qin : pSolo.QSmax;
-//                     pin=(cbReadCountExactTotal[cbin]+1)*std::pow(10.0,-qin/10.0);
-//                     ptot+=pin;
-//                     if (pin>pmax) {
-//                         cb=cbin;
-//                         pmax=pin;
-//                     };
-//                 //};
             };
             if (ptot>0.0 && pmax>=pSolo.cbMinP*ptot) {
                 //record feature

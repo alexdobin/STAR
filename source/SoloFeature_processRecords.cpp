@@ -12,17 +12,17 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     time(&rawTime);
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Starting Solo post-map for " <<SoloFeatureTypes::Names[featureType] <<endl;
   
+    ///////////////////////////// collect RAchunk->RA->soloRead->readFeat
     nReadsInput=0;
     for (int ii=0; ii<P.runThreadN; ii++) {//point to
         readFeatAll[ii]= RAchunk[ii]->RA->soloRead->readFeat[pSolo.featureInd[featureType]];
         nReadsInput = max(nReadsInput,RAchunk[ii]->RA->iReadAll);
     };
     ++nReadsInput;
-
+    
     countCBgeneUMI();
 
     ofstream *statsStream = &ofstrOpen(outputPrefix+"Features.stats",ERROR_OUT, P);
-    //*statsStream << setw(50)<< SoloFeatureTypes::Names[featureType] <<"\n";
     readFeatSum->statsOut(*statsStream);
     statsStream->close();
     

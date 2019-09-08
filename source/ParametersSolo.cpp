@@ -79,28 +79,30 @@ void ParametersSolo::initialize(Parameters *pPin)
     //////////////////////////////////// features
     featureInd={-1};
     featureYes={false};
-    for (auto &fin : featureIn) {
-        bool finGood=false;
-        for (uint32 ii=0; ii<SoloFeatureTypes::Names.size(); ii++) {
+    for (uint32 ii=0; ii<SoloFeatureTypes::Names.size(); ii++) {
+        for (auto &fin : featureIn) {
             if (fin==SoloFeatureTypes::Names[ii]) {
-                finGood=true;
                 featureYes[ii]=true;
                 features.push_back(ii);
                 featureInd[ii]=features.size()-1;
                 break;
             };
         };
-        if (!finGood) {
-            ostringstream errOut;
-            errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in --soloFeatures="<<fin<<"\n";
-            errOut << "SOLUTION: use allowed option: ";
-            errOut <<SoloFeatureTypes::Names[0];
-            for (auto &fname : SoloFeatureTypes::Names)
-                errOut <<"   OR   "<< fname;
-            exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
-        };
     };
     nFeatures=features.size();
+
+    if (nFeatures != featureIn.size()) {
+        ostringstream errOut;
+        errOut << "EXITING because of fatal PARAMETERS error: unrecognized option(s) in --soloFeatures ";
+        for (auto &fname : featureIn)
+                errOut << fname <<" ";
+        errOut << "\nSOLUTION: use allowed option: ";
+        errOut <<SoloFeatureTypes::Names[0];
+        for (auto &fname : SoloFeatureTypes::Names)
+            errOut <<"   OR   "<< fname;
+        exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+    };
+
     if (featureYes[SoloFeatureTypes::Gene]) {
         pP->quant.gene.yes=true;
         pP->quant.yes = true;

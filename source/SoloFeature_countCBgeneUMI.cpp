@@ -82,7 +82,7 @@ void SoloFeature::countCBgeneUMI()
     ///////////////////////////////////////////////////////////////////////////
     ////////////// Input records
     for (int ii=0; ii<P.runThreadN; ii++) {//TODO: this can be parallelized
-        readFeatAll[ii]->inputRecords(rCBpa, rguStride, readBarSum->cbReadCountExact, streamTranscriptsOut, readInfo);
+        readFeatAll[ii]->inputRecords(rCBpa, rguStride, readBarSum->cbReadCountExact, streamTranscriptsOut, readInfo, soloFeatAll);
     };
 
     for (uint32 iCB=0; iCB<nCB; iCB++) {
