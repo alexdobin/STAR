@@ -38,6 +38,11 @@ public:
     vector<uint32> nGenePerCB;//number of genes (with >0 UMIs) per CB
     vector<uint64> nReadPerCB;//number of reads per CB
     
+    vector<uint32> countCellGeneUMI;//sparsified matrix for the counts, each entry is: geneID count1 count2 ... countNcounts
+    vector<uint32> countCellGeneUMIindex;//index of CBs in the count matrix
+    uint32 countNcounts; //number of counts per entry in the count matrix
+    
+    
     vector<bool> cellFilterVec;
     struct {
         uint64 nCells, nReadInCells, medianReadPerCell, meanReadPerCell, nUMIinCells, medianUMIperCell, meanUMIperCell, nGeneInCells, medianGenePerCell, meanGenePerCell, nGeneDetected;
@@ -54,7 +59,7 @@ public:
     SoloFeature(int32 feTy, Parameters &Pin, Transcriptome &inTrans, SoloReadBarcode *readBarSumIn, SoloFeature **soloFeatAll);
     void processRecords(ReadAlignChunk **RAchunk);
     void countCBgeneUMI();
-    void collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot, uint32 *umiArray, uint64 cellBarcode);
+    void collapseUMI(uint32 iCB, uint32 *umiArray);
     void outputResults(bool cellFilterYes);
     void addBAMtags(char *&bam0, uint32 &size0, char* bam1);
     void statsOutput();

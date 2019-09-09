@@ -114,12 +114,16 @@ void SoloFeature::countCBgeneUMI()
     nUMIperCB.resize(nCB);
     nGenePerCB.resize(nCB);
     nReadPerCB.resize(nCB);
-    uint32 *umiArray = new uint32[nReadPerCBmax*umiArrayStride];
+    uint32 *umiArray = new uint32[nReadPerCBmax*umiArrayStride];//temp array for collapsing UMI
+    
+    countNcounts=3; //hard-coded for now, works for both Gene*/SJ and Velocyto
+    countCellGeneUMI.resize(nReadsMapped*countNcounts/5); //5 is heuristic, will be resized if needed
+    countCellGeneUMIindex.resize(nCB);
     
     for (uint32 icb=0; icb<nCB; icb++) {//main collapse cycle
         nReadPerCB[icb] =( rCBpa[indCB[icb]]-rCBp[icb] ) / rguStride; //number of reads that were matched to WL, rCBpa accumulated reference to the last element+1
         
-        collapseUMI(rCBp[icb], nReadPerCB[icb], nGenePerCB[icb], nUMIperCB[icb], umiArray, indCB[icb]);
+        collapseUMI(icb, umiArray);
         
         readFeatSum->stats.V[readFeatSum->stats.nUMIs] += nUMIperCB[icb];
         if (nGenePerCB[icb]>0)

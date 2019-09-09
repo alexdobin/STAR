@@ -96,7 +96,17 @@ uint32 graphNumberOfConnectedComponents(uint32 N, vector<array<uint32,2>> V, vec
     return nConnComp;
 };
 
-void SoloFeature::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nUtot, uint32 *umiArray, uint64 cellBarcode) {
+void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray) {
+                                 
+    uint32 *rGU=rCBp[iCB];
+    uint32 rN=nReadPerCB[iCB];
+
+    if (featureType==SoloFeatureTypes::Velocyto) {//special processing, by UMI
+        qsort(rGU, rN, rguStride*sizeof(uint32), funCompareTypeShift<uint32, 1>);//sort by the UMI
+        
+        return;
+    };    
+    
     
     unordered_map <uint32, unordered_map<uint32,uint32>> umiGeneHash;
                    //UMI                 //Gene //Count
@@ -123,19 +133,11 @@ void SoloFeature::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nU
         };
     };
     
-    if (featureType==SoloFeatureTypes::Velocyto) {
-        //special processing, by UMI
-        qsort(rGU, rN, rguStride*sizeof(uint32), funCompareTypeShift<uint32, 1>);//sort by the UMI
-        
-        return;
-    };
-    
-    
     qsort(rGU,rN,rguStride*sizeof(uint32),funCompareNumbers<uint32>); //sort by gene number
 
     //compact reads per gene
     uint32 gid1=-1;//current gID
-    nGenes=0; //number of genes
+    uint32 nGenes=0; //number of genes
     uint32 *gID = new uint32[min(Trans.nGe,rN)+1]; //gene IDS
     uint32 *gReadS = new uint32[min(Trans.nGe,rN)+1]; //start of gene reads TODO: allocate this array in the 2nd half of rGU
     for (uint32 iR=0; iR<rN*rguStride; iR+=rguStride) {
@@ -149,7 +151,7 @@ void SoloFeature::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nU
     gReadS[nGenes]=rguStride*rN;//so that gReadS[nGenes]-gReadS[nGenes-1] is the number of reads for nGenes, see below in qsort
 
     uint32 *nUg = new uint32[nGenes*3];//3 types of counts
-    nUtot=0;
+    uint32 nUtot=0;
     for (uint32 iG=0; iG<nGenes; iG++) {//collapse UMIs for each gene
         uint32 *rGU1=rGU+gReadS[iG];
 
@@ -183,7 +185,7 @@ void SoloFeature::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nU
                 for (uint32 iR=0; iR<gReadS[iG+1]-gReadS[iG]; iR+=rguStride) {//cycle over reads
                     if (rGU1[iR+rguU]==umiArray[0]) {//other UMIs were filtered out
                         uint64 iread1 = rGU1[iR+rguR];
-                        readInfo[iread1].cb = cellBarcode;
+                        readInfo[iread1].cb = indCB[iCB] ;
                         readInfo[iread1].umi = umiArray[0];
                     };
                 };
@@ -247,7 +249,7 @@ void SoloFeature::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nU
                 uint32 iUmi=0;
                 for (uint32 iR=0; iR<gReadS[iG+1]-gReadS[iG]; iR+=rguStride) {//cycle over reads
                     uint64 iread1 = rGU1[iR+rguR];
-                    readInfo[iread1].cb = cellBarcode;
+                    readInfo[iread1].cb = indCB[iCB] ;
 
                     if (iUmi < umiCorrN && rGU1[iR+rguU]>umiArray[iUmi*2]) //advance in the umiArray sorted list
                         ++iUmi;
@@ -261,6 +263,8 @@ void SoloFeature::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nU
             };
         };
     };
+    
+    nUMIperCB[iCB]=nUtot;
 
     uint32 *rGUp=rGU;//first place where rGU is overwritten with gene counts. Before it's intact though sorted differently.
     uint32 nGenesOut=0;
@@ -281,5 +285,5 @@ void SoloFeature::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nU
             rGUp += 2;
         };
     };
-    nGenes=nGenesOut;
+    nGenePerCB[iCB]=nGenesOut;
 };
