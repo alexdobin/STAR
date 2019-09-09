@@ -40,7 +40,7 @@ public:
     
     vector<uint32> countCellGeneUMI;//sparsified matrix for the counts, each entry is: geneID count1 count2 ... countNcounts
     vector<uint32> countCellGeneUMIindex;//index of CBs in the count matrix
-    uint32 countNcounts; //number of counts per entry in the count matrix
+    uint32 countMatStride; //number of counts per entry in the count matrix
     
     
     vector<bool> cellFilterVec;

@@ -71,7 +71,6 @@ void SoloFeature::outputResults(bool cellFilterYes)
                 
     uint32  cbInd1=0;
     for (uint32 icb=0; icb<nCB; icb++) {
-        uint32 *rCBpp=rCBp[icb];
         if (cellFilterYes) {
             if (cellFilterVec[icb]) {
                 ++cbInd1;
@@ -83,25 +82,16 @@ void SoloFeature::outputResults(bool cellFilterYes)
         };
         for (uint32 ig=0; ig<nGenePerCB[icb]; ig++) {
             
+            uint32 indG1=countCellGeneUMIindex[icb]+ig*countMatStride;
+            
             if (cellFilterYes)
-                geneDetected[rCBpp[0]]=true;
+                geneDetected[countCellGeneUMI[indG1]]=true;
             
             //feature index, CB index
-            countMatrixStream << rCBpp[0]+1  <<' '<< cbInd1;
-            
-            //count(s)
-            array<uint32,3> count1;
-            if (rCBpp[1]>1) {//3 counts recorded
-                count1[0] = rCBpp[1];
-                count1[1] = rCBpp[2];
-                count1[2] = rCBpp[3];
-                rCBpp += 4;
-            } else {//1 recorded
-                count1 = {1,1,1};
-                rCBpp += 2;
-            };
+            countMatrixStream << countCellGeneUMI[indG1]+1 <<' '<< cbInd1;
+
             for (uint32 ii=0; ii<pSolo.umiDedupColumns.size(); ii++)
-                countMatrixStream <<' '<< count1[pSolo.umiDedupColumns[ii]];
+                countMatrixStream <<' '<< countCellGeneUMI[indG1+1+pSolo.umiDedupColumns[ii]];
             
             countMatrixStream << '\n';
         };

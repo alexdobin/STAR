@@ -38,8 +38,5 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     statsOutput();
     
     //delete big arrays allocated in the previous functions
-    delete[] rGeneUMI;
-    delete[] rCBp;
     delete[] indCB;
-
 };

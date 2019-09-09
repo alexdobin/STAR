@@ -58,7 +58,8 @@ void collapseUMIwith1MMlowHalf(uint32 *umiArr, uint32 umiArrayStride, uint32 umi
     };
 };
 
-void graphDepthFirstSearch(uint32 n, vector<vector<uint32>> &nodeEdges, vector <uint32> &nodeColor) {
+void graphDepthFirstSearch(uint32 n, vector<vector<uint32>> &nodeEdges, vector <uint32> &nodeColor) 
+{
     for (const auto &nn : nodeEdges[n]) {
         if (nodeColor[nn]==(uint32)-1) {//node not visited
             nodeColor[nn]=nodeColor[n];
@@ -67,7 +68,8 @@ void graphDepthFirstSearch(uint32 n, vector<vector<uint32>> &nodeEdges, vector <
     };
 };
 
-uint32 graphNumberOfConnectedComponents(uint32 N, vector<array<uint32,2>> V, vector<uint32> &nodeColor) {//find number of connected components
+uint32 graphNumberOfConnectedComponents(uint32 N, vector<array<uint32,2>> V, vector<uint32> &nodeColor) 
+{//find number of connected components
     //N=number of nodes
     //V=edges, list of connected nodes, each pair of nodes listed once
     //simple recursive DFS
@@ -96,7 +98,8 @@ uint32 graphNumberOfConnectedComponents(uint32 N, vector<array<uint32,2>> V, vec
     return nConnComp;
 };
 
-void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray) {
+void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray) 
+{
                                  
     uint32 *rGU=rCBp[iCB];
     uint32 rN=nReadPerCB[iCB];
@@ -150,8 +153,15 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray) {
     };
     gReadS[nGenes]=rguStride*rN;//so that gReadS[nGenes]-gReadS[nGenes-1] is the number of reads for nGenes, see below in qsort
 
-    uint32 *nUg = new uint32[nGenes*3];//3 types of counts
-    uint32 nUtot=0;
+    
+    if (countCellGeneUMI.size() < countCellGeneUMIindex[iCB] + nGenes*countMatStride) //allocated vector too small
+        countCellGeneUMI.resize(countCellGeneUMI.size()*2);
+    
+    nGenePerCB[iCB]=0;
+    nUMIperCB[iCB]=0;
+    countCellGeneUMIindex[iCB+1]=countCellGeneUMIindex[iCB];
+    /////////////////////////////////////////////
+    /////////// main cycle over genes
     for (uint32 iG=0; iG<nGenes; iG++) {//collapse UMIs for each gene
         uint32 *rGU1=rGU+gReadS[iG];
 
@@ -177,25 +187,12 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray) {
         };
 
         uint32 nU0=(iR1+umiArrayStride)/umiArrayStride;
-
-        if (nU0<=1) {
-            nUg[3*iG]=nU0;
-            nUtot+=nU0;
-            if (nU0==1 && readInfo.size()>0) {//fill in readInfo: CB,UMI
-                for (uint32 iR=0; iR<gReadS[iG+1]-gReadS[iG]; iR+=rguStride) {//cycle over reads
-                    if (rGU1[iR+rguU]==umiArray[0]) {//other UMIs were filtered out
-                        uint64 iread1 = rGU1[iR+rguR];
-                        readInfo[iread1].cb = indCB[iCB] ;
-                        readInfo[iread1].umi = umiArray[0];
-                    };
-                };
-            };
-        } else {
-            //collapse with 1MM
-            uint32 nU1=nU0, nU2=nU0;//2 types of 1MM collapsing
-            uint32 graphN=0; //number of nodes
-            vector<array<uint32,2>> graphConn;//node connections
-
+        uint32 nU1=nU0, nU2=nU0;//2 types of 1MM collapsing
+        uint32 graphN=0; //number of nodes
+        vector<array<uint32,2>> graphConn;//node connections
+        vector<uint32> graphComp;//for each node (color) - connected component number
+        
+        if (nU0>1) {//collapse with 1MM
             collapseUMIwith1MMlowHalf(umiArray, umiArrayStride, pSolo.umiMaskLow, nU0, nU1, nU2, graphN, graphConn);
 
             //exchange low and high half of UMIs, re-sort, and look for 1MM again
@@ -205,85 +202,76 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray) {
             qsort(umiArray, nU0, umiArrayStride*sizeof(uint32), funCompareNumbers<uint32>);
             collapseUMIwith1MMlowHalf(umiArray, umiArrayStride, pSolo.umiMaskLow, nU0, nU1, nU2, graphN, graphConn);
 
-            vector<uint32> graphComp;//for each node (color) - connected component number
             uint32 nConnComp=graphNumberOfConnectedComponents(graphN, graphConn, graphComp);
-            nUg[3*iG]=nU0;        
-            nUg[3*iG+1]=nU1+nConnComp;
-            nUg[3*iG+2]=nU2;
-            nUtot+=nUg[3*iG+1];
+            nU1 += nConnComp;
+        };
+        
+        if (nU0>0) {
+            nGenePerCB[iCB]++;
+            nUMIperCB[iCB]+=nU1;
+            countCellGeneUMI[countCellGeneUMIindex[iCB+1]+0]=gID[iG];        
+            countCellGeneUMI[countCellGeneUMIindex[iCB+1]+1]=nU0;
+            countCellGeneUMI[countCellGeneUMIindex[iCB+1]+2]=nU1;
+            countCellGeneUMI[countCellGeneUMIindex[iCB+1]+3]=nU2;
+            countCellGeneUMIindex[iCB+1] = countCellGeneUMIindex[iCB+1] + countMatStride;//iCB+1 accumulates the index
+        };
             
-            if (readInfo.size()>0) {//fill in readInfo: CB,UMI
-
-                for (uint32 ii=0; ii<graphComp.size(); ii++) {//for non-conflicting colors, need to fill the colors correctly
-                    if (graphComp[ii]==(uint32)-1)
-                        graphComp[ii]=ii;
-                };
-
-                const uint32 bitTopMask=~(1<<31);
-                vector<array<uint32,2>> umiBest(graphN,{0,0});
-                uint32 umiCorrN=0;//number of umi to error-correct
-                for (uint32 iu=0; iu<umiArrayStride*nU0; iu+=umiArrayStride)  {
-                    //switch low/high to recover original UMIs
-                    pSolo.umiSwapHalves(umiArray[iu]);//halves were swapped, need to reurn back to UMIs
-                    //find best UMI (highest count) for each connected component
-                    if (umiArray[iu+2]==def_MarkNoColor)
-                        continue;
-                    uint32 color1=graphComp[umiArray[iu+2]];
-                    uint32 count1=umiArray[iu+1] & bitTopMask;
-                    if (umiBest[color1][0] < count1) {
-                        umiBest[color1][0] = count1;
-                        umiBest[color1][1] = umiArray[iu];
-                    };              
-                    //reuse umiArray: now the stride is 2, and it contains only UMI that may be error corrected and the colors
-                    umiArray[umiCorrN*2]=umiArray[iu];
-                    umiArray[umiCorrN*2+1]=color1;
-                    ++umiCorrN;
-                };
-
-                if (umiCorrN==0) {
-                    umiArray[0]=(uint32)-1;//to make sure that no UMI can match this first element
-                } else {//sort UMIs
-                    qsort(umiArray, umiCorrN, 2*sizeof(uint32), funCompareNumbers<uint32>);
-                };
-
-                uint32 iUmi=0;
-                for (uint32 iR=0; iR<gReadS[iG+1]-gReadS[iG]; iR+=rguStride) {//cycle over reads
+        if (readInfo.size()>0 && nU0<=1) {//fill in readInfo: CB,UMI
+            for (uint32 iR=0; iR<gReadS[iG+1]-gReadS[iG]; iR+=rguStride) {//cycle over reads
+                if (rGU1[iR+rguU]==umiArray[0]) {//other UMIs were filtered out
                     uint64 iread1 = rGU1[iR+rguR];
                     readInfo[iread1].cb = indCB[iCB] ;
-
-                    if (iUmi < umiCorrN && rGU1[iR+rguU]>umiArray[iUmi*2]) //advance in the umiArray sorted list
-                        ++iUmi;
-
-                    if (iUmi < umiCorrN && rGU1[iR+rguU]==umiArray[iUmi*2]) {//correct UMI
-                        readInfo[iread1].umi=umiBest[umiArray[iUmi*2+1]][1];
-                    } else {//no UMI correction
-                        readInfo[iread1].umi=rGU1[iR+rguU];
-                    };
+                    readInfo[iread1].umi = umiArray[0];
                 };
             };
-        };
-    };
-    
-    nUMIperCB[iCB]=nUtot;
+        } else if (readInfo.size()>0) {
+            
+            for (uint32 ii=0; ii<graphComp.size(); ii++) {//for non-conflicting colors, need to fill the colors correctly
+                if (graphComp[ii]==(uint32)-1)
+                    graphComp[ii]=ii;
+            };
 
-    uint32 *rGUp=rGU;//first place where rGU is overwritten with gene counts. Before it's intact though sorted differently.
-    uint32 nGenesOut=0;
-    for (uint32 iG=0; iG<nGenes; iG++) {//output for all genes
-        
-        if (nUg[3*iG]==0)
-            continue;//no counts for this gene (possible if UMI filtering is on)
-        
-        ++nGenesOut;
+            const uint32 bitTopMask=~(1<<31);
+            vector<array<uint32,2>> umiBest(graphN,{0,0});
+            uint32 umiCorrN=0;//number of umi to error-correct
+            for (uint32 iu=0; iu<umiArrayStride*nU0; iu+=umiArrayStride) {
+                //switch low/high to recover original UMIs
+                pSolo.umiSwapHalves(umiArray[iu]);//halves were swapped, need to reurn back to UMIs
+                //find best UMI (highest count) for each connected component
+                if (umiArray[iu+2]==def_MarkNoColor)
+                    continue;
+                uint32 color1=graphComp[umiArray[iu+2]];
+                uint32 count1=umiArray[iu+1] & bitTopMask;
+                if (umiBest[color1][0] < count1) {
+                    umiBest[color1][0] = count1;
+                    umiBest[color1][1] = umiArray[iu];
+                };              
+                //reuse umiArray: now the stride is 2, and it contains only UMI that may be error corrected and the colors
+                umiArray[umiCorrN*2]=umiArray[iu];
+                umiArray[umiCorrN*2+1]=color1;
+                ++umiCorrN;
+            };
 
-        rGUp[0]=gID[iG];
-        rGUp[1]=nUg[3*iG];
-        if (nUg[3*iG]>1) {//record 2 more counts
-            rGUp[2]=nUg[3*iG+1];
-            rGUp[3]=nUg[3*iG+2];
-            rGUp += 4;
-        } else {//only one count recorded, save space
-            rGUp += 2;
-        };
+            if (umiCorrN==0) {
+                umiArray[0]=(uint32)-1;//to make sure that no UMI can match this first element
+            } else {//sort UMIs
+                qsort(umiArray, umiCorrN, 2*sizeof(uint32), funCompareNumbers<uint32>);
+            };
+
+            uint32 iUmi=0;
+            for (uint32 iR=0; iR<gReadS[iG+1]-gReadS[iG]; iR+=rguStride) {//cycle over reads
+                uint64 iread1 = rGU1[iR+rguR];
+                readInfo[iread1].cb = indCB[iCB] ;
+
+                if (iUmi < umiCorrN && rGU1[iR+rguU]>umiArray[iUmi*2]) //advance in the umiArray sorted list
+                    ++iUmi;
+
+                if (iUmi < umiCorrN && rGU1[iR+rguU]==umiArray[iUmi*2]) {//correct UMI
+                    readInfo[iread1].umi=umiBest[umiArray[iUmi*2+1]][1];
+                } else {//no UMI correction
+                    readInfo[iread1].umi=rGU1[iR+rguU];
+                };
+            };
+        };//else if (readInfo.size()>0)
     };
-    nGenePerCB[iCB]=nGenesOut;
 };
