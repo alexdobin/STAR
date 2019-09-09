@@ -112,7 +112,7 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
         
         typeUMI umi1=(uint32)-1;
         uint32 g1=0;
-        bool multigene=false; 
+        bool multigene=true;//initial condition, to process first record
         array<bool,4> gtype={false};
         uint32 iRrec=0;
         for (uint32 iR=0; iR<rN*rguStride; iR+=rguStride) {//cycle over reads
@@ -120,7 +120,7 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
             uint32 g2=((rGU[iR] << 2) >> 2);//remove top 2 bits
             typeUMI umi2=rGU[iR+1];
             
-            if (umi2!=umi1) {//start new umi
+            if (umi2!=umi1 || iR==(rN-1)*rguStride) {//start new umi
                 if (!multigene) {//record this gene
                     rGU[iRrec]=g1;
                     ++iRrec;
@@ -146,7 +146,7 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
             
             multigene=(g2==g1);
             
-            gtype[ ( rGU[iR] >> (sizeof(typeUMI)-2) ) ]=true; //top 2 bits define the type of the read
+            gtype[ ( rGU[iR] >> (typeUMIbits-2) ) ]=true; //top 2 bits define the type of the read
         };
         
         if (iRrec==0) //all multigenes
@@ -160,7 +160,7 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
 
         g1=(uint32)-1;
         for (uint32 iR=0; iR<iRrec; iR+=2) {
-            if (rGU[iR]!=g1) {//new gene
+            if (rGU[iR]!=g1 || iR==iRrec) {//new gene
                 g1=rGU[iR];
                 nGenePerCB[iCB]++;
                 countCellGeneUMI[countCellGeneUMIindex[iCB+1]+0]=g1;

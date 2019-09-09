@@ -36,7 +36,7 @@ public:
 
     vector<uint32> nUMIperCB, nUMIperCBsorted;//number of UMIs per CB, and the same sorted (descendant)
     vector<uint32> nGenePerCB;//number of genes (with >0 UMIs) per CB
-    vector<uint64> nReadPerCB;//number of reads per CB
+    vector<uint32> nReadPerCB;//number of reads per CB
     
     vector<uint32> countCellGeneUMI;//sparsified matrix for the counts, each entry is: geneID count1 count2 ... countNcounts
     vector<uint32> countCellGeneUMIindex;//index of CBs in the count matrix

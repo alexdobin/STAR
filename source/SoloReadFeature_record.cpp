@@ -16,9 +16,6 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript *ali
 {
     if (pSolo.type==0 || soloBar.cbMatch<0)
         return;
-
-    if (!readInfoYes)
-        iRead=(uint64)-1;//marks no readInfo
        
     ReadSoloFeatures reFe;
     
@@ -41,7 +38,7 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript *ali
                             stats.V[stats.nAmbigFeatureMultimap]++;//multigene caused by multimapper
                     } else {//good gene
                         reFe.gene=*readGe->begin();
-                        nFeat = outputReadCB(streamReads, iRead, featureType, soloBar, reFe, readAnnot);
+                        nFeat = outputReadCB(streamReads, (readInfoYes ? iRead : (uint64)-1), featureType, soloBar, reFe, readAnnot);
                     };
                 };
                 break;
@@ -57,7 +54,7 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript *ali
                     if ( reFe.sj.empty() || (sjAnnot && readAnnot.geneConcordant.size()==0) ) {//no junctions, or annotated junction but no gene (i.e. read does not fully match transcript)
                         stats.V[stats.nNoFeature]++;
                     } else {//goo junction
-                        nFeat = outputReadCB(streamReads, iRead, featureType, soloBar, reFe, readAnnot);
+                        nFeat = outputReadCB(streamReads, (readInfoYes ? iRead : (uint64)-1), featureType, soloBar, reFe, readAnnot);
                     };
                 };                  
                 break;

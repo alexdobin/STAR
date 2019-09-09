@@ -61,8 +61,7 @@ void SoloFeature::countCBgeneUMI()
     rCBp = new uint32*[nCB+1];
     uint32 **rCBpa = new uint32*[pSolo.cbWLsize+1];
     indCB = new uint32[nCB];
-
-    uint32 nReadPerCBmax=0;
+    
     rCBp[0]=rGeneUMI;
     rCBpa[0]=rGeneUMI;
     nCB=0;//will count it again below
@@ -85,11 +84,12 @@ void SoloFeature::countCBgeneUMI()
         readFeatAll[ii]->inputRecords(rCBpa, rguStride, readBarSum->cbReadCountExact, streamTranscriptsOut, readInfo, soloFeatAll);
     };
 
+    nReadPerCB.resize(nCB);
+    uint32 nReadPerCBmax=0;
     for (uint32 iCB=0; iCB<nCB; iCB++) {
-        uint64 nr=(rCBpa[indCB[iCB]]-rCBp[iCB])/rguStride;  //number of reads that were matched to WL, rCBpa accumulated reference to the last element+1
-        if (nr>nReadPerCBmax)
-            nReadPerCBmax=nr;
-        readFeatSum->stats.V[readFeatSum->stats.nMatch] += nr;
+        nReadPerCB[iCB] = (rCBpa[indCB[iCB]]-rCBp[iCB])/rguStride;  //number of reads that were matched to WL, rCBpa accumulated reference to the last element+1
+        nReadPerCBmax=max(nReadPerCBmax,nReadPerCB[iCB]);
+        readFeatSum->stats.V[readFeatSum->stats.nMatch] += nReadPerCB[iCB];
     };
 
     for (int ii=0; ii<P.runThreadN; ii++) {
@@ -113,7 +113,7 @@ void SoloFeature::countCBgeneUMI()
     /////////////////////////// collapse each CB
     nUMIperCB.resize(nCB);
     nGenePerCB.resize(nCB);
-    nReadPerCB.resize(nCB);
+    
     uint32 *umiArray = new uint32[nReadPerCBmax*umiArrayStride];//temp array for collapsing UMI
     
     countMatStride=4; //hard-coded for now, works for both Gene*/SJ and Velocyto
@@ -122,7 +122,6 @@ void SoloFeature::countCBgeneUMI()
     countCellGeneUMIindex[0]=0;
     
     for (uint32 icb=0; icb<nCB; icb++) {//main collapse cycle
-        nReadPerCB[icb] =( rCBpa[indCB[icb]]-rCBp[icb] ) / rguStride; //number of reads that were matched to WL, rCBpa accumulated reference to the last element+1
         
         collapseUMI(icb, umiArray);
         

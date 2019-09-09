@@ -51,18 +51,19 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
     streamReads->flush();
     streamReads->seekg(0,ios::beg);
     
-    switch (featureType) {//for non-standard prcoessing
-        case SoloFeatureTypes::Velocyto :
-            uint32 iread, feature, vtype;
-            while (*streamReads >> iread) {//until the end of file
-                *streamReads >> feature >> vtype; //vType=1,2,3, cannot be zero
-                uint64 cb=soloFeatAll[pSolo.featureInd[SoloFeatureTypes::Gene]]->readInfo[iread].cb;
-                if (cb+1!=0) {
-                    cbP[cb][0]=feature | (vtype << 30); //encode vType in the top 2 bits;
-                    cbP[cb][1]=soloFeatAll[pSolo.featureInd[SoloFeatureTypes::Gene]]->readInfo[iread].umi;
-                };
+    if (featureType==SoloFeatureTypes::Velocyto) {//for non-standard processing
+        uint32 feature, vtype;
+        uint64 iread;
+        while (*streamReads >> iread) {//until the end of file
+            *streamReads >> feature >> vtype; //vType=1,2,3, cannot be zero
+            uint64 cb=soloFeatAll[pSolo.featureInd[SoloFeatureTypes::Gene]]->readInfo[iread].cb;
+            if (cb+1!=0) {
+                cbP[cb][0]=feature | (vtype << 30); //encode vType in the top 2 bits;
+                cbP[cb][1]=soloFeatAll[pSolo.featureInd[SoloFeatureTypes::Gene]]->readInfo[iread].umi;
+                cbP[cb]+=cbPstride;
             };
-            return;
+        };
+        return;
     };
     
     
