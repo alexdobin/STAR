@@ -123,6 +123,14 @@ void SoloFeature::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nU
         };
     };
     
+    if (featureType==SoloFeatureTypes::Velocyto) {
+        //special processing, by UMI
+        qsort(rGU, rN, rguStride*sizeof(uint32), funCompareTypeShift<uint32, 1>);//sort by the UMI
+        
+        return;
+    };
+    
+    
     qsort(rGU,rN,rguStride*sizeof(uint32),funCompareNumbers<uint32>); //sort by gene number
 
     //compact reads per gene
@@ -259,7 +267,7 @@ void SoloFeature::collapseUMI(uint32 *rGU, uint32 rN, uint32 &nGenes, uint32 &nU
     for (uint32 iG=0; iG<nGenes; iG++) {//output for all genes
         
         if (nUg[3*iG]==0)
-            continue;
+            continue;//no counts for this gene (possible if UMI filtering is on)
         
         ++nGenesOut;
 

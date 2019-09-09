@@ -17,62 +17,56 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript *ali
     if (pSolo.type==0 || soloBar.cbMatch<0)
         return;
 
+    if (!readInfoYes)
+        iRead=(uint64)-1;//marks no readInfo
+       
     ReadSoloFeatures reFe;
     
-    set<uint32> *readGe=&readAnnot.geneConcordant; //for featureType==0
-
-    bool readFeatYes=true;
-    //calculate feature
+    uint32 nFeat=0; //number of features in this read (could be >1 for SJs)
     if (nTr==0) {//unmapped
         stats.V[stats.nUnmapped]++;
-        readFeatYes=false;
         
     } else {
         switch (featureType) {
             case SoloFeatureTypes::Gene :
             case SoloFeatureTypes::GeneFull : 
-
-                //check genes, return if no gene of multimapping
-                if (featureType==SoloFeatureTypes::GeneFull) {
-                    readGe = &readAnnot.geneFull;
+                {
+                    set<uint32> *readGe=( featureType==SoloFeatureTypes::Gene 
+                                                      ? &readAnnot.geneConcordant : &readAnnot.geneFull ); //for Gene or GeneFull
+                    if (readGe->size()==0) {//check genes
+                        stats.V[stats.nNoFeature]++;//no gene
+                    } else if (readGe->size()>1) {
+                        stats.V[stats.nAmbigFeature]++;//multigene
+                        if (nTr>1)
+                            stats.V[stats.nAmbigFeatureMultimap]++;//multigene caused by multimapper
+                    } else {//good gene
+                        reFe.gene=*readGe->begin();
+                        nFeat = outputReadCB(streamReads, iRead, featureType, soloBar, reFe, readAnnot);
+                    };
                 };
-                if (readGe->size()==0) {
-                    stats.V[stats.nNoFeature]++;
-                    readFeatYes=false;
-                };
-                if (readGe->size()>1) {
-                    stats.V[stats.nAmbigFeature]++;
-                    if (nTr>1)
-                        stats.V[stats.nAmbigFeatureMultimap]++;
-                    readFeatYes=false;
-                };
-                if (readFeatYes)
-                    reFe.gene=*readGe->begin();
                 break;
         
             case SoloFeatureTypes::SJ : 
                 if (nTr>1) {//reject all multimapping junctions
                     stats.V[stats.nAmbigFeatureMultimap]++;
-                    readFeatYes=false;
-                } else {//for SJs, still check genes, return if multi-gene
-                    if (readAnnot.geneConcordant.size()>1) {
-                        stats.V[stats.nAmbigFeature]++;
-                        readFeatYes=false;
-                    } else {//one gene or no gene
-                        bool sjAnnot;
-                        alignOut->extractSpliceJunctions(reFe.sj, sjAnnot);
-                        if ( reFe.sj.empty() || (sjAnnot && readAnnot.geneConcordant.size()==0) ) {//no junctions, or annotated junction but no gene (i.e. read does not fully match transcript)
-                            stats.V[stats.nNoFeature]++;
-                            readFeatYes=false;
-                        };
+                } else if (readAnnot.geneConcordant.size()>1){//for SJs, still check genes, no feature if multi-gene
+                    stats.V[stats.nAmbigFeature]++;
+                } else {//one gene or no gene
+                    bool sjAnnot;
+                    alignOut->extractSpliceJunctions(reFe.sj, sjAnnot);
+                    if ( reFe.sj.empty() || (sjAnnot && readAnnot.geneConcordant.size()==0) ) {//no junctions, or annotated junction but no gene (i.e. read does not fully match transcript)
+                        stats.V[stats.nNoFeature]++;
+                    } else {//goo junction
+                        nFeat = outputReadCB(streamReads, iRead, featureType, soloBar, reFe, readAnnot);
                     };
-                };
+                };                  
                 break;
         
             case SoloFeatureTypes::Transcript3p : 
                 if (readAnnot.transcriptConcordant.size()==0) {
                     stats.V[stats.nNoFeature]++;
-                    readFeatYes=false;
+                } else {
+                    nFeat = outputReadCB(streamReads, iRead, featureType, soloBar, reFe, readAnnot);
                 };
                 break;
                 
@@ -80,10 +74,11 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript *ali
                 //different record: iRead, gene, type
                 if (readAnnot.geneVelocyto[1]>0) {
                     *streamReads << iRead <<' '<< readAnnot.geneVelocyto[0] <<' '<< readAnnot.geneVelocyto[1] <<'\n';
+                    nFeat=1;
                 } else {
                     stats.V[stats.nNoFeature]++;
                 };
-                return; //no need to go with downstream processing
+                break; //no need to go with downstream processing
                 
 //             case SoloFeatureTypes::VelocytoSpliced :
 //                 if (readAnnot.geneVelocyto[1]==1) {
@@ -114,19 +109,21 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript *ali
         };//switch (featureType)
     };//if (nTr==0)
     
-    if (!readFeatYes && !readInfoYes) //no feature, and no readInfo requested
-        return;
-    
-    if (!readInfoYes)
-        iRead=(uint64)-1;
-
-    uint32 nfeat = outputReadCB(streamReads, iRead, (readFeatYes ? featureType : -1), soloBar, reFe, readAnnot);
-    if (pSolo.cbWLsize>0) {//WL
-        for (auto &cbi : soloBar.cbMatchInd)
-            cbReadCount[cbi] += nfeat;
-    } else {//no WL
-        cbReadCountMap[soloBar.cbMatchInd[0]] += nfeat;
+    if (nFeat==0 && readInfoYes) {//no feature, but readInfo requested
+        outputReadCB(streamReads, iRead, (uint32)-1, soloBar, reFe, readAnnot);
     };
+    
+    if (nFeat==0)
+        return; //no need to record the number of reads per CB
+    
+    if (pSolo.cbWLyes) {//WL
+        for (auto &cbi : soloBar.cbMatchInd)
+            cbReadCount[cbi] += nFeat;
+    } else {//no WL
+        cbReadCountMap[soloBar.cbMatchInd[0]] += nFeat;
+    };
+    
+    return;
 };
 
 uint32 outputReadCB(fstream *streamOut, const uint64 iRead, const int32 featureType, const SoloReadBarcode &soloBar, const ReadSoloFeatures &reFe, const ReadAnnotations &readAnnot)
