@@ -8,6 +8,7 @@
 
 void SoloFeature::outputResults(bool cellFilterYes)
 {    
+    //make directories
     string outputPrefix1;
     if (cellFilterYes) {
         outputPrefix1 = outputPrefix + "/filtered/";
@@ -21,6 +22,8 @@ void SoloFeature::outputResults(bool cellFilterYes)
                        std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
     };
             
+    /////////////////////////////////////////////////////////////
+    //write features.tsv
     if ( featureType==SoloFeatureTypes::Gene || featureType==SoloFeatureTypes::GeneFull ) {//this onlys need to be done once
         //output genes
         ofstream &geneStr=ofstrOpen(outputPrefix1+pSolo.outFileNames[1],ERROR_OUT, P);
@@ -29,7 +32,8 @@ void SoloFeature::outputResults(bool cellFilterYes)
         geneStr.close();
     };
 
-    //output CBs
+    ////////////////////////////////////////////////////////////////////////////
+    //write barcodes.tsv
     ofstream &cbStr=ofstrOpen(outputPrefix1+pSolo.outFileNames[2],ERROR_OUT, P);
     uint64 nCellGeneEntries=0;//total number of non-zero cell/gene combinations (entries in the output matrix)
     if (cellFilterYes) {//filtered cells
@@ -48,9 +52,15 @@ void SoloFeature::outputResults(bool cellFilterYes)
     };
     cbStr.flush();   
 
+    /////////////////////////////////////////////////////////////
     //output counting matrix
     string matrixFileName=outputPrefix1+pSolo.outFileNames[3];
     ofstream &countMatrixStream=ofstrOpen(matrixFileName,ERROR_OUT, P);
+    
+    
+    vector <uint32> umiOutCol = pSolo.umiDedupColumns;
+    if (featureType==SoloFeatureTypes::Velocyto)
+        umiOutCol={0,1,2};
 
     //header
     uint32 featureN=0;
@@ -61,14 +71,7 @@ void SoloFeature::outputResults(bool cellFilterYes)
     };
     countMatrixStream <<"%%MatrixMarket matrix coordinate integer general\n%\n";
     countMatrixStream << featureN <<' '<< (cellFilterYes ? filteredCells.nCells : pSolo.cbWLsize) <<' '<< nCellGeneEntries << '\n';
-
-    bool *geneDetected=NULL;
-    if (cellFilterYes) {
-        geneDetected = new bool[Trans.nGe];
-        memset((void*) geneDetected, 0, Trans.nGe);
-    };
     
-                
     uint32  cbInd1=0;
     for (uint32 icb=0; icb<nCB; icb++) {
         if (cellFilterYes) {
@@ -84,25 +87,14 @@ void SoloFeature::outputResults(bool cellFilterYes)
             
             uint32 indG1=countCellGeneUMIindex[icb]+ig*countMatStride;
             
-            if (cellFilterYes)
-                geneDetected[countCellGeneUMI[indG1]]=true;
-            
             //feature index, CB index
             countMatrixStream << countCellGeneUMI[indG1]+1 <<' '<< cbInd1;
 
-            for (uint32 ii=0; ii<pSolo.umiDedupColumns.size(); ii++)
-                countMatrixStream <<' '<< countCellGeneUMI[indG1+1+pSolo.umiDedupColumns[ii]];
+            for (uint32 ii=0; ii<umiOutCol.size(); ii++)
+                countMatrixStream <<' '<< countCellGeneUMI[indG1+1+umiOutCol[ii]];
             
             countMatrixStream << '\n';
         };
     };
     countMatrixStream.flush();
-    
-    if (cellFilterYes) {
-        filteredCells.nGeneDetected=0;
-        for (uint32 ii=0; ii<Trans.nGe; ii++) {
-            if (geneDetected[ii])
-                filteredCells.nGeneDetected++;
-        };
-    };
 };

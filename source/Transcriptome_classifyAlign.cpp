@@ -136,10 +136,9 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
     
     //velocyto logic
     readAnnot.geneVelocyto[0]=reGe;
-    if (reGe==(uint32)-1) {//multi-gene
+    
+    if (reAnn[AlignVsTranscript::ExonIntronSpan]) {
         readAnnot.geneVelocyto[1]=0;
-    } else if (reAnn[AlignVsTranscript::ExonIntronSpan]) {
-        readAnnot.geneVelocyto[1]=2; //unspliced
     } else if (reAnn[AlignVsTranscript::Concordant] || reAnn[AlignVsTranscript::Exon]) {//at least one model is exonic
         if (!reAnn[AlignVsTranscript::Intron] && !reAnn[AlignVsTranscript::ExonIntron]) {
             readAnnot.geneVelocyto[1]=1; //spliced
@@ -149,4 +148,18 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
     } else {//all other combinations are unspliced, as they do not contain a single purely exonic model
         readAnnot.geneVelocyto[1]=2;
     };
+    
+//     if (reGe==(uint32)-1) {//multi-gene
+//         readAnnot.geneVelocyto[1]=0;//value does not matter, it will not be recorded
+//     } else if (reAnn[AlignVsTranscript::ExonIntronSpan]) {
+//         readAnnot.geneVelocyto[1]=2; //unspliced
+//     } else if (reAnn[AlignVsTranscript::Concordant] || reAnn[AlignVsTranscript::Exon]) {//at least one model is exonic
+//         if (!reAnn[AlignVsTranscript::Intron] && !reAnn[AlignVsTranscript::ExonIntron]) {
+//             readAnnot.geneVelocyto[1]=1; //spliced
+//         } else {
+//             readAnnot.geneVelocyto[1]=3; //ambiguous <= exonic * ( intronic || mixed)
+//         };
+//     } else {//all other combinations are unspliced, as they do not contain a single purely exonic model
+//         readAnnot.geneVelocyto[1]=2;
+//     };
 };

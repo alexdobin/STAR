@@ -25,6 +25,10 @@ void SoloFeature::cellFiltering()
 
     cellFilterVec.resize(nCB,false);
     memset(&filteredCells,0,sizeof(filteredCells));
+
+    bool *geneDetected = new bool[Trans.nGe];
+    memset((void*) geneDetected, 0, Trans.nGe);
+
     for (uint32 icb=0; icb<nCB; icb++) {
         if (nUMIperCB[icb]>=nUMImin) {
             cellFilterVec[icb]=true;
@@ -38,7 +42,18 @@ void SoloFeature::cellFiltering()
             
             filteredCells.nReadInCells += nReadPerCB[icb];
             filteredCells.nReadPerCell.push_back(nReadPerCB[icb]);
+            
+            for (uint32 ig=0; ig<nGenePerCB[icb]; ig++) {
+                uint32 indG1=countCellGeneUMIindex[icb]+ig*countMatStride;
+                geneDetected[countCellGeneUMI[indG1]]=true;            
+            };
         };
+    };
+    
+    filteredCells.nGeneDetected=0;
+    for (uint32 ii=0; ii<Trans.nGe; ii++) {
+        if (geneDetected[ii])
+            filteredCells.nGeneDetected++;
     };
     
     filteredCells.meanUMIperCell = filteredCells.nUMIinCells / filteredCells.nCells;
