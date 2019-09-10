@@ -94,7 +94,7 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
     readAnnot.geneConcordant={};
 
     array<bool,AlignVsTranscript::N> reAnn={false};
-    uint32 reGe=(uint32)-1;
+    uint32 reGe=(uint32)-2;//so that the first gene can be recorded
     
     for (uint iag=0; iag<nAlignG; iag++) {
         
@@ -124,7 +124,7 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
                 aG.alignGenes.insert(trGene[tr1]);//genes for each alignment
             };
                        
-            if (reGe==(uint32)-1)
+            if (reGe==(uint32)-2) //first gene
                 reGe=trGene[tr1];
             if (reGe!=trGene[tr1])
                 reGe=(uint32)-1; //marks multi-gene align
@@ -135,7 +135,7 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
     };
     
     //velocyto logic
-    readAnnot.geneVelocyto[0]=reGe;
+    readAnnot.geneVelocyto[0]=(reGe+2==0 ? (uint32)-1 : reGe);//-2 marks no gene, convert to -1 which marks either no gene or multigene - no output
     
     if (reAnn[AlignVsTranscript::ExonIntronSpan]) {
         readAnnot.geneVelocyto[1]=0;
