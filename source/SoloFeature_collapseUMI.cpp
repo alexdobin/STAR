@@ -110,20 +110,24 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
         
 //         unordered_map<uint32, array<uint32,3>>> geneCountHash;
         
-        typeUMI umi1=(uint32)-1;
-        uint32 g1=0;
-        bool multigene=true;//initial condition, to process first record
+        uint32 g1=(uint32)-1;//gene undefined for the first entry, for correct multigene identification
+        bool multigene=false;//initial condition, to process first record
         array<bool,4> gtype={false};
         uint32 iRrec=0;
         for (uint32 iR=0; iR<rN*rguStride; iR+=rguStride) {//cycle over reads
             
+            //process UMI
             uint32 g2=((rGU[iR] << 2) >> 2);//remove top 2 bits
-            typeUMI umi2=rGU[iR+1];
+            gtype[ ( rGU[iR] >> (typeUMIbits-2) ) ]=true; //top 2 bits define the type of the read
+            if (g2!=g1 && g1+1!=0)
+                multigene=true;
+            g1=g2;
             
-            if (umi2!=umi1 || iR==(rN-1)*rguStride) {//start new umi
-                if (!multigene) {//record this gene
-                    rGU[iRrec]=g1;
-                    ++iRrec;
+            //IF end of array OR new UMI in the next record
+            if (iR==(rN-1)*rguStride || rGU[iR+1]!=rGU[iR+3]) {//output this gene IF: past the end of array OR peeked ahead, and the umi is different
+                    if (!multigene) {//record this gene
+                        rGU[iRrec]=g1;
+                        ++iRrec;
                     if (gtype[0]) {//at least one UMI was exon-intron span => unspliced
                         rGU[iRrec]=2; //unspliced
                     } else if (gtype[1]) {//at least one UMI was purely exonic
@@ -137,38 +141,35 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
                     };
                     ++iRrec;
                 };
-                
-                umi1=umi2;
-                g1=g2;
+
+                g1=(uint32)-1;
                 gtype={false};
                 multigene=false;
             };
-            
-            multigene=(g2==g1);
-            
-            gtype[ ( rGU[iR] >> (typeUMIbits-2) ) ]=true; //top 2 bits define the type of the read
         };
         
-        if (iRrec==0) //all multigenes
+        countCellGeneUMIindex[iCB+1]=countCellGeneUMIindex[iCB];
+        nGenePerCB[iCB]=0;
+        nUMIperCB[iCB]=iRrec/2;
+        
+        if (iRrec==0) //all multigenes. niothing to trecord
             return;
         
         qsort(rGU, iRrec/2, 2*sizeof(uint32), funCompareNumbers<uint32>);//sort by the gene
-        
-        nGenePerCB[iCB]=0;
-        nUMIperCB[iCB]=iRrec/2;
-        countCellGeneUMIindex[iCB+1]=countCellGeneUMIindex[iCB];        
 
-        g1=(uint32)-1;
+        countCellGeneUMIindex[iCB+1] -= countMatStride;//it will be added back for the first entry
+        g1=(uint32)-1;//for the first entry to trigger new gene record
         for (uint32 iR=0; iR<iRrec; iR+=2) {
-            if (rGU[iR]!=g1 || iR==iRrec) {//new gene
+            if (rGU[iR]!=g1) {//new gene
                 g1=rGU[iR];
                 nGenePerCB[iCB]++;
+                
+                countCellGeneUMIindex[iCB+1] += countMatStride;//iCB+1 accumulates the index                
                 countCellGeneUMI[countCellGeneUMIindex[iCB+1]+0]=g1;
-                countCellGeneUMIindex[iCB+1] = countCellGeneUMIindex[iCB+1] + countMatStride;//iCB+1 accumulates the index
             };
             countCellGeneUMI[countCellGeneUMIindex[iCB+1]+rGU[iR+1]]++;
         };
-        
+        countCellGeneUMIindex[iCB+1] += countMatStride;
         return;
     };    
     
