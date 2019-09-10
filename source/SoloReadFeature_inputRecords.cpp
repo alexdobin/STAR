@@ -58,7 +58,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
             *streamReads >> feature >> vtype; //vType=1,2,3, cannot be zero
             uint64 cb=soloFeatAll[pSolo.featureInd[SoloFeatureTypes::Gene]]->readInfo[iread].cb;
             if (cb+1!=0) {
-                cbP[cb][0]=feature | (vtype << 30); //encode vType in the top 2 bits;
+                cbP[cb][0]=feature | (vtype << velocytoTypeGeneBitShift ); //encode vType in the top 2 bits;
                 cbP[cb][1]=soloFeatAll[pSolo.featureInd[SoloFeatureTypes::Gene]]->readInfo[iread].umi;
                 cbP[cb]+=cbPstride;
             };

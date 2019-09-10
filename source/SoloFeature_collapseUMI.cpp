@@ -4,6 +4,7 @@
 #include "serviceFuns.cpp"
 #include <unordered_map>
 #include "SoloCommon.h"
+#include <bitset>
 
 #define def_MarkNoColor  (uint32) -1
 
@@ -112,13 +113,14 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
         
         uint32 g1=(uint32)-1;//gene undefined for the first entry, for correct multigene identification
         bool multigene=false;//initial condition, to process first record
-        array<bool,4> gtype={false};
+        uint32 gVelo=0;
+        
         uint32 iRrec=0;
         for (uint32 iR=0; iR<rN*rguStride; iR+=rguStride) {//cycle over reads
             
             //process UMI
-            uint32 g2=((rGU[iR] << 2) >> 2);//remove top 2 bits
-            gtype[ ( rGU[iR] >> (typeUMIbits-2) ) ]=true; //top 2 bits define the type of the read
+            uint32 g2=((rGU[iR] << velocytoTypeGeneBits) >> velocytoTypeGeneBits);//remove top 2 bits
+            gVelo = gVelo | ( rGU[iR] >> velocytoTypeGeneBitShift );
             if (g2!=g1 && g1+1!=0)
                 multigene=true;
             g1=g2;
@@ -128,22 +130,37 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
                     if (!multigene) {//record this gene
                         rGU[iRrec]=g1;
                         ++iRrec;
-                    if (gtype[0]) {//at least one UMI was exon-intron span => unspliced
-                        rGU[iRrec]=2; //unspliced
-                    } else if (gtype[1]) {//at least one UMI was purely exonic
-                        if (!gtype[2] && !gtype[3]) {
-                            rGU[iRrec]=1; //spliced 
-                        } else {//one purely exonic and one purely intronic or mixed
-                            rGU[iRrec]=3; //ambiguous
+                        
+                        bitset<velocytoTypeGeneBits> gV (gVelo);
+                        if (!gV.test(AlignVsTranscript::ExonIntronSpan)) {//all UMIs are spanning models
+                            rGU[iRrec]=2; //unspliced 
+                        } else if (gV.test(AlignVsTranscript::Exon)) {//>=1 purely exonic tr 
+                            if (!gV.test(AlignVsTranscript::Intron) && !gV.test(AlignVsTranscript::ExonIntron)) {//0 purely intronic && 0 mixed
+                                rGU[iRrec]=1; //spliced 
+                            } else {//>=1 purely exonic and >=1 purely intronic or mixed
+                                rGU[iRrec]=3; //ambiguous
+                            };
+                        } else {//0 exonic, >=1 intronic and/or >=1 mixed
+                            rGU[iRrec]=2;//unspliced
                         };
-                    } else {//only purely unspliced UMIs, or purely unspliced + mixed
-                        rGU[iRrec]=2;//unspliced
+                        
+//                         if (gtype[0]) {//at least one UMI was exon-intron span => unspliced
+//                             rGU[iRrec]=2; //unspliced
+//                         } else if (gtype[1]) {//at least one UMI was purely exonic
+//                             if (!gtype[2] && !gtype[3]) {
+//                                 rGU[iRrec]=1; //spliced 
+//                             } else {//one purely exonic and one purely intronic or mixed
+//                                 rGU[iRrec]=3; //ambiguous
+//                             };
+//                         } else {//only purely unspliced UMIs, or purely unspliced + mixed
+//                             rGU[iRrec]=2;//unspliced
+//                         };
+                        
+                        ++iRrec;
                     };
-                    ++iRrec;
-                };
 
                 g1=(uint32)-1;
-                gtype={false};
+                gVelo=0;
                 multigene=false;
             };
         };
