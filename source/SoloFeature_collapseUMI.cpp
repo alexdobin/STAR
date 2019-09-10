@@ -132,12 +132,12 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
                         rGU[iRrec]=2; //unspliced
                     } else if (gtype[1]) {//at least one UMI was purely exonic
                         if (!gtype[2] && !gtype[3]) {
-                            rGU[iRrec]=1; //unspliced 
+                            rGU[iRrec]=1; //spliced 
                         } else {//one purely exonic and one purely intronic or mixed
                             rGU[iRrec]=3; //ambiguous
                         };
                     } else {//only purely unspliced UMIs, or purely unspliced + mixed
-                        rGU[iRrec]=1;//unspliuced
+                        rGU[iRrec]=2;//unspliced
                     };
                     ++iRrec;
                 };
