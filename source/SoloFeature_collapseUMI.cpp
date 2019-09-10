@@ -152,8 +152,11 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
         nGenePerCB[iCB]=0;
         nUMIperCB[iCB]=iRrec/2;
         
-        if (iRrec==0) //all multigenes. niothing to trecord
+        if (iRrec==0) //all multigenes. nothing to trecord
             return;
+    
+        if (countCellGeneUMI.size() < countCellGeneUMIindex[iCB] + (iRrec/2)*countMatStride) //allocated vector too small
+        countCellGeneUMI.resize(countCellGeneUMI.size()*2);        
         
         qsort(rGU, iRrec/2, 2*sizeof(uint32), funCompareNumbers<uint32>);//sort by the gene
 
