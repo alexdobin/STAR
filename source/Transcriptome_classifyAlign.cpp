@@ -134,7 +134,7 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
             if (aStatus==AlignVsTranscript::Concordant)
                 aStatus=AlignVsTranscript::Exon;
             
-            if (!aStatus==AlignVsTranscript::ExonIntronSpan) {
+            if (aStatus!=AlignVsTranscript::ExonIntronSpan) {
                 reAnn.set(AlignVsTranscript::ExonIntronSpan, true);//meaning of this bit is NoExonIntronSpan
                 reAnn.set(aStatus, true);
             };
