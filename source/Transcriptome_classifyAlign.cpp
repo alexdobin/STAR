@@ -107,7 +107,7 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
         if (tr1==(uint32) -1) 
             continue; //this alignment is outside of range of all transcripts
 
-        uint aGend=aG.exons[aG.nExons-1][EX_G];
+        uint aGend=aG.exons[aG.nExons-1][EX_G]+aG.exons[aG.nExons-1][EX_L]-1;
 
         ++tr1;
         do {//cycle back through all the transcripts
