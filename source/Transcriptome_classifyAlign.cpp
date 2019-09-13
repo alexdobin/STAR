@@ -5,7 +5,7 @@
 #include "ReadAnnotations.h"
 #include <bitset>
 
-int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, uint32 *exLenCum1, uint16 exN1) 
+int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, uint32 *exLenCum1, uint16 exN1, uint32 minOverlapMinusOne) 
 {
     //returned values: 1: align fully agrees with transcript, including splices
     //                 2: align is fully exonic, but not concordant
@@ -32,18 +32,27 @@ int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, ui
     //if trStr1==2: TTS=trLen[tr1]-TTS, TSS=trLen[tr1]-TSS
     
     //aG.canonSJ[aG.nExons-1]=-999; //marks the last block
-    for (uint32 iab=0, ex1=0, bS=0, bE=0, eE=0, enS=0; 
+    for (uint32 iab=0, ex1=0, bS=0, bE=0, bEt=0, bSt=0, eE=0, enS=0; 
                 iab<aG.nExons; iab++) {//scan through all blocks of the align
         
-        uint64 bEprev=bE;
+        uint32 bEtprev=bEt;
         
-        bS=(uint32) (aG.exons[iab][EX_G]-trS1);//block start
-        bE=bS+aG.exons[iab][EX_L]-1;//block end
-        
-        if (iab==0 || aG.canonSJ[iab-1]==-3) {//start of alig, or jump to another mate
+        bSt=bS=(uint32) (aG.exons[iab][EX_G]-trS1);//block start
+        bEt=bE=bS+aG.exons[iab][EX_L]-1;//block end
+
+        if ( minOverlapMinusOne>0 ) {
+            if ( bEt-bSt < 2*minOverlapMinusOne ) {
+                bEt=(uint32)-1;
+                continue;//this block is too short
+            };
+            bS = bS+minOverlapMinusOne;
+            bE = bE-minOverlapMinusOne;   
+        };
+            
+        if (iab==0 || aG.canonSJ[iab-1]==-3 || bEtprev==(uint32)-1) {//start of align, or jump to another mate, or previous block was too short
             ex1=binarySearch1<uint32>(bS, exSE1, 2*exN1) / 2;// alignStart>=ex1start            
         } else if (aG.canonSJ[iab-1]>=0) {//splice junction
-            if (bEprev == eE && bS == enS) {//eE and enS are still from the old ex1
+            if (bEtprev == eE && bSt == enS) {//eE and enS are still from the old ex1
                 ++ex1; //junction agrees
             } else {
                 alignSJconcordant = false;
@@ -54,7 +63,7 @@ int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, ui
         //uint64 eS=exSE1[2*ex1];
         eE  = exSE1[2*ex1+1];
         enS = ex1+1<exN1 ? exSE1[2*(ex1+1)] : 0;//next exon start
-              
+
         if (bS <= eE) {//block starts in the ex1 exon
             if (bE > eE) {
                 alignSpansExonIntr = true;
@@ -121,7 +130,7 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
                  (P.pSolo.strand >= 0 && (trStr[tr1]==1 ? aG.Str : 1-aG.Str) != (uint32)P.pSolo.strand) ) //!(this transcript contains the read, and has correct strand)
                      continue;
                  
-            int aStatus=alignToTranscript(aG, trS[tr1], trStr[tr1], exSE+2*trExI[tr1], exLenCum+trExI[tr1], trExN[tr1]);
+            int aStatus=alignToTranscript(aG, trS[tr1], trStr[tr1], exSE+2*trExI[tr1], exLenCum+trExI[tr1], trExN[tr1],6);
             
             if (aStatus<0)
                 continue; //align is not concordant with this transcript because one of the align junctions does not match transcript junction
@@ -139,9 +148,9 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
                 reGe=(uint32)-1; //marks multi-gene align
             
             //calculate reAnn
-            if (reGe+1!=0) {//not multi-mapper
+            if (reGe!=(uint32)-1) {//not multi-mapper
                     
-                if (reGe+2==0) //first gene
+                if (reGe==(uint32)-2) //first gene
                     reGe=trGene[tr1];
                 
                 if (reGe!=trGene[tr1]) {//
