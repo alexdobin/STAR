@@ -58,13 +58,13 @@ int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, ui
         if (bS <= eE) {//block starts in the ex1 exon
             if (bE > eE) {
                 alignSpansExonIntr = true;
-                break;//if ex/in span is detected, no need to check anything else
+                //break;//if ex/in span is detected, no need to check anything else - no true : might still have non-concordant junction
             };
             alignExonic = true;
         } else {//block starts in the intron
             if (bE >= enS) {//block overlaps next exon
                 alignSpansExonIntr = true;
-                break;//if ex/in span is detected, no need to check anything else
+                //break;//if ex/in span is detected, no need to check anything else
             };
             alignIntronic = true;
         };
@@ -134,17 +134,26 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
                 readAnnot.geneConcordant.insert(trGene[tr1]);//genes for all alignments
                 aG.alignGenes.insert(trGene[tr1]);//genes for each alignment
             };
-                       
-            if (reGe==(uint32)-2) //first gene
-                reGe=trGene[tr1];
-            if (reGe!=trGene[tr1])
+            
+            if (nAlignG>1)
                 reGe=(uint32)-1; //marks multi-gene align
             
-            if (aStatus!=AlignVsTranscript::ExonIntronSpan) {
-                reAnn.set(AlignVsTranscript::ExonIntronSpan, true);//meaning of this bit is NoExonIntronSpan
-                reAnn.set(aStatus, true);
-            };
+            //calculate reAnn
+            if (reGe+1!=0) {//not multi-mapper
+                    
+                if (reGe+2==0) //first gene
+                    reGe=trGene[tr1];
                 
+                if (reGe!=trGene[tr1]) {//
+                    reGe=(uint32)-1; //marks multi-gene align
+                } else {
+                    if (aStatus!=AlignVsTranscript::ExonIntronSpan) {
+                        reAnn.set(AlignVsTranscript::ExonIntronSpan, true);//meaning of this bit is NoExonIntronSpan
+                        reAnn.set(aStatus, true);
+                    };
+                };
+            };
+            
         } while (trEmax[tr1]>=aGend && tr1>0);
     };
     
