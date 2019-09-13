@@ -134,7 +134,7 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
                         bitset<velocytoTypeGeneBits> gV (gVelo);
                         if (!gV.test(AlignVsTranscript::ExonIntronSpan)) {//all UMIs are spanning models
                             rGU[iRrec]=2; //unspliced 
-                        } else if (gV.test(AlignVsTranscript::Exon)) {//>=1 purely exonic tr 
+                        } else if (gV.test(AlignVsTranscript::Concordant)) {//>=1 purely exonic tr 
                             if (!gV.test(AlignVsTranscript::Intron) && !gV.test(AlignVsTranscript::ExonIntron)) {//0 purely intronic && 0 mixed
                                 rGU[iRrec]=1; //spliced 
                             } else {//>=1 purely exonic and >=1 purely intronic or mixed

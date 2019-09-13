@@ -70,14 +70,19 @@ int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, ui
         };
     };//cycle over align blocks
     
+    if (!alignSJconcordant) //if align has a junction, it's always checked for concordance
+        return -1;          //even for exon/intron aligns, sjs have to be concordant, otherwise align is not consistent with this transcript model
+    
     if (alignSpansExonIntr) {
         return AlignVsTranscript::ExonIntronSpan; //align spans exon/intron boundary
     } else if (!alignIntronic) {//align is purely exonic
-        if (alignSJconcordant) {
-            return AlignVsTranscript::Concordant; //align is concordant with the transcript, i.e. fully agrees with transcript, including splices
-        } else {
-            return AlignVsTranscript::Exon; //align is fully exonic, but not concordant
-        };
+        return AlignVsTranscript::Concordant; //align is fully exonic and concordant
+        //this cannot happen anymore, since we are non-concordant alignments return -1 above
+        //if (alignSJconcordant) {
+        //    return AlignVsTranscript::Concordant; //align is concordant with the transcript, i.e. fully agrees with transcript, including splices
+        // } else {
+        //    return AlignVsTranscript::Exon; //align is fully exonic, but not concordant
+        //};
     } else {//align has introns
         if (alignExonic) {
             return AlignVsTranscript::ExonIntron; //mixed exonic/intronic align, but no span
@@ -117,6 +122,10 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
                      continue;
                  
             int aStatus=alignToTranscript(aG, trS[tr1], trStr[tr1], exSE+2*trExI[tr1], exLenCum+trExI[tr1], trExN[tr1]);
+            
+            if (aStatus<0)
+                continue; //align is not concordant with this transcript because one of the align junctions does not match transcript junction
+            
             if (aStatus==AlignVsTranscript::Concordant) {//align conforms with the transcript
 
                 //TODO!!!FIX THIS//uint32 distTTS=trLen[tr1]-(aTall[nAtr].exons[aTall[nAtr].nExons-1][EX_G] + aTall[nAtr].exons[aTall[nAtr].nExons-1][EX_L]);
@@ -130,9 +139,6 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
                 reGe=trGene[tr1];
             if (reGe!=trGene[tr1])
                 reGe=(uint32)-1; //marks multi-gene align
-            
-            if (aStatus==AlignVsTranscript::Concordant)
-                aStatus=AlignVsTranscript::Exon;
             
             if (aStatus!=AlignVsTranscript::ExonIntronSpan) {
                 reAnn.set(AlignVsTranscript::ExonIntronSpan, true);//meaning of this bit is NoExonIntronSpan

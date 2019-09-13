@@ -3,7 +3,7 @@
 
 namespace AlignVsTranscript 
 {
-    enum {Intron=0, ExonIntron=1, ExonIntronSpan=2, Exon=3, Concordant=4, N=5};
+    enum {Intron=0, ExonIntron=1, ExonIntronSpan=2, Concordant=3, N=4};
 };
 
 #endif
