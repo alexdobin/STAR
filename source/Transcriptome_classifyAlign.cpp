@@ -41,7 +41,7 @@ int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, ui
         bEt=bE=bS+aG.exons[iab][EX_L]-1;//block end
 
         if ( minOverlapMinusOne>0 ) {
-            if ( bEt-bSt < 2*minOverlapMinusOne ) {
+            if ( bEt-bSt < minOverlapMinusOne ) {
                 bEt=(uint32)-1;
                 continue;//this block is too short
             };
