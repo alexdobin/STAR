@@ -5,7 +5,7 @@
 #include "ReadAnnotations.h"
 #include <bitset>
 
-int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, uint32 *exLenCum1, uint16 exN1, uint32 minOverlapMinusOne) 
+int alignToTranscript(Transcript &aG, uint trS1, uint32 *exSE1, uint16 exN1, uint32 minOverlapMinusOne) 
 {
     //returned values: 1: align fully agrees with transcript, including splices
     //                 2: align is fully exonic, but not concordant
@@ -130,10 +130,7 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
                  (P.pSolo.strand >= 0 && (trStr[tr1]==1 ? aG.Str : 1-aG.Str) != (uint32)P.pSolo.strand) ) //!(this transcript contains the read, and has correct strand)
                      continue;
                  
-            int aStatus=alignToTranscript(aG, trS[tr1], trStr[tr1], exSE+2*trExI[tr1], exLenCum+trExI[tr1], trExN[tr1],6);
-            
-            if (aStatus<0)
-                continue; //align is not concordant with this transcript because one of the align junctions does not match transcript junction
+            int aStatus=alignToTranscript(aG, trS[tr1], exSE+2*trExI[tr1], trExN[tr1],0);
             
             if (aStatus==AlignVsTranscript::Concordant) {//align conforms with the transcript
 
@@ -144,13 +141,13 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
                 aG.alignGenes.insert(trGene[tr1]);//genes for each alignment
             };
             
-            if (P.pSolo.featureYes[SoloFeatureTypes::Velocyto]) {
+            if (P.pSolo.featureYes[SoloFeatureTypes::Velocyto] && nAlignG==1) {//another calculation for velocyto with minOverlapMinusOne=6
                 
                 //6 is the hard code minOverlapMinusOne, to agree with velocyto's MIN_FLANK=5
-                aStatus=alignToTranscript(aG, trS[tr1], trStr[tr1], exSE+2*trExI[tr1], exLenCum+trExI[tr1], trExN[tr1], 6);
+                aStatus=alignToTranscript(aG, trS[tr1], exSE+2*trExI[tr1], trExN[tr1], 6);
                 
-                if (nAlignG>1)
-                    reGe=(uint32)-1; //marks multi-gene align
+                if (aStatus<0)
+                    continue; //align is not concordant with this transcript because one of the align junctions does not match transcript junction
 
                 //calculate reAnn
                 if (reGe!=(uint32)-1) {//not multi-mapper
