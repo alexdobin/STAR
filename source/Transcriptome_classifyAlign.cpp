@@ -144,25 +144,30 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
                 aG.alignGenes.insert(trGene[tr1]);//genes for each alignment
             };
             
-            if (nAlignG>1)
-                reGe=(uint32)-1; //marks multi-gene align
-            
-            //calculate reAnn
-            if (reGe!=(uint32)-1) {//not multi-mapper
-                    
-                if (reGe==(uint32)-2) //first gene
-                    reGe=trGene[tr1];
+            if (P.pSolo.featureYes[SoloFeatureTypes::Velocyto]) {
                 
-                if (reGe!=trGene[tr1]) {//
+                //6 is the hard code minOverlapMinusOne, to agree with velocyto's MIN_FLANK=5
+                aStatus=alignToTranscript(aG, trS[tr1], trStr[tr1], exSE+2*trExI[tr1], exLenCum+trExI[tr1], trExN[tr1], 6);
+                
+                if (nAlignG>1)
                     reGe=(uint32)-1; //marks multi-gene align
-                } else {
-                    if (aStatus!=AlignVsTranscript::ExonIntronSpan) {
-                        reAnn.set(AlignVsTranscript::ExonIntronSpan, true);//meaning of this bit is NoExonIntronSpan
-                        reAnn.set(aStatus, true);
+
+                //calculate reAnn
+                if (reGe!=(uint32)-1) {//not multi-mapper
+
+                    if (reGe==(uint32)-2) //first gene
+                        reGe=trGene[tr1];
+
+                    if (reGe!=trGene[tr1]) {//
+                        reGe=(uint32)-1; //marks multi-gene align
+                    } else {
+                        if (aStatus!=AlignVsTranscript::ExonIntronSpan) {
+                            reAnn.set(AlignVsTranscript::ExonIntronSpan, true);//meaning of this bit is NoExonIntronSpan
+                            reAnn.set(aStatus, true);
+                        };
                     };
                 };
             };
-            
         } while (trEmax[tr1]>=aGend && tr1>0);
     };
     
