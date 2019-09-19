@@ -1,3 +1,8 @@
+* Implemented Summary.csv statistics output for raw and filtered cells useful for quick run quality assessment.
+* Implemented --soloUMIfiltering MultiGeneUMI option introduced in CellRanger 3.x.x for filtering UMI collisions between different genes.
+* Implemented --soloCellFilter option for basic filtering of the cells, similar to the methods used by CellRanger 2.2.x.
+* Implemented --soloCBmatchWLtype 1MM_multi_pseudocounts option, introduced in CellRange 3.x.x, which slightly changes the posterior probability calculation for CB with 1 mismatch. 
+* Implemented --soloFeatures Velocyto option to produce Spliced, Unsplied, and Ambiguous counts similar to the velocyto.py tool developed by LaManno et al. This option is under actice development and the results may change in the future versions.
 * Implemented SAM attributes sS and sQ to output sequence and quality of the entire barcode read, and sM to output the barcode match status.
 * Implemented complex barcodes in STARsolo with --soloType CB_UMI_Complex, --soloCBmatchWLtype --soloAdapterSequence, --soloAdapterMismatchesNmax, --soloCBposition,--soloUMIposition .
 * Implemented CB/UB/GX/GN BAM tags for STARsolo.
