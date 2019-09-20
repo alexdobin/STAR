@@ -51,12 +51,22 @@ int alignToTranscript(Transcript &aG, uint trS1, uint32 *exSE1, uint16 exN1, uin
             
         if (iab==0 || aG.canonSJ[iab-1]==-3 || bEtprev==(uint32)-1) {//start of align, or jump to another mate, or previous block was too short
             ex1=binarySearch1<uint32>(bS, exSE1, 2*exN1) / 2;// alignStart>=ex1start            
-        } else if (aG.canonSJ[iab-1]>=0) {//splice junction
+        };
+        
+        if (iab > 0 && aG.canonSJ[iab-1]>=0) {//splice junction
             if (bEtprev == eE && bSt == enS) {//eE and enS are still from the old ex1
                 ++ex1; //junction agrees
-            } else {
+            } else if ( !(bEtprev==(uint32)-1 && bE<=exSE1[2*ex1+1]) ) {//special case the splice overhang was too short and hence not checked - now will check that this block is inside exon
+                        /* note that we are not checking exact agreement between block start and exon start
+                         * the logic here is that if the splice overhang is too short, we do not trust its location, 
+                         * and so we only need to check whether this - large - block is inside an exon -
+                         * if it overlaps an intron, only then we will consider the alignment discordant
+                         * this seems to match better velocyto logic, but I would prefer a stricter logic here:
+                         * splice have to be fully concordant with the transcript - this is more consistent with CR logic fo assigning reads to gene  
+                         */ 
                 alignSJconcordant = false;
-                ex1=binarySearch1<uint32>(bS, exSE1, 2*exN1) / 2;// alignStart>=ex1start
+                break; //no need to continue, will return -1
+                //ex1=binarySearch1<uint32>(bS, exSE1, 2*exN1) / 2;// alignStart>=ex1start
             };
         };
 
