@@ -28,7 +28,7 @@ CFLAGS := -O3 -pipe -Wall -Wextra $(CFLAGS)
 
 
 ##########################################################################################################
-OBJECTS = SmithWatermanAlignment.o SWReadSequenceGeneration.o SWComputeScore.o \
+OBJECTS = SmithWaterman.o SmithWaterman_scoreSpliced.o \
         GTF.o GTF_transcriptGeneSJ.o GTF_superTranscript.o \
 	SoloFeature_countCBgeneUMI.o Transcriptome_classifyAlign.o SoloFeature_cellFiltering.o SoloFeature_statsOutput.o bamSortByCoordinate.o SoloBarcode.o ParametersSolo.o SoloRead.o SoloRead_record.o \
 	SoloReadBarcode.o SoloReadBarcode_getCBandUMI.o SoloBarcode_extractBarcode.o \

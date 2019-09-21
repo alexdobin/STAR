@@ -9,10 +9,6 @@
 #include "TimeFunctions.h"
 #include "ErrorWarning.h"
 #include "GTF.h"
-#include "SmithWatermanAlignment.h"
-#include "SWComputeScore.hpp"
-#include "SWReadSequenceGeneration.hpp"
-#include "Test.cpp"
 #include "SjdbClass.h"
 #include "sjdbLoadFromFiles.h"
 #include "sjdbPrepare.h"
@@ -152,10 +148,7 @@ void Genome::genomeGenerate() {
     GTF mainGTF(*this, P, pGe.gDir, sjdbLoci);
             
     mainGTF.superTranscript(); //this may change the genome into (Super)Transcriptome
-    
-    SmithWatermanAlignment SWAlignment(mainGTF.sequenceOfSuperTranscripts, mainGTF.spliceJunctions, mainGTF, mainGTF.normalTranscriptIntervalsInST, mainGTF.sequenceOfNormalTranscripts, mainGTF.normalTranscriptSuperTindex);
-    SWAlignment.testSmithWatermanScoreComp();
-    exit(0);
+
     chrBinFill();//chrBin is first used in the transcriptGeneSJ below
     
     mainGTF.transcriptGeneSJ();

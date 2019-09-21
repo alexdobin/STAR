@@ -1,20 +1,16 @@
-//
-//  SWComputeScore.cpp
-//  
-//
-//  Created by Fahimeh Mirhaj on 6/18/19.
-//
+/*
+ * Created by Fahimeh Mirhaj on 6/18/19.
+*/
 
-#include "SWComputeScore.hpp"
-#include "SmithWatermanAlignment.h"
-#include "GTF.h"
-#include <climits> //INT_MIN
-#include <iostream>
-#include <string>
-#include <algorithm> //find()
-#include <stdlib.h> //abs()
-#include <utility>
-SmithWatermanAlignment::scoreType SmithWatermanAlignment::computeScoreWithSpliceJunctions(uint32 transId, vector<uint8> read, array<SmithWatermanAlignment::seqLenType, 2> &indexToAbsMaxScore) {
+#include "SmithWaterman.h"
+// #include <climits> //INT_MIN
+// #include <iostream>
+// #include <string>
+// #include <algorithm> //find()
+// #include <stdlib.h> //abs()
+// #include <utility>
+
+SmithWaterman::scoreType SmithWaterman::scoreSpliced(uint32 transId, vector<uint8> read, array<SmithWaterman::seqLenType, 2> &indexToAbsMaxScore) {
     vector<uint8> &superTrancript = sequenceOfSuperTranscripts[transId];
     uint32 readLength = read.size();
     uint32 STLength = superTrancript.size();
@@ -91,53 +87,8 @@ SmithWatermanAlignment::scoreType SmithWatermanAlignment::computeScoreWithSplice
     } // col for loop
     return maxScore;
 }
-SmithWatermanAlignment::scoreType SmithWatermanAlignment::computeScore(uint32 transId, vector<uint8> read, array<SmithWatermanAlignment::seqLenType, 2> &indexToAbsMaxScore) {
-    vector<uint8> &superTrancript = sequenceOfSuperTranscripts[transId];
-    uint32 readLength = read.size();
-    uint32 STLength = superTrancript.size();
-    
-    for(uint i = 0; i < readLength; i++) {
-        scoringMatrix[0][i] = 0;
-    }
-    for(uint j = 0; j < STLength; j++) {
-        scoringMatrix[j][0] = 0;
-    }
-    // Compute scores and finding absolute maximum
-    scoreType maxScore = 0;
-    
-    for(uint col = 1; col <= STLength; col++) {
-        for(uint row = 1; row <= readLength; row++) {
-            scoringMatrix[col][row]= max(0, max(max(scoringMatrix[col][row-1] + gapPenalty, scoringMatrix[col-1][row] + gapPenalty), scoringMatrix[col-1][row-1] + (read[row-1] == superTrancript[col-1] ? matchScore : misMatchPenalty)));
-            
-            if(maxScore < scoringMatrix[col][row]) {
-                maxScore = scoringMatrix[col][row];
-                indexToAbsMaxScore[0] = col;
-                indexToAbsMaxScore[1] = row;
-            }
-        }
-    }
-    return maxScore;
-}
-void SmithWatermanAlignment::traceBack(uint32 transId, array<seqLenType, 2> &maxScoreIndexes, seqLenType &SuperTransStart) {
-    eachReadStats[0] = 0;
-    eachReadStats[1] = 0;
-    eachReadStats[2] = 0;
-    eachReadStats[3] = 0;
-    
-    int col = maxScoreIndexes[0];
-    int row = maxScoreIndexes[1];
-    int rowT = 0;
-    int colT = 0;
-    while(col > 0 && row > 0 && scoringMatrix[col][row] != 0) {
-        rowT = directionMatrix[col][row].second;
-        colT = directionMatrix[col][row].first;
 
-        row = rowT;
-        col = colT;
-    }
-    SuperTransStart = col;
-}
-void SmithWatermanAlignment::splicJunctionsTransformation() {
+void SmithWaterman::splicJunctionsTransformation() {
     superTranscriptsSpliceJunctions.resize(sequenceOfSuperTranscripts.size());
     uint32 prevTransId;
     map <uint32, set<array<uint32, 2>>> transIdToStartEndMap;

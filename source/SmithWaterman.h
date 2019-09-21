@@ -1,15 +1,12 @@
-//
-//  SmithWatermanAlignment.h
-//  
-//
-//  Created by Fahimeh Mirhaj on 6/14/19.
-//
+/*
+ * Created by Fahimeh Mirhaj on 6/14/19.
+*/
 
-#ifndef SmithWatermanAlignment_h
-#define SmithWatermanAlignment_h
+#ifndef H_SmithWaterman
+#define H_SmithWaterman
 
 #include "GTF.h"
-class SmithWatermanAlignment{
+class SmithWaterman {
 public:
     typedef int32 scoreType;
     typedef uint32 seqLenType;
@@ -25,20 +22,15 @@ public:
     int8_t matchScore = 1;
     int8_t misMatchPenalty = -1;
     enum {sjS,sjE,sjT,sjSu,sjL};
-    SmithWatermanAlignment(vector<vector<uint8>> &sequenceOfSTs, vector<array<uint32,sjL>> &spJunctions, GTF &gtfIn, vector<pair<uint64, uint64>> &normalTransIntervalInST, vector<vector<uint8>> &seqOfNormalT, vector<uint64> &normalTSuperTInd);
     
-    ~SmithWatermanAlignment();
-    
-    vector<uint8> generateReadSeq(vector<uint8> normalTranscript, scoreType &trueScore, uint &randomStartIndex, uint &readEndIndex);
-    
+    SmithWaterman(vector<vector<uint8>> &sequenceOfSTs, vector<array<uint32,sjL>> &spJunctions, GTF &gtfIn, vector<pair<uint64, uint64>> &normalTransIntervalInST, vector<vector<uint8>> &seqOfNormalT, vector<uint64> &normalTSuperTInd);
+    ~SmithWaterman();
+
     void splicJunctionsTransformation();
-    
-    scoreType computeScore(uint32 transId, vector<uint8> read, array<seqLenType, 2> &indexToAbsMaxScore);
-    
-    scoreType computeScoreWithSpliceJunctions(uint32 transId, vector<uint8> read, array<seqLenType, 2> &indexToAbsMaxScore);
-    
+    //scoreType computeScore(uint32 transId, vector<uint8> read, array<seqLenType, 2> &indexToAbsMaxScore);
+    scoreType scoreSpliced(uint32 transId, vector<uint8> read, array<seqLenType, 2> &indexToAbsMaxScore);
     void traceBack(uint32 transId, array<seqLenType, 2> &indexToAbsMaxScore, seqLenType &SuperTransStart);
-    void testSmithWatermanScoreComp();
+    
 private:
     
     void clearDPTables();
@@ -53,4 +45,4 @@ private:
     GTF &gtf;
 };
 
-#endif /* SmithWatermanAlignment_h */
+#endif

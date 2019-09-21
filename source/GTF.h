@@ -6,7 +6,7 @@
 #include "SjdbClass.h"
 #include "Genome.h"
 
-class GTF{
+class GTF {
 public:
     bool gtfYes; 
 
