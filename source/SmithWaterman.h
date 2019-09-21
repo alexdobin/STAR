@@ -35,13 +35,13 @@ private:
     
     void clearDPTables();
     
-    vector<vector<uint8>> &sequenceOfSuperTranscripts;
+    vector<vector<uint8>> &superTrSeq;
     vector<array<uint32,sjL>> &spliceJunctions;
     vector<vector<array<uint32, 3>>> superTranscriptsSpliceJunctions;
     vector<vector<array<uint32, 2>>> superTranscriptsSpliceJunctionsCollapsed;
-    vector<pair<uint64, uint64>> &normalTranscriptIntervalsInST;
-    vector<vector<uint8>> &sequenceOfNormalTranscripts;
-    vector<uint64> &normalTranscriptSuperTindex;
+    vector<pair<uint64, uint64>> &transcriptSuperTrStartEnd;
+    vector<vector<uint8>> &transcriptSeq;
+    vector<uint64> &transcriptSuperTrIndex;
     GTF &gtf;
 };
 

@@ -5,10 +5,10 @@
 #include "SmithWaterman.h"
 #include "GTF.h"
 using namespace std;
-SmithWaterman::SmithWaterman (vector<vector<uint8>> &sequenceOfSTs, vector<array<uint32,sjL>> &spJunctions, GTF &gtfIn, vector<pair<uint64, uint64>> &normalTransIntervalInST, vector<vector<uint8>> &seqOfNormalT, vector<uint64> &normalTSuperTInd): sequenceOfSuperTranscripts(sequenceOfSTs), spliceJunctions(spJunctions), gtf(gtfIn), normalTranscriptIntervalsInST(normalTransIntervalInST), sequenceOfNormalTranscripts(seqOfNormalT), normalTranscriptSuperTindex(normalTSuperTInd) {
+SmithWaterman::SmithWaterman (vector<vector<uint8>> &sequenceOfSTs, vector<array<uint32,sjL>> &spJunctions, GTF &gtfIn, vector<pair<uint64, uint64>> &normalTransIntervalInST, vector<vector<uint8>> &seqOfNormalT, vector<uint64> &normalTSuperTInd): superTrSeq(sequenceOfSTs), spliceJunctions(spJunctions), gtf(gtfIn), transcriptSuperTrStartEnd(normalTransIntervalInST), transcriptSeq(seqOfNormalT), transcriptSuperTrIndex(normalTSuperTInd) {
     scoringMatrix = new scoreType*[maxSeqLength];
     directionMatrix = new pair<seqLenType,seqLenType>*[maxSeqLength];
-    superTIntervals = new pair<uint64, uint64>[gtfIn.superTranscriptIntervals.size()];
+    superTIntervals = new pair<uint64, uint64>[gtfIn.superTrStartEnd.size()];
     for(uint i = 0; i < maxSeqLength; ++i) {
         directionMatrix[i] = new pair<seqLenType,seqLenType>[10000];
     };
@@ -31,7 +31,7 @@ SmithWaterman::~SmithWaterman() {
 
 //Unslpiced score, for testing - not used in main code
 // SmithWaterman::scoreType SmithWaterman::computeScore(uint32 transId, vector<uint8> read, array<SmithWaterman::seqLenType, 2> &indexToAbsMaxScore) {
-//     vector<uint8> &superTrancript = sequenceOfSuperTranscripts[transId];
+//     vector<uint8> &superTrancript = superTrSeq[transId];
 //     uint32 readLength = read.size();
 //     uint32 STLength = superTrancript.size();
 //     

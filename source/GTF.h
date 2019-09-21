@@ -16,13 +16,13 @@ public:
     vector<uint32> transcriptStrand;
     vector <string> transcriptID, geneID;    
     
-    vector<vector<uint8>> sequenceOfNormalTranscripts;
-    vector<vector<uint8>> sequenceOfSuperTranscripts;
-    vector<pair<uint64, uint64>> superTranscriptIntervals;
-    vector<uint8> sequenceOfCondensedGenome;
-    vector<pair<uint64, uint64>> transcriptIntervals;
-    vector<uint64> normalTranscriptSuperTindex;
-    vector<pair<uint64, uint64>> normalTranscriptIntervalsInST;
+    vector<vector<uint8>> transcriptSeq;//sequences of normal transcripts
+    vector<vector<uint8>> superTrSeq;//sequences of supertranscripts
+    vector<pair<uint64, uint64>> superTrStartEnd;//superTr start end in normal genome
+    vector<uint8> superTrGenomeSeq;//condensed genome made of supertranscripts
+    vector<pair<uint64, uint64>> transcriptStartEnd;//normal transcripts start/end in the normal genome
+    vector<uint64> transcriptSuperTrIndex;//superTr's index this tr belongs to
+    vector<pair<uint64, uint64>> transcriptSuperTrStartEnd;//tr start/end in the superTr it belongs to
     
     enum {sjS,sjE,sjT,sjSu,sjL};//start end transcript superTranscript
     vector<array<uint32,sjL>> spliceJunctions; //splice junctions

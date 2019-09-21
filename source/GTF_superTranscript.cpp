@@ -55,21 +55,21 @@ void GTF::superTranscript() {
     //Condensed genome (a.k.a SuperTranscriptome) sequence
     for(const auto& p: mergedIntervals) {
         for(uint64 j = p.first; j <= p.second; ++j) {
-            sequenceOfCondensedGenome.push_back((uint8) genome.G[j]);
+            superTrGenomeSeq.push_back((uint8) genome.G[j]);
         };
     };
-    P.inOut->logMain << "SuperTranscriptome (condensed) genome length = " << sequenceOfCondensedGenome.size() <<endl;
+    P.inOut->logMain << "SuperTranscriptome (condensed) genome length = " << superTrGenomeSeq.size() <<endl;
     
     //Sort rows of exonLoci based on transId and startInterval
     //Find super and normal transcript intervals and sequences
-    transcriptIntervals.resize(transcriptID.size(), {(uint64)-1, 0}); //normal transcript
+    transcriptStartEnd.resize(transcriptID.size(), {(uint64)-1, 0}); //normal transcript
     for(uint64 i = 0 ; i < exonLoci.size(); i++) {//start-end of the normal transcripts in the condensed genome coordinates
         uint64 transId = exonLoci[i][exT];
-        transcriptIntervals[transId].first = min(transcriptIntervals[transId].first, exonLoci[i][exS]);
-        transcriptIntervals[transId].second = max(transcriptIntervals[transId].second, exonLoci[i][exE]);
+        transcriptStartEnd[transId].first = min(transcriptStartEnd[transId].first, exonLoci[i][exS]);
+        transcriptStartEnd[transId].second = max(transcriptStartEnd[transId].second, exonLoci[i][exE]);
     };
     
-    vector<pair<uint64, uint64>> tempTranscriptIntervals = transcriptIntervals;//sorted transript intervals
+    vector<pair<uint64, uint64>> tempTranscriptIntervals = transcriptStartEnd;//sorted transript intervals
     sort(tempTranscriptIntervals.begin(), tempTranscriptIntervals.end(),
          [](const pair<uint64, uint64>& t1, const pair<uint64, uint64>& t2) {
              return t1.first < t2.first;
@@ -79,34 +79,34 @@ void GTF::superTranscript() {
         if(p.first <= curr.second) { //without +1
             curr.second = max(curr.second, p.second);
         } else {
-            superTranscriptIntervals.push_back(curr);
+            superTrStartEnd.push_back(curr);
             curr = p;
         };
     };
-    superTranscriptIntervals.push_back(curr);//record last element
+    superTrStartEnd.push_back(curr);//record last element
 
     //superTranscript sequences
     uint64 maxSTlen=0;
-    for(const auto& p: superTranscriptIntervals) {
-        sequenceOfSuperTranscripts.push_back(vector<uint8>(sequenceOfCondensedGenome.begin()+p.first, sequenceOfCondensedGenome.begin()+p.second));
+    for(const auto& p: superTrStartEnd) {
+        superTrSeq.push_back(vector<uint8>(superTrGenomeSeq.begin()+p.first, superTrGenomeSeq.begin()+p.second));
         maxSTlen=max(maxSTlen,p.second-p.first);
     };
-    P.inOut->logMain << "Number of superTranscripts = " << superTranscriptIntervals.size() <<";   max length = " <<maxSTlen <<endl;
+    P.inOut->logMain << "Number of superTranscripts = " << superTrStartEnd.size() <<";   max length = " <<maxSTlen <<endl;
     
-    normalTranscriptSuperTindex.resize(transcriptID.size());
+    transcriptSuperTrIndex.resize(transcriptID.size());
     //for each normal transcript, find superTranscript it belongs to
     uint64 ist=0;
     for (auto &ee: exonLoci) {
-        if (ee[exS]>superTranscriptIntervals[ist].second)
+        if (ee[exS]>superTrStartEnd[ist].second)
             ++ist;
-        normalTranscriptSuperTindex[ee[exT]]=ist;
+        transcriptSuperTrIndex[ee[exT]]=ist;
     };
     
     
-    normalTranscriptIntervalsInST.resize(transcriptID.size());
-    for(uint i = 0; i < transcriptIntervals.size(); i++) {
-        normalTranscriptIntervalsInST[i].first = transcriptIntervals[i].first - superTranscriptIntervals[normalTranscriptSuperTindex[i]].first;
-        normalTranscriptIntervalsInST[i].second = transcriptIntervals[i].second - superTranscriptIntervals[normalTranscriptSuperTindex[i]].first;
+    transcriptSuperTrStartEnd.resize(transcriptID.size());
+    for(uint i = 0; i < transcriptStartEnd.size(); i++) {
+        transcriptSuperTrStartEnd[i].first = transcriptStartEnd[i].first - superTrStartEnd[transcriptSuperTrIndex[i]].first;
+        transcriptSuperTrStartEnd[i].second = transcriptStartEnd[i].second - superTrStartEnd[transcriptSuperTrIndex[i]].first;
     }
     //////////////////Normal transcripts
     sort(exonLoci.begin(), exonLoci.end(),
@@ -114,19 +114,19 @@ void GTF::superTranscript() {
              return (e1[exT] < e2[exT]) || ((e1[exT] == e2[exT]) && (e1[exS] < e2[exS]));
          });
     
-    sequenceOfNormalTranscripts.resize(transcriptID.size());
+    transcriptSeq.resize(transcriptID.size());
     for(uint64 i = 0; i < exonLoci.size(); i++) {
-        sequenceOfNormalTranscripts[exonLoci[i][exT]].insert(sequenceOfNormalTranscripts[exonLoci[i][exT]].end(),
-                                                             sequenceOfCondensedGenome.begin()+exonLoci[i][exS], sequenceOfCondensedGenome.begin()+exonLoci[i][exE] + 1);
+        transcriptSeq[exonLoci[i][exT]].insert(transcriptSeq[exonLoci[i][exT]].end(),
+                                                             superTrGenomeSeq.begin()+exonLoci[i][exS], superTrGenomeSeq.begin()+exonLoci[i][exE] + 1);
     };
 
     //output normal transcript sequences
     vector<char> numToCharConverter{'A','C','G','T','N','M'};
     ofstream & tranIdSequences = ofstrOpen(P.pGe.gDir+"/transcriptSequences.fasta",ERROR_OUT, P);
-    for(uint64 i = 0; i < sequenceOfNormalTranscripts.size(); i++) {
+    for(uint64 i = 0; i < transcriptSeq.size(); i++) {
         tranIdSequences << ">" << transcriptID[i] << "\n";
-        for(uint64 j = 0; j < sequenceOfNormalTranscripts[i].size(); j++) {
-            tranIdSequences << numToCharConverter[sequenceOfNormalTranscripts[i][j]];
+        for(uint64 j = 0; j < transcriptSeq[i].size(); j++) {
+            tranIdSequences << numToCharConverter[transcriptSeq[i][j]];
         }
         tranIdSequences << "\n";
     }
@@ -136,8 +136,8 @@ void GTF::superTranscript() {
     for(uint64 i = 1; i < exonLoci.size(); i++) {//exonLoci are still sorted by transcript index and start coordinate
         if (exonLoci[i][exT]==exonLoci[i-1][exT]) {//same transcript
             if (exonLoci[i][exS] > exonLoci[i-1][exE]+1) {//gap >0, otherwise we do not need to record the junction (may need it in the future for other purposes though)
-                uint64 sti=normalTranscriptSuperTindex[exonLoci[i][exT]];//ST index
-                uint64 sts=superTranscriptIntervals[sti].first; //superTranscript start
+                uint64 sti=transcriptSuperTrIndex[exonLoci[i][exT]];//ST index
+                uint64 sts=superTrStartEnd[sti].first; //superTranscript start
                 spliceJunctions.emplace_back();//add one element
                 spliceJunctions.back()[sjS] = (uint32)(exonLoci[i-1][exE]-sts);
                 spliceJunctions.back()[sjE] = (uint32)(exonLoci[i]  [exS]-sts);
@@ -156,17 +156,17 @@ void GTF::superTranscript() {
     
     //replace the Genome sequence and all necessary parameters for downstream genome generation
     if (P.pGe.gType=="Transcriptome") {
-        genome.concatenateChromosomes(sequenceOfNormalTranscripts, transcriptID, genome.genomeChrBinNbases);
+        genome.concatenateChromosomes(transcriptSeq, transcriptID, genome.genomeChrBinNbases);
         gtfYes=false; //annotations were converted into transcript sequences and are no longer used
         P.sjdbInsert.yes=false; //actually, it might pe possible to add splice junctions on top of the transcriptome
     } else if (P.pGe.gType=="SuperTranscriptome") {
-        vector<string> superTranscriptID(superTranscriptIntervals.size());
+        vector<string> superTranscriptID(superTrStartEnd.size());
         for (uint64 ii=0; ii<superTranscriptID.size(); ii++)
             superTranscriptID[ii]="st" + to_string(ii);
         
-        genome.concatenateChromosomes(sequenceOfSuperTranscripts, superTranscriptID, genome.genomeChrBinNbases);
+        genome.concatenateChromosomes(superTrSeq, superTranscriptID, genome.genomeChrBinNbases);
         
-        transcriptStrand.resize(superTranscriptIntervals.size(),1);
+        transcriptStrand.resize(superTrStartEnd.size(),1);//transcript are always on + strand in superTr
         
         //sort but exon start position
         sort(exonLoci.begin(), exonLoci.end(),
@@ -178,10 +178,10 @@ void GTF::superTranscript() {
         //shift exonLoci according to chrStart
         uint64 ist=0;
         for (auto &ee: exonLoci) {
-            if (ee[exS]>superTranscriptIntervals[ist].second)
+            if (ee[exS]>superTrStartEnd[ist].second)
                 ++ist;
-            ee[exS]+=genome.chrStart[ist]-superTranscriptIntervals[ist].first;
-            ee[exE]+=genome.chrStart[ist]-superTranscriptIntervals[ist].first;
+            ee[exS]+=genome.chrStart[ist]-superTrStartEnd[ist].first;
+            ee[exE]+=genome.chrStart[ist]-superTrStartEnd[ist].first;
         };
     };
 }

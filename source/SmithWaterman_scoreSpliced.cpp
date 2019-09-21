@@ -11,7 +11,7 @@
 // #include <utility>
 
 SmithWaterman::scoreType SmithWaterman::scoreSpliced(uint32 transId, vector<uint8> read, array<SmithWaterman::seqLenType, 2> &indexToAbsMaxScore) {
-    vector<uint8> &superTrancript = sequenceOfSuperTranscripts[transId];
+    vector<uint8> &superTrancript = superTrSeq[transId];
     uint32 readLength = read.size();
     uint32 STLength = superTrancript.size();
     vector<array<uint32, 2>> &eachSTSP = superTranscriptsSpliceJunctionsCollapsed[transId];
@@ -89,7 +89,7 @@ SmithWaterman::scoreType SmithWaterman::scoreSpliced(uint32 transId, vector<uint
 }
 
 void SmithWaterman::splicJunctionsTransformation() {
-    superTranscriptsSpliceJunctions.resize(sequenceOfSuperTranscripts.size());
+    superTranscriptsSpliceJunctions.resize(superTrSeq.size());
     uint32 prevTransId;
     map <uint32, set<array<uint32, 2>>> transIdToStartEndMap;
     bool firtInsert = true;
@@ -104,7 +104,7 @@ void SmithWaterman::splicJunctionsTransformation() {
         transIdToStartEndMap[transId].insert(startEndArray);
     }
     
-    superTranscriptsSpliceJunctionsCollapsed.resize(sequenceOfSuperTranscripts.size());
+    superTranscriptsSpliceJunctionsCollapsed.resize(superTrSeq.size());
     for(auto k = transIdToStartEndMap.begin(); k != transIdToStartEndMap.end(); k++) {
         for(auto& l: k->second) {
             superTranscriptsSpliceJunctionsCollapsed[k->first].push_back(l);
