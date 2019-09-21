@@ -1,12 +1,18 @@
 #include <cmath>
 
+#include "Genome.h"
+
 #include "IncludeDefine.h"
 #include "Parameters.h"
 #include "SuffixArrayFuns.h"
 #include "PackedArray.h"
 #include "TimeFunctions.h"
 #include "ErrorWarning.h"
-#include "loadGTF.h"
+#include "GTF.h"
+#include "SmithWatermanAlignment.h"
+#include "SWComputeScore.hpp"
+#include "SWReadSequenceGeneration.hpp"
+#include "Test.cpp"
 #include "SjdbClass.h"
 #include "sjdbLoadFromFiles.h"
 #include "sjdbPrepare.h"
@@ -86,28 +92,6 @@ inline int funCompareSuffixes ( const void *a, const void *b){
     };
 };
 
-// inline bool funCompareSuffixesBool ( const void *a, const void *b)
-// {
-// 	uint jj=0LLU;
-//
-// 	uint *ga=(uint*)((globalG-7LLU)+(*((uint*)a)));
-// 	uint *gb=(uint*)((globalG-7LLU)+(*((uint*)b)));
-//     uint va=0,vb=0;
-//
-// 	while (va==vb && jj<globalL) {
-// 		va=*(ga-jj);
-// 		vb=*(gb-jj);
-// 		jj++;
-// 	};
-//
-// 	if (va<vb) {
-//         return true;
-// 	} else {
-// 		return false;
-// 	};
-// };
-
-
 inline uint funG2strLocus (uint SAstr, uint const N, char const GstrandBit, uint const GstrandMask) {
     bool strandG = (SAstr>>GstrandBit) == 0;
     SAstr &= GstrandMask;
@@ -118,14 +102,14 @@ inline uint funG2strLocus (uint SAstr, uint const N, char const GstrandBit, uint
 void Genome::genomeGenerate() {
 
     //check parameters
-    if (sjdbOverhang<=0 && (pGe.sjdbFileChrStartEnd.at(0)!="-" || pGe.sjdbGTFfile!="-"))
-    {
+    if (sjdbOverhang<=0 && (pGe.sjdbFileChrStartEnd.at(0)!="-" || pGe.sjdbGTFfile!="-")) {
         ostringstream errOut;
         errOut << "EXITING because of FATAL INPUT PARAMETER ERROR: for generating genome with annotations (--sjdbFileChrStartEnd or --sjdbGTFfile options)\n";
         errOut << "you need to specify >0 --sjdbOverhang\n";
         errOut << "SOLUTION: re-run genome generation specifying non-zero --sjdbOverhang, which ideally should be equal to OneMateLength-1, or could be chosen generically as ~100\n";
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
-    }
+    };
+    
     if (pGe.sjdbFileChrStartEnd.at(0)=="-" && pGe.sjdbGTFfile=="-")
     {
         if (P.parArray.at(P.pGe.sjdbOverhang_par)->inputLevel>0 && sjdbOverhang>0)
@@ -150,70 +134,42 @@ void Genome::genomeGenerate() {
     //define some parameters from input parameters
     genomeChrBinNbases=1LLU << pGe.gChrBinNbits;
 
-    uint nGenomeReal=genomeScanFastaFiles(P,NULL,false,*this);//first scan the fasta file to find all the sizes
-    chrBinFill();
-
-    uint L=10000;//maximum length of genome suffix
-    uint nG1alloc=(nGenomeReal + L)*2;
-    char *G1=new char[nG1alloc];
-    G=G1+L;
-
-    memset(G1,GENOME_spacingChar,nG1alloc);//initialize to K-1 all bytes
+    nGenome = genomeScanFastaFiles(P,NULL,false,*this);//first scan the fasta file to find all the sizes
+       
+    genomeSequenceAllocate();
 
     genomeScanFastaFiles(P,G,true,*this);    //load the genome sequence
+    
+    consensusSequence(); //replace with consensus allele
 
-    if (pGe.gConsensusFile!="-") {//load consensus SNPs
-        ifstream &consIn=ifstrOpen(pGe.gConsensusFile, ERROR_OUT, "SOLUTION: check path and permission for the --genomeConsensusFile file" + pGe.gConsensusFile, P);
-
-        map<string,uint> chrStartMap;
-        for (uint ii=0;ii<nChrReal;ii++) {
-            chrStartMap.insert(std::pair <string,uint> (chrName[ii], chrStart[ii]));
-        };
-
-        uint nInserted=0, nWrongChr=0, nWrongRef=0, nRefN=0;
-        while (consIn.good()) {
-            string chr1, refIn, altIn, dummy;
-            uint start1;
-            char ref1,alt1;
-
-            consIn >> chr1 >> start1 >> dummy >> refIn >> altIn;
-            consIn.ignore(numeric_limits<streamsize>::max(),'\n');
-
-            convertNucleotidesToNumbers(refIn.c_str(),&ref1,1);
-            convertNucleotidesToNumbers(altIn.c_str(),&alt1,1);
-            --start1;//VCF positions are 1-based
-
-            if (chrStartMap.count(chr1)==1) {//otherwise just skip
-                start1+=chrStartMap[chr1];
-                if (G[start1]>3)
-                    ++nRefN;
-
-                if (G[start1]==ref1 || G[start1]>3) {
-                    G[start1]=alt1;
-                    ++nInserted;
-                } else {
-                    ++nWrongRef;
-                    P.inOut->logMain << "WARNING: reference allele in consensus file does not agree with reference genome base: ";
-                    P.inOut->logMain << chr1 <<"   "<< start1-chrStartMap[chr1] <<"   "<< (int) G[start1]<<"   "<< (int) ref1<<"   "<< (int) alt1<<"\n";
-                };
-            } else {
-                ++nWrongChr;
-            };
-        };
-        P.inOut->logMain <<"Inserted consensus variants: " << nInserted <<", including reference N-base:"<< nRefN <<", wrong chromosome: " << nWrongChr<< ", wrong reference base: " << nWrongRef << endl;
-    };
-
-    uint N = nGenomeReal;
-    nGenome=N;
-    uint N2 = N*2;
+    for (uint ii=0;ii<nGenome;ii++) {//- strand
+        G[2*nGenome-1-ii]=G[ii]<4 ? 3-G[ii] : G[ii];
+    };    
+    
+    //load junctions if needed
+    SjdbClass sjdbLoci;
+    
+    GTF mainGTF(*this, P, pGe.gDir, sjdbLoci);
+            
+    mainGTF.superTranscript(); //this may change the genome into (Super)Transcriptome
+    
+    SmithWatermanAlignment SWAlignment(mainGTF.sequenceOfSuperTranscripts, mainGTF.spliceJunctions, mainGTF, mainGTF.normalTranscriptIntervalsInST, mainGTF.sequenceOfNormalTranscripts, mainGTF.normalTranscriptSuperTindex);
+    SWAlignment.testSmithWatermanScoreComp();
+    exit(0);
+    chrBinFill();//chrBin is first used in the transcriptGeneSJ below
+    
+    mainGTF.transcriptGeneSJ();
+    
+    sjdbLoadFromFiles(P,sjdbLoci);    
 
     if (pGe.gSAindexNbases > log2(nGenome)/2-1) {
         ostringstream warnOut; 
         warnOut << "--genomeSAindexNbases " << pGe.gSAindexNbases << " is too large for the genome size=" << nGenome;
         warnOut << ", which may cause seg-fault at the mapping step. Re-run genome generation with recommended --genomeSAindexNbases " << int(log2(nGenome)/2-1);
         warningMessage(warnOut.str(),P.inOut->logMain,std::cerr,P);
-    };
+    };    
     
+    //output genome metadata
     ofstream & chrN = ofstrOpen(pGe.gDir+"/chrName.txt",ERROR_OUT, P);
     ofstream & chrS = ofstrOpen(pGe.gDir+"/chrStart.txt",ERROR_OUT, P);
     ofstream & chrL = ofstrOpen(pGe.gDir+"/chrLength.txt",ERROR_OUT, P);
@@ -228,34 +184,24 @@ void Genome::genomeGenerate() {
     chrS<<chrStart[nChrReal]<<"\n";//size of the genome
     chrN.close();chrL.close();chrS.close(); chrNL.close();
 
-    if (P.limitGenomeGenerateRAM < (nG1alloc+nG1alloc/3)) {//allocate nG1alloc/3 for SA generation
-        ostringstream errOut;
-        errOut <<"EXITING because of FATAL PARAMETER ERROR: limitGenomeGenerateRAM="<< (P.limitGenomeGenerateRAM) <<"is too small for your genome\n";
-        errOut <<"SOLUTION: please specify --limitGenomeGenerateRAM not less than "<< nG1alloc+nG1alloc/3 <<" and make that much RAM available \n";
-        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
-    };
-
     //preparing to generate SA
-    for (uint ii=0;ii<N;ii++) {//- strand
-        G[N2-1-ii]=G[ii]<4 ? 3-G[ii] : G[ii];
-    };
-
     nSA=0;
-    for (uint ii=0;ii<N2;ii+=pGe.gSAsparseD) {
+    for (uint ii=0;ii<2*nGenome;ii+=pGe.gSAsparseD) {
         if (G[ii]<4) {
             nSA++;
         };
     };
 
-    GstrandBit = (char) (uint) floor(log(N+P.limitSjdbInsertNsj*sjdbLength)/log(2))+1;
-    if (GstrandBit<32) GstrandBit=32; //TODO: use simple access function for SA
-    P.inOut->logMain <<"Estimated genome size="<<N+P.limitSjdbInsertNsj*sjdbLength<<"   "<<N<<"   "<<P.limitSjdbInsertNsj*sjdbLength<<"\n";
+    // GstrandBit
+    GstrandBit = (char) (uint) floor(log(nGenome+P.limitSjdbInsertNsj*sjdbLength)/log(2))+1; //GstrandBit uses P.limitSjdbInsertNsj even if no insertion requested, in case it will be requested at the mapping stage
+    if (GstrandBit<32) GstrandBit=32; //TODO: should not this be 31? Need to test for small genomes. TODO: use simple access function for SA
+    P.inOut->logMain <<"Estimated genome size="<<nGenome+P.limitSjdbInsertNsj*sjdbLength<<" = "<<nGenome<<" + "<<P.limitSjdbInsertNsj*sjdbLength<<"\n";
     P.inOut->logMain << "GstrandBit=" << int(GstrandBit) <<"\n";
-
     GstrandMask = ~(1LLU<<GstrandBit);
     SA.defineBits(GstrandBit+1,nSA);
-    if (P.sjdbInsert.yes)     {//reserve space for junction insertion
-        SApass1.defineBits(GstrandBit+1,nSA+2*P.limitSjdbInsertNsj*sjdbLength);//TODO: this allocation is wasteful, get a better estimate of the number of junctions
+
+    if (P.sjdbInsert.yes) {//reserve space for junction insertion       
+        SApass1.defineBits( GstrandBit+1, nSA+2*sjdbLength*min((uint64)sjdbLoci.chr.size(),P.limitSjdbInsertNsj) );//TODO: this allocation is wasteful, get a better estimate of the number of junctions
     } else {//same as SA
         SApass1.defineBits(GstrandBit+1,nSA);
     };
@@ -271,8 +217,8 @@ void Genome::genomeGenerate() {
 //     if (false)
     {//sort SA chunks
 
-        for (uint ii=0;ii<N;ii++) {//re-fill the array backwards for sorting
-            swap(G[N2-1-ii],G[ii]);
+        for (uint ii=0;ii<nGenome;ii++) {//re-fill the array backwards for sorting
+            swap(G[2*nGenome-1-ii],G[ii]);
         };
         globalG=G;
         globalL=pGe.gSuffixLengthMax/sizeof(uint);
@@ -281,7 +227,7 @@ void Genome::genomeGenerate() {
         uint* indPrefCount = new uint [indPrefN];
         memset(indPrefCount,0,indPrefN*sizeof(indPrefCount[0]));
         nSA=0;
-        for (uint ii=0;ii<N2;ii+=pGe.gSAsparseD) {
+        for (uint ii=0;ii<2*nGenome;ii+=pGe.gSAsparseD) {
             if (G[ii]<4) {
                 uint p1=(G[ii]<<12) + (G[ii-1]<<8) + (G[ii-2]<<4) + G[ii-3];
                 indPrefCount[p1]++;
@@ -323,7 +269,7 @@ void Genome::genomeGenerate() {
         #pragma omp parallel for num_threads(P.runThreadN) ordered schedule(dynamic,1)
         for (int iChunk=0; iChunk < (int) saChunkN; iChunk++) {//start the chunk cycle: sort each chunk with qsort and write to a file
             uint* saChunk=new uint [indPrefChunkCount[iChunk]];//allocate local array for each chunk
-            for (uint ii=0,jj=0;ii<N2;ii+=pGe.gSAsparseD) {//fill the chunk with SA indices
+            for (uint ii=0,jj=0;ii<2*nGenome;ii+=pGe.gSAsparseD) {//fill the chunk with SA indices
                 if (G[ii]<4) {
                     uint p1=(G[ii]<<12) + (G[ii-1]<<8) + (G[ii-2]<<4) + G[ii-3];
                     if (p1>=indPrefStart[iChunk] && p1<indPrefStart[iChunk+1]) {
@@ -338,7 +284,7 @@ void Genome::genomeGenerate() {
             //sort the chunk
             qsort(saChunk,indPrefChunkCount[iChunk],sizeof(saChunk[0]),funCompareSuffixes);
             for (uint ii=0;ii<indPrefChunkCount[iChunk];ii++) {
-                saChunk[ii]=N2-1-saChunk[ii];
+                saChunk[ii]=2*nGenome-1-saChunk[ii];
             };
             //write files
             string chunkFileName=pGe.gDir+"/SA_"+to_string( (uint) iChunk);
@@ -373,7 +319,7 @@ void Genome::genomeGenerate() {
             while (! saChunkFile.eof()) {//read blocks from each file
                 uint chunkBytesN=fstreamReadBig(saChunkFile,(char*) saIn,SA_CHUNK_BLOCK_SIZE*sizeof(saIn[0]));
                 for (uint ii=0;ii<chunkBytesN/sizeof(saIn[0]);ii++) {
-                    SA.writePacked( packedInd+ii, (saIn[ii]<N) ? saIn[ii] : ( (saIn[ii]-N) | N2bit ) );
+                    SA.writePacked( packedInd+ii, (saIn[ii]<nGenome) ? saIn[ii] : ( (saIn[ii]-nGenome) | N2bit ) );
 
                     #ifdef genenomeGenerate_SA_textOutput
                         SAtxtStream << saIn[ii] << "\n";
@@ -400,8 +346,8 @@ void Genome::genomeGenerate() {
 
         //DONE with suffix array generation
 
-        for (uint ii=0;ii<N;ii++) {//return to normal order for future use
-            swap(G[N2-1-ii],G[ii]);
+        for (uint ii=0;ii<nGenome;ii++) {//return to normal order for future use
+            swap(G[2*nGenome-1-ii],G[ii]);
         };
         delete [] indPrefCount;
         delete [] indPrefStart;
@@ -414,46 +360,15 @@ void Genome::genomeGenerate() {
     P.inOut->logMain     << timeMonthDayTime(rawTime) <<" ... finished generating suffix array\n" <<flush;
     *P.inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... finished generating suffix array\n" <<flush;
 
-////////////////////////////////////////
-//          SA index
-//
-//     PackedArray SAold;
-//
-//     if (true)
-//     {//testing: load SA from disk
-//             //read chunks and pack into full SA
-//
-//         ifstream oldSAin("./DirTrue/SA");
-//         oldSAin.seekg (0, ios::end);
-//         nSAbyte=(uint) oldSAin.tellg();
-//         oldSAin.clear();
-//         oldSAin.seekg (0, ios::beg);
-//
-//         nSA=(nSAbyte*8)/(GstrandBit+1);
-//         SAold.defineBits(GstrandBit+1,nSA);
-//         SAold.allocateArray();
-//
-//         oldSAin.read(SAold.charArray,SAold.lengthByte);
-//         oldSAin.close();
-//
-//         SA1=SAold;
-//         SA2=SAold;
-//     };
-
     genomeSAindex(G, SA, P, SAi, *this);
 
     sjdbN=0;
-    if (pGe.sjdbFileChrStartEnd.at(0)!="-" || pGe.sjdbGTFfile!="-")
-    {//insert junctions
-        SjdbClass sjdbLoci;
-
-        Genome mainGenome1(*this);
-
+    if (P.sjdbInsert.yes) {//insert junctions
         P.sjdbInsert.outDir=pGe.gDir;
         P.twoPass.pass2=false;
 
-        sjdbInsertJunctions(P, *this, mainGenome1, sjdbLoci);
-
+        Genome genome1(*this); //create copy here, *this will be changed by sjdbInsertJunctions
+        sjdbInsertJunctions(P, *this, genome1, sjdbLoci);
     };
 
     pGe.gFileSizes.clear();

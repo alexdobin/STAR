@@ -9,7 +9,8 @@
 
 class Genome {
     public:
-        char *G, *sigG;
+        char *G, *G1;
+        uint64 nGenome, nG1alloc;
         PackedArray SA,SAinsert,SApass1,SApass2;
         PackedArray SAi;
         Variation *Var;
@@ -19,14 +20,14 @@ class Genome {
         ParametersGenome &pGe;
 
         //chr parameters
-        vector <uint> chrStart, chrLength, chrLengthAll;
+        vector <uint64> chrStart, chrLength, chrLengthAll;
         uint genomeChrBinNbases, chrBinN, *chrBin;
         vector <string> chrName, chrNameAll;
-        map <string,uint> chrNameIndex;
+        map <string,uint64> chrNameIndex;
 
         uint *genomeSAindexStart;//starts of the L-mer indices in the SAindex, 1<=L<=pGe.gSAindexNbases
 
-        uint nGenome, nSA, nSAbyte, nChrReal;//genome length, SA length, # of chromosomes, vector of chromosome start loci
+        uint nSA, nSAbyte, nChrReal;//genome length, SA length, # of chromosomes, vector of chromosome start loci
         uint nGenome2, nSA2, nSAbyte2, nChrReal2; //same for the 2nd pass
         uint nSAi; //size of the SAindex
         unsigned char GstrandBit, SAiMarkNbit, SAiMarkAbsentBit; //SA index bit for strand information
@@ -54,16 +55,19 @@ class Genome {
         void genomeLoad();
         void chrBinFill();
         void chrInfoLoad();
+        void genomeSequenceAllocate();
+        void concatenateChromosomes(const vector<vector<uint8>> &vecSeq, const vector<string> &vecName, const uint64 padBin);
 
         void insertSequences();
 
+        void consensusSequence();
+        
         void genomeGenerate();
 
     private:
         Parameters &P;
         key_t shmKey;
         char *shmStart;
-        char *G1; //pointer -200 of G
         uint OpenStream(string name, ifstream & stream, uint size);
         void HandleSharedMemoryException(const SharedMemoryException & exc, uint64 shmSize);
 

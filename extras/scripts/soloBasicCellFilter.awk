@@ -1,5 +1,4 @@
 # usage awk -v exactCells=... -v maxCells=... -v maxPercentile=... -v maxMinRatio=... -f soloBasicCellFilter.awk 
-BEGIN {
     # default values - if variables were not defined by the user
     if (exactCells==0)
         exactCells=0;

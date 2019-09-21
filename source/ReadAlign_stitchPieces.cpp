@@ -225,10 +225,22 @@ for (uint iW=0;iW<nW;iW++) {//check each window
         if (swWinCov[iW]>swWinCovMax) swWinCovMax=swWinCov[iW];
     };//if (nWA[iW]>0)
 };//for (uint iW=0;iW<nW;iW++)
+
+//debug
+for (uint iW=0;iW<nW;iW++) {
+	if (swWinCov[iW]>=swWinCovMax*P.winReadCoverageRelativeMin && swWinCov[iW]>=P.winReadCoverageBasesMin) {
+		//debug: output windows and coverages
+		cout << readName <<" "<< WC[iW][WC_Chr] <<" "<< double(swWinCov[iW])/readLength[0]  <<" "<< double(swWinCov[iW])/swWinCovMax <<'\n';
+	};
+};
+nW=0;
+return;
+//debug
+
 for (uint iW=0;iW<nW;iW++) {
     if (swWinCov[iW]<swWinCovMax*P.winReadCoverageRelativeMin || swWinCov[iW]<P.winReadCoverageBasesMin) {//remove windows that are not good enough
         nWA[iW]=0;
-    } else {//merge pieces that are adjacent in R- and G-spaces
+    } else {//merge pieces that are adjacent in R- and G-spaces	
         uint ia1=0;
         for (uint ia=1; ia<nWA[iW]; ia++) {
             if ( WA[iW][ia][WA_rStart] == (WA[iW][ia1][WA_rStart]+WA[iW][ia1][WA_Length]) \

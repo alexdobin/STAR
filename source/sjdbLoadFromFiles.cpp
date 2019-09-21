@@ -1,6 +1,7 @@
 #include "sjdbLoadFromFiles.h"
 #include "sjdbLoadFromStream.h"
 #include "ErrorWarning.h"
+#include "TimeFunctions.h"
 
 void sjdbLoadFromFiles(Parameters &P, SjdbClass &sjdbLoci) {
 
@@ -15,7 +16,11 @@ void sjdbLoadFromFiles(Parameters &P, SjdbClass &sjdbLoci) {
 
             sjdbLoadFromStream(sjdbStreamIn, sjdbLoci);
 
-            P.inOut->logMain << "Loaded database junctions from file: " << P.pGe.sjdbFileChrStartEnd.at(ifile) <<", total number of junctions: "<<sjdbLoci.chr.size()<<" junctions\n\n";
+            sjdbLoci.priority.resize(sjdbLoci.chr.size(),10);
+            
+            time_t rawtime;
+            time ( &rawtime );
+            P.inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the pGe.sjdbFileChrStartEnd file(s), total number of junctions:" << sjdbLoci.chr.size()<<"\n\n";
         };
     }; //if (P.pGe.sjdbFileChrStartEnd!="-")
 

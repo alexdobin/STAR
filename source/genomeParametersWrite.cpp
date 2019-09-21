@@ -9,6 +9,8 @@ void genomeParametersWrite(string fileName, Parameters& P, string errorOut, Geno
     genomePar << "### GstrandBit "<< int(mapGen.GstrandBit) <<"\n";
 
     genomePar << "versionGenome\t" << P.versionGenome <<"\n";
+    genomePar << "genomeType\t" << mapGen.pGe.gType <<"\n";
+    
     genomePar << "genomeFastaFiles\t";
     for (uint ii=0;ii<mapGen.pGe.gFastaFiles.size();ii++) genomePar << mapGen.pGe.gFastaFiles.at(ii) << " ";
     genomePar << "\n";

@@ -255,13 +255,13 @@ class Parameters {
         } sjdbInsert;
 
         //storage limits
-        uint limitGenomeGenerateRAM;
-        uint limitIObufferSize; //max size of the in/out buffer, bytes
-        uint limitOutSAMoneReadBytes;
-        uint limitOutSJoneRead, limitOutSJcollapsed;
-        uint limitBAMsortRAM;
-        uint limitSjdbInsertNsj;
-        uint limitNreadsSoft;
+        uint64 limitGenomeGenerateRAM;
+        uint64 limitIObufferSize; //max size of the in/out buffer, bytes
+        uint64 limitOutSAMoneReadBytes;
+        uint64 limitOutSJoneRead, limitOutSJcollapsed;
+        uint64 limitBAMsortRAM;
+        uint64 limitSjdbInsertNsj;
+        uint64 limitNreadsSoft;
 
         // penalties
         intScore scoreGap, scoreGapNoncan, scoreGapGCAG, scoreGapATAC, scoreDelBase, scoreDelOpen, scoreInsBase, scoreInsOpen;

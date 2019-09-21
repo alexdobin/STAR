@@ -5,8 +5,7 @@
 uint genomeScanFastaFiles (Parameters &P, char* G, bool flagRun, Genome &mapGen) {//scans fasta files. flagRun=false: check and find full size, flaRun=true: collect all the data
 
     uint N=0;//total number of bases in the genome, including chr "spacers"
-    if (!flagRun && mapGen.chrLength.size()>0)
-    {//previous chr records exist
+    if (!flagRun && mapGen.chrLength.size()>0) {//previous chr records exist
        mapGen.chrStart.pop_back();//remove last record, it will be recorded again
        N =  mapGen.chrStart.back()+mapGen.chrLength.back();
        mapGen.chrLength.pop_back();//remove last record, it will be recorded again
@@ -15,27 +14,25 @@ uint genomeScanFastaFiles (Parameters &P, char* G, bool flagRun, Genome &mapGen)
     ifstream fileIn;
     for (uint ii=0;ii<mapGen.pGe.gFastaFiles.size();ii++) {//all the input files
         fileIn.open(mapGen.pGe.gFastaFiles.at(ii).c_str());
-        if ( !fileIn.good() )
-        {//
+        if ( !fileIn.good() ) {//
             ostringstream errOut;
             errOut << "EXITING because of INPUT ERROR: could not open genomeFastaFile: " <<mapGen.pGe.gFastaFiles.at(ii) <<"\n";
             exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         };
         char cc=fileIn.peek();
-        if ( !fileIn.good() )
-        {//
+        if ( !fileIn.good() ) {//
             ostringstream errOut;
             errOut << "EXITING because of INPUT ERROR: could not read from genomeFastaFile: " <<mapGen.pGe.gFastaFiles.at(ii) <<"\n";
             exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         };
-        if (cc!='>')
-        {
+        if (cc!='>') {
             ostringstream errOut;
             errOut << "EXITING because of INPUT ERROR: the file format of the genomeFastaFile: " <<mapGen.pGe.gFastaFiles.at(ii) << " is not fasta:";
             errOut << " the first character is '" <<cc<<"' ("<< (cc+0) << "), not '>'.\n";
             errOut << " Solution: check formatting of the fasta file. Make sure the file is uncompressed (unzipped).\n";
             exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
-        };         while(!fileIn.eof()) {//read each file until eof
+        };         
+        while(!fileIn.eof()) {//read each file until eof
             string lineIn (4096,'.');
             getline(fileIn,lineIn);
             if (lineIn[0]=='>') {//new chromosome
@@ -71,7 +68,6 @@ uint genomeScanFastaFiles (Parameters &P, char* G, bool flagRun, Genome &mapGen)
         };
         fileIn.close();
     };
-
 
     if (!flagRun)
         mapGen.chrLength.push_back(N-mapGen.chrStart.at(mapGen.chrStart.size()-1)); //true length of the last chr

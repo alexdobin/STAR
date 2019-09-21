@@ -676,3 +676,21 @@ void Genome::chrBinFill() {
         chrBin[ii]=ichr-1;
     };
 };
+
+//////////////////////////////////////////////////////////
+void Genome::genomeSequenceAllocate()
+{
+    nG1alloc=(nGenome + 1)*2;
+    
+    if (P.limitGenomeGenerateRAM < (nG1alloc+nG1alloc/3)) {//allocate nG1alloc/3 for SA generation
+        ostringstream errOut;
+        errOut <<"EXITING because of FATAL PARAMETER ERROR: limitGenomeGenerateRAM="<< (P.limitGenomeGenerateRAM) <<"is too small for your genome\n";
+        errOut <<"SOLUTION: please specify --limitGenomeGenerateRAM not less than "<< nG1alloc+nG1alloc/3 <<" and make that much RAM available \n";
+        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
+    };    
+    
+    G1=new char[nG1alloc];
+    G=G1+1;
+
+    memset(G1,GENOME_spacingChar,nG1alloc);//initialize to K-1 all bytes
+};

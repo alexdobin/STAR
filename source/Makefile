@@ -28,8 +28,9 @@ CFLAGS := -O3 -pipe -Wall -Wextra $(CFLAGS)
 
 
 ##########################################################################################################
-
-OBJECTS = SoloFeature_countCBgeneUMI.o Transcriptome_classifyAlign.o SoloFeature_cellFiltering.o SoloFeature_statsOutput.o bamSortByCoordinate.o SoloBarcode.o ParametersSolo.o SoloRead.o SoloRead_record.o \
+OBJECTS = SmithWatermanAlignment.o SWReadSequenceGeneration.o SWComputeScore.o \
+        GTF.o GTF_transcriptGeneSJ.o GTF_superTranscript.o \
+	SoloFeature_countCBgeneUMI.o Transcriptome_classifyAlign.o SoloFeature_cellFiltering.o SoloFeature_statsOutput.o bamSortByCoordinate.o SoloBarcode.o ParametersSolo.o SoloRead.o SoloRead_record.o \
 	SoloReadBarcode.o SoloReadBarcode_getCBandUMI.o SoloBarcode_extractBarcode.o \
 	SoloReadFeature.o SoloReadFeature_record.o SoloReadFeature_inputRecords.o \
 	Solo.o SoloFeature.o SoloFeature_collapseUMI.o SoloFeature_outputResults.o SoloFeature_processRecords.o SoloFeature_addBAMtags.o \
@@ -51,8 +52,9 @@ OBJECTS = SoloFeature_countCBgeneUMI.o Transcriptome_classifyAlign.o SoloFeature
 	ChimericSegment.cpp ChimericAlign.cpp ChimericAlign_chimericJunctionOutput.o ChimericAlign_chimericStitching.o \
 	stitchWindowAligns.o extendAlign.o stitchAlignToTranscript.o alignSmithWaterman.o \
 	Genome_genomeGenerate.o genomeParametersWrite.o genomeScanFastaFiles.o genomeSAindex.o \
-	Genome_insertSequences.o insertSeqSA.o funCompareUintAndSuffixes.o funCompareUintAndSuffixesMemcmp.o \
-	TimeFunctions.o ErrorWarning.o loadGTF.o streamFuns.o stringSubstituteAll.o \
+	Genome_insertSequences.o Genome_consensusSequence.o \
+	insertSeqSA.o funCompareUintAndSuffixes.o funCompareUintAndSuffixesMemcmp.o \
+	TimeFunctions.o ErrorWarning.o streamFuns.o stringSubstituteAll.o \
 	Transcriptome.o Transcriptome_quantAlign.o Transcriptome_geneFullAlignOverlap.o \
 	ReadAlign_quantTranscriptome.o Quantifications.o Transcriptome_geneCountsAddAlign.o \
 	sjdbLoadFromFiles.o sjdbLoadFromStream.o sjdbPrepare.o sjdbBuildIndex.o sjdbInsertJunctions.o mapThreadsSpawn.o \

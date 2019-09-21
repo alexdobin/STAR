@@ -35,6 +35,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <int> (-1, -1, "runRNGseed", &runRNGseed));
 
     //genome
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "genomeType", &pGe.gType));    
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "genomeDir", &pGe.gDir));
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "genomeLoad", &pGe.gLoad));
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "genomeFastaFiles", &pGe.gFastaFiles));
@@ -1282,6 +1283,13 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 
 //     genomeNumToNT={'A','C','G','T','N'};
     strcpy(genomeNumToNT,"ACGTN");
+    
+    if (pGe.gType!="Full" && pGe.gType!="Transcriptome" && pGe.gType!="SuperTranscriptome") {
+        ostringstream errOut;
+        errOut << "EXITING because of FATAL parameter error: --genomeType=" << pGe.gType << "\n";
+        errOut << "SOLUTION: use one of the allowed values of --genomeLoad : Full OR Transcriptome OR SuperTranscriptome\n" <<flush;
+        exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
 
     if (pGe.gLoad!="LoadAndKeep" && pGe.gLoad!="LoadAndRemove" && pGe.gLoad!="Remove" && pGe.gLoad!="LoadAndExit" && pGe.gLoad!="NoSharedMemory") {// find shared memory fragment
         ostringstream errOut;
@@ -1295,13 +1303,11 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     sjdbInsert.pass1=false;
     sjdbInsert.pass2=false;
     sjdbInsert.yes=false;
-    if (pGe.sjdbFileChrStartEnd.at(0)!="-" || pGe.sjdbGTFfile!="-")
-    {//will insert annotated sjdb on the fly
+    if (pGe.sjdbFileChrStartEnd.at(0)!="-" || pGe.sjdbGTFfile!="-") {//will insert annotated sjdb on the fly
        sjdbInsert.pass1=true;
        sjdbInsert.yes=true;
     };
-    if (twoPass.yes)
-    {
+    if (twoPass.yes) {
        sjdbInsert.pass2=true;
        sjdbInsert.yes=true;
     };

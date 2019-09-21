@@ -5,6 +5,8 @@ class ParametersGenome {//"constant" genome parameters - user input
     public:
         string gDir;
         string gLoad;
+        string gType;
+        
         vector <string> gFastaFiles;
         vector <string> gChainFiles;
         string gConsensusFile;

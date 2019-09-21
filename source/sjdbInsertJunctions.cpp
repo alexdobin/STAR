@@ -3,7 +3,7 @@
 #include "sjdbLoadFromFiles.h"
 #include "sjdbPrepare.h"
 #include "ErrorWarning.h"
-#include "loadGTF.h"
+#include "GTF.h"
 #include "sjdbBuildIndex.h"
 #include "streamFuns.h"
 #include "genomeParametersWrite.h"
@@ -34,28 +34,18 @@ void sjdbInsertJunctions(Parameters & P, Genome & mapGen, Genome & mapGen1, Sjdb
         sjdbLoci.priority.resize(sjdbLoci.chr.size(),0);
         time ( &rawtime );
         P.inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the 1st pass file: " << P.twoPass.pass1sjFile <<": "<<sjdbLoci.chr.size()<<" total junctions\n\n";
-    } else
+    } else if (P.runMode!="genomeGenerate")
     {//loading junctions from GTF or tab or from the saved genome is only allowed at the 1st pass
      //at the 2nd pass these are already in the sjdbLoci
-
-        if (P.pGe.sjdbFileChrStartEnd.at(0)!="-")
-        {//load from junction files
-            sjdbLoadFromFiles(P,sjdbLoci);
-            sjdbLoci.priority.resize(sjdbLoci.chr.size(),10);
-            time ( &rawtime );
-            P.inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the pGe.sjdbFileChrStartEnd file(s), " << sjdbLoci.chr.size()<<" total junctions\n\n";
-        };
-
-        if (P.pGe.sjdbGTFfile!="-")
-        {//load from GTF
-            loadGTF(sjdbLoci, P, P.sjdbInsert.outDir, mapGen);
-            sjdbLoci.priority.resize(sjdbLoci.chr.size(),20);
-            time ( &rawtime );
-            P.inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the GTF file: " << P.pGe.sjdbGTFfile<<": "<<sjdbLoci.chr.size()<<" total junctions\n\n";
-        };
+     //with runMode=="genomeGenerate", the junctions from GTF and File are already loaded
+        sjdbLoadFromFiles(P, sjdbLoci);
+        GTF gtf(mapGen, P, P.sjdbInsert.outDir, sjdbLoci);
+        gtf.transcriptGeneSJ();
     };
 
-    char *Gsj=new char [2*mapGen.sjdbLength*sjdbLoci.chr.size()*(P.var.yes ? 2:1)+1];//array to store junction sequences, will be filled in sjdbPrepare
+    //char *Gsj=new char [2*mapGen.sjdbLength*sjdbLoci.chr.size()*(P.var.yes ? 2:1)+1];//array to store junction sequences, will be filled in sjdbPrepare
+    char *Gsj=new char [2*mapGen.sjdbLength*sjdbLoci.chr.size()+1];//array to store junction sequences, will be filled in sjdbPrepare
+
     sjdbPrepare (sjdbLoci, P, mapGen.chrStart[mapGen.nChrReal], P.sjdbInsert.outDir, mapGen, Gsj);//mapGen.nGenome - change when replacing junctions
     time ( &rawtime );
     P.inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished preparing junctions" <<endl;

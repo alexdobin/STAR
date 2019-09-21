@@ -11,3 +11,8 @@ doc/*.toc
 
 # Don't track the STAR binary once it has being built
 source/STAR
+.DS_Store
+*.xcworkspacedata
+*.pbxproj
+*.plist
+*.xcuserstate

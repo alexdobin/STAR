@@ -33,6 +33,12 @@ runRNGseed                      777
 
 
 ### Genome Parameters
+genomeType                  Full
+    string: type of genome to generate
+                            Full                ... full (normal) genome
+                            Transcriptome       ... genome consists of transcript sequences
+                            SuperTransriptome   ... genome consists of superTranscript sequences
+                            
 genomeDir                   ./GenomeDir/
     string: path to the directory where genome files are stored (for --runMode alignReads) or will be generated (for --runMode generateGenome)
 

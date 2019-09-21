@@ -25,9 +25,9 @@ void warningMessage(string messageOut, ostream &streamOut1, ostream &streamOut2,
     time( &timeCurrent);
     if (P.runThreadN>1) pthread_mutex_lock(&g_threadChunks.mutexError);
     if (streamOut1.good()) {
-        streamOut1 << "WARNING: " << messageOut << " : " << timeMonthDayTime(timeCurrent) <<endl;
+        streamOut1 << timeMonthDayTime(timeCurrent) <<"\tWARNING: " << messageOut <<endl;
     };
     if (streamOut2.good()) {
-        streamOut2 << "WARNING: " << messageOut << "\t\t " << timeMonthDayTime(timeCurrent) <<endl;
+        streamOut2 << timeMonthDayTime(timeCurrent) << "\tWARNING: " << messageOut <<endl;
     };
 };
