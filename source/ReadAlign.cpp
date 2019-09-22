@@ -38,7 +38,11 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
     scoreSeedBestMM = new uint [P.seedPerWindowNmax];
     seedChain = new uint [P.seedPerWindowNmax];
 #endif
-
+    if (P.pGe.gType==2) {//SuperTranscriptome
+        spliceGraph = new SpliceGraph(mapGen.superTr);
+    };
+    
+    
     WA=new uiWA*[P.alignWindowsPerReadNmax];
     for (uint ii=0;ii<P.alignWindowsPerReadNmax;ii++)
         WA[ii]=new uiWA[P.seedPerWindowNmax];

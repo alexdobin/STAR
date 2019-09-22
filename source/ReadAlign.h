@@ -13,17 +13,16 @@
 #include "ChimericDetection.h"
 #include "SoloRead.h"
 #include "ReadAnnotations.h"
+#include "SpliceGraph.h"
 
 #include <time.h>
 #include <random>
 
 class ReadAlign {
     public:
-         //methods
         ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk);//allocate arrays
         int oneRead();
 
-        //vars
         Genome &mapGen; //mapped-to-genome structure
 
         uint64 iRead, iReadAll;
@@ -54,6 +53,8 @@ class ReadAlign {
         ChimericDetection *chimDet;
 
         SoloRead *soloRead; //counts reads per CB per and outputs CB/UMI/gene into file, per thread
+        
+        SpliceGraph *spliceGraph;
 
     private:
         Parameters& P; //pointer to the parameters, will be initialized on construction

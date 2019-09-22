@@ -35,7 +35,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <int> (-1, -1, "runRNGseed", &runRNGseed));
 
     //genome
-    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "genomeType", &pGe.gType));    
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "genomeType", &pGe.gTypeString));    
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "genomeDir", &pGe.gDir));
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "genomeLoad", &pGe.gLoad));
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "genomeFastaFiles", &pGe.gFastaFiles));
@@ -1284,9 +1284,9 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 //     genomeNumToNT={'A','C','G','T','N'};
     strcpy(genomeNumToNT,"ACGTN");
     
-    if (pGe.gType!="Full" && pGe.gType!="Transcriptome" && pGe.gType!="SuperTranscriptome") {
+    if (pGe.gTypeString!="Full" && pGe.gTypeString!="Transcriptome" && pGe.gTypeString!="SuperTranscriptome") {
         ostringstream errOut;
-        errOut << "EXITING because of FATAL parameter error: --genomeType=" << pGe.gType << "\n";
+        errOut << "EXITING because of FATAL parameter error: --genomeType=" << pGe.gTypeString << "\n";
         errOut << "SOLUTION: use one of the allowed values of --genomeLoad : Full OR Transcriptome OR SuperTranscriptome\n" <<flush;
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };

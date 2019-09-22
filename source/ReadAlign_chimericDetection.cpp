@@ -9,7 +9,7 @@
 //#include "stitchWindowAligns.h"
 //#include "sjSplitAlign.cpp"
 //#include "PackedArray.h"
-//#include "alignSmithWaterman.h"
+//#include "alignSpliceGraph.h"
 //#include "GlobalVariables.h"
 //#include <time.h>
 

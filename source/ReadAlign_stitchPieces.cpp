@@ -6,7 +6,6 @@
 #include "stitchWindowAligns.h"
 #include "sjAlignSplit.cpp"
 #include "PackedArray.h"
-#include "alignSmithWaterman.h"
 #include "GlobalVariables.h"
 #include <time.h>
 
@@ -229,8 +228,11 @@ for (uint iW=0;iW<nW;iW++) {//check each window
 //debug
 for (uint iW=0;iW<nW;iW++) {
 	if (swWinCov[iW]>=swWinCovMax*P.winReadCoverageRelativeMin && swWinCov[iW]>=P.winReadCoverageBasesMin) {
-		//debug: output windows and coverages
-		cout << readName <<" "<< WC[iW][WC_Chr] <<" "<< double(swWinCov[iW])/readLength[0]  <<" "<< double(swWinCov[iW])/swWinCovMax <<'\n';
+        array<uint32,2> alignEnds, alignStarts;
+        uint32 swScore = spliceGraph->swScoreSpliced(R[0], Lread, WC[iW][WC_Chr], alignEnds);
+        spliceGraph->swTraceBack(alignEnds, alignStarts);
+		cout << readName <<'\t'<< WC[iW][WC_Chr] <<'\t'<< double(swWinCov[iW])/readLength[0] <<'\t'<< double(swWinCov[iW])/swWinCovMax <<'\t'<<
+                Lread    <<'\t'<< swScore <<'\t'<< double(swScore)/Lread <<'\t'<< alignStarts[0] <<'\t'<< alignEnds[0] <<'\t'<< alignStarts[1] <<'\t'<< alignEnds[1] << endl;
 	};
 };
 nW=0;

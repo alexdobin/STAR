@@ -25,7 +25,7 @@
 //arbitrary number for ftok function
 #define SHM_projectID 23
 
-Genome::Genome (Parameters &Pin ): pGe(Pin.pGe), sharedMemory(NULL), P(Pin), shmStart(NULL) {
+Genome::Genome (Parameters &P): P(P), pGe(P.pGe), sharedMemory(NULL), shmStart(NULL), superTr(P,this->chrLength) {
     shmKey=ftok(pGe.gDir.c_str(),SHM_projectID);
 
     sjdbOverhang = pGe.sjdbOverhang; //will be re-defined later if another value was used for the generated genome
@@ -157,13 +157,12 @@ void Genome::genomeLoad(){//allocate and load Genome
     //check if sjdbInfo.txt exists => genome was generated with junctions
     bool sjdbInfoExists=false;
     struct stat sjdb1;
-    if ( stat( (pGe.gDir+"/sjdbInfo.txt").c_str(), &sjdb1) == 0 )
-    {//file exists
+    if ( stat( (pGe.gDir+"/sjdbInfo.txt").c_str(), &sjdb1) == 0 ) {//file exists
         sjdbInfoExists=true;
     };
 
-    if ( P.sjdbInsert.yes && sjdbInfoExists && P1.pGe.sjdbInsertSave=="")
-    {//if sjdbInsert, and genome had junctions, and genome is old - it should be re-generated with new STAR
+    if ( P.sjdbInsert.yes && sjdbInfoExists && P1.pGe.sjdbInsertSave=="") {
+        //if sjdbInsert, and genome had junctions, and genome is old - it should be re-generated with new STAR
         ostringstream errOut;
         errOut << "EXITING because of FATAL ERROR: old Genome is INCOMPATIBLE with on the fly junction insertion\n";
         errOut << "SOLUTION: please re-generate genome from scratch with the latest version of STAR\n";
@@ -176,32 +175,33 @@ void Genome::genomeLoad(){//allocate and load Genome
     genomeChrBinNbases=1LLU<<pGe.gChrBinNbits;
     pGe.gSAsparseD=P1.pGe.gSAsparseD;
 
-    if (P1.pGe.gFileSizes.size()>0)
-    {//genomeFileSize was recorded in the genomeParameters file, copy the values to P
+    if (P1.pGe.gFileSizes.size()>0){//genomeFileSize was recorded in the genomeParameters file, copy the values to P
         pGe.gFileSizes = P1.pGe.gFileSizes;
     };
 
-    if (P.parArray.at(pGe.sjdbOverhang_par)->inputLevel==0 && P1.pGe.sjdbOverhang>0)
-    {//if --sjdbOverhang was not defined by user and it was defined >0 at the genome generation step, then use pGe.sjdbOverhang from the genome generation step
+    if (P.parArray.at(pGe.sjdbOverhang_par)->inputLevel==0 && P1.pGe.sjdbOverhang>0) {
+        //if --sjdbOverhang was not defined by user and it was defined >0 at the genome generation step, then use pGe.sjdbOverhang from the genome generation step
         pGe.sjdbOverhang=P1.pGe.sjdbOverhang;
         P.inOut->logMain << "--sjdbOverhang = " << pGe.sjdbOverhang << " taken from the generated genome\n";
-    } else if (sjdbInfoExists && P.parArray.at(pGe.sjdbOverhang_par)->inputLevel>0 && pGe.sjdbOverhang!=P1.pGe.sjdbOverhang)
-    {//if pGe.sjdbOverhang was defined at the genome generation step,the mapping step value has to agree with it
+    } else if (sjdbInfoExists && P.parArray.at(pGe.sjdbOverhang_par)->inputLevel>0 && pGe.sjdbOverhang!=P1.pGe.sjdbOverhang) {
+        //if pGe.sjdbOverhang was defined at the genome generation step,the mapping step value has to agree with it
         ostringstream errOut;
         errOut << "EXITING because of fatal PARAMETERS error: present --sjdbOverhang="<<pGe.sjdbOverhang << " is not equal to the value at the genome generation step ="<< P1.pGe.sjdbOverhang << "\n";
         errOut << "SOLUTION: \n" <<flush;
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_GENOME_FILES, P);
     };
-
     sjdbOverhang = pGe.sjdbOverhang;
     sjdbLength = pGe.sjdbOverhang==0 ? 0 : pGe.sjdbOverhang*2+1;
+    
+    pGe.gType=1;
+    if (P1.pGe.gTypeString=="SuperTranscriptome")
+        pGe.gType=2;
 
     P.inOut->logMain << "Started loading the genome: " << asctime (localtime ( &rawtime ))<<"\n"<<flush;
 
     ifstream GenomeIn, SAin, SAiIn;
 
-    if (pGe.gFileSizes.size() < 2)
-    {//no size info available
+    if (pGe.gFileSizes.size() < 2) {//no size info available
         pGe.gFileSizes.push_back(0);
         pGe.gFileSizes.push_back(0);
     };
@@ -216,13 +216,12 @@ void Genome::genomeLoad(){//allocate and load Genome
     nSAi=genomeSAindexStart[pGe.gSAindexNbases];
     P.inOut->logMain << "Read from SAindex: pGe.gSAindexNbases=" << pGe.gSAindexNbases <<"  nSAi="<< nSAi <<endl;
 
-
     /////////////////////////////////// at this point all array sizes should be known: calculate packed array lengths
     if (GstrandBit==0) {//not defined before
         GstrandBit = (uint) floor(log(nGenome)/log(2))+1;
-        if (GstrandBit<32) GstrandBit=32; //TODO: use simple access function for SA
+        if (GstrandBit<32) 
+            GstrandBit=32; //TODO: use simple access function for SA
     };
-
 
     GstrandMask = ~(1LLU<<GstrandBit);
     nSA=(nSAbyte*8)/(GstrandBit+1);
@@ -314,31 +313,27 @@ void Genome::genomeLoad(){//allocate and load Genome
     } else if (pGe.gLoad=="NoSharedMemory") {// simply allocate memory, do not use shared memory
         genomeInsertL=0;
         genomeInsertChrIndFirst=nChrReal;
-        if (pGe.gFastaFiles.at(0)!="-")
-        {//will insert sequences in the genome, now estimate the extra size
+        if (pGe.gFastaFiles.at(0)!="-") {//will insert sequences in the genome, now estimate the extra size
            uint oldlen=chrStart.back();//record the old length
            genomeInsertL=genomeScanFastaFiles(P, G, false, *this)-oldlen;
         };
 
         try {
-
-            if (P.sjdbInsert.pass1 || P.sjdbInsert.pass2)
-            {//reserve extra memory for insertion at the 1st and/or 2nd step
+            if (P.sjdbInsert.pass1 || P.sjdbInsert.pass2) {
+                //reserve extra memory for insertion at the 1st and/or 2nd step
                 nGenomeInsert=nGenome+genomeInsertL;
                 nSAinsert=nSA+2*genomeInsertL;
 
                 nGenomePass1=nGenomeInsert;
                 nSApass1=nSAinsert;
-                if (P.sjdbInsert.pass1)
-                {
+                if (P.sjdbInsert.pass1) {
                     nGenomePass1+=P.limitSjdbInsertNsj*sjdbLength;
                     nSApass1+=2*P.limitSjdbInsertNsj*sjdbLength;
                 };
 
                 nGenomePass2=nGenomePass1;
                 nSApass2=nSApass1;
-                if (P.sjdbInsert.pass2)
-                {
+                if (P.sjdbInsert.pass2) {
                     nGenomePass2+=P.limitSjdbInsertNsj*sjdbLength;
                     nSApass2+=2*P.limitSjdbInsertNsj*sjdbLength;
                 };
@@ -355,14 +350,11 @@ void Genome::genomeLoad(){//allocate and load Genome
                 SAinsert.pointArray(SApass1.charArray+SApass1.lengthByte-SAinsert.lengthByte);
 
                 SA.pointArray(SAinsert.charArray+SAinsert.lengthByte-SA.lengthByte);
-            } else
-            {//no sjdb insertions
-                if (genomeInsertL==0)
-                {// no sequence insertion, simple allocation
+            } else {//no sjdb insertions
+                if (genomeInsertL==0) {// no sequence insertion, simple allocation
                     G1=new char[nGenome+L+L];
                     SA.allocateArray();
-                } else
-                {
+                } else {
                     G1=new char[nGenome+L+L+genomeInsertL];
                     SAinsert.defineBits(GstrandBit+1,nSA+2*genomeInsertL);//TODO: re-define GstrandBit if necessary
                     SAinsert.allocateArray();
@@ -378,20 +370,7 @@ void Genome::genomeLoad(){//allocate and load Genome
             errOut <<"Possible cause 2: not enough virtual memory allowed with ulimit. SOLUTION: run ulimit -v " <<  nGenome+L+L+SA.lengthByte+SAi.lengthByte+2000000000<<endl <<flush;
             exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_MEMORY_ALLOCATION, P);
         };
-
-    }
-
-
-//     if (twopass1readsN==0) {//not 2-pass
-//         shmStartG=SHM_startSHM;
-//         shmStartSA=0;
-//     } else {//2-pass
-//         ostringstream errOut;
-//         errOut << "EXITING because of FATAL ERROR: 2-pass procedure cannot be used with genome already loaded im memory'  "\n" ;
-//         errOut << "SOLUTION: check shared memory settings as explained in STAR manual, OR run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;
-//         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_SHM, P);
-//     };
-
+    };
 
     G=G1+L;
 
@@ -404,7 +383,7 @@ void Genome::genomeLoad(){//allocate and load Genome
         P.inOut->logMain <<"Loading Genome ... " << flush;
         uint genomeReadBytesN=fstreamReadBig(GenomeIn,G,nGenome);
         P.inOut->logMain <<"done! state: good=" <<GenomeIn.good()\
-                <<" eof="<<GenomeIn.eof()<<" fail="<<GenomeIn.fail()<<" bad="<<GenomeIn.bad()<<"; loaded "<<genomeReadBytesN<<" bytes\n" << flush;
+                         <<" eof="<<GenomeIn.eof()<<" fail="<<GenomeIn.fail()<<" bad="<<GenomeIn.bad()<<"; loaded "<<genomeReadBytesN<<" bytes\n" << flush;
         GenomeIn.close();
 
         for (uint ii=0;ii<L;ii++) {// attach a tail with the largest symbol
@@ -525,7 +504,6 @@ void Genome::genomeLoad(){//allocate and load Genome
         P.winBinNbits = max( P.winBinNbits, (uint) floor(log2(nGenome/40000+1)+0.5) );
         //ISSUE - to be fixed in STAR3: if alignIntronMax>0 but alignMatesGapMax==0, winBinNbits will be defined by alignIntronMax
         P.inOut->logMain << "To accommodate alignIntronMax="<<P.alignIntronMax<<" redefined winBinNbits="<< P.winBinNbits <<endl;
-
     };
 
     if (P.winBinNbits > pGe.gChrBinNbits) {
@@ -545,7 +523,11 @@ void Genome::genomeLoad(){//allocate and load Genome
     };
 
     P.winBinChrNbits=pGe.gChrBinNbits-P.winBinNbits;
-    P.winBinN = nGenome/(1LLU << P.winBinNbits)+1;//this may be chenaged later
+    P.winBinN = nGenome/(1LLU << P.winBinNbits)+1;//this may be changed later
+    
+    if (pGe.gType==2) {//SuperTranscriptome
+        superTr.load(G, chrStart);
+    };
 };
 
 

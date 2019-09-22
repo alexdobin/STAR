@@ -116,7 +116,7 @@ uint64 GTF::transcriptGeneSJ() {//sort exonLoci by transcript ID and exon coordi
     uint64 sjN=0;
     for (uint64 iex=1; iex<exonN; iex++) {
         if (trIDn==exonLoci[iex][exT]) {
-            uint64 chr1=genome.chrBin[exonLoci[iex][exS] >> genome.pGe.gChrBinNbits];
+                uint64 chr1=genome.chrBin[exonLoci[iex][exS] >> genome.pGe.gChrBinNbits];
             if ( exonLoci[iex][exS]<=exonLoci[iex-1][exE]+1 ) {//touching - nothing to do
             } else if ( exonLoci[iex][exS]<=exonLoci[iex-1][exE] ) {//overlapping
                 P.inOut->logMain << "WARNING: while processing pGe.sjdbGTFfile=" << genome.pGe.sjdbGTFfile <<": overlapping exons:\n";

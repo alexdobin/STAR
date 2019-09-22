@@ -1,24 +1,24 @@
 /*
  * Created by Fahimeh Mirhaj on 6/10/19.
 */
-
-#include "SmithWaterman.h"
-#include "GTF.h"
 using namespace std;
-SmithWaterman::SmithWaterman (vector<vector<uint8>> &sequenceOfSTs, vector<array<uint32,sjL>> &spJunctions, GTF &gtfIn, vector<pair<uint64, uint64>> &normalTransIntervalInST, vector<vector<uint8>> &seqOfNormalT, vector<uint64> &normalTSuperTInd): superTrSeq(sequenceOfSTs), spliceJunctions(spJunctions), gtf(gtfIn), transcriptSuperTrStartEnd(normalTransIntervalInST), transcriptSeq(seqOfNormalT), transcriptSuperTrIndex(normalTSuperTInd) {
-    scoringMatrix = new scoreType*[maxSeqLength];
-    directionMatrix = new pair<seqLenType,seqLenType>*[maxSeqLength];
-    superTIntervals = new pair<uint64, uint64>[gtfIn.superTrStartEnd.size()];
+
+#include "SpliceGraph.h"
+#include "GTF.h"
+SpliceGraph::SpliceGraph (SuperTranscript &superTr) : superTr(superTr)
+{
+    scoringMatrix = new typeAlignScore*[maxSeqLength];
+    directionMatrix = new pair<typeSeqLen,typeSeqLen>*[maxSeqLength];
+    //superTIntervals = new pair<uint64, uint64>[gtfIn.superTr.startEndInFullGenome.size()];
     for(uint i = 0; i < maxSeqLength; ++i) {
-        directionMatrix[i] = new pair<seqLenType,seqLenType>[10000];
+        directionMatrix[i] = new pair<typeSeqLen,typeSeqLen>[10000];
     };
     for(uint i = 0; i < maxSeqLength; i++) {
-        scoringMatrix[i] = new scoreType[10000];
+        scoringMatrix[i] = new typeAlignScore[10000];
     };
-    splicJunctionsTransformation();
 };
 
-SmithWaterman::~SmithWaterman() {
+SpliceGraph::~SpliceGraph() {
     for(uint i = 0; i < maxSeqLength; i++) {
         delete[] scoringMatrix[i];
     };
@@ -30,8 +30,8 @@ SmithWaterman::~SmithWaterman() {
 }
 
 //Unslpiced score, for testing - not used in main code
-// SmithWaterman::scoreType SmithWaterman::computeScore(uint32 transId, vector<uint8> read, array<SmithWaterman::seqLenType, 2> &indexToAbsMaxScore) {
-//     vector<uint8> &superTrancript = superTrSeq[transId];
+// SpliceGraph::typeAlignScore SpliceGraph::computeScore(uint32 transId, vector<uint8> read, array<SpliceGraph::typeSeqLen, 2> &indexToAbsMaxScore) {
+//     vector<uint8> &superTrancript = superTr.seq[transId];
 //     uint32 readLength = read.size();
 //     uint32 STLength = superTrancript.size();
 //     
@@ -42,7 +42,7 @@ SmithWaterman::~SmithWaterman() {
 //         scoringMatrix[j][0] = 0;
 //     }
 //     // Compute scores and finding absolute maximum
-//     scoreType maxScore = 0;
+//     typeAlignScore maxScore = 0;
 //     
 //     for(uint col = 1; col <= STLength; col++) {
 //         for(uint row = 1; row <= readLength; row++) {
