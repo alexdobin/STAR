@@ -14,7 +14,7 @@ struct sjInfo {
 class SuperTranscript {
     private:
     Parameters &P;
-public:
+public:   
     vector<uint8> seqConcat;//concatenated sequences of supertranscripts, a.k.a. Condensed Genome 
     vector<vector<uint8>> seq;//sequences of supertranscripts
     vector<pair<uint64, uint64>> startEndInFullGenome;//superTr start end in normal genome
@@ -26,7 +26,9 @@ public:
     vector<sjInfo> sj; //all splice junctions
     vector<vector<array<uint32,2>>> sjC; //collapsed splice junctions
     
-    SuperTranscript(Parameters &P, vector<uint64> &chrLength) : P(P), length(chrLength) {};
+    uint32 N; //number of superTr
+    
+    SuperTranscript(Parameters &P, vector<uint64> &chrLength) : P(P), length(chrLength), N(length.size()) {};
     void sjCollapse();
     void load(char *G, vector<uint64> &chrStart);
 };

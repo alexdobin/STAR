@@ -195,7 +195,7 @@ void Genome::genomeLoad(){//allocate and load Genome
     
     pGe.gType=1;
     if (P1.pGe.gTypeString=="SuperTranscriptome")
-        pGe.gType=2;
+        pGe.gType=101;
 
     P.inOut->logMain << "Started loading the genome: " << asctime (localtime ( &rawtime ))<<"\n"<<flush;
 

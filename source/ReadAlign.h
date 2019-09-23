@@ -54,7 +54,7 @@ class ReadAlign {
 
         SoloRead *soloRead; //counts reads per CB per and outputs CB/UMI/gene into file, per thread
         
-        SpliceGraph *spliceGraph;
+        SpliceGraph *splGraph;
 
     private:
         Parameters& P; //pointer to the parameters, will be initialized on construction
@@ -81,8 +81,6 @@ class ReadAlign {
         uint *scoreSeedBestInd, *seedChain, *scoreSeedBestMM;
 
         bool outFilterPassed; //true if alignment passed all filter and is output to SAM/BAM
-
-//         StatsAll *statsRA;
 
         //transcript
         Transcript* trArray; //linear array of transcripts to store all of them from all windows
@@ -164,6 +162,7 @@ class ReadAlign {
         void resetN();//resets the counters to 0
         void multMapSelect();
         int mapOneRead();
+        void mapOneReadSpliceGraph();
         uint maxMappableLength2strands(uint pieceStart, uint pieceLength, uint iDir, uint iSA1, uint iSA2, uint& maxL, uint iFrag);
         void storeAligns (uint iDir, uint Shift, uint Nrep, uint L, uint indStartEnd[2], uint iFrag);
 
@@ -183,7 +182,6 @@ class ReadAlign {
         void chimericDetectionOldOutput();
         bool chimericDetectionMult();
         void chimericDetectionPEmerged(ReadAlign &seRa);
-//         void chimericDetectionPEmergedTrim();
 
         void outputAlignments();
         void calcCIGAR(Transcript const &trOut, uint nMates, uint iExMate, uint leftMate);

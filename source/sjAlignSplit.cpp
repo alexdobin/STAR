@@ -1,5 +1,4 @@
-#include "IncludeDefine.h"
-#include "Genome.h"
+#include "sjAlignSplit.h"
 
 bool sjAlignSplit(uint a1,uint aLength, const Genome &mapGen, uint &a1D, uint &aLengthD, uint &a1A, uint &aLengthA, uint &isj) {
     uint sj1=(a1-mapGen.sjGstart)%mapGen.sjdbLength;

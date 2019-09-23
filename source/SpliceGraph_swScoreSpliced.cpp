@@ -3,14 +3,8 @@
 */
 
 #include "SpliceGraph.h"
-// #include <climits> //INT_MIN
-// #include <iostream>
-// #include <string>
-// #include <algorithm> //find()
-// #include <stdlib.h> //abs()
-// #include <utility>
 
-SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(char *readSeq, uint32 readLength, uint32 suTrInd, array<SpliceGraph::typeSeqLen, 2> &alignEnds) 
+SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, const uint32 readLength, const uint32 suTrInd, array<SpliceGraph::typeSeqLen, 2> &alignEnds)
 {//Smith-Waterman alignment  
     uint32 superTrLen = superTr.length[suTrInd];
     
@@ -26,8 +20,8 @@ SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(char *readSeq, uint32 re
     for(uint64 col=1; col<=superTrLen; col++) {//main cycle over columns
         vector<uint32> sjColumn;
         for(uint64 sj1 = 0; sj1 < superTr.sjC[suTrInd].size(); sj1++) {
-            if( col == superTr.sjC[suTrInd][sj1][sjE] ) {
-                sjColumn.push_back(superTr.sjC[suTrInd][sj1][sjS]);
+            if( col == superTr.sjC[suTrInd][sj1][1] ) {
+                sjColumn.push_back(superTr.sjC[suTrInd][sj1][0]);
             };
         };
         

@@ -28,7 +28,8 @@ CFLAGS := -O3 -pipe -Wall -Wextra $(CFLAGS)
 
 
 ##########################################################################################################
-OBJECTS = SpliceGraph.o SpliceGraph_swScoreSpliced.o SpliceGraph_swTraceBack.o \
+OBJECTS = ReadAlign_mapOneReadSpliceGraph.o SpliceGraph.o SpliceGraph_swScoreSpliced.o SpliceGraph_swTraceBack.o \
+	SpliceGraph_findSuperTr.o sjAlignSplit.o \
         GTF.o GTF_transcriptGeneSJ.o GTF_superTranscript.o SuperTranscript.o \
 	SoloFeature_countCBgeneUMI.o Transcriptome_classifyAlign.o SoloFeature_cellFiltering.o SoloFeature_statsOutput.o bamSortByCoordinate.o SoloBarcode.o ParametersSolo.o SoloRead.o SoloRead_record.o \
 	SoloReadBarcode.o SoloReadBarcode_getCBandUMI.o SoloBarcode_extractBarcode.o \

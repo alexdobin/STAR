@@ -7,11 +7,6 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
                     : mapGen(genomeIn), P(Pin), chunkTr(TrIn)
 {
     readNmates=P.readNmates;
-    winBin = new uintWinBin* [2];
-    winBin[0] = new uintWinBin [P.winBinN];
-    winBin[1] = new uintWinBin [P.winBinN];
-    memset(winBin[0],255,sizeof(winBin[0][0])*P.winBinN);
-    memset(winBin[1],255,sizeof(winBin[0][0])*P.winBinN);
     //RNGs
     rngMultOrder.seed(P.runRNGseed*(iChunk+1));
     rngUniformReal0to1=std::uniform_real_distribution<double> (0.0, 1.0);
@@ -19,34 +14,42 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
     if ( P.quant.trSAM.yes ) {
         alignTrAll=new Transcript [P.alignTranscriptsPerReadNmax];
     };
-    //split
-    splitR=new uint*[3];
-    splitR[0]=new uint[P.maxNsplit]; splitR[1]=new uint[P.maxNsplit]; splitR[2]=new uint[P.maxNsplit];
-    //alignments
-    PC=new uiPC[P.seedPerReadNmax];
-    WC=new uiWC[P.alignWindowsPerReadNmax];
-    nWA=new uint[P.alignWindowsPerReadNmax];
-    nWAP=new uint[P.alignWindowsPerReadNmax];
-    WALrec=new uint[P.alignWindowsPerReadNmax];
-    WlastAnchor=new uint[P.alignWindowsPerReadNmax];
 
-#ifdef COMPILE_FOR_LONG_READS
-    swWinCov = new uint[P.alignWindowsPerReadNmax];
-    scoreSeedToSeed = new intScore [P.seedPerWindowNmax*(P.seedPerWindowNmax+1)/2];
-    scoreSeedBest = new intScore [P.seedPerWindowNmax];
-    scoreSeedBestInd = new uint [P.seedPerWindowNmax];
-    scoreSeedBestMM = new uint [P.seedPerWindowNmax];
-    seedChain = new uint [P.seedPerWindowNmax];
-#endif
     if (P.pGe.gType==2) {//SuperTranscriptome
-        spliceGraph = new SpliceGraph(mapGen.superTr);
+        splGraph = new SpliceGraph(mapGen.superTr,P);
+    } else {//standard map algorithm:
+        winBin = new uintWinBin* [2];
+        winBin[0] = new uintWinBin [P.winBinN];
+        winBin[1] = new uintWinBin [P.winBinN];
+        memset(winBin[0],255,sizeof(winBin[0][0])*P.winBinN);
+        memset(winBin[1],255,sizeof(winBin[0][0])*P.winBinN);
+        //split
+        splitR=new uint*[3];
+        splitR[0]=new uint[P.maxNsplit]; splitR[1]=new uint[P.maxNsplit]; splitR[2]=new uint[P.maxNsplit];
+        //alignments
+        PC=new uiPC[P.seedPerReadNmax];
+        WC=new uiWC[P.alignWindowsPerReadNmax];
+        nWA=new uint[P.alignWindowsPerReadNmax];
+        nWAP=new uint[P.alignWindowsPerReadNmax];
+        WALrec=new uint[P.alignWindowsPerReadNmax];
+        WlastAnchor=new uint[P.alignWindowsPerReadNmax];
+    
+        WA=new uiWA*[P.alignWindowsPerReadNmax];
+        for (uint ii=0;ii<P.alignWindowsPerReadNmax;ii++)
+            WA[ii]=new uiWA[P.seedPerWindowNmax];
+        WAincl = new bool [P.seedPerWindowNmax];        
+
+        #ifdef COMPILE_FOR_LONG_READS
+        swWinCov = new uint[P.alignWindowsPerReadNmax];
+        scoreSeedToSeed = new intScore [P.seedPerWindowNmax*(P.seedPerWindowNmax+1)/2];
+        scoreSeedBest = new intScore [P.seedPerWindowNmax];
+        scoreSeedBestInd = new uint [P.seedPerWindowNmax];
+        scoreSeedBestMM = new uint [P.seedPerWindowNmax];
+        seedChain = new uint [P.seedPerWindowNmax];
+        #endif
     };
-    
-    
-    WA=new uiWA*[P.alignWindowsPerReadNmax];
-    for (uint ii=0;ii<P.alignWindowsPerReadNmax;ii++)
-        WA[ii]=new uiWA[P.seedPerWindowNmax];
-    WAincl = new bool [P.seedPerWindowNmax];
+
+    //aligns a.k.a. transcripts
     trAll = new Transcript**[P.alignWindowsPerReadNmax+1];
     nWinTr = new uint[P.alignWindowsPerReadNmax];
     trArray = new Transcript[P.alignTranscriptsPerReadNmax];
@@ -54,6 +57,7 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
     for (uint ii=0;ii<P.alignTranscriptsPerReadNmax;ii++)
         trArrayPointer[ii]= &(trArray[ii]);
     trInit = new Transcript;
+    
     //read
     Read0 = new char*[2];
     Read0[0]  = new char [DEF_readSeqLengthMax+1];
@@ -71,6 +75,7 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
     Read1[0]=new char[DEF_readSeqLengthMax+1]; Read1[1]=new char[DEF_readSeqLengthMax+1]; Read1[2]=new char[DEF_readSeqLengthMax+1];
     Qual1=new char*[2]; //modified QSs for scoring
     Qual1[0]=new char[DEF_readSeqLengthMax+1]; Qual1[1]=new char[DEF_readSeqLengthMax+1];
+    
     //outBAM
     outBAMoneAlignNbytes = new uint [P.readNmates+2]; //extra piece for chimeric reads
     outBAMoneAlign = new char* [P.readNmates+2]; //extra piece for chimeric reads
@@ -78,9 +83,11 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
         outBAMoneAlign[ii]=new char [BAMoutput_oneAlignMaxBytes];
     };
     resetN();
+    
     //chim
     chunkOutChimJunction = new fstream;
     chimDet = new ChimericDetection(P, trAll, nWinTr, Read1, mapGen, chunkOutChimJunction, this);
+    
     //solo
     soloRead = new SoloRead (P, iChunk);
 };
@@ -96,8 +103,5 @@ void ReadAlign::resetN () {//reset resets the counters to 0 for a new read
     for (uint ii=0; ii<P.readNmates; ii++) {
         maxScoreMate[ii]=0;
     };
-
-//     for (uint ii=0;ii<P.alignTranscriptsPerReadNmax;ii++) trArrayPointer[ii]= &(trArray[ii]);
-
 };
 

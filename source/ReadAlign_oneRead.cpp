@@ -68,7 +68,11 @@ int ReadAlign::oneRead() {//process one read: load, map, write
     outFilterMismatchNmaxTotal=min(P.outFilterMismatchNmax, (uint) (P.outFilterMismatchNoverReadLmax*(readLength[0]+readLength[1])));
 
     //map the read
-    mapOneRead();
+    if (P.pGe.gType==101) {//SpliceGraph
+        mapOneReadSpliceGraph();
+    } else {//all other cases - standard allignmen algorithm
+        mapOneRead();
+    };
 
     peOverlapMergeMap();
     multMapSelect();
