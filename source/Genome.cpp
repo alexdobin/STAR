@@ -25,7 +25,8 @@
 //arbitrary number for ftok function
 #define SHM_projectID 23
 
-Genome::Genome (Parameters &P): P(P), pGe(P.pGe), sharedMemory(NULL), shmStart(NULL), superTr(P,this->chrLength) {
+Genome::Genome (Parameters &P): P(P), pGe(P.pGe), sharedMemory(NULL), shmStart(NULL) 
+{
     shmKey=ftok(pGe.gDir.c_str(),SHM_projectID);
 
     sjdbOverhang = pGe.sjdbOverhang; //will be re-defined later if another value was used for the generated genome
@@ -525,8 +526,9 @@ void Genome::genomeLoad(){//allocate and load Genome
     P.winBinChrNbits=pGe.gChrBinNbits-P.winBinNbits;
     P.winBinN = nGenome/(1LLU << P.winBinNbits)+1;//this may be changed later
     
-    if (pGe.gType==2) {//SuperTranscriptome
-        superTr.load(G, chrStart);
+    if (pGe.gType==101) {//SuperTranscriptome
+		superTr = new SuperTranscript (P,chrLength);
+        superTr->load(G, chrStart);
     };
 };
 

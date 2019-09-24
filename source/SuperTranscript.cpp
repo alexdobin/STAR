@@ -30,12 +30,12 @@ void SuperTranscript::sjCollapse()
 
 void SuperTranscript::load(char *G, vector<uint64> &chrStart)
 {
-    seqp.resize(length.size());
-    for (uint64 ii=0; ii<length.size(); ii++)
+    seqp.resize(N);
+    for (uint64 ii=0; ii<N; ii++)
         seqp[ii]=(uint8*)G+chrStart[ii];
     
     ifstream & superTrSJ = ifstrOpen(P.pGe.gDir+"/superTranscriptSJcollapsed.tsv", ERROR_OUT, "SOLUTION: re-generate the genome.", P);
-    sjC.resize(length.size());
+    sjC.resize(N);
     uint32 sutr=0,sutr1=0;
     vector<array<uint32,2>> sj1;
     while(superTrSJ >> sutr) {
@@ -48,5 +48,4 @@ void SuperTranscript::load(char *G, vector<uint64> &chrStart)
         superTrSJ >> sj1.back()[0] >> sj1.back()[1];
     };
     superTrSJ.close();
-    
 };

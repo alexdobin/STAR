@@ -54,7 +54,7 @@ public:
     uint genomeInsertChrIndFirst; //index of the first inserted chromosome
 
     //SuperTranscript genome
-    SuperTranscript superTr;
+    SuperTranscript *superTr;
 
     SharedMemory *sharedMemory;
 

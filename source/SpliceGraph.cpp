@@ -8,7 +8,7 @@ using namespace std;
 SpliceGraph::SpliceGraph (SuperTranscript &superTr, Parameters &P) : superTr(superTr), P(P)
 {
     //find candidate superTr
-    superTrSeedCount = new typeSuperTrSeedCount[2*superTr.N];//for stranded data, do not need 2nd strand
+    superTrSeedCount = new typeSuperTrSeedCount[2*superTr.N];//TODO: for stranded data, do not need 2nd strand
     
     //Smith-Waterman
     scoringMatrix = new typeAlignScore*[maxSeqLength];
