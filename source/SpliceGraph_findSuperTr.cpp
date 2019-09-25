@@ -9,6 +9,9 @@ void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, 
 	float seedCoverageMinToMax = 0.1;
 	uint32 seedMultMax = 200;
 	
+	vector<uint32> seedSuperTr;
+	seedSuperTr.reserve(seedMultMax);
+	
 	//readLen, readSeq
     uint32 seedLen=mapGen.pGe.gSAindexNbases; //TODO: make user-definable
     memset(superTrSeedCount,0,sizeof(superTrSeedCount[0])*2*superTr.N);
@@ -40,6 +43,8 @@ void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, 
 		if (iSA2-iSA1>=seedMultMax) //this seed map too many times
 			continue;
 		
+		seedSuperTr.clear();
+		seedSuperTr.resize(iSA2-iSA1+1);
         for (uint64 isa=iSA1;isa<=iSA2;isa++) {//loop through seed SA boundaries
             uint64 a1 = mapGen.SA[isa];
             uint64 aStr = a1 >> mapGen.GstrandBit;
@@ -56,10 +61,20 @@ void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, 
                 };
             };
             
-            superTrSeedCount[aStr*superTr.N  + mapGen.chrBin[a1 >> mapGen.pGe.gChrBinNbits]]++;
+            seedSuperTr[isa-iSA1]=(uint32)(aStr*superTr.N  + mapGen.chrBin[a1 >> mapGen.pGe.gChrBinNbits]);
         };//loop through seed SA boundaries
+		
+		sort(seedSuperTr.begin(),seedSuperTr.end());
+		uint32 su1prev=(uint32)-1;
+		for (auto &su1 : seedSuperTr) {//this will eliminate multiple matches of the same seed into the same suTr
+			if (su1!=su1prev) {
+				superTrSeedCount[su1]++;
+				su1prev=su1;
+			};
+		};
+			
     };//loop through seeds
-    
+	
     //find max coverage
     typeSuperTrSeedCount countMax=0;
 	//float countOverSuperTrLenMax=0;
