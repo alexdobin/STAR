@@ -4,6 +4,9 @@
 
 #include "SpliceGraph.h"
 
+#define macro_CompareScore(score1,scoreMax,dirInd,dirIndMax)	if(score1>scoreMax){dirIndMax=dirInd;scoreMax=score1;}
+
+
 SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, const uint32 readLength, const uint32 suTrInd, array<SpliceGraph::typeSeqLen, 2> &alignEnds)
 {//Smith-Waterman alignment  
     uint32 superTrLen = superTr.length[suTrInd];
@@ -12,12 +15,13 @@ SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, con
     for(uint i = 0; i <= readLength; i++) {
         scoringMatrix[0][i] = 0;
     };
-    for(uint j = 0; j <= superTrLen; j++) {
-        scoringMatrix[j][0] = 0;
-    };
 
-    typeAlignScore maxScore = 0;
+    typeAlignScore scoreMaxGlobal = 0;
+	uint32 matIndex=readLength;//current matIndex: starting from 1st column (not 0th)
+	
     for(uint64 col=1; col<=superTrLen; col++) {//main cycle over columns
+		scoringMatrix[col][0] = 0;
+		
         vector<uint32> sjColumn;
         for(uint64 sj1 = 0; sj1 < superTr.sjC[suTrInd].size(); sj1++) {
             if( col == superTr.sjC[suTrInd][sj1][1] ) {
@@ -26,47 +30,39 @@ SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, con
         };
         
         for(uint row = 1; row <= readLength; row++) {
-            vector<typeAlignScore> scoreVec(3 + (2 * sjColumn.size()));
-            scoreVec[0] = scoringMatrix[col][row-1] + gapPenalty;
-            scoreVec[1] = scoringMatrix[col-1][row] + gapPenalty;
-            scoreVec[2] = scoringMatrix[col-1][row-1] + (readSeq[row-1] == superTr.seqp[suTrInd][col-1] ? matchScore : misMatchPenalty);
-            
-            for(uint32 i = 0; i < sjColumn.size(); i++) {
-                auto indx = sjColumn[i];
-                scoreVec[3 + i * 2] = scoringMatrix[indx + 1][row] + gapPenalty;
-                scoreVec[3 + i * 2 + 1] = scoringMatrix[indx + 1][row - 1] + (readSeq[row - 1] == superTr.seqp[suTrInd][indx+1] ? matchScore : misMatchPenalty);
+			//matIndex++;
+			
+			uint8 dirIndMax = 0 ; //direction index
+			typeAlignScore scoreMax = 0; //max score for this cell
+			typeAlignScore score1; //calculated score
+			
+			score1 = scoringMatrix[col][row-1] + gapPenalty;
+			macro_CompareScore(score1,scoreMax,1,dirIndMax);
+			
+			score1 = scoringMatrix[col-1][row] + gapPenalty;
+			macro_CompareScore(score1,scoreMax,2,dirIndMax);
+			
+			score1 = scoringMatrix[col-1][row-1] + (readSeq[row-1] == superTr.seqp[suTrInd][col-1] ? matchScore : misMatchPenalty);
+			macro_CompareScore(score1,scoreMax,3,dirIndMax);
+            for(uint32 ii = 0; ii < sjColumn.size(); ii++) {
+                auto sjCol = sjColumn[ii];
+				
+                score1 = scoringMatrix[sjCol + 1][row] + gapPenalty;
+				macro_CompareScore(score1,scoreMax,4+ii*2,dirIndMax);
+				
+                score1 = scoringMatrix[sjCol + 1][row - 1] + (readSeq[row - 1] == superTr.seqp[suTrInd][sjCol+1] ? matchScore : misMatchPenalty);
+				macro_CompareScore(score1,scoreMax,5+ii*2,dirIndMax);				
             };
-            
-            int kMax = 0;
-            typeAlignScore localMaxScore = 0;
-            for(uint k = 0; k < scoreVec.size(); k++) {
-                if(localMaxScore < scoreVec[k]) {
-                    kMax = k;
-                    localMaxScore = scoreVec[k];
-                };
-            };
-            scoringMatrix[col][row] = localMaxScore;
-            if(maxScore < scoringMatrix[col][row]) {
-                maxScore = scoringMatrix[col][row];
+			
+// 			directionMatrix[matIndex]=dirIndMax;			
+            scoringMatrix[col][row] = scoreMax;
+            if(scoreMaxGlobal < scoreMax) {
+                scoreMaxGlobal = scoreMax;
                 alignEnds[0] = row;                
                 alignEnds[1] = col;
             };
-            
-            if(kMax == 0) {
-                directionMatrix[col][row].first = col;
-                directionMatrix[col][row].second = row-1;
-            } else if (kMax == 1) {
-                directionMatrix[col][row].first = col-1;
-                directionMatrix[col][row].second = row;
-            } else if (kMax == 2) {
-                directionMatrix[col][row].first = col-1;
-                directionMatrix[col][row].second = row-1;
-            } else {
-                directionMatrix[col][row].first = sjColumn[(kMax - 3) /2];
-                directionMatrix[col][row].second = ((kMax - 3) %2) == 0 ? row: row - 1;
-            };
         }; // row for loop
     }; // col for loop
-    return maxScore;
+    return scoreMaxGlobal;
 };
 

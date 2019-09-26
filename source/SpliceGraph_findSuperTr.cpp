@@ -91,7 +91,8 @@ void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, 
         uint32 sutr1=ii%superTr.N;
         uint32 str1=ii/superTr.N;
 		
-        if (superTrSeedCount[ii]<countMax*seedCoverageMinToMax)
+        //if (superTrSeedCount[ii]<countMax*seedCoverageMinToMax)
+		if (superTrSeedCount[ii] < readLen*seedCoverageThreshold/seedLen)
 		//if (superTrSeedCount[ii]<countOverSuperTrLenMax*superTr.length[sutr1]*seedCoverageMinToMax)
 			continue;
 
@@ -102,7 +103,7 @@ void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, 
         array<uint32,2> alignEnds, alignStarts;
         
 		uint32 swScore = 0;
-        //swScore = swScoreSpliced((str1==0 ? readSeq : readSeqRevCompl), readLen, sutr1, alignEnds);
+        swScore = swScoreSpliced((str1==0 ? readSeq : readSeqRevCompl), readLen, sutr1, alignEnds);
         
         //swTraceBack(alignEnds, alignStarts);
 		//float(superTrSeedCount[ii])/countMax
