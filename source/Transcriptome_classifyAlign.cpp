@@ -5,15 +5,8 @@
 #include "ReadAnnotations.h"
 #include <bitset>
 
-int alignToTranscript(Transcript &aG, uint trS1, uint32 *exSE1, uint16 exN1, uint32 minOverlapMinusOne) 
-{
-    //returned values: 1: align fully agrees with transcript, including splices
-    //                 2: align is fully exonic, but not concordant
-    //                 3: align is fully intronic
-    //                 4: align has blocks mapping to exons and introns, but no spanning
-    //                 5: align spans exon/intron boundary
-    
-
+int alignToTranscript(Transcript &aG, uint trS1, uint32 *exSE1, uint16 exN1) 
+{    
     bool alignIntronic      =false;
     bool alignExonic        =false;
     bool alignSpansExonIntr =false;
@@ -21,8 +14,6 @@ int alignToTranscript(Transcript &aG, uint trS1, uint32 *exSE1, uint16 exN1, uin
     
     //we assume that align is fully contained in the transcript, i.e. alignStart>=trStart, alignEnd<=trEnd
     //find exon that overlaps beginning of the read
-    //uint32 g1=aG.exons[0][EX_G]-trS1;//start of the align
-    //uint32 ex1=binarySearch1<uint32>(g1, exSE1, 2*exN1) / 2;// ex1start<=alignStart
     
     //TODO
     //iab=0;
@@ -31,28 +22,18 @@ int alignToTranscript(Transcript &aG, uint trS1, uint32 *exSE1, uint16 exN1, uin
     //distTTS=trLen[tr1]-(gthaG.exons[iab][EX_G]-trS1-exSE1[2*ex1]+exLenCum1[ex1]+aG.exons[iab][EX_L]);
     //if trStr1==2: TTS=trLen[tr1]-TTS, TSS=trLen[tr1]-TSS
     
-    //aG.canonSJ[aG.nExons-1]=-999; //marks the last block
-    for (uint32 iab=0, ex1=0, bS=0, bE=0, bEt=0, bSt=0, eE=0, enS=0; 
+    for (uint32 iab=0, ex1=0, bS=0, bE=0, eE=0, enS=0;
                 iab<aG.nExons; iab++) {//scan through all blocks of the align
-        
-        uint32 bEtprev=bEt;
-        
-        bSt=bS=(uint32) (aG.exons[iab][EX_G]-trS1);//block start
-        bEt=bE=bS+aG.exons[iab][EX_L]-1;//block end
 
-        if ( minOverlapMinusOne>0 ) {
-            if ( bEt-bSt < minOverlapMinusOne ) {
-                bEt=(uint32)-1;
-                continue;//this block is too short
-            };
-            bS = bS+minOverlapMinusOne;
-            bE = bE-minOverlapMinusOne;   
-        };
-            
-        if (iab==0 || aG.canonSJ[iab-1]==-3 || bEtprev==(uint32)-1) {//start of align, or jump to another mate, or previous block was too short
-            ex1=binarySearch1<uint32>(bS, exSE1, 2*exN1) / 2;// alignStart>=ex1start            
-        } else if (aG.canonSJ[iab-1]>=0) {//splice junction: note splice junctions are not checked if the blocks are too small
-            if (bEtprev == eE && bSt == enS) {//eE and enS are still from the old ex1
+        uint64 bEprev=bE;
+
+        bS=(uint32) (aG.exons[iab][EX_G]-trS1);//block start
+        bE=bS+aG.exons[iab][EX_L]-1;//block end
+
+        if (iab==0 || aG.canonSJ[iab-1]==-3) {//start of alig, or jump to another mate
+            ex1=binarySearch1<uint32>(bS, exSE1, 2*exN1) / 2;// alignStart>=ex1start
+        } else if (aG.canonSJ[iab-1]>=0) {//splice junction
+            if (bEprev == eE && bS == enS) {//eE and enS are still from the old ex1
                 ++ex1; //junction agrees
             } else {
                 alignSJconcordant = false;
@@ -76,10 +57,86 @@ int alignToTranscript(Transcript &aG, uint trS1, uint32 *exSE1, uint16 exN1, uin
                 //break;//if ex/in span is detected, no need to check anything else
             };
             alignIntronic = true;
-            if (aG.sjYes) {//spliced align cannot overlap an intron
-                alignSJconcordant=false;
-                break;
+        };
+    };//cycle over align blocks
+
+    if (!alignSJconcordant) //if align has a junction, it's always checked for concordance
+        return -1;          //even for exon/intron aligns, sjs have to be concordant, otherwise align is not consistent with this transcript model
+
+    if (alignSpansExonIntr) {
+        return AlignVsTranscript::ExonIntronSpan; //align spans exon/intron boundary
+    } else if (!alignIntronic) {//align is purely exonic
+        return AlignVsTranscript::Concordant; //align is fully exonic and concordant
+    } else {//align has introns
+        if (alignExonic) {
+            return AlignVsTranscript::ExonIntron; //mixed exonic/intronic align, but no span
+        } else {
+            return AlignVsTranscript::Intron; //purely intronic align
+        };
+    };
+};
+
+int alignToTranscriptMinOverlap(Transcript &aG, uint trS1, uint32 *exSE1, uint16 exN1, uint32 minOverlapMinusOne) 
+{
+    bool alignIntronic      =false;
+    bool alignExonic        =false;
+    bool alignSpansExonIntr =false;
+    bool alignSJconcordant  =true;
+    
+    //we assume that align is fully contained in the transcript, i.e. alignStart>=trStart, alignEnd<=trEnd
+    //find exon that overlaps beginning of the read
+    
+    for (uint32 iab=0, ex1=0, bS=0, bE=0, eS=0, eE=0, enS=0; 
+                iab<aG.nExons; iab++) {//scan through all blocks of the align
+              
+        bS=(uint32) (aG.exons[iab][EX_G]-trS1);//block start
+        bE=bSt+aG.exons[iab][EX_L]-1;//block end
+            
+        if (iab==0 || aG.canonSJ[iab-1]==-3 || aG.canonSJ[iab-1]>=0) {//start of align, or jump to another mate, or junction
+            ex1=binarySearch1<uint32>(bS, exSE1, 2*exN1) / 2;// alignStart>=ex1start            
+        };
+
+        eS  = exSE1[2*ex1];
+        eE  = exSE1[2*ex1+1];
+        enS = ex1+1<exN1 ? exSE1[2*(ex1+1)] : 0;//next exon start
+
+        uint32 bStype=0;
+        if (bS <= eE-minOverlapMinusOne && bS>=eS+minOverlapMinusOne) {
+            bStype=1;//bS exonic
+        } else if (bS>eE+minOverlapMinusOne && bS<enS-minOverlapMinusOne) {
+            bStype=2;//bS intronic
+        };//otherwise it's undefined, to close to exon end
+        
+        uint32 bEtype=0;
+        if (bE >= enS+minOverlapMinusOne) {
+            bEtype=1;//bE exonic
+        } else if (bE<eE-minOverlapMinusOne) {
+            bEtype=2;//bE intronic
+        };//otherwise it's undefined, to close to exon end        
+        
+        if (bStype==0)
+            bStype=bEtype
+        
+        if (bS <= eE) {//block starts in the ex1 exon
+            if (bE > eE) {
+                alignSpansExonIntr = true;
             };
+            alignExonic = true;
+        } else {//block starts in the intron
+            if (bE >= enS) {//block overlaps next exon
+                alignSpansExonIntr = true;
+            };
+            
+            if (enS-eE>1000000) {//if intron is too large, do not mark this align as intronic. This is to match velocyto.py logic. TODO: make it a parameter
+                return -1;//no intronic match since the intron is too large
+            };
+
+            alignIntronic = true;
+        };
+        
+        if (aG.sjYes && (alignIntronic || alignSpansExonIntr)) {//spliced align cannot overlap an intron
+            alignSJconcordant=false;
+            break;
         };
     };//cycle over align blocks
     
@@ -90,21 +147,13 @@ int alignToTranscript(Transcript &aG, uint trS1, uint32 *exSE1, uint16 exN1, uin
         return AlignVsTranscript::ExonIntronSpan; //align spans exon/intron boundary
     } else if (!alignIntronic) {//align is purely exonic
         return AlignVsTranscript::Concordant; //align is fully exonic and concordant
-        //this cannot happen anymore, since we are non-concordant alignments return -1 above
-        //if (alignSJconcordant) {
-        //    return AlignVsTranscript::Concordant; //align is concordant with the transcript, i.e. fully agrees with transcript, including splices
-        // } else {
-        //    return AlignVsTranscript::Exon; //align is fully exonic, but not concordant
-        //};
-    } else {//align has introns
+     } else {//align has introns
         if (alignExonic) {
             return AlignVsTranscript::ExonIntron; //mixed exonic/intronic align, but no span
         } else {
             return AlignVsTranscript::Intron; //purely intronic align
         };
     };
-
-    return (uint32)-1; //this should not happen
 };
 
 void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnnotations &readAnnot) 
@@ -134,11 +183,12 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
                  (P.pSolo.strand >= 0 && (trStr[tr1]==1 ? aG.Str : 1-aG.Str) != (uint32)P.pSolo.strand) ) //!(this transcript contains the read, and has correct strand)
                      continue;
                  
-            int aStatus=alignToTranscript(aG, trS[tr1], exSE+2*trExI[tr1], trExN[tr1],0);
+            int aStatus=alignToTranscript(aG, trS[tr1], exSE+2*trExI[tr1], trExN[tr1]);
             
             if (aStatus==AlignVsTranscript::Concordant) {//align conforms with the transcript
 
-                //TODO!!!FIX THIS//uint32 distTTS=trLen[tr1]-(aTall[nAtr].exons[aTall[nAtr].nExons-1][EX_G] + aTall[nAtr].exons[aTall[nAtr].nExons-1][EX_L]);
+                //TODO!!!FIX THIS for Quant!!!
+                //uint32 distTTS=trLen[tr1]-(aTall[nAtr].exons[aTall[nAtr].nExons-1][EX_G] + aTall[nAtr].exons[aTall[nAtr].nExons-1][EX_L]);
                 //readAnnot.transcriptConcordant.push_back({tr1,distTTS});
 
                 readAnnot.geneConcordant.insert(trGene[tr1]);//genes for all alignments
@@ -148,7 +198,7 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
             if (P.pSolo.featureYes[SoloFeatureTypes::Velocyto] && nAlignG==1) {//another calculation for velocyto with minOverlapMinusOne=6
                 
                 //6 is the hard code minOverlapMinusOne, to agree with velocyto's MIN_FLANK=5
-                aStatus=alignToTranscript(aG, trS[tr1], exSE+2*trExI[tr1], trExN[tr1], 6);
+                aStatus=alignToTranscriptMinOverlap(aG, trS[tr1], exSE+2*trExI[tr1], trExN[tr1], 6);
                 
                 if (aStatus<0)
                     continue; //align is not concordant with this transcript because one of the align junctions does not match transcript junction
