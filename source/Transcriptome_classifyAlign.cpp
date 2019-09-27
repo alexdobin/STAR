@@ -86,54 +86,58 @@ int alignToTranscriptMinOverlap(Transcript &aG, uint trS1, uint32 *exSE1, uint16
     //we assume that align is fully contained in the transcript, i.e. alignStart>=trStart, alignEnd<=trEnd
     //find exon that overlaps beginning of the read
     
-    for (uint32 iab=0, ex1=0, bS=0, bE=0, eS=0, eE=0, enS=0; 
-                iab<aG.nExons; iab++) {//scan through all blocks of the align
+    for (uint32 iab=0; iab<aG.nExons; iab++) {//scan through all blocks of the align
               
-        bS=(uint32) (aG.exons[iab][EX_G]-trS1);//block start
-        bE=bSt+aG.exons[iab][EX_L]-1;//block end
-            
-        if (iab==0 || aG.canonSJ[iab-1]==-3 || aG.canonSJ[iab-1]>=0) {//start of align, or jump to another mate, or junction
-            ex1=binarySearch1<uint32>(bS, exSE1, 2*exN1) / 2;// alignStart>=ex1start            
+        uint32 bS=(uint32) (aG.exons[iab][EX_G]-trS1);//block start
+
+        uint32 ex1=binarySearch1<uint32>(bS, exSE1, 2*exN1) / 2;// alignStart>=ex1start
+        if ((uint16)ex1==exN1-1) {//reached last exon. 
+            //we assume that the end of align is < end of transcript was checked before this function was called
+            //ex1 is positive since align is entirely inside this transcript
+            alignExonic=true;//can only be exonic
+            break;
+        };                    
+        
+        while (iab < aG.nExons-1  &&  aG.canonSJ[iab] > -3  &&  aG.canonSJ[iab] < 0) {//indel, expand the block
+            ++iab;
         };
+            
+        uint32 bE=(uint32) (aG.exons[iab][EX_G] - trS1 + aG.exons[iab][EX_L] - 1);//block end
+        
+        if ( bE-bS < minOverlapMinusOne ) //block is too short
+            continue;
+        
+        
+        uint32 eE  = exSE1[2*ex1+1];//exon1 end
+        uint32 enS = exSE1[2*ex1+2];//exon2 start
+        uint32 enE = exSE1[2*ex1+3];//exon2 end
 
-        eS  = exSE1[2*ex1];
-        eE  = exSE1[2*ex1+1];
-        enS = ex1+1<exN1 ? exSE1[2*(ex1+1)] : 0;//next exon start
-
-        uint32 bStype=0;
-        if (bS <= eE-minOverlapMinusOne && bS>=eS+minOverlapMinusOne) {
-            bStype=1;//bS exonic
-        } else if (bS>eE+minOverlapMinusOne && bS<enS-minOverlapMinusOne) {
-            bStype=2;//bS intronic
-        };//otherwise it's undefined, to close to exon end
-        
-        uint32 bEtype=0;
-        if (bE >= enS+minOverlapMinusOne) {
-            bEtype=1;//bE exonic
-        } else if (bE<eE-minOverlapMinusOne) {
-            bEtype=2;//bE intronic
-        };//otherwise it's undefined, to close to exon end        
-        
-        if (bStype==0)
-            bStype=bEtype
-        
-        if (bS <= eE) {//block starts in the ex1 exon
-            if (bE > eE) {
-                alignSpansExonIntr = true;
-            };
-            alignExonic = true;
-        } else {//block starts in the intron
-            if (bE >= enS) {//block overlaps next exon
+        //bS>=eS always
+        if (bS <= eE-minOverlapMinusOne) {//start is certainly in exon1
+            if (bE<=eE+minOverlapMinusOne) {//end is in exon1
+                alignExonic=true;
+            } else {//end spans into intron1
                 alignSpansExonIntr = true;
             };
             
-            if (enS-eE>1000000) {//if intron is too large, do not mark this align as intronic. This is to match velocyto.py logic. TODO: make it a parameter
-                return -1;//no intronic match since the intron is too large
-            };
-
-            alignIntronic = true;
+        } else if (bS<enS-minOverlapMinusOne) {//start is in the intron1
+            if (bE>=enS+minOverlapMinusOne) {//end is certainly in exon2 or intron2
+                alignSpansExonIntr = true;
+            } else if (bE>eE+minOverlapMinusOne) {//end is certainly in intron1
+                if (enS-eE>1000000) {//if intron is too large, do not mark this align as intronic. This is to match velocyto.py logic. TODO: make it a parameter
+                    return -1;//no intronic match since the intron is too large. This prevents large introns from swallowing small genes inside them
+                };
+                alignIntronic=true;
+            };//otherwise start and end are too close to exon1 end, no call
+            
+        } else {//start is too close to the exon2 start
+            if (bE>enE+minOverlapMinusOne) {//end is certainly in intron2
+                alignSpansExonIntr = true;
+            } else if (bE>=enS+minOverlapMinusOne) {//end is certainly in exon2
+                alignExonic=true;
+            };//otherwise start and end are too close to exon2 end, no call
         };
-        
+    
         if (aG.sjYes && (alignIntronic || alignSpansExonIntr)) {//spliced align cannot overlap an intron
             alignSJconcordant=false;
             break;
