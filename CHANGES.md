@@ -1,3 +1,5 @@
+* Fixed the problem with no output to Chimeric.out.sam 
+
 STAR 2.7.2b 2019/08/29
 ======================
 Bug fixes in chimeric detection, contributed by Meng Xiao He (@mengxiao)

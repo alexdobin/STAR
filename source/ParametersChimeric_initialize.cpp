@@ -9,11 +9,7 @@ void ParametersChimeric::initialize(Parameters *pPin)
         return;
     
     pP=pPin;
-    
-    if (out.samOld) {
-        pP->inOut->outChimSAM.open((pP->outFileNamePrefix + "Chimeric.out.sam").c_str());
-        pP->inOut->outChimSAM << pP->samHeader;
-    };
+
     pthread_mutex_init(&g_threadChunks.mutexOutChimSAM, NULL);
     pthread_mutex_init(&g_threadChunks.mutexOutChimJunction, NULL);
     
@@ -39,7 +35,12 @@ void ParametersChimeric::initialize(Parameters *pPin)
             exitWithError(errOut.str(), std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
     };
-
+    
+    if (out.samOld) {
+        pP->inOut->outChimSAM.open((pP->outFileNamePrefix + "Chimeric.out.sam").c_str());
+        pP->inOut->outChimSAM << pP->samHeader;
+    };
+    
     if (out.junctions) {
         pP->inOut->outChimJunction.open((pP->outFileNamePrefix + "Chimeric.out.junction").c_str());
         
