@@ -6,7 +6,7 @@
 * Implemented SAM attributes sS and sQ to output sequence and quality of the entire barcode read, and sM to output the barcode match status.
 * Implemented complex barcodes in STARsolo with --soloType CB_UMI_Complex, --soloCBmatchWLtype --soloAdapterSequence, --soloAdapterMismatchesNmax, --soloCBposition,--soloUMIposition .
 * Implemented CB/UB/GX/GN BAM tags for STARsolo.
-
+* Fixed the problem with no output to Chimeric.out.sam 
 
 STAR 2.7.2b 2019/08/29
 ======================
