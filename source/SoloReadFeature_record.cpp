@@ -67,41 +67,32 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript *ali
                 };
                 break;
                 
-            case SoloFeatureTypes::Velocyto :
+            case SoloFeatureTypes::VelocytoSimple :
                 //different record: iRead, gene, type
-                if (readAnnot.geneVelocyto[0]+1 !=0 ) {//otherwise, no gene
-                    *streamReads << iRead <<' '<< readAnnot.geneVelocyto[0] <<' '<< readAnnot.geneVelocyto[1] <<'\n';
+                if (readAnnot.geneVelocytoSimple[0]+1 !=0 ) {//otherwise, no gene
+                    *streamReads << iRead <<' '<< readAnnot.geneVelocytoSimple[0] <<' '<< readAnnot.geneVelocytoSimple[1] <<'\n';
                     nFeat=1;
                 } else {
                     stats.V[stats.nNoFeature]++;
                 };
                 break; //no need to go with downstream processing
-                
-//             case SoloFeatureTypes::VelocytoSpliced :
-//                 if (readAnnot.geneVelocyto[1]==1) {
-//                     reFe.gene=readAnnot.geneVelocyto[0];
-//                 } else {
-//                     readFeatYes=false;
-//                     stats.V[stats.nNoFeature]++;
-//                 };
-//                 break;
-//                 
-//             case SoloFeatureTypes::VelocytoUnspliced :
-//                 if (readAnnot.geneVelocyto[1]==2) {
-//                     reFe.gene=readAnnot.geneVelocyto[0];
-//                 } else {
-//                     readFeatYes=false;
-//                     stats.V[stats.nNoFeature]++;
-//                 };
-//                 break;                
-//                 
-//             case SoloFeatureTypes::VelocytoAmbiguous :
-//                 if (readAnnot.geneVelocyto[1]==3) {
-//                     reFe.gene=readAnnot.geneVelocyto[0];
-//                 } else {
-//                     readFeatYes=false;
-//                     stats.V[stats.nNoFeature]++;                    
-//                 };
+
+            case SoloFeatureTypes::Velocyto :
+                //different record: iRead, nTr, tr1, type1, tr2, type2 ...
+                if (readAnnot.trVelocytoType.size()>0) {//otherwise, no gene
+                    
+                    sort(readAnnot.trVelocytoType.begin(), readAnnot.trVelocytoType.end(),
+                         [](const trTypeStruct &t1, const trTypeStruct &t2) {return t1.tr < t2.tr;});
+
+                    *streamReads << iRead <<' '<< readAnnot.trVelocytoType.size();
+                    for (auto &tt: readAnnot.trVelocytoType)
+                         *streamReads <<' '<< tt.tr <<' '<< (uint32) tt.type;
+                    *streamReads <<'\n';
+                    nFeat=1;
+                } else {
+                    stats.V[stats.nNoFeature]++;
+                };
+                break; //no need to go with downstream processing                
                 
         };//switch (featureType)
     };//if (nTr==0)

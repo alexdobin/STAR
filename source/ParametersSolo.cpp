@@ -298,7 +298,7 @@ void ParametersSolo::initialize(Parameters *pPin)
     readInfoYes={false};
     if (samAttrYes) //pSolo.samAttrFeature=0 by default, so need to check samAttrYes
         readInfoYes[samAttrFeature]=true;
-    if (featureYes[SoloFeatureTypes::Velocyto]) //turn readInfo on for Gene needed by Velocyto
+    if (featureYes[SoloFeatureTypes::VelocytoSimple] || featureYes[SoloFeatureTypes::Velocyto]) //turn readInfo on for Gene needed by VelocytoSimple
         readInfoYes[SoloFeatureTypes::Gene]=true;    
     
     //cell filtering

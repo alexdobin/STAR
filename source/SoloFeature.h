@@ -58,7 +58,9 @@ public:
 
     SoloFeature(int32 feTy, Parameters &Pin, Transcriptome &inTrans, SoloReadBarcode *readBarSumIn, SoloFeature **soloFeatAll);
     void processRecords(ReadAlignChunk **RAchunk);
+    void sumThreads(ReadAlignChunk **RAchunk);
     void countCBgeneUMI();
+    void countVelocyto(SoloFeature &soloFeatGene);
     void collapseUMI(uint32 iCB, uint32 *umiArray);
     void outputResults(bool cellFilterYes);
     void addBAMtags(char *&bam0, uint32 &size0, char* bam1);

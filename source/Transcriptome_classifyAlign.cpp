@@ -164,7 +164,8 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
 {
     readAnnot.transcriptConcordant={};
     readAnnot.geneConcordant={};
-
+    readAnnot.trVelocytoType={};
+            
     //array<bool,AlignVsTranscript::N> reAnn={false};
     uint32 reGe=(uint32)-2;//so that the first gene can be recorded
     std::bitset<velocytoTypeGeneBits> reAnn; //initialized to 0 (false)
@@ -199,14 +200,14 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
                 aG.alignGenes.insert(trGene[tr1]);//genes for each alignment
             };
             
-            if (P.pSolo.featureYes[SoloFeatureTypes::Velocyto] && nAlignG==1) {//another calculation for velocyto with minOverlapMinusOne=6
+            if ((P.pSolo.featureYes[SoloFeatureTypes::Velocyto] || P.pSolo.featureYes[SoloFeatureTypes::VelocytoSimple]) && nAlignG==1) {//another calculation for velocyto with minOverlapMinusOne=6
                 
                 //6 is the hard code minOverlapMinusOne, to agree with velocyto's MIN_FLANK=5
                 aStatus=alignToTranscriptMinOverlap(aG, trS[tr1], exSE+2*trExI[tr1], trExN[tr1], 6);
                 
                 if (aStatus<0)
                     continue; //align is not concordant with this transcript because one of the align junctions does not match transcript junction
-
+                
                 //calculate reAnn
                 if (reGe!=(uint32)-1) {//not multi-mapper
 
@@ -222,38 +223,18 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
                         };
                     };
                 };
+                
+                std::bitset<velocytoTypeGeneBits> reAnn1; //initialized to 0 (false)
+                if (aStatus!=AlignVsTranscript::ExonIntronSpan) {
+                    reAnn1.set(AlignVsTranscript::ExonIntronSpan, true);//meaning of this bit is NoExonIntronSpan
+                    reAnn1.set(aStatus, true);
+                };
+                readAnnot.trVelocytoType.push_back({tr1, (uint8) reAnn1.to_ulong()});
             };
         } while (trEmax[tr1]>=aGend && tr1>0);
     };
     
-    //velocyto logic
-    readAnnot.geneVelocyto[0]=(reGe+2==0 ? (uint32)-1 : reGe);//-2 marks no gene, convert to -1 which marks either no gene or multigene - no output     
-    readAnnot.geneVelocyto[1]=reAnn.to_ulong();
-    
-    
-//     if (reAnn[AlignVsTranscript::ExonIntronSpan]) {
-//         readAnnot.geneVelocyto[1]=0;
-//     } else if (reAnn[AlignVsTranscript::Concordant] || reAnn[AlignVsTranscript::Exon]) {//at least one model is exonic
-//         if (!reAnn[AlignVsTranscript::Intron] && !reAnn[AlignVsTranscript::ExonIntron]) {
-//             readAnnot.geneVelocyto[1]=1; //spliced
-//         } else {
-//             readAnnot.geneVelocyto[1]=3; //ambiguous <= exonic * ( intronic || mixed)
-//         };
-//     } else {//all other combinations are unspliced, as they do not contain a single purely exonic model
-//         readAnnot.geneVelocyto[1]=2;
-//     };
-    
-//     if (reGe==(uint32)-1) {//multi-gene
-//         readAnnot.geneVelocyto[1]=0;//value does not matter, it will not be recorded
-//     } else if (reAnn[AlignVsTranscript::ExonIntronSpan]) {
-//         readAnnot.geneVelocyto[1]=2; //unspliced
-//     } else if (reAnn[AlignVsTranscript::Concordant] || reAnn[AlignVsTranscript::Exon]) {//at least one model is exonic
-//         if (!reAnn[AlignVsTranscript::Intron] && !reAnn[AlignVsTranscript::ExonIntron]) {
-//             readAnnot.geneVelocyto[1]=1; //spliced
-//         } else {
-//             readAnnot.geneVelocyto[1]=3; //ambiguous <= exonic * ( intronic || mixed)
-//         };
-//     } else {//all other combinations are unspliced, as they do not contain a single purely exonic model
-//         readAnnot.geneVelocyto[1]=2;
-//     };
+    //VelocytoSimple logic
+    readAnnot.geneVelocytoSimple[0]=(reGe+2==0 ? (uint32)-1 : reGe);//-2 marks no gene, convert to -1 which marks either no gene or multigene - no output     
+    readAnnot.geneVelocytoSimple[1]=reAnn.to_ulong();
 };

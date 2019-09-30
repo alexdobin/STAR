@@ -16,9 +16,6 @@ bool inputFeatureUmi(fstream *strIn, int32 featureType, bool readInfoYes, array<
     switch (featureType) {
         case SoloFeatureTypes::Gene :
         case SoloFeatureTypes::GeneFull :
-//         case SoloFeatureTypes::VelocytoSpliced :
-//         case SoloFeatureTypes::VelocytoUnspliced :
-//         case SoloFeatureTypes::VelocytoAmbiguous :
             *strIn >> feature;
             break;
 
@@ -51,19 +48,24 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
     streamReads->flush();
     streamReads->seekg(0,ios::beg);
     
-    if (featureType==SoloFeatureTypes::Velocyto) {//for non-standard processing
-        uint32 feature, vtype;
-        uint64 iread;
-        while (*streamReads >> iread) {//until the end of file
-            *streamReads >> feature >> vtype; //vType=1,2,3, cannot be zero
-            uint64 cb=soloFeatAll[pSolo.featureInd[SoloFeatureTypes::Gene]]->readInfo[iread].cb;
-            if (cb+1!=0) {
-                cbP[cb][0]=feature | (vtype << velocytoTypeGeneBitShift ); //encode vType in the top 2 bits;
-                cbP[cb][1]=soloFeatAll[pSolo.featureInd[SoloFeatureTypes::Gene]]->readInfo[iread].umi;
-                cbP[cb]+=cbPstride;
+    switch (featureType) {//for non-standard processing
+        
+        case SoloFeatureTypes::VelocytoSimple :
+        {
+            uint32 feature, vtype;
+            uint64 iread;
+            while (*streamReads >> iread) {//until the end of file
+                *streamReads >> feature >> vtype;
+                uint64 cb=soloFeatAll[pSolo.featureInd[SoloFeatureTypes::Gene]]->readInfo[iread].cb;
+                if (cb+1!=0) {
+                    cbP[cb][0]=feature | (vtype << velocytoTypeGeneBitShift ); //encode vType in the top 2 bits;
+                    cbP[cb][1]=soloFeatAll[pSolo.featureInd[SoloFeatureTypes::Gene]]->readInfo[iread].umi;
+                    cbP[cb]+=cbPstride;
+                };
             };
+            return;
+            break;
         };
-        return;
     };
     
     
