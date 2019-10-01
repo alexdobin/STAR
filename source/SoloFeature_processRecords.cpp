@@ -15,7 +15,7 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     sumThreads(RAchunk);
     
     if (featureType==SoloFeatureTypes::Velocyto) {
-        countVelocyto(*soloFeatAll[pSolo.featureInd[SoloFeatureTypes::Gene]]);
+        countVelocyto();
     } else {//all others, standard processing
         countCBgeneUMI();
     };

@@ -217,19 +217,21 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
                     if (reGe!=trGene[tr1]) {//
                         reGe=(uint32)-1; //marks multi-gene align
                     } else {
-                        if (aStatus!=AlignVsTranscript::ExonIntronSpan) {
+                        if (aStatus!=AlignVsTranscript::ExonIntronSpan) {//no exon/intron span
                             reAnn.set(AlignVsTranscript::ExonIntronSpan, true);//meaning of this bit is NoExonIntronSpan
                             reAnn.set(aStatus, true);
                         };
                     };
                 };
                 
-                std::bitset<velocytoTypeGeneBits> reAnn1; //initialized to 0 (false)
-                if (aStatus!=AlignVsTranscript::ExonIntronSpan) {
-                    reAnn1.set(AlignVsTranscript::ExonIntronSpan, true);//meaning of this bit is NoExonIntronSpan
-                    reAnn1.set(aStatus, true);
+                uint8 reAnn1=0; //initialized to 0 (false)
+                if (aStatus!=AlignVsTranscript::ExonIntronSpan) {//no span
+                    reAnn1 = 1 << AlignVsTranscript::ExonIntronSpan;//meaning of this bit is NoExonIntronSpan
+                    reAnn1 = reAnn1 | (1 << aStatus);
+                } else {//span
+                    reAnn1 = 1 << AlignVsTranscript::Intron; //span is also considered intronic
                 };
-                readAnnot.trVelocytoType.push_back({tr1, (uint8) reAnn1.to_ulong()});
+                readAnnot.trVelocytoType.push_back({tr1, reAnn1});
             };
         } while (trEmax[tr1]>=aGend && tr1>0);
     };

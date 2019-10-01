@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <bitset>
 
-void SoloFeature::countVelocyto(SoloFeature &soloFeatGene)
+void SoloFeature::countVelocyto()
 {//velocyto counting gets info from Gene counting
     time_t rawTime;
 
@@ -91,29 +91,46 @@ void SoloFeature::countVelocyto(SoloFeature &soloFeatGene)
             if (umi.second.empty()) //no transcripts in the intesect
                 continue;
             uint32 geneI=Trans.trGene[umi.second[0].tr];
-            uint32 geneT=0;
-            for (auto &tt : umi.second) {
+            
+            //for each transcript, are all UMIs:
+            bool exonModel=false;   //purely exonic
+            bool intronModel=false; //purely intronic
+            bool noSpanModel=false; //not spanning, i.e. this is false only if all UMIs are spanning
+            bool mixedModel=false;  //both intronic and exonic, but not spanning
+            
+            for (auto &tt : umi.second) {//cycle over transcripts in this UMI
                 if (Trans.trGene[tt.tr] != geneI) {//multigene
                     geneI=(uint32)-1;
                     break;
                 };
-                geneT |= tt.type;
+                
+                bitset<velocytoTypeGeneBits> gV (tt.type);
+                
+                mixedModel  |= (gV.test(AlignVsTranscript::Intron) && gV.test(AlignVsTranscript::Concordant)) || gV.test(AlignVsTranscript::ExonIntron);//has mixed model                
+                noSpanModel |= gV.test(AlignVsTranscript::ExonIntronSpan);
+                exonModel   |= gV.test(AlignVsTranscript::Concordant) && !gV.test(AlignVsTranscript::Intron) && !gV.test(AlignVsTranscript::ExonIntron);//has only-exons model
+                
+                //intronModel |= gV.test(AlignVsTranscript::Intron) && !gV.test(AlignVsTranscript::ExonIntron) && !gV.test(AlignVsTranscript::Concordant);//has only-introns model, this includes span
+                //I like the previous line more: exon-intron span models are also considered intronic. However, this is not what velocyto does:
+                intronModel |= gV.test(AlignVsTranscript::Intron) && !gV.test(AlignVsTranscript::ExonIntron) && !gV.test(AlignVsTranscript::Concordant) && gV.test(AlignVsTranscript::ExonIntronSpan);//has only-introns model, this does not includes span
+                //imagine only one reads (UMI) that maps to exon-intron boundary in one model, and fully exonic in the other model
+                //noSpanMode=true, since there is exonic model, and intronModel=false => the read will be considered spliced. I would rather consider it mixed.
+                //real example: 85942   0       3       50104995        255     3S95M   *       0       0       AATAAAACTTGTGGGGATTTTAATGTATTTCTTTGGTGAAAATACATTAGTTGTTTGTCTCTAATTGGATCACTTTCCCTTCTAGACTCTGAACAGGA      A<<FFJJJAFJFFJJJJJJJJ<AFJJFJFJAJJJJJFJJAFAFA-A<JFJJJFJAAJJFJJFFAFJJ<FFF7FJJJ<--FFFFJAFFFFJJJ<FFFJJ        NH:i:1  HI:i:1  CR:Z:CTCTACGCACATCTTT   UR:Z:TACGATCATG GX:Z:ENSG00000003756    GN:Z:RBM5       CB:Z:CTCTACGCACATCTTT   UB:Z:TACGATCATG
+                
+                
             };
             
             if (geneI+1==0) //multigene
                 continue;
-
-            bitset<velocytoTypeGeneBits> gV (geneT);
-            if (!gV.test(AlignVsTranscript::ExonIntronSpan)) {//all UMIs are spanning models
-                geneC[geneI][1]++; //unspliced 
-            } else if (gV.test(AlignVsTranscript::Concordant)) {//>=1 purely exonic tr 
-                if (!gV.test(AlignVsTranscript::Intron) && !gV.test(AlignVsTranscript::ExonIntron)) {//0 purely intronic && 0 mixed
-                    geneC[geneI][0]++; //spliced 
-                } else {//>=1 purely exonic and >=1 purely intronic or mixed
-                    geneC[geneI][2]++; //ambiguous
-                };
-            } else {//0 exonic, >=1 intronic and/or >=1 mixed
+            
+            if (exonModel && !intronModel && !mixedModel) {// all models are only-exons
+                geneC[geneI][0]++; //spliced 
+            } else if (!noSpanModel) {//all models are only-spans. Not sure if this ever happens, should be simplified
                 geneC[geneI][1]++;//unspliced
+            } else if (intronModel && !exonModel) {//at least one only-introns model, no only-exon models, could be mixed models
+                geneC[geneI][1]++;//unspliced
+            } else {//all other combinations are mixed models, i.e. both only-exons and only-introns
+                geneC[geneI][2]++;//ambiguous
             };
             
             nUMIperCB[iCB]++;
