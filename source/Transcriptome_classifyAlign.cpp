@@ -225,11 +225,10 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
                 };
                 
                 uint8 reAnn1=0; //initialized to 0 (false)
-                if (aStatus!=AlignVsTranscript::ExonIntronSpan) {//no span
-                    reAnn1 = 1 << AlignVsTranscript::ExonIntronSpan;//meaning of this bit is NoExonIntronSpan
-                    reAnn1 = reAnn1 | (1 << aStatus);
-                } else {//span
-                    reAnn1 = 1 << AlignVsTranscript::Intron; //span is also considered intronic
+                reAnn1 = 1 << aStatus;
+                if (aStatus==AlignVsTranscript::ExonIntronSpan) {//span
+                    reAnn1 = reAnn1 | (1 << AlignVsTranscript::Intron); //span is also considered intronic
+                    reAnn1 = reAnn1 | (1 << AlignVsTranscript::Concordant); //span is also considered exonic
                 };
                 readAnnot.trVelocytoType.push_back({tr1, reAnn1});
             };

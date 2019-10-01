@@ -95,7 +95,7 @@ void SoloFeature::countVelocyto()
             //for each transcript, are all UMIs:
             bool exonModel=false;   //purely exonic
             bool intronModel=false; //purely intronic
-            bool noSpanModel=false; //not spanning, i.e. this is false only if all UMIs are spanning
+            bool spanModel=true; //spanning model for all UMIs
             bool mixedModel=false;  //both intronic and exonic, but not spanning
             
             for (auto &tt : umi.second) {//cycle over transcripts in this UMI
@@ -106,13 +106,13 @@ void SoloFeature::countVelocyto()
                 
                 bitset<velocytoTypeGeneBits> gV (tt.type);
                 
-                mixedModel  |= (gV.test(AlignVsTranscript::Intron) && gV.test(AlignVsTranscript::Concordant)) || gV.test(AlignVsTranscript::ExonIntron);//has mixed model                
-                noSpanModel |= gV.test(AlignVsTranscript::ExonIntronSpan);
+                mixedModel  |= ((gV.test(AlignVsTranscript::Intron) && gV.test(AlignVsTranscript::Concordant)) || gV.test(AlignVsTranscript::ExonIntron)) && !gV.test(AlignVsTranscript::ExonIntronSpan);//has exon and intron, but no span
+                spanModel   &= gV.test(AlignVsTranscript::ExonIntronSpan);
                 exonModel   |= gV.test(AlignVsTranscript::Concordant) && !gV.test(AlignVsTranscript::Intron) && !gV.test(AlignVsTranscript::ExonIntron);//has only-exons model
                 
-                //intronModel |= gV.test(AlignVsTranscript::Intron) && !gV.test(AlignVsTranscript::ExonIntron) && !gV.test(AlignVsTranscript::Concordant);//has only-introns model, this includes span
+                intronModel |= gV.test(AlignVsTranscript::Intron) && !gV.test(AlignVsTranscript::ExonIntron) && !gV.test(AlignVsTranscript::Concordant);//has only-introns model, this includes span
                 //I like the previous line more: exon-intron span models are also considered intronic. However, this is not what velocyto does:
-                intronModel |= gV.test(AlignVsTranscript::Intron) && !gV.test(AlignVsTranscript::ExonIntron) && !gV.test(AlignVsTranscript::Concordant) && gV.test(AlignVsTranscript::ExonIntronSpan);//has only-introns model, this does not includes span
+                //intronModel |= gV.test(AlignVsTranscript::Intron) && !gV.test(AlignVsTranscript::ExonIntron) && !gV.test(AlignVsTranscript::Concordant) && gV.test(AlignVsTranscript::ExonIntronSpan);//has only-introns model, this does not includes span
                 //imagine only one reads (UMI) that maps to exon-intron boundary in one model, and fully exonic in the other model
                 //noSpanMode=true, since there is exonic model, and intronModel=false => the read will be considered spliced. I would rather consider it mixed.
                 //real example: 85942   0       3       50104995        255     3S95M   *       0       0       AATAAAACTTGTGGGGATTTTAATGTATTTCTTTGGTGAAAATACATTAGTTGTTTGTCTCTAATTGGATCACTTTCCCTTCTAGACTCTGAACAGGA      A<<FFJJJAFJFFJJJJJJJJ<AFJJFJFJAJJJJJFJJAFAFA-A<JFJJJFJAAJJFJJFFAFJJ<FFF7FJJJ<--FFFFJAFFFFJJJ<FFFJJ        NH:i:1  HI:i:1  CR:Z:CTCTACGCACATCTTT   UR:Z:TACGATCATG GX:Z:ENSG00000003756    GN:Z:RBM5       CB:Z:CTCTACGCACATCTTT   UB:Z:TACGATCATG
@@ -125,7 +125,7 @@ void SoloFeature::countVelocyto()
             
             if (exonModel && !intronModel && !mixedModel) {// all models are only-exons
                 geneC[geneI][0]++; //spliced 
-            } else if (!noSpanModel) {//all models are only-spans. Not sure if this ever happens, should be simplified
+            } else if (spanModel) {//all models are only-spans. Not sure if this ever happens, should be simplified
                 geneC[geneI][1]++;//unspliced
             } else if (intronModel && !exonModel) {//at least one only-introns model, no only-exon models, could be mixed models
                 geneC[geneI][1]++;//unspliced
