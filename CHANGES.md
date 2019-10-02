@@ -1,3 +1,5 @@
+STAR 2.7.2c 2019/10/02
+======================
 * Fixed the problem with no output to Chimeric.out.sam 
 
 STAR 2.7.2b 2019/08/29
