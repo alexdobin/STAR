@@ -113,14 +113,14 @@ int alignToTranscriptMinOverlap(Transcript &aG, uint trS1, uint32 *exSE1, uint16
         uint32 enE = exSE1[2*ex1+3];//exon2 end
 
         //bS>=eS always
-        if (bS <= eE-minOverlapMinusOne) {//start is certainly in exon1
+        if (bS+minOverlapMinusOne <= eE) {//start is certainly in exon1
             if (bE<=eE+minOverlapMinusOne) {//end is in exon1
                 alignExonic=true;
             } else {//end spans into intron1
                 alignSpansExonIntr = true;
             };
             
-        } else if (bS<enS-minOverlapMinusOne) {//start is in the intron1
+        } else if (bS+minOverlapMinusOne < enS) {//start is in the intron1
             if (bE>=enS+minOverlapMinusOne) {//end is certainly in exon2 or intron2
                 alignSpansExonIntr = true;
             } else if (bE>eE+minOverlapMinusOne) {//end is certainly in intron1

@@ -977,6 +977,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     //quantification parameters
     quant.yes=false;
     quant.geneFull.yes=false;
+    quant.gene.yes=false;
     quant.geCount.yes=false;
     quant.trSAM.yes=false;
     quant.trSAM.bamYes=false;

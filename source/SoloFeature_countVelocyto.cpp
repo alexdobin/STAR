@@ -61,8 +61,11 @@ void SoloFeature::countVelocyto()
             trT1.reserve(cuTrTypes[iCB][umi].size());
             
             for (uint32 iold=0; iold<cuTrTypes[iCB][umi].size(); iold++) {//intersection of old with new
-                while (cuTrTypes[iCB][umi][iold].tr>trT[inew].tr) //move through the sorted lists
+                while (inew < trT.size() && cuTrTypes[iCB][umi][iold].tr>trT[inew].tr) //move through the sorted lists
                     ++inew;
+                
+                if (inew == trT.size() ) //end of trT reached
+                    break;
                 
                 if (cuTrTypes[iCB][umi][iold].tr == trT[inew].tr) {//
                     trT1.push_back({trT[inew].tr, (uint8)(cuTrTypes[iCB][umi][iold].type | trT[inew].type)});
@@ -72,6 +75,7 @@ void SoloFeature::countVelocyto()
         };        
     };   
     
+    time(&rawTime);
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Velocyto counting: finished input" <<endl;
 
     
@@ -108,16 +112,8 @@ void SoloFeature::countVelocyto()
                 
                 mixedModel  |= ((gV.test(AlignVsTranscript::Intron) && gV.test(AlignVsTranscript::Concordant)) || gV.test(AlignVsTranscript::ExonIntron)) && !gV.test(AlignVsTranscript::ExonIntronSpan);//has exon and intron, but no span
                 spanModel   &= gV.test(AlignVsTranscript::ExonIntronSpan);
-                exonModel   |= gV.test(AlignVsTranscript::Concordant) && !gV.test(AlignVsTranscript::Intron) && !gV.test(AlignVsTranscript::ExonIntron);//has only-exons model
-                
+                exonModel   |= gV.test(AlignVsTranscript::Concordant) && !gV.test(AlignVsTranscript::Intron) && !gV.test(AlignVsTranscript::ExonIntron);//has only-exons model                
                 intronModel |= gV.test(AlignVsTranscript::Intron) && !gV.test(AlignVsTranscript::ExonIntron) && !gV.test(AlignVsTranscript::Concordant);//has only-introns model, this includes span
-                //I like the previous line more: exon-intron span models are also considered intronic. However, this is not what velocyto does:
-                //intronModel |= gV.test(AlignVsTranscript::Intron) && !gV.test(AlignVsTranscript::ExonIntron) && !gV.test(AlignVsTranscript::Concordant) && gV.test(AlignVsTranscript::ExonIntronSpan);//has only-introns model, this does not includes span
-                //imagine only one reads (UMI) that maps to exon-intron boundary in one model, and fully exonic in the other model
-                //noSpanMode=true, since there is exonic model, and intronModel=false => the read will be considered spliced. I would rather consider it mixed.
-                //real example: 85942   0       3       50104995        255     3S95M   *       0       0       AATAAAACTTGTGGGGATTTTAATGTATTTCTTTGGTGAAAATACATTAGTTGTTTGTCTCTAATTGGATCACTTTCCCTTCTAGACTCTGAACAGGA      A<<FFJJJAFJFFJJJJJJJJ<AFJJFJFJAJJJJJFJJAFAFA-A<JFJJJFJAAJJFJJFFAFJJ<FFF7FJJJ<--FFFFJAFFFFJJJ<FFFJJ        NH:i:1  HI:i:1  CR:Z:CTCTACGCACATCTTT   UR:Z:TACGATCATG GX:Z:ENSG00000003756    GN:Z:RBM5       CB:Z:CTCTACGCACATCTTT   UB:Z:TACGATCATG
-                
-                
             };
             
             if (geneI+1==0) //multigene
@@ -125,11 +121,11 @@ void SoloFeature::countVelocyto()
             
             if (exonModel && !intronModel && !mixedModel) {// all models are only-exons
                 geneC[geneI][0]++; //spliced 
-            } else if (spanModel) {//all models are only-spans. Not sure if this ever happens, should be simplified
+            } else if ( spanModel ||
+                        ( (intronModel || mixedModel) && !exonModel)
+                      ) {//all models are only-spans. Not sure if this ever happens, should be simplified. Intron or mixed, but not exon
                 geneC[geneI][1]++;//unspliced
-            } else if (intronModel && !exonModel) {//at least one only-introns model, no only-exon models, could be mixed models
-                geneC[geneI][1]++;//unspliced
-            } else {//all other combinations are mixed models, i.e. both only-exons and only-introns
+            } else {//all other combinations are mixed models, i.e. both only-exons and only-introns, only-exons and mixed
                 geneC[geneI][2]++;//ambiguous
             };
             
@@ -158,5 +154,5 @@ void SoloFeature::countVelocyto()
 
     
     time(&rawTime);
-    P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished collapsing UMIs" <<endl;
+    P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Velocyto counting: finished collapsing UMIs" <<endl;
 };

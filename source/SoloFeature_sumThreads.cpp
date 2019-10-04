@@ -4,9 +4,7 @@
 #include "SequenceFuns.h"
 
 void SoloFeature::sumThreads(ReadAlignChunk **RAchunk)
-{    
-    time_t rawTime;
-    
+{      
     ///////////////////////////// collect RAchunk->RA->soloRead->readFeat
     nReadsInput=0;//TODO: get this from stats
     for (int ii=0; ii<P.runThreadN; ii++) {//point to
