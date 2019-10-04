@@ -1195,9 +1195,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             errOut <<"SOLUTION: re-run STAR without these attribures, or with --soloType set\n";
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
-    
-    //initialize chimeric parameters
-    pCh.initialize(this);
 
     alignEndsType.ext[0][0]=false;
     alignEndsType.ext[0][1]=false;

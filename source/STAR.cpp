@@ -310,7 +310,8 @@ int main(int argInN, char* argIn[]) {
 
     };
 
-    //initialize chimeric parameters here
+    //initialize chimeric parameters here - note that chimeric parameters require samHeader
+    P.pCh.initialize(&P);
     
     // P.inOut->logMain << "mlock value="<<mlockall(MCL_CURRENT|MCL_FUTURE) <<"\n"<<flush;
 

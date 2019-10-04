@@ -1,3 +1,7 @@
+STAR 2.7.2d 2019/10/04
+======================
+* Fixed the problem with no header in Chimeric.out.sam
+
 STAR 2.7.2c 2019/10/02
 ======================
 * Fixed the problem with no output to Chimeric.out.sam 
@@ -31,7 +35,6 @@ STAR 2.7.1a 2019/05/15
 
 STAR 2.7.0f 2019/03/28
 ======================
-
 * Fixed a problem in STARsolo with empty Unmapped.out.mate2 file. Issue #593.
 * Fixed a problem with CR CY UR UQ SAM tags in solo output. Issue #593.
 * Fixed problems with STARsolo and 2-pass.
