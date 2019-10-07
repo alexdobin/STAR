@@ -2,7 +2,9 @@
 #include "SequenceFuns.h"
 #include "ErrorWarning.h"
 #include "IncludeDefine.h"
-#include <type_traits> // C++0x
+# include "BAMfunctions.h"
+
+#include <type_traits>
 
 void ReadAlign::samAttrNM_MD (Transcript const &trOut, uint iEx1, uint iEx2, uint &tagNM, string &tagMD) {
     tagNM=0;
@@ -37,140 +39,6 @@ void ReadAlign::samAttrNM_MD (Transcript const &trOut, uint iEx1, uint iEx2, uin
     };
     tagMD+=to_string(matchN);
 };
-// calculate bin given an alignment covering [beg,end) (zero-based, half-close-half-open)
-int reg2bin(int beg, int end)
-{
-    --end;
-    if (beg>>14 == end>>14) return ((1<<15)-1)/7 + (beg>>14);
-    if (beg>>17 == end>>17) return ((1<<12)-1)/7 + (beg>>17);
-    if (beg>>20 == end>>20) return ((1<<9)-1)/7 + (beg>>20);
-    if (beg>>23 == end>>23) return ((1<<6)-1)/7 + (beg>>23);
-    if (beg>>26 == end>>26) return ((1<<3)-1)/7 + (beg>>26);
-    return 0;
-};
-
-int bamAttrArrayWrite(int32 attr, const char* tagName, char* attrArray ) {
-    attrArray[0]=tagName[0];attrArray[1]=tagName[1];
-    attrArray[2]='i';
-    *( (int32*) (attrArray+3))=attr;
-    return 3+sizeof(int32);
-};
-int bamAttrArrayWrite(float attr, const char* tagName, char* attrArray ) {
-    attrArray[0]=tagName[0];attrArray[1]=tagName[1];
-    attrArray[2]='f';
-    *( (float*) (attrArray+3))=attr;
-    return 3+sizeof(int32);
-};
-int bamAttrArrayWrite(char attr, const char* tagName, char* attrArray ) {
-    attrArray[0]=tagName[0];attrArray[1]=tagName[1];
-    attrArray[2]='A';
-    attrArray[3]=attr;
-    return 3+sizeof(char);
-};
-int bamAttrArrayWrite(string &attr, const char* tagName, char* attrArray ) {
-    attrArray[0]=tagName[0];attrArray[1]=tagName[1];
-    attrArray[2]='Z';
-    memcpy(attrArray+3,attr.c_str(),attr.size()+1);//copy string data including \0
-    return 3+attr.size()+1;
-};
-int bamAttrArrayWrite(const vector<char> &attr, const char* tagName, char* attrArray ) {
-    attrArray[0]=tagName[0];attrArray[1]=tagName[1];
-    attrArray[2]='B';
-    attrArray[3]='c';
-    *( (int32*) (attrArray+4))=attr.size();
-    memcpy(attrArray+4+sizeof(int32),attr.data(),attr.size());//copy array data
-    return 4+sizeof(int32)+attr.size();
-};
-int bamAttrArrayWrite(const vector<int32> &attr, const char* tagName, char* attrArray ) {
-    attrArray[0]=tagName[0];attrArray[1]=tagName[1];
-    attrArray[2]='B';
-    attrArray[3]='i';
-    *( (int32*) (attrArray+4))=attr.size();
-    memcpy(attrArray+4+sizeof(int32),attr.data(),sizeof(int32)*attr.size());//copy array data
-    return 4+sizeof(int32)+sizeof(int32)*attr.size();
-};
-
-int bamAttrArrayWriteSAMtags(string &attrStr, char *attrArray) {//write bam record into attrArray for string attribute attString
-    size_t pos1=0, pos2=0;
-    int nattr=0;
-    do {//cycle over multiple tags separated by tab
-        pos2 = attrStr.find('\t',pos1);
-        string attr1 = attrStr.substr(pos1, pos2-pos1);
-        pos1=pos2+1;
-
-        if (attr1.empty())
-            continue; //extra tab at the beginning, or consecutive tabs
-
-        switch (attr1.at(3)) {
-            case 'i':
-            {
-                int32 a1=stol(attr1.substr(5));
-                nattr += bamAttrArrayWrite(a1,attr1.c_str(),attrArray+nattr);
-                break;
-            };
-            case 'A':
-            {
-                char a1=attr1.at(5);
-                nattr += bamAttrArrayWrite(a1,attr1.c_str(),attrArray+nattr);
-                break;
-            };
-                break;
-            case 'Z':
-            {
-                string a1=attr1.substr(5);
-                nattr += bamAttrArrayWrite(a1,attr1.c_str(),attrArray+nattr);
-                break;
-            };
-            case 'f':
-            {
-                float a1=stof(attr1.substr(5));
-                nattr += bamAttrArrayWrite(a1,attr1.c_str(),attrArray+nattr);
-                break;
-            };
-        };
-    } while (pos2!= string::npos);
-
-    return nattr;
-};
-
-template <typename intType>
-int bamAttrArrayWriteInt(intType xIn, const char* tagName, char* attrArray, Parameters &P) {//adapted from samtools
-    attrArray[0]=tagName[0];attrArray[1]=tagName[1];
-    #define ATTR_RECORD_INT(_intChar,_intType,_intValue) attrArray[2] = _intChar; *(_intType*)(attrArray+3) = (_intType) _intValue; return 3+sizeof(_intType)
-    int64 x = (int64) xIn;
-    if (x < 0) {
-        if (x >= -127) {
-            ATTR_RECORD_INT('c',int8_t,x);
-        } else if (x >= -32767) {
-            ATTR_RECORD_INT('s',int16_t,x);
-        } else {
-            ATTR_RECORD_INT('i',int32_t,x);
-            if (!(x>=-2147483647)) {
-                ostringstream errOut;
-                errOut <<"EXITING because of FATAL BUG: integer out of range for BAM conversion: "<< x <<"\n";
-                errOut <<"SOLUTION: contact Alex Dobin at dobin@cshl.edu\n";
-                exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_BUG, P);
-            };
-        };
-    } else {
-        if (x <= 255) {
-            ATTR_RECORD_INT('C',uint8_t,x);
-        } else if (x <= 65535) {
-            ATTR_RECORD_INT('S',uint16_t,x);
-        } else {
-            ATTR_RECORD_INT('I',uint32_t,x);
-            if (!(x<=4294967295)) {
-                ostringstream errOut;
-                errOut <<"EXITING because of FATAL BUG: integer out of range for BAM conversion: "<< x <<"\n";
-                errOut <<"SOLUTION: contact Alex Dobin at dobin@cshl.edu\n";
-                exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_BUG, P);
-            };
-        };
-    };
-};
-
-
-
 
 int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint trChrStart, uint mateChr, uint mateStart, char mateStrand, int alignType, bool *mateMapped, vector<int> outSAMattrOrder, char** outBAMarray, uint* outBAMarrayN) {
     //return: number of lines (mates)
@@ -279,8 +147,25 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
             attrN+=bamAttrArrayWriteInt(trOut.nMM,"nM",attrOutArray+attrN,P);
             attrN+=bamAttrArrayWrite((to_string((uint) alignType)).at(0), "uT",attrOutArray+attrN); //cast to uint is only necessary for old compilers
 
-            if (!P.outSAMattrRG.empty()) attrN+=bamAttrArrayWrite(P.outSAMattrRG.at(readFilesIndex),"RG",attrOutArray+attrN);
-
+            if (P.outSAMattrPresent.RG)
+                attrN+=bamAttrArrayWrite(P.outSAMattrRG.at(readFilesIndex),"RG",attrOutArray+attrN);
+            if (P.outSAMattrPresent.CR)
+                attrN+=bamAttrArrayWrite(soloRead->readBar->cbSeq,"CR",attrOutArray+attrN);
+            if (P.outSAMattrPresent.CY)
+                attrN+=bamAttrArrayWrite(soloRead->readBar->cbQual,"CY",attrOutArray+attrN);
+            if (P.outSAMattrPresent.CB && soloRead->readBar->cbSeqCorrected!="")
+                attrN+=bamAttrArrayWrite(soloRead->readBar->cbSeqCorrected,"CB",attrOutArray+attrN);            
+            if (P.outSAMattrPresent.UR)
+                attrN+=bamAttrArrayWrite(soloRead->readBar->umiSeq,"UR",attrOutArray+attrN);
+            if (P.outSAMattrPresent.UY)
+                attrN+=bamAttrArrayWrite(soloRead->readBar->umiQual,"UY",attrOutArray+attrN);
+            if (P.outSAMattrPresent.sM)
+                attrN+=bamAttrArrayWrite(soloRead->readBar->cbMatch,"sM",attrOutArray+attrN);
+            if (P.outSAMattrPresent.sS)
+                attrN+=bamAttrArrayWrite(soloRead->readBar->bSeq,"sS",attrOutArray+attrN);
+            if (P.outSAMattrPresent.sQ)
+                attrN+=bamAttrArrayWrite(soloRead->readBar->bQual,"sQ",attrOutArray+attrN);
+            
         } else {//this mate is mapped
             if (flagPaired) {//paired reads
                 samFLAG=0x0001;
@@ -472,24 +357,51 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                             attrN+=bamAttrArrayWrite(matesCIGAR[1-imate],"MC",attrOutArray+attrN);
                         };
                         break;
-
+                        
+                    //solo
                     case ATTR_CR:
-                            attrN+=bamAttrArrayWrite(soloRead->readBar->cbSeq,"CR",attrOutArray+attrN);
+                        attrN+=bamAttrArrayWrite(soloRead->readBar->cbSeq,"CR",attrOutArray+attrN);
                         break;
                     case ATTR_CY:
-                            attrN+=bamAttrArrayWrite(soloRead->readBar->cbQual,"CY",attrOutArray+attrN);
+                        attrN+=bamAttrArrayWrite(soloRead->readBar->cbQual,"CY",attrOutArray+attrN);
                         break;
                     case ATTR_UR:
-                            attrN+=bamAttrArrayWrite(soloRead->readBar->umiSeq,"UR",attrOutArray+attrN);
+                        attrN+=bamAttrArrayWrite(soloRead->readBar->umiSeq,"UR",attrOutArray+attrN);
                         break;
                     case ATTR_UY:
-                            attrN+=bamAttrArrayWrite(soloRead->readBar->umiQual,"UY",attrOutArray+attrN);
+                        attrN+=bamAttrArrayWrite(soloRead->readBar->umiQual,"UY",attrOutArray+attrN);
                         break;
-
+                    case ATTR_GX:
+                        if (readAnnot.geneConcordant.size()==1 && trOut.alignGenes.size()==1) //only output if read maps to a single gene
+                            attrN+=bamAttrArrayWrite(chunkTr->geID[*trOut.alignGenes.begin()],"GX",attrOutArray+attrN);
+                        break;
+                    case ATTR_GN:
+                        if (readAnnot.geneConcordant.size()==1 && trOut.alignGenes.size()==1) //only output if read maps to a single gene
+                            attrN+=bamAttrArrayWrite(chunkTr->geName[*trOut.alignGenes.begin()],"GN",attrOutArray+attrN);
+                        break;                        
+                        
+                    case ATTR_sM:
+                        attrN+=bamAttrArrayWrite(soloRead->readBar->cbMatch,"sM",attrOutArray+attrN);
+                        break;
+                    case ATTR_sS:
+                        attrN+=bamAttrArrayWrite(soloRead->readBar->bSeq,"sS",attrOutArray+attrN);
+                        break;
+                    case ATTR_sQ:
+                        attrN+=bamAttrArrayWrite(soloRead->readBar->bQual,"sQ",attrOutArray+attrN);
+                        break;
+                        
+                    //following attributes are not processed here
+                    case ATTR_CB:
+                        if (soloRead->readBar->cbSeqCorrected!="")
+                        attrN+=bamAttrArrayWrite(soloRead->readBar->cbSeqCorrected,"CB",attrOutArray+attrN);                        
+                        break;
+                    case ATTR_UB:
+                        break;
+                        
                     default:
                         ostringstream errOut;
                         errOut <<"EXITING because of FATAL BUG: unknown/unimplemented SAM/BAM atrribute (tag): "<<outSAMattrOrder[ii] <<"\n";
-                        errOut <<"SOLUTION: contact Alex Dobin at dobin@cshl.edu\n";
+                        errOut <<"SOLUTION: please make sure that SAM attributes in --outSAMattributes are compatible with the --outSAMtype option\n";
                         exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
                 };
             };

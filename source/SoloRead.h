@@ -3,6 +3,7 @@
 
 #include "SoloReadBarcode.h"
 #include "SoloReadFeature.h"
+#include "ReadAnnotations.h"
 
 class SoloRead {
 public:
@@ -10,7 +11,7 @@ public:
     SoloReadFeature **readFeat;
     
     SoloRead(Parameters &Pin, int32 iChunkIn);
-    void record(uint64 nTr, set<uint32> &readTrGenes, set<uint32> &readGenes, Transcript *alignOut);
+    void record(uint64 nTr, Transcript *alignOut, uint64 iRead, ReadAnnotations &readAnnot);
     
 private:
     const int32 iChunk;

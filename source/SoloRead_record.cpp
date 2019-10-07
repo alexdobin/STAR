@@ -1,10 +1,12 @@
 #include "SoloRead.h"
 
-void SoloRead::record(uint64 nTr, set<uint32> &readGene, set<uint32> &readGeneFull, Transcript *alignOut)
+void SoloRead::record(uint64 nTr, Transcript *alignOut, uint64 iRead, ReadAnnotations &readAnnot)
 {
-    if (pSolo.type==0)
+    if (pSolo.type==pSolo.SoloTypes::None)
+        return;
+    if (pSolo.type==pSolo.SoloTypes::CB_samTagOut)
         return;
 
     for (uint32 ii=0; ii<pSolo.nFeatures; ii++)
-        readFeat[ii]->record(*readBar, nTr, readGene, readGeneFull, alignOut);
+        readFeat[ii]->record(*readBar, nTr, alignOut, iRead, readAnnot);
 };

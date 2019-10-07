@@ -12,6 +12,7 @@
 #include "Quantifications.h"
 #include "ChimericDetection.h"
 #include "SoloRead.h"
+#include "ReadAnnotations.h"
 
 #include <time.h>
 #include <random>
@@ -25,7 +26,7 @@ class ReadAlign {
         //vars
         Genome &mapGen; //mapped-to-genome structure
 
-        uint iRead;
+        uint64 iRead, iReadAll;
         char **Read1;
 
         Stats statsRA; //mapping statistics
@@ -87,7 +88,7 @@ class ReadAlign {
         Transcript** trArrayPointer; //linear array of transcripts to store all of them from all windows
 
         //read
-        uint iReadAll, iMate;
+        uint64 iMate;
         char readFilter; //Illumina not passed Y/N
         bool revertStrand; //what to do with the strand, according to strandType and iMate
         uint clip3pNtotal[MAX_N_MATES], clip5pNtotal[MAX_N_MATES], clip3pAdapterN[MAX_N_MATES]; //total number of trimmed bases from 5p,3p
@@ -154,7 +155,11 @@ class ReadAlign {
             uint ovS;//first read base of the overlap
             uint mateStart[2];//mates starts in the merged read
         } peOv;//PE  mates overlap/merge/remap structure
+        
+        //read annotations
+        ReadAnnotations readAnnot;
 
+        /////////////////////////////////////////////////////////////////// METHODS
         void resetN();//resets the counters to 0
         void multMapSelect();
         int mapOneRead();
@@ -185,7 +190,7 @@ class ReadAlign {
         void stitchWindowSeeds (uint iW, uint iWrec, bool *WAexcl, char *R);//stitches all seeds in one window: iW
         void stitchPieces(char **R, uint Lread);
 
-        uint quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT, vector<uint32> &readTranscripts, set<uint32> &readTrGenes);
+        uint quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT);
 
         void copyRead(ReadAlign&);
         void waspMap();

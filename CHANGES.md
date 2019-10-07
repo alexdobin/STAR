@@ -1,3 +1,12 @@
+* Implemented Summary.csv statistics output for raw and filtered cells useful for quick run quality assessment.
+* Implemented --soloUMIfiltering MultiGeneUMI option introduced in CellRanger 3.x.x for filtering UMI collisions between different genes.
+* Implemented --soloCellFilter option for basic filtering of the cells, similar to the methods used by CellRanger 2.2.x.
+* Implemented --soloCBmatchWLtype 1MM_multi_pseudocounts option, introduced in CellRange 3.x.x, which slightly changes the posterior probability calculation for CB with 1 mismatch. 
+* Implemented --soloFeatures Velocyto option to produce Spliced, Unsplied, and Ambiguous counts similar to the velocyto.py tool developed by LaManno et al. This option is under actice development and the results may change in the future versions.
+* Implemented SAM attributes sS and sQ to output sequence and quality of the entire barcode read, and sM to output the barcode match status.
+* Implemented complex barcodes in STARsolo with --soloType CB_UMI_Complex, --soloCBmatchWLtype --soloAdapterSequence, --soloAdapterMismatchesNmax, --soloCBposition,--soloUMIposition .
+* Implemented CB/UB/GX/GN BAM tags for STARsolo.
+
 STAR 2.7.2d 2019/10/04
 ======================
 * Fixed the problem with no header in Chimeric.out.sam
@@ -18,6 +27,10 @@ STAR 2.7.2a 2019/08/13
 * Chimeric read reporting now requires that the chimeric read alignment score higher than the alternative non-chimeric alignment to the reference genome.  The Chimeric.out.junction file now includes the scores of the chimeric alignments and non-chimeric alternative alignments, in addition to the PEmerged bool attribute. (bhaas, Aug 2019)
 * Fixed the problem with ALT=* in STAR-WASP.
 * Implemented extras/scripts/soloBasicCellFilter.awk script to perform basic filtering of the STARsolo count matrices.
+* Fixed a bug causing rare seg-faults with for --peOverlap* options and chimeric detection.
+* Fixed a problem in STARsolo with unmapped reads counts in Solo.out/*.stats files.
+* Fixed a bug in STARsolo with counting reads for splice junctions. Solo.out/matrixSJ.mtx output is slighlty changed.
+* Fixed the problem with ALT=* in VCF files for STAR-WASP.
 
 STAR 2.7.1a 2019/05/15
 ======================

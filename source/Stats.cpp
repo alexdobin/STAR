@@ -12,6 +12,7 @@ void Stats::resetN() {//zero all counters
         splicesN[ii]=0;
     };
 
+    qualHist={{}};
 };
 
 Stats::Stats() {//constructor
@@ -149,6 +150,13 @@ void Stats::writeLines(ofstream &streamOut, const vector<int> outType, const str
                 streamOut << commStr <<" "<< outStr <<"\n";
             streamOut << commStr <<" "<< "Nreads " << readN <<"\t"<< "NreadsUnique " << mappedReadsU <<"\t"<< "NreadsMulti " << mappedReadsM << "\n";
         };
+    };
+};
+
+void Stats::qualHistCalc(const uint64 imate, const char* qual, const uint64 len)
+{//calculates histogram of quality scores for each imate        
+    for (uint64 ix=0; ix<len; ix++) {
+            qualHist[imate][(uint8)qual[ix]]++;
     };
 };
 

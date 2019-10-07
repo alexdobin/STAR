@@ -3,6 +3,7 @@
 #include "ThreadControl.h"
 #include "ErrorWarning.h"
 #include "SequenceFuns.h"
+#include "GlobalVariables.h"
 
 void ReadAlignChunk::processChunks() {//read-map-write chunks
     noReadsLeft=false; //true if there no more reads left in the file
@@ -95,21 +96,22 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                         for (uint imate=0; imate<P.readNmatesIn; imate++)
                             P.inOut->readIn[imate].ignore(DEF_readNameSeqLengthMax,'\n');
 
-                        if (P.pSolo.type==1) {//record barcode sequence
+                        if (P.pSolo.type>0) {//record barcode sequence
                             string seq1;
-                            getline(P.inOut->readIn[1],seq1);
+                            getline(P.inOut->readIn[P.pSolo.barcodeRead],seq1);
                             if (seq1.size() != P.pSolo.bL && P.pSolo.bL > 0) {
                                 ostringstream errOut;
                                 errOut << "EXITING because of FATAL ERROR in input read file: the total length of barcode sequence is "  << seq1.size() << " not equal to expected " <<P.pSolo.bL <<"\n"  ;
                                 errOut << "Read ID="<<readID<< "   Sequence="<<seq1<<"\n";
-                                errOut << "SOLUTION: make sure that the barcode read is the second in --readFilesIn and check that is has the correct formatting\n";
+                                errOut << "SOLUTION: make sure that the barcode read is the last file in --readFilesIn , and check that it has the correct formatting\n";
                                 errOut << "          If UMI+CB length is not equal to the barcode read length, specify barcode read length with --soloBarcodeReadLength\n";
                                 exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
                             };
                             readID += ' ' + seq1;
-                            P.inOut->readIn[1].ignore(DEF_readNameSeqLengthMax,'\n');//skip to the end of 3rd ("+") line
-                            getline(P.inOut->readIn[1],seq1); //read qualities
+                            P.inOut->readIn[P.pSolo.barcodeRead].ignore(DEF_readNameSeqLengthMax,'\n');//skip to the end of 3rd ("+") line
+                            getline(P.inOut->readIn[P.pSolo.barcodeRead],seq1); //read qualities
                             readID += ' ' + seq1;
+                            g_statsAll.qualHistCalc(1, seq1.c_str(), seq1.size());
                         };
 
                         //copy the same readID to both mates
@@ -124,6 +126,10 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                             P.inOut->readIn[imate].getline(chunkIn[imate] + chunkInSizeBytesTotal[imate], DEF_readNameSeqLengthMax+1 );
                             chunkInSizeBytesTotal[imate] += P.inOut->readIn[imate].gcount();
                             chunkIn[imate][chunkInSizeBytesTotal[imate]-1]='\n';
+                            
+                            if (iline==3 && P.outFilterBySJoutStage!=2) {
+                                g_statsAll.qualHistCalc(imate, chunkIn[imate] + chunkInSizeBytesTotal[imate] - P.inOut->readIn[imate].gcount(), P.inOut->readIn[imate].gcount());
+                            };
                         };
                     };
                 } else if (nextChar=='>') {//fasta, can be multiline, which is converted to single line

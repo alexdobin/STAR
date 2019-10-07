@@ -68,11 +68,9 @@ typedef uint8_t uint8;
 
 #define scoreMatch 1
 
-
 //cleaned
 //output
 #define BAMoutput_oneAlignMaxBytes 100000
-
 
 //SAM attributes
 #define ATTR_NH 1
@@ -95,6 +93,13 @@ typedef uint8_t uint8;
 #define ATTR_CY 18
 #define ATTR_UR 19
 #define ATTR_UY 20
+#define ATTR_CB 21
+#define ATTR_UB 22
+#define ATTR_GX 23
+#define ATTR_GN 24
+#define ATTR_sM 25
+#define ATTR_sS 26
+#define ATTR_sQ 27
 
 //BAM definitions
 #define BAM_CIGAR_MaxSize 10000
@@ -119,7 +124,7 @@ typedef uint8_t uint8;
 #endif
 
 //input reads
-#define MAX_N_MATES 2
+#define MAX_N_MATES 3
 #define DEF_readNameLengthMax 50000
 #if defined COMPILE_FOR_LONG_READS
     #define DEF_readSeqLengthMax 500000

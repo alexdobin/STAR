@@ -3,31 +3,33 @@
 #include <set>
 #include "IncludeDefine.h"
 #include "Parameters.h"
+#include "SoloReadBarcodeStats.h"
 
 class SoloReadBarcode {
 public:
     uint32 homoPolymer[4];//homopolymer constants
-    string cbSeq, umiSeq, cbQual, umiQual;
-    uint64 cbB;
+    string cbSeq, umiSeq, cbQual, umiQual, bSeq, bQual;
+    string cbSeqCorrected;
     uint32 umiB;
-    int64  cbI;
-    int32  cbMatch;//0=exact, 1=1 match with 1MM, 2= >1 matches with 1MM
+    //int64  cbI;
+    int32  cbMatch;//-1: no match, 0: exact, 1: 1 match with 1MM, >1: # of matches with 1MM
     string cbMatchString;//CB matches and qualities
-    vector<uint32> cbMatchInd;//matches
+    vector<uint64> cbMatchInd;//matches
     uint32 *cbReadCountExact;
+    map <uint32,uint32> cbReadCountMap;//count read per CB for no WL
 
-    struct {
-        enum {                 nNinBarcode,  nUMIhomopolymer,  nTooMany,  nNoMatch,  nStats};
-        uint64 V[nStats];
-        vector<string> names={"nNinBarcode","nUMIhomopolymer","nTooMany","nNoMatch"};
-    } stats;
+
+    SoloReadBarcodeStats stats;
 
     SoloReadBarcode(Parameters &Pin);
     void getCBandUMI(string &readNameExtra);
     void addCounts(const SoloReadBarcode &rfIn);
     void addStats(const SoloReadBarcode &rfIn);
     void statsOut(ofstream &streamOut);
-
+    void matchCBtoWL(string &cbSeq1, string &cbQual1, vector<uint64> &cbWL, int32 &cbMatch1, vector<uint64> &cbMatchInd1, string &cbMatchString1);
+    bool convertCheckUMI();
+    void addStats(const int32 cbMatch1);
+    
 private:
     Parameters &P;
     ParametersSolo &pSolo;

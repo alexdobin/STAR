@@ -66,6 +66,7 @@ class Parameters {
         uint iReadAll;
         uint readNmates, readNmatesIn;
         string readMatesLengthsIn;
+        uint32 readQualityScoreBase;
 
         vector <string> readNameSeparator;
         vector <char> readNameSeparatorChar;
@@ -151,7 +152,7 @@ class Parameters {
 
         int outSAMtlen;
 
-        struct {bool NH,HI,AS,NM,MD,nM,jM,jI,RG,XS,rB,vG,vA,vW,ch,MC,CR,CY,UR,UY;} outSAMattrPresent, outSAMattrPresentQuant;
+        struct {bool NH,HI,AS,NM,MD,nM,jM,jI,RG,XS,rB,vG,vA,vW,ch,MC,CR,CY,UR,UY,CB,UB,GX,GN,sM,sS,sQ;} outSAMattrPresent, outSAMattrPresentQuant;
 
         vector <int> outSAMattrOrder, outSAMattrOrderQuant;
         int outBAMcompression;
@@ -293,6 +294,10 @@ class Parameters {
               bool yes;
           } geneFull;
 
+          struct {
+              bool yes;
+          } gene;
+          
         } quant;
 
         //variation parameters

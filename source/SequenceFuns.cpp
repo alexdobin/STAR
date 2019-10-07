@@ -315,7 +315,22 @@ uint localSearchNisMM(const char *x, uint nx, const char *y, uint ny, double pMM
     return ixBest;
 };
 
-
+uint32 localAlignHammingDist(const string &text, const string &query, uint32 &pos)
+{
+    uint32 distBest=query.size();
+    for (uint32 ii=0; ii<text.size()-query.size()+1; ii++) {
+        uint32 dist1=0;
+        for (uint32 jj=0; jj<query.size(); jj++) {
+            if (text[jj+ii]!=query[jj])
+                ++dist1;
+        };
+        if (dist1<distBest) {
+            distBest=dist1;
+            pos=ii;
+        };
+    };
+    return distBest;
+};
 
 uint qualitySplit(char* r, char* q, uint L, char Qsplit, uint maxNsplit, uint  minLsplit, uint** splitR) {
     //splits the read r[L] by quality scores q[L], outputs in splitR - split coordinate/length - per base

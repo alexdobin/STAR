@@ -2,12 +2,12 @@
 #include "ReadAlign.h"
 #include "serviceFuns.cpp"
 
-
 int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, uint32 *exLenCum1, uint16 exN1, Transcript &aT) {
 
     //find exon that overlaps beginning of the read
-    uint32 g1=aG.exons[0][EX_G]-trS1;//start of the transcript
+    uint32 g1=aG.exons[0][EX_G]-trS1;//start of the align
     uint32 ex1=binarySearch1<uint32>(g1, exSE1, 2*exN1);
+    //this sholud not be possible - we check before we call this function
     if (ex1>=2*exN1) return 0; //align start is to the right of all exons
 
     if (ex1%2==1) {//beginning of the read >=end of an exon
@@ -27,7 +27,6 @@ int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, ui
         if (aG.exons[iab][EX_G]+aG.exons[iab][EX_L]>exSE1[2*ex1+1]+trS1+1) {//block extends past exon end
             return 0;
         };
-
         if (iab==0 || aG.canonSJ[iab-1]<0) {
             aT.exons[aT.nExons][EX_R]=aG.exons[iab][EX_R];
             aT.exons[aT.nExons][EX_G]=aG.exons[iab][EX_G]-trS1-exSE1[2*ex1]+exLenCum1[ex1];
@@ -89,11 +88,11 @@ int alignToTranscript(Transcript &aG, uint trS1, uint8 trStr1, uint32 *exSE1, ui
     return 0; //this should not happen
 };
 
-uint32 Transcriptome::quantAlign (Transcript &aG, Transcript *aTall, vector<uint32> &readTranscripts, set<uint32> &readTrGenes) {
+uint32 Transcriptome::quantAlign (Transcript &aG, Transcript *aTall) {
     uint32 nAtr=0; //number of alignments to the transcriptome
 
     //binary search through transcript starts
-    uint32 tr1=binarySearch1a<uint>(aG.exons[0][EX_G], trS, nTr);
+    uint32 tr1=binarySearch1a<uint>(aG.exons[0][EX_G], trS, nTr);//tr1 has the maximum transcript start such that it is still <= align start
     if (tr1==(uint32) -1) return 0; //alignment outside of range of all transcripts
 
     uint aGend=aG.exons[aG.nExons-1][EX_G];
@@ -107,16 +106,6 @@ uint32 Transcriptome::quantAlign (Transcript &aG, Transcript *aTall, vector<uint
                     aTall[nAtr].Chr = tr1;
                     aTall[nAtr].Str = trStr[tr1]==1 ? aG.Str : 1-aG.Str; //TODO strandedness
                     ++nAtr;
-                    if (P.pSolo.strand==-1 || (int32) aTall[nAtr-1].Str == P.pSolo.strand) {//correct strand
-                        readTranscripts.push_back(tr1);
-                        readTrGenes.insert(trGene[tr1]);
-//                         {//find the distance to 3'
-//                             uint64 distTTS=trLen[tr1]-(aTall[nAtr].exons[aTall[nAtr].nExons-1][EX_G] + aTall[nAtr].exons[aTall[nAtr].nExons-1][EX_L]);
-//                             cout <<"\t"<< distTTS;
-//     //                         if (distTTS>100000)
-//     //                             cerr << distTTS <<"\t"<< trLen[tr1] << "\n";
-//                         };                        
-                    };
                 };
         };
     } while (trEmax[tr1]>=aGend && tr1>0);

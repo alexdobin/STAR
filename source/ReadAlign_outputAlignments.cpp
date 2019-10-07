@@ -8,10 +8,6 @@ void ReadAlign::outputAlignments() {
 
     bool mateMapped[2]={false,false};
 
-    set<uint32> readGeneFull={},readGene={};
-    vector<uint32> readTranscripts={};
-    vector<int32> readGeneExon={};
-
     outFilterPassed=true;//only false if the alignment is held for outFilterBySJoutStage
     if (unmapType==-1) {//output transcripts
         if (P.outFilterBySJoutStage==1) {//filtering by SJout
@@ -93,6 +89,25 @@ void ReadAlign::outputAlignments() {
             nTrOut=min(P.outSAMmultNmax,nTrOut); //number of to write to SAM/BAM files
 
             soloRead->readBar->getCBandUMI(readNameExtra.at(0));
+            //genes
+            if ( P.quant.geCount.yes ) {
+                chunkTr->geneCountsAddAlign(nTr, trMult, readAnnot.geneExonOverlap);
+            };
+            //solo-GeneFull
+            if ( P.quant.geneFull.yes ) {
+                chunkTr->geneFullAlignOverlap(nTr, trMult, P.pSolo.strand, readAnnot.geneFull);
+            };
+            //solo-Gene
+            if ( P.quant.gene.yes ) {
+                chunkTr->classifyAlign(trMult, nTrOut, readAnnot);
+            };            
+            //transcripts
+            if ( P.quant.trSAM.yes ) {//NOTE: the transcripts are changed by this function (soft-clipping extended), cannot be reused
+                quantTranscriptome(chunkTr, nTrOut, trMult,  alignTrAll);
+            };
+
+            //solo
+            soloRead->record(nTr, trMult[0], iReadAll, readAnnot);             
             
             //write to SAM/BAM
             for (uint iTr=0;iTr<nTrOut;iTr++) {//write all transcripts
@@ -151,7 +166,7 @@ void ReadAlign::outputAlignments() {
                             outBAMunsorted->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], imate>0 ? 0 : outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1]);
                         };
                         if (P.outBAMcoord) {//KeepPairs option does not affect for sorted BAM since we do not want multiple entries for the same unmapped read
-                            outBAMcoord->coordOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], iReadAll);
+                            outBAMcoord->coordOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], iReadAll<<32);
                         };
                     };
                 };
@@ -163,30 +178,13 @@ void ReadAlign::outputAlignments() {
                     outputTranscriptSJ (*(trMult[iTr]), nTr, chunkOutSJ, sjReadStartN);
                 };
             };
-            
-            //genes
-            if ( P.quant.geCount.yes ) {
-                chunkTr->geneCountsAddAlign(nTr, trMult, readGeneExon);
-            };
-
-            if ( P.quant.geneFull.yes ) {
-                chunkTr->geneFullAlignOverlap(nTr, trMult, P.pSolo.strand, readGeneFull);
-            };
-
-            //transcripts
-            if ( P.quant.trSAM.yes ) {//NOTE: the transcripts are changed by this function (soft-clipping extended), cannot be reused
-                quantTranscriptome(chunkTr, nTrOut, trMult,  alignTrAll, readTranscripts, readGene);
-            };
-
-            //solo
-            soloRead->record(nTr, readGene, readGeneFull, trMult[0]); 
         };
     };
 
     if (unmapType>=0) {//unmapped reads
         statsRA.unmappedAll++;
         soloRead->readBar->getCBandUMI(readNameExtra.at(0));
-        soloRead->record(nTr, readGene, readGeneFull, trMult[0]);         
+        soloRead->record(0, trMult[0], iReadAll, readAnnot);         
     };
 
     if ( P.outSAMunmapped.within && unmapType>=0 && unmapType<4 ) {//output unmapped within && unmapped read && both mates unmapped
@@ -200,7 +198,7 @@ void ReadAlign::outputAlignments() {
                     outBAMquant->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], imate>0 ? 0 : outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1]);
                 };
                 if (P.outBAMcoord) {
-                    outBAMcoord->coordOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], iReadAll);
+                    outBAMcoord->coordOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], iReadAll<<32);
                 };
             };
         };

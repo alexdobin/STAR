@@ -25,7 +25,7 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
     };
     geStream.close();
 
-    if ( P.quant.trSAM.yes ) {//load exon-transcript structures
+    if ( P.quant.trSAM.yes || P.quant.gene.yes ) {//load exon-transcript structures
         //load tr and ex info
         ifstream & trinfo = ifstrOpen(trInfoDir+"/transcriptInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step",P);
         trinfo >> nTr;
@@ -37,6 +37,8 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
         trStr=new uint8 [nTr];
         trID.resize(nTr);
         trGene=new uint32 [nTr];
+        trLen=new uint32 [nTr];
+        
         for (uint32 itr=0; itr<nTr; itr++) {
             uint16 str1;
             trinfo >> trID[itr] >> trS[itr] >> trE[itr] >> trEmax[itr] >> str1 >> trExN[itr] >> trExI[itr] >> trGene[itr];
@@ -60,6 +62,11 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
         for (uint32 iex=0; iex<nEx; iex++) {
             exinfo >> exSE[2*iex] >> exSE[2*iex+1] >> exLenCum[iex]; //reading all elements one after another
         };
+        for (uint32 ii=0;ii<nTr;ii++) {
+            uint32 iex1=trExI[ii]+trExN[ii]-1; //last exon of the transcript
+            trLen[ii]=exLenCum[iex1]+exSE[2*iex1+1]-exSE[2*iex1]+1;
+        };
+        
         P.inOut->logMain << "Loaded exon database, nEx="<<nEx<<endl;
         exinfo.close();
     };

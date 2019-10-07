@@ -9,18 +9,19 @@
 
 
 class Solo {
-public:
-
-    SoloFeature **soloFeat;
-
-    Solo(ReadAlignChunk **RAchunk, Parameters &Pin, Transcriptome &inTrans);
-    void processAndOutput();
-
 private:
     ReadAlignChunk **RAchunk;
     Parameters &P;
-    ParametersSolo &pSolo;
     Transcriptome &Trans;
+
+public:
+    ParametersSolo &pSolo;
+    SoloFeature **soloFeat;
+    
+    SoloReadBarcode *readBarSum;
+
+    Solo(ReadAlignChunk **RAchunk, Parameters &Pin, Transcriptome &inTrans);
+    void processAndOutput();
 };
 
 #endif

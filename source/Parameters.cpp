@@ -55,6 +55,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "readMatesLengthsIn", &readMatesLengthsIn));
     parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "readMapNumber", &readMapNumber));
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readNameSeparator", &readNameSeparator));
+    parArray.push_back(new ParameterInfoScalar <uint32> (-1, -1, "readQualityScoreBase", &readQualityScoreBase));
     //parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "readStrand", &pReads.strandString));
 
 
@@ -258,11 +259,18 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <uint32>   (-1, -1, "soloCBlen", &pSolo.cbL));
     parArray.push_back(new ParameterInfoScalar <uint32>   (-1, -1, "soloUMIlen", &pSolo.umiL));
     parArray.push_back(new ParameterInfoScalar <uint32>   (-1, -1, "soloBarcodeReadLength", &pSolo.bL));
-    parArray.push_back(new ParameterInfoScalar <string>   (-1, -1, "soloCBwhitelist", &pSolo.soloCBwhitelist));
+    parArray.push_back(new ParameterInfoVector <string>   (-1, -1, "soloCBwhitelist", &pSolo.soloCBwhitelist));
     parArray.push_back(new ParameterInfoScalar <string>   (-1, -1, "soloStrand", &pSolo.strandStr));
-    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "soloOutFileNames", &pSolo.outFileNames));
-    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "soloFeatures", &pSolo.featureIn));
-    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "soloUMIdedup", &pSolo.umiDedup));
+    parArray.push_back(new ParameterInfoVector <string>   (-1, -1, "soloOutFileNames", &pSolo.outFileNames));
+    parArray.push_back(new ParameterInfoVector <string>   (-1, -1, "soloFeatures", &pSolo.featureIn));
+    parArray.push_back(new ParameterInfoVector <string>   (-1, -1, "soloUMIdedup", &pSolo.umiDedup));
+    parArray.push_back(new ParameterInfoScalar <string>   (-1, -1, "soloAdapterSequence",&pSolo.adapterSeq));
+    parArray.push_back(new ParameterInfoScalar <uint32>   (-1, -1, "soloAdapterMismatchesNmax", &pSolo.adapterMismatchesNmax));
+    parArray.push_back(new ParameterInfoScalar <string>    (-1, -1, "soloCBmatchWLtype", &pSolo.CBmatchWL.type));
+    parArray.push_back(new ParameterInfoVector <string>   (-1, -1, "soloCBposition",&pSolo.cbPositionStr));
+    parArray.push_back(new ParameterInfoScalar <string>   (-1, -1, "soloUMIposition",&pSolo.umiPositionStr));
+    parArray.push_back(new ParameterInfoVector <string>   (-1, -1, "soloCellFilter",&pSolo.cellFilter.type));
+    parArray.push_back(new ParameterInfoVector <string>   (-1, -1, "soloUMIfiltering",&pSolo.umiFiltering.type));
 
     parameterInputName.push_back("Default");
     parameterInputName.push_back("Command-Line-Initial");
@@ -429,7 +437,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     };
     //     parOut.close();
     */
-    
     inOut->logMain << "----------------------------------------\n\n" << flush;
 
 
@@ -856,7 +863,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         //check sizes of the mate files, if not the same, assume mates are not the same length
         if (readNmates==1) {
             readMatesEqualLengths=true;
-        } else if (readNmates > 2){
+        } else if (readNmates > 2 && pSolo.typeStr=="None"){
             ostringstream errOut;
             errOut <<"EXITING: because of fatal input ERROR: number of read mates files > 2: " <<readNmates << "\n";
             errOut <<"SOLUTION:specify only one or two files in the --readFilesIn option. If file names contain spaces, use quotes: \"file name\"\n";
@@ -879,7 +886,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                 inOut->outUnmappedReadsStream[imate].open(ff.str().c_str());
             };
         };
-
 
         if (outFilterType=="Normal") {
             outFilterBySJoutStage=0;
@@ -914,15 +920,15 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     chunkOutBAMsizeBytes= (uint) int((1.0/BUFFER_InSizeFraction-1.0)*chunkInSizeBytesArray*2.0);
     chunkInSizeBytes=chunkInSizeBytesArray-2*(DEF_readSeqLengthMax+1)-2*DEF_readNameLengthMax;//to prevent overflow
 
-    //basic trimming
-    if (clip5pNbases.size()==1 && readNmates==2) clip5pNbases.push_back(clip5pNbases[0]);
-    if (clip3pNbases.size()==1 && readNmates==2) clip3pNbases.push_back(clip3pNbases[0]);
-    if (clip3pAfterAdapterNbases.size()==1 && readNmates==2) clip3pAfterAdapterNbases.push_back(clip3pAfterAdapterNbases[0]);
+    //basic trimming: same adapter for both mates
+    if (clip5pNbases.size()==1 && readNmates>=2) clip5pNbases.push_back(clip5pNbases[0]);
+    if (clip3pNbases.size()==1 && readNmates>=2) clip3pNbases.push_back(clip3pNbases[0]);
+    if (clip3pAfterAdapterNbases.size()==1 && readNmates>=2) clip3pAfterAdapterNbases.push_back(clip3pAfterAdapterNbases[0]);
 
-    //adapter clipping
-    if (clip3pAdapterSeq.size()==1 && readNmates==2) clip3pAdapterSeq.push_back(clip3pAdapterSeq[0]);
-    if (clip3pAdapterMMp.size()==1 && readNmates==2) clip3pAdapterMMp.push_back(clip3pAdapterMMp[0]);
-    for (uint imate=0;imate<readNmates;imate++) {
+    //adapter clipping: same adapter for both mates
+    if (clip3pAdapterSeq.size()==1 && readNmates>=2) clip3pAdapterSeq.push_back(clip3pAdapterSeq[0]);
+    if (clip3pAdapterMMp.size()==1 && readNmates>=2) clip3pAdapterMMp.push_back(clip3pAdapterMMp[0]);
+    for (uint imate=0;imate<min(2LLU,readNmates);imate++) {
         if (clip3pAdapterSeq.at(imate).at(0)=='-') {// no clipping
             clip3pAdapterSeq.at(imate).assign("");
         } else {//clipping
@@ -971,6 +977,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     //quantification parameters
     quant.yes=false;
     quant.geneFull.yes=false;
+    quant.gene.yes=false;
     quant.geCount.yes=false;
     quant.trSAM.yes=false;
     quant.trSAM.bamYes=false;
@@ -1027,9 +1034,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
     
-    //solo
-    pSolo.initialize(this);
-
     //outSAMattributes
     outSAMattrPresent.NH=false;//TODO re-write as class with constructor?
     outSAMattrPresent.HI=false;
@@ -1042,17 +1046,25 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     outSAMattrPresent.RG=false;
     outSAMattrPresent.MC=false;
     outSAMattrPresent.XS=false;
+    outSAMattrPresent.ch=false;
+
     outSAMattrPresent.vA=false;
     outSAMattrPresent.vG=false;
     outSAMattrPresent.vW=false;
-    outSAMattrPresent.ch=false;
     outSAMattrPresent.rB=false;
+    
     outSAMattrPresent.CR=false;
     outSAMattrPresent.CY=false;
     outSAMattrPresent.UR=false;
     outSAMattrPresent.UY=false;
-
-
+    outSAMattrPresent.CB=false;
+    outSAMattrPresent.UB=false;
+    outSAMattrPresent.GX=false;
+    outSAMattrPresent.GN=false;
+    outSAMattrPresent.sM=false;
+    outSAMattrPresent.sS=false;    
+    outSAMattrPresent.sQ=false;
+    
     //for quant SAM output only NH and HI flags
     outSAMattrPresentQuant=outSAMattrPresent;
     outSAMattrPresentQuant.NH=true;
@@ -1136,6 +1148,34 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             outSAMattrOrder.push_back(ATTR_UY);
             outSAMattrOrderQuant.push_back(ATTR_UY);
             outSAMattrPresent.UY=true;
+        } else if (vAttr1.at(ii)== "CB") {
+            outSAMattrOrder.push_back(ATTR_CB);
+            outSAMattrOrderQuant.push_back(ATTR_CB);
+            outSAMattrPresent.CB=true;
+        } else if (vAttr1.at(ii)== "UB") {
+            outSAMattrOrder.push_back(ATTR_UB);
+            outSAMattrOrderQuant.push_back(ATTR_UB);
+            outSAMattrPresent.UB=true;
+        } else if (vAttr1.at(ii)== "GX") {
+            outSAMattrOrder.push_back(ATTR_GX);
+            outSAMattrOrderQuant.push_back(ATTR_GX);
+            outSAMattrPresent.GX=true;            
+        } else if (vAttr1.at(ii)== "GN") {
+            outSAMattrOrder.push_back(ATTR_GN);
+            outSAMattrOrderQuant.push_back(ATTR_GN);
+            outSAMattrPresent.GN=true; 
+        } else if (vAttr1.at(ii)== "sM") {
+            outSAMattrOrder.push_back(ATTR_sM);
+            outSAMattrOrderQuant.push_back(ATTR_sM);
+            outSAMattrPresent.sM=true;
+        } else if (vAttr1.at(ii)== "sS") {
+            outSAMattrOrder.push_back(ATTR_sS);
+            outSAMattrOrderQuant.push_back(ATTR_sS);
+            outSAMattrPresent.sS=true;  
+        } else if (vAttr1.at(ii)== "sQ") {
+            outSAMattrOrder.push_back(ATTR_sQ);
+            outSAMattrOrderQuant.push_back(ATTR_sQ);
+            outSAMattrPresent.sQ=true;              
         } else if (vAttr1.at(ii)== "XS") {
             outSAMattrOrder.push_back(ATTR_XS);
             outSAMattrPresent.XS=true;
@@ -1189,12 +1229,8 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         inOut->logMain << "WARNING --waspOutputMode is set, therefore STAR will output vW attribute" <<endl;
     };
 
-    if (pSolo.type==0 && (outSAMattrPresent.CR || outSAMattrPresent.CY || outSAMattrPresent.UR || outSAMattrPresent.UY) ) {
-            ostringstream errOut;
-            errOut <<"EXITING because of FATAL INPUT ERROR: --outSAMattributes contains CR/CY/UR/UY tags, but --soloType is not set\n";
-            errOut <<"SOLUTION: re-run STAR without these attribures, or with --soloType set\n";
-            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-    };
+    //solo
+    pSolo.initialize(this);
 
     alignEndsType.ext[0][0]=false;
     alignEndsType.ext[0][1]=false;

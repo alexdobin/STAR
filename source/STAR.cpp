@@ -17,9 +17,8 @@
 #include "ErrorWarning.h"
 #include "sysRemoveDir.h"
 #include "BAMfunctions.h"
+#include "bamSortByCoordinate.h"
 #include "Transcriptome.h"
-#include "BAMbinSortByCoordinate.h"
-#include "BAMbinSortUnmapped.h"
 #include "signalFromBAM.h"
 #include "mapThreadsSpawn.h"
 #include "ErrorWarning.h"
@@ -28,13 +27,11 @@
 #include "Variation.h"
 #include "Solo.h"
 
-#include "bam_cat.h"
-
 #include "htslib/htslib/sam.h"
 #include "parametersDefault.xxd"
 
 void usage(int usageType) {
-    cout << "Usage: STAR  [options]... --genomeDir REFERENCE   --readFilesIn R1.fq R2.fq\n";
+    cout << "Usage: STAR  [options]... --genomeDir /path/to/genome/index/   --readFilesIn R1.fq R2.fq\n";
     cout <<"Spliced Transcripts Alignment to a Reference (c) Alexander Dobin, 2009-2019\n\n";
     cout <<"For more details see:\n";
     cout <<"<https://github.com/alexdobin/STAR>\n";
@@ -146,10 +143,12 @@ int main(int argInN, char* argIn[]) {
 
         P1.quant.yes=false;
         P1.quant.trSAM.yes=false;
-        P1.quant.geCount.yes=false;
-        P1.outSAMunmapped.within=false;
         P1.quant.trSAM.bamYes=false;
+        P1.quant.geneFull.yes=false;
+        P1.quant.geCount.yes=false;
 
+        P1.outSAMunmapped.within=false;
+        
         P1.outFilterBySJoutStage=0;
 
         P1.outReadsUnmapped="None";
@@ -160,7 +159,7 @@ int main(int argInN, char* argIn[]) {
 //         P1.inOut->logMain.open((P1.outFileNamePrefix + "Log.out").c_str());
 
         P1.wasp.outputMode="None"; //no WASP filtering on the 1st pass
-        P1.pSolo.type=0; //no solo in the first pass
+        P1.pSolo.type=P1.pSolo.SoloTypes::None; //no solo in the first pass
 
         g_statsAll.resetN();
         time(&g_statsAll.timeStartMap);
@@ -362,8 +361,8 @@ int main(int argInN, char* argIn[]) {
     //collapse splice junctions from different threads/chunks, and output them
     outputSJ(RAchunk,P);
 
-    //solo genes
-    Solo soloMain(RAchunk,P,*RAchunk[0]->chunkTr);//solo for genes
+    //solo counts
+    Solo soloMain(RAchunk,P,*RAchunk[0]->chunkTr);
     soloMain.processAndOutput();
 
     if ( P.quant.geCount.yes ) {//output gene quantifications
@@ -377,89 +376,8 @@ int main(int argInN, char* argIn[]) {
         RAchunk[0]->chunkFilesCat(P.inOut->outSAM, P.outFileTmp + "/Aligned.out.sam.chunk", g_threadChunks.chunkOutN);
     };
 
-    if (P.outBAMcoord) {//sort BAM if needed
-        *P.inOut->logStdOut << timeMonthDayTime() << " ..... started sorting BAM\n" <<flush;
-        P.inOut->logMain << timeMonthDayTime() << " ..... started sorting BAM\n" <<flush;
-        uint32 nBins=P.outBAMcoordNbins;
-
-        //check max size needed for sorting
-        uint maxMem=0;
-        for (uint32 ibin=0; ibin<nBins-1; ibin++) {//check all bins
-            uint binS=0;
-            for (int it=0; it<P.runThreadN; it++) {//collect sizes from threads
-                binS += RAchunk[it]->chunkOutBAMcoord->binTotalBytes[ibin]+24*RAchunk[it]->chunkOutBAMcoord->binTotalN[ibin];
-            };
-            if (binS>maxMem) maxMem=binS;
-        };
-        P.inOut->logMain << "Max memory needed for sorting = "<<maxMem<<endl;
-        if (maxMem>P.limitBAMsortRAM) {
-            ostringstream errOut;
-            errOut <<"EXITING because of fatal ERROR: not enough memory for BAM sorting: \n";
-            errOut <<"SOLUTION: re-run STAR with at least --limitBAMsortRAM " <<maxMem+1000000000;
-            exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
-        } else if(maxMem==0) {
-            P.inOut->logMain << "WARNING: nothing to sort - no output alignments" <<endl;
-            BGZF *bgzfOut;
-            bgzfOut=bgzf_open(P.outBAMfileCoordName.c_str(),("w"+to_string((long long) P.outBAMcompression)).c_str());
-            if (bgzfOut==NULL) {
-                ostringstream errOut;
-                errOut <<"EXITING because of fatal ERROR: could not open output bam file: " << P.outBAMfileCoordName << "\n";
-                errOut <<"SOLUTION: check that the disk is not full, increase the max number of open files with Linux command ulimit -n before running STAR";
-                exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
-            };
-            outBAMwriteHeader(bgzfOut,P.samHeaderSortedCoord,mainGenome.chrNameAll,mainGenome.chrLengthAll);
-            bgzf_close(bgzfOut);
-        } else {//sort
-            uint totalMem=0;
-            #pragma omp parallel num_threads(P.outBAMsortingThreadNactual)
-            #pragma omp for schedule (dynamic,1)
-            for (uint32 ibin1=0; ibin1<nBins; ibin1++) {
-                uint32 ibin=nBins-1-ibin1;//reverse order to start with the last bin - unmapped reads
-
-                uint binN=0, binS=0;
-                for (int it=0; it<P.runThreadN; it++) {//collect sizes from threads
-                    binN += RAchunk[it]->chunkOutBAMcoord->binTotalN[ibin];
-                    binS += RAchunk[it]->chunkOutBAMcoord->binTotalBytes[ibin];
-                };
-
-                if (binS==0) continue; //empty bin
-
-                if (ibin == nBins-1) {//last bin for unmapped reads
-                    BAMbinSortUnmapped(ibin,P.runThreadN,P.outBAMsortTmpDir, P, mainGenome);
-                } else {
-                    uint newMem=binS+binN*24;
-                    bool boolWait=true;
-                    while (boolWait) {
-                        #pragma omp critical
-                        if (totalMem+newMem < P.limitBAMsortRAM) {
-                            boolWait=false;
-                            totalMem+=newMem;
-                        };
-                        usleep(100000);
-                    };
-                    BAMbinSortByCoordinate(ibin,binN,binS,P.runThreadN,P.outBAMsortTmpDir, P, mainGenome);
-                    #pragma omp critical
-                    totalMem-=newMem;//"release" RAM
-                };
-            };
-
-            //concatenate all BAM files, using bam_cat
-            char **bamBinNames = new char* [nBins];
-            vector <string> bamBinNamesV;
-            for (uint32 ibin=0; ibin<nBins; ibin++) {
-
-                bamBinNamesV.push_back(P.outBAMsortTmpDir+"/b"+std::to_string((uint) ibin));
-                struct stat buffer;
-                if (stat (bamBinNamesV.back().c_str(), &buffer) != 0) {//check if file exists
-                    bamBinNamesV.pop_back();
-                };
-            };
-            for (uint32 ibin=0; ibin<bamBinNamesV.size(); ibin++) {
-                    bamBinNames[ibin] = (char*) bamBinNamesV.at(ibin).c_str();
-            };
-            bam_cat(bamBinNamesV.size(), bamBinNames, 0, P.outBAMfileCoordName.c_str());
-        };
-    };
+    bamSortByCoordinate(P, RAchunk, mainGenome, soloMain);
+    
     //wiggle output
     if (P.outWigFlags.yes) {
         *(P.inOut->logStdOut) << timeMonthDayTime() << " ..... started wiggle output\n" <<flush;

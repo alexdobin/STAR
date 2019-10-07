@@ -3,6 +3,8 @@
 
 void Transcriptome::geneFullAlignOverlap(uint nA, Transcript **aAll, int32 strandType, set<uint32> &geneOverlap)
 {
+     geneOverlap={};
+    
      for (uint32 iA=0; iA<nA; iA++) {
          Transcript &a = *aAll[iA];//one unique alignment only
 

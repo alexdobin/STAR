@@ -2,8 +2,9 @@
 #include "ErrorWarning.h"
 #include "serviceFuns.cpp"
 #include "BAMfunctions.h"
+#include "SequenceFuns.h"
 
-void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, string dirBAMsort, Parameters &P, Genome &mapGen) {
+void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, string dirBAMsort, Parameters &P, Genome &mapGen, Solo &solo) {
 
     if (binS==0) return; //nothing to do for empty bins
     //allocate arrays
@@ -61,9 +62,15 @@ void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, st
 
     outBAMwriteHeader(bgzfBin,P.samHeaderSortedCoord,mapGen.chrNameAll,mapGen.chrLengthAll);
     //send ordered aligns to bgzf one-by-one
+    char bam1[BAM_ATTR_MaxSize];//temp array
     for (uint ia=0;ia<binN;ia++) {
-        char* ib=bamIn+startPos[ia*3+2];
-        bgzf_write(bgzfBin,ib, *((uint32*) ib)+sizeof(uint32) );
+        char* bam0=bamIn+startPos[ia*3+2];
+        uint32 size0=*((uint32*) bam0)+sizeof(uint32);
+        
+        if (solo.pSolo.samAttrYes)
+            solo.soloFeat[solo.pSolo.samAttrFeature]->addBAMtags(bam0,size0,bam1);
+        
+        bgzf_write(bgzfBin, bam0, size0);
     };
 
     bgzf_flush(bgzfBin);

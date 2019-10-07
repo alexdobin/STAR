@@ -4,57 +4,67 @@
 #include "serviceFuns.cpp"
 #include <random>
 
-uint ReadAlign::quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT, vector<uint32> &readTranscripts, set<uint32> &readTrGenes) {
+uint ReadAlign::quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript **alignG, Transcript *alignT) {
     uint nAlignT=0;
     for (uint iag=0; iag<nAlignG; iag++) {//transform all alignments
 
-        if (!P.quant.trSAM.indel && (alignG[iag]->nDel>0 || alignG[iag]->nIns>0) ) {//prevent indels if requested
+        Transcript *align1=alignG[iag];
+        
+        align1->alignGenes={};
+        
+        if (!P.quant.trSAM.indel && (align1->nDel>0 || align1->nIns>0) ) {
+            //prevent indels if requested
             continue;
         };
-        if (!P.quant.trSAM.singleEnd && (P.readNmates==2 && alignG[iag]->exons[0][EX_iFrag]==alignG[iag]->exons[alignG[iag]->nExons-1][EX_iFrag]) )
-        {//prevent single end alignments
+        if (!P.quant.trSAM.singleEnd && (P.readNmates==2 && align1->exons[0][EX_iFrag]==align1->exons[align1->nExons-1][EX_iFrag]) ) {
+        //prevent single end alignments
             continue;
         };
 
-        uint nMM1=0;
-        char* R=Read1[alignG[iag]->roStr==0 ? 0:2];
-        if (!P.quant.trSAM.softClip) {//soft clipping not allowed, extend them if possible
-            for (uint32 iab=0; iab<alignG[iag]->nExons; iab++) {
+        if (!P.quant.trSAM.softClip) {
+            //soft clipping not allowed, extend them if possible
+            uint nMM1=0;
+            char* R=Read1[align1->roStr==0 ? 0:2];
+            Transcript align2=*align1; //copy this transcript to avoid changing the original one
+            
+            for (uint32 iab=0; iab<align2.nExons; iab++) {
                 uint left1=0,right1=0;//how many bases to move left or right
                 if (iab==0) {
-                    left1=alignG[iag]->exons[iab][EX_R];
-                } else if (alignG[iag]->canonSJ[iab-1]==-3) {
-                    left1=alignG[iag]->exons[iab][EX_R]-readLength[alignG[iag]->exons[iab-1][EX_iFrag]]-1;
+                    left1=align2.exons[iab][EX_R];
+                } else if (align2.canonSJ[iab-1]==-3) {
+                    left1=align2.exons[iab][EX_R]-readLength[align2.exons[iab-1][EX_iFrag]]-1;
                 };
-                if (iab==alignG[iag]->nExons-1) {//last block of left mates
-                    right1=Lread-alignG[iag]->exons[iab][EX_R]-alignG[iag]->exons[iab][EX_L];
+                if (iab==align2.nExons-1) {//last block of left mates
+                    right1=Lread-align2.exons[iab][EX_R]-align2.exons[iab][EX_L];
 
-                } else if (alignG[iag]->canonSJ[iab]==-3) {//last block of the right mate (i.e. whole read)
-                    right1=readLength[alignG[iag]->exons[iab][EX_iFrag]]-alignG[iag]->exons[iab][EX_R]-alignG[iag]->exons[iab][EX_L];
+                } else if (align2.canonSJ[iab]==-3) {//last block of the right mate (i.e. whole read)
+                    right1=readLength[align2.exons[iab][EX_iFrag]]-align2.exons[iab][EX_R]-align2.exons[iab][EX_L];
                 };
 
                 for (uint b=1; b<=left1 ; b++) {//extend to the left
-                    char r1=R[alignG[iag]->exons[iab][EX_R]-b];
-                    char g1=mapGen.G[alignG[iag]->exons[iab][EX_G]-b];
+                    char r1=R[align2.exons[iab][EX_R]-b];
+                    char g1=mapGen.G[align2.exons[iab][EX_G]-b];
                     if ( r1!=g1 && r1<4 && g1<4) ++nMM1;
                 };
                 for (uint b=0; b<right1 ; b++) {//extend to the left
-                    char r1=R[alignG[iag]->exons[iab][EX_R]+alignG[iag]->exons[iab][EX_L]+b];
-                    char g1=mapGen.G[alignG[iag]->exons[iab][EX_G]+alignG[iag]->exons[iab][EX_L]+b];
+                    char r1=R[align2.exons[iab][EX_R]+align2.exons[iab][EX_L]+b];
+                    char g1=mapGen.G[align2.exons[iab][EX_G]+align2.exons[iab][EX_L]+b];
                     if ( r1!=g1 && r1<4 && g1<4) ++nMM1;
                 };
-                alignG[iag]->exons[iab][EX_R] -= left1;
-                alignG[iag]->exons[iab][EX_G] -= left1;
-                alignG[iag]->exons[iab][EX_L] += left1+right1;
+                align2.exons[iab][EX_R] -= left1;
+                align2.exons[iab][EX_G] -= left1;
+                align2.exons[iab][EX_L] += left1+right1;
             };
 
-            if ( (alignG[iag]->nMM + nMM1) > min(outFilterMismatchNmaxTotal, (uint) (P.outFilterMismatchNoverLmax*(Lread-1)) ) ) {
+            if ( (align2.nMM + nMM1) > min(outFilterMismatchNmaxTotal, (uint) (P.outFilterMismatchNoverLmax*(Lread-1)) ) ) {
                 //extension of soft clips yielded too many mismatches, no output
                 continue;
             };
+            
+            align1 = &align2;
         };
 
-        nAlignT += Tr->quantAlign(*alignG[iag],alignT+nAlignT, readTranscripts, readTrGenes);
+        nAlignT += Tr->quantAlign(*align1,alignT+nAlignT);
     };
 
     if (P.quant.trSAM.bamYes) {//output Aligned.toTranscriptome.bam

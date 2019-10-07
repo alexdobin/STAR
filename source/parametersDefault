@@ -143,6 +143,9 @@ readMatesLengthsIn          NotEqual
 readNameSeparator           /
     string(s): character(s) separating the part of the read names that will be trimmed in output (read name after space is always trimmed)
 
+readQualityScoreBase        33
+    int>=0: number to be subtracted from the ASCII code to get Phred quality score
+
 clip3pNbases                 0
     int(s): number(s) of bases to clip from 3p of each mate. If one value is given, it will be assumed the same for both mates.
 
@@ -249,7 +252,12 @@ outSAMattributes                Standard
                                 vA          ... variant allele
                                 vG          ... genomic coordiante of the variant overlapped by the read
                                 vW          ... 0/1 - alignment does not pass / passes WASP filtering. Requires --waspOutputMode SAMtag
+                                STARsolo:
                                 CR CY UR UY ... sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing
+                                CB UB       ... error-corrected cell barcodes and UMIs for solo* demultiplexing. Requires --outSAMtype BAM SortedByCoordinate.
+                                sM          ... assessment of CB and UMI
+                                sS          ... sequence of the entire barcode (CB,UMI,adapter...)
+                                sQ          ... quality of the entire barcode
                                 Unsupported/undocumented:
                                 rB          ... alignment block read/genomic coordinates
                                 vR          ... read coordinate of the variant
@@ -670,10 +678,11 @@ waspOutputMode              None
 ### STARsolo (single cell RNA-seq) parameters
 soloType                    None
     string(s): type of single-cell RNA-seq
-                            Droplet   ... one cell barcode and one UMI barcode in read2, e.g. Drop-seq and 10X Chromium
+                            CB_UMI_Simple   ... (a.k.a. Droplet) one UMI and one Cell Barcode of fixed length in read2, e.g. Drop-seq and 10X Chromium
+                            CB_UMI_Complex  ... one UMI of fixed length, but multiple Cell Barcodes of varying length, as well as adapters sequences are allowed in read2 only, e.g. inDrop.
 
 soloCBwhitelist             -
-    string: file with whitelist of cell barcodes
+    string(s): file(s) with whitelist(s) of cell barcodes. Only one file allowed with 
 
 soloCBstart                 1
     int>0: cell barcode start base
@@ -690,7 +699,37 @@ soloUMIlen                  10
 soloBarcodeReadLength       1
     int: length of the barcode read
                             1   ... equal to sum of soloCBlen+soloUMIlen
-                            0  ... not defined, do not check
+                            0   ... not defined, do not check
+
+soloCBposition              -
+    strings(s)              position of Cell Barcode(s) on the barcode read.
+                            Presently only works with --soloType CB_UMI_Complex, and barcodes are assumed to be on Read2.
+                            Format for each barcode: startAnchor_startDistance_endAnchor_endDistance
+                            start(end)Anchor defines the anchor base for the CB: 0: read start; 1: read end; 2: adapter start; 3: adapter end
+                            start(end)Distance is the distance from the CB start(end) to the Anchor base
+                            String for different barcodes are separated by space.
+                            Example: inDrop (Zilionis et al, Nat. Protocols, 2017):
+                            --soloCBposition  0_0_2_-1  3_1_3_8
+
+soloUMIposition             -
+    string                  position of the UMI on the barcode read, same as soloCBposition
+                            Example: inDrop (Zilionis et al, Nat. Protocols, 2017):
+                            --soloCBposition  3_9_3_14
+
+soloAdapterSequence         -
+    string:                 adapter sequence to anchor barcodes.
+
+soloAdapterMismatchesNmax   1
+    int>0:                  maximum number of mismatches allowed in adapter sequence.
+
+soloCBmatchWLtype           1MM_multi
+    string:                 matching the Cell Barcodes to the WhiteList
+                            Exact                   ... only exact matches allowed
+                            1MM                     ... only one match in whitelist with 1 mismatched base allowed. Allowed CBs have to have at least one read with exact match.
+                            1MM_multi               ... multiple matches in whitelist with 1 mismatched base allowed, posterior probability calculation is used choose one of the matches. 
+                                                        Allowed CBs have to have at least one read with exact match. Similar to CellRanger 2.2.0
+                            1MM_multi_pseudocounts  ... same as 1MM_Multi, but pseudocounts of 1 are added to all whitelist barcodes.
+                                                        Similar to CellRanger 3.x.x
 
 soloStrand                  Forward
     string: strandedness of the solo libraries:
@@ -703,19 +742,25 @@ soloFeatures                Gene
                             Gene            ... genes: reads match the gene transcript
                             SJ              ... splice junctions: reported in SJ.out.tab
                             GeneFull        ... full genes: count all reads overlapping genes' exons and introns
+                            Transcript3p   ... quantification of transcript for 3' protocols
 
 soloUMIdedup                1MM_All
     string(s):              type of UMI deduplication (collapsing) algorithm
                             1MM_All             ... all UMIs with 1 mismatch distance to each other are collapsed (i.e. counted once)
                             1MM_Directional     ... follows the "directional" method from the UMI-tools by Smith, Heger and Sudbery (Genome Research 2017).
-                            1MM_NotCollapsed      ... UMIs with 1 mismatch distance to others are not collapsed (i.e. all counted)
+                            Exact               ... only exactly matching UMIs are collapsed
 
-soloOutFileNames            Solo.out/ genes.tsv barcodes.tsv matrix.mtx matrixSJ.mtx matrixGeneFull.mtx
-    string(s)               file names for STARsolo output
-                            1st word    ... file name prefix
-                            2nd word    ... gene IDs and names
-                            3rd word    ... barcode sequences
-                            4th word    ... cell/Gene counts matrix
-                            5th word    ... cell/SJ counts matrix
-                            6th word    ... cell/GeneFull counts matrix
+soloUMIfiltering            -
+    string(s)               type of UMI filtering
+                            -               ... basic filtering: remove UMIs with N and homopolymers (similar to CellRanger 2.2.0)
+                            MultiGeneUMI    ... remove lower-count UMIs that map to more than one gene (introduced in CellRanger 3.x.x)
 
+soloOutFileNames            Solo.out/          features.tsv barcodes.tsv        matrix.mtx
+    string(s)               file names for STARsolo output:
+                            file_name_prefix   gene_names   barcode_sequences   cell_feature_count_matrix
+
+soloCellFilter              CellRanger2.2 3000 0.99 10
+    string(s):              cell filtering type and parameters
+                            CellRanger2.2   ... simple filtering of CellRanger 2.2, followed by thre numbers: number of expected cells, robust maximum percentile for UMI count, maximum to minimum ratio for UMI count
+                            TopCells        ... only report top cells by UMI count, followed by the excat number of cells
+                            None            ... do not output filtered cells

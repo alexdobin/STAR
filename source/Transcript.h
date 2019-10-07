@@ -5,17 +5,19 @@
 #include "Parameters.h"
 #include "Variation.h"
 #include "Genome.h"
+#include <set>
 
 class Transcript {
 public:
     uint exons[MAX_N_EXONS][EX_SIZE]; //coordinates of all exons: r-start, g-start, length
+
     uint shiftSJ[MAX_N_EXONS][2]; //shift of the SJ coordinates due to genomic micro-repeats
     int canonSJ[MAX_N_EXONS]; //canonicity of each junction
     uint8 sjAnnot[MAX_N_EXONS]; //anotated or not
     uint8 sjStr[MAX_N_EXONS]; //strand of the junction
-
     uint intronMotifs[3];
     uint8 sjMotifStrand;
+    bool sjYes;
 
     uint nExons; //number of exons in the read transcript
 
@@ -52,6 +54,9 @@ public:
     vector <int32> varInd;
     vector <int32> varGenCoord, varReadCoord ;
     vector <char> varAllele;
+    
+    //annotations
+    std::set <uint32> alignGenes;
 
     Transcript(); //resets to 0
     void reset(); //reset to 0

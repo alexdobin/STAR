@@ -6,6 +6,11 @@
 #include "Parameters.h"
 #include "Transcript.h"
 #include "SoloReadBarcode.h"
+#include "SoloCommon.h"
+#include "SoloReadFeatureStats.h"
+#include "ReadAnnotations.h"
+
+class SoloFeature;
 
 class SoloReadFeature {
 public:
@@ -14,23 +19,22 @@ public:
 
     uint32 *cbReadCount;
     map <uint32,uint32> cbReadCountMap;
+    
+    bool readInfoYes;
 
-    fstream *strU_0 ,*strU_1, *strU_2; //unique mappers, CB matches whitelist with 0,1>=2 MM
-
-    struct {
-        enum {                 nUnmapped,  nNoFeature,  nAmbigFeature,  nAmbigFeatureMultimap,  nTooMany,  nNoExactMatch,  nExactMatch,  nMatch,  nCellBarcodes,  nUMIs, nStats};
-        uint64 V[nStats];
-        vector<string> names={"nUnmapped","nNoFeature","nAmbigFeature","nAmbigFeatureMultimap","nTooMany","nNoExactMatch","nExactMatch","nMatch","nCellBarcodes","nUMIs",};
-    } stats;
+    fstream *streamReads;
 
     string cbSeq, umiSeq, cbQual, umiQual;
+    
+    SoloReadFeatureStats stats;
 
     SoloReadFeature (int32 feTy, Parameters &Pin, int iChunk);
-    void record(SoloReadBarcode &soloBar, uint nTr, set<uint32> &readGene, set<uint32> &readGeneFull, Transcript *alignOut);
+    void record(SoloReadBarcode &soloBar, uint nTr, Transcript *alignOut, uint64 iRead, ReadAnnotations &readAnnot);
     void addCounts(const SoloReadFeature &soloCBin);
     void addStats(const SoloReadFeature &soloCBin);
     void statsOut(ofstream &streamOut);
-    void inputRecords(uint32 **cbP, uint32 *cbReadCountExact);
+    void inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbReadCountExact, 
+                      ofstream *streamTranscriptsOut, vector<readInfoStruct> &readInfo, SoloFeature **soloFeatAll);
 
 private:
     const int32 featureType;
