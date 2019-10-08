@@ -3,7 +3,7 @@ STARsolo: mapping, demultiplexing and quantification for single cell RNA-seq
 
 Major updates in STAR 2.7.3a (Oct 8 2019)
 -----------------------------------------
-* **Output enhamcement:**
+* **Output enhancements:**
     * Summary.csv statistics output for raw and filtered cells useful for quick run quality assessment.
     * --soloCellFilter option for basic filtering of the cells, similar to the methods used by CellRanger 2.2.x.
 * [**Better compatibility with CellRanger 3.x.x:**](#matching-cellranger-3xx-results) 
