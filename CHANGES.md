@@ -1,11 +1,22 @@
-* Implemented Summary.csv statistics output for raw and filtered cells useful for quick run quality assessment.
-* Implemented --soloUMIfiltering MultiGeneUMI option introduced in CellRanger 3.x.x for filtering UMI collisions between different genes.
-* Implemented --soloCellFilter option for basic filtering of the cells, similar to the methods used by CellRanger 2.2.x.
-* Implemented --soloCBmatchWLtype 1MM_multi_pseudocounts option, introduced in CellRange 3.x.x, which slightly changes the posterior probability calculation for CB with 1 mismatch. 
-* Implemented --soloFeatures Velocyto option to produce Spliced, Unsplied, and Ambiguous counts similar to the velocyto.py tool developed by LaManno et al. This option is under actice development and the results may change in the future versions.
-* Implemented SAM attributes sS and sQ to output sequence and quality of the entire barcode read, and sM to output the barcode match status.
-* Implemented complex barcodes in STARsolo with --soloType CB_UMI_Complex, --soloCBmatchWLtype --soloAdapterSequence, --soloAdapterMismatchesNmax, --soloCBposition,--soloUMIposition .
-* Implemented CB/UB/GX/GN BAM tags for STARsolo.
+STAR 2.7.3a 2019/10/08
+======================
+Major new features in STARsolo
+------------------------------
+* **Output enhancements:**
+    * Summary.csv statistics output for raw and filtered cells useful for quick run quality assessment.
+    * --soloCellFilter option for basic filtering of the cells, similar to the methods used by CellRanger 2.2.x.
+* [**Better compatibility with CellRanger 3.x.x:**](docs/STARsolo.md#matching-cellranger-3xx-results) 
+    * --soloUMIfiltering MultiGeneUMI option introduced in CellRanger 3.x.x for filtering UMI collisions between different genes.
+    * --soloCBmatchWLtype 1MM_multi_pseudocounts option, introduced in CellRanger 3.x.x, which slightly changes the posterior probability calculation for CB with 1 mismatch.
+* [**Velocyto spliced/unspliced/ambiguous quantification:**](docs/STARsolo.md#velocyto-splicedunsplicedambiguous-quantification)
+    * --soloFeatures Velocyto option to produce Spliced, Unspliced, and Ambiguous counts similar to the [velocyto.py](http://velocyto.org/) tool developed by [LaManno et al](https://doi.org/10.1038/s41586-018-0414-6). This option is under active development and the results may change in the future versions.
+* [**Support for complex barcodes, e.g. inDrop:**](docs/STARsolo.md#barcode-geometry)
+    * Complex barcodes in STARsolo with --soloType CB_UMI_Complex, --soloCBmatchWLtype --soloAdapterSequence, --soloAdapterMismatchesNmax, --soloCBposition,--soloUMIposition 
+* [**BAM tags:**](#bam-tags)
+    * CB/UB for corrected CellBarcode/UMI
+    * GX/GN for gene ID/name
+* STARsolo most up-to-date [documentation](docs/STARsolo.md).
+
 
 STAR 2.7.2d 2019/10/04
 ======================
@@ -20,7 +31,6 @@ STAR 2.7.2b 2019/08/29
 Bug fixes in chimeric detection, contributed by Meng Xiao He (@mengxiao)
 * Fix memory leak in handling chimeric multimappers: #721
 * Ensure chimeric alignment score requirements are consistently checked: #722,#723.
-
 
 STAR 2.7.2a 2019/08/13
 ======================

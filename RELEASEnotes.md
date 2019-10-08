@@ -1,3 +1,22 @@
+STAR 2.7.3a 2019/10/08
+======================
+Major new features in STARsolo
+------------------------------
+* **Output enhancements:**
+    * Summary.csv statistics output for raw and filtered cells useful for quick run quality assessment.
+    * --soloCellFilter option for basic filtering of the cells, similar to the methods used by CellRanger 2.2.x.
+* [**Better compatibility with CellRanger 3.x.x:**](docs/STARsolo.md#matching-cellranger-3xx-results)
+    * --soloUMIfiltering MultiGeneUMI option introduced in CellRanger 3.x.x for filtering UMI collisions between different genes.
+    * --soloCBmatchWLtype 1MM_multi_pseudocounts option, introduced in CellRanger 3.x.x, which slightly changes the posterior probability calculation for CB with 1 mismatch.
+* [**Velocyto spliced/unspliced/ambiguous quantification:**](docs/STARsolo.md#velocyto-splicedunsplicedambiguous-quantification)
+    * --soloFeatures Velocyto option to produce Spliced, Unspliced, and Ambiguous counts similar to the [velocyto.py](http://velocyto.org/) tool developed by [LaManno et al](https://doi.org/10.1038/s41586-018-0414-6). This option is under active development and the results may change in the future versions.
+* [**Support for complex barcodes, e.g. inDrop:**](docs/STARsolo.md#barcode-geometry)
+    * Complex barcodes in STARsolo with --soloType CB_UMI_Complex, --soloCBmatchWLtype --soloAdapterSequence, --soloAdapterMismatchesNmax, --soloCBposition,--soloUMIposition
+* [**BAM tags:**](#bam-tags)
+    * CB/UB for corrected CellBarcode/UMI
+    * GX/GN for gene ID/name
+* STARsolo most up-to-date [documentation](docs/STARsolo.md).
+
 STAR 2.7.2a 2019/08/13
 ======================
 
