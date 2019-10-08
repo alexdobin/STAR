@@ -146,6 +146,7 @@ int main(int argInN, char* argIn[]) {
         P1.quant.trSAM.bamYes=false;
         P1.quant.geneFull.yes=false;
         P1.quant.geCount.yes=false;
+        P1.quant.gene.yes=false;
 
         P1.outSAMunmapped.within=false;
         

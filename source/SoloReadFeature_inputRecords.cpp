@@ -68,7 +68,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
         };
     };
     
-    
+    //////////////////////////////////////////// standard features
     uint32 feature, umi, iread;
     int32 cbmatch;
     int64 cb;

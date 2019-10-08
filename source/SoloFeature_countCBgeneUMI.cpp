@@ -87,7 +87,7 @@ void SoloFeature::countCBgeneUMI()
     };
     
     delete[] rGeneUMI;
-    delete[] rCBp;
+    //delete[] rCBp;
     
     time(&rawTime);
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished collapsing UMIs" <<endl;

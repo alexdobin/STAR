@@ -2,16 +2,17 @@
 #include "streamFuns.h"
 #include "TimeFunctions.h"
 #include "SequenceFuns.h"
+#include "Stats.h"
+#include "GlobalVariables.h"
 
 void SoloFeature::sumThreads(ReadAlignChunk **RAchunk)
 {      
     ///////////////////////////// collect RAchunk->RA->soloRead->readFeat
-    nReadsInput=0;//TODO: get this from stats
+    nReadsInput=g_statsAll.readN+1; //reserve 1 extra
+            
     for (int ii=0; ii<P.runThreadN; ii++) {//point to
         readFeatAll[ii]= RAchunk[ii]->RA->soloRead->readFeat[pSolo.featureInd[featureType]];
-        nReadsInput = max(nReadsInput,RAchunk[ii]->RA->iReadAll);
     };
-    ++nReadsInput;    
     
     for (int ii=0; ii<P.runThreadN; ii++) {
         readFeatSum->addCounts(*readFeatAll[ii]);

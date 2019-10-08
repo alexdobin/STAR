@@ -5,6 +5,11 @@
 
 void ParametersChimeric::initialize(Parameters *pPin)
 {
+    out.bam=false;
+    out.junctions=false;
+    out.samOld=false;
+    out.bamHardClip=true;//default
+    
     if (segmentMin==0)
         return;
     
@@ -12,11 +17,7 @@ void ParametersChimeric::initialize(Parameters *pPin)
 
     pthread_mutex_init(&g_threadChunks.mutexOutChimSAM, NULL);
     pthread_mutex_init(&g_threadChunks.mutexOutChimJunction, NULL);
-    
-    out.bam=false;
-    out.junctions=false;
-    out.samOld=false;
-    out.bamHardClip=true;//default
+
     for (const auto& type1 : out.type) {
         if (type1=="WithinBAM") {
             out.bam=true;
