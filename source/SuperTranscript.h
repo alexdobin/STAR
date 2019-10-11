@@ -24,9 +24,12 @@ public:
     vector<uint8*> seqp;//pointers to sequence for each superTr
     vector<uint64> &length;//superTr lengths == Genome.chrLength
     vector<sjInfo> sj; //all splice junctions
-    vector<vector<array<uint32,2>>> sjC; //collapsed splice junctions
+    vector<vector<array<uint32,3>>> sjC; //collapsed splice junctions
     
     uint32 N; //number of superTr
+    
+    uint32 sjNmax;//max number of SJs per superTr
+    vector<vector<uint32>> sjDonor;//SJ donor coordinates, sorted
     
     SuperTranscript(Parameters &P, vector<uint64> &chrLength) : P(P), length(chrLength), N(length.size()) {};
     void sjCollapse();

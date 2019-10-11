@@ -11,7 +11,7 @@ SpliceGraph::SpliceGraph (SuperTranscript &superTr, Parameters &P) : superTr(sup
     superTrSeedCount = new typeSuperTrSeedCount[2*superTr.N];//TODO: for stranded data, do not need 2nd strand
     
     //Smith-Waterman
-    scoringMatrix = new typeAlignScore*[maxSeqLength];
+    scoringMatrix = new typeAlignScore*[superTr.sjNmax+2];
     directionMatrix = new pair<typeSeqLen,typeSeqLen>*[maxSeqLength];
     //superTIntervals = new pair<uint64, uint64>[gtfIn.superTr.startEndInFullGenome.size()];
     for(uint i = 0; i < maxSeqLength; ++i) {
@@ -31,7 +31,7 @@ SpliceGraph::~SpliceGraph() {
         delete[] directionMatrix[i];
     };
     delete[] directionMatrix;
-}
+};
 
 //Unslpiced score, for testing - not used in main code
 // SpliceGraph::typeAlignScore SpliceGraph::computeScore(uint32 transId, vector<uint8> read, array<SpliceGraph::typeSeqLen, 2> &indexToAbsMaxScore) {

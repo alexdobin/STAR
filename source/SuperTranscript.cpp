@@ -6,8 +6,8 @@ void SuperTranscript::sjCollapse()
     sort(sj.begin(), sj.end(),
      [](const sjInfo &sj1, const sjInfo &sj2) {
          return ( sj1.super  < sj2.super) || 
-                ( sj1.super == sj2.super && sj1.end  < sj2.end ) ||
-                ( sj1.super == sj2.super && sj1.end == sj2.end && sj1.start < sj2.start) ;
+                ( sj1.super == sj2.super && sj1.start < sj2.start ) ||
+                ( sj1.super == sj2.super && sj1.start == sj2.start && sj1.end < sj2.end ) ;
      });
 
     //collapse junctions in each superTr, those junctions that belong to different transcript - remove the transcript info
@@ -29,23 +29,46 @@ void SuperTranscript::sjCollapse()
 };
 
 void SuperTranscript::load(char *G, vector<uint64> &chrStart)
-{
+{//load superTranscript seqs and
     seqp.resize(N);
     for (uint64 ii=0; ii<N; ii++)
         seqp[ii]=(uint8*)G+chrStart[ii];
     
     ifstream & superTrSJ = ifstrOpen(P.pGe.gDir+"/superTranscriptSJcollapsed.tsv", ERROR_OUT, "SOLUTION: re-generate the genome.", P);
+    
     sjC.resize(N);
+    sjDonor.resize(N);
+    
     uint32 sutr=0,sutr1=0;
-    vector<array<uint32,2>> sj1;
-    while(superTrSJ >> sutr) {
-        if (sutr!=sutr1) {
-            sjC[sutr1]=sj1;
-            sj1.clear();
+    vector<array<uint32,3>> sjC1;
+    sjNmax=0;
+    vector<uint32> sjDonor1;
+    
+    while(superTrSJ >> sutr) {//load junctions, assume they are sorted by donor coordinate
+        if (sutr!=sutr1) {//new suTr
+            //sort sj1 by acceptor position
+            sort(sjC1.begin(), sjC1.end(),
+                [](const array<uint32,3> &sj1, const array<uint32,3> &sj2) {
+                 return ( sj1[1] < sj2[1] ) ||
+                        ( sj1[1] == sj2[1]  && sj1[0] < sj2[0] );
+                });
+
+            sjC[sutr1]=sjC1;
+            
+            if (sjNmax < sjC1.size())
+                sjNmax=sjC1.size();
+            
+            sjC1.clear();
             sutr1=sutr;
         };
-        sj1.emplace_back();
-        superTrSJ >> sj1.back()[0] >> sj1.back()[1];
+        
+        uint32 sjd, sja;
+        superTrSJ >> sjd >> sja;
+        
+        if (sjDonor1.back() < sjd) 
+            sjDonor1.push_back(sjd);
+        
+        sjC1.push_back({sjd,sja,(uint32)sjDonor1.size()-1});//record donor, acceptor, and position of the donor in sjDonor
     };
     superTrSJ.close();
 };
