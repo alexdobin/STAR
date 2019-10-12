@@ -5,7 +5,7 @@
 #include "Parameters.h"
 #include "SjdbClass.h"
 #include "Genome.h"
-#include "SuperTranscript.h"
+#include "SuperTranscriptome.h"
 
 class GTF {
 private:
@@ -27,7 +27,7 @@ public:
     vector<vector<uint8>> transcriptSeq;//sequences of normal transcripts
     vector<pair<uint64, uint64>> transcriptStartEnd;//normal transcripts start/end in the normal genome
 
-    SuperTranscript superTr;
+    SuperTranscriptome superTr;
     
     GTF(Genome &genomeIn, Parameters &Pin, string dirOutIn, SjdbClass &sjdbLociIn);
     uint64 transcriptGeneSJ();

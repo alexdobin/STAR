@@ -1,7 +1,7 @@
-#include "SuperTranscript.h"
+#include "SuperTranscriptome.h"
 #include "streamFuns.h"
 
-void SuperTranscript::sjCollapse()
+void SuperTranscriptome::sjCollapse()
 {//sort junctions by superTranscript, and then by the end coordinate, and then by the start coordinate
     sort(sj.begin(), sj.end(),
      [](const sjInfo &sj1, const sjInfo &sj2) {
@@ -28,7 +28,7 @@ void SuperTranscript::sjCollapse()
     P.inOut->logMain << "Number of collapsed splice junctions in superTranscripts = " << sjC.size() <<endl;
 };
 
-void SuperTranscript::load(char *G, vector<uint64> &chrStart)
+void SuperTranscriptome::load(char *G, vector<uint64> &chrStart)
 {//load superTranscript seqs and
     seqp.resize(N);
     for (uint64 ii=0; ii<N; ii++)
@@ -42,6 +42,7 @@ void SuperTranscript::load(char *G, vector<uint64> &chrStart)
     uint32 sutr=0,sutr1=0;
     vector<array<uint32,3>> sjC1;
     sjNmax=0;
+    sjDonorNmax=0;
     vector<uint32> sjDonor1;
     
     while(superTrSJ >> sutr) {//load junctions, assume they are sorted by donor coordinate
@@ -54,21 +55,29 @@ void SuperTranscript::load(char *G, vector<uint64> &chrStart)
                 });
 
             sjC[sutr1]=sjC1;
+            sjDonor[sutr1]=sjDonor1;
             
             if (sjNmax < sjC1.size())
                 sjNmax=sjC1.size();
             
+            if (sjDonorNmax < sjDonor1.size())
+                sjDonorNmax=sjDonor1.size();
+            
             sjC1.clear();
+            sjDonor1.clear();
             sutr1=sutr;
         };
         
         uint32 sjd, sja;
         superTrSJ >> sjd >> sja;
         
-        if (sjDonor1.back() < sjd) 
+        if (sjDonor1.empty() || sjDonor1.back() < sjd) 
             sjDonor1.push_back(sjd);
         
         sjC1.push_back({sjd,sja,(uint32)sjDonor1.size()-1});//record donor, acceptor, and position of the donor in sjDonor
     };
     superTrSJ.close();
+    
+    P.inOut->logMain << "Max number of splice junctions in a superTranscript = " << sjNmax <<endl;
+    P.inOut->logMain << "Max number of donor sites in a superTranscript = " << sjDonorNmax <<endl;
 };

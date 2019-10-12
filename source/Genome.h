@@ -6,7 +6,7 @@
 #include "PackedArray.h"
 #include "SharedMemory.h"
 #include "Variation.h"
-#include "SuperTranscript.h"
+#include "SuperTranscriptome.h"
 
 class Genome {
 private:
@@ -53,8 +53,8 @@ public:
     uint genomeInsertL; //total length of the sequence to be inserted on the fly
     uint genomeInsertChrIndFirst; //index of the first inserted chromosome
 
-    //SuperTranscript genome
-    SuperTranscript *superTr;
+    //SuperTranscriptome genome
+    SuperTranscriptome *superTr;
 
     SharedMemory *sharedMemory;
 

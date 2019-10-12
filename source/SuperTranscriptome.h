@@ -1,5 +1,5 @@
-#ifndef H_SuperTranscript
-#define H_SuperTranscript
+#ifndef H_SuperTranscriptome
+#define H_SuperTranscriptome
 
 #include "IncludeDefine.h"
 #include "Parameters.h"
@@ -11,7 +11,7 @@ struct sjInfo {
     uint32 super;
 };
 
-class SuperTranscript {
+class SuperTranscriptome {
     private:
     Parameters &P;
 public:   
@@ -25,13 +25,13 @@ public:
     vector<uint64> &length;//superTr lengths == Genome.chrLength
     vector<sjInfo> sj; //all splice junctions
     vector<vector<array<uint32,3>>> sjC; //collapsed splice junctions
-    
+    vector<vector<uint32>> sjDonor;//SJ donor coordinates, sorted
+    uint32 sjNmax, sjDonorNmax;//max number of SJs per superTr, SJ donors
+
     uint32 N; //number of superTr
     
-    uint32 sjNmax;//max number of SJs per superTr
-    vector<vector<uint32>> sjDonor;//SJ donor coordinates, sorted
     
-    SuperTranscript(Parameters &P, vector<uint64> &chrLength) : P(P), length(chrLength), N(length.size()) {};
+    SuperTranscriptome(Parameters &P, vector<uint64> &chrLength) : P(P), length(chrLength), N(length.size()) {};
     void sjCollapse();
     void load(char *G, vector<uint64> &chrStart);
 };

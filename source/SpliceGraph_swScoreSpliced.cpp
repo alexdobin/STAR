@@ -6,8 +6,7 @@
 
 #define macro_CompareScore(score1,scoreMax,dirInd,dirIndMax)	if(score1>scoreMax){dirIndMax=dirInd;scoreMax=score1;}
 
-
-SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, const uint32 readLength, const uint32 suTrInd, array<SpliceGraph::typeSeqLen, 2> &alignEnds)
+SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, const uint32 readLen, const uint32 suTrInd, array<SpliceGraph::typeSeqLen, 2> &alignEnds)
 {//Smith-Waterman alignment with splices
     
     uint32 superTrLen = superTr.length[suTrInd];
@@ -15,68 +14,109 @@ SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, con
     typeAlignScore scoreMaxGlobal = 0;
     
     uint32 iDonor=0; //current donor in the donor list
-    auto pColPrev=scoringMatrix[0];//pointer to prev column
-    auto pCol=scoringMatrix[0]+1;//pointer to current column
+    uint32 iAcceptor=0;//current acceptor in the sjC list (sorted by acceptors
+    bool sjYes=superTr.sjC[suTrInd].size() > 0; //spliced superTr
     
-    for(uint i = 0; i <= readLength; i++)//fill 0th column
-        pColPrev[i] = 0;
+    typeAlignScore *scoreColumn, *scoreColumnPrev;//pointer to column and prev column    
+    uint32 iTwoColumn = 0;//selects the column from scoreTwoColumn 2-col matrix
+    scoreColumn = scoreTwoColumns[iTwoColumn];
+    for(uint i = 0; i <= readLen; i++){//fill 0th column
+        scoreColumn[i] = 0;
+    };
     
-	uint32 matIndex=readLength;//current matIndex: starting from 1st column (not 0th)
-	
-    for(uint64 col=1; col<=superTrLen; col++) {//main cycle over columns
-		pCol[0] = 0;
-		
-        vector<uint32> sjColumn;
-        for(uint64 sj1 = 0; sj1 < superTr.sjC[suTrInd].size(); sj1++) {
-            if( col == superTr.sjC[suTrInd][sj1][1] ) {
-                sjColumn.push_back(superTr.sjC[suTrInd][sj1][0]);
+	uint32 matIndex=0;//current matIndex: starting from 1st column (not 0th)
+    
+    for(uint64 col=0; col<superTrLen; col++) {//main cycle over columns: note that columns are counted from 0!
+        scoreColumnPrev = scoreColumn;//prev column pointer
+        iTwoColumn = iTwoColumn==0 ? 1 : 0; //switch columns      
+        scoreColumn = scoreTwoColumns[iTwoColumn];
+        
+        //find the splice junction connected donor columns, if any
+        uint32 sjN=0;
+        if (sjYes) {//col matches acceptor column
+            while (col==superTr.sjC[suTrInd][iAcceptor][1]) {//col matches acceptor column: find all donors
+                sjDindex[sjN]=superTr.sjC[suTrInd][iAcceptor][2];//index of donor
+                ++sjN;
+                ++iAcceptor;
+            };
+            
+            if (col==superTr.sjDonor[suTrInd][iDonor]) {//donor column, has to be recorded
+                scoreColumn=scoringMatrix[iDonor];//point to the stored columns
+                ++iDonor; //advance for the next donor column
             };
         };
         
-        for(uint row = 1; row <= readLength; row++) {
-			//matIndex++;
+        scoreColumn[0] = 0; //initialize top row
+        for(uint row = 1; row <= readLen; row++) {//rows are counte from 1, 0th row is filled with 0
 			
 			uint8 dirIndMax = 0 ; //direction index
 			typeAlignScore scoreMax = 0; //max score for this cell
 			typeAlignScore score1; //calculated score
 			
-			score1 = pCol[row-1] + gapPenalty;
+            //down
+			score1 = scoreColumn[row-1] + gapPenalty;
 			macro_CompareScore(score1,scoreMax,1,dirIndMax);
 			
-			score1 = pColPrev[row] + gapPenalty;
+            //right
+			score1 = scoreColumnPrev[row] + gapPenalty;
 			macro_CompareScore(score1,scoreMax,2,dirIndMax);
 			
-			score1 = pColPrev[row-1] + (readSeq[row-1] == superTr.seqp[suTrInd][col-1] ? matchScore : misMatchPenalty);
+            //diagonal
+			score1 = scoreColumnPrev[row-1] + (readSeq[row-1] == superTr.seqp[suTrInd][col] ? matchScore : misMatchPenalty);
 			macro_CompareScore(score1,scoreMax,3,dirIndMax);
 			
-            for(uint32 ii = 0; ii < sjColumn.size(); ii++) {
-                auto sjCol = sjColumn[ii];
-				
-                score1 = scoringMatrix[sjCol + 1][row] + gapPenalty;
+            for(uint32 ii = 0; ii < sjN; ii++) {
+                score1 = scoringMatrix[sjDindex[ii]][row] + gapPenalty;
 				macro_CompareScore(score1,scoreMax,4+ii*2,dirIndMax);
 				
-                score1 = scoringMatrix[sjCol + 1][row - 1] + (readSeq[row - 1] == superTr.seqp[suTrInd][sjCol+1] ? matchScore : misMatchPenalty);
+                score1 = scoringMatrix[sjDindex[ii]][row - 1] + (readSeq[row - 1] == superTr.seqp[suTrInd][sjDindex[ii]] ? matchScore : misMatchPenalty);
 				macro_CompareScore(score1,scoreMax,5+ii*2,dirIndMax);				
             };
 			
-// 			directionMatrix[matIndex]=dirIndMax;			
-            pCol[row] = scoreMax;
+			directionMatrix[matIndex]=dirIndMax;	
+            matIndex++;//matIndex stride is readLen (not +1)
+
+            scoreColumn[row] = scoreMax;
             if(scoreMaxGlobal < scoreMax) {
                 scoreMaxGlobal = scoreMax;
                 alignEnds[0] = row;                
                 alignEnds[1] = col;
             };
         }; // row for loop
-        
-        if (col-1==superTr.sjDonor[suTrInd][iDonor]) {//need to save previous column
-            pColPrev=pCol;//current -> previous        
-            ++pCol;//advance by one
-            ++iDonor;
-        } else {//no need to save previous column, swap it with current and refill
-            swap(pCol,pColPrev);
-        };
-        
     }; // col for loop
+    
+    ///////////traceback
+    int32 row = alignEnds[0];    
+    int32 col = alignEnds[1];
+    matIndex=row+col*readLen;
+    --iAcceptor; //= last junction
+    while(col >= 0 && row > 0) {
+        uint32 dir1= (uint32) directionMatrix[row+col*readLen];
+        switch (dir1) 
+        {
+            case 0:
+                break; //reached scoringMatrix==0
+            case 1:
+                --row;
+                break;
+            case 2:
+                --col;
+                break;
+            case 3:
+                --row;
+                --col;
+                break;
+            default: //junctions
+                while (col >= (int32)superTr.sjC[suTrInd][iAcceptor][1]) {//find (acceptor-1) that matches this column
+                    --iAcceptor;
+                };                
+                col=superTr.sjDonor[suTrInd][ superTr.sjC[suTrInd][iAcceptor+1+(dir1-4)/2][2] ];
+                if ((dir1-4)%2 == 1) {
+                    --row;
+                };
+        };
+    };
+    
     return scoreMaxGlobal;
 };
 

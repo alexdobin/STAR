@@ -5,21 +5,19 @@ using namespace std;
 
 #include "SpliceGraph.h"
 #include "GTF.h"
-SpliceGraph::SpliceGraph (SuperTranscript &superTr, Parameters &P) : superTr(superTr), P(P)
+SpliceGraph::SpliceGraph (SuperTranscriptome &superTr, Parameters &P) : superTr(superTr), P(P)
 {
     //find candidate superTr
     superTrSeedCount = new typeSuperTrSeedCount[2*superTr.N];//TODO: for stranded data, do not need 2nd strand
     
     //Smith-Waterman
-    scoringMatrix = new typeAlignScore*[superTr.sjNmax+2];
-    directionMatrix = new pair<typeSeqLen,typeSeqLen>*[maxSeqLength];
-    //superTIntervals = new pair<uint64, uint64>[gtfIn.superTr.startEndInFullGenome.size()];
-    for(uint i = 0; i < maxSeqLength; ++i) {
-        directionMatrix[i] = new pair<typeSeqLen,typeSeqLen>[10000];
+    scoringMatrix = new typeAlignScore*[superTr.sjDonorNmax+2];
+    scoreTwoColumns[0] = new typeAlignScore[maxSeqLength];
+    scoreTwoColumns[1] = new typeAlignScore[maxSeqLength];
+    for(uint32 ii = 0; ii < superTr.sjDonorNmax+2; ii++) {
+        scoringMatrix[ii] = new typeAlignScore[maxSeqLength];//TODO make it a user parameter
     };
-    for(uint i = 0; i < maxSeqLength; i++) {
-        scoringMatrix[i] = new typeAlignScore[10000];
-    };
+    sjDindex = new uint32[superTr.sjDonorNmax];
 };
 
 SpliceGraph::~SpliceGraph() {
@@ -27,9 +25,6 @@ SpliceGraph::~SpliceGraph() {
         delete[] scoringMatrix[i];
     };
     delete[] scoringMatrix;
-    for(uint i = 0; i < maxSeqLength; i++) {
-        delete[] directionMatrix[i];
-    };
     delete[] directionMatrix;
 };
 

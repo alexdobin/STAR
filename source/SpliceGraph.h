@@ -11,12 +11,14 @@ public:
     typedef int32 typeAlignScore;
     typedef uint32 typeSeqLen;
     
-    SuperTranscript &superTr;
+    SuperTranscriptome &superTr;
     
     //vector<array<typeSeqLen, 2>> readAndSuperTranscript;
-    const static typeSeqLen maxSeqLength = 100000;
-    typeAlignScore** scoringMatrix;
-    pair<typeSeqLen,typeSeqLen>** directionMatrix;
+    const static typeSeqLen maxSeqLength = 100000;//make user parameter?
+    typeAlignScore **scoringMatrix, *scoreTwoColumns[2];
+    const static typeSeqLen maxMatrixSize = 1000000000; //1B elements in the matrix for now
+    uint8 directionMatrix[maxMatrixSize];
+    uint32 *sjDindex;
     
     int8_t gapPenalty = -1;
     int8_t matchScore = 1;
@@ -26,7 +28,7 @@ public:
     typedef uint16 typeSuperTrSeedCount;
     typeSuperTrSeedCount *superTrSeedCount;
     
-    SpliceGraph(SuperTranscript &superTr, Parameters &P);
+    SpliceGraph(SuperTranscriptome &superTr, Parameters &P);
     ~SpliceGraph();
 
     typeAlignScore swScoreSpliced(const char *readSeq, const uint32 readLength, const uint32 suTrInd, array<SpliceGraph::typeSeqLen, 2> &alignEnds);
