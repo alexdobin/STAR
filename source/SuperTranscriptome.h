@@ -17,9 +17,8 @@ class SuperTranscriptome {
 public:   
     vector<uint8> seqConcat;//concatenated sequences of supertranscripts, a.k.a. Condensed Genome 
     vector<vector<uint8>> seq;//sequences of supertranscripts
-    vector<pair<uint64, uint64>> startEndInFullGenome;//superTr start end in normal genome
     vector<uint64> trIndex;//superTr's index this tr belongs to
-    vector<pair<uint64, uint64>> trStartEnd;//tr start/end in the superTr it belongs to
+    vector<array<uint64,2>> trStartEnd;//tr start/end in the superTr it belongs to
     
     vector<uint8*> seqp;//pointers to sequence for each superTr
     vector<uint64> &length;//superTr lengths == Genome.chrLength

@@ -25,7 +25,7 @@ public:
     std::map <string,uint64> transcriptIDnumber, geneIDnumber;
 
     vector<vector<uint8>> transcriptSeq;//sequences of normal transcripts
-    vector<pair<uint64, uint64>> transcriptStartEnd;//normal transcripts start/end in the normal genome
+    vector<array<uint64,2>> transcriptStartEnd;//normal transcripts start/end in the normal genome
 
     SuperTranscriptome superTr;
     
