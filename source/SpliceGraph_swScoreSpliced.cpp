@@ -6,27 +6,27 @@
 
 #define macro_CompareScore(score1,scoreMax,dirInd,dirIndMax)	if(score1>scoreMax){dirIndMax=dirInd;scoreMax=score1;}
 
-SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, const uint32 readLen, const uint32 suTrInd, array<SpliceGraph::typeSeqLen, 2> &alignEnds)
+SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, const uint32 readLen, const uint32 suTrInd, array<SpliceGraph::typeSeqLen, 2> &alignStarts, array<SpliceGraph::typeSeqLen, 2> &alignEnds)
 {//Smith-Waterman alignment with splices
     
     uint32 superTrLen = superTr.length[suTrInd];
 
     typeAlignScore scoreMaxGlobal = 0;
     
-    uint32 iDonor=0; //current donor in the donor list
-    uint32 iAcceptor=0;//current acceptor in the sjC list (sorted by acceptors
+    int32 iDonor=0; //current donor in the donor list
+    int32 iAcceptor=0;//current acceptor in the sjC list (sorted by acceptors
     bool sjYes=superTr.sjC[suTrInd].size() > 0; //spliced superTr
     
     typeAlignScore *scoreColumn, *scoreColumnPrev;//pointer to column and prev column    
     uint32 iTwoColumn = 0;//selects the column from scoreTwoColumn 2-col matrix
     scoreColumn = scoreTwoColumns[iTwoColumn];
-    for(uint i = 0; i <= readLen; i++){//fill 0th column
-        scoreColumn[i] = 0;
+    for(uint32 ii = 0; ii <= readLen; ii++){//fill 0th column
+        scoreColumn[ii] = 0;
     };
     
 	uint32 matIndex=0;//current matIndex: starting from 1st column (not 0th)
     
-    for(uint64 col=0; col<superTrLen; col++) {//main cycle over columns: note that columns are counted from 0!
+    for(uint32 col=0; col<superTrLen; col++) {//main cycle over columns: note that columns are counted from 0!
         scoreColumnPrev = scoreColumn;//prev column pointer
         iTwoColumn = iTwoColumn==0 ? 1 : 0; //switch columns      
         scoreColumn = scoreTwoColumns[iTwoColumn];
@@ -69,7 +69,7 @@ SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, con
                 score1 = scoringMatrix[sjDindex[ii]][row] + gapPenalty;
 				macro_CompareScore(score1,scoreMax,4+ii*2,dirIndMax);
 				
-                score1 = scoringMatrix[sjDindex[ii]][row - 1] + (readSeq[row - 1] == superTr.seqp[suTrInd][sjDindex[ii]] ? matchScore : misMatchPenalty);
+                score1 = scoringMatrix[sjDindex[ii]][row - 1] + (readSeq[row - 1] == superTr.seqp[suTrInd][col] ? matchScore : misMatchPenalty);
 				macro_CompareScore(score1,scoreMax,5+ii*2,dirIndMax);				
             };
 			
@@ -92,10 +92,10 @@ SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, con
     --iAcceptor; //= last junction
     while(col >= 0 && row > 0) {
         uint32 dir1= (uint32) directionMatrix[row+col*readLen];
+        if (dir1==0) //reached scoringMatrix==0
+            break;
         switch (dir1) 
         {
-            case 0:
-                break; //reached scoringMatrix==0
             case 1:
                 --row;
                 break;
@@ -107,7 +107,7 @@ SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, con
                 --col;
                 break;
             default: //junctions
-                while (col >= (int32)superTr.sjC[suTrInd][iAcceptor][1]) {//find (acceptor-1) that matches this column
+                while (iAcceptor+1!=0 && col <= (int32)superTr.sjC[suTrInd][iAcceptor][1]) {//find (acceptor-1) that matches this column
                     --iAcceptor;
                 };                
                 col=superTr.sjDonor[suTrInd][ superTr.sjC[suTrInd][iAcceptor+1+(dir1-4)/2][2] ];
@@ -116,7 +116,9 @@ SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, con
                 };
         };
     };
-    
+    alignStarts[0]=(uint32)max(0,row-1);
+    alignStarts[1]=(uint32)max(0,col);
+    alignEnds[0]--; //substract 1 from row
     return scoreMaxGlobal;
 };
 

@@ -12,7 +12,7 @@ void SuperTranscriptome::sjCollapse()
 
     //collapse junctions in each superTr, those junctions that belong to different transcript - remove the transcript info
     sjC.resize(seq.size());
-    for(uint64 i = 0; i < sj.size(); i++) {
+    for(uint32 i = 0; i < sj.size(); i++) {
         if (i==0 || sj[i].start!=sj[i-1].start || sj[i].end!=sj[i-1].end || sj[i].super!=sj[i-1].super) //new junction
             sjC[ sj[i].super ].push_back({sj[i].start, sj[i].end});
     };

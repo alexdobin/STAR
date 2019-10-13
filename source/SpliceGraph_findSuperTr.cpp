@@ -103,7 +103,7 @@ void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, 
         array<uint32,2> alignEnds, alignStarts;
         
 		uint32 swScore = 0;
-        swScore = swScoreSpliced((str1==0 ? readSeq : readSeqRevCompl), readLen, sutr1, alignEnds);
+        swScore = swScoreSpliced((str1==0 ? readSeq : readSeqRevCompl), readLen, sutr1, alignStarts, alignEnds);
         
         //swTraceBack(alignEnds, alignStarts);
 		//float(superTrSeedCount[ii])/countMax

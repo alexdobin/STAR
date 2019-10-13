@@ -25,27 +25,27 @@ void GTF::superTranscript() {
          });
     
     uint64 gapValue = exonLoci[0][exS];
-    pair<uint64,uint64> curr = {exonLoci[0][exS], exonLoci[0][exE]}; //intervals[0]
+    array<uint64,2> curr = {exonLoci[0][exS], exonLoci[0][exE]}; //intervals[0]
     exonLoci[0][exS] = 0;
     exonLoci[0][exE] -= gapValue;
-    vector<pair<uint64,uint64>> mergedIntervals;
+    vector<array<uint64,2>> mergedIntervals;
     
     for(uint64 i = 1; i < exonLoci.size(); ++i) {
-        if(exonLoci[i][exS] <= curr.second+1) {
-            curr.second = max(curr.second, exonLoci[i][exE]);
+        if(exonLoci[i][exS] <= curr[1]+1) {
+            curr[1] = max(curr[1], exonLoci[i][exE]);
         } else {
-            gapValue += exonLoci[i][exS] - curr.second - 1;
+            gapValue += exonLoci[i][exS] - curr[1] - 1;
             mergedIntervals.push_back(curr);
             curr = {exonLoci[i][exS], exonLoci[i][exE]};
-        }
+        };
         exonLoci[i][exS] -= gapValue;
         exonLoci[i][exE] -= gapValue;
-    }
+    };
     mergedIntervals.push_back(curr);
     
     //Condensed genome (a.k.a SuperTranscriptome) sequence
     for(const auto& p: mergedIntervals) {
-        for(uint64 j = p.first; j <= p.second; ++j) {
+        for(uint64 j = p[0]; j <= p[1]; ++j) {
             superTr.seqConcat.push_back((uint8) genome.G[j]);
         };
     };
@@ -136,7 +136,7 @@ void GTF::superTranscript() {
     // splice junctions, in superTranscript coordinates. Here, sjS is the last base of donor exon, and sjE is the last base of acceptor exon
     for(uint64 i = 1; i < exonLoci.size(); i++) {//exonLoci are still sorted by transcript index and start coordinate
         if (exonLoci[i][exT]==exonLoci[i-1][exT]) {//same transcript
-            if (exonLoci[i][exS] > exonLoci[i-1][exE]+1) {//gap >0, otherwise we do not need to record the junction (may need it in the future for other purposes though)
+            if (exonLoci[i][exS] > (exonLoci[i-1][exE]+1)) {//gap >0, otherwise we do not need to record the junction (may need it in the future for other purposes though)
                 uint64 sti=superTr.trIndex[exonLoci[i][exT]];//ST index
                 uint64 sts=superTr.startEndInFullGenome[sti].first; //superTranscript start
                 superTr.sj.emplace_back();//add one element
