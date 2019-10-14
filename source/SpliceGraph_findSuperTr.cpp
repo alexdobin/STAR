@@ -131,23 +131,22 @@ void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, 
             int32 iEx=-1;//current exon
             //bool blockStarted=false;
             for (uint32 row=alignStarts[0]; row<=alignEnds[0]; row++) {
-                if (rowCol[row]<0) {//this row has no mapped base (i.e. no block) = bases deleted from query
-                    //blockStarted=false;
-                    continue;
-                };
-                
-                if (iEx==-1 || rowCol[row]!=rowCol[row-1]+1) {//start new block
-                    ++iEx;
-                    trA.exons[iEx][EX_R]=row;
-                    trA.exons[iEx][EX_G]=mapGen.chrStart[trA.Chr]+rowCol[row];
-                    trA.exons[iEx][EX_L]=1;
-                    trA.canonSJ[iEx]=-1;
-                    trA.sjAnnot[iEx]=0;
-                    //blockStarted=true;
-                } else {
-                    trA.exons[iEx][EX_L]++;
+
+                if (rowCol[row]>=0) {//this row has no mapped base (i.e. no block) = bases deleted from query
+                    if (iEx==-1 || rowCol[row]!=rowCol[row-1]+1) {//start new block
+                        ++iEx;
+                        trA.exons[iEx][EX_R]=row;
+                        trA.exons[iEx][EX_G]=mapGen.chrStart[trA.Chr]+rowCol[row];
+                        trA.exons[iEx][EX_L]=1;
+                        trA.canonSJ[iEx]=-1;
+                        trA.sjAnnot[iEx]=0;
+                        //blockStarted=true;
+                    } else {
+                        trA.exons[iEx][EX_L]++;
+                    };
                 };
          
+                //this needs to be done even if rowCol[row]==-1
                 if (rowSJ[row]>0) {//junction block
                     //blockStarted=false;//previous block ends
                     trA.canonSJ[iEx]=1;

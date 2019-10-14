@@ -11,12 +11,13 @@ void ReadAlign::samAttrNM_MD (Transcript const &trOut, uint iEx1, uint iEx2, uin
     tagMD="";
     char* R=Read1[trOut.roStr==0 ? 0:2];
     uint matchN=0;
+    uint32 nMM=0, nI=0, nD=0;
     for (uint iex=iEx1;iex<=iEx2;iex++) {
         for (uint ii=0;ii<trOut.exons[iex][EX_L];ii++) {
             char r1=R[ii+trOut.exons[iex][EX_R]];
             char g1=mapGen.G[ii+trOut.exons[iex][EX_G]];
             if ( r1!=g1 || r1==4 || g1==4) {
-                ++tagNM;
+                ++nMM;
                 tagMD+=to_string(matchN);
                 tagMD+=P.genomeNumToNT[(uint8) g1];
                 matchN=0;
@@ -26,9 +27,9 @@ void ReadAlign::samAttrNM_MD (Transcript const &trOut, uint iEx1, uint iEx2, uin
         };
         if (iex<iEx2) {
             if (trOut.canonSJ[iex] < 0) {//indels, junction are not included in edit distance
-                tagNM+=trOut.exons[iex+1][EX_R]-trOut.exons[iex][EX_R]-trOut.exons[iex][EX_L];//insertion
-                tagNM+=trOut.exons[iex+1][EX_G]-(trOut.exons[iex][EX_G]+trOut.exons[iex][EX_L]);//deletion
+                nD+=trOut.exons[iex+1][EX_G]-(trOut.exons[iex][EX_G]+trOut.exons[iex][EX_L]);//deletion
             };
+            nI+=trOut.exons[iex+1][EX_R]-trOut.exons[iex][EX_R]-trOut.exons[iex][EX_L];//insertion
             if (trOut.canonSJ[iex]==-1) {//deletion. TODO: This does not work if there is both deletion and insertion!!!
                 tagMD+=to_string(matchN) + "^";
                 for (uint ii=trOut.exons[iex][EX_G]+trOut.exons[iex][EX_L];ii<trOut.exons[iex+1][EX_G];ii++) {
@@ -39,6 +40,8 @@ void ReadAlign::samAttrNM_MD (Transcript const &trOut, uint iEx1, uint iEx2, uin
         };
     };
     tagMD+=to_string(matchN);
+    //cout << nMM<<" "<<nD<<" "<<nI<<endl;
+    tagNM=nMM+nI+nD;
 };
 
 int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint trChrStart, uint mateChr, uint mateStart, char mateStrand, int alignType, bool *mateMapped, vector<int> outSAMattrOrder, char** outBAMarray, uint* outBAMarrayN) {

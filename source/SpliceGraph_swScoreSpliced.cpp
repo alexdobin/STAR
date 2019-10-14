@@ -90,6 +90,7 @@ SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, con
     int32 row = alignEnds[0];//true row
     int32 col = alignEnds[1];
     
+    uint32 nMapped=0, nMM=0, nI=0, nD=0, nSJ=0;
 //     blockSJ.clear();//index of junction blocks, recorded acceptors, then converted to donors
 //     blockCoord.clear();//bR,bG,bL,type recorded ends, then converted to starts
     //vector<uint32> rowCol(readLen), rowSJ(readLen,0); //records col vs row TODO define outside for speed
@@ -107,27 +108,34 @@ SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, con
         {
             case 1:
                 --row;
+                ++nI;
                 break;
             case 2:
                 --col;
+                ++nD;
                 break;
             case 3:
+                ++nMapped;
+                nMM+=(uint32)(readSeq[row]!=superTr.seqP[col]);
                 rowCol[row]=col;//for each row, point to the column where blocj starts
                 --row;
                 --col;                  
                 break;
             default: //junction jump
+                ++nSJ;
                 while (iAcceptor+1!=0 && col <= (int32)superTr.sjC[iAcceptor][1]) {//find (acceptor-1) that matches this column
                     --iAcceptor;
                 };                
                 //row: same or -1
                 if ((dir1-4)%2 == 1) {//diagonal-like
-                    rowCol[row]=col;//for each row, point to the column where block starts                
+                    ++nMapped;
+                    nMM+=(uint32)(readSeq[row]!=superTr.seqP[col]);
+                    rowCol[row]=col;//for each row, point to the column where block starts                     
                     --row;
-                    rowSJ[row]=1;//diagonal jump => will start new block
                 } else {
-                    rowSJ[row]=2;//horizontal jump - no new block yet
+                    //++nD; //?
                 };
+                rowSJ[row]=1;
                 //column: jump to donor
                 col=superTr.sjDonor[ superTr.sjC[iAcceptor+1+(dir1-4)/2][2] ];                
         };
@@ -138,6 +146,8 @@ SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, con
         row++; //find first col>=0 - this is the alignment start. 
     alignStarts[0]=row;
     alignStarts[1]=rowCol[row];
+    
+    //cout <<nMapped<<" "<<nMM<<" "<<nD<<" "<<nI<<" "<<nSJ<<endl;
     
     //calculate blo
     
