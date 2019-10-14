@@ -527,8 +527,8 @@ void Genome::genomeLoad(){//allocate and load Genome
     P.winBinN = nGenome/(1LLU << P.winBinNbits)+1;//this may be changed later
     
     if (pGe.gType==101) {//SuperTranscriptome
-		superTr = new SuperTranscriptome (P,chrLength);
-        superTr->load(G, chrStart);
+		superTr = new SuperTranscriptome (P);
+        superTr->load(G, chrStart, chrLength);
     };
 };
 

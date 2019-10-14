@@ -1,5 +1,6 @@
 #include "SpliceGraph.h"
 #include "sjAlignSplit.h"
+#include "ReadAlign.h"
 
 void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, const uint32 readLen, const string &readName, Genome &mapGen)
 {//find the candidate superTranscripts: seed-and-rank algorithm implemented
@@ -14,7 +15,7 @@ void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, 
 	
 	//readLen, readSeq
     uint32 seedLen=mapGen.pGe.gSAindexNbases; //TODO: make user-definable
-    memset(superTrSeedCount,0,sizeof(superTrSeedCount[0])*2*superTr.N);
+    memset(superTrSeedCount,0,sizeof(superTrSeedCount[0])*2*superTrome.N);
     
     for (uint32 iseed=0; iseed<readLen/seedLen; iseed++) {//loop through seeds
         //calculate index
@@ -61,7 +62,7 @@ void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, 
                 };
             };
             
-            seedSuperTr[isa-iSA1]=(uint32)(aStr*superTr.N  + mapGen.chrBin[a1 >> mapGen.pGe.gChrBinNbits]);
+            seedSuperTr[isa-iSA1]=(uint32)(aStr*superTrome.N  + mapGen.chrBin[a1 >> mapGen.pGe.gChrBinNbits]);
         };//loop through seed SA boundaries
 		
 		sort(seedSuperTr.begin(),seedSuperTr.end());
@@ -78,7 +79,7 @@ void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, 
     //find max coverage
     typeSuperTrSeedCount countMax=0;
 	//float countOverSuperTrLenMax=0;
-    for (uint32 ii=0; ii<2*superTr.N; ii++) {
+    for (uint32 ii=0; ii<2*superTrome.N; ii++) {
         countMax=max(superTrSeedCount[ii], countMax);
 		//countOverSuperTrLenMax=max(superTrSeedCount[ii]/float(superTr.length[ii%superTr.N]), countOverSuperTrLenMax);
     };
@@ -86,35 +87,66 @@ void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, 
     if (countMax*seedLen<readLen*seedCoverageThreshold)//no good candidates, hard-coded for now
         return;
     
-    for (uint32 ii=0; ii<superTr.N; ii++) {//selection cycle
+    uint32 nSuperTr=0;
+    uint32 maxMaxScore=0;
+    for (uint32 ii=0; ii<superTrome.N; ii++) {//selection cycle
 				
-        uint32 sutr1=ii%superTr.N;
-        uint32 str1=ii/superTr.N;
+        uint32 sutr1=ii%superTrome.N;
+        uint32 str1=ii/superTrome.N;
 		
+        //if (superTrSeedCount[ii]<countOverSuperTrLenMax*superTr.length[sutr1]*seedCoverageMinToMax)
         //if (superTrSeedCount[ii]<countMax*seedCoverageMinToMax)
-		if (superTrSeedCount[ii] < readLen*seedCoverageThreshold/seedLen)
-		//if (superTrSeedCount[ii]<countOverSuperTrLenMax*superTr.length[sutr1]*seedCoverageMinToMax)
+		if (superTrSeedCount[ii] < readLen*seedCoverageThreshold/seedLen) {
 			continue;
+        };
 
-
-		if (superTr.length[sutr1]>=100000) //temporary restriction: will lift after redoing the scoringMatrix
+		if (readLen>=100000 || superTrome.superTrs[sutr1].length*readLen>=1000000000) {//temporary restriction: will lift after redoing the scoringMatrix
 			continue;		
-		
+        };
+        
         array<uint32,2> alignEnds, alignStarts;
         
 		uint32 swScore = 0;
-        swScore = swScoreSpliced((str1==0 ? readSeq : readSeqRevCompl), readLen, sutr1, alignStarts, alignEnds);
+        swScore = swScoreSpliced((str1==0 ? readSeq : readSeqRevCompl), readLen, superTrome.superTrs[sutr1], alignStarts, alignEnds);
         
         //swTraceBack(alignEnds, alignStarts);
 		//float(superTrSeedCount[ii])/countMax
 		//float(superTrSeedCount[ii])/superTr.length[sutr1]/countOverSuperTrLenMax <<'\t'<<
 
-		cout << readName <<'\t'<< sutr1 <<'\t'<< str1 <<'\t'<< superTr.length[sutr1] <<'\t'<< readLen <<'\t'<< float(superTrSeedCount[ii])/readLen*seedLen <<'\t'<<  
+		cout << readName <<'\t'<< sutr1 <<'\t'<< str1 <<'\t'<< superTrome.superTrs[sutr1].length <<'\t'<< readLen <<'\t'<< float(superTrSeedCount[ii])/readLen*seedLen <<'\t'<<  
 				float(superTrSeedCount[ii])/countMax <<'\t'<<
                 swScore <<'\t'<< float(swScore)/readLen <<'\t'<< alignStarts[0] <<'\t'<< alignEnds[0] <<'\t'<< alignStarts[1] <<'\t'<< alignEnds[1] << endl;
-
+        
+        //convert into trAll
+        RA->trAll[nSuperTr]=RA->trArrayPointer+nSuperTr;
+        RA->nWinTr[nSuperTr]=1;
+        Transcript &trA = *RA->trAll[nSuperTr][0]; //transcript to fill
+        trA=*RA->trInit;
+        trA.Chr=sutr1;
+        trA.Str=str1;
+        trA.maxScore=swScore;
+        trA.nMatch=swScore;//TODO fix this, calculate number of matched bases
+        trA.nExons=blockCoord.size();
+        for (uint32 iex=0; iex<blockCoord.size(); iex++) {
+            trA.exons[iex][EX_R]=blockCoord[iex][0];
+            trA.exons[iex][EX_G]=mapGen.chrStart[trA.Chr]+blockCoord[iex][1];
+            trA.exons[iex][EX_L]=blockCoord[iex][2];
+            trA.exons[iex][EX_iFrag]=0;
+            trA.exons[iex][EX_sjA]=0;
+            trA.canonSJ[iex]=blockCoord[iex][3];
+            trA.sjAnnot[iex]=blockCoord[iex][3]>0; //all annotated for now
+        };
+//         for (auto &isj : blockSJ) {
+//             trA.canonSJ[isj]=1;//need to determine motif here
+//             trA.sjAnnot[isj]=1;
+//         };
+        if (swScore>maxMaxScore) {
+            maxMaxScore=swScore;
+            RA->trBest=&trA;
+        };
+        nSuperTr++;
     };
-
+    RA->nW=nSuperTr;
     return;
 };
 

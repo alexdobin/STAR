@@ -5,7 +5,7 @@
 #include "TimeFunctions.h"
 
 GTF::GTF(Genome &genomeIn, Parameters &Pin, string dirOutIn, SjdbClass &sjdbLociIn) 
-                 : genome(genomeIn), P(Pin), dirOut(dirOutIn), sjdbLoci(sjdbLociIn), superTr(P,genome.chrLength)
+                 : genome(genomeIn), P(Pin), dirOut(dirOutIn), sjdbLoci(sjdbLociIn), superTrome(P)
  {//initialize; load gtf file; returns number of added junctions
                      
     if (genome.sjdbOverhang==0 || genome.pGe.sjdbGTFfile=="-") {//no GTF

@@ -11,33 +11,34 @@ void SuperTranscriptome::sjCollapse()
      });
 
     //collapse junctions in each superTr, those junctions that belong to different transcript - remove the transcript info
-    sjC.resize(seq.size());
+    vector<vector<array<uint32,2>>> sjCollapsed;
+    sjCollapsed.resize(seq.size());
     for(uint32 i = 0; i < sj.size(); i++) {
         if (i==0 || sj[i].start!=sj[i-1].start || sj[i].end!=sj[i-1].end || sj[i].super!=sj[i-1].super) //new junction
-            sjC[ sj[i].super ].push_back({sj[i].start, sj[i].end});
+            sjCollapsed[ sj[i].super ].push_back({sj[i].start, sj[i].end});
     };
     
     ofstream & superTrSJ = ofstrOpen(P.pGe.gDir+"/superTranscriptSJcollapsed.tsv", ERROR_OUT, P);
-    for(uint64 i = 0; i < sjC.size(); i++) {
-        for(auto &sj1 : sjC[i])
+    for(uint64 i = 0; i < sjCollapsed.size(); i++) {
+        for(auto &sj1 : sjCollapsed[i])
             superTrSJ << i <<"\t"<< sj1[0] <<"\t"<< sj1[1] << "\n";
     };
     superTrSJ.close(); 
 
     P.inOut->logMain << "Number of splice junctions in superTranscripts = " << sj.size() <<endl;
-    P.inOut->logMain << "Number of collapsed splice junctions in superTranscripts = " << sjC.size() <<endl;
+    P.inOut->logMain << "Number of collapsed splice junctions in superTranscripts = " << sjCollapsed.size() <<endl;
 };
 
-void SuperTranscriptome::load(char *G, vector<uint64> &chrStart)
+void SuperTranscriptome::load(char *G, vector<uint64> &chrStart, vector<uint64> &chrLength)
 {//load superTranscript seqs and
-    seqp.resize(N);
-    for (uint64 ii=0; ii<N; ii++)
-        seqp[ii]=(uint8*)G+chrStart[ii];
+    N=chrLength.size();
+    superTrs.resize(N);
+    for (uint32 ii=0; ii<N; ii++) {
+        superTrs[ii].length=chrLength[ii];
+        superTrs[ii].seqP=(uint8*)G+chrStart[ii];
+    };
     
     ifstream & superTrSJ = ifstrOpen(P.pGe.gDir+"/superTranscriptSJcollapsed.tsv", ERROR_OUT, "SOLUTION: re-generate the genome.", P);
-    
-    sjC.resize(N);
-    sjDonor.resize(N);
     
     uint32 sutr=0,sutr1=0;
     vector<array<uint32,3>> sjC1;
@@ -45,8 +46,11 @@ void SuperTranscriptome::load(char *G, vector<uint64> &chrStart)
     sjDonorNmax=0;
     vector<uint32> sjDonor1;
     
-    while(superTrSJ >> sutr) {//load junctions, assume they are sorted by donor coordinate
-        if (sutr!=sutr1) {//new suTr
+    while(true) {//load junctions, assume they are sorted by donor coordinate
+        
+        bool inGood = (superTrSJ >> sutr);
+        
+        if (sutr!=sutr1 || !inGood) {//new suTr
             //sort sj1 by acceptor position
             sort(sjC1.begin(), sjC1.end(),
                 [](const array<uint32,3> &sj1, const array<uint32,3> &sj2) {
@@ -54,18 +58,22 @@ void SuperTranscriptome::load(char *G, vector<uint64> &chrStart)
                         ( sj1[1] == sj2[1]  && sj1[0] < sj2[0] );
                 });
 
-            sjC[sutr1]=sjC1;
-            sjDonor[sutr1]=sjDonor1;
+            superTrs[sutr1].sjC=sjC1;
+            superTrs[sutr1].sjDonor=sjDonor1;
             
             if (sjNmax < sjC1.size())
                 sjNmax=sjC1.size();
-            
-            if (sjDonorNmax < sjDonor1.size())
+            if (sjDonorNmax < sjDonor1.size()) {
                 sjDonorNmax=sjDonor1.size();
+            };
             
             sjC1.clear();
             sjDonor1.clear();
             sutr1=sutr;
+            
+            if (!inGood) {
+                break; //end of file
+            };
         };
         
         uint32 sjd, sja;

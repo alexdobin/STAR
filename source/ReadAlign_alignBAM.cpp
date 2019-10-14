@@ -232,16 +232,14 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                     uint gapR=trOut.exons[ii][EX_R]-trOut.exons[ii-1][EX_R]-trOut.exons[ii-1][EX_L];
                     //it's possible to have a D or N and I at the same time
                     if (gapR>0){
-
                         packedCIGAR[nCIGAR++]=gapR<<BAM_CIGAR_OperationShift | BAM_CIGAR_I;
                     };
                     if (trOut.canonSJ[ii-1]>=0 || trOut.sjAnnot[ii-1]==1) {//junction: N
-
                         packedCIGAR[nCIGAR++]=gapG<<BAM_CIGAR_OperationShift | BAM_CIGAR_N;
                         SJmotif.push_back(trOut.canonSJ[ii-1] + (trOut.sjAnnot[ii-1]==0 ? 0 : SJ_SAM_AnnotatedMotifShift)); //record junction type
                         SJintron.push_back((int32) (trOut.exons[ii-1][EX_G] + trOut.exons[ii-1][EX_L] + 1 - trChrStart) );//record intron start
                         SJintron.push_back((int32) (trOut.exons[ii][EX_G] - trChrStart)); //record intron end
-                    } else if (gapG>0) {//deletion: N
+                    } else if (gapG>0) {//deletion: D
                         packedCIGAR[nCIGAR++]=gapG<<BAM_CIGAR_OperationShift | BAM_CIGAR_D;
                     };
                 };

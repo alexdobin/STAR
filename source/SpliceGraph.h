@@ -4,14 +4,17 @@
 
 #ifndef H_SpliceGraph
 #define H_SpliceGraph
-
 #include "GTF.h"
+#include "Transcript.h"
+
+class ReadAlign;
+
 class SpliceGraph {
 public:
     typedef int32 typeAlignScore;
     typedef uint32 typeSeqLen;
     
-    SuperTranscriptome &superTr;
+    SuperTranscriptome &superTrome;
     
     //vector<array<typeSeqLen, 2>> readAndSuperTranscript;
     const static typeSeqLen maxSeqLength = 100000;//make user parameter?
@@ -28,15 +31,20 @@ public:
     typedef uint16 typeSuperTrSeedCount;
     typeSuperTrSeedCount *superTrSeedCount;
     
-    SpliceGraph(SuperTranscriptome &superTr, Parameters &P);
+    //output
+    vector<array<int32,4>> blockCoord;
+    //vector<int32> blockSJ;
+    
+    SpliceGraph(SuperTranscriptome &superTrome, Parameters &P, ReadAlign *RA);
     ~SpliceGraph();
 
-    typeAlignScore swScoreSpliced(const char *readSeq, const uint32 readLength, const uint32 suTrInd, array<SpliceGraph::typeSeqLen, 2> &alignStarts, array<SpliceGraph::typeSeqLen, 2> &alignEnds);
+    typeAlignScore swScoreSpliced(const char *readSeq, const uint32 readLength, const SuperTranscript &superTr, array<SpliceGraph::typeSeqLen, 2> &alignStarts, array<SpliceGraph::typeSeqLen, 2> &alignEnds);
     void swTraceBack(array<typeSeqLen, 2> &alignEnds, array<typeSeqLen, 2> &alignStarts);
     void findSuperTr(const char *readSeq, const char *readSeqRevCompl, const uint32 readLen, const string &readName, Genome &mapGen);
     
 private:
     Parameters &P;
+    ReadAlign *RA;
 };
 
 #endif

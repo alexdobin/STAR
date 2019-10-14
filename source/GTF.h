@@ -27,7 +27,7 @@ public:
     vector<vector<uint8>> transcriptSeq;//sequences of normal transcripts
     vector<array<uint64,2>> transcriptStartEnd;//normal transcripts start/end in the normal genome
 
-    SuperTranscriptome superTr;
+    SuperTranscriptome superTrome;
     
     GTF(Genome &genomeIn, Parameters &Pin, string dirOutIn, SjdbClass &sjdbLociIn);
     uint64 transcriptGeneSJ();

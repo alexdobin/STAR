@@ -36,6 +36,5 @@ void ReadAlign::mapOneReadSpliceGraph()
 
     splGraph->findSuperTr(Read1[0], Read1[2], Lread, readName, mapGen);
     
-    nW=0;//debug
     return;
 };

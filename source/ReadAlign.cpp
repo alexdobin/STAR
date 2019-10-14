@@ -16,7 +16,7 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
     };
 
     if (P.pGe.gType==101) {//SuperTranscriptome
-        splGraph = new SpliceGraph(*mapGen.superTr,P);
+        splGraph = new SpliceGraph(*mapGen.superTr, P, this);
     } else {//standard map algorithm:
         winBin = new uintWinBin* [2];
         winBin[0] = new uintWinBin [P.winBinN];

@@ -50,10 +50,10 @@ void GTF::superTranscript() {
         //Condensed genome (a.k.a SuperTranscriptome) sequence
         for(const auto& p: mergedIntervals) {
             for(uint64 j = p[0]; j <= p[1]; ++j) {
-                superTr.seqConcat.push_back((uint8) genome.G[j]);
+                superTrome.seqConcat.push_back((uint8) genome.G[j]);
             };
         };
-        P.inOut->logMain << "SuperTranscriptome (condensed) genome length = " << superTr.seqConcat.size() <<endl;
+        P.inOut->logMain << "SuperTranscriptome (condensed) genome length = " << superTrome.seqConcat.size() <<endl;
     };
 
     
@@ -87,24 +87,24 @@ void GTF::superTranscript() {
     //superTranscript sequences
     uint64 maxSTlen=0;
     for(const auto& p: superTrStartEnd) {
-        superTr.seq.push_back(vector<uint8>(superTr.seqConcat.begin()+p[0], superTr.seqConcat.begin()+p[1]+1));
+        superTrome.seq.push_back(vector<uint8>(superTrome.seqConcat.begin()+p[0], superTrome.seqConcat.begin()+p[1]+1));
         maxSTlen=max(maxSTlen,p[1]-p[0]);
     };
     P.inOut->logMain << "Number of superTranscripts = " << superTrStartEnd.size() <<";   max length = " <<maxSTlen <<endl;
     
-    superTr.trIndex.resize(transcriptID.size());
+    superTrome.trIndex.resize(transcriptID.size());
     //for each normal transcript, find superTranscript it belongs to
     uint64 ist=0;
     for (auto &ee: exonLoci) {
         if (ee[exS]>superTrStartEnd[ist][1])
             ++ist;
-        superTr.trIndex[ee[exT]]=ist;
+        superTrome.trIndex[ee[exT]]=ist;
     };
     
-    superTr.trStartEnd.resize(transcriptID.size());
+    superTrome.trStartEnd.resize(transcriptID.size());
     for(uint i = 0; i < transcriptStartEnd.size(); i++) {
-        superTr.trStartEnd[i][0] = transcriptStartEnd[i][0] - superTrStartEnd[superTr.trIndex[i]][0];
-        superTr.trStartEnd[i][1] = transcriptStartEnd[i][1] - superTrStartEnd[superTr.trIndex[i]][0];
+        superTrome.trStartEnd[i][0] = transcriptStartEnd[i][0] - superTrStartEnd[superTrome.trIndex[i]][0];
+        superTrome.trStartEnd[i][1] = transcriptStartEnd[i][1] - superTrStartEnd[superTrome.trIndex[i]][0];
     };
     //////////////////Normal transcripts
     sort(exonLoci.begin(), exonLoci.end(),
@@ -116,8 +116,8 @@ void GTF::superTranscript() {
     for(uint64 i = 0; i < exonLoci.size(); i++) {
         transcriptSeq[exonLoci[i][exT]].insert(
                                                transcriptSeq[exonLoci[i][exT]].end(), 
-                                               superTr.seqConcat.begin()+exonLoci[i][exS], 
-                                               superTr.seqConcat.begin()+exonLoci[i][exE] + 1
+                                               superTrome.seqConcat.begin()+exonLoci[i][exS], 
+                                               superTrome.seqConcat.begin()+exonLoci[i][exE] + 1
                                               );
     };
 
@@ -137,17 +137,17 @@ void GTF::superTranscript() {
     for(uint64 i = 1; i < exonLoci.size(); i++) {//exonLoci are still sorted by transcript index and start coordinate
         if (exonLoci[i][exT]==exonLoci[i-1][exT]) {//same transcript
             if (exonLoci[i][exS] > (exonLoci[i-1][exE]+1)) {//gap >0, otherwise we do not need to record the junction (may need it in the future for other purposes though)
-                uint64 sti=superTr.trIndex[exonLoci[i][exT]];//ST index
+                uint64 sti=superTrome.trIndex[exonLoci[i][exT]];//ST index
                 uint64 sts=superTrStartEnd[sti][0]; //superTranscript start
-                superTr.sj.emplace_back();//add one element
-                superTr.sj.back().start = (uint32)(exonLoci[i-1][exE]-sts);//start at the last base of the exon
-                superTr.sj.back().end = (uint32)(exonLoci[i]  [exS]-sts);//end at the first base of the next exon
-                superTr.sj.back().tr = exonLoci[i][exT];//the transcript info is retained, thus there will be duplicate junctions that belong to different transcripts
-                superTr.sj.back().super = sti;
+                superTrome.sj.emplace_back();//add one element
+                superTrome.sj.back().start = (uint32)(exonLoci[i-1][exE]-sts);//start at the last base of the exon
+                superTrome.sj.back().end = (uint32)(exonLoci[i]  [exS]-sts);//end at the first base of the next exon
+                superTrome.sj.back().tr = exonLoci[i][exT];//the transcript info is retained, thus there will be duplicate junctions that belong to different transcripts
+                superTrome.sj.back().super = sti;
             };
         };
     };
-    superTr.sjCollapse();
+    superTrome.sjCollapse();
     
     //replace the Genome sequence and all necessary parameters for downstream genome generation
     if (P.pGe.gTypeString=="Transcriptome") {
@@ -159,7 +159,7 @@ void GTF::superTranscript() {
         for (uint64 ii=0; ii<superTranscriptID.size(); ii++)
             superTranscriptID[ii]="st" + to_string(ii);
         
-        genome.concatenateChromosomes(superTr.seq, superTranscriptID, genome.genomeChrBinNbases);
+        genome.concatenateChromosomes(superTrome.seq, superTranscriptID, genome.genomeChrBinNbases);
         
         transcriptStrand.resize(superTrStartEnd.size(),1);//transcript are always on + strand in superTr
         

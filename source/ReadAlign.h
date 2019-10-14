@@ -44,6 +44,16 @@ class ReadAlign {
         intScore maxScoreMate[MAX_N_MATES];
 
         uint readFilesIndex;
+        
+        //transcripts (aligns)
+        uint nW;
+        uint *nWinTr; //number of recorded transcripts per window
+        Transcript trA, trA1, *trBest, *trInit; //transcript, best tr, next best tr, initialized tr
+        Transcript ***trAll; //all transcripts for all windows
+        Transcript* trArray; //linear array of transcripts to store all of them from all windows
+        Transcript** trArrayPointer; //linear array of transcripts to store all of them from all windows
+        Transcript* trMult[MAX_N_MULTMAP];//multimapping transcripts
+        Transcript *alignTrAll;//alignments to transcriptome        
 
         ReadAlign *waspRA; //ReadAlign for alternative WASP alignment
         int waspType, waspType1; //alignment ASE-WASP type and
@@ -82,10 +92,6 @@ class ReadAlign {
 
         bool outFilterPassed; //true if alignment passed all filter and is output to SAM/BAM
 
-        //transcript
-        Transcript* trArray; //linear array of transcripts to store all of them from all windows
-        Transcript** trArrayPointer; //linear array of transcripts to store all of them from all windows
-
         //read
         uint64 iMate;
         char readFilter; //Illumina not passed Y/N
@@ -120,7 +126,7 @@ class ReadAlign {
         int unmapType; //marker for why a read is unmapped
 
         uint mapMarker; //alignment marker (typically, if there is something wrong)
-        uint nA, nP, nW, nWall, nUM[2]; //number of all alignments,  pieces, windows, U/M,
+        uint nA, nP, nWall, nUM[2]; //number of all alignments,  pieces, windows, U/M,
         uint *nWA, *nWAP, *WALrec, *WlastAnchor; //number of alignments per window, per window per piece, min recordable length per window
         bool *WAincl; //alginment inclusion mask
 
@@ -131,10 +137,6 @@ class ReadAlign {
         uint nTr, nTrMate; // number of transcripts called
         intScore maxScore;//maximum alignment score
 
-        Transcript trA, trA1, *trBest, *trInit; //transcript, best tr, next best tr, initialized tr
-        Transcript ***trAll; //all transcripts for all windows
-        uint *nWinTr; //number of recorded transcripts per window
-
         //old chimeric detection
         uint chimN, chimRepeat, chimStr;
         int chimMotif;
@@ -142,11 +144,6 @@ class ReadAlign {
         Transcript trChim[MAX_N_CHIMERAS];
         //new chimeric detection
         bool chimRecord; //true if chimeric aligment was detected
-
-        Transcript *alignC, *extendC, *polyAtailC; //alignment rules/conditions
-
-        Transcript* trMult[MAX_N_MULTMAP];//multimapping transcripts
-        Transcript *alignTrAll;//alignments to transcriptome
 
         struct {
             bool yes;
