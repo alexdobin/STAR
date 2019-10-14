@@ -126,15 +126,41 @@ void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, 
         trA.Str=str1;
         trA.maxScore=swScore;
         trA.nMatch=swScore;//TODO fix this, calculate number of matched bases
-        trA.nExons=blockCoord.size();
-        for (uint32 iex=0; iex<blockCoord.size(); iex++) {
-            trA.exons[iex][EX_R]=blockCoord[iex][0];
-            trA.exons[iex][EX_G]=mapGen.chrStart[trA.Chr]+blockCoord[iex][1];
-            trA.exons[iex][EX_L]=blockCoord[iex][2];
+        
+        {//calculate blocks from rowCol and rowSJ
+            int32 iEx=-1;//current exon
+            //bool blockStarted=false;
+            for (uint32 row=alignStarts[0]; row<=alignEnds[0]; row++) {
+                if (rowCol[row]<0) {//this row has no mapped base (i.e. no block) = bases deleted from query
+                    //blockStarted=false;
+                    continue;
+                };
+                
+                if (iEx==-1 || rowCol[row]!=rowCol[row-1]+1) {//start new block
+                    ++iEx;
+                    trA.exons[iEx][EX_R]=row;
+                    trA.exons[iEx][EX_G]=mapGen.chrStart[trA.Chr]+rowCol[row];
+                    trA.exons[iEx][EX_L]=1;
+                    trA.canonSJ[iEx]=-1;
+                    trA.sjAnnot[iEx]=0;
+                    //blockStarted=true;
+                } else {
+                    trA.exons[iEx][EX_L]++;
+                };
+         
+                if (rowSJ[row]>0) {//junction block
+                    //blockStarted=false;//previous block ends
+                    trA.canonSJ[iEx]=1;
+                    trA.sjAnnot[iEx]=1;
+                };
+            };
+            
+            trA.nExons=iEx+1;
+        };       
+        
+        for (uint32 iex=0; iex<trA.nExons; iex++) {
             trA.exons[iex][EX_iFrag]=0;
             trA.exons[iex][EX_sjA]=0;
-            trA.canonSJ[iex]=blockCoord[iex][3];
-            trA.sjAnnot[iex]=blockCoord[iex][3]>0; //all annotated for now
         };
 //         for (auto &isj : blockSJ) {
 //             trA.canonSJ[isj]=1;//need to determine motif here

@@ -124,14 +124,24 @@ void GTF::superTranscript() {
     //output normal transcript sequences
     vector<char> numToCharConverter{'A','C','G','T','N'};
     ofstream & trSeqOut = ofstrOpen(P.pGe.gDir+"/transcriptSequences.fasta",ERROR_OUT, P);
-    for(uint64 i = 0; i < transcriptSeq.size(); i++) {
-        trSeqOut << ">" << transcriptID[i] << "\n";
-        for(uint64 j = 0; j < transcriptSeq[i].size(); j++) {
-            trSeqOut << numToCharConverter[transcriptSeq[i][j]];
+    for (uint64 ii = 0; ii < transcriptSeq.size(); ii++) {
+        trSeqOut << ">" << transcriptID[ii] << "\n";
+        for(uint64 jj = 0; jj < transcriptSeq[ii].size(); jj++) {
+            trSeqOut << numToCharConverter[transcriptSeq[ii][jj]];
         };
         trSeqOut << "\n";
     };
     trSeqOut.close();
+    ofstream & sutrSeqOut = ofstrOpen(P.pGe.gDir+"/superTranscriptSequences.fasta",ERROR_OUT, P);
+    for (uint64 ii = 0; ii < superTrome.seq.size(); ii++) {
+        sutrSeqOut << ">st" << to_string(ii) << "\n";
+        for(uint64 jj = 0; jj < superTrome.seq[ii].size(); jj++) {
+            sutrSeqOut << numToCharConverter[superTrome.seq[ii][jj]];
+        };
+        sutrSeqOut << "\n";
+    };
+    sutrSeqOut.close();
+    
     
     // splice junctions, in superTranscript coordinates. Here, sjS is the last base of donor exon, and sjE is the last base of acceptor exon
     for(uint64 i = 1; i < exonLoci.size(); i++) {//exonLoci are still sorted by transcript index and start coordinate

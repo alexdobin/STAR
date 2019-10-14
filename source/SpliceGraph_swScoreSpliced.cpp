@@ -47,7 +47,6 @@ SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, con
         };
         
         scoreColumn[0] = 0; //initialize top row
-        ++matIndex; //since we are skippin the 1st row in the loop
         for(uint row = 1; row <= readLen; row++) {//rows are counte from 1, 0th row is filled with 0
 			
 			uint8 dirIndMax = 0 ; //direction index
@@ -75,7 +74,7 @@ SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, con
             };
 			
 			directionMatrix[matIndex]=dirIndMax;
-            ++matIndex;//matIndex stride is (readLen+1)
+            ++matIndex;//matIndex stride is (readLen)
 
             scoreColumn[row] = scoreMax;
             if(scoreMaxGlobal < scoreMax) {
@@ -85,74 +84,76 @@ SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, con
             };
         }; // row for loop
     }; // col for loop
+    alignEnds[0]--;//truw row
     
     ///////////traceback
-    int32 row = alignEnds[0];    
+    int32 row = alignEnds[0];//true row
     int32 col = alignEnds[1];
     
-    //blockSJ.clear();//index of junction blocks, recorded acceptors, then converted to donors
-    blockCoord.clear();//bR,bG,bL,type recorded ends, then converted to starts
-    array<int32,4> block1;
-    int32 bType=16; //0: continuing block; 1: D, 2: I, 3: DI, 4: SJ
+//     blockSJ.clear();//index of junction blocks, recorded acceptors, then converted to donors
+//     blockCoord.clear();//bR,bG,bL,type recorded ends, then converted to starts
+    //vector<uint32> rowCol(readLen), rowSJ(readLen,0); //records col vs row TODO define outside for speed
     
+    rowCol.clear();
+    rowSJ.clear();
+    rowCol.resize(readLen,-1);
+    rowSJ.resize(readLen+1,-1);//one extra element since we are going to check row+1
     --iAcceptor; //= last junction
-    while(col >= 0 && row > 0) {
-        uint32 dir1= (uint32) directionMatrix[row+col*(readLen+1)];
+    while(col >= 0 && row >= 0) {
+        uint32 dir1= (uint32) directionMatrix[row+col*readLen];
         if (dir1==0) //reached scoringMatrix==0
             break;
         switch (dir1) 
         {
             case 1:
                 --row;
-                bType=bType | 2;//insertion
                 break;
             case 2:
                 --col;
-                bType=bType | 1;//deletion
                 break;
             case 3:
-                if (bType!=0) {//start new block
-                    block1={row-1, col, 0, bType};
-                    bType=0;//marks continuing block
-                };
+                rowCol[row]=col;//for each row, point to the column where blocj starts
                 --row;
                 --col;                  
-                block1[2]++;//increase block length
                 break;
             default: //junction jump
-                bType=4;//marks junction for now TODO: motif, annotation
-                //blockSJ.push_back(blockCoord.size());
                 while (iAcceptor+1!=0 && col <= (int32)superTr.sjC[iAcceptor][1]) {//find (acceptor-1) that matches this column
                     --iAcceptor;
                 };                
-                col=superTr.sjDonor[ superTr.sjC[iAcceptor+1+(dir1-4)/2][2] ];
-                if ((dir1-4)%2 == 1) {
+                //row: same or -1
+                if ((dir1-4)%2 == 1) {//diagonal-like
+                    rowCol[row]=col;//for each row, point to the column where block starts                
                     --row;
-                    block1[2]++;//increase block length
+                    rowSJ[row]=1;//diagonal jump => will start new block
+                } else {
+                    rowSJ[row]=2;//horizontal jump - no new block yet
                 };
-        };
-        if (bType!=0 && block1[2]>0) {//block has ended: record the old one
-            blockCoord.push_back(block1);
-            block1[2]=0;
+                //column: jump to donor
+                col=superTr.sjDonor[ superTr.sjC[iAcceptor+1+(dir1-4)/2][2] ];                
         };
     };   
     
-    alignStarts[0]=(uint32)max(0,row-1);
-    alignStarts[1]=(uint32)max(0,col);
-    alignEnds[0]--; //substract 1 from row
+    row=max(0,row);
+    while (rowCol[row]<0)
+        row++; //find first col>=0 - this is the alignment start. 
+    alignStarts[0]=row;
+    alignStarts[1]=rowCol[row];
     
-    if (block1[2]>0) {
-        blockCoord.push_back(block1);//last block
-    };
-    std::reverse(blockCoord.begin(), blockCoord.end());
-    for (auto &b : blockCoord) {
-        b[0] -= b[2]-1;
-        b[1] -= b[2]-1;
-    };
-//     std::reverse(blockSJ.begin(), blockSJ.end());
-//     for (auto &b : blockSJ) {
-//         b = blockCoord.size()-1-b-1;
+    //calculate blo
+    
+//     
+//     if (block1[2]>0) {
+//         blockCoord.push_back(block1);//last block
 //     };
+//     std::reverse(blockCoord.begin(), blockCoord.end());
+//     for (auto &b : blockCoord) {
+//         b[0] -= b[2]-1;
+//         b[1] -= b[2]-1;
+//     };
+// //     std::reverse(blockSJ.begin(), blockSJ.end());
+// //     for (auto &b : blockSJ) {
+// //         b = blockCoord.size()-1-b-1;
+// //     };
     return scoreMaxGlobal;
 };
 

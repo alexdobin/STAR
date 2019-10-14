@@ -25,15 +25,16 @@ void ReadAlign::samAttrNM_MD (Transcript const &trOut, uint iEx1, uint iEx2, uin
             };
         };
         if (iex<iEx2) {
-            if (trOut.canonSJ[iex]==-1) {//deletion
-                tagNM+=trOut.exons[iex+1][EX_G]-(trOut.exons[iex][EX_G]+trOut.exons[iex][EX_L]);
+            if (trOut.canonSJ[iex] < 0) {//indels, junction are not included in edit distance
+                tagNM+=trOut.exons[iex+1][EX_R]-trOut.exons[iex][EX_R]-trOut.exons[iex][EX_L];//insertion
+                tagNM+=trOut.exons[iex+1][EX_G]-(trOut.exons[iex][EX_G]+trOut.exons[iex][EX_L]);//deletion
+            };
+            if (trOut.canonSJ[iex]==-1) {//deletion. TODO: This does not work if there is both deletion and insertion!!!
                 tagMD+=to_string(matchN) + "^";
                 for (uint ii=trOut.exons[iex][EX_G]+trOut.exons[iex][EX_L];ii<trOut.exons[iex+1][EX_G];ii++) {
                     tagMD+=P.genomeNumToNT[(uint8) mapGen.G[ii]];
                 };
                 matchN=0;
-            } else if (trOut.canonSJ[iex]==-2) {//insertion
-                tagNM+=trOut.exons[iex+1][EX_R]-trOut.exons[iex][EX_R]-trOut.exons[iex][EX_L];
             };
         };
     };

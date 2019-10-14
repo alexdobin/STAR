@@ -32,8 +32,9 @@ public:
     typeSuperTrSeedCount *superTrSeedCount;
     
     //output
-    vector<array<int32,4>> blockCoord;
+    //vector<array<int32,4>> blockCoord;
     //vector<int32> blockSJ;
+    vector<int32> rowCol, rowSJ;
     
     SpliceGraph(SuperTranscriptome &superTrome, Parameters &P, ReadAlign *RA);
     ~SpliceGraph();
