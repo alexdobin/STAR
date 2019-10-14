@@ -319,7 +319,7 @@ outSAMfilter            None
 
 
 outSAMmultNmax          -1
-    int: max number of multiple alignments for a read that will be output to the SAM/BAM files.
+    int: max number of multiple alignments for a read that will be output to the SAM/BAM files. Note that if this value is not equal to -1, the top scoring alignment will be output first
                         -1 ... all alignments (up to --outFilterMultimapNmax) will be output
 
 outSAMtlen              1
