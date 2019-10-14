@@ -93,7 +93,7 @@ SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, con
     //blockSJ.clear();//index of junction blocks, recorded acceptors, then converted to donors
     blockCoord.clear();//bR,bG,bL,type recorded ends, then converted to starts
     array<int32,4> block1;
-    int32 bType=9; //marks nothing
+    int32 bType=16; //0: continuing block; 1: D, 2: I, 3: DI, 4: SJ
     
     --iAcceptor; //= last junction
     while(col >= 0 && row > 0) {
@@ -104,23 +104,23 @@ SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, con
         {
             case 1:
                 --row;
-                bType=-2;//insertion
+                bType=bType | 2;//insertion
                 break;
             case 2:
                 --col;
-                bType=-1;//deletion
+                bType=bType | 1;//deletion
                 break;
             case 3:
-                if (bType!=10) {//start new block
+                if (bType!=0) {//start new block
                     block1={row-1, col, 0, bType};
-                    bType=10;//marks continuing block
+                    bType=0;//marks continuing block
                 };
                 --row;
                 --col;                  
                 block1[2]++;//increase block length
                 break;
             default: //junction jump
-                bType=1;//marks junction for now TODO: motif, annotation
+                bType=4;//marks junction for now TODO: motif, annotation
                 //blockSJ.push_back(blockCoord.size());
                 while (iAcceptor+1!=0 && col <= (int32)superTr.sjC[iAcceptor][1]) {//find (acceptor-1) that matches this column
                     --iAcceptor;
@@ -131,7 +131,7 @@ SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, con
                     block1[2]++;//increase block length
                 };
         };
-        if (bType!=10 && block1[2]>0) {//block has ended: record the old one, start the new one
+        if (bType!=0 && block1[2]>0) {//block has ended: record the old one
             blockCoord.push_back(block1);
             block1[2]=0;
         };
