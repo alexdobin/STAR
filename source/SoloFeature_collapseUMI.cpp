@@ -127,37 +127,24 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
             
             //IF end of array OR new UMI in the next record
             if (iR==(rN-1)*rguStride || rGU[iR+1]!=rGU[iR+3]) {//output this gene IF: past the end of array OR peeked ahead, and the umi is different
-                    if (!multigene) {//record this gene
-                        rGU[iRrec]=g1;
-                        ++iRrec;
-                        
-                        bitset<velocytoTypeGeneBits> gV (gVelo);
-                        if (!gV.test(AlignVsTranscript::ExonIntronSpan)) {//all UMIs are spanning models
-                            rGU[iRrec]=2; //unspliced 
-                        } else if (gV.test(AlignVsTranscript::Concordant)) {//>=1 purely exonic tr 
-                            if (!gV.test(AlignVsTranscript::Intron) && !gV.test(AlignVsTranscript::ExonIntron)) {//0 purely intronic && 0 mixed
-                                rGU[iRrec]=1; //spliced 
-                            } else {//>=1 purely exonic and >=1 purely intronic or mixed
-                                rGU[iRrec]=3; //ambiguous
-                            };
-                        } else {//0 exonic, >=1 intronic and/or >=1 mixed
-                            rGU[iRrec]=2;//unspliced
+                if (!multigene) {//record this gene
+                    rGU[iRrec]=g1;
+                    ++iRrec;
+
+                    bitset<velocytoTypeGeneBits> gV (gVelo);
+                    if (!gV.test(AlignVsTranscript::ExonIntronSpan)) {//all UMIs are spanning models
+                        rGU[iRrec]=2; //unspliced 
+                    } else if (gV.test(AlignVsTranscript::Concordant)) {//>=1 purely exonic tr 
+                        if (!gV.test(AlignVsTranscript::Intron) && !gV.test(AlignVsTranscript::ExonIntron)) {//0 purely intronic && 0 mixed
+                            rGU[iRrec]=1; //spliced 
+                        } else {//>=1 purely exonic and >=1 purely intronic or mixed
+                            rGU[iRrec]=3; //ambiguous
                         };
-                        
-//                         if (gtype[0]) {//at least one UMI was exon-intron span => unspliced
-//                             rGU[iRrec]=2; //unspliced
-//                         } else if (gtype[1]) {//at least one UMI was purely exonic
-//                             if (!gtype[2] && !gtype[3]) {
-//                                 rGU[iRrec]=1; //spliced 
-//                             } else {//one purely exonic and one purely intronic or mixed
-//                                 rGU[iRrec]=3; //ambiguous
-//                             };
-//                         } else {//only purely unspliced UMIs, or purely unspliced + mixed
-//                             rGU[iRrec]=2;//unspliced
-//                         };
-                        
-                        ++iRrec;
+                    } else {//0 exonic, >=1 intronic and/or >=1 mixed
+                        rGU[iRrec]=2;//unspliced
                     };
+                    ++iRrec;
+                };
 
                 g1=(uint32)-1;
                 gVelo=0;
@@ -173,7 +160,7 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
             return;
     
         if (countCellGeneUMI.size() < countCellGeneUMIindex[iCB] + (iRrec/2)*countMatStride) //allocated vector too small
-        countCellGeneUMI.resize(countCellGeneUMI.size()*2);        
+            countCellGeneUMI.resize(countCellGeneUMI.size()*2);        
         
         qsort(rGU, iRrec/2, 2*sizeof(uint32), funCompareNumbers<uint32>);//sort by the gene
 

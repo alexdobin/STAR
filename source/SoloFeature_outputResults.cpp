@@ -28,11 +28,13 @@ void SoloFeature::outputResults(bool cellFilterYes)
         case SoloFeatureTypes::Gene :
         case SoloFeatureTypes::GeneFull :
         case SoloFeatureTypes::Velocyto :
+        case SoloFeatureTypes::VelocytoSimple :            
         {
             ofstream &geneStr=ofstrOpen(outputPrefix1+pSolo.outFileNames[1],ERROR_OUT, P);
             for (uint32 ii=0; ii<Trans.nGe; ii++)
                 geneStr << Trans.geID[ii] <<"\t"<< (Trans.geName[ii].empty() ? Trans.geID[ii] : Trans.geName[ii]) << '\n';
             geneStr.close();
+            break;
         };
     };
 
@@ -63,7 +65,7 @@ void SoloFeature::outputResults(bool cellFilterYes)
     
     
     vector <uint32> umiOutCol = pSolo.umiDedupColumns;
-    if (featureType==SoloFeatureTypes::Velocyto)
+    if (featureType==SoloFeatureTypes::Velocyto || featureType==SoloFeatureTypes::VelocytoSimple)
         umiOutCol={0,1,2};
 
     //header
@@ -72,6 +74,7 @@ void SoloFeature::outputResults(bool cellFilterYes)
         case SoloFeatureTypes::Gene :
         case SoloFeatureTypes::GeneFull :
         case SoloFeatureTypes::Velocyto :
+        case SoloFeatureTypes::VelocytoSimple :            
             featureN=Trans.nGe;//genes
             break;
         case SoloFeatureTypes::SJ :

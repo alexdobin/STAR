@@ -42,6 +42,7 @@ public:
     vector<uint32> countCellGeneUMIindex;//index of CBs in the count matrix
     uint32 countMatStride; //number of counts per entry in the count matrix
     
+    //vector<vector<array<uint32,4>>> cellFeatureCounts; //another way to collect the cell/feature counts
     
     vector<bool> cellFilterVec;
     struct {
@@ -58,7 +59,9 @@ public:
 
     SoloFeature(int32 feTy, Parameters &Pin, Transcriptome &inTrans, SoloReadBarcode *readBarSumIn, SoloFeature **soloFeatAll);
     void processRecords(ReadAlignChunk **RAchunk);
+    void sumThreads(ReadAlignChunk **RAchunk);
     void countCBgeneUMI();
+    void countVelocyto();
     void collapseUMI(uint32 iCB, uint32 *umiArray);
     void outputResults(bool cellFilterYes);
     void addBAMtags(char *&bam0, uint32 &size0, char* bam1);

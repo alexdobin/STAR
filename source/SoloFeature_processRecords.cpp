@@ -11,17 +11,16 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     time_t rawTime;
     time(&rawTime);
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Starting Solo post-map for " <<SoloFeatureTypes::Names[featureType] <<endl;
-  
-    ///////////////////////////// collect RAchunk->RA->soloRead->readFeat
-    nReadsInput=0;
-    for (int ii=0; ii<P.runThreadN; ii++) {//point to
-        readFeatAll[ii]= RAchunk[ii]->RA->soloRead->readFeat[pSolo.featureInd[featureType]];
-        nReadsInput = max(nReadsInput,RAchunk[ii]->RA->iReadAll);
-    };
-    ++nReadsInput;
+     
+    sumThreads(RAchunk);
     
-    countCBgeneUMI();
+    if (featureType==SoloFeatureTypes::Velocyto) {
+        countVelocyto();
+    } else {//all others, standard processing
+        countCBgeneUMI();
+    };
 
+    //output
     ofstream *statsStream = &ofstrOpen(outputPrefix+"Features.stats",ERROR_OUT, P);
     readFeatSum->statsOut(*statsStream);
     statsStream->close();
@@ -38,5 +37,5 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     statsOutput();
     
     //delete big arrays allocated in the previous functions
-    delete[] indCB;
+    //delete[] indCB;
 };

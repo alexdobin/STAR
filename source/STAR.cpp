@@ -146,6 +146,7 @@ int main(int argInN, char* argIn[]) {
         P1.quant.trSAM.bamYes=false;
         P1.quant.geneFull.yes=false;
         P1.quant.geCount.yes=false;
+        P1.quant.gene.yes=false;
 
         P1.outSAMunmapped.within=false;
         
@@ -309,7 +310,8 @@ int main(int argInN, char* argIn[]) {
 
     };
 
-    //initialize chimeric parameters here
+    //initialize chimeric parameters here - note that chimeric parameters require samHeader
+    P.pCh.initialize(&P);
     
     // P.inOut->logMain << "mlock value="<<mlockall(MCL_CURRENT|MCL_FUTURE) <<"\n"<<flush;
 

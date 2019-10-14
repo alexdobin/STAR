@@ -978,6 +978,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     //quantification parameters
     quant.yes=false;
     quant.geneFull.yes=false;
+    quant.gene.yes=false;
     quant.geCount.yes=false;
     quant.trSAM.yes=false;
     quant.trSAM.bamYes=false;
@@ -1231,9 +1232,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 
     //solo
     pSolo.initialize(this);
-    
-    //initialize chimeric parameters
-    pCh.initialize(this);
 
     alignEndsType.ext[0][0]=false;
     alignEndsType.ext[0][1]=false;

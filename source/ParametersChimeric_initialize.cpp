@@ -5,22 +5,19 @@
 
 void ParametersChimeric::initialize(Parameters *pPin)
 {
-    if (segmentMin==0)
-        return;
-    
-    pP=pPin;
-    
-    if (out.samOld) {
-        pP->inOut->outChimSAM.open((pP->outFileNamePrefix + "Chimeric.out.sam").c_str());
-        pP->inOut->outChimSAM << pP->samHeader;
-    };
-    pthread_mutex_init(&g_threadChunks.mutexOutChimSAM, NULL);
-    pthread_mutex_init(&g_threadChunks.mutexOutChimJunction, NULL);
-    
     out.bam=false;
     out.junctions=false;
     out.samOld=false;
     out.bamHardClip=true;//default
+    
+    if (segmentMin==0)
+        return;
+    
+    pP=pPin;
+
+    pthread_mutex_init(&g_threadChunks.mutexOutChimSAM, NULL);
+    pthread_mutex_init(&g_threadChunks.mutexOutChimJunction, NULL);
+
     for (const auto& type1 : out.type) {
         if (type1=="WithinBAM") {
             out.bam=true;
@@ -39,7 +36,12 @@ void ParametersChimeric::initialize(Parameters *pPin)
             exitWithError(errOut.str(), std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
     };
-
+    
+    if (out.samOld) {
+        pP->inOut->outChimSAM.open((pP->outFileNamePrefix + "Chimeric.out.sam").c_str());
+        pP->inOut->outChimSAM << pP->samHeader;
+    };
+    
     if (out.junctions) {
         pP->inOut->outChimJunction.open((pP->outFileNamePrefix + "Chimeric.out.junction").c_str());
         

@@ -17,9 +17,12 @@ void ParametersSolo::initialize(Parameters *pPin)
         yes = false;
         samAttrYes = false;
         //solo SAM attributes not allowed
-        if (pP->outSAMattrPresent.CR || pP->outSAMattrPresent.CY || pP->outSAMattrPresent.UR || pP->outSAMattrPresent.UY  || pP->outSAMattrPresent.CB  || pP->outSAMattrPresent.UB) {
+        if ( pP->outSAMattrPresent.CR || pP->outSAMattrPresent.CY || pP->outSAMattrPresent.UR 
+          || pP->outSAMattrPresent.UY  || pP->outSAMattrPresent.CB  || pP->outSAMattrPresent.UB
+          || pP->outSAMattrPresent.sS  || pP->outSAMattrPresent.sQ  || pP->outSAMattrPresent.sM
+           ) {
             ostringstream errOut;
-            errOut <<"EXITING because of FATAL INPUT ERROR: --outSAMattributes contains CR/CY/UR/UY tags, but --soloType is not set\n";
+            errOut <<"EXITING because of FATAL INPUT ERROR: --outSAMattributes contains CR/CY/UR/UY/CB/UB tags, but --soloType is not set\n";
             errOut <<"SOLUTION: re-run STAR without these attribures, or with --soloType set\n";
             exitWithError(errOut.str(), std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };        
@@ -298,7 +301,7 @@ void ParametersSolo::initialize(Parameters *pPin)
     readInfoYes={false};
     if (samAttrYes) //pSolo.samAttrFeature=0 by default, so need to check samAttrYes
         readInfoYes[samAttrFeature]=true;
-    if (featureYes[SoloFeatureTypes::Velocyto]) //turn readInfo on for Gene needed by Velocyto
+    if (featureYes[SoloFeatureTypes::VelocytoSimple] || featureYes[SoloFeatureTypes::Velocyto]) //turn readInfo on for Gene needed by VelocytoSimple
         readInfoYes[SoloFeatureTypes::Gene]=true;    
     
     //cell filtering

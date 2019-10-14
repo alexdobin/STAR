@@ -325,7 +325,7 @@ outSAMfilter            None
 
 
 outSAMmultNmax          -1
-    int: max number of multiple alignments for a read that will be output to the SAM/BAM files.
+    int: max number of multiple alignments for a read that will be output to the SAM/BAM files. Note that if this value is not equal to -1, the top scoring alignment will be output first
                         -1 ... all alignments (up to --outFilterMultimapNmax) will be output
 
 outSAMtlen              1
@@ -770,3 +770,5 @@ soloCellFilter              CellRanger2.2 3000 0.99 10
                             CellRanger2.2   ... simple filtering of CellRanger 2.2, followed by thre numbers: number of expected cells, robust maximum percentile for UMI count, maximum to minimum ratio for UMI count
                             TopCells        ... only report top cells by UMI count, followed by the excat number of cells
                             None            ... do not output filtered cells
+
+
