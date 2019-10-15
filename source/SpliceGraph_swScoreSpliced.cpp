@@ -98,7 +98,7 @@ SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, con
     rowCol.clear();
     rowSJ.clear();
     rowCol.resize(readLen,-1);
-    rowSJ.resize(readLen+1,-1);//one extra element since we are going to check row+1
+    rowSJ.resize(readLen+1,{-1,-1});//one extra element since we are going to check row+1
     --iAcceptor; //= last junction
     while(col >= 0 && row >= 0) {
         uint32 dir1= (uint32) directionMatrix[row+col*readLen];
@@ -135,9 +135,10 @@ SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, con
                 } else {
                     //++nD; //?
                 };
-                rowSJ[row]=1;
+                rowSJ[row][1]=col;//acceptor
                 //column: jump to donor
-                col=superTr.sjDonor[ superTr.sjC[iAcceptor+1+(dir1-4)/2][2] ];                
+                col=superTr.sjDonor[ superTr.sjC[iAcceptor+1+(dir1-4)/2][2] ];
+                rowSJ[row][0]=col;//donor
         };
     };   
     

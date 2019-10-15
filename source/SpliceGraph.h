@@ -34,7 +34,8 @@ public:
     //output
     //vector<array<int32,4>> blockCoord;
     //vector<int32> blockSJ;
-    vector<int32> rowCol, rowSJ;
+    vector<int32> rowCol;
+    vector<array<int32,2>> rowSJ;
     
     SpliceGraph(SuperTranscriptome &superTrome, Parameters &P, ReadAlign *RA);
     ~SpliceGraph();

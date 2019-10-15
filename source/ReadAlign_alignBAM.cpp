@@ -247,7 +247,8 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                         packedCIGAR[nCIGAR++]=gapG<<BAM_CIGAR_OperationShift | BAM_CIGAR_D;
                     };
                 };
-                packedCIGAR[nCIGAR++]=trOut.exons[ii][EX_L]<<BAM_CIGAR_OperationShift | BAM_CIGAR_M;
+                if (trOut.exons[ii][EX_L]>0) //do not record 0-length blocks (which could appear near junctions followed by deletions)
+                    packedCIGAR[nCIGAR++]=trOut.exons[ii][EX_L]<<BAM_CIGAR_OperationShift | BAM_CIGAR_M;
             };
 
             if (SJmotif.size()==0) {//no junctions recorded, mark with -1

@@ -6,21 +6,20 @@ void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, 
 {//find the candidate superTranscripts: seed-and-rank algorithm implemented
 		
 	//hardcoded for now
-	float seedCoverageThreshold = 0.1;
-	float seedCoverageMinToMax = 0.1;
-	uint32 seedMultMax = 200;
-	
-	vector<uint32> seedSuperTr;
+	float seedCoverageThreshold = 0.02;
+	float seedCoverageMinToMax = 0.5;
+	uint32 seedMultMax = P.seedMultimapNmax;
+    uint32 seedSpacing = 1;
+	uint32 seedLen=mapGen.pGe.gSAindexNbases; //TODO: make user-definable	vector<uint32> seedSuperTr;
+    
+    vector<uint32> seedSuperTr;
 	seedSuperTr.reserve(seedMultMax);
-	
-	//readLen, readSeq
-    uint32 seedLen=mapGen.pGe.gSAindexNbases; //TODO: make user-definable
     memset(superTrSeedCount,0,sizeof(superTrSeedCount[0])*2*superTrome.N);
     
-    for (uint32 iseed=0; iseed<readLen/seedLen; iseed++) {//loop through seeds
+    for (uint32 iseed=0; iseed<readLen; iseed+=seedSpacing) {//loop through seeds
         //calculate index
         uint64 ind1=0;
-        for (uint32 ii=iseed*seedLen; ii<(iseed+1)*seedLen; ii++) {
+        for (uint32 ii=iseed; ii<iseed+seedLen; ii++) {
             uint b=(uint64) readSeq[ii];
             if (b>3) {//N
                 continue; //no mapping for seeds with Ns
@@ -84,7 +83,7 @@ void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, 
 		//countOverSuperTrLenMax=max(superTrSeedCount[ii]/float(superTr.length[ii%superTr.N]), countOverSuperTrLenMax);
     };
     
-    if (countMax*seedLen<readLen*seedCoverageThreshold)//no good candidates, hard-coded for now
+    if (countMax<readLen*seedCoverageThreshold/seedSpacing)//no good candidates, hard-coded for now
         return;
     
     uint32 nSuperTr=0;
@@ -96,7 +95,7 @@ void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, 
 		
         //if (superTrSeedCount[ii]<countOverSuperTrLenMax*superTr.length[sutr1]*seedCoverageMinToMax)
         //if (superTrSeedCount[ii]<countMax*seedCoverageMinToMax)
-		if (superTrSeedCount[ii] < readLen*seedCoverageThreshold/seedLen) {
+		if (superTrSeedCount[ii] < readLen*seedCoverageThreshold/seedSpacing || superTrSeedCount[ii]<countMax*seedCoverageMinToMax) {
 			continue;
         };
 
@@ -113,7 +112,7 @@ void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, 
 		//float(superTrSeedCount[ii])/countMax
 		//float(superTrSeedCount[ii])/superTr.length[sutr1]/countOverSuperTrLenMax <<'\t'<<
 
-		cout << readName <<'\t'<< sutr1 <<'\t'<< str1 <<'\t'<< superTrome.superTrs[sutr1].length <<'\t'<< readLen <<'\t'<< float(superTrSeedCount[ii])/readLen*seedLen <<'\t'<<  
+		cout << readName <<'\t'<< sutr1 <<'\t'<< str1 <<'\t'<< superTrome.superTrs[sutr1].length <<'\t'<< readLen <<'\t'<< float(superTrSeedCount[ii])/readLen*seedSpacing <<'\t'<<  
 				float(superTrSeedCount[ii])/countMax <<'\t'<<
                 swScore <<'\t'<< float(swScore)/readLen <<'\t'<< alignStarts[0] <<'\t'<< alignEnds[0] <<'\t'<< alignStarts[1] <<'\t'<< alignEnds[1] << endl;
         
@@ -129,7 +128,6 @@ void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, 
         
         {//calculate blocks from rowCol and rowSJ
             int32 iEx=-1;//current exon
-            //bool blockStarted=false;
             for (uint32 row=alignStarts[0]; row<=alignEnds[0]; row++) {
 
                 if (rowCol[row]>=0) {//this row has no mapped base (i.e. no block) = bases deleted from query
@@ -140,17 +138,27 @@ void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, 
                         trA.exons[iEx][EX_L]=1;
                         trA.canonSJ[iEx]=-1;
                         trA.sjAnnot[iEx]=0;
-                        //blockStarted=true;
                     } else {
                         trA.exons[iEx][EX_L]++;
                     };
                 };
          
                 //this needs to be done even if rowCol[row]==-1
-                if (rowSJ[row]>0) {//junction block
-                    //blockStarted=false;//previous block ends
-                    trA.canonSJ[iEx]=1;
+                if (rowSJ[row][0]>=0) {//junction: create two 0-length blocks to encapsulate junction
+                    ++iEx;
+                    trA.exons[iEx][EX_R]=row+1;
+                    trA.exons[iEx][EX_G]=mapGen.chrStart[trA.Chr]+rowSJ[row][0]+1;
+                    trA.exons[iEx][EX_L]=0;
+                    trA.canonSJ[iEx]=1;//TODO actual motif
                     trA.sjAnnot[iEx]=1;
+                    //if (rowSJ[row]!=rowCol[row+1]) {//create 0-length block to mark junction, on the next row
+                        ++iEx;
+                        trA.exons[iEx][EX_R]=row+1;
+                        trA.exons[iEx][EX_G]=mapGen.chrStart[trA.Chr]+rowSJ[row][1];
+                        trA.exons[iEx][EX_L]=0;
+                        trA.canonSJ[iEx]=-1;
+                        trA.sjAnnot[iEx]=0;
+                    //};
                 };
             };
             
@@ -161,10 +169,6 @@ void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, 
             trA.exons[iex][EX_iFrag]=0;
             trA.exons[iex][EX_sjA]=0;
         };
-//         for (auto &isj : blockSJ) {
-//             trA.canonSJ[isj]=1;//need to determine motif here
-//             trA.sjAnnot[isj]=1;
-//         };
         if (swScore>maxMaxScore) {
             maxMaxScore=swScore;
             RA->trBest=&trA;
