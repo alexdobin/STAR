@@ -26,6 +26,9 @@
 #include "sjdbInsertJunctions.h"
 #include "Variation.h"
 #include "Solo.h"
+#include "samHeaders.h"
+
+#include "twoPassRunPass1.h"
 
 #include "htslib/htslib/sam.h"
 #include "parametersDefault.xxd"
@@ -33,6 +36,8 @@
 void usage(int usageType) {
     cout << "Usage: STAR  [options]... --genomeDir /path/to/genome/index/   --readFilesIn R1.fq R2.fq\n";
     cout <<"Spliced Transcripts Alignment to a Reference (c) Alexander Dobin, 2009-2019\n\n";
+    cout << "STAR version=" << STAR_VERSION << "\n";
+    cout << "STAR compilation time,server,dir=" << COMPILATION_TIME_PLACE << "\n";
     cout <<"For more details see:\n";
     cout <<"<https://github.com/alexdobin/STAR>\n";
     cout <<"<https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf>\n";
@@ -56,25 +61,24 @@ int main(int argInN, char* argIn[]) {
 
     time(&g_statsAll.timeStart);
 
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////// Parameters
     Parameters P; //all parameters
     P.inputParameters(argInN, argIn);
 
     *(P.inOut->logStdOut) << timeMonthDayTime(g_statsAll.timeStart) << " ..... started STAR run\n" <<flush;
 
     //generate genome
-    if (P.runMode=="alignReads")
-    {//continue
-    } else if (P.runMode=="genomeGenerate")
-    {
-        Genome mainGenome(P);
-        mainGenome.genomeGenerate();
+    if (P.runMode=="alignReads") {
+        //continue
+    } else if (P.runMode=="genomeGenerate") {
+        Genome genomeMain(P, P.pGe);
+        genomeMain.genomeGenerate();
         (void) sysRemoveDir (P.outFileTmp);
         P.inOut->logMain << "DONE: Genome generation, EXITING\n" << flush;
         exit(0);
-    } else if (P.runMode=="liftOver")
-    {
-        for (uint ii=0; ii<P.pGe.gChainFiles.size();ii++)
-        {
+    } else if (P.runMode=="liftOver") {
+        for (uint ii=0; ii<P.pGe.gChainFiles.size();ii++) {
             Chain chain(P,P.pGe.gChainFiles.at(ii));
             chain.liftOverGTF(P.pGe.sjdbGTFfile,P.outFileNamePrefix+"GTFliftOver_"+to_string(ii+1)+".gtf");
             P.inOut->logMain << "DONE: lift-over of GTF file, EXITING\n" << flush;
@@ -85,31 +89,20 @@ int main(int argInN, char* argIn[]) {
         exit(1);
     };
 
-    Genome mainGenome (P);
-    mainGenome.genomeLoad();
-
-
-    if (P.pGe.gLoad=="LoadAndExit" || P.pGe.gLoad=="Remove")
-    {
-        return 0;
-    };
-
+    ////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////// Genome
+    Genome genomeMain (P, P.pGe);
+    genomeMain.genomeLoad();
+   
     //calculate genome-related parameters
-    Transcriptome *mainTranscriptome=NULL;
-    mainGenome.Var=new Variation(P, mainGenome.chrStart, mainGenome.chrNameIndex);
-
-
-    if (P.pGe.gFastaFiles.at(0)!="-")
-    {//insert sequences in the genome
-
-    };
+    Transcriptome *transcriptomeMain=NULL;
+    genomeMain.Var=new Variation(P, genomeMain.chrStart, genomeMain.chrNameIndex);
 
     SjdbClass sjdbLoci;
 
-    if (P.sjdbInsert.pass1)
-    {
-        Genome mainGenome1=mainGenome;//not sure if I need to create the copy - mainGenome1 below should not be changed
-        sjdbInsertJunctions(P, mainGenome, mainGenome1, sjdbLoci);
+    if (P.sjdbInsert.pass1) {
+        Genome genomeMain1=genomeMain;//not sure if I need to create the copy - genomeMain1 below should not be changed
+        sjdbInsertJunctions(P, genomeMain, genomeMain1, sjdbLoci);
     };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////START
@@ -127,198 +120,33 @@ int main(int argInN, char* argIn[]) {
 
     g_statsAll.progressReportHeader(P.inOut->logProgress);
 
-    if (P.twoPass.yes) {//2-pass
-        //re-define P for the pass1
-
-        Genome mainGenome1=mainGenome;
-
-        Parameters P1=P;
-        //turn off unnecessary calculations
-        P1.outSAMtype[0]="None";
-        P1.outSAMbool=false;
-        P1.outBAMunsorted=false;
-        P1.outBAMcoord=false;
-
-        P1.pCh.segmentMin=0;
-
-        P1.quant.yes=false;
-        P1.quant.trSAM.yes=false;
-        P1.quant.trSAM.bamYes=false;
-        P1.quant.geneFull.yes=false;
-        P1.quant.geCount.yes=false;
-        P1.quant.gene.yes=false;
-
-        P1.outSAMunmapped.within=false;
-        
-        P1.outFilterBySJoutStage=0;
-
-        P1.outReadsUnmapped="None";
-
-        P1.outFileNamePrefix=P.twoPass.dir;
-
-        P1.readMapNumber=min(P.twoPass.pass1readsN, P.readMapNumber);
-//         P1.inOut->logMain.open((P1.outFileNamePrefix + "Log.out").c_str());
-
-        P1.wasp.outputMode="None"; //no WASP filtering on the 1st pass
-        P1.pSolo.type=P1.pSolo.SoloTypes::None; //no solo in the first pass
-
-        g_statsAll.resetN();
-        time(&g_statsAll.timeStartMap);
-        P.inOut->logProgress << timeMonthDayTime(g_statsAll.timeStartMap) <<"\tStarted 1st pass mapping\n" <<flush;
-        *P.inOut->logStdOut << timeMonthDayTime(g_statsAll.timeStartMap) << " ..... started 1st pass mapping\n" <<flush;
-
-        //run mapping for Pass1
-        ReadAlignChunk *RAchunk1[P.runThreadN];
-        for (int ii=0;ii<P1.runThreadN;ii++) {
-            RAchunk1[ii]=new ReadAlignChunk(P1, mainGenome, mainTranscriptome, ii);
-        };
-        mapThreadsSpawn(P1, RAchunk1);
-        outputSJ(RAchunk1,P1); //collapse and output junctions
-//         for (int ii=0;ii<P1.runThreadN;ii++) {
-//             delete [] RAchunk[ii];
-//         };
-
-        time_t rawtime; time (&rawtime);
-        P.inOut->logProgress << timeMonthDayTime(rawtime) <<"\tFinished 1st pass mapping\n";
-        *P.inOut->logStdOut << timeMonthDayTime(rawtime) << " ..... finished 1st pass mapping\n" <<flush;
-        ofstream logFinal1 ( (P.twoPass.dir + "/Log.final.out").c_str());
-        g_statsAll.reportFinal(logFinal1);
-
-        P.twoPass.pass2=true;//starting the 2nd pass
-        P.twoPass.pass1sjFile=P.twoPass.dir+"/SJ.out.tab";
-
-        sjdbInsertJunctions(P, mainGenome, mainGenome1, sjdbLoci);
-
-        //reopen reads files
-        P.closeReadsFiles();
-        P.openReadsFiles();
-    } else {//not 2-pass
-        //nothing for now
-    };
+    /////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////// 2-pass 1st pass
+    twoPassRunPass1(P, genomeMain, transcriptomeMain, sjdbLoci);
 
     if ( P.quant.yes ) {//load transcriptome
-        mainTranscriptome=new Transcriptome(P);
+        transcriptomeMain=new Transcriptome(P);
     };
 
     //initialize Stats
     g_statsAll.resetN();
     time(&g_statsAll.timeStartMap);
     *P.inOut->logStdOut << timeMonthDayTime(g_statsAll.timeStartMap) << " ..... started mapping\n" <<flush;
-
     g_statsAll.timeLastReport=g_statsAll.timeStartMap;
 
-    //open SAM/BAM files for output
-    if (P.outSAMmode != "None") {//open SAM file and write header
-        ostringstream samHeaderStream;
-
-        for (uint ii=0;ii<mainGenome.nChrReal;ii++) {
-            samHeaderStream << "@SQ\tSN:"<< mainGenome.chrName.at(ii) <<"\tLN:"<<mainGenome.chrLength[ii]<<"\n";
-        };
-
-        mainGenome.chrNameAll=mainGenome.chrName;
-        mainGenome.chrLengthAll=mainGenome.chrLength;
-        {//add exra references
-            ifstream extrastream (P.pGe.gDir + "/extraReferences.txt");
-            while (extrastream.good()) {
-                string line1;
-                getline(extrastream,line1);
-                istringstream stream1 (line1);
-                string field1;
-                stream1 >> field1;//should check for @SQ
-
-                if (field1!="") {//skip blank lines
-                    samHeaderStream << line1 <<"\n";
-
-                    stream1 >> field1;
-                    mainGenome.chrNameAll.push_back(field1.substr(3));
-                    stream1 >> field1;
-                    mainGenome.chrLengthAll.push_back((uint) stoll(field1.substr(3)));
-                };
-            };
-            extrastream.close();
-        };
-
-        if (P.outSAMheaderPG.at(0)!="-") {
-            samHeaderStream << P.outSAMheaderPG.at(0);
-            for (uint ii=1;ii<P.outSAMheaderPG.size(); ii++) {
-                samHeaderStream << "\t" << P.outSAMheaderPG.at(ii);
-            };
-            samHeaderStream << "\n";
-        };
-
-        samHeaderStream << "@PG\tID:STAR\tPN:STAR\tVN:" << STAR_VERSION <<"\tCL:" << P.commandLineFull <<"\n";
-
-        if (P.outSAMheaderCommentFile!="-") {
-            ifstream comstream (P.outSAMheaderCommentFile);
-            while (comstream.good()) {
-                string line1;
-                getline(comstream,line1);
-                if (line1.find_first_not_of(" \t\n\v\f\r")!=std::string::npos) {//skip blank lines
-                    samHeaderStream << line1 <<"\n";
-                };
-            };
-            comstream.close();
-        };
-
-
-        for (uint32 ii=0;ii<P.outSAMattrRGlineSplit.size();ii++) {//@RG lines
-            samHeaderStream << "@RG\t" << P.outSAMattrRGlineSplit.at(ii) <<"\n";
-        };
-
-
-        samHeaderStream <<  "@CO\t" <<"user command line: " << P.commandLine <<"\n";
-
-        samHeaderStream << P.samHeaderExtra;
-
-        if (P.outSAMheaderHD.at(0)!="-") {
-            P.samHeaderHD = P.outSAMheaderHD.at(0);
-            for (uint ii=1;ii<P.outSAMheaderHD.size(); ii++) {
-                P.samHeaderHD +="\t" + P.outSAMheaderHD.at(ii);
-            };
-        } else {
-            P.samHeaderHD = "@HD\tVN:1.4";
-        };
-
-
-        P.samHeader=P.samHeaderHD+"\n"+samHeaderStream.str();
-        //for the sorted BAM, need to add SO:cooridnate to the header line
-        P.samHeaderSortedCoord=P.samHeaderHD + (P.outSAMheaderHD.size()==0 ? "" : "\tSO:coordinate") + "\n" + samHeaderStream.str();
-
-        if (P.outSAMbool) {//
-            *P.inOut->outSAM << P.samHeader;
-        };
-        if (P.outBAMunsorted){
-            outBAMwriteHeader(P.inOut->outBAMfileUnsorted,P.samHeader,mainGenome.chrNameAll,mainGenome.chrLengthAll);
-        };
-//             if (P.outBAMcoord){
-//                 outBAMwriteHeader(P.inOut->outBAMfileCoord,P.samHeader,mainGenome.chrName,mainGenome.chrLength);
-//             };
-
-        if ( P.quant.trSAM.bamYes ) {
-            samHeaderStream.str("");
-            vector <uint> trlength;
-            for (uint32 ii=0;ii<mainTranscriptome->trID.size();ii++) {
-                uint32 iex1=mainTranscriptome->trExI[ii]+mainTranscriptome->trExN[ii]-1; //last exon of the transcript
-                trlength.push_back(mainTranscriptome->exLenCum[iex1]+mainTranscriptome->exSE[2*iex1+1]-mainTranscriptome->exSE[2*iex1]+1);
-                samHeaderStream << "@SQ\tSN:"<< mainTranscriptome->trID.at(ii) <<"\tLN:"<<trlength.back()<<"\n";
-            };
-            for (uint32 ii=0;ii<P.outSAMattrRGlineSplit.size();ii++) {//@RG lines
-                samHeaderStream << "@RG\t" << P.outSAMattrRGlineSplit.at(ii) <<"\n";
-            };
-            outBAMwriteHeader(P.inOut->outQuantBAMfile,samHeaderStream.str(),mainTranscriptome->trID,trlength);
-        };
-
-    };
+    //SAM headers
+    samHeaders(P, *genomeMain.genomeOut, *transcriptomeMain);
 
     //initialize chimeric parameters here - note that chimeric parameters require samHeader
     P.pCh.initialize(&P);
     
+    // this does not seem to work at the moment
     // P.inOut->logMain << "mlock value="<<mlockall(MCL_CURRENT|MCL_FUTURE) <<"\n"<<flush;
 
     // prepare chunks and spawn mapping threads
     ReadAlignChunk *RAchunk[P.runThreadN];
     for (int ii=0;ii<P.runThreadN;ii++) {
-        RAchunk[ii]=new ReadAlignChunk(P, mainGenome, mainTranscriptome, ii);
+        RAchunk[ii]=new ReadAlignChunk(P, genomeMain, transcriptomeMain, ii);
     };
 
     mapThreadsSpawn(P, RAchunk);
@@ -349,14 +177,14 @@ int main(int argInN, char* argIn[]) {
     };
 
     if (P.outBAMcoord && P.limitBAMsortRAM==0) {//make it equal ot the genome size
-        P.limitBAMsortRAM=mainGenome.nGenome+mainGenome.SA.lengthByte+mainGenome.SAi.lengthByte;
+        P.limitBAMsortRAM=genomeMain.nGenome+genomeMain.SA.lengthByte+genomeMain.SAi.lengthByte;
     };
 
     time(&g_statsAll.timeFinishMap);
     *P.inOut->logStdOut << timeMonthDayTime(g_statsAll.timeFinishMap) << " ..... finished mapping\n" <<flush;
 
     //no need for genome anymore, free the memory
-    mainGenome.freeMemory();
+    genomeMain.freeMemory();
 
     //aggregate output junctions
     //collapse splice junctions from different threads/chunks, and output them
@@ -377,7 +205,7 @@ int main(int argInN, char* argIn[]) {
         RAchunk[0]->chunkFilesCat(P.inOut->outSAM, P.outFileTmp + "/Aligned.out.sam.chunk", g_threadChunks.chunkOutN);
     };
 
-    bamSortByCoordinate(P, RAchunk, mainGenome, soloMain);
+    bamSortByCoordinate(P, RAchunk, genomeMain, soloMain);
     
     //wiggle output
     if (P.outWigFlags.yes) {
@@ -401,10 +229,10 @@ int main(int argInN, char* argIn[]) {
     };
 
     P.closeReadsFiles();//this will kill the readFilesCommand processes if necessary
-    //mainGenome.~Genome(); //need explicit call because of the 'delete P.inOut' below, which will destroy P.inOut->logStdOut
-    if (mainGenome.sharedMemory != NULL) {//need explicit call because this destructor will write to files which are deleted by 'delete P.inOut' below
-        delete mainGenome.sharedMemory;
-        mainGenome.sharedMemory = NULL;
+    //genomeMain.~Genome(); //need explicit call because of the 'delete P.inOut' below, which will destroy P.inOut->logStdOut
+    if (genomeMain.sharedMemory != NULL) {//need explicit call because this destructor will write to files which are deleted by 'delete P.inOut' below
+        delete genomeMain.sharedMemory;
+        genomeMain.sharedMemory = NULL;
     };
 
     delete P.inOut; //to close files

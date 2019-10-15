@@ -16,6 +16,8 @@ private:
     uint OpenStream(string name, ifstream & stream, uint size);
     void HandleSharedMemoryException(const SharedMemoryException & exc, uint64 shmSize);
 public:
+    Genome *genomeOut;
+    
     char *G, *G1;
     uint64 nGenome, nG1alloc;
     PackedArray SA,SAinsert,SApass1,SApass2;
@@ -58,7 +60,7 @@ public:
 
     SharedMemory *sharedMemory;
 
-    Genome (Parameters &P);
+    Genome (Parameters &P, ParametersGenome &pGe);
     //~Genome();
 
     void freeMemory();
