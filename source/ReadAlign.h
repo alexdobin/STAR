@@ -23,7 +23,7 @@ class ReadAlign {
         ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk);//allocate arrays
         int oneRead();
 
-        Genome &mapGen; //mapped-to-genome structure
+        Genome &mapGen, &genOut; //mapped-to-genome structure
 
         uint64 iRead, iReadAll;
         char **Read1;
@@ -50,9 +50,10 @@ class ReadAlign {
         uint *nWinTr; //number of recorded transcripts per window
         Transcript trA, trA1, *trBest, *trInit; //transcript, best tr, next best tr, initialized tr
         Transcript ***trAll; //all transcripts for all windows
-        Transcript* trArray; //linear array of transcripts to store all of them from all windows
-        Transcript** trArrayPointer; //linear array of transcripts to store all of them from all windows
-        Transcript* trMult[MAX_N_MULTMAP];//multimapping transcripts
+        Transcript *trArray; //linear array of transcripts to store all of them from all windows
+        Transcript **trArrayPointer; //linear array of transcripts to store all of them from all windows
+        Transcript *trMult[MAX_N_MULTMAP];//multimapping transcripts
+        Transcript **trMultOut;//multimapping transcripts - converted to output genome
         Transcript *alignTrAll;//alignments to transcriptome        
 
         ReadAlign *waspRA; //ReadAlign for alternative WASP alignment

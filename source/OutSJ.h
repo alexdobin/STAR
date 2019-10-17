@@ -30,7 +30,7 @@ public:
     void collapseOneSJ(char* isj1P, char* isjP, Parameters& P);
 
 private:
-    Genome &mapGen;
+    Genome &genOut;
 };
 
 class OutSJ {
@@ -47,7 +47,7 @@ public:
 
 private:
     Parameters &P;
-    Genome &mapGen;
+    Genome &genOut;
 };
 
 int compareSJ(const void* i1, const void* i2); //external functions

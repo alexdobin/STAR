@@ -22,10 +22,10 @@ void outputSJ(ReadAlignChunk** RAchunk, Parameters& P) {//collapses junctions fr
 //     system("echo `date` ..... Writing splice junctions >> Log.timing.out");
 
 
-    Junction oneSJ(RAchunk[0]->mapGen);
+    Junction oneSJ(RAchunk[0]->RA->genOut);
     char** sjChunks = new char* [P.runThreadN+1];
     #define OUTSJ_limitScale 5
-    OutSJ allSJ (P.limitOutSJcollapsed*OUTSJ_limitScale,P,RAchunk[0]->mapGen);
+    OutSJ allSJ (P.limitOutSJcollapsed*OUTSJ_limitScale,P,RAchunk[0]->RA->genOut);
 
     if (P.outFilterBySJoutStage!=1) {//chunkOutSJ
         for (int ic=0;ic<P.runThreadN;ic++) {//populate sjChunks with links to data

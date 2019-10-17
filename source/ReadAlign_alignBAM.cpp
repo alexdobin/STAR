@@ -15,7 +15,7 @@ void ReadAlign::samAttrNM_MD (Transcript const &trOut, uint iEx1, uint iEx2, uin
     for (uint iex=iEx1;iex<=iEx2;iex++) {
         for (uint ii=0;ii<trOut.exons[iex][EX_L];ii++) {
             char r1=R[ii+trOut.exons[iex][EX_R]];
-            char g1=mapGen.G[ii+trOut.exons[iex][EX_G]];
+            char g1=genOut.G[ii+trOut.exons[iex][EX_G]];
             if ( r1!=g1 || r1==4 || g1==4) {
                 ++nMM;
                 tagMD+=to_string(matchN);
@@ -33,7 +33,7 @@ void ReadAlign::samAttrNM_MD (Transcript const &trOut, uint iEx1, uint iEx2, uin
             if (trOut.canonSJ[iex]==-1) {//deletion. TODO: This does not work if there is both deletion and insertion!!!
                 tagMD+=to_string(matchN) + "^";
                 for (uint ii=trOut.exons[iex][EX_G]+trOut.exons[iex][EX_L];ii<trOut.exons[iex+1][EX_G];ii++) {
-                    tagMD+=P.genomeNumToNT[(uint8) mapGen.G[ii]];
+                    tagMD+=P.genomeNumToNT[(uint8) genOut.G[ii]];
                 };
                 matchN=0;
             };
@@ -120,7 +120,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                        samFLAG|=0x20;
                     };
                     mateChr=trOut.Chr;
-                    trChrStart=mapGen.chrStart[mateChr];
+                    trChrStart=genOut.chrStart[mateChr];
                     mateStart=trOut.exons[0][EX_G] - trChrStart;
                     mateStrand= trOut.Str == (1-imate) ? 0 : 1;
 
@@ -174,7 +174,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
             if (flagPaired) {//paired reads
                 samFLAG=0x0001;
                 if (iExMate==trOut.nExons-1) {//single mate
-                    if (mateChr>mapGen.nChrReal) samFLAG|=0x0008; //not mapped as pair
+                    if (mateChr>genOut.nChrReal) samFLAG|=0x0008; //not mapped as pair
                 } else {//properly paired
                     samFLAG|=0x0002; //mapped as pair
                 };
@@ -321,8 +321,8 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                             for (uint ii=iEx1;ii<=iEx2;ii++) {
                                 rb.push_back( (int32) trOut.exons[ii][EX_R]+1 );
                                 rb.push_back( (int32) trOut.exons[ii][EX_R]+trOut.exons[ii][EX_L]);
-                                rb.push_back( (int32) (trOut.exons[ii][EX_G]-mapGen.chrStart[trOut.Chr]+1) );
-                                rb.push_back( (int32) (trOut.exons[ii][EX_G]-mapGen.chrStart[trOut.Chr]+trOut.exons[ii][EX_L]) );
+                                rb.push_back( (int32) (trOut.exons[ii][EX_G]-genOut.chrStart[trOut.Chr]+1) );
+                                rb.push_back( (int32) (trOut.exons[ii][EX_G]-genOut.chrStart[trOut.Chr]+trOut.exons[ii][EX_L]) );
                             };
                             attrN+=bamAttrArrayWrite(rb,"rB",attrOutArray+attrN);
                         };
@@ -479,7 +479,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
         //6: next refID Ref-ID of the next segment (􀀀1  mate refID < n ref)
         if (nMates>1) {
             pBAM[6]=trOut.Chr;
-        } else if (mateChr<mapGen.nChrReal){
+        } else if (mateChr<genOut.nChrReal){
             pBAM[6]=mateChr;
         } else {
             pBAM[6]=-1;
@@ -488,7 +488,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
         //7: next pos 0-based leftmost pos of the next segment (= PNEXT 􀀀 1)
         if (nMates>1) {
             pBAM[7]=trOut.exons[(imate==0 ? iExMate+1 : 0)][EX_G] - trChrStart;
-        } else if (mateChr<mapGen.nChrReal){
+        } else if (mateChr<genOut.nChrReal){
             pBAM[7]=mateStart;
         } else {
             pBAM[7]=-1;

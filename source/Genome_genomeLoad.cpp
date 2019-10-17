@@ -312,7 +312,7 @@ void Genome::genomeLoad(){//allocate and load Genome
         P.inOut->logMain <<"Genome file size: "<<nGenome <<" bytes; state: good=" <<GenomeIn.good()\
                 <<" eof="<<GenomeIn.eof()<<" fail="<<GenomeIn.fail()<<" bad="<<GenomeIn.bad()<<"\n"<<flush;
         P.inOut->logMain <<"Loading Genome ... " << flush;
-        uint genomeReadBytesN=fstreamReadBig(GenomeIn,G,nGenome);
+        uint64 genomeReadBytesN=fstreamReadBig(GenomeIn,G,nGenome);
         P.inOut->logMain <<"done! state: good=" <<GenomeIn.good()\
                          <<" eof="<<GenomeIn.eof()<<" fail="<<GenomeIn.fail()<<" bad="<<GenomeIn.bad()<<"; loaded "<<genomeReadBytesN<<" bytes\n" << flush;
         GenomeIn.close();
@@ -459,6 +459,16 @@ void Genome::genomeLoad(){//allocate and load Genome
     if (pGe.gType==101) {//SuperTranscriptome
 		superTr = new SuperTranscriptome (P);
         superTr->load(G, chrStart, chrLength);
+        
+        //genomeOut
+        P.pGeOut.gDir=pGe.gDir+"/fullGenome/";
+        genomeOut.yes=true;
+        genomeOut.gapsAreJunctions=true;
+        genomeOut.convFile=pGe.gDir+"/fullGenome/conversionToFullGenome.tsv";
+        
+        genomeOut.g = new Genome(P,P.pGeOut);
+        genomeOut.g->genomeOut=genomeOut;
+        genomeOut.g->genomeOutLoad();
     };
     
     if (P.pGe.gLoad=="LoadAndExit" || P.pGe.gLoad=="Remove") {

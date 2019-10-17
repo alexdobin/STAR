@@ -68,6 +68,8 @@ public:
     string generateCigarP(); //generates CIGAR
     void peOverlapSEtoPE(uint* mSta, Transcript &t);
     void extractSpliceJunctions(vector<array<uint64,2>> &sjOut, bool &annotYes);
+    
+    bool convertGenome(Genome &genMap, Genome &genOut, Transcript & A);
 
 private:
 

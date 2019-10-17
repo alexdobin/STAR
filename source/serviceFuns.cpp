@@ -214,5 +214,32 @@ inline int64 binarySearchExact(argType x, argType *X, uint64 N) {
     };
 };
 
+// template <class argType>
+// inline uint64 binarySearchStride(argType *X, uint64 N, artgType x, iStart, stride )
+// {
+//     //binary search in the sorted list wit stride
+//     //1b returns the first X element that is >= x
+//     //X are all distinct
+//     //if x>X[N-1], -1 is returned
+// 
+//     if (x>X[N-1]) {
+//         return -1;
+//     } else if (x<=X[0]) {
+//         return 0;
+//     };
+// 
+//     int32 i1=0, i2=N-1, i3=N/2;
+//     while (i2>i1+1) {//binary search
+//         i3=(i1+i2)/2;
+//         if (X[i3]>=x) {
+//             i2=i3;
+//         } else {
+//             i1=i3;
+//         };
+//     };
+// 
+//     return i2;
+// };
+
 
 #endif

@@ -47,6 +47,19 @@ void ReadAlign::outputAlignments() {
         };
 
         if (outFilterPassed) {
+            if (nTr>1) {//multimappers
+                statsRA.mappedReadsM++;
+                unmapType=-1;
+            } else if (nTr==1) {//unique mappers
+                statsRA.mappedReadsU++;
+                statsRA.transcriptStats(*(trMult[0]),Lread);
+                unmapType=-2;
+            } else {//cannot be
+                ostringstream errOut;
+                errOut  << "EXITING because of a BUG: nTr=0 in outputAlignments.cpp";
+                exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_BUG, P);
+            };
+            
             uint nTrOut=nTr; //number of aligns to output
             bool outSAMfilterYes=true;
             if (P.outSAMfilter.yes) {
@@ -73,29 +86,26 @@ void ReadAlign::outputAlignments() {
                     };
                 };
             };
-            if (nTr>1) {//multimappers
-                statsRA.mappedReadsM++;
-                unmapType=-1;
-            } else if (nTr==1) {//unique mappers
-                statsRA.mappedReadsU++;
-                statsRA.transcriptStats(*(trMult[0]),Lread);
-                unmapType=-2;
-            } else {//cannot be
-                ostringstream errOut;
-                errOut  << "EXITING because of a BUG: nTr=0 in outputAlignments.cpp";
-                exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_BUG, P);
-            };
 
-            nTrOut=min(P.outSAMmultNmax,nTrOut); //number of to write to SAM/BAM files
+
+            if (mapGen.genomeOut.yes) {//convert to new genome
+                uint32 nTr1=0;
+                for (uint32 iTr=0;iTr<nTrOut;iTr++) {//convert output transcripts into new genome
+                    *trMultOut[nTr1]=*trMult[iTr];//copy information before conversion
+                    nTr1 += trMult[iTr]->convertGenome(mapGen, *mapGen.genomeOut.g, *trMultOut[nTr1]);
+                    trMult[nTr1-1] = trMultOut[nTr1-1]; //point to new transcsript
+                };
+                nTrOut=nTr1;
+            };
 
             soloRead->readBar->getCBandUMI(readNameExtra.at(0));
             //genes
             if ( P.quant.geCount.yes ) {
-                chunkTr->geneCountsAddAlign(nTr, trMult, readAnnot.geneExonOverlap);
+                chunkTr->geneCountsAddAlign(nTrOut, trMult, readAnnot.geneExonOverlap);
             };
             //solo-GeneFull
             if ( P.quant.geneFull.yes ) {
-                chunkTr->geneFullAlignOverlap(nTr, trMult, P.pSolo.strand, readAnnot.geneFull);
+                chunkTr->geneFullAlignOverlap(nTrOut, trMult, P.pSolo.strand, readAnnot.geneFull);
             };
             //solo-Gene
             if ( P.quant.gene.yes ) {
@@ -107,10 +117,12 @@ void ReadAlign::outputAlignments() {
             };
 
             //solo
-            soloRead->record(nTr, trMult[0], iReadAll, readAnnot);             
+            soloRead->record(nTrOut, trMult[0], iReadAll, readAnnot);             
+            
+            uint64 nTrOutSAM=min(P.outSAMmultNmax,nTrOut); //number of to write to SAM/BAM files            
             
             //write to SAM/BAM
-            for (uint iTr=0;iTr<nTrOut;iTr++) {//write all transcripts
+            for (uint iTr=0;iTr<nTrOutSAM;iTr++) {//write all transcripts
                 //mateMapped1 = true if a mate is present in this transcript
                 bool mateMapped1[2]={false,false};
                 mateMapped1[trMult[iTr]->exons[0][EX_iFrag]]=true;
@@ -124,16 +136,16 @@ void ReadAlign::outputAlignments() {
                 };
 
                 if ((P.outBAMunsorted || P.outBAMcoord) && outSAMfilterYes) {//BAM output
-                    alignBAM(*(trMult[iTr]), nTr, iTr, mapGen.chrStart[trMult[iTr]->Chr], (uint) -1, (uint) -1, 0, -1, NULL, P.outSAMattrOrder,outBAMoneAlign, outBAMoneAlignNbytes);
+                    alignBAM(*(trMult[iTr]), nTrOut, iTr, mapGen.chrStart[trMult[iTr]->Chr], (uint) -1, (uint) -1, 0, -1, NULL, P.outSAMattrOrder,outBAMoneAlign, outBAMoneAlignNbytes);
 
                     if (P.outBAMunsorted) {//unsorted
                         for (uint imate=0; imate<P.readNmates; imate++) {//output each mate
-                            outBAMunsorted->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], (imate>0 || iTr>0) ? 0 : (outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1])*2*nTrOut);
+                            outBAMunsorted->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], (imate>0 || iTr>0) ? 0 : (outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1])*2*nTrOutSAM);
                         };
                         if (P.outSAMunmapped.keepPairs && P.readNmates>1 && ( !mateMapped1[0] || !mateMapped1[1] ) ) {//keep pairs && paired reads && one of the mates not mapped in this transcript
                             alignBAM(*trMult[iTr], 0, 0, mapGen.chrStart[trMult[iTr]->Chr], (uint) -1, (uint) -1, 0, 4, mateMapped1, P.outSAMattrOrder, outBAMoneAlign, outBAMoneAlignNbytes);
                             for (uint imate=0; imate<P.readNmates; imate++) {//output each mate
-                                outBAMunsorted->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], (imate>0 || iTr>0) ? 0 : (outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1])*2*nTrOut);
+                                outBAMunsorted->unsortedOneAlign(outBAMoneAlign[imate], outBAMoneAlignNbytes[imate], (imate>0 || iTr>0) ? 0 : (outBAMoneAlignNbytes[0]+outBAMoneAlignNbytes[1])*2*nTrOutSAM);
                             };
                         };
                     };
@@ -172,10 +184,10 @@ void ReadAlign::outputAlignments() {
                 };
             };
 
-            if (P.outSJfilterReads=="All" || nTr==1) {
+            if (P.outSJfilterReads=="All" || nTrOut==1) {
                 uint sjReadStartN=chunkOutSJ->N;
-                for (uint iTr=0;iTr<nTr;iTr++) {//write all transcripts junctions
-                    outputTranscriptSJ (*(trMult[iTr]), nTr, chunkOutSJ, sjReadStartN);
+                for (uint64 iTr=0; iTr<nTrOut; iTr++) {//write all transcripts junctions
+                    outputTranscriptSJ (*(trMult[iTr]), nTrOut, chunkOutSJ, sjReadStartN);
                 };
             };
         };

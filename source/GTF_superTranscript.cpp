@@ -19,6 +19,7 @@ void GTF::superTranscript() {
         };
     };
     
+    vector<array<uint64,2>> mergedIntervals;
     {//create mergedIntervals=union of all exons, and condensed genome
         //exonLoci are transformed into coordinates in condensed genome
         //sort by exon start position
@@ -32,7 +33,6 @@ void GTF::superTranscript() {
         array<uint64,2> curr = {exonLoci[0][exS], exonLoci[0][exE]}; //intervals[0]
         exonLoci[0][exS] = 0;
         exonLoci[0][exE] -= gapValue;
-        vector<array<uint64,2>> mergedIntervals;
 
         for(uint64 i = 1; i < exonLoci.size(); ++i) {
             if(exonLoci[i][exS] <= curr[1]+1) {
@@ -66,7 +66,7 @@ void GTF::superTranscript() {
     };
     
     vector<array<uint64,2>> superTrStartEnd;//superTr start end in normal genome
-    {//superTrStartEnd=coordinates in Condendsed genome at the moment, will be changed later
+    {//superTrStartEnd=coordinates in Condendsed genome
         vector<array<uint64,2>> transcriptStartEndSorted = transcriptStartEnd;//sorted transript intervals
         sort(transcriptStartEndSorted.begin(), transcriptStartEndSorted.end(),
              [](const array<uint64,2>& t1, const array<uint64,2>& t2) {
@@ -159,6 +159,8 @@ void GTF::superTranscript() {
     };
     superTrome.sjCollapse();
     
+    //save some variables for real genome here?
+    
     //replace the Genome sequence and all necessary parameters for downstream genome generation
     if (P.pGe.gTypeString=="Transcriptome") {
         genome.concatenateChromosomes(transcriptSeq, transcriptID, genome.genomeChrBinNbases);
@@ -189,6 +191,23 @@ void GTF::superTranscript() {
             ee[exE]+=genome.chrStart[ist]-superTrStartEnd[ist][0];
         };
     };
+    
+    //output conversion blocks
+    ofstream & convStream = ofstrOpen(P.pGe.gDir+"/fullGenome/conversionToFullGenome.tsv",ERROR_OUT, P);
+    convStream << mergedIntervals.size()<<'\n';
+    
+    uint64 condGstart=0; //start of the interval in the condensed genome
+    uint32 iSuTr=0;
+    for (auto &b : mergedIntervals) {
+        uint64 len1 = b[1]-b[0]+1;
+
+        //            start in the suTrome:  start in condG                                length     start in fullGenome
+        convStream << genome.chrStart[iSuTr]+condGstart-superTrStartEnd[iSuTr][0] <<'\t'<< len1<<'\t'<< b[0] <<'\n';     // <<"\t"<<iSuTr<<"\t"<<b[1]<<"\t"<<condGstart<<"\t"<<superTrStartEnd[iSuTr][0]<<"\t"<<superTrStartEnd[iSuTr][1]<<'\n';
+        condGstart+=len1;
+        if (condGstart>superTrStartEnd[iSuTr][1])
+            ++iSuTr;
+    };
+    convStream.close();
 }
 
 void Genome::concatenateChromosomes(const vector<vector<uint8>> &vecSeq, const vector<string> &vecName, const uint64 padBin)

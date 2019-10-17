@@ -43,7 +43,7 @@ class Parameters {
 
         //genome
         char genomeNumToNT[6];
-        ParametersGenome pGe;
+        ParametersGenome pGe, pGeOut;
 
         //binning,windows,anchors
         uint winBinChrNbits, winBinNbits, winAnchorDistNbins, winFlankNbins, winBinN;

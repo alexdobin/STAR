@@ -4,7 +4,7 @@
 #include "ReadAlign.h"
 
 ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk)
-                    : mapGen(genomeIn), P(Pin), chunkTr(TrIn)
+                    : mapGen(genomeIn), genOut(*genomeIn.genomeOut.g), P(Pin), chunkTr(TrIn)
 {
     readNmates=P.readNmates;
     //RNGs
@@ -57,6 +57,12 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
     for (uint ii=0;ii<P.alignTranscriptsPerReadNmax;ii++)
         trArrayPointer[ii]= &(trArray[ii]);
     trInit = new Transcript;
+    
+    if (mapGen.genomeOut.yes) {//allocate output transcripts
+        trMultOut = new Transcript*[P.outFilterMultimapNmax];
+        for (uint32 ii=0; ii<P.outFilterMultimapNmax; ii++) 
+            trMultOut[ii]=new Transcript;
+    };
     
     //read
     Read0 = new char*[2];

@@ -16,7 +16,14 @@ private:
     uint OpenStream(string name, ifstream & stream, uint size);
     void HandleSharedMemoryException(const SharedMemoryException & exc, uint64 shmSize);
 public:
-    Genome *genomeOut;
+    
+    struct {
+        bool yes;
+        bool gapsAreJunctions;
+        Genome *g;
+        string convFile;
+        vector<array<uint64,3>> convBlocks;
+    } genomeOut;
     
     char *G, *G1;
     uint64 nGenome, nG1alloc;
@@ -65,6 +72,7 @@ public:
 
     void freeMemory();
     void genomeLoad();
+    void genomeOutLoad();
     void chrBinFill();
     void chrInfoLoad();
     void genomeSequenceAllocate();

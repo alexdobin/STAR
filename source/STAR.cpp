@@ -135,7 +135,7 @@ int main(int argInN, char* argIn[]) {
     g_statsAll.timeLastReport=g_statsAll.timeStartMap;
 
     //SAM headers
-    samHeaders(P, *genomeMain.genomeOut, *transcriptomeMain);
+    samHeaders(P, *genomeMain.genomeOut.g, *transcriptomeMain);
 
     //initialize chimeric parameters here - note that chimeric parameters require samHeader
     P.pCh.initialize(&P);
