@@ -8,6 +8,8 @@ void ReadAlign::outputTranscriptSJ(Transcript const &trOut, uint nTrOut, OutSJ *
 //     if (nTrOut>1) return; //junctions from multi-mappers are not recorded
 
 //     if (P.outSAMmode=="None") return; //no SAM output
+    if (trOut.nExons==0)
+        return;
 
     for (uint iex=0;iex<trOut.nExons-1;iex++) {//record all junctions
         if (trOut.canonSJ[iex]>=0) {//only record junctions, not indels or mate gap

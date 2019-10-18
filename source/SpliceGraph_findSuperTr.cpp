@@ -105,8 +105,16 @@ void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, 
         
         array<uint32,2> alignEnds, alignStarts;
         
+        //convert into trAll
+        RA->trAll[nSuperTr]=RA->trArrayPointer+nSuperTr;
+        RA->nWinTr[nSuperTr]=1;
+        Transcript &trA = *RA->trAll[nSuperTr][0]; //transcript to fill
+        trA=*RA->trInit;
+        trA.Chr=sutr1;
+        trA.Str=str1;
+        
 		uint32 swScore = 0;
-        swScore = swScoreSpliced((str1==0 ? readSeq : readSeqRevCompl), readLen, superTrome.superTrs[sutr1], alignStarts, alignEnds);
+        swScore = swScoreSpliced((str1==0 ? readSeq : readSeqRevCompl), readLen, superTrome.superTrs[sutr1], alignStarts, alignEnds, trA.cigar);
         
         //swTraceBack(alignEnds, alignStarts);
 		//float(superTrSeedCount[ii])/countMax
@@ -116,59 +124,55 @@ void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, 
 				float(superTrSeedCount[ii])/countMax <<'\t'<<
                 swScore <<'\t'<< float(swScore)/readLen <<'\t'<< alignStarts[0] <<'\t'<< alignEnds[0] <<'\t'<< alignStarts[1] <<'\t'<< alignEnds[1] << endl;
         
-        //convert into trAll
-        RA->trAll[nSuperTr]=RA->trArrayPointer+nSuperTr;
-        RA->nWinTr[nSuperTr]=1;
-        Transcript &trA = *RA->trAll[nSuperTr][0]; //transcript to fill
-        trA=*RA->trInit;
-        trA.Chr=sutr1;
-        trA.Str=str1;
         trA.maxScore=swScore;
         trA.nMatch=swScore;//TODO fix this, calculate number of matched bases
+        trA.nExons=0;
+        trA.gStart=mapGen.chrStart[trA.Chr]+alignStarts[1];
         
-        {//calculate blocks from rowCol and rowSJ
-            int32 iEx=-1;//current exon
-            for (uint32 row=alignStarts[0]; row<=alignEnds[0]; row++) {
+//         {//calculate blocks from rowCol and rowSJ
+//             int32 iEx=-1;//current exon
+//             for (uint32 row=alignStarts[0]; row<=alignEnds[0]; row++) {
+// 
+//                 if (rowCol[row]>=0) {//this row has no mapped base (i.e. no block) = bases deleted from query
+//                     if (iEx==-1 || rowCol[row]!=rowCol[row-1]+1) {//start new block
+//                         ++iEx;
+//                         trA.exons[iEx][EX_R]=row;
+//                         trA.exons[iEx][EX_G]=mapGen.chrStart[trA.Chr]+rowCol[row];
+//                         trA.exons[iEx][EX_L]=1;
+//                         trA.canonSJ[iEx]=-1;
+//                         trA.sjAnnot[iEx]=0;
+//                     } else {
+//                         trA.exons[iEx][EX_L]++;
+//                     };
+//                 };
+//          
+//                 //this needs to be done even if rowCol[row]==-1
+//                 if (rowSJ[row][0]>=0) {//junction: create two 0-length blocks to encapsulate junction
+//                     ++iEx;
+//                     trA.exons[iEx][EX_R]=row+1;
+//                     trA.exons[iEx][EX_G]=mapGen.chrStart[trA.Chr]+rowSJ[row][0]+1;
+//                     trA.exons[iEx][EX_L]=0;
+//                     trA.canonSJ[iEx]=1;//TODO actual motif
+//                     trA.sjAnnot[iEx]=1;
+//                     //if (rowSJ[row]!=rowCol[row+1]) {//create 0-length block to mark junction, on the next row
+//                         ++iEx;
+//                         trA.exons[iEx][EX_R]=row+1;
+//                         trA.exons[iEx][EX_G]=mapGen.chrStart[trA.Chr]+rowSJ[row][1];
+//                         trA.exons[iEx][EX_L]=0;
+//                         trA.canonSJ[iEx]=-1;
+//                         trA.sjAnnot[iEx]=0;
+//                     //};
+//                 };
+//             };
+//             
+//             trA.nExons=iEx+1;
+// 
+//             for (uint32 iex=0; iex<trA.nExons; iex++) {
+//                 trA.exons[iex][EX_iFrag]=0;
+//                 trA.exons[iex][EX_sjA]=0;
+//             };            
+//         };       
 
-                if (rowCol[row]>=0) {//this row has no mapped base (i.e. no block) = bases deleted from query
-                    if (iEx==-1 || rowCol[row]!=rowCol[row-1]+1) {//start new block
-                        ++iEx;
-                        trA.exons[iEx][EX_R]=row;
-                        trA.exons[iEx][EX_G]=mapGen.chrStart[trA.Chr]+rowCol[row];
-                        trA.exons[iEx][EX_L]=1;
-                        trA.canonSJ[iEx]=-1;
-                        trA.sjAnnot[iEx]=0;
-                    } else {
-                        trA.exons[iEx][EX_L]++;
-                    };
-                };
-         
-                //this needs to be done even if rowCol[row]==-1
-                if (rowSJ[row][0]>=0) {//junction: create two 0-length blocks to encapsulate junction
-                    ++iEx;
-                    trA.exons[iEx][EX_R]=row+1;
-                    trA.exons[iEx][EX_G]=mapGen.chrStart[trA.Chr]+rowSJ[row][0]+1;
-                    trA.exons[iEx][EX_L]=0;
-                    trA.canonSJ[iEx]=1;//TODO actual motif
-                    trA.sjAnnot[iEx]=1;
-                    //if (rowSJ[row]!=rowCol[row+1]) {//create 0-length block to mark junction, on the next row
-                        ++iEx;
-                        trA.exons[iEx][EX_R]=row+1;
-                        trA.exons[iEx][EX_G]=mapGen.chrStart[trA.Chr]+rowSJ[row][1];
-                        trA.exons[iEx][EX_L]=0;
-                        trA.canonSJ[iEx]=-1;
-                        trA.sjAnnot[iEx]=0;
-                    //};
-                };
-            };
-            
-            trA.nExons=iEx+1;
-        };       
-        
-        for (uint32 iex=0; iex<trA.nExons; iex++) {
-            trA.exons[iex][EX_iFrag]=0;
-            trA.exons[iex][EX_sjA]=0;
-        };
         if (swScore>maxMaxScore) {
             maxMaxScore=swScore;
             RA->trBest=&trA;

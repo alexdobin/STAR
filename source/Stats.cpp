@@ -41,6 +41,9 @@ void Stats::transcriptStats(Transcript &T, uint Lread) {
     mappedInsL += T.lIns;
     mappedDelL += T.lDel;
 
+    if (T.nExons==0)
+        return;
+    
     uint mappedL=0;
     for (uint ii=0; ii<T.nExons; ii++) {
         mappedL += T.exons[ii][EX_L];

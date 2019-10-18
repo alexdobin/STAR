@@ -58,7 +58,7 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
         trArrayPointer[ii]= &(trArray[ii]);
     trInit = new Transcript;
     
-    if (mapGen.genomeOut.yes) {//allocate output transcripts
+    if (mapGen.genomeOut.convYes) {//allocate output transcripts
         trMultOut = new Transcript*[P.outFilterMultimapNmax];
         for (uint32 ii=0; ii<P.outFilterMultimapNmax; ii++) 
             trMultOut[ii]=new Transcript;

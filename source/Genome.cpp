@@ -18,6 +18,7 @@ Genome::Genome (Parameters &P, ParametersGenome &pGe): P(P), shmStart(NULL), pGe
 {
     shmKey=ftok(pGe.gDir.c_str(),SHM_projectID);
     genomeOut.g=this;//will change if genomeOut is different from genomeMain
+    genomeOut.convYes=false;
     sjdbOverhang = pGe.sjdbOverhang; //will be re-defined later if another value was used for the generated genome
     sjdbLength = pGe.sjdbOverhang==0 ? 0 : pGe.sjdbOverhang*2+1;
 };

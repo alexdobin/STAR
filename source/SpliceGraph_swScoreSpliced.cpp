@@ -1,12 +1,12 @@
 /*
  * Created by Fahimeh Mirhaj on 6/18/19.
-*/
+ */
 
 #include "SpliceGraph.h"
 #define macro_CompareScore(score1,scoreMax,dirInd,dirIndMax)	if(score1>scoreMax){dirIndMax=dirInd;scoreMax=score1;}
 
 SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, const uint32 readLen, const SuperTranscript &superTr, 
-                                                        array<SpliceGraph::typeSeqLen, 2> &alignStarts, array<SpliceGraph::typeSeqLen, 2> &alignEnds)
+                                                        array<SpliceGraph::typeSeqLen, 2> &alignStarts, array<SpliceGraph::typeSeqLen, 2> &alignEnds, vector<array<uint32,2>> &cigar)
 {//Smith-Waterman alignment with splices
     
     uint32 superTrLen = superTr.length;
@@ -84,7 +84,7 @@ SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, con
             };
         }; // row for loop
     }; // col for loop
-    alignEnds[0]--;//truw row
+    alignEnds[0]--;//true row
     
     ///////////traceback
     int32 row = alignEnds[0];//true row
@@ -93,13 +93,14 @@ SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, con
     uint32 nMapped=0, nMM=0, nI=0, nD=0, nSJ=0;
 //     blockSJ.clear();//index of junction blocks, recorded acceptors, then converted to donors
 //     blockCoord.clear();//bR,bG,bL,type recorded ends, then converted to starts
-    //vector<uint32> rowCol(readLen), rowSJ(readLen,0); //records col vs row TODO define outside for speed
+//     vector<uint32> rowCol(readLen), rowSJ(readLen,0); //records col vs row TODO define outside for speed
+    --iAcceptor; //= last junction
     
     rowCol.clear();
     rowSJ.clear();
     rowCol.resize(readLen,-1);
     rowSJ.resize(readLen+1,{-1,-1});//one extra element since we are going to check row+1
-    --iAcceptor; //= last junction
+    
     while(col >= 0 && row >= 0) {
         uint32 dir1= (uint32) directionMatrix[row+col*readLen];
         if (dir1==0) //reached scoringMatrix==0
@@ -148,23 +149,97 @@ SpliceGraph::typeAlignScore SpliceGraph::swScoreSpliced(const char *readSeq, con
     alignStarts[0]=row;
     alignStarts[1]=rowCol[row];
     
-    //cout <<nMapped<<" "<<nMM<<" "<<nD<<" "<<nI<<" "<<nSJ<<endl;
+    cigar.clear();
+    cigar.reserve(readLen);
+    row = alignEnds[0];//true row
+    col = alignEnds[1];
     
-    //calculate blo
+    nMapped=0, nMM=0, nI=0, nD=0, nSJ=0;
+    iAcceptor=superTr.sjC.size()-1; //= last junction
     
-//     
-//     if (block1[2]>0) {
-//         blockCoord.push_back(block1);//last block
-//     };
-//     std::reverse(blockCoord.begin(), blockCoord.end());
-//     for (auto &b : blockCoord) {
-//         b[0] -= b[2]-1;
-//         b[1] -= b[2]-1;
-//     };
-// //     std::reverse(blockSJ.begin(), blockSJ.end());
-// //     for (auto &b : blockSJ) {
-// //         b = blockCoord.size()-1-b-1;
-// //     };
+    if (row!=(int32)readLen-1) //soft-clip
+        cigar.push_back({BAM_CIGAR_S, readLen-1-row}); 
+    
+    uint32 cigarOp=0, cigarLen=0, cigarOpPrev=(uint32)-1;
+    uint32 sjGap=0;
+    while(col >= 0 && row >= 0) {
+        uint32 dir1= (uint32) directionMatrix[row+col*readLen];
+        
+        if (dir1==0) //reached scoringMatrix==0
+            break;
+        
+        switch (dir1) 
+        {
+            case 1:
+                --row;
+                ++nI;
+                cigarOp=BAM_CIGAR_I;
+                break;
+            case 2:
+                --col;
+                ++nD;
+                cigarOp=BAM_CIGAR_D;
+                break;
+            case 3:
+                ++nMapped;
+                nMM+=(uint32)(readSeq[row]!=superTr.seqP[col]);
+                cigarOp=BAM_CIGAR_M;
+                --row;
+                --col;                  
+                break;
+            default: //junction jump
+                ++nSJ;
+                while (iAcceptor+1!=0 && col <= (int32)superTr.sjC[iAcceptor][1]) {//find (acceptor-1) that matches this column
+                    --iAcceptor;
+                };
+                
+                //row: same or -1
+                if ((dir1-4)%2 == 1) {//diagonal-like
+                    ++nMapped;
+                    nMM+=(uint32)(readSeq[row]!=superTr.seqP[col]);
+                    --row;
+                    cigarOp=BAM_CIGAR_M;
+                } else {
+                    //++nD; //?
+                    cigarOp=BAM_CIGAR_D;
+                };
+                
+                //column: jump to donor
+                sjGap=col;
+                col=superTr.sjDonor[ superTr.sjC[iAcceptor+1+(dir1-4)/2][2] ];
+                sjGap=sjGap-col-1;
+        };
+        
+        if (cigarOp!=cigarOpPrev) {//changed direction - record new cigar op
+            if (cigarLen>0)
+                cigar.push_back({cigarOpPrev, cigarLen});
+            cigarLen=0;
+            cigarOpPrev=cigarOp;
+        };
+        ++cigarLen;
+        if (sjGap>0) {
+            cigar.push_back({cigarOp, cigarLen});//record previous opeartion
+            cigar.push_back({BAM_CIGAR_N, sjGap});//record N
+            cigarLen=0; //keep cigarLen=0: after SJ, the blocks start anew
+            cigarOpPrev=(uint32)-1;
+            sjGap=0;
+        };
+    };
+    
+    if (cigarLen>0)
+        cigar.push_back({cigarOp, cigarLen});
+        
+//     row=max(0,row);
+//     col=max(0,col);
+        
+    ++row;
+    ++col;
+    alignStarts[0]=row;
+    alignStarts[1]=col;        
+    if (row>0)
+        cigar.push_back({BAM_CIGAR_S, (uint32)row}); 
+        
+    std::reverse(cigar.begin(), cigar.end());
     return scoreMaxGlobal;
 };
 

@@ -462,7 +462,7 @@ void Genome::genomeLoad(){//allocate and load Genome
         
         //genomeOut
         P.pGeOut.gDir=pGe.gDir+"/fullGenome/";
-        genomeOut.yes=true;
+        genomeOut.convYes=true;
         genomeOut.gapsAreJunctions=true;
         genomeOut.convFile=pGe.gDir+"/fullGenome/conversionToFullGenome.tsv";
         

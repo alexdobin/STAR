@@ -18,7 +18,7 @@ private:
 public:
     
     struct {
-        bool yes;
+        bool convYes;
         bool gapsAreJunctions;
         Genome *g;
         string convFile;

@@ -87,17 +87,26 @@ void ReadAlign::outputAlignments() {
                 };
             };
 
-
-            if (mapGen.genomeOut.yes) {//convert to new genome
+            if (mapGen.genomeOut.convYes) {//convert to new genome
                 uint32 nTr1=0;
                 for (uint32 iTr=0;iTr<nTrOut;iTr++) {//convert output transcripts into new genome
                     *trMultOut[nTr1]=*trMult[iTr];//copy information before conversion
-                    nTr1 += trMult[iTr]->convertGenome(mapGen, *mapGen.genomeOut.g, *trMultOut[nTr1]);
-                    trMult[nTr1-1] = trMultOut[nTr1-1]; //point to new transcsript
+                    if (trMult[iTr]->convertGenomeCigar(*mapGen.genomeOut.g, *trMultOut[nTr1])) {
+                        ++nTr1;
+                        trMult[nTr1-1] = trMultOut[nTr1-1]; //point to new transcsript
+                    };
                 };
                 nTrOut=nTr1;
             };
 
+            //temporary: SAM output for SpliceGraph
+            if (mapGen.pGe.gType==101) {
+                for (uint iTr=0; iTr<nTrOut; iTr++) {//write all transcripts            
+                    outBAMbytes+=outputSpliceGraphSAM(*(trMult[iTr]), nTrOut, iTr, outSAMstream);
+                };
+                return;
+            };
+            
             soloRead->readBar->getCBandUMI(readNameExtra.at(0));
             //genes
             if ( P.quant.geCount.yes ) {

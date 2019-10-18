@@ -10,7 +10,8 @@
 class Transcript {
 public:
     uint exons[MAX_N_EXONS][EX_SIZE]; //coordinates of all exons: r-start, g-start, length
-
+    vector <array<uint32,2>> cigar; //new way to record alignments, with CIGAR operations. For now, only used by splice-graph
+    
     uint shiftSJ[MAX_N_EXONS][2]; //shift of the SJ coordinates due to genomic micro-repeats
     int canonSJ[MAX_N_EXONS]; //canonicity of each junction
     uint8 sjAnnot[MAX_N_EXONS]; //anotated or not
@@ -69,7 +70,8 @@ public:
     void peOverlapSEtoPE(uint* mSta, Transcript &t);
     void extractSpliceJunctions(vector<array<uint64,2>> &sjOut, bool &annotYes);
     
-    bool convertGenome(Genome &genMap, Genome &genOut, Transcript & A);
+    bool convertGenome(Genome &genOut, Transcript & A);
+    bool convertGenomeCigar(Genome &genOut, Transcript & A);
 
 private:
 

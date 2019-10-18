@@ -65,7 +65,9 @@ void GTF::superTranscript() {
         transcriptStartEnd[transId][1] = max(transcriptStartEnd[transId][1], exonLoci[i][exE]);
     };
     
-    vector<array<uint64,2>> superTrStartEnd;//superTr start end in normal genome
+    vector<array<uint64,2>> superTrStartEnd;
+    vector<uint64> mergedIntervalsSuperTrIndex(mergedIntervals.size());
+    uint64 miI=0, miLen=0;
     {//superTrStartEnd=coordinates in Condendsed genome
         vector<array<uint64,2>> transcriptStartEndSorted = transcriptStartEnd;//sorted transript intervals
         sort(transcriptStartEndSorted.begin(), transcriptStartEndSorted.end(),
@@ -74,6 +76,13 @@ void GTF::superTranscript() {
              });
         auto curr = transcriptStartEndSorted.front();
         for(const auto& p: transcriptStartEndSorted) {//if transcript intervals overlap by >=1 base, merge them into SuperTranscripts
+            
+            while (miLen<curr[1]) {//keep up with merged intervals
+                miLen += mergedIntervals[miI][1]-mergedIntervals[miI][0]+1;
+                miI++;
+            };            
+            curr[1]=max(curr[1],miLen-1);//suTr boundary has to be at the mergedInterval boundary
+            
             if(p[0] <= curr[1]) { //without +1
                 curr[1] = max(curr[1], p[1]);
             } else {
@@ -202,7 +211,7 @@ void GTF::superTranscript() {
         uint64 len1 = b[1]-b[0]+1;
 
         //            start in the suTrome:  start in condG                                length     start in fullGenome
-        convStream << genome.chrStart[iSuTr]+condGstart-superTrStartEnd[iSuTr][0] <<'\t'<< len1<<'\t'<< b[0] <<'\n';     // <<"\t"<<iSuTr<<"\t"<<b[1]<<"\t"<<condGstart<<"\t"<<superTrStartEnd[iSuTr][0]<<"\t"<<superTrStartEnd[iSuTr][1]<<'\n';
+        convStream << genome.chrStart[iSuTr]+condGstart-superTrStartEnd[iSuTr][0] <<'\t'<< len1<<'\t'<< b[0] <<'\n'; //<<"\t"<<iSuTr<<"\t"<<b[1]<<"\t"<<condGstart<<"\t"<<superTrStartEnd[iSuTr][0]<<"\t"<<superTrStartEnd[iSuTr][1]<<'\n';
         condGstart+=len1;
         if (condGstart>superTrStartEnd[iSuTr][1])
             ++iSuTr;
