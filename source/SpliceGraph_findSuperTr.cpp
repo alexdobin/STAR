@@ -129,6 +129,7 @@ void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, 
         trA.nMM=alignInfo.nMM;
         trA.lIns=alignInfo.nI;
         trA.lDel=alignInfo.nD;
+        trA.rLength=alignInfo.nMap;
 //         {//calculate blocks from rowCol and rowSJ
 //             int32 iEx=-1;//current exon
 //             for (uint32 row=alignInfo.aStart[0]; row<=alignInfo.aEnd[0]; row++) {

@@ -10,13 +10,13 @@
 
 class Genome {
 private:
-    Parameters &P;
     key_t shmKey;
     char *shmStart;
     uint OpenStream(string name, ifstream & stream, uint size);
     void HandleSharedMemoryException(const SharedMemoryException & exc, uint64 shmSize);
 public:
-    
+    Parameters &P;
+
     struct {
         bool convYes;
         bool gapsAreJunctions;
