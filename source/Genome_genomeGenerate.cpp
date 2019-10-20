@@ -163,19 +163,7 @@ void Genome::genomeGenerate() {
     };    
     
     //output genome metadata
-    ofstream & chrN = ofstrOpen(pGe.gDir+"/chrName.txt",ERROR_OUT, P);
-    ofstream & chrS = ofstrOpen(pGe.gDir+"/chrStart.txt",ERROR_OUT, P);
-    ofstream & chrL = ofstrOpen(pGe.gDir+"/chrLength.txt",ERROR_OUT, P);
-    ofstream & chrNL = ofstrOpen(pGe.gDir+"/chrNameLength.txt",ERROR_OUT, P);
-
-    for (uint ii=0;ii<nChrReal;ii++) {//output names, starts, lengths
-        chrN<<chrName[ii]<<"\n";
-        chrS<<chrStart[ii]<<"\n";
-        chrL<<chrLength.at(ii)<<"\n";
-        chrNL<<chrName[ii]<<"\t"<<chrLength.at(ii)<<"\n";
-    };
-    chrS<<chrStart[nChrReal]<<"\n";//size of the genome
-    chrN.close();chrL.close();chrS.close(); chrNL.close();
+    writeChrInfo(pGe.gDir);
 
     //preparing to generate SA
     nSA=0;
@@ -376,9 +364,7 @@ void Genome::genomeGenerate() {
     P.inOut->logMain     << timeMonthDayTime(rawTime) <<" ... writing Genome to disk ...\n" <<flush;
     *P.inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ... writing Genome to disk ...\n" <<flush;
 
-    ofstream & genomeOut = ofstrOpen(pGe.gDir+"/Genome",ERROR_OUT, P);
-    fstreamWriteBig(genomeOut,G,nGenome,pGe.gDir+"/Genome",ERROR_OUT,P);
-    genomeOut.close();
+    writeGenomeSequence(pGe.gDir);
 
     //write SA
     time ( &rawTime );
@@ -413,4 +399,27 @@ void Genome::genomeGenerate() {
     time(&rawTime);
     P.inOut->logMain    << timeMonthDayTime(rawTime) << " ..... finished successfully\n" <<flush;
     *P.inOut->logStdOut << timeMonthDayTime(rawTime) << " ..... finished successfully\n" <<flush;
+};
+
+void Genome::writeChrInfo(const string dirOut) 
+{//write chr information
+    ofstream & chrN = ofstrOpen(dirOut+"/chrName.txt",ERROR_OUT, P);
+    ofstream & chrS = ofstrOpen(dirOut+"/chrStart.txt",ERROR_OUT, P);
+    ofstream & chrL = ofstrOpen(dirOut+"/chrLength.txt",ERROR_OUT, P);
+    ofstream & chrNL = ofstrOpen(dirOut+"/chrNameLength.txt",ERROR_OUT, P);
+
+    for (uint ii=0;ii<nChrReal;ii++) {//output names, starts, lengths
+        chrN<<chrName[ii]<<"\n";
+        chrS<<chrStart[ii]<<"\n";
+        chrL<<chrLength.at(ii)<<"\n";
+        chrNL<<chrName[ii]<<"\t"<<chrLength.at(ii)<<"\n";
+    };
+    chrS<<chrStart[nChrReal]<<"\n";//size of the genome
+    chrN.close();chrL.close();chrS.close(); chrNL.close();
+};
+void Genome::writeGenomeSequence(const string dirOut) 
+{//write genome sequence
+    ofstream &genomeOut = ofstrOpen(dirOut+"/Genome",ERROR_OUT, P);
+    fstreamWriteBig(genomeOut,G,nGenome,dirOut+"/Genome",ERROR_OUT,P);
+    genomeOut.close();
 };

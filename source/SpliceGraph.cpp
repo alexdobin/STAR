@@ -19,8 +19,8 @@ SpliceGraph::SpliceGraph (SuperTranscriptome &superTrome, Parameters &P, ReadAli
     };
     sjDindex = new uint32[superTrome.sjDonorNmax];
     
-    rowCol.reserve(100000);
-    rowSJ.reserve(100000);
+    //rowCol.reserve(100000);
+    //rowSJ.reserve(100000);
     //blockCoord.reserve(100000);
     //blockSJ.reserve(10000);
 };

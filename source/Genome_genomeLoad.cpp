@@ -469,6 +469,15 @@ void Genome::genomeLoad(){//allocate and load Genome
         genomeOut.g = new Genome(P,P.pGeOut);
         genomeOut.g->genomeOut=genomeOut;
         genomeOut.g->genomeOutLoad();
+        
+        //debug checks
+//         for (auto &b : genomeOut.g->genomeOut.convBlocks) {
+//             uint64 g1=*(genomeOut.g->G+b[2]);
+//             uint64 g2=*(G+b[0]);
+//             if (g1!=g2)
+//                 cout <<b[0]<<" "<<b[1]<<" "<<b[2]<<endl;
+//         };
+        
     };
     
     if (P.pGe.gLoad=="LoadAndExit" || P.pGe.gLoad=="Remove") {

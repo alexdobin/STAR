@@ -44,10 +44,12 @@ void Genome::genomeOutLoad(){//allocate and load *output* Genome
 
     ifstream &convStream= ifstrOpen(genomeOut.convFile, ERROR_OUT, "SOLUTION: regenerate genome.", P);
     uint32 nconv;
-    convStream >> nconv;
+    convStream >> nconv >> genomeOut.nMinusStrandOffset;
     genomeOut.convBlocks.resize(nconv+1);
     for (uint32 ii=0; ii<nconv; ii++)
         convStream >> genomeOut.convBlocks[ii][0] >> genomeOut.convBlocks[ii][1] >> genomeOut.convBlocks[ii][2];
     
-    genomeOut.convBlocks[nconv][0]=genomeOut.convBlocks[nconv-1][0]+genomeOut.convBlocks[nconv-1][1];
+    //genomeOut.convBlocks[nconv][0]=genomeOut.convBlocks[nconv-1][0]+genomeOut.convBlocks[nconv-1][1];
+    genomeOut.convBlocks[nconv-1][1] +=1;//increase the length of the last block so that we never reach the last base
+    genomeOut.convBlocks[nconv][0]=(uint64)-1;//start of the block after last is infinity
 };

@@ -102,9 +102,7 @@ void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, 
 		if (readLen>=100000 || superTrome.superTrs[sutr1].length*readLen>=1000000000) {//temporary restriction: will lift after redoing the scoringMatrix
 			continue;		
         };
-        
-        array<uint32,2> alignEnds, alignStarts;
-        
+                
         //convert into trAll
         RA->trAll[nSuperTr]=RA->trArrayPointer+nSuperTr;
         RA->nWinTr[nSuperTr]=1;
@@ -114,24 +112,26 @@ void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, 
         trA.Str=str1;
         
 		uint32 swScore = 0;
-        swScore = swScoreSpliced((str1==0 ? readSeq : readSeqRevCompl), readLen, superTrome.superTrs[sutr1], alignStarts, alignEnds, trA.cigar);
+        swScore = swScoreSpliced((str1==0 ? readSeq : readSeqRevCompl), readLen, superTrome.superTrs[sutr1], trA.cigar);
         
-        //swTraceBack(alignEnds, alignStarts);
+        //swTraceBack(alignInfo.aEnd, alignInfo.aStart);
 		//float(superTrSeedCount[ii])/countMax
 		//float(superTrSeedCount[ii])/superTr.length[sutr1]/countOverSuperTrLenMax <<'\t'<<
 
 		cout << readName <<'\t'<< sutr1 <<'\t'<< str1 <<'\t'<< superTrome.superTrs[sutr1].length <<'\t'<< readLen <<'\t'<< float(superTrSeedCount[ii])/readLen*seedSpacing <<'\t'<<  
 				float(superTrSeedCount[ii])/countMax <<'\t'<<
-                swScore <<'\t'<< float(swScore)/readLen <<'\t'<< alignStarts[0] <<'\t'<< alignEnds[0] <<'\t'<< alignStarts[1] <<'\t'<< alignEnds[1] << endl;
+                swScore <<'\t'<< float(swScore)/readLen <<'\t'<< alignInfo.aStart[0] <<'\t'<< alignInfo.aEnd[0] <<'\t'<< alignInfo.aStart[1] <<'\t'<< alignInfo.aEnd[1] << endl;
         
         trA.maxScore=swScore;
         trA.nMatch=swScore;//TODO fix this, calculate number of matched bases
         trA.nExons=0;
-        trA.gStart=mapGen.chrStart[trA.Chr]+alignStarts[1];
-        
+        trA.gStart=mapGen.chrStart[trA.Chr]+alignInfo.aStart[1];
+        trA.nMM=alignInfo.nMM;
+        trA.lIns=alignInfo.nI;
+        trA.lDel=alignInfo.nD;
 //         {//calculate blocks from rowCol and rowSJ
 //             int32 iEx=-1;//current exon
-//             for (uint32 row=alignStarts[0]; row<=alignEnds[0]; row++) {
+//             for (uint32 row=alignInfo.aStart[0]; row<=alignInfo.aEnd[0]; row++) {
 // 
 //                 if (rowCol[row]>=0) {//this row has no mapped base (i.e. no block) = bases deleted from query
 //                     if (iEx==-1 || rowCol[row]!=rowCol[row-1]+1) {//start new block

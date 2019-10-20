@@ -19,7 +19,9 @@ bool Transcript::convertGenomeCigar(Genome &genOut, Transcript & A)
     
     uint64 gEnd=gStart;//gEnd is end+1
     uint32 l1=0, l2=0;
-    for (auto &cc : cigar) {
+    uint32 gGapNew=0;
+    for (uint32 iC=0; iC<cigar.size(); iC++) {
+        auto cc=cigar[iC];        
         if (cc[0]==BAM_CIGAR_M)
             l1+=cc[1];
         if (cc[0]==BAM_CIGAR_M || cc[0]==BAM_CIGAR_D || cc[0]==BAM_CIGAR_N) {//M,D,N: blocks that have to be split if they overlap blocks boundaries
@@ -39,6 +41,7 @@ bool Transcript::convertGenomeCigar(Genome &genOut, Transcript & A)
                 };
                 
                 len1 = (uint32)( coBl[icB+1][2]-coBl[icB][2]-coBl[icB][1] );//insert junction gap
+                gGapNew += len1;
                 
                 if (A.cigar.back()[0]==BAM_CIGAR_N) {
                     A.cigar.back()[1] += len1;//add to previous gap
@@ -55,8 +58,9 @@ bool Transcript::convertGenomeCigar(Genome &genOut, Transcript & A)
               
             if(cc[0]==BAM_CIGAR_M)
                 l2 += gEnd-gStart1;
-            if (l1!=l2)
+            if (l1!=l2) {
                 cout << l1 <<" "<< l2 <<endl;                
+            };
             
             if (gEnd<coBl[icB][0]) //step back
                 --icB;
@@ -65,17 +69,28 @@ bool Transcript::convertGenomeCigar(Genome &genOut, Transcript & A)
             l1+=cc[1];
             l2+=cc[1];
             A.cigar.push_back(cc);
-        };
+        };        
     };
-
-    if (A.cigar.back()[0] == BAM_CIGAR_N)
-        A.cigar.pop_back();
+    if (l1!=l2) {
+        cout << l1 <<" "<< l2 <<endl;                
+    };
     
+    //remove last junction, or the junction before last S - it could appear if the last cigar M lands at the end of the c-block
+    if (A.cigar.back()[0] == BAM_CIGAR_N) {
+        gGapNew-=A.cigar.back()[1];
+        A.cigar.pop_back(); 
+    };
+    if (A.cigar.back()[0] == BAM_CIGAR_S && (*(A.cigar.end()-2))[0] == BAM_CIGAR_N) {
+        gGapNew-=(*(A.cigar.end()-2))[1];
+        A.cigar.erase(A.cigar.end()-2);
+    };
+    
+    A.gLength=gEnd-gStart+gGapNew;
     A.Str = Str;
 
-    if (A.gStart >= genOut.nGenome) {//convert to +strand
+    if (A.gStart >= genOut.genomeOut.nMinusStrandOffset) {//convert to +strand
         A.Str = 1-A.Str;
-        A.gStart = 2*genOut.nGenome - (A.gStart+gEnd-gStart);
+        A.gStart = 2*genOut.genomeOut.nMinusStrandOffset - (A.gStart+A.gLength);
         std::reverse(A.cigar.begin(), A.cigar.end());
     };
         

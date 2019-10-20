@@ -4,18 +4,26 @@
 
 #include "GTF.h"
 #include "streamFuns.h"
+#include "genomeParametersWrite.h"
 
 void GTF::superTranscript() {
     if (P.pGe.gTypeString!="Transcriptome" && P.pGe.gTypeString!="SuperTranscriptome") {
         return;
     };
     
+    //write full genome
+    mkdir((genome.pGe.gDir+"/fullGenome").c_str(), P.runDirPerm);
+    genomeParametersWrite(genome.pGe.gDir+"/fullGenome/genomeParameters.txt", P, ERROR_OUT, genome);
+    genome.writeChrInfo(genome.pGe.gDir+"/fullGenome/");
+    genome.writeGenomeSequence(genome.pGe.gDir+"/fullGenome/");
+
+    uint64 nMinusStrandOffset=genome.nGenome;
     for(uint64 i = 0; i < exonLoci.size(); i++) {//convert (-)strand exons coordinates
         uint64 transId = exonLoci[i][exT];
         if(transcriptStrand[transId] == 2) {
             uint64 temp = exonLoci[i][exS];
-            exonLoci[i][exS] = 2 * genome.nGenome - 1 - exonLoci[i][exE];
-            exonLoci[i][exE] = 2 * genome.nGenome - 1 - temp;
+            exonLoci[i][exS] = 2*nMinusStrandOffset - 1 - exonLoci[i][exE];
+            exonLoci[i][exE] = 2*nMinusStrandOffset - 1 - temp;
         };
     };
     
@@ -79,6 +87,7 @@ void GTF::superTranscript() {
             
             while (miLen<curr[1]) {//keep up with merged intervals
                 miLen += mergedIntervals[miI][1]-mergedIntervals[miI][0]+1;
+                mergedIntervalsSuperTrIndex[miI]=superTrStartEnd.size();
                 miI++;
             };            
             curr[1]=max(curr[1],miLen-1);//suTr boundary has to be at the mergedInterval boundary
@@ -203,18 +212,19 @@ void GTF::superTranscript() {
     
     //output conversion blocks
     ofstream & convStream = ofstrOpen(P.pGe.gDir+"/fullGenome/conversionToFullGenome.tsv",ERROR_OUT, P);
-    convStream << mergedIntervals.size()<<'\n';
+    convStream << mergedIntervals.size() <<'\t'<< nMinusStrandOffset <<'\n';
     
     uint64 condGstart=0; //start of the interval in the condensed genome
-    uint32 iSuTr=0;
-    for (auto &b : mergedIntervals) {
+    for (uint64 ib=0; ib<mergedIntervals.size(); ib++) {
+        auto b=mergedIntervals[ib];
         uint64 len1 = b[1]-b[0]+1;
+        uint64 iSuTr=mergedIntervalsSuperTrIndex[ib];
 
         //            start in the suTrome:  start in condG                                length     start in fullGenome
         convStream << genome.chrStart[iSuTr]+condGstart-superTrStartEnd[iSuTr][0] <<'\t'<< len1<<'\t'<< b[0] <<'\n'; //<<"\t"<<iSuTr<<"\t"<<b[1]<<"\t"<<condGstart<<"\t"<<superTrStartEnd[iSuTr][0]<<"\t"<<superTrStartEnd[iSuTr][1]<<'\n';
         condGstart+=len1;
-        if (condGstart>superTrStartEnd[iSuTr][1])
-            ++iSuTr;
+//         if (condGstart>superTrStartEnd[iSuTr][1])
+//             ++iSuTr;
     };
     convStream.close();
 }

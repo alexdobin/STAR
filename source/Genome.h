@@ -23,6 +23,7 @@ public:
         Genome *g;
         string convFile;
         vector<array<uint64,3>> convBlocks;
+        uint64 nMinusStrandOffset;//offset for the (-) strand, typically=nGenomeReal
     } genomeOut;
     
     char *G, *G1;
@@ -76,12 +77,15 @@ public:
     void chrBinFill();
     void chrInfoLoad();
     void genomeSequenceAllocate();
-    void concatenateChromosomes(const vector<vector<uint8>> &vecSeq, const vector<string> &vecName, const uint64 padBin);
 
     void insertSequences();
 
     void consensusSequence();
 
     void genomeGenerate();
+    void writeChrInfo(const string dirOut);
+    void concatenateChromosomes(const vector<vector<uint8>> &vecSeq, const vector<string> &vecName, const uint64 padBin);
+    void writeGenomeSequence(const string dirOut);
+
 };
 #endif

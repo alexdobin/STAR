@@ -49,13 +49,15 @@ uint64 ReadAlign::outputSpliceGraphSAM(Transcript const &trOut, uint nTrOut, uin
         seqOut=Read0[0];
         qualOut=Qual0[0];
     } else {
-        revComplementNucleotides(Read0[0], seqRev, readLengthOriginal[0]);
-        for (uint ii=0;ii<readLengthOriginal[0]; ii++) 
-            qualRev[ii]=Qual0[0][readLengthOriginal[0]-1-ii];
+        revComplementNucleotides(Read0[0], seqRev, Lread);
+        for (uint ii=0;ii<Lread; ii++) 
+            qualRev[ii]=Qual0[0][Lread-1-ii];
         seqOut=seqRev;
         qualOut=qualRev;
     };
-
+    seqOut[Lread]=0;//to ensure string termination
+    qualOut[Lread]=0;
+    
     int MAPQ=P.outSAMmapqUnique;
     if (nTrOut>=5) {
         MAPQ=0;
@@ -65,7 +67,7 @@ uint64 ReadAlign::outputSpliceGraphSAM(Transcript const &trOut, uint nTrOut, uin
         MAPQ=3;
     };
 
-    *outStream << readName+1 <<"\t"<< ((samFLAG & P.outSAMflagAND) | P.outSAMflagOR) <<"\t"<< genOut.chrName[trOut.Chr] <<"\t"<< trOut.gStart + 1 - mapGen.chrStart[trOut.Chr]
+    *outStream << readName+1 <<"\t"<< ((samFLAG & P.outSAMflagAND) | P.outSAMflagOR) <<"\t"<< genOut.chrName[trOut.Chr] <<"\t"<< trOut.gStart + 1 - genOut.chrStart[trOut.Chr]
                 <<"\t"<< MAPQ <<"\t"<< cigar;
 
     *outStream <<"\t"<< "*" <<"\t"<< 0 <<"\t"<< 0;
@@ -77,42 +79,8 @@ uint64 ReadAlign::outputSpliceGraphSAM(Transcript const &trOut, uint nTrOut, uin
     } else {
         *outStream <<"\t"<< "*";
     };
-
-//         uint tagNM=0;
-//         string tagMD("");
-//         if (P.outSAMattrPresent.NM || P.outSAMattrPresent.MD) {
-//             char* R=Read1[trOut.roStr==0 ? 0:2];
-//             uint matchN=0;
-//             for (uint iex=iEx1;iex<=iEx2;iex++) {
-//                 for (uint ii=0;ii<trOut.exons[iex][EX_L];ii++) {
-//                     char r1 = R[ii+trOut.exons[iex][EX_R]];
-//                     char g1 = mapGen.G[ii+trOut.exons[iex][EX_G]];
-//                     if ( r1!=g1 || r1==4 || g1==4) {
-//                         ++tagNM;
-// //                         if (matchN>0 || (ii==0 && iex>0 && trOut.canonSJ[iex]==-1) ) {
-//                         tagMD+=to_string(matchN);
-// //                         };
-//                         tagMD+=P.genomeNumToNT[(uint8) g1];
-//                         matchN=0;
-//                     } else {
-//                         matchN++;
-//                     };
-//                 };
-//                 if (iex<iEx2) {
-//                     if (trOut.canonSJ[iex]==-1) {//deletion
-//                         tagNM+=trOut.exons[iex+1][EX_G]-(trOut.exons[iex][EX_G]+trOut.exons[iex][EX_L]);
-//                         tagMD+=to_string(matchN) + "^";
-//                         for (uint ii=trOut.exons[iex][EX_G]+trOut.exons[iex][EX_L];ii<trOut.exons[iex+1][EX_G];ii++) {
-//                             tagMD+=P.genomeNumToNT[(uint8) mapGen.G[ii]];
-//                         };
-//                         matchN=0;
-//                     } else if (trOut.canonSJ[iex]==-2) {//insertion
-//                         tagNM+=trOut.exons[iex+1][EX_R]-trOut.exons[iex][EX_R]-trOut.exons[iex][EX_L];
-//                     };
-//                 };
-//             };
-//             tagMD+=to_string(matchN);
-//         };
+    
+    uint32 tagNM = trOut.nMM + trOut.lIns + trOut.lDel;
 
         for (uint ii=0;ii<P.outSAMattrOrder.size();ii++) {
             switch (P.outSAMattrOrder[ii]) {
@@ -128,6 +96,10 @@ uint64 ReadAlign::outputSpliceGraphSAM(Transcript const &trOut, uint nTrOut, uin
                 case ATTR_nM:
                     *outStream<<"\tnM:i:"<<trOut.nMM;
                     break;
+                case ATTR_NM:
+                    *outStream<< "\tNM:i:" <<tagNM;
+                    break;
+                    
 //                 case ATTR_jM:
 //                     *outStream<<"\tjM:B:c"<< SJmotif;
 //                     break;
@@ -140,9 +112,6 @@ uint64 ReadAlign::outputSpliceGraphSAM(Transcript const &trOut, uint nTrOut, uin
 //                     } else if (trOut.sjMotifStrand==2) {
 //                         *outStream<<"\tXS:A:-";
 //                     };
-//                     break;
-//                 case ATTR_NM:
-//                     *outStream<< "\tNM:i:" <<tagNM;
 //                     break;
 //                 case ATTR_MD:
 //                     *outStream<< "\tMD:Z:" <<tagMD;
@@ -160,7 +129,6 @@ uint64 ReadAlign::outputSpliceGraphSAM(Transcript const &trOut, uint nTrOut, uin
                 case ATTR_jM:
                 case ATTR_jI:
                 case ATTR_XS:
-                case ATTR_NM:
                 case ATTR_MD:
                     
                 case ATTR_ch:
