@@ -76,10 +76,10 @@ int ReadAlign::oneRead() {//process one read: load, map, write
 
     peOverlapMergeMap();
     
-    transformGenome();
-    
     multMapSelect();
     
+    transformGenome();
+
     mappedFilter();
 
     if (!peOv.yes) {//if the alignment was not mates merged - otherwise the chimeric detection was already done

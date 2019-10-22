@@ -182,7 +182,7 @@ void Genome::transformGenome(vector<array<uint64,exL>> &exonLoci)
             convStream << transformBlocks.size() <<'\t'<< "-1" <<'\n'; //no -strand
     
             for (auto &tb : transformBlocks) {
-                convStream << tb[0] <<'\t'<< tb[1] <<'\t'<< tb[2] <<'\n';
+                convStream << tb[2] <<'\t'<< tb[1] <<'\t'<< tb[0] <<'\n'; //revert old new for reverse conversion
             };
             convStream.close();
         };

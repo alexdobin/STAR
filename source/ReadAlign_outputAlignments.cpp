@@ -11,6 +11,7 @@ void ReadAlign::outputAlignments() {
     outFilterPassed=true;//only false if the alignment is held for outFilterBySJoutStage
     if (unmapType==-1) {//output transcripts
         if (P.outFilterBySJoutStage==1) {//filtering by SJout
+            
             for (uint iTr=0;iTr<nTr;iTr++) {//check transcript for unannotated junctions
                 for (uint iex=0;iex<trMult[iTr]->nExons-1;iex++) {//check all junctions
                     if (trMult[iTr]->canonSJ[iex]>=0 && trMult[iTr]->sjAnnot[iex]==0) {
@@ -20,8 +21,9 @@ void ReadAlign::outputAlignments() {
                 };
                 if (!outFilterPassed) break;
             };
+            
             if (!outFilterPassed) {//this read is held for further filtering BySJout, record fastq
-                unmapType=-3; //the read is not conisddred unmapped
+                unmapType=-3; //the read is not conisdered mapped
                 statsRA.readN--;
                 statsRA.readBases -= readLength[0]+readLength[1];
 
@@ -37,14 +39,16 @@ void ReadAlign::outputAlignments() {
                     };
                 };
             };
+            
+            //SJ output for all reads, including those not passed bySJout filtering. This only needs to be at the 1st stage of BySJout filtering
+            if (P.outSJfilterReads=="All" || nTr==1) {
+                uint sjReadStartN=chunkOutSJ1->N;
+                for (uint iTr=0;iTr<nTr;iTr++) {//report SJs for all transcripts
+                    outputTranscriptSJ (*(trMult[iTr]), nTr, chunkOutSJ1, sjReadStartN);
+                };
+            };            
         };
 
-        if (P.outSJfilterReads=="All" || nTr==1) {
-            uint sjReadStartN=chunkOutSJ1->N;
-            for (uint iTr=0;iTr<nTr;iTr++) {//report SJs for all transcripts
-                outputTranscriptSJ (*(trMult[iTr]), nTr, chunkOutSJ1, sjReadStartN);
-            };
-        };
 
         if (outFilterPassed) {
             if (nTr>1) {//multimappers
@@ -194,7 +198,9 @@ void ReadAlign::outputAlignments() {
                 };
             };
 
-            if (P.outSJfilterReads=="All" || nTrOut==1) {
+            //junction output for mapped reads (i.e. passed BySJout filtering)
+            //TODO junction output for converted genome. Do not record junction motif ot annotation, calculate it after final collapse
+            if ((P.outSJfilterReads=="All" || nTrOut==1) && !mapGen.genomeOut.convYes) {
                 uint sjReadStartN=chunkOutSJ->N;
                 for (uint64 iTr=0; iTr<nTrOut; iTr++) {//write all transcripts junctions
                     outputTranscriptSJ (*(trMult[iTr]), nTrOut, chunkOutSJ, sjReadStartN);

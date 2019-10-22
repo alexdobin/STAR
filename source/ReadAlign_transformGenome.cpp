@@ -3,7 +3,7 @@
 
 void ReadAlign::transformGenome() 
 {//convert to new genome
-    if (!mapGen.genomeOut.convYes || mapGen.pGe.transform.type==0)
+    if (!mapGen.genomeOut.convYes || mapGen.pGe.transform.type==0 || nTr > P.outFilterMultimapNmax || nTr==0)
         return;
     
     uint32 nTr1=0;

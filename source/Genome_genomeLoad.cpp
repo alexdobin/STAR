@@ -486,9 +486,9 @@ void Genome::genomeLoad(){//allocate and load Genome
         genomeOut.gapsAreJunctions=false;
         genomeOut.convFile=pGe.gDir+"/transformGenomeBlocks.tsv";
         
-        if (pGe.transform.typeString=="Haploid") {
+        if (P1.pGe.transform.typeString=="Haploid") {
             pGe.transform.type=1;
-        } else if (pGe.transform.typeString=="Diploid") {
+        } else if (P1.pGe.transform.typeString=="Diploid") {
             pGe.transform.type=2;
         };
         
