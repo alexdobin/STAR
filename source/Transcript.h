@@ -70,7 +70,7 @@ public:
     void peOverlapSEtoPE(uint* mSta, Transcript &t);
     void extractSpliceJunctions(vector<array<uint64,2>> &sjOut, bool &annotYes);
     
-    bool convertGenome(Genome &genOut, Transcript & A);
+    bool transformGenome(Genome &genOut, Transcript & A);
     bool convertGenomeCigar(Genome &genOut, Transcript & A);
 
 private:

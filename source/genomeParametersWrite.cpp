@@ -12,15 +12,20 @@ void genomeParametersWrite(string fileName, Parameters& P, string errorOut, Geno
     genomePar << "genomeType\t" << mapGen.pGe.gTypeString <<"\n";
     
     genomePar << "genomeFastaFiles\t";
-    for (uint ii=0;ii<mapGen.pGe.gFastaFiles.size();ii++) genomePar << mapGen.pGe.gFastaFiles.at(ii) << " ";
+    for (uint ii=0;ii<mapGen.pGe.gFastaFiles.size();ii++) 
+        genomePar << mapGen.pGe.gFastaFiles.at(ii) << " ";
     genomePar << "\n";
     genomePar << "genomeSAindexNbases\t" << mapGen.pGe.gSAindexNbases << "\n";
     genomePar << "genomeChrBinNbits\t" << mapGen.pGe.gChrBinNbits << "\n";
     genomePar << "genomeSAsparseD\t" << mapGen.pGe.gSAsparseD <<"\n";
+    
+    genomePar << "genomeTransformType\t" << mapGen.pGe.transform.typeString <<"\n";
+    genomePar << "genomeTransformVCF\t" << mapGen.pGe.transform.vcfFile <<"\n";
+    
     genomePar << "sjdbOverhang\t" << mapGen.sjdbOverhang <<"\n";
-
     genomePar << "sjdbFileChrStartEnd\t";
-    for (uint ii=0;ii<mapGen.pGe.sjdbFileChrStartEnd.size();ii++) genomePar<< mapGen.pGe.sjdbFileChrStartEnd.at(ii) << " ";
+    for (uint ii=0;ii<mapGen.pGe.sjdbFileChrStartEnd.size();ii++) 
+        genomePar<< mapGen.pGe.sjdbFileChrStartEnd.at(ii) << " ";
     genomePar<<"\n";
 
     genomePar << "sjdbGTFfile\t" << mapGen.pGe.sjdbGTFfile <<"\n";

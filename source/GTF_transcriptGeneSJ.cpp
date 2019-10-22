@@ -25,6 +25,7 @@ uint64 GTF::transcriptGeneSJ() {//sort exonLoci by transcript ID and exon coordi
     if (!gtfYes)
         return 0;
     
+    exonN=exonLoci.size();
     qsort((void*) exonLoci.data(), exonN, sizeof(uint64)*exL, funCompareUint2);
 
     {//exon-gene data structures: exon start/end/strand/gene/transcript

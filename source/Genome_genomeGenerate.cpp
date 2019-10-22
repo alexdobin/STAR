@@ -132,28 +132,23 @@ void Genome::genomeGenerate() {
 
     nGenome = genomeScanFastaFiles(P,NULL,false,*this);//first scan the fasta file to find all the sizes
        
-    genomeSequenceAllocate();
+    genomeSequenceAllocate(nGenome, nG1alloc, G, G1);
 
     genomeScanFastaFiles(P,G,true,*this);    //load the genome sequence
     
-    consensusSequence(); //replace with consensus allele
-
-    for (uint ii=0;ii<nGenome;ii++) {//- strand
-        G[2*nGenome-1-ii]=G[ii]<4 ? 3-G[ii] : G[ii];
-    };    
+    consensusSequence(); //replace with consensus allele 
+        
+    SjdbClass sjdbLoci; //will be filled in transcriptGeneSJ below
+    GTF mainGTF(*this, P, pGe.gDir, sjdbLoci); //this loads exonLoci and gene/transcript metadata only, sjdbLoci is not filled
     
-    //load junctions if needed
-    SjdbClass sjdbLoci;
+    transformGenome(mainGTF.exonLoci);
     
-    GTF mainGTF(*this, P, pGe.gDir, sjdbLoci);
-            
     mainGTF.superTranscript(); //this may change the genome into (Super)Transcriptome
 
     chrBinFill();//chrBin is first used in the transcriptGeneSJ below
-    
     mainGTF.transcriptGeneSJ();
     
-    sjdbLoadFromFiles(P,sjdbLoci);    
+    sjdbLoadFromFiles(P,sjdbLoci);//this will not be transformed. TODO prevent this parameter combination
 
     if (pGe.gSAindexNbases > log2(nGenome)/2-1) {
         ostringstream warnOut; 
@@ -166,6 +161,9 @@ void Genome::genomeGenerate() {
     writeChrInfo(pGe.gDir);
 
     //preparing to generate SA
+    for (uint ii=0;ii<nGenome;ii++) {//- strand
+        G[2*nGenome-1-ii]=G[ii]<4 ? 3-G[ii] : G[ii];
+    };   
     nSA=0;
     for (uint ii=0;ii<2*nGenome;ii+=pGe.gSAsparseD) {
         if (G[ii]<4) {

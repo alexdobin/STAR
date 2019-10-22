@@ -1,5 +1,5 @@
 #include "Transcript.h"
-bool Transcript::convertGenome(Genome &genOut, Transcript & A)
+bool Transcript::transformGenome(Genome &genOut, Transcript & A)
 {
     uint32 nB=0;//number of out blocks
     auto &coBl=genOut.genomeOut.convBlocks;

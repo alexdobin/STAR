@@ -13,6 +13,12 @@ class ParametersGenome {//"constant" genome parameters - user input
         vector <string> gChainFiles;
         string gConsensusFile;
 
+        struct {
+            int32 type;
+            string typeString;
+            string vcfFile;
+        } transform;
+        
         uint gSAindexNbases;//length of the SA pre-index strings
         uint gChrBinNbits;
         uint gSAsparseD;//SA sparsity

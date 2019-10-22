@@ -16,7 +16,11 @@ private:
     void HandleSharedMemoryException(const SharedMemoryException & exc, uint64 shmSize);
 public:
     Parameters &P;
+    ParametersGenome &pGe;
+    SharedMemory *sharedMemory;
 
+    enum {exT,exS,exE,exG,exL}; //indexes in the exonLoci array from GTF
+    
     struct {
         bool convYes;
         bool gapsAreJunctions;
@@ -26,6 +30,8 @@ public:
         uint64 nMinusStrandOffset;//offset for the (-) strand, typically=nGenomeReal
     } genomeOut;
     
+    vector<array<uint64,3>> transformBlocks;
+     
     char *G, *G1;
     uint64 nGenome, nG1alloc;
     PackedArray SA,SAinsert,SApass1,SApass2;
@@ -34,7 +40,6 @@ public:
 
     uint nGenomeInsert, nGenomePass1, nGenomePass2, nSAinsert, nSApass1, nSApass2;
 
-    ParametersGenome &pGe;
 
     //chr parameters
     vector <uint64> chrStart, chrLength, chrLengthAll;
@@ -66,8 +71,6 @@ public:
     //SuperTranscriptome genome
     SuperTranscriptome *superTr;
 
-    SharedMemory *sharedMemory;
-
     Genome (Parameters &P, ParametersGenome &pGe);
     //~Genome();
 
@@ -76,11 +79,12 @@ public:
     void genomeOutLoad();
     void chrBinFill();
     void chrInfoLoad();
-    void genomeSequenceAllocate();
+    void genomeSequenceAllocate(uint64 nGenomeIn, uint64 &nG1allocOut, char*& Gout, char*& G1out);
 
     void insertSequences();
 
     void consensusSequence();
+    void transformGenome(vector<array<uint64,exL>> &exonLoci) ;
 
     void genomeGenerate();
     void writeChrInfo(const string dirOut);

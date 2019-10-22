@@ -477,7 +477,24 @@ void Genome::genomeLoad(){//allocate and load Genome
 //             if (g1!=g2)
 //                 cout <<b[0]<<" "<<b[1]<<" "<<b[2]<<endl;
 //         };
+    };
+    
+    if (P1.pGe.transform.typeString != "None") {//convert genome coordinates
+        //genomeOut
+        P.pGeOut.gDir=pGe.gDir+"/normalGenome/";
+        genomeOut.convYes=true;
+        genomeOut.gapsAreJunctions=false;
+        genomeOut.convFile=pGe.gDir+"/transformGenomeBlocks.tsv";
         
+        if (pGe.transform.typeString=="Haploid") {
+            pGe.transform.type=1;
+        } else if (pGe.transform.typeString=="Diploid") {
+            pGe.transform.type=2;
+        };
+        
+        genomeOut.g = new Genome(P,P.pGeOut);
+        genomeOut.g->genomeOut=genomeOut;
+        genomeOut.g->genomeOutLoad();
     };
     
     if (P.pGe.gLoad=="LoadAndExit" || P.pGe.gLoad=="Remove") {

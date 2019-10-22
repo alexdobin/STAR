@@ -14,7 +14,7 @@
 //arbitrary number for ftok function
 #define SHM_projectID 23
 
-Genome::Genome (Parameters &P, ParametersGenome &pGe): P(P), shmStart(NULL), pGe(pGe), sharedMemory(NULL)
+Genome::Genome (Parameters &P, ParametersGenome &pGe): shmStart(NULL), P(P), pGe(pGe), sharedMemory(NULL)
 {
     shmKey=ftok(pGe.gDir.c_str(),SHM_projectID);
     genomeOut.g=this;//will change if genomeOut is different from genomeMain
@@ -205,19 +205,19 @@ void Genome::chrBinFill() {
 };
 
 //////////////////////////////////////////////////////////
-void Genome::genomeSequenceAllocate()
+void Genome::genomeSequenceAllocate(uint64 nGenomeIn, uint64 &nG1allocOut, char*& Gout, char*& G1out)
 {
-    nG1alloc=(nGenome + 1)*2;
+    nG1allocOut=(nGenomeIn + 1)*2;
     
-    if (P.limitGenomeGenerateRAM < (nG1alloc+nG1alloc/3)) {//allocate nG1alloc/3 for SA generation
+    if (P.limitGenomeGenerateRAM < (nG1allocOut+nG1allocOut/3)) {//allocate nG1alloc/3 for SA generation
         ostringstream errOut;
         errOut <<"EXITING because of FATAL PARAMETER ERROR: limitGenomeGenerateRAM="<< (P.limitGenomeGenerateRAM) <<"is too small for your genome\n";
-        errOut <<"SOLUTION: please specify --limitGenomeGenerateRAM not less than "<< nG1alloc+nG1alloc/3 <<" and make that much RAM available \n";
+        errOut <<"SOLUTION: please specify --limitGenomeGenerateRAM not less than "<< nG1allocOut+nG1allocOut/3 <<" and make that much RAM available \n";
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
     };    
     
-    G1=new char[nG1alloc];
-    G=G1+1;
+    G1out=new char[nG1allocOut];
+    Gout=G1out+1;
 
-    memset(G1,GENOME_spacingChar,nG1alloc);//initialize to K-1 all bytes
+    memset(G1out,GENOME_spacingChar,nG1allocOut);//initialize to K-1 all bytes
 };

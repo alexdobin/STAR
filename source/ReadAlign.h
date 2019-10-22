@@ -135,7 +135,7 @@ class ReadAlign {
         char *swT;
 
         uint storedLmin, uniqLmax, uniqLmaxInd, multLmax, multLmaxN, multNmin, multNminL, multNmax, multNmaxL;
-        uint nTr, nTrMate; // number of transcripts called
+        uint64 nTr, nTrMate; // number of transcripts called
         intScore maxScore;//maximum alignment score
 
         //old chimeric detection
@@ -183,6 +183,7 @@ class ReadAlign {
         bool chimericDetectionMult();
         void chimericDetectionPEmerged(ReadAlign &seRa);
 
+        void transformGenome();
         void outputAlignments();
         void calcCIGAR(Transcript const &trOut, uint nMates, uint iExMate, uint leftMate);
 

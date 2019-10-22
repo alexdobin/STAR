@@ -70,12 +70,16 @@ int ReadAlign::oneRead() {//process one read: load, map, write
     //map the read
     if (P.pGe.gType==101) {//SpliceGraph
         mapOneReadSpliceGraph();
-    } else {//all other cases - standard allignmen algorithm
+    } else {//all other cases - standard alignment algorithm
         mapOneRead();
     };
 
     peOverlapMergeMap();
+    
+    transformGenome();
+    
     multMapSelect();
+    
     mappedFilter();
 
     if (!peOv.yes) {//if the alignment was not mates merged - otherwise the chimeric detection was already done
