@@ -479,18 +479,22 @@ void Genome::genomeLoad(){//allocate and load Genome
 //         };
     };
     
-    if (P1.pGe.transform.typeString != "None") {//convert genome coordinates
+        
+    if (P1.pGe.transform.typeString=="Haploid") {
+        pGe.transform.type=1;
+    } else if (P1.pGe.transform.typeString=="Diploid") {
+        pGe.transform.type=2;
+    } else {//TODO check for wrong values
+        pGe.transform.type=0;
+    };    
+    
+    if (pGe.transform.type != 0) {//convert genome coordinates
         //genomeOut
         P.pGeOut.gDir=pGe.gDir+"/normalGenome/";
         genomeOut.convYes=true;
         genomeOut.gapsAreJunctions=false;
         genomeOut.convFile=pGe.gDir+"/transformGenomeBlocks.tsv";
-        
-        if (P1.pGe.transform.typeString=="Haploid") {
-            pGe.transform.type=1;
-        } else if (P1.pGe.transform.typeString=="Diploid") {
-            pGe.transform.type=2;
-        };
+
         
         genomeOut.g = new Genome(P,P.pGeOut);
         genomeOut.g->genomeOut=genomeOut;

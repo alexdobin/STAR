@@ -128,6 +128,7 @@ void Genome::transformGenome(vector<array<uint64,exL>> &exonLoci)
             
             if (!chtTransformYes[ichr]) {//simple copy
                 memcpy(Gnew+chrStart1[ichr], G+chrStart[ichr], chrLength[ichr]);
+                transformBlocks.push_back({chrStart[ichr], chrLength[ichr], chrStart1[ichr]});
                 continue;
             };
             
