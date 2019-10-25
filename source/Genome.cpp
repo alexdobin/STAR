@@ -207,7 +207,7 @@ void Genome::chrBinFill() {
 //////////////////////////////////////////////////////////
 void Genome::genomeSequenceAllocate(uint64 nGenomeIn, uint64 &nG1allocOut, char*& Gout, char*& G1out)
 {
-    nG1allocOut=(nGenomeIn + 1)*2;
+    nG1allocOut=(nGenomeIn + 100)*2; //extra 100 bytes at the beginning, just in case
     
     if (P.limitGenomeGenerateRAM < (nG1allocOut+nG1allocOut/3)) {//allocate nG1alloc/3 for SA generation
         ostringstream errOut;
@@ -217,7 +217,7 @@ void Genome::genomeSequenceAllocate(uint64 nGenomeIn, uint64 &nG1allocOut, char*
     };    
     
     G1out=new char[nG1allocOut];
-    Gout=G1out+1;
+    Gout=G1out+100;
 
     memset(G1out,GENOME_spacingChar,nG1allocOut);//initialize to K-1 all bytes
 };

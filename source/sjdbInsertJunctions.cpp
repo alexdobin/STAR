@@ -12,8 +12,8 @@ void sjdbInsertJunctions(Parameters & P, Genome & mapGen, Genome & mapGen1, Sjdb
 {
     time_t rawtime;
 
-    if (mapGen.sjdbN>0 && sjdbLoci.chr.size()==0)
-    {//load from the saved genome, only if the loading did not happen already (if sjdb insertion happens at the 1st pass, sjdbLoci will be populated
+    if (mapGen.sjdbN>0 && sjdbLoci.chr.size()==0) {
+        //load from the saved genome, only if the loading did not happen already (if sjdb insertion happens at the 1st pass, sjdbLoci will be populated
         ifstream & sjdbStreamIn = ifstrOpen(P.pGe.gDir+"/sjdbList.out.tab", ERROR_OUT, "SOLUTION: re-generate the genome in pGe.gDir=" + P.pGe.gDir, P);
         sjdbLoadFromStream(sjdbStreamIn, sjdbLoci);
         sjdbLoci.priority.resize(sjdbLoci.chr.size(),30);
@@ -21,9 +21,9 @@ void sjdbInsertJunctions(Parameters & P, Genome & mapGen, Genome & mapGen1, Sjdb
         P.inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the generated genome " << P.pGe.gDir+"/sjdbList.out.tab" <<": "<<sjdbLoci.chr.size()<<" total junctions\n\n";
     };
 
-    if (P.twoPass.pass2)
-    {//load 1st pass new junctions
-     //sjdbLoci already contains the junctions from before 1st pass
+    if (P.twoPass.pass2) {
+        //load 1st pass new junctions
+        //sjdbLoci already contains the junctions from before 1st pass
         ifstream sjdbStreamIn ( P.twoPass.pass1sjFile.c_str() );
         if (sjdbStreamIn.fail()) {
             ostringstream errOut;
@@ -34,13 +34,13 @@ void sjdbInsertJunctions(Parameters & P, Genome & mapGen, Genome & mapGen1, Sjdb
         sjdbLoci.priority.resize(sjdbLoci.chr.size(),0);
         time ( &rawtime );
         P.inOut->logMain << timeMonthDayTime(rawtime) << "   Loaded database junctions from the 1st pass file: " << P.twoPass.pass1sjFile <<": "<<sjdbLoci.chr.size()<<" total junctions\n\n";
-    } else if (P.runMode!="genomeGenerate")
-    {//loading junctions from GTF or tab or from the saved genome is only allowed at the 1st pass
-     //at the 2nd pass these are already in the sjdbLoci
-     //with runMode=="genomeGenerate", the junctions from GTF and File are already loaded
+    } else if (P.runMode!="genomeGenerate") {
+        //loading junctions from GTF or tab or from the saved genome is only allowed at the 1st pass
+        //at the 2nd pass these are already in the sjdbLoci
+        //with runMode=="genomeGenerate", the junctions from GTF and File are already loaded
         sjdbLoadFromFiles(P, sjdbLoci);
         GTF gtf(mapGen, P, P.sjdbInsert.outDir, sjdbLoci);
-        gtf.transcriptGeneSJ();
+        gtf.transcriptGeneSJ(P.sjdbInsert.outDir);
     };
 
     //char *Gsj=new char [2*mapGen.sjdbLength*sjdbLoci.chr.size()*(P.var.yes ? 2:1)+1];//array to store junction sequences, will be filled in sjdbPrepare

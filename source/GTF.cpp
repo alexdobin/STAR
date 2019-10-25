@@ -4,8 +4,8 @@
 #include "streamFuns.h"
 #include "TimeFunctions.h"
 
-GTF::GTF(Genome &genomeIn, Parameters &Pin, string dirOutIn, SjdbClass &sjdbLoci) 
-                 : genome(genomeIn), P(Pin), dirOut(dirOutIn), sjdbLoci(sjdbLoci), superTrome(P)
+GTF::GTF(Genome &genome, Parameters &P, const string &dirOut, SjdbClass &sjdbLoci) 
+                 : genome(genome), P(P), dirOut(dirOut), sjdbLoci(sjdbLoci), superTrome(P)
  {//initialize; load gtf file; returns number of added junctions
                      
     if (genome.sjdbOverhang==0 || genome.pGe.sjdbGTFfile=="-") {//no GTF
@@ -13,12 +13,15 @@ GTF::GTF(Genome &genomeIn, Parameters &Pin, string dirOutIn, SjdbClass &sjdbLoci
         return;
     };
     gtfYes=true;
+    mkdir(dirOut.c_str(), P.runDirPerm);
     
     time_t rawTime;
     time(&rawTime);
     P.inOut->logMain     << timeMonthDayTime(rawTime) <<" ..... processing annotations GTF\n" <<flush;
     *P.inOut->logStdOut  << timeMonthDayTime(rawTime) <<" ..... processing annotations GTF\n" <<flush;
 
+    std::map <string,uint64> transcriptIDnumber, geneIDnumber;    
+    
     ifstream sjdbStreamIn ( genome.pGe.sjdbGTFfile.c_str() );
     if (sjdbStreamIn.fail()) {
         ostringstream errOut;
@@ -26,8 +29,7 @@ GTF::GTF(Genome &genomeIn, Parameters &Pin, string dirOutIn, SjdbClass &sjdbLoci
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
     };
 
-    if (genome.chrNameIndex.size()==0)
-    {
+    if (genome.chrNameIndex.size()==0) {
         for (uint64 ii=0;ii<genome.nChrReal;ii++) {
             genome.chrNameIndex[genome.chrName[ii]]=ii;
         };

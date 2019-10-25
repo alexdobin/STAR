@@ -22,15 +22,14 @@ public:
     vector<uint32> transcriptStrand;
     vector <string> transcriptID, geneID;    
     vector<array<string,2>> geneAttr;
-    std::map <string,uint64> transcriptIDnumber, geneIDnumber;
 
     vector<vector<uint8>> transcriptSeq;//sequences of normal transcripts
     vector<array<uint64,2>> transcriptStartEnd;//normal transcripts start/end in the normal genome
 
     SuperTranscriptome superTrome;
     
-    GTF(Genome &genomeIn, Parameters &Pin, string dirOutIn, SjdbClass &sjdbLoci);
-    uint64 transcriptGeneSJ();
+    GTF(Genome &genomeIn, Parameters &Pin, const string &dirOut, SjdbClass &sjdbLoci);
+    uint64 transcriptGeneSJ(const string &dirOut);
     void superTranscript();
 };
 

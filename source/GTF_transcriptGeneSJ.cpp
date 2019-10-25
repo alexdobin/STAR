@@ -20,7 +20,7 @@
 #define GTF_exgeGeID(ii) ((ii)*GTF_exgeLoci_size+3)
 #define GTF_exgeTrID(ii) ((ii)*GTF_exgeLoci_size+4)
 
-uint64 GTF::transcriptGeneSJ() {//sort exonLoci by transcript ID and exon coordinates
+uint64 GTF::transcriptGeneSJ(const string &dirOut) {//sort exonLoci by transcript ID and exon coordinates
     
     if (!gtfYes)
         return 0;
@@ -171,7 +171,7 @@ uint64 GTF::transcriptGeneSJ() {//sort exonLoci by transcript ID and exon coordi
     sjdbLoci.priority.resize(sjdbLoci.chr.size(),20);
 
     P.inOut->logMain << "Processing pGe.sjdbGTFfile=" << genome.pGe.sjdbGTFfile <<", found:\n";
-    P.inOut->logMain << "\t\t"  << transcriptIDnumber.size() <<" transcripts\n" << "\t\t"  << exonN << " exons (non-collapsed)\n" << "\t\t"  << sjdbLoci.chr.size()-sjdbN1 << " collapsed junctions\n";
+    P.inOut->logMain << "\t\t"  << transcriptID.size() <<" transcripts\n" << "\t\t"  << exonN << " exons (non-collapsed)\n" << "\t\t"  << sjdbLoci.chr.size()-sjdbN1 << " collapsed junctions\n";
     P.inOut->logMain << "Total junctions: " <<sjdbLoci.chr.size()<<"\n";
     time_t rawTime;
     time(&rawTime);

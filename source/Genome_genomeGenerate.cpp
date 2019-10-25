@@ -106,10 +106,8 @@ void Genome::genomeGenerate() {
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
     };
     
-    if (pGe.sjdbFileChrStartEnd.at(0)=="-" && pGe.sjdbGTFfile=="-")
-    {
-        if (P.parArray.at(P.pGe.sjdbOverhang_par)->inputLevel>0 && sjdbOverhang>0)
-        {
+    if (pGe.sjdbFileChrStartEnd.at(0)=="-" && pGe.sjdbGTFfile=="-") {
+        if (P.parArray.at(P.pGe.sjdbOverhang_par)->inputLevel>0 && sjdbOverhang>0) {
             ostringstream errOut;
             errOut << "EXITING because of FATAL INPUT PARAMETER ERROR: when generating genome without annotations (--sjdbFileChrStartEnd or --sjdbGTFfile options)\n";
             errOut << "do not specify >0 --sjdbOverhang\n";
@@ -118,7 +116,20 @@ void Genome::genomeGenerate() {
         };
         sjdbOverhang=0;
     };
-
+    
+    if (pGe.transform.typeString=="None") {
+        pGe.transform.type=0;
+    } else if (pGe.transform.typeString=="Haploid") {
+        pGe.transform.type=1;
+    } else if (pGe.transform.typeString=="Diploid") {
+        pGe.transform.type=2;
+    } else {
+        ostringstream errOut;
+        errOut << "EXITING because of FATAL INPUT ERROR: unrecognized option in --outTransformType=" << pGe.transform.typeString << "\n";
+        errOut << "SOLUTION: use one of the allowed values of --outWigType : 'None' or 'Haploid' or 'Diploid' \n";
+        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
+    };
+    
     //time
     time_t rawTime;
     string timeString;
@@ -131,22 +142,20 @@ void Genome::genomeGenerate() {
     genomeChrBinNbases=1LLU << pGe.gChrBinNbits;
 
     nGenome = genomeScanFastaFiles(P,NULL,false,*this);//first scan the fasta file to find all the sizes
-       
     genomeSequenceAllocate(nGenome, nG1alloc, G, G1);
-
     genomeScanFastaFiles(P,G,true,*this);    //load the genome sequence
     
-    consensusSequence(); //replace with consensus allele 
+    //consensusSequence(); //replace with consensus allele 
         
     SjdbClass sjdbLoci; //will be filled in transcriptGeneSJ below
-    GTF mainGTF(*this, P, pGe.gDir, sjdbLoci); //this loads exonLoci and gene/transcript metadata only, sjdbLoci is not filled
+    GTF mainGTF(*this, P, pGe.gDir+(pGe.transform.type==0 ? "" : "/normalGenome/"), sjdbLoci); //this loads exonLoci and gene/transcript metadata only, sjdbLoci is not filled
     
-    transformGenome(mainGTF.exonLoci);
+    transformGenome(&mainGTF);
     
     mainGTF.superTranscript(); //this may change the genome into (Super)Transcriptome
 
     chrBinFill();//chrBin is first used in the transcriptGeneSJ below
-    mainGTF.transcriptGeneSJ();
+    mainGTF.transcriptGeneSJ(pGe.gDir);
     
     sjdbLoadFromFiles(P,sjdbLoci);//this will not be transformed. TODO prevent this parameter combination
 
@@ -162,6 +171,8 @@ void Genome::genomeGenerate() {
 
     //preparing to generate SA
     for (uint ii=0;ii<nGenome;ii++) {//- strand
+        //if (G[ii]>5)
+        //    cerr << ii <<" "<< G[ii]<<"\n";
         G[2*nGenome-1-ii]=G[ii]<4 ? 3-G[ii] : G[ii];
     };   
     nSA=0;
@@ -220,7 +231,7 @@ void Genome::genomeGenerate() {
         //saChunkSize=nSA/saChunkN+100000;//final chunk size
         if (P.runThreadN>1) saChunkSize=min(saChunkSize,nSA/(P.runThreadN-1));
 
-        uint saChunkN=nSA/saChunkSize;//estimate
+        uint saChunkN=nSA/saChunkSize+1;//estimate
         uint* indPrefStart = new uint [saChunkN*2]; //start and stop, *2 just in case
         uint* indPrefChunkCount = new uint [saChunkN*2];
         indPrefStart[0]=0;

@@ -8,6 +8,8 @@
 #include "Variation.h"
 #include "SuperTranscriptome.h"
 
+class GTF;
+
 class Genome {
 private:
     key_t shmKey;
@@ -20,17 +22,6 @@ public:
     SharedMemory *sharedMemory;
 
     enum {exT,exS,exE,exG,exL}; //indexes in the exonLoci array from GTF
-    
-    struct {
-        bool convYes;
-        bool gapsAreJunctions;
-        Genome *g;
-        string convFile;
-        vector<array<uint64,3>> convBlocks;
-        uint64 nMinusStrandOffset;//offset for the (-) strand, typically=nGenomeReal
-    } genomeOut;
-    
-    vector<array<uint64,3>> transformBlocks;
      
     char *G, *G1;
     uint64 nGenome, nG1alloc;
@@ -84,12 +75,32 @@ public:
     void insertSequences();
 
     void consensusSequence();
-    void transformGenome(vector<array<uint64,exL>> &exonLoci) ;
-
+    
     void genomeGenerate();
     void writeChrInfo(const string dirOut);
     void concatenateChromosomes(const vector<vector<uint8>> &vecSeq, const vector<string> &vecName, const uint64 padBin);
     void writeGenomeSequence(const string dirOut);
-
+    
+    //transform genome coordinates
+    struct {
+        bool convYes;
+        bool gapsAreJunctions;
+        Genome *g;
+        string convFile;
+        vector<array<uint64,3>> convBlocks;
+        uint64 nMinusStrandOffset;//offset for the (-) strand, typically=nGenomeReal
+    } genomeOut;
+    
+    typedef struct {
+        uint64 pos;
+        int32 len;//0: SNV, <0: deletion; >0: insertion
+        array<string,2> seq;//sequence for SNV and insertions, empty for deletions
+    } VariantInfo;
+    
+    void transformGenome(GTF *gtf) ;
+    void transformChrLenStart(map<string,vector<VariantInfo>> &vcfVariants, vector<uint64> &chrStart1, vector<uint64> &chrLength1);
+    void transformGandBlocks(map<string,vector<VariantInfo>> &vcfVariants, vector<uint64> &chrStart1, vector<uint64> &chrLength1, vector<array<uint64,3>> &transformBlocks, char *Gnew);
+    void transformBlocksWrite(vector<array<uint64,3>> &transformBlocks);
+    void transformExonLoci(vector<array<uint64,exL>> &exonLoci, vector<array<uint64,3>> &transformBlocks);
 };
 #endif
