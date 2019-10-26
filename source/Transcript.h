@@ -34,7 +34,8 @@ public:
     //loci
     uint rStart, roStart, rLength, gStart, gLength, cStart; //read, original read, and genomic start/length, chromosome start
     uint Chr,Str,roStr; //chromosome and strand and original read Strand
-
+    uint32 haploType; //haplotype index for diploid genome
+    
     bool primaryFlag;
 
     uint nMatch;//min number of matches

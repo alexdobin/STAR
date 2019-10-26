@@ -323,6 +323,11 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
                         *outStream<< "\tMC:Z:" <<matesCIGAR[1-imate];
                     };
                     break;
+                case ATTR_ha:
+                    if (mapGen.pGe.transform.type==2) {
+                        *outStream<< "\tha:i:" <<trOut.haploType;
+                    };
+                    break;                    
                     
                 //do nothing - this attributes only work for BAM output
                 case ATTR_ch:

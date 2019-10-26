@@ -911,8 +911,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 
     // in/out buffers
     #define BUFFER_InSizeFraction 0.5
-    if (limitIObufferSize<limitOutSJcollapsed*Junction::dataSize+1000000)
-    {
+    if (limitIObufferSize<limitOutSJcollapsed*Junction::dataSize+1000000) {
         ostringstream errOut;
         errOut <<"EXITING because of FATAL INPUT ERROR: --limitIObufferSize="<<limitIObufferSize <<" is too small for ";
         errOut << "--limitOutSJcollapsed*"<<Junction::dataSize<<"="<< limitOutSJcollapsed<<"*"<<Junction::dataSize<<"="<<limitOutSJcollapsed*Junction::dataSize<<"\n";
@@ -924,13 +923,18 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     chunkInSizeBytes=chunkInSizeBytesArray-2*(DEF_readSeqLengthMax+1)-2*DEF_readNameLengthMax;//to prevent overflow
 
     //basic trimming: same adapter for both mates
-    if (clip5pNbases.size()==1 && readNmates>=2) clip5pNbases.push_back(clip5pNbases[0]);
-    if (clip3pNbases.size()==1 && readNmates>=2) clip3pNbases.push_back(clip3pNbases[0]);
-    if (clip3pAfterAdapterNbases.size()==1 && readNmates>=2) clip3pAfterAdapterNbases.push_back(clip3pAfterAdapterNbases[0]);
+    if (clip5pNbases.size()==1 && readNmates>=2) 
+        clip5pNbases.push_back(clip5pNbases[0]);
+    if (clip3pNbases.size()==1 && readNmates>=2) 
+        clip3pNbases.push_back(clip3pNbases[0]);
+    if (clip3pAfterAdapterNbases.size()==1 && readNmates>=2) 
+        clip3pAfterAdapterNbases.push_back(clip3pAfterAdapterNbases[0]);
 
     //adapter clipping: same adapter for both mates
-    if (clip3pAdapterSeq.size()==1 && readNmates>=2) clip3pAdapterSeq.push_back(clip3pAdapterSeq[0]);
-    if (clip3pAdapterMMp.size()==1 && readNmates>=2) clip3pAdapterMMp.push_back(clip3pAdapterMMp[0]);
+    if (clip3pAdapterSeq.size()==1 && readNmates>=2) 
+        clip3pAdapterSeq.push_back(clip3pAdapterSeq[0]);
+    if (clip3pAdapterMMp.size()==1 && readNmates>=2) 
+        clip3pAdapterMMp.push_back(clip3pAdapterMMp[0]);
     for (uint imate=0;imate<min(2LLU,readNmates);imate++) {
         if (clip3pAdapterSeq.at(imate).at(0)=='-') {// no clipping
             clip3pAdapterSeq.at(imate).assign("");
@@ -943,8 +947,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 
     //variation
     var.yes=false;
-    if (var.vcfFile!="-")
-    {
+    if (var.vcfFile!="-") {
         var.yes=true;
     };
 
@@ -977,6 +980,21 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
 
+    
+    //genome transformation
+    if (pGe.transform.typeString=="None") {
+        pGe.transform.type=0;
+    } else if (pGe.transform.typeString=="Haploid") {
+        pGe.transform.type=1;
+    } else if (pGe.transform.typeString=="Diploid") {
+        pGe.transform.type=2;
+    } else {
+        ostringstream errOut;
+        errOut << "EXITING because of FATAL INPUT ERROR: unrecognized option in --outTransformType=" << pGe.transform.typeString << "\n";
+        errOut << "SOLUTION: use one of the allowed values of --outWigType : 'None' or 'Haploid' or 'Diploid' \n";
+        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };        
+    
     //quantification parameters
     quant.yes=false;
     quant.geneFull.yes=false;
@@ -1055,7 +1073,8 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     outSAMattrPresent.vG=false;
     outSAMattrPresent.vW=false;
     outSAMattrPresent.rB=false;
-    
+    outSAMattrPresent.ha=false;
+
     outSAMattrPresent.CR=false;
     outSAMattrPresent.CY=false;
     outSAMattrPresent.UR=false;
@@ -1119,6 +1138,9 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         } else if (vAttr1.at(ii)== "vW") {
             outSAMattrOrder.push_back(ATTR_vW);
             outSAMattrPresent.vW=true;
+        } else if (vAttr1.at(ii)== "ha") {
+            outSAMattrOrder.push_back(ATTR_ha);
+            outSAMattrPresent.ha=true;            
         } else if (vAttr1.at(ii)== "RG") {
             outSAMattrOrder.push_back(ATTR_RG);
             outSAMattrOrderQuant.push_back(ATTR_RG);
@@ -1240,48 +1262,32 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     alignEndsType.ext[1][0]=false;
     alignEndsType.ext[1][1]=false;
 
-    if (alignEndsType.in=="EndToEnd")
-    {
+    if (alignEndsType.in=="EndToEnd") {
         alignEndsType.ext[0][0]=true;
         alignEndsType.ext[0][1]=true;
         alignEndsType.ext[1][0]=true;
         alignEndsType.ext[1][1]=true;
-    } else if (alignEndsType.in=="Extend5pOfRead1" )
-    {
+    } else if (alignEndsType.in=="Extend5pOfRead1" ) {
         alignEndsType.ext[0][0]=true;
-    } else if (alignEndsType.in=="Extend5pOfReads12" )
-    {
+    } else if (alignEndsType.in=="Extend5pOfReads12" ) {
         alignEndsType.ext[0][0]=true;
         alignEndsType.ext[1][0]=true;
-    } else if (alignEndsType.in=="Extend3pOfRead1" )
-    {
+    } else if (alignEndsType.in=="Extend3pOfRead1" ) {
         alignEndsType.ext[0][1]=true;
-    } else if (alignEndsType.in=="Local")
-    {
+    } else if (alignEndsType.in=="Local") {
         //nothing to do for now
-    } else
-    {
+    } else {
         ostringstream errOut;
         errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented value for --alignEndsType: "<<alignEndsType.in <<"\n";
         errOut <<"SOLUTION: re-run STAR with --alignEndsType Local OR EndToEnd OR Extend5pOfRead1 OR Extend3pOfRead1\n";
         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
 
-//     #ifdef COMPILE_NO_SHM
-//         if (pGe.gLoad!="NoSharedMemory") {
-//             ostringstream errOut;
-//             errOut <<"EXITING because of FATAL INPUT ERROR: The code was compiled with NO SHARED MEMORY support, but pGe.gLoad="<<pGe.gLoad<<"\n";
-//             errOut <<"SOLUTION: run STAR with    --genomeLoad NoSharedMemory    option\n";
-//             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-//         };
-//     #endif
-
     //open compilation-dependent streams
     #ifdef OUTPUT_localChains
             inOut->outLocalChains.open((outFileNamePrefix + "LocalChains.out.tab").c_str());
     #endif
 
-//     genomeNumToNT={'A','C','G','T','N'};
     strcpy(genomeNumToNT,"ACGTN");
     
     if (pGe.gTypeString!="Full" && pGe.gTypeString!="Transcriptome" && pGe.gTypeString!="SuperTranscriptome") {
@@ -1299,7 +1305,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     };
 
    //sjdb insert on the fly
-
     sjdbInsert.pass1=false;
     sjdbInsert.pass2=false;
     sjdbInsert.yes=false;
@@ -1348,29 +1353,20 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         inOut->logMain<<"WARNING: --limitBAMsortRAM=0, will use genome size as RAM limit for BAM sorting\n";
     };
 
-    for (uint ii=0; ii<readNameSeparator.size(); ii++)
-    {
-        if (readNameSeparator.at(ii)=="space")
-        {
+    for (uint ii=0; ii<readNameSeparator.size(); ii++) {
+        if (readNameSeparator.at(ii)=="space") {
             readNameSeparatorChar.push_back(' ');
-        }
-        else if (readNameSeparator.at(ii)=="none")
-        {
+        } else if (readNameSeparator.at(ii)=="none") {
             //nothing to do
-        }
-        else if (readNameSeparator.at(ii).size()==1)
-        {
+        } else if (readNameSeparator.at(ii).size()==1) {
             readNameSeparatorChar.push_back(readNameSeparator.at(ii).at(0));
-        }
-        else
-        {
+        } else{
             ostringstream errOut;
             errOut << "EXITING because of fatal PARAMETERS error: unrecognized value of --readNameSeparator="<<readNameSeparator.at(ii)<<"\n";
             errOut << "SOLUTION: use allowed values: space OR single characters";
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
     };
-
 
     //outSAMunmapped
     outSAMunmapped.yes=false;
@@ -1418,7 +1414,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         errOut << "SOLUTION: use allowed option: None or Right";
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
-
 
     //peOverlap
     if (peOverlap.NbasesMin>0) {

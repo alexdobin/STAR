@@ -78,9 +78,9 @@ genomeSuffixLengthMax       -1
 
 genomeTransformType         None
     string: type of genome transformation
-                            None    ... no transformation
-                            Haploid ... insert alternative allele from VCF file (e.g. consensus allele)
-                            Diploid ... create two haplotypes for each chromosome listed in VCF file, for genotypes 1|2, assumes perfect phasing (e.g. personal genome)
+                            None       ... no transformation
+                            Haploid    ... replace reference alleles with alternative alleles from VCF file (e.g. consensus allele)
+                            Diploid    ... create two haplotypes for each chromosome listed in VCF file, for genotypes 1|2, assumes perfect phasing (e.g. personal genome)
 
 genomeTransformVCF          -
     string: path to VCF file for genome transformation
@@ -263,9 +263,11 @@ outSAMattributes                Standard
                                 None        ... no attributes
                                 Standard    ... NH HI AS nM
                                 All         ... NH HI AS nM NM MD jM jI MC ch
+                                variation:
                                 vA          ... variant allele
                                 vG          ... genomic coordiante of the variant overlapped by the read
-                                vW          ... 0/1 - alignment does not pass / passes WASP filtering. Requires --waspOutputMode SAMtag
+                                vW          ... indicates whether alignment passes (=1) or not (!=1) WASP filtering. Requires --waspOutputMode SAMtag
+                                ha          ... haplotype (1/2) when mapping to the diplod genome. Requires genome generated with --genomeTransformType Diploid
                                 STARsolo:
                                 CR CY UR UY ... sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing
                                 CB UB       ... error-corrected cell barcodes and UMIs for solo* demultiplexing. Requires --outSAMtype BAM SortedByCoordinate.

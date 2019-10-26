@@ -200,7 +200,7 @@ void ReadAlign::outputAlignments() {
 
             //junction output for mapped reads (i.e. passed BySJout filtering)
             //TODO junction output for converted genome. Do not record junction motif ot annotation, calculate it after final collapse
-            if ((P.outSJfilterReads=="All" || nTrOut==1) && !mapGen.genomeOut.convYes) {
+            if ((P.outSJfilterReads=="All" || nTrOut==1)) {
                 uint sjReadStartN=chunkOutSJ->N;
                 for (uint64 iTr=0; iTr<nTrOut; iTr++) {//write all transcripts junctions
                     outputTranscriptSJ (*(trMult[iTr]), nTrOut, chunkOutSJ, sjReadStartN);

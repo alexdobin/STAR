@@ -117,19 +117,6 @@ void Genome::genomeGenerate() {
         sjdbOverhang=0;
     };
     
-    if (pGe.transform.typeString=="None") {
-        pGe.transform.type=0;
-    } else if (pGe.transform.typeString=="Haploid") {
-        pGe.transform.type=1;
-    } else if (pGe.transform.typeString=="Diploid") {
-        pGe.transform.type=2;
-    } else {
-        ostringstream errOut;
-        errOut << "EXITING because of FATAL INPUT ERROR: unrecognized option in --outTransformType=" << pGe.transform.typeString << "\n";
-        errOut << "SOLUTION: use one of the allowed values of --outWigType : 'None' or 'Haploid' or 'Diploid' \n";
-        exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
-    };
-    
     //time
     time_t rawTime;
     string timeString;
