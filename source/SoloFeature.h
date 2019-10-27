@@ -62,6 +62,7 @@ public:
     void sumThreads(ReadAlignChunk **RAchunk);
     void countCBgeneUMI();
     void countVelocyto();
+    void quantTranscript();
     void collapseUMI(uint32 iCB, uint32 *umiArray);
     void outputResults(bool cellFilterYes);
     void addBAMtags(char *&bam0, uint32 &size0, char* bam1);

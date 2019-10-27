@@ -84,6 +84,9 @@ public:
         bool MultiGeneUMI;
     } umiFiltering;
     
+    //clusters
+    string clusterCBfile;
+    
     //output
     vector<string> outFileNames;
     

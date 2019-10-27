@@ -781,4 +781,5 @@ soloCellFilter              CellRanger2.2 3000 0.99 10
                             TopCells        ... only report top cells by UMI count, followed by the excat number of cells
                             None            ... do not output filtered cells
 
-
+soloClusterCBfile           -
+    string:                 file containing the cluster information for cell barcodes, two columns: CB cluster_index. Only used with --soloFeatures Transcript3p

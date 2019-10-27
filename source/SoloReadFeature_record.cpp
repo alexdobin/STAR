@@ -148,21 +148,26 @@ uint32 outputReadCB(fstream *streamOut, const uint64 iRead, const int32 featureT
                 *streamOut << soloBar.umiB <<' ';//UMI
                 if ( iRead != (uint64)-1 )
                     *streamOut << iRead <<' ';//iRead            
-                *streamOut << sj[0] <<' '<< sj[1] <<' '<< soloBar.cbMatch <<' '<< soloBar.cbMatchString <<'\n';;
+                *streamOut << sj[0] <<' '<< sj[1] <<' '<< soloBar.cbMatch <<' '<< soloBar.cbMatchString <<'\n';
             };
             nout=reFe.sj.size();
             break;
             
         case SoloFeatureTypes::Transcript3p :
-            //transcript,distToTTS structure            
-            *streamOut << soloBar.umiB <<' ';//UMI
-            if ( iRead != (uint64)-1 )
-                *streamOut << iRead <<' ';//iRead
-            *streamOut << readAnnot.transcriptConcordant.size()<<' ';
+            //transcript,distToTTS structure 
+            if (soloBar.cbMatch>1 || readAnnot.transcriptConcordant.size()==0)
+                break; //do not record ambiguous CB      
+            *streamOut << soloBar.cbMatchString <<' ';            
+            *streamOut << soloBar.umiB <<' ';
+            *streamOut << readAnnot.transcriptConcordant.size();
             for (auto &tt: readAnnot.transcriptConcordant) {
-                *streamOut << tt[0] <<' '<< tt[1] <<' ';
+                *streamOut <<' '<< tt[0] <<' '<< tt[1];
             };
-            *streamOut << soloBar.cbMatch <<' '<< soloBar.cbMatchString <<'\n';
+            if ( iRead != (uint64)-1 )
+                *streamOut  <<' '<< iRead;//iRead
+            *streamOut  <<'\n';
+            nout=1;
+            break;
     }; //switch (featureType)
     
     return nout;

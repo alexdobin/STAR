@@ -28,17 +28,18 @@ CFLAGS := -O3 -pipe -Wall -Wextra $(CFLAGS)
 
 
 ##########################################################################################################
-OBJECTS = ReadAlign_transformGenome.o Genome_transformGenome.o Transcript_convertGenomeCigar.o \
-	twoPassRunPass1.o samHeaders.o Genome_genomeLoad.o Genome_genomeOutLoad.o Transcript_transformGenome.o ReadAlign_outputSpliceGraphSAM.o \
-	ReadAlign_mapOneReadSpliceGraph.o SpliceGraph.o SpliceGraph_swScoreSpliced.o SpliceGraph_swTraceBack.o \
-	SpliceGraph_findSuperTr.o sjAlignSplit.o \
-	GTF.o GTF_transcriptGeneSJ.o GTF_superTranscript.o SuperTranscriptome.o \
-	SoloFeature_sumThreads.o SoloFeature_countVelocyto.o SoloFeature_countCBgeneUMI.o Transcriptome_classifyAlign.o SoloFeature_cellFiltering.o \
+OBJECTS = SoloFeature_quantTranscript.o SoloFeature_sumThreads.o SoloFeature_countVelocyto.o SoloFeature_countCBgeneUMI.o \
+	Transcriptome_classifyAlign.o SoloFeature_cellFiltering.o \
 	SoloFeature_statsOutput.o bamSortByCoordinate.o SoloBarcode.o \
 	ParametersSolo.o SoloRead.o SoloRead_record.o \
 	SoloReadBarcode.o SoloReadBarcode_getCBandUMI.o SoloBarcode_extractBarcode.o \
 	SoloReadFeature.o SoloReadFeature_record.o SoloReadFeature_inputRecords.o \
 	Solo.o SoloFeature.o SoloFeature_collapseUMI.o SoloFeature_outputResults.o SoloFeature_processRecords.o SoloFeature_addBAMtags.o \
+	ReadAlign_transformGenome.o Genome_transformGenome.o Transcript_convertGenomeCigar.o \
+	twoPassRunPass1.o samHeaders.o Genome_genomeLoad.o Genome_genomeOutLoad.o Transcript_transformGenome.o ReadAlign_outputSpliceGraphSAM.o \
+	ReadAlign_mapOneReadSpliceGraph.o SpliceGraph.o SpliceGraph_swScoreSpliced.o SpliceGraph_swTraceBack.o \
+	SpliceGraph_findSuperTr.o sjAlignSplit.o \
+	GTF.o GTF_transcriptGeneSJ.o GTF_superTranscript.o SuperTranscriptome.o \
 	ReadAlign_outputAlignments.o  \
 	ReadAlign.o STAR.o \
 	SharedMemory.o PackedArray.o SuffixArrayFuns.o Parameters.o InOutStreams.o SequenceFuns.o Genome.o Stats.o \

@@ -16,6 +16,8 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     
     if (featureType==SoloFeatureTypes::Velocyto) {
         countVelocyto();
+    } else if (featureType==SoloFeatureTypes::Transcript3p) {
+        quantTranscript();
     } else {//all others, standard processing
         countCBgeneUMI();
     };

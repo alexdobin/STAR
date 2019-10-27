@@ -179,7 +179,7 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
         if (tr1==(uint32) -1) 
             continue; //this alignment is outside of range of all transcripts
 
-        uint aGend=aG.exons[aG.nExons-1][EX_G]+aG.exons[aG.nExons-1][EX_L]-1;
+        uint64 aGend=aG.exons[aG.nExons-1][EX_G]+aG.exons[aG.nExons-1][EX_L]-1;
 
         ++tr1;
         do {//cycle back through all the transcripts
@@ -192,9 +192,13 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
             
             if (aStatus==AlignVsTranscript::Concordant) {//align conforms with the transcript
 
-                //TODO!!!FIX THIS for Quant!!!
-                //uint32 distTTS=trLen[tr1]-(aTall[nAtr].exons[aTall[nAtr].nExons-1][EX_G] + aTall[nAtr].exons[aTall[nAtr].nExons-1][EX_L]);
-                //readAnnot.transcriptConcordant.push_back({tr1,distTTS});
+                uint64 distTTS;
+                if (trStr[tr1]==1) {//+strand
+                    distTTS = trE[tr1] - aGend;
+                } else {//-strand
+                    distTTS = aG.exons[0][EX_G] - trS[tr1];
+                };
+                readAnnot.transcriptConcordant.push_back({tr1,(uint32) distTTS});
 
                 readAnnot.geneConcordant.insert(trGene[tr1]);//genes for all alignments
                 aG.alignGenes.insert(trGene[tr1]);//genes for each alignment
