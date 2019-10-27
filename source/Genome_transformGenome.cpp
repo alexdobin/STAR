@@ -223,7 +223,7 @@ void Genome::transformGandBlocks(map<string,vector<VariantInfo>> &vcfVariants, v
         uint64 iv=0, g1=chrStart1[ichr],  g0=chrStart[ichr];
         transformBlocks.push_back({g0, 0, g1});//first block for the chromosome
         while (g0<chrStart[ichr]+chrLength[ichr]) {
-            if (g0==vV[iv].pos-1+chrStart[ichr]) {
+            if (g0==vV[iv].pos-1+chrStart[ichr]) {//VCF records 1-based positions
 
                 array<string,2> &seq = vV[iv].seq;
 
