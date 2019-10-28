@@ -60,11 +60,16 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript *ali
                 break;
         
             case SoloFeatureTypes::Transcript3p : 
-                if (readAnnot.transcriptConcordant.size()==0) {
+                if (readAnnot.transcriptConcordant.size()==0 || soloBar.cbMatch>1) {//do not record ambiguous CB  
                     stats.V[stats.nNoFeature]++;
                 } else {
                     nFeat = outputReadCB(streamReads, iRead, featureType, soloBar, reFe, readAnnot);
+                };                
+                if (readAnnot.transcriptConcordant.size()==1 && readAnnot.transcriptConcordant[0][1] < transcriptDistCount.size()) {
+                    //read maps to one transcript - use for distTTS distribution function
+                    transcriptDistCount[readAnnot.transcriptConcordant[0][1]]++;
                 };
+                
                 break;
                 
             case SoloFeatureTypes::VelocytoSimple :
@@ -154,9 +159,7 @@ uint32 outputReadCB(fstream *streamOut, const uint64 iRead, const int32 featureT
             break;
             
         case SoloFeatureTypes::Transcript3p :
-            //transcript,distToTTS structure 
-            if (soloBar.cbMatch>1 || readAnnot.transcriptConcordant.size()==0)
-                break; //do not record ambiguous CB      
+            //transcript,distToTTS structure    
             *streamOut << soloBar.cbMatchString <<' ';            
             *streamOut << soloBar.umiB <<' ';
             *streamOut << readAnnot.transcriptConcordant.size();
@@ -167,6 +170,7 @@ uint32 outputReadCB(fstream *streamOut, const uint64 iRead, const int32 featureT
                 *streamOut  <<' '<< iRead;//iRead
             *streamOut  <<'\n';
             nout=1;
+
             break;
     }; //switch (featureType)
     

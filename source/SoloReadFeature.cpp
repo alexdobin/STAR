@@ -21,7 +21,10 @@ SoloReadFeature::SoloReadFeature(int32 feTy, Parameters &Pin, int iChunk)
 
     if (iChunk>=0) {
         streamReads = &fstrOpen(P.outFileTmp+"/solo"+SoloFeatureTypes::Names[featureType]+'_'+std::to_string(iChunk),ERROR_OUT, P);
-    };    
+    };
+    
+    if (featureType==SoloFeatureTypes::Transcript3p)
+        transcriptDistCount.resize(10000,0);
 };
 
 void SoloReadFeature::addCounts(const SoloReadFeature &rfIn)

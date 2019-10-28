@@ -20,6 +20,8 @@ public:
     uint32 *cbReadCount;
     map <uint32,uint32> cbReadCountMap;
     
+    vector<uint32> transcriptDistCount;
+    
     bool readInfoYes;
 
     fstream *streamReads;
