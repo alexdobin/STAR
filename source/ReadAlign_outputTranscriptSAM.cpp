@@ -232,7 +232,7 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
         } else if (mateChr<mapGen.nChrReal){//mateChr is given in the function parameters
             *outStream <<"\t"<< mapGen.chrName[mateChr] <<"\t"<< mateStart+1-mapGen.chrStart[mateChr] <<"\t"<< 0;
         } else {
-            *outStream <<"\t"<< "*" <<"\t"<< 0 <<"\t"<< 0;
+            *outStream << "\t*\t0\t0";
         };
 
 
