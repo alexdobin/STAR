@@ -13,10 +13,15 @@ void ReadAlign::assignAlignToWindow(uint a1, uint aLength, uint aStr, uint aNrep
     {//do not check for overlap if this is an sj-align
         uint iA;
         for (iA=0; iA<nWA[iW]; iA++) {
-            if (aFrag==WA[iW][iA][WA_iFrag] && WA[iW][iA][WA_sjA]==sjA \
-                && a1+WA[iW][iA][WA_rStart]==WA[iW][iA][WA_gStart]+aRstart \
-                && ( (aRstart>=WA[iW][iA][WA_rStart] && aRstart<WA[iW][iA][WA_rStart]+WA[iW][iA][WA_Length]) \
-                  || (aRstart+aLength>=WA[iW][iA][WA_rStart] && aRstart+aLength<WA[iW][iA][WA_rStart]+WA[iW][iA][WA_Length]) ) ) {//this piece overlaps with iA
+          auto& align = WA[iW][iA];
+          if (a1+align[WA_rStart]==align[WA_gStart]+aRstart
+              && aFrag==align[WA_iFrag]
+              && align[WA_sjA]==sjA
+              && ((aRstart >= align[WA_rStart] &&
+                    aRstart < align[WA_rStart]+align[WA_Length])
+                   || (aRstart+aLength>=align[WA_rStart]
+                       && aRstart+aLength<align[WA_rStart]+align[WA_Length]))) {
+            //this piece overlaps with iA
                 break;
             };
         };
