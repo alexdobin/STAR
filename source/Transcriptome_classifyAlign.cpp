@@ -5,7 +5,7 @@
 #include "ReadAnnotations.h"
 #include <bitset>
 
-int alignToTranscript(Transcript &aG, uint trS1, uint32 *exSE1, uint16 exN1) 
+int alignToTranscript(Transcript &aG, uint64 trS1, uint16 exN1, uint32 *exSE1, uint32 *exLenCum1, array<uint32,2> &distTrEnds) 
 {    
     bool alignIntronic      =false;
     bool alignExonic        =false;
@@ -51,6 +51,12 @@ int alignToTranscript(Transcript &aG, uint trS1, uint32 *exSE1, uint16 exN1)
                 //break;//if ex/in span is detected, no need to check anything else - no true : might still have non-concordant junction
             };
             alignExonic = true;
+            
+            if (iab==0) {
+                distTrEnds[0]=exLenCum1[ex1]+bS-exSE1[2*ex1];
+            };
+            distTrEnds[1] = eE - bE + (  ex1==(uint32)exN1-1 ?  0  :  exSE1[2*exN1-1]-exSE1[2*exN1-2]+1 + exLenCum1[exN1-1]-exLenCum1[ex1+1]  );
+            
         } else {//block starts in the intron
             if (bE >= enS) {//block overlaps next exon
                 alignSpansExonIntr = true;
@@ -65,8 +71,10 @@ int alignToTranscript(Transcript &aG, uint trS1, uint32 *exSE1, uint16 exN1)
 
     if (alignSpansExonIntr) {
         return AlignVsTranscript::ExonIntronSpan; //align spans exon/intron boundary
+        
     } else if (!alignIntronic) {//align is purely exonic
         return AlignVsTranscript::Concordant; //align is fully exonic and concordant
+        
     } else {//align has introns
         if (alignExonic) {
             return AlignVsTranscript::ExonIntron; //mixed exonic/intronic align, but no span
@@ -188,16 +196,16 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
                  (P.pSolo.strand >= 0 && (trStr[tr1]==1 ? aG.Str : 1-aG.Str) != (uint32)P.pSolo.strand) ) //!(this transcript contains the read, and has correct strand)
                      continue;
                  
-            int aStatus=alignToTranscript(aG, trS[tr1], exSE+2*trExI[tr1], trExN[tr1]);
+            array<uint32, 2> distTrEnds;     
+            int aStatus=alignToTranscript(aG, trS[tr1], trExN[tr1], exSE+2*trExI[tr1], exLenCum+trExI[tr1], distTrEnds);
             
             if (aStatus==AlignVsTranscript::Concordant) {//align conforms with the transcript
 
-                uint64 distTTS;
-                if (trStr[tr1]==1) {//+strand
-                    distTTS = trE[tr1] - aGend;
-                } else {//-strand
-                    distTTS = aG.exons[0][EX_G] - trS[tr1];
-                };
+                //debug
+                //if (aG.nExons==1 && aG.exons[0][EX_L]+distTrEnds[0]+distTrEnds[1] != trLen[tr1])
+                //    cerr << aG.exons[0][EX_L]+distTrEnds[0]+distTrEnds[1] <<" "<<trLen[tr1] <<endl;
+                
+                uint64 distTTS = (uint64) ( trStr[tr1]==1 ? distTrEnds[1] : distTrEnds[0] );
                 readAnnot.transcriptConcordant.push_back({tr1,(uint32) distTTS});
 
                 readAnnot.geneConcordant.insert(trGene[tr1]);//genes for all alignments

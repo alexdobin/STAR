@@ -56,15 +56,6 @@ void SoloFeature::countCBgeneUMI()
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished reading reads from Solo files nCB="<<nCB <<", nReadPerCBmax="<<nReadPerCBmax;
     P.inOut->logMain <<", nMatch="<<readFeatSum->stats.V[readFeatSum->stats.nMatch]<<endl;
     
-    if (featureType==SoloFeatureTypes::Transcript3p) {
-        streamTranscriptsOut->flush();
-        ofstream &outStr=ofstrOpen(P.outFileNamePrefix+pSolo.outFileNames[0]+"transcripts.tsv",ERROR_OUT, P);        
-        for (uint32 ii=0; ii<Trans.nTr; ii++)
-            outStr << Trans.trID[ii] <<"\t"<< Trans.trLen[ii] <<"\t"<< Trans.geName[Trans.trGene[ii]] << '\n';
-        outStr.close();
-        return; //the rest not implemented yet
-    };
-    
     //////////////////////////////////////////////////////////////////////////////
     /////////////////////////// collapse each CB
     nUMIperCB.resize(nCB);

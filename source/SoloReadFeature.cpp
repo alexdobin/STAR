@@ -38,6 +38,11 @@ void SoloReadFeature::addCounts(const SoloReadFeature &rfIn)
             cbReadCountMap[ii->first] += ii->second;
         };
     };
+    
+    if (transcriptDistCount.size()>0) {
+        for (uint32 ii=0; ii<transcriptDistCount.size(); ii++)
+            transcriptDistCount[ii] += rfIn.transcriptDistCount[ii];
+    };
 };
 
 void SoloReadFeature::addStats(const SoloReadFeature &rfIn)

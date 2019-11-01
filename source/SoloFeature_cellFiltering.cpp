@@ -7,7 +7,7 @@
 
 void SoloFeature::cellFiltering()
 {    
-    if (pSolo.cellFilter.type[0]=="None")
+    if (pSolo.cellFilter.type[0]=="None"|| nCB<1)
         return;
     
     //sort nUperCB
