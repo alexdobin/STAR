@@ -8,7 +8,7 @@
 
 intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart,
                                  uint gBstart, uint L, uint iFragB, uint sjAB,
-                                 const Parameters& P, char* R, Genome &mapGen,
+                                 const Parameters& P, const char* R, const Genome &mapGen,
                                  Transcript *trA, const uint outFilterMismatchNmaxTotal) {
     //stitch together A and B, extend in the gap, returns max score
 

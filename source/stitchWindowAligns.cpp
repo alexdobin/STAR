@@ -7,8 +7,8 @@
 
 
 void finalizeTranscript(ReadAlign *RA, Transcript **wTr, uint *nWinTr,
-                        Parameters &P, Genome &mapGen, char *R, uint Lread,
-                        Transcript& trA, uint tG2, uint tR2, int Score) {
+                        const Parameters &P, const Genome &mapGen, const char *R, uint Lread,
+                        Transcript trA, uint tG2, uint tR2, int Score) {
 
   // extend first
   Transcript trAstep1;
@@ -373,9 +373,9 @@ void finalizeTranscript(ReadAlign *RA, Transcript **wTr, uint *nWinTr,
   return;
 }
 
-void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, uint tG2, Transcript trA, \
-                        uint Lread, uiWA* WA, char* R, Genome &mapGen, \
-                        Parameters& P, Transcript** wTr, uint* nWinTr, ReadAlign *RA) {
+void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, uint tG2, const Transcript& trA,
+                        uint Lread, uiWA* WA, char* R, const Genome &mapGen,
+                        const Parameters& P, Transcript** wTr, uint* nWinTr, ReadAlign *RA) {
     //recursively stitch aligns for one gene
     //*nWinTr - number of transcripts for the current window
 
