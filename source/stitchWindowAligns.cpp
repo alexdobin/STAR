@@ -5,6 +5,32 @@
 #include <cmath>
 #include <ctime>
 
+// check for conditions used in stitchAlignToTranscript for early exit,
+// so there is no need to create additional instance of [Transcript].
+bool isAlignToSkip(uint rAend, uint gAend, uint rBstart, uint gBstart, uint L,
+                   uint iFragB, uint sjAB, const Genome &mapGen,
+                   const Transcript &trA) {
+  if (trA.nExons >= MAX_N_EXONS)
+    return true;
+
+  if (sjAB != ((uint)-1) && trA.exons[trA.nExons - 1][EX_sjA] == sjAB &&
+      trA.exons[trA.nExons - 1][EX_iFrag] == iFragB && rBstart == rAend + 1 &&
+      gAend + 1 < gBstart) {
+    // simple stitching if junction belongs to a database
+    // check for too large repeats around non-canonical junction
+    return (mapGen.sjdbMotif[sjAB] == 0 &&
+            (L <= mapGen.sjdbShiftRight[sjAB] ||
+             trA.exons[trA.nExons - 1][EX_L] <= mapGen.sjdbShiftLeft[sjAB]));
+  } else { // general stitching
+    uint gBend = gBstart + L - 1;
+    uint rBend = rBstart + L - 1;
+    // stitch aligns on the same fragment
+    // check if r-overlapping fully
+    return ((rBend <= rAend) ||
+            (gBend <= gAend)) &&
+           (trA.exons[trA.nExons - 1][EX_iFrag] == iFragB);
+  }
+}
 
 void finalizeTranscript(ReadAlign *RA, Transcript **wTr, uint *nWinTr,
                         const Parameters &P, const Genome &mapGen, const char *R, uint Lread,
@@ -386,39 +412,45 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
       return;
     };
 
-    int dScore=0;
-    Transcript trAi=trA; //trA copy with this align included, to be used in the 1st recursive call of StitchAlign
-    if (trA.nExons>0) {//stitch, a transcript has already been originated
-
-        dScore=stitchAlignToTranscript(tR2, tG2, WA[iA][WA_rStart], WA[iA][WA_gStart], WA[iA][WA_Length], WA[iA][WA_iFrag],  WA[iA][WA_sjA], P, R, mapGen, &trAi, RA->outFilterMismatchNmaxTotal);
+    const auto& align = WA[iA];
+    if (trA.nExons == 0 ||
+        !isAlignToSkip(tR2, tG2, align[WA_rStart], align[WA_gStart],
+                    align[WA_Length], align[WA_iFrag], align[WA_sjA], mapGen, trA)) {
+      int dScore=0;
+      Transcript trAi=trA; //trA copy with this align included, to be used in the 1st recursive call of StitchAlign
+      if (trA.nExons > 0)  {//stitch, a transcript has already been originated
+        dScore=stitchAlignToTranscript(tR2, tG2, align[WA_rStart], align[WA_gStart],
+                                       align[WA_Length], align[WA_iFrag], align[WA_sjA],
+                                       P, R, mapGen, &trAi, RA->outFilterMismatchNmaxTotal);
         //TODO check if the new stitching creates too many MM, quit this transcript if so
+      } else { //this is the first align in the transcript
+        trAi.exons[0][EX_R]=trAi.rStart=align[WA_rStart]; //transcript start/end
+        trAi.exons[0][EX_G]=trAi.gStart=align[WA_gStart];
+        trAi.exons[0][EX_L]=align[WA_Length];
+        trAi.exons[0][EX_iFrag]=align[WA_iFrag];
+        trAi.exons[0][EX_sjA]=align[WA_sjA];
+        trAi.nExons=1; //recorded first exon
+        trAi.nMatch=align[WA_Length]; //# of matches
 
-    } else { //this is the first align in the transcript
-            trAi.exons[0][EX_R]=trAi.rStart=WA[iA][WA_rStart]; //transcript start/end
-            trAi.exons[0][EX_G]=trAi.gStart=WA[iA][WA_gStart];
-            trAi.exons[0][EX_L]=WA[iA][WA_Length];
-            trAi.exons[0][EX_iFrag]=WA[iA][WA_iFrag];
-            trAi.exons[0][EX_sjA]=WA[iA][WA_sjA];
-            trAi.nExons=1; //recorded first exon
-            trAi.nMatch=WA[iA][WA_Length]; //# of matches
-
-            for (uint ii=0;ii<WA[iA][WA_Length];ii++) dScore+=scoreMatch; //sum all the scores
-            for (uint ii=0; ii<nA; ii++) WAincl[ii]=false;
-    };
-
-    if (dScore>-1000000) {//include this align
+        for (uint ii=0;ii<align[WA_Length];ii++) dScore+=scoreMatch; //sum all the scores
+        for (uint ii=0; ii<nA; ii++) WAincl[ii]=false;
+      }
+      if (dScore>-1000000) {//include this align
         WAincl[iA]=true;
-
-        if ( WA[iA][WA_Nrep]==1 ) trAi.nUnique++; //unique piece
-        if ( WA[iA][WA_Anchor]>0 ) trAi.nAnchor++; //anchor piece piece
-
-        stitchWindowAligns(iA+1, nA, Score+dScore, WAincl, WA[iA][WA_rStart]+WA[iA][WA_Length]-1, WA[iA][WA_gStart]+WA[iA][WA_Length]-1, trAi, Lread, WA, R, mapGen, P, wTr, nWinTr, RA);
-    };
-
+        if (align[WA_Nrep] == 1) trAi.nUnique++; //unique piece
+        if (align[WA_Anchor] > 0) trAi.nAnchor++; //anchor piece piece
+        stitchWindowAligns(iA+1, nA, Score+dScore, WAincl,
+                           align[WA_rStart]+align[WA_Length]-1,
+                           align[WA_gStart]+align[WA_Length]-1,
+                           trAi, Lread, WA, R, mapGen, P, wTr, nWinTr, RA);
+      }
+    }
     //also run a transcript w/o including this align
-    if (WA[iA][WA_Anchor]!=2 || trA.nAnchor>0) {//only allow exclusion if this is not the last anchor, or other anchors have been used
-        WAincl[iA]=false;
-        stitchWindowAligns(iA+1, nA, Score, WAincl, tR2, tG2, trA, Lread, WA, R, mapGen, P, wTr, nWinTr, RA);
+    if (align[WA_Anchor] != 2 || trA.nAnchor > 0) {
+      //only allow exclusion if this is not the last anchor, or other anchors have been used
+      WAincl[iA] = false;
+      stitchWindowAligns(iA+1, nA, Score, WAincl, tR2, tG2, trA, Lread, WA, R,
+                         mapGen, P, wTr, nWinTr, RA);
     };
     return;
 };
