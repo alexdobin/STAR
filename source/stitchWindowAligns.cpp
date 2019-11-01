@@ -33,17 +33,19 @@ bool isAlignToSkip(uint rAend, uint gAend, uint rBstart, uint gBstart, uint L,
 }
 
 void finalizeTranscript(ReadAlign *RA, Transcript **wTr, uint *nWinTr,
-                        const Parameters &P, const Genome &mapGen, const char *R, uint Lread,
-                        Transcript trA, uint tG2, uint tR2, int Score) {
+                        const Parameters &P, const Genome &mapGen,
+                        const char *R, uint Lread, Transcript trA, uint tG2,
+                        uint tR2, int Score) {
 
   // extend first
   Transcript trAstep1;
-  
+
   int vOrder[2]; // decide in which order to extend: extend the 5' of the read
                  // first
 
 #if EXTEND_ORDER == 1
-  if (trA.roStr == 0) { // decide in which order to extend: extend the 5' of the read first
+  if (trA.roStr == 0) {
+    // decide in which order to extend: extend the 5' of the read first
     vOrder[0] = 0;
     vOrder[1] = 1;
   } else {
@@ -62,9 +64,8 @@ void finalizeTranscript(ReadAlign *RA, Transcript **wTr, uint *nWinTr,
     switch (vOrder[iOrd]) {
 
     case 0: // extend at start
-
-      if (trA.rStart >
-          0) { // if transcript does not start at base, extend to the read start
+      if (trA.rStart > 0) {
+        // if transcript does not start at base, extend to the read start
         trAstep1.reset();
         uint imate = trA.exons[0][EX_iFrag];
         if (extendAlign(R, mapGen.G, trA.rStart - 1, trA.gStart - 1, -1, -1,
@@ -102,9 +103,8 @@ void finalizeTranscript(ReadAlign *RA, Transcript **wTr, uint *nWinTr,
 
           tR2 += trAstep1.extendL;
           tG2 += trAstep1.extendL;
-
-          trA.exons[trA.nExons - 1][EX_L] +=
-            trAstep1.extendL; // extend the length of the last exon
+          // extend the length of the last exon
+          trA.exons[trA.nExons - 1][EX_L] += trAstep1.extendL;
         };
         // TODO penalize unmapped bases at the end
       };
@@ -114,7 +114,7 @@ void finalizeTranscript(ReadAlign *RA, Transcript **wTr, uint *nWinTr,
   if (!P.alignSoftClipAtReferenceEnds.yes &&
       ((trA.exons[trA.nExons - 1][EX_G] + Lread -
         trA.exons[trA.nExons - 1][EX_R]) >
-       (mapGen.chrStart[trA.Chr] + mapGen.chrLength[trA.Chr]) ||
+           (mapGen.chrStart[trA.Chr] + mapGen.chrLength[trA.Chr]) ||
        trA.exons[0][EX_G] < (mapGen.chrStart[trA.Chr] + trA.exons[0][EX_R]))) {
     return; // no soft clipping past the ends of the chromosome
   };
@@ -127,9 +127,9 @@ void finalizeTranscript(ReadAlign *RA, Transcript **wTr, uint *nWinTr,
 
   // check exons lengths including repeats, do not report a transcript with
   // short exons
-  for (uint isj = 0; isj < trA.nExons - 1;
-       isj++) { // check exons for min length, if they are not annotated and
-                // precede a junction
+  for (uint isj = 0; isj < trA.nExons - 1; isj++) {
+    // check exons for min length, if they are not annotated
+    //   and  precede a junction
     if (trA.canonSJ[isj] >= 0) {   // junction
       if (trA.sjAnnot[isj] == 1) { // sjdb
         if ((trA.exons[isj][EX_L] < P.alignSJDBoverhangMin &&
@@ -142,7 +142,7 @@ void finalizeTranscript(ReadAlign *RA, Transcript **wTr, uint *nWinTr,
       } else { // non-sjdb
         if (trA.exons[isj][EX_L] < P.alignSJoverhangMin + trA.shiftSJ[isj][0] ||
             trA.exons[isj + 1][EX_L] <
-            P.alignSJoverhangMin + trA.shiftSJ[isj][1])
+                P.alignSJoverhangMin + trA.shiftSJ[isj][1])
           return;
       };
     };
@@ -176,8 +176,8 @@ void finalizeTranscript(ReadAlign *RA, Transcript **wTr, uint *nWinTr,
       P.outFilterIntronStrands == "RemoveInconsistentStrands")
     return;
 
-  if (sjN > 0 && trA.sjMotifStrand == 0 &&
-      P.outSAMstrandField.type == 1) { // strand not defined for a junction
+  if (sjN > 0 && trA.sjMotifStrand == 0 && P.outSAMstrandField.type == 1) {
+    // strand not defined for a junction
     return;
   };
 
@@ -196,10 +196,10 @@ void finalizeTranscript(ReadAlign *RA, Transcript **wTr, uint *nWinTr,
   } else {
     ostringstream errOut;
     errOut << "EXITING because of FATAL INPUT error: unrecognized value of "
-      "--outFilterIntronMotifs="
+              "--outFilterIntronMotifs="
            << P.outFilterIntronMotifs << "\n";
     errOut << "SOLUTION: re-run STAR with --outFilterIntronMotifs = None -OR- "
-      "RemoveNoncanonical -OR- RemoveNoncanonicalUnannotated\n";
+              "RemoveNoncanonical -OR- RemoveNoncanonicalUnannotated\n";
     exitWithError(errOut.str(), std::cerr, P.inOut->logMain,
                   EXIT_CODE_INPUT_FILES, P);
   };
@@ -224,7 +224,8 @@ void finalizeTranscript(ReadAlign *RA, Transcript **wTr, uint *nWinTr,
     };
   };
 
-  if (P.outFilterBySJoutStage == 2) { // junctions have to be present in the filtered set P.sjnovel
+  if (P.outFilterBySJoutStage == 2) {
+    // junctions have to be present in the filtered set P.sjnovel
     for (uint iex = 0; iex < trA.nExons - 1; iex++) {
       if (trA.canonSJ[iex] >= 0 && trA.sjAnnot[iex] == 0) {
         uint jS = trA.exons[iex][EX_G] + trA.exons[iex][EX_L];
@@ -235,9 +236,8 @@ void finalizeTranscript(ReadAlign *RA, Transcript **wTr, uint *nWinTr,
     };
   };
 
-  if (trA.exons[0][EX_iFrag] !=
-      trA.exons[trA.nExons - 1]
-      [EX_iFrag]) { // check for correct overlap between mates
+  if (trA.exons[0][EX_iFrag] != trA.exons[trA.nExons - 1][EX_iFrag]) {
+    // check for correct overlap between mates
     if (trA.exons[trA.nExons - 1][EX_G] + trA.exons[trA.nExons - 1][EX_L] <=
         trA.exons[0][EX_G])
       return; // to avoid negative insert size
@@ -251,15 +251,15 @@ void finalizeTranscript(ReadAlign *RA, Transcript **wTr, uint *nWinTr,
     };
 
     if (trA.exons[iexM2 - 1][EX_G] + trA.exons[iexM2 - 1][EX_L] >
-        trA.exons[iexM2]
-        [EX_G]) { // mates overlap - check consistency of junctions
+        trA.exons[iexM2][EX_G]) {
+      // mates overlap - check consistency of junctions
 
       if (trA.exons[0][EX_G] > trA.exons[iexM2][EX_G] + trA.exons[0][EX_R] +
-          P.alignEndsProtrude.nBasesMax)
+                                   P.alignEndsProtrude.nBasesMax)
         return; // LeftMateStart > RightMateStart + allowance
       if (trA.exons[iexM2 - 1][EX_G] + trA.exons[iexM2 - 1][EX_L] >
           trA.exons[trA.nExons - 1][EX_G] + Lread -
-          trA.exons[trA.nExons - 1][EX_R] + P.alignEndsProtrude.nBasesMax)
+              trA.exons[trA.nExons - 1][EX_R] + P.alignEndsProtrude.nBasesMax)
         return; // LeftMateEnd   > RightMateEnd +allowance
 
       // check for junctions consistency
@@ -270,8 +270,8 @@ void finalizeTranscript(ReadAlign *RA, Transcript **wTr, uint *nWinTr,
             trA.exons[iex2 - 1][EX_G] + trA.exons[iex2 - 1][EX_L])
           break;
       };
-      while (iex1 < iexM2 &&
-             iex2 < trA.nExons) {        // cycle through all overlapping exons
+      while (iex1 < iexM2 && iex2 < trA.nExons) {
+        // cycle through all overlapping exons
         if (trA.canonSJ[iex1 - 1] < 0) { // skip non-junctions
           iex1++;
           continue;
@@ -304,7 +304,8 @@ void finalizeTranscript(ReadAlign *RA, Transcript **wTr, uint *nWinTr,
 
   // calculate some final values for the transcript
 
-  trA.roStart = (trA.roStr == 0) ? trA.rStart : Lread - trA.rStart - trA.rLength;
+  trA.roStart =
+      (trA.roStr == 0) ? trA.rStart : Lread - trA.rStart - trA.rLength;
   trA.maxScore = Score;
 
   if (trA.exons[0][EX_iFrag] ==
@@ -344,31 +345,33 @@ void finalizeTranscript(ReadAlign *RA, Transcript **wTr, uint *nWinTr,
 
     uint iTr = 0; // transcript insertion/replacement place
 
+    // caclulate total mapped length
     trA.mappedLength = 0;
-    for (uint iex = 0; iex < trA.nExons; iex++) { // caclulate total mapped length
+    for (uint iex = 0; iex < trA.nExons; iex++) {
       trA.mappedLength += trA.exons[iex][EX_L];
     };
 
-    while (iTr < *nWinTr) { // scan through all recorded transcripts for this
-                            // window - check for duplicates
+    // scan through all recorded transcripts for this window -
+    // check for duplicates
+    while (iTr < *nWinTr) {
 
       // another way to calculate uOld, uNew: w/o gMap
       uint nOverlap = blocksOverlap(trA, *wTr[iTr]);
       uint uNew = trA.mappedLength - nOverlap;
       uint uOld = wTr[iTr]->mappedLength - nOverlap;
 
-      if (uNew == 0 && Score < wTr[iTr]->maxScore) { // new transript is a subset of the old ones
+      if (uNew == 0 && Score < wTr[iTr]->maxScore) {
+        // new transript is a subset of the old ones
         break;
-      } else if (uOld == 0) { // old transcript is a subset of the new one,
-                              // remove old transcript
+      } else if (uOld == 0) {
+        // old transcript is a subset of the new one, remove old transcript
         Transcript *pTr = wTr[iTr];
         for (uint ii = iTr + 1; ii < *nWinTr; ii++)
           wTr[ii - 1] = wTr[ii]; // shift transcripts
         (*nWinTr)--;
         wTr[*nWinTr] = pTr;
-      } else if (uOld > 0 &&
-                 (uNew > 0 ||
-                  Score >= wTr[iTr]->maxScore)) { // check next transcript
+      } else if (uOld > 0 && (uNew > 0 || Score >= wTr[iTr]->maxScore)) {
+        // check next transcript
         iTr++;
       };
     };
@@ -381,11 +384,12 @@ void finalizeTranscript(ReadAlign *RA, Transcript **wTr, uint *nWinTr,
       };
 
       Transcript *pTr = wTr[*nWinTr];
-      for (int ii = *nWinTr; ii > int(iTr); ii--) { // shift all the transcript pointers down from iTr
+      for (int ii = *nWinTr; ii > int(iTr); ii--) {
+        // shift all the transcript pointers down from iTr
         wTr[ii] = wTr[ii - 1];
       };
-      wTr[iTr] = pTr; // the new transcript pointer is now at *nWinTr+1, move it
-                      // into the iTr
+      // the new transcript pointer is now at *nWinTr+1, move it into the iTr
+      wTr[iTr] = pTr;
       *(wTr[iTr]) = trA;
       if (*nWinTr < P.alignTranscriptsPerWindowNmax) {
         (*nWinTr)++; // increment number of transcripts per window;
@@ -454,5 +458,3 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
     };
     return;
 };
-
-
