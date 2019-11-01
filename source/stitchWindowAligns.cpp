@@ -386,7 +386,6 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
       return;
     };
 
-    ///////////////////////////////////////////////////////////////////////////////////
     int dScore=0;
     Transcript trAi=trA; //trA copy with this align included, to be used in the 1st recursive call of StitchAlign
     if (trA.nExons>0) {//stitch, a transcript has already been originated
@@ -400,16 +399,11 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
             trAi.exons[0][EX_L]=WA[iA][WA_Length];
             trAi.exons[0][EX_iFrag]=WA[iA][WA_iFrag];
             trAi.exons[0][EX_sjA]=WA[iA][WA_sjA];
-
             trAi.nExons=1; //recorded first exon
-
-            for (uint ii=0;ii<WA[iA][WA_Length];ii++) dScore+=scoreMatch; //sum all the scores
-
             trAi.nMatch=WA[iA][WA_Length]; //# of matches
 
+            for (uint ii=0;ii<WA[iA][WA_Length];ii++) dScore+=scoreMatch; //sum all the scores
             for (uint ii=0; ii<nA; ii++) WAincl[ii]=false;
-
-
     };
 
     if (dScore>-1000000) {//include this align
@@ -419,8 +413,6 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
         if ( WA[iA][WA_Anchor]>0 ) trAi.nAnchor++; //anchor piece piece
 
         stitchWindowAligns(iA+1, nA, Score+dScore, WAincl, WA[iA][WA_rStart]+WA[iA][WA_Length]-1, WA[iA][WA_gStart]+WA[iA][WA_Length]-1, trAi, Lread, WA, R, mapGen, P, wTr, nWinTr, RA);
-    } else {
-
     };
 
     //also run a transcript w/o including this align
