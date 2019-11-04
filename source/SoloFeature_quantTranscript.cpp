@@ -241,9 +241,9 @@ void SoloFeature::quantTranscript()
             };
             
             //convergence check
-            double diffThresholdMax=1e-6;
-            double diffThresholdOne=1e-9;
-            double exprThreshold=0*nUMItot;
+            double diffThresholdMax=1e-5;
+            double diffThresholdOne=diffThresholdMax*0.1;
+            double exprThreshold=1e-8*nUMItot;
             double diffMax=0, diffSum=0, aboveThrN=0, aboveThrExprSum=0, aboveThrOneN=0 ;
             for (uint32 itr=0; itr<thNew.size(); itr++) {
                 if (trConverged[itr] || thOld[itr]==0)
@@ -259,7 +259,8 @@ void SoloFeature::quantTranscript()
                 
                 if (thNew[itr]<exprThreshold) {
                     trConverged[itr]=true;
-                    trUnique[itr]=thNew[itr];//0 here could make more sense, but convergence suffers
+                    //trUnique[itr]=thNew[itr];//0 here could make more sense, but convergence suffers
+                    trUnique[itr]=0;
                 };
                 if (diff1<diffThresholdOne) {
                     trConverged[itr]=true;
