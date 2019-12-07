@@ -13,9 +13,8 @@
 void ReadAlign::stitchPieces(char **R, uint Lread) {
 
     //zero-out winBin
-    memset(winBin[0],255,sizeof(winBin[0][0])*P.winBinN);
-    memset(winBin[1],255,sizeof(winBin[0][0])*P.winBinN);
-
+    winBin[0].reset();
+    winBin[1].reset();
 
 //     for (uint iWin=0;iWin<nWall;iWin++) {//zero out winBin
 //         if (WC[iWin][WC_gStart]<=WC[iWin][WC_gEnd]) {//otherwise the window is dead

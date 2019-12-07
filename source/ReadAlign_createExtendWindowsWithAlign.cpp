@@ -9,7 +9,7 @@ int ReadAlign::createExtendWindowsWithAlign(uint a1, uint aStr) {
 
     uint aBin = (a1 >> P.winBinNbits); //align's bin
     uint iBinLeft=aBin, iBinRight=aBin;
-    uintWinBin* wB=winBin[aStr];
+    FastResetVector<uintWinBin>& wB=winBin[aStr];
     uint iBin=-1, iWin=-1, iWinRight=-1;
 
 
