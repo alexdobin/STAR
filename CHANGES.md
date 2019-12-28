@@ -1,3 +1,6 @@
+
+* Fixed a seg-fault in STARsolo for cases where no cell barcodes matched whitelist (#784).  
+
 STAR 2.7.3a 2019/10/08
 ======================
 Major new features in STARsolo
