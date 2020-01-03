@@ -180,11 +180,8 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
 
             if (readFilter=='Y') samFLAG|=0x200; //not passing quality control
 
-            if (alignType==-11 || alignType==-12 || alignType==-13) {
-                samFLAG|=0x800; //mark chimeric alignments
-            } else {//only non-chimeric alignments will be marked as non-primary, since chimeric are already marked with 0x800
-                if (!trOut.primaryFlag) samFLAG|=0x100;//mark not primary align
-            };
+            if (alignType==-11 || alignType==-12 || alignType==-13) samFLAG|=0x800; //mark chimeric alignments
+            if (!trOut.primaryFlag) samFLAG|=0x100; //mark not primary align
 
             iEx1 = (imate==0 ? 0 : iExMate+1);
             iEx2 = (imate==0 ? iExMate : trOut.nExons-1);

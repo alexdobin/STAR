@@ -55,6 +55,11 @@ class ReadAlign {
 
         SoloRead *soloRead; //counts reads per CB per and outputs CB/UMI/gene into file, per thread
 
+	//input,output
+        char** outBAMoneAlign;
+        uint* outBAMoneAlignNbytes;
+        int alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint trChrStart, uint mateChr, uint mateStart, char mateStrand, int unmapType, bool *mateMapped, vector<int> outSAMattrOrder, char** outBAMarray, uint* outBAMarrayN);
+
     private:
         Parameters& P; //pointer to the parameters, will be initialized on construction
 
@@ -69,9 +74,6 @@ class ReadAlign {
         std::uniform_real_distribution<double> rngUniformReal0to1;//initialize in ReadAlign.cpp
 
         //input,output
-
-        char** outBAMoneAlign;
-        uint* outBAMoneAlignNbytes;
 
         ostringstream samStreamCIGAR, samStreamSJmotif, samStreamSJintron;
         vector <string> matesCIGAR;
@@ -168,7 +170,6 @@ class ReadAlign {
 
         bool outputTranscript(Transcript *trOut, uint nTrOut, ofstream *outBED);
         uint outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint mateChr, uint mateStart, char mateStrand, int unmapType, bool *mateMapped, ostream *outStream);
-        int alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint trChrStart, uint mateChr, uint mateStart, char mateStrand, int unmapType, bool *mateMapped, vector<int> outSAMattrOrder, char** outBAMarray, uint* outBAMarrayN);
         void samAttrNM_MD (Transcript const &trOut, uint iEx1, uint iEx2, uint &tagNM, string &tagMD);
 
         void outputTranscriptSJ(Transcript const &trOut, uint nTrOut, OutSJ *outStream, uint sjReadStartN );

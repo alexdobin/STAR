@@ -37,6 +37,7 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int max
 
     chimAligns.clear();
     chimScoreBest=0;
+    std::size_t bestChimAlign=0; // points to element of chimAligns with highest chimScoreBest
 
     int maxPossibleAlignScore = (int)(readLength[0]+readLength[1]);
     int minScoreToConsider = P.pCh.scoreMin;
@@ -81,10 +82,11 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int max
 
                             if (chimAligns.back().chimScore > chimScoreBest) {
                                 chimScoreBest=chimAligns.back().chimScore;
+                                bestChimAlign = chimAligns.size()-1;
                                 if ((chimScoreBest - (int)P.pCh.multimapScoreRange) > minScoreToConsider)
                                     // best score increased, so subsequent alignment candidates must score higher
                                     minScoreToConsider = chimScoreBest - (int)P.pCh.multimapScoreRange;
-                            }
+                            };
                         } // endif stitched chimera survived.
                         else {
                             // al1, al2 allocated during stitching
@@ -111,9 +113,15 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int max
     if (chimN > P.pCh.multimapNmax) //too many loci
         return false;
 
-    for (auto cAit=chimAligns.begin(); cAit<chimAligns.end(); cAit++) {//output chimeras within score range
-        if (cAit->chimScore >= minScoreToConsider)
-            cAit->chimericJunctionOutput(*ostreamChimJunction, chimN, maxNonChimAlignScore, PEmerged_flag, chimScoreBest, maxPossibleAlignScore);
+    uint iTr = 0; //keep track of "HI" SAM attribute
+    for (std::size_t i = 0; i < chimAligns.size(); i++) {//output chimeras within score range
+        if (chimAligns[i].chimScore >= minScoreToConsider) {
+            if (P.pCh.out.junctions)
+                chimAligns[i].chimericJunctionOutput(*ostreamChimJunction, chimN, maxNonChimAlignScore, PEmerged_flag, chimScoreBest, maxPossibleAlignScore);
+            if (P.pCh.out.bam)
+                chimAligns[i].chimericBAMoutput(chimAligns[i].al1, chimAligns[i].al2, chimAligns[i].RA, iTr, chimN, i == bestChimAlign, P);
+            iTr++;
+        };
     };
 
     return chimN > 0;

@@ -80,10 +80,10 @@ void ParametersChimeric::initialize(Parameters *pPin)
             exitWithError(errOut.str(), std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
 
-    if (multimapNmax>0 && (out.bam || out.samOld)) {
+    if (multimapNmax>0 && out.samOld) {
             ostringstream errOut;
-            errOut <<"EXITING because of fatal PARAMETERS error: --chimMultimapNmax > 0 (new chimeric detection) presently only works with --chimOutType Junctions\n";
-            errOut <<"SOLUTION: re-run with --chimOutType Junctions\n";
+            errOut <<"EXITING because of fatal PARAMETERS error: --chimMultimapNmax > 0 (new chimeric detection) presently only works with --chimOutType Junctions/WithinBAM\n";
+            errOut <<"SOLUTION: re-run with --chimOutType Junctions/WithinBAM\n";
             exitWithError(errOut.str(), std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
 
