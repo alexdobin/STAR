@@ -60,8 +60,12 @@ Compile under Mac OS X
 # 2. Install gcc with brew: 
 $ brew install gcc --without-multilib
 # 3. Build STAR:
+# run 'make' in the source directory
 # note that the path to c++ executable has to be adjusted to its current version
+$cd source
 $make STARforMacStatic CXX=/usr/local/Cellar/gcc/8.2.0/bin/g++-8
+# 4. Make it availible through the terminal
+$cp STAR /usr/local/bin
 ```
 
 All platforms - non-standard gcc
