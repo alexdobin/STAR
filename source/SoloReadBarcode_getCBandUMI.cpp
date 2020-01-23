@@ -147,7 +147,7 @@ bool SoloReadBarcode::convertCheckUMI()
 };
 
 //////////////////////////////////////////////////////////////////////////////////////
-void SoloReadBarcode::getCBandUMI(string &readNameExtra)
+void SoloReadBarcode::getCBandUMI(const string &readNameExtra, const uint32 &readFilesIndex)
 {
     if (pSolo.type==0)
         return;
@@ -235,6 +235,8 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
         if (cbMatchGood) {
             cbMatchString=to_string(cbMatchInd[0]);
         };
+        
+    ///////////////////////////////////////////////////////////////////////////    
     } else if (pSolo.type==pSolo.SoloTypes::CB_samTagOut) {
         //CB only, on read 3
         cbSeq=bSeq.substr(pSolo.cbS-1,pSolo.cbL);
@@ -245,6 +247,14 @@ void SoloReadBarcode::getCBandUMI(string &readNameExtra)
         } else {
             cbSeqCorrected="";
         };
+        
+    ///////////////////////////////////////////////////////////////////////////    
+    } else if (pSolo.type==pSolo.SoloTypes::SmartSeq) {        
+        cbSeq=cbQual=cbSeqCorrected=""; //TODO make cbSeq=file label
+        cbMatch=0;
+        cbMatchInd={readFilesIndex};
+        cbMatchString=to_string(cbMatchInd[0]);
+        umiB=0;
     };
     
     addStats(cbMatch);

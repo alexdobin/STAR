@@ -43,7 +43,7 @@ class ReadAlign {
         uint Lread, readLength[MAX_N_MATES], readLengthOriginal[MAX_N_MATES], readLengthPair, readLengthPairOriginal;
         intScore maxScoreMate[MAX_N_MATES];
 
-        uint readFilesIndex;
+        uint32 readFilesIndex;
         
         //transcripts (aligns)
         uint nW;

@@ -52,10 +52,15 @@ void ParametersSolo::initialize(Parameters *pPin)
     } else if (typeStr=="CB_UMI_Complex") {
         type=SoloTypes::CB_UMI_Complex;
         bL=0;
+        
     } else if (typeStr=="CB_samTagOut") {
         type=SoloTypes::CB_samTagOut;     
         if (bL==1)
             bL=cbL;
+        
+    } else if (typeStr=="SmartSeq") {
+        type=SoloTypes::SmartSeq;     
+       
     } else  {
         ostringstream errOut;
         errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in --soloType="<<typeStr<<"\n";
@@ -64,13 +69,22 @@ void ParametersSolo::initialize(Parameters *pPin)
         exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
 
-    if (pP->readNmatesIn<2) {
-        exitWithError("solo* options require 2 reads or 3 reads, where the last read is the barcode read.\n"
-                      "SOLUTION: specify 2 or 3 files in --readFilesIn",std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+    if (type==SoloTypes::SmartSeq) {//no barcode read
+        pP->readNmates=pP->readNmatesIn; 
+        barcodeRead=-1; 
+        barcodeReadYes=false;
+        //TODO: a lot of parameters should not be defined for SmartSeq option - check it here
+        //umiDedup
+    } else {//all other types require barcode read
+        if (pP->readNmatesIn<2) {
+            exitWithError("solo* options require 2 reads or 3 reads, where the last read is the barcode read.\n"
+                          "SOLUTION: specify 2 or 3 files in --readFilesIn",std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+        };
+        pP->readNmates=pP->readNmatesIn-1; //output mates    
+        barcodeRead=pP->readNmates;//TODO make this flexible
+        barcodeReadYes=true;
     };
-    pP->readNmates=pP->readNmatesIn-1; //output mates TODO: check that readNmatesIn==2       
-    barcodeRead=pP->readNmates;//TODO make this flexible
-
+    
     ///////////////////////////////////////////////// soloStrand
     if (strandStr=="Unstranded") {
         strand=-1;
@@ -122,23 +136,28 @@ void ParametersSolo::initialize(Parameters *pPin)
     };
     
     ////////////////////////////////////////////umiDedup
-    umiDedupYes.resize(3,false);
-    umiDedupColumns.resize(umiDedup.size());
-    for (uint32 ii=0; ii<umiDedup.size(); ii++) {
-        if (umiDedup[ii]=="Exact") {
-            umiDedupYes[0]=true;
-            umiDedupColumns[ii]=0;
-        } else if (umiDedup[ii]=="1MM_All") {
-            umiDedupYes[1]=true;
-            umiDedupColumns[ii]=1;
-        } else if (umiDedup[ii]=="1MM_Directional") {
-            umiDedupYes[2]=true;
-            umiDedupColumns[ii]=2;
-        } else {
-            ostringstream errOut;
-            errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in --soloUMIdedup="<<umiDedup[ii]<<"\n";
-            errOut << "SOLUTION: used allowed options: Exact -or- 1MM_All -or- 1MM_Directional";
-            exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+    if (type==SoloTypes::SmartSeq) {//only "exact" umidedup
+        umiDedupYes={true,false,false};
+        umiDedupColumns={0};
+    } else {
+        umiDedupYes.resize(3,false);
+        umiDedupColumns.resize(umiDedup.size());
+        for (uint32 ii=0; ii<umiDedup.size(); ii++) {
+            if (umiDedup[ii]=="Exact") {
+                umiDedupYes[0]=true;
+                umiDedupColumns[ii]=0;
+            } else if (umiDedup[ii]=="1MM_All") {
+                umiDedupYes[1]=true;
+                umiDedupColumns[ii]=1;
+            } else if (umiDedup[ii]=="1MM_Directional") {
+                umiDedupYes[2]=true;
+                umiDedupColumns[ii]=2;
+            } else {
+                ostringstream errOut;
+                errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in --soloUMIdedup="<<umiDedup[ii]<<"\n";
+                errOut << "SOLUTION: used allowed options: Exact -or- 1MM_All -or- 1MM_Directional";
+                exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+            };
         };
     };
     ///////////// finished parameters input
@@ -161,7 +180,7 @@ void ParametersSolo::initialize(Parameters *pPin)
     umiMaskLow=(uint32) ( (((uint64)1)<<umiL) - 1);
     umiMaskHigh=~umiMaskLow;
 
-    //load the CB whitelist
+    //////////////////////////////////////////////////////CB whitelist
     if (type==SoloTypes::CB_UMI_Simple || type==SoloTypes::CB_samTagOut) {//simple whitelist
         if (soloCBwhitelist.size()>1) {
             ostringstream errOut;
@@ -205,6 +224,12 @@ void ParametersSolo::initialize(Parameters *pPin)
         for (uint64 ii=0; ii<cbWLsize; ii++)
              cbWLstr[ii] = convertNuclInt64toString(cbWL[ii],cbL);        
         
+    //////////////////////////////////////////////////////////////////////////////////
+    } else if (type==SoloTypes::SmartSeq) {
+        cbWLstr=pP->outSAMattrRG;
+        cbWLsize=cbWLstr.size();
+        cbWLyes=true; 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////    
     } else if (type==SoloTypes::CB_UMI_Complex) {//complex barcodes: multiple whitelist (one for each CB), varying CB length
         cbWLyes=true; //for complex barcodes, no-whitelist option is not allowed for now
         
@@ -279,17 +304,6 @@ void ParametersSolo::initialize(Parameters *pPin)
     time_t rawTime;
     time(&rawTime);
     pP->inOut->logMain << timeMonthDayTime(rawTime) << "Finished reading, sorting and deduplicating CB whitelist sequences." <<endl;
-
-    
-//     if (!pP->quant.trSAM.yes) {
-//         pP->quant.yes = true;
-//         pP->quant.trSAM.yes = true;
-//         pP->quant.trSAM.bamYes = false;
-//         pP->quant.trSAM.bamCompression = -2;
-//         pP->quant.trSAM.indel = true;
-//         pP->quant.trSAM.softClip = true;
-//         pP->inOut->logMain << "Turning on Genomic->Transcriptomic coordinate conversion for STARsolo\n";
-//     };
 
     //SAM attributes
     samAttrYes=false;
