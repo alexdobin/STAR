@@ -126,7 +126,7 @@ class Parameters {
         uint seedNoneLociPerWindow; //max number of aligns from one piece per window
         uint seedSearchStartLmax;
         double seedSearchStartLmaxOverLread; //length of split start points
-        uint seedSplitMin;
+        uint64 seedSplitMin, seedMapMin;
 
         //chunk parameters
         uint chunkInSizeBytes,chunkInSizeBytesArray,chunkOutBAMsizeBytes;
@@ -320,7 +320,7 @@ class Parameters {
 
         //splitting
         char Qsplit;
-        uint maxNsplit, minLsplit, minLmap;
+        uint maxNsplit;
 
         //not really parameters, but global variables:
         array<vector<uint64>,2> sjAll;

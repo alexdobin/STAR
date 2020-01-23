@@ -14,7 +14,7 @@ int ReadAlign::mapOneRead() {
     revertStrand = false; //the 2nd read is awlays on opposite strand. 1st and 2nd reads have already been reversed.
 
     if (Lread>0) {
-        Nsplit=qualitySplit(Read1[0], Qual1[0], Lread, P.Qsplit, P.maxNsplit, P.minLsplit, splitR);
+        Nsplit=qualitySplit(Read1[0], Qual1[0], Lread, P.Qsplit, P.maxNsplit, P.seedSplitMin, splitR);
         // splitR[0][fragnum] => good region start position   (from SequenceFuns.cpp)
         // splitR[1][fragnum] => good reagion length
         // splitR[2][fragnum] => fragnum ?
@@ -62,7 +62,7 @@ int ReadAlign::mapOneRead() {
                     Lmapped=0;  // length of segment mapped so far.
 
                     // begin mapping starting from segment start position (istart*Lstart)
-                    while ( istart*Lstart + Lmapped + P.minLmap < splitR[1][ip] ) {//map until unmapped portion is <=minLmap (default: 5)
+                    while ( istart*Lstart + Lmapped + P.seedMapMin < splitR[1][ip] ) {//map until unmapped portion is <=minLmap (default: 5)
 
                         // Shift is the position in the read to begin mapping from.
                         uint Shift = iDir==0 ? ( splitR[0][ip] + istart*Lstart + Lmapped ) : \
