@@ -1,3 +1,4 @@
+* Iimplemented --seedMapMin option (previously hard-coded) to define minimum seed length.
 * Fixed a bug with solo SJ output for large genomes.
 * Fixed a seg-fault in STARsolo for cases where no cell barcodes matched whitelist (#784).  
 

@@ -11,6 +11,7 @@ void ParametersSolo::initialize(Parameters *pPin)
 {
     pP=pPin;
 
+    barcodeStart=barcodeEnd=0; //this means that the entire barcodeRead is considered barcode. Will changed it for simple barcodes.
     yes = true;
     if (typeStr=="None") {
         type = SoloTypes::None;
@@ -41,8 +42,13 @@ void ParametersSolo::initialize(Parameters *pPin)
             errOut << "SOLUTION: CB length cannot be longer than 31";
             exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
+        
         if (bL==1)
             bL=cbL+umiL;
+        
+        barcodeStart=min(cbS,umiS)-1;
+        barcodeEnd=max(cbS+cbL,umiS+umiL)-2;
+        
     } else if (typeStr=="CB_UMI_Complex") {
         type=SoloTypes::CB_UMI_Complex;
         bL=0;
