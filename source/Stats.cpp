@@ -160,3 +160,9 @@ void Stats::qualHistCalc(const uint64 imate, const char* qual, const uint64 len)
     };
 };
 
+void Stats::qualHistCalcSolo(const uint64 imate, const char* qual, const vector<uint32> stlen)// start1, const uint64 len1, const uint64 len1,)
+{//calculates histogram of quality scores for each imate        
+//     for (uint64 ix=0; ix<len; ix++) {
+//             qualHist[imate][(uint8)qual[ix]]++;
+//     };
+};

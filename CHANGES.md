@@ -1,4 +1,4 @@
-
+* Fixed a bug with solo SJ output for large genomes.
 * Fixed a seg-fault in STARsolo for cases where no cell barcodes matched whitelist (#784).  
 
 STAR 2.7.3a 2019/10/08
