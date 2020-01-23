@@ -44,7 +44,7 @@ class ReadAlign {
         uint Lread, readLength[MAX_N_MATES], readLengthOriginal[MAX_N_MATES], readLengthPair, readLengthPairOriginal;
         intScore maxScoreMate[MAX_N_MATES];
 
-        uint readFilesIndex;
+        uint32 readFilesIndex;
 
         ReadAlign *waspRA; //ReadAlign for alternative WASP alignment
         int waspType, waspType1; //alignment ASE-WASP type and

@@ -29,13 +29,11 @@ void SoloFeature::outputResults(bool cellFilterYes)
         case SoloFeatureTypes::GeneFull :
         case SoloFeatureTypes::Velocyto :
         case SoloFeatureTypes::VelocytoSimple :            
-        {
             ofstream &geneStr=ofstrOpen(outputPrefix1+pSolo.outFileNames[1],ERROR_OUT, P);
             for (uint32 ii=0; ii<Trans.nGe; ii++)
                 geneStr << Trans.geID[ii] <<"\t"<< (Trans.geName[ii].empty() ? Trans.geID[ii] : Trans.geName[ii]) << '\n';
             geneStr.close();
             break;
-        };
     };
 
     ////////////////////////////////////////////////////////////////////////////

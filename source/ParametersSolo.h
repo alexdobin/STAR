@@ -13,7 +13,7 @@ class ParametersSolo {
 public:
     //chemistry, library etc
     string typeStr;
-    enum SoloTypes : int32 {None=0, CB_UMI_Simple=1, CB_UMI_Complex=2, CB_samTagOut=3};
+    enum SoloTypes : int32 {None=0, CB_UMI_Simple=1, CB_UMI_Complex=2, CB_samTagOut=3, SmartSeq=4};
     SoloTypes type;
     bool yes;
     string strandStr;
@@ -21,6 +21,7 @@ public:
     
     uint32 barcodeRead;//which read is the barcode read = 0,1,2?
     uint32 barcodeStart, barcodeEnd;//start/end of barcode sequence on barcodeRead
+    bool barcodeReadYes;
     
     //simple barcodes
     uint32 cbS,cbL; //cell barcode start,length

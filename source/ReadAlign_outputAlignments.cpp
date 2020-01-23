@@ -88,7 +88,7 @@ void ReadAlign::outputAlignments() {
 
             nTrOut=min(P.outSAMmultNmax,nTrOut); //number of to write to SAM/BAM files
 
-            soloRead->readBar->getCBandUMI(readNameExtra.at(0));
+            soloRead->readBar->getCBandUMI(readNameExtra.at(0), readFilesIndex);
             //genes
             if ( P.quant.geCount.yes ) {
                 chunkTr->geneCountsAddAlign(nTr, trMult, readAnnot.geneExonOverlap);
@@ -183,7 +183,7 @@ void ReadAlign::outputAlignments() {
 
     if (unmapType>=0) {//unmapped reads
         statsRA.unmappedAll++;
-        soloRead->readBar->getCBandUMI(readNameExtra.at(0));
+        soloRead->readBar->getCBandUMI(readNameExtra.at(0), readFilesIndex);
         soloRead->record(0, trMult[0], iReadAll, readAnnot);         
     };
 
