@@ -83,6 +83,10 @@ all: STAR
 clean:
 	rm -f *.o STAR STARstatic STARlong Depend.list
 
+.PHONY: clean_solo
+clean_solo:
+	rm -f Solo*.o
+
 .PHONY: CLEAN
 CLEAN:
 	rm -f *.o STAR Depend.list

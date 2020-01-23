@@ -274,6 +274,7 @@ outSAMattributes                Standard
                                 sM          ... assessment of CB and UMI
                                 sS          ... sequence of the entire barcode (CB,UMI,adapter...)
                                 sQ          ... quality of the entire barcode
+                                GX GN       ... gene ID and gene name
                                 Unsupported/undocumented:
                                 rB          ... alignment block read/genomic coordinates
                                 vR          ... read coordinate of the variant
@@ -518,6 +519,9 @@ seedNoneLociPerWindow    10
 
 seedSplitMin                12
     int>0: min length of the seed sequences split by Ns or mate gap
+
+seedMapMin              5
+    int>0: min length of seeds to be mapped
 
 alignIntronMin              21
     minimum intron size: genomic gap is considered intron if its length>=alignIntronMin, otherwise it is considered Deletion

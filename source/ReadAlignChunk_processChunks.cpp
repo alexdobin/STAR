@@ -111,7 +111,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                             P.inOut->readIn[P.pSolo.barcodeRead].ignore(DEF_readNameSeqLengthMax,'\n');//skip to the end of 3rd ("+") line
                             getline(P.inOut->readIn[P.pSolo.barcodeRead],seq1); //read qualities
                             readID += ' ' + seq1;
-                            g_statsAll.qualHistCalc(1, seq1.c_str(), seq1.size());
+                            g_statsAll.qualHistCalc(1, seq1.c_str()+P.pSolo.barcodeStart, P.pSolo.barcodeEnd==0 ? seq1.size() : P.pSolo.barcodeEnd-P.pSolo.barcodeStart+1);
                         };
 
                         //copy the same readID to both mates

@@ -20,7 +20,7 @@ bool inputFeatureUmi(fstream *strIn, int32 featureType, bool readInfoYes, array<
             break;
 
         case SoloFeatureTypes::SJ :
-            uint32 sj[2];
+            uint64 sj[2];
             *strIn >> sj[0] >> sj[1];
             feature=(uint32) binarySearch2(sj[0],sj[1],sjAll[0].data(),sjAll[1].data(),sjAll[0].size());
             break;
