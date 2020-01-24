@@ -51,7 +51,6 @@ public:
     } filteredCells;
     
     string outputPrefix;
-    ofstream *streamTranscriptsOut;
     
     array<vector<uint64>,2> sjAll;
     

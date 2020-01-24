@@ -43,31 +43,11 @@ bool inputFeatureUmi(fstream *strIn, int32 featureType, bool readInfoYes, array<
 };
 
 void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbReadCountTotal, 
-                                   ofstream *streamTranscriptsOut, vector<readInfoStruct> &readInfo, SoloFeature **soloFeatAll)
+                                   vector<readInfoStruct> &readInfo, SoloFeature **soloFeatAll)
 {   
     streamReads->flush();
     streamReads->seekg(0,ios::beg);
-    
-    switch (featureType) {//for non-standard processing
-        
-        case SoloFeatureTypes::VelocytoSimple :
-        {
-            uint32 feature, vtype;
-            uint64 iread;
-            while (*streamReads >> iread) {//until the end of file
-                *streamReads >> feature >> vtype;
-                uint64 cb=soloFeatAll[pSolo.featureInd[SoloFeatureTypes::Gene]]->readInfo[iread].cb;
-                if (cb+1!=0) {
-                    cbP[cb][0]=feature | (vtype << velocytoTypeGeneBitShift ); //encode vType in the top 2 bits;
-                    cbP[cb][1]=soloFeatAll[pSolo.featureInd[SoloFeatureTypes::Gene]]->readInfo[iread].umi;
-                    cbP[cb]+=cbPstride;
-                };
-            };
-            return;
-            break;
-        };
-    };
-    
+
     //////////////////////////////////////////// standard features
     uint32 feature, umi, iread;
     int32 cbmatch;
@@ -91,30 +71,21 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
             if (!pSolo.cbWLyes) //if no-WL, the full cbInteger was recorded - now has to be placed in order
                 cb=binarySearchExact<uint64>(cb,pSolo.cbWL.data(),pSolo.cbWLsize);
 
-            //record feature
-            if (featureType==SoloFeatureTypes::Transcript3p) {//variable length feature, separate treatment, feature always defined (i.e. !=-1)
-                //for now - output all in file
-                *streamTranscriptsOut << cb <<' '<< umi <<' '<< trIdDist.size()/2;
-                for (auto &tt: trIdDist)
-                    *streamTranscriptsOut <<' '<< tt;
-                *streamTranscriptsOut << '\n';
+            //record feature ingle-number feature
+            if (feature != (uint32)(-1)) {
+                cbP[cb][0]=feature;
+                cbP[cb][1]=umi;
+                if (readInfoYes) {
+                    cbP[cb][2]=iread;
+                };
+                cbP[cb]+=cbPstride;
                 if (cbmatch==0)
                     stats.V[stats.nExactMatch]++;
-            } else {//single-number feature
-                if (feature != (uint32)(-1)) {
-                    cbP[cb][0]=feature;
-                    cbP[cb][1]=umi;
-                    if (readInfoYes) {
-                        cbP[cb][2]=iread;
-                    };
-                    cbP[cb]+=cbPstride;
-                    if (cbmatch==0)
-                        stats.V[stats.nExactMatch]++;
-                } else {//no feature - record readInfo
-                    readInfo[iread].cb=cb;
-                    readInfo[iread].umi=umi;
-                };
+            } else {//no feature - record readInfo
+                readInfo[iread].cb=cb;
+                readInfo[iread].umi=umi;
             };
+            
         } else {//multiple matches
             float ptot=0.0,pmax=0.0;
             for (uint32 ii=0; ii<(uint32)cbmatch; ii++) {
@@ -134,26 +105,18 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
                 };
             };
             if (ptot>0.0 && pmax>=pSolo.cbMinP*ptot) {
-                //record feature
-                if (featureType==SoloFeatureTypes::Transcript3p) {//variable length feature
-                    //for now - output all in file
-                    *streamTranscriptsOut << cb <<' '<< umi <<' '<< trIdDist.size()/2;
-                    for (auto &tt: trIdDist)
-                        *streamTranscriptsOut <<' '<< tt;
-                    *streamTranscriptsOut << '\n';
-                } else {//single-number feature
-                    if (feature != (uint32)(-1)) {
-                        cbP[cb][0]=feature;
-                        cbP[cb][1]=umi;
-                        if (readInfoYes) {
-                            cbP[cb][2]=iread;
-                        };
-                        cbP[cb]+=cbPstride;
-                    } else {//no feature - record readInfo
-                        readInfo[iread].cb=cb;
-                        readInfo[iread].umi=umi;
-                    };    
-                };
+                //record feature single-number feature
+                if (feature != (uint32)(-1)) {
+                    cbP[cb][0]=feature;
+                    cbP[cb][1]=umi;
+                    if (readInfoYes) {
+                        cbP[cb][2]=iread;
+                    };
+                    cbP[cb]+=cbPstride;
+                } else {//no feature - record readInfo
+                    readInfo[iread].cb=cb;
+                    readInfo[iread].umi=umi;
+                };    
             } else if (feature != (uint32)(-1)) {
                 stats.V[stats.nTooMany]++;
             };

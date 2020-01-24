@@ -20,8 +20,4 @@ SoloFeature::SoloFeature(int32 feTy, Parameters &Pin, Transcriptome &inTrans, So
         errOut << "SOLUTION: check the path and permisssions";
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
     };
-    
-    if (featureType==SoloFeatureTypes::Transcript3p) {//for now - open output file
-        streamTranscriptsOut = &ofstrOpen(outputPrefix+"transcriptCbUmiIndexDistance.txt",ERROR_OUT, P);
-    };
 };

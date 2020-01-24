@@ -36,7 +36,7 @@ public:
     void addStats(const SoloReadFeature &soloCBin);
     void statsOut(ofstream &streamOut);
     void inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbReadCountExact, 
-                      ofstream *streamTranscriptsOut, vector<readInfoStruct> &readInfo, SoloFeature **soloFeatAll);
+                      vector<readInfoStruct> &readInfo, SoloFeature **soloFeatAll);
 
 private:
     const int32 featureType;
