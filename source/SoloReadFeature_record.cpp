@@ -51,7 +51,7 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript *ali
                 } else {//one gene or no gene
                     bool sjAnnot;
                     alignOut->extractSpliceJunctions(reFe.sj, sjAnnot);
-                    if ( reFe.sj.empty() || (sjAnnot && readAnnot.geneConcordant.size()==0) ) {//no junctions, or annotated junction but no gene (i.e. read does not fully match transcript)
+                    if ( reFe.sj.empty() ) {//no junctions, or annotated junction but no gene (i.e. read does not fully match transcript)
                         stats.V[stats.nNoFeature]++;
                     } else {//goo junction
                         nFeat = outputReadCB(streamReads, (readInfoYes ? iRead : (uint64)-1), featureType, soloBar, reFe, readAnnot);
@@ -71,16 +71,6 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript *ali
                 };
                 
                 break;
-                
-            case SoloFeatureTypes::VelocytoSimple :
-                //different record: iRead, gene, type
-                if (readAnnot.geneVelocytoSimple[0]+1 !=0 ) {//otherwise, no gene
-                    *streamReads << iRead <<' '<< readAnnot.geneVelocytoSimple[0] <<' '<< readAnnot.geneVelocytoSimple[1] <<'\n';
-                    nFeat=1;
-                } else {
-                    stats.V[stats.nNoFeature]++;
-                };
-                break; //no need to go with downstream processing
 
             case SoloFeatureTypes::Velocyto :
                 //different record: iRead, nTr, tr1, type1, tr2, type2 ...

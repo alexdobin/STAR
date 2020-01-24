@@ -1,3 +1,4 @@
+* Change in STARsolo SJ output behavior: junctions are output even of reads do not match genes
 * Fixed the problem in Solo Q30 Bases in Summary.csv average (#798).
 * Iimplemented --seedMapMin option (previously hard-coded) to define minimum seed length.
 * Fixed a bug with solo SJ output for large genomes.

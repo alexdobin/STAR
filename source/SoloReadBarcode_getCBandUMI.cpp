@@ -254,7 +254,7 @@ void SoloReadBarcode::getCBandUMI(const string &readNameExtra, const uint32 &rea
         cbMatch=0;
         cbMatchInd={readFilesIndex};
         cbMatchString=to_string(cbMatchInd[0]);
-        umiB=0;
+        umiB=rand()%5;
     };
     
     addStats(cbMatch);

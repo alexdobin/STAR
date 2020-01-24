@@ -1,9 +1,13 @@
 #ifndef H_SoloFeature
 #define H_SoloFeature
+
+#include <fstream>
+#include <unordered_map>
+#include <unordered_set>
+
 #include "IncludeDefine.h"
 #include "ReadAlignChunk.h"
 #include "Transcriptome.h"
-#include <fstream>
 
 #include "SoloCommon.h"
 #include "SoloRead.h"
@@ -42,7 +46,7 @@ public:
     vector<uint32> countCellGeneUMIindex;//index of CBs in the count matrix
     uint32 countMatStride; //number of counts per entry in the count matrix
     
-    //vector<vector<array<uint32,4>>> cellFeatureCounts; //another way to collect the cell/feature counts
+    vector<unordered_map<uint32, unordered_set<uint64>>> cbFeatureUMImap; //for SmartSeq counting
     
     vector<bool> cellFilterVec;
     struct {
@@ -59,6 +63,7 @@ public:
     SoloFeature(int32 feTy, Parameters &Pin, Transcriptome &inTrans, SoloReadBarcode *readBarSumIn, SoloFeature **soloFeatAll);
     void processRecords(ReadAlignChunk **RAchunk);
     void sumThreads(ReadAlignChunk **RAchunk);
+    void countSmartSeq();
     void countCBgeneUMI();
     void countVelocyto();
     void quantTranscript();

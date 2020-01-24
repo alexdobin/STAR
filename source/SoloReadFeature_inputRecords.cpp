@@ -42,8 +42,7 @@ bool inputFeatureUmi(fstream *strIn, int32 featureType, bool readInfoYes, array<
     return true;
 };
 
-void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbReadCountTotal, 
-                                   vector<readInfoStruct> &readInfo, SoloFeature **soloFeatAll)
+void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbReadCountTotal, vector<readInfoStruct> &readInfo, SoloFeature *soloFeat)
 {   
     streamReads->flush();
     streamReads->seekg(0,ios::beg);
@@ -60,7 +59,13 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
             continue;
         };
 
-        if (cbmatch<=1) {//single match
+        if (pSolo.type==pSolo.SoloTypes::SmartSeq) {
+            *streamReads >> cb; //cbmatch==0 always, only one cb
+            soloFeat->cbFeatureUMImap[cb][feature].insert(umi);
+            soloFeat->nReadPerCB[cb]++;
+            stats.V[stats.nExactMatch]++;
+            
+        } else if (cbmatch<=1) {//single match
             *streamReads >> cb;
 
             if ( pSolo.CBmatchWL.oneExact && cbmatch==1 && cbReadCountTotal[cb]==0 && feature!=(uint32)(-1) ) {//single 1MM match, no exact matches to this CB

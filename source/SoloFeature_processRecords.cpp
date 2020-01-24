@@ -20,7 +20,11 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
         quantTranscript();
         return;
     } else {//all others, standard processing
-        countCBgeneUMI();
+        if (pSolo.type==pSolo.SoloTypes::SmartSeq) {
+            countSmartSeq();
+        } else {
+            countCBgeneUMI();
+        };
     };
 
     //output
