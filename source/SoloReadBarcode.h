@@ -6,11 +6,17 @@
 #include "SoloReadBarcodeStats.h"
 
 class SoloReadBarcode {
+private:
+    Parameters &P;
+    
 public:
+    ParametersSolo &pSolo;    
+
+    
     uint32 homoPolymer[4];//homopolymer constants
     string cbSeq, umiSeq, cbQual, umiQual, bSeq, bQual;
     string cbSeqCorrected;
-    uint32 umiB;
+    uint64 umiB;
     //int64  cbI;
     int32  cbMatch;//-1: no match, 0: exact, 1: 1 match with 1MM, >1: # of matches with 1MM
     string cbMatchString;//CB matches and qualities
@@ -30,9 +36,7 @@ public:
     bool convertCheckUMI();
     void addStats(const int32 cbMatch1);
     
-private:
-    Parameters &P;
-    ParametersSolo &pSolo;
+
 };
 
 #endif

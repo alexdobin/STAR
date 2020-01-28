@@ -71,6 +71,8 @@ public:
     void peOverlapSEtoPE(uint* mSta, Transcript &t);
     void extractSpliceJunctions(vector<array<uint64,2>> &sjOut, bool &annotYes);
     
+    uint64 chrStartLengthExtended();
+    
     bool transformGenome(Genome &genOut, Transcript & A);
     bool convertGenomeCigar(Genome &genOut, Transcript & A);
 

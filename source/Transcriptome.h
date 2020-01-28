@@ -49,7 +49,7 @@ public:
     void geneCountsAddAlign(uint nA, Transcript **aAll, vector<int32> &gene1); //add one alignment to gene counts
     void quantsAllocate(); //allocate quants structure
     void quantsOutput(); //output quantification files
-    void geneFullAlignOverlap(uint nA, Transcript **aAll, int32 strandType, set<uint32> &geneOverlap);
+    void geneFullAlignOverlap(uint nA, Transcript **aAll, int32 strandType, ReadAnnotations &readAnnot);
     void classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnnotations &readAnnot);
     
 private:

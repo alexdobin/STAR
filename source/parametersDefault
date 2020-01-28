@@ -700,6 +700,7 @@ soloType                    None
     string(s): type of single-cell RNA-seq
                             CB_UMI_Simple   ... (a.k.a. Droplet) one UMI and one Cell Barcode of fixed length in read2, e.g. Drop-seq and 10X Chromium
                             CB_UMI_Complex  ... one UMI of fixed length, but multiple Cell Barcodes of varying length, as well as adapters sequences are allowed in read2 only, e.g. inDrop.
+                            SmartSeq        ... Smart-seq: each cell in a separtate FASTQ (paired- or single-end), barcodes are corresponding read-groups, no UMI sequences, alginments deduplicated according to alignment start and end (after extending soft-clipped bases)
 
 soloCBwhitelist             -
     string(s): file(s) with whitelist(s) of cell barcodes. Only one file allowed with 

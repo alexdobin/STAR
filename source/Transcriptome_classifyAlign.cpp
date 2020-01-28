@@ -209,6 +209,7 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
                 readAnnot.transcriptConcordant.push_back({tr1,(uint32) distTTS});
 
                 readAnnot.geneConcordant.insert(trGene[tr1]);//genes for all alignments
+                readAnnot.geneConcordantTr=iag;
                 aG.alignGenes.insert(trGene[tr1]);//genes for each alignment
             };
             

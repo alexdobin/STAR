@@ -31,7 +31,7 @@ public:
     SoloReadFeatureStats stats;
 
     SoloReadFeature (int32 feTy, Parameters &Pin, int iChunk);
-    void record(SoloReadBarcode &soloBar, uint nTr, Transcript *alignOut, uint64 iRead, ReadAnnotations &readAnnot);
+    void record(SoloReadBarcode &soloBar, uint nTr, Transcript **alignOut, uint64 iRead, ReadAnnotations &readAnnot);
     void addCounts(const SoloReadFeature &soloCBin);
     void addStats(const SoloReadFeature &soloCBin);
     void statsOut(ofstream &streamOut);

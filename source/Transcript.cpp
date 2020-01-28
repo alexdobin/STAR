@@ -50,3 +50,10 @@ void Transcript::extractSpliceJunctions(vector<array<uint64,2>> &sjOut, bool &an
     };
 };
 
+uint64 Transcript::chrStartLengthExtended()
+{
+    uint64 start1  = cStart - exons[0][EX_R];
+    uint64 length1 = exons[nExons-1][EX_G] + Lread - exons[nExons-1][EX_R] - exons[0][EX_G] + exons[0][EX_R];
+    
+    return (start1 << 32) | length1;
+};

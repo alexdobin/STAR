@@ -5,7 +5,7 @@
 #include "SoloCommon.h"
 #include "SoloFeature.h"
 
-bool inputFeatureUmi(fstream *strIn, int32 featureType, bool readInfoYes, array<vector<uint64>,2> &sjAll, uint32 &iread, int32 &cbmatch, uint32 &feature, uint32 &umi, vector<uint32> &featVecU32)
+bool inputFeatureUmi(fstream *strIn, int32 featureType, bool readInfoYes, array<vector<uint64>,2> &sjAll, uint64 &iread, int32 &cbmatch, uint32 &feature, uint64 &umi, vector<uint32> &featVecU32)
 {
     if (!(*strIn >> umi)) //end of file
         return false;
@@ -48,7 +48,8 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
     streamReads->seekg(0,ios::beg);
 
     //////////////////////////////////////////// standard features
-    uint32 feature, umi, iread;
+    uint32 feature;
+    uint64 umi, iread;
     int32 cbmatch;
     int64 cb;
     vector<uint32> trIdDist;

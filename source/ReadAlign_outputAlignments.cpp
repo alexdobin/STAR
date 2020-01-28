@@ -114,13 +114,14 @@ void ReadAlign::outputAlignments() {
             
             soloRead->readBar->getCBandUMI(readNameExtra.at(0), readFilesIndex);
 
+            //TODO maybe initialize readAnnot to all empty?
             //genes
             if ( P.quant.geCount.yes ) {
                 chunkTr->geneCountsAddAlign(nTrOut, trMult, readAnnot.geneExonOverlap);
             };
             //solo-GeneFull
             if ( P.quant.geneFull.yes ) {
-                chunkTr->geneFullAlignOverlap(nTrOut, trMult, P.pSolo.strand, readAnnot.geneFull);
+                chunkTr->geneFullAlignOverlap(nTrOut, trMult, P.pSolo.strand, readAnnot);
             };
             //solo-Gene
             if ( P.quant.gene.yes ) {
@@ -132,7 +133,7 @@ void ReadAlign::outputAlignments() {
             };
 
             //solo
-            soloRead->record(nTrOut, trMult[0], iReadAll, readAnnot);             
+            soloRead->record(nTrOut, trMult, iReadAll, readAnnot);             
             
             uint64 nTrOutSAM=min(P.outSAMmultNmax,nTrOut); //number of to write to SAM/BAM files            
             
@@ -213,7 +214,7 @@ void ReadAlign::outputAlignments() {
     if (unmapType>=0) {//unmapped reads
         statsRA.unmappedAll++;
         soloRead->readBar->getCBandUMI(readNameExtra.at(0), readFilesIndex);
-        soloRead->record(0, trMult[0], iReadAll, readAnnot);         
+        soloRead->record(0, trMult, iReadAll, readAnnot);         
     };
 
     if ( P.outSAMunmapped.within && unmapType>=0 && unmapType<4 ) {//output unmapped within && unmapped read && both mates unmapped

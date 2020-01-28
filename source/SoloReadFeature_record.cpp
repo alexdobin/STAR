@@ -8,16 +8,20 @@ class ReadSoloFeatures {
 public:
     uint32 gene;
     vector<array<uint64,2>> sj;
+    bool sjAnnot;
+    uint32 indAnnotTr; //index of the annotated transcript
+    Transcript **alignOut;
 };
 
-uint32 outputReadCB(fstream *streamOut, const uint64 iRead, const int32 featureType, const SoloReadBarcode &soloBar, const ReadSoloFeatures &reFe, const ReadAnnotations &readAnnot);
+uint32 outputReadCB(fstream *streamOut, const uint64 iRead, const int32 featureType, SoloReadBarcode &soloBar, const ReadSoloFeatures &reFe, const ReadAnnotations &readAnnot);
 
-void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript *alignOut, uint64 iRead, ReadAnnotations &readAnnot)
+void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **alignOut, uint64 iRead, ReadAnnotations &readAnnot)
 {
     if (pSolo.type==0 || soloBar.cbMatch<0)
         return;
        
     ReadSoloFeatures reFe;
+    reFe.alignOut=alignOut;
     
     uint32 nFeat=0; //number of features in this read (could be >1 for SJs)
     if (nTr==0) {//unmapped
@@ -37,7 +41,8 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript *ali
                         if (nTr>1)
                             stats.V[stats.nAmbigFeatureMultimap]++;//multigene caused by multimapper
                     } else {//good gene
-                        reFe.gene=*readGe->begin();
+                        reFe.gene = *readGe->begin();
+                        reFe.indAnnotTr = ( featureType==SoloFeatureTypes::Gene ? readAnnot.geneConcordantTr : readAnnot.geneFullTr );                        
                         nFeat = outputReadCB(streamReads, (readInfoYes ? iRead : (uint64)-1), featureType, soloBar, reFe, readAnnot);
                     };
                 };
@@ -49,11 +54,11 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript *ali
                 } else if (readAnnot.geneConcordant.size()>1){//for SJs, still check genes, no feature if multi-gene
                     stats.V[stats.nAmbigFeature]++;
                 } else {//one gene or no gene
-                    bool sjAnnot;
-                    alignOut->extractSpliceJunctions(reFe.sj, sjAnnot);
-                    if ( reFe.sj.empty() ) {//no junctions, or annotated junction but no gene (i.e. read does not fully match transcript)
+                    alignOut[0]->extractSpliceJunctions(reFe.sj, reFe.sjAnnot);
+                    if ( reFe.sj.empty() || (reFe.sjAnnot && readAnnot.geneConcordant.size()==0) ) {//no junctions, or annotated junction but no gene (i.e. read does not fully match transcript)
                         stats.V[stats.nNoFeature]++;
-                    } else {//goo junction
+                    } else {//good junction
+                        reFe.indAnnotTr=0;                        
                         nFeat = outputReadCB(streamReads, (readInfoYes ? iRead : (uint64)-1), featureType, soloBar, reFe, readAnnot);
                     };
                 };                  
@@ -109,13 +114,17 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript *ali
     return;
 };
 
-uint32 outputReadCB(fstream *streamOut, const uint64 iRead, const int32 featureType, const SoloReadBarcode &soloBar, const ReadSoloFeatures &reFe, const ReadAnnotations &readAnnot)
+uint32 outputReadCB(fstream *streamOut, const uint64 iRead, const int32 featureType, SoloReadBarcode &soloBar, const ReadSoloFeatures &reFe, const ReadAnnotations &readAnnot)
 {   
     //format of the temp output file
     // UMI [iRead] type feature* cbMatchString
     //             0=exact match, 1=one non-exact match, 2=multipe non-exact matches
     //                   gene or sj[0] sj[1]
     //                           CB or nCB {CB Qual, ...}
+    
+    if (soloBar.pSolo.type==soloBar.pSolo.SoloTypes::SmartSeq && featureType!=-1) {//need to calculate "UMI" from align start/end
+        soloBar.umiB=reFe.alignOut[reFe.indAnnotTr]->chrStartLengthExtended();
+    };
     
     uint64 nout=1;
     

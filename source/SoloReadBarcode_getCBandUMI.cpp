@@ -133,7 +133,7 @@ void SoloReadBarcode::addStats(const int32 cbMatch1)
 ///////////////////////////////////////////////////////////////////////////////////////
 bool SoloReadBarcode::convertCheckUMI()
 {//check UMIs, return if bad UMIs
-    if (convertNuclStrToInt32(umiSeq,umiB)!=-1) {//convert and check for Ns
+    if (convertNuclStrToInt64(umiSeq,umiB)!=-1) {//convert and check for Ns
         stats.V[stats.nNinUMI]++;//UMIs are not allowed to have Ns
         cbMatch=-23;
         return false;
@@ -254,7 +254,7 @@ void SoloReadBarcode::getCBandUMI(const string &readNameExtra, const uint32 &rea
         cbMatch=0;
         cbMatchInd={readFilesIndex};
         cbMatchString=to_string(cbMatchInd[0]);
-        umiB=rand()%5;
+        //umiB=rand()%5; for testing
     };
     
     addStats(cbMatch);

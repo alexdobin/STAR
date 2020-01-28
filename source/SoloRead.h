@@ -11,7 +11,7 @@ public:
     SoloReadFeature **readFeat;
     
     SoloRead(Parameters &Pin, int32 iChunkIn);
-    void record(uint64 nTr, Transcript *alignOut, uint64 iRead, ReadAnnotations &readAnnot);
+    void record(uint64 nTr, Transcript **alignOut, uint64 iRead, ReadAnnotations &readAnnot);
     
 private:
     const int32 iChunk;

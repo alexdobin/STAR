@@ -10,7 +10,7 @@ void SoloFeature::cellFiltering()
 
     if (pSolo.cellFilter.type[0]=="None" ||  nCB<1)
         return;
-    
+       
     //sort nUperCB
     nUMIperCBsorted=nUMIperCB;
     qsort(nUMIperCBsorted.data(), nCB, sizeof(uint32), funCompareNumbersReverse<uint32>); //sort by gene number
@@ -23,7 +23,9 @@ void SoloFeature::cellFiltering()
     } else if (pSolo.cellFilter.type[0]=="TopCells") {
         nUMImin = nUMIperCBsorted[max(nCB-1,pSolo.cellFilter.topCells)];
     };
-
+    nUMImin=max(nUMImin,(uint32) 1);//cannot be zero
+    
+    
     cellFilterVec.resize(nCB,false);
     memset(&filteredCells,0,sizeof(filteredCells));
 
@@ -49,6 +51,16 @@ void SoloFeature::cellFiltering()
                 geneDetected[countCellGeneUMI[indG1]]=true;            
             };
         };
+    };   
+    
+    if (filteredCells.nCells==0) {//TODO constructor for filteredCell
+        filteredCells.nGeneDetected = 0;
+        filteredCells.meanUMIperCell = 0;
+        filteredCells.meanReadPerCell = 0;
+        filteredCells.medianUMIperCell = 0;
+        filteredCells.medianGenePerCell = 0;
+        filteredCells.medianReadPerCell = 0;
+        return;
     };
     
     filteredCells.nGeneDetected=0;
@@ -67,4 +79,6 @@ void SoloFeature::cellFiltering()
     filteredCells.medianUMIperCell = nUMIperCBsorted[filteredCells.nCells/2];
     filteredCells.medianGenePerCell = filteredCells.nGenePerCell[filteredCells.nCells/2];
     filteredCells.medianReadPerCell = filteredCells.nReadPerCell[filteredCells.nCells/2];
+    
+    return;
 };
