@@ -39,37 +39,42 @@ void SoloFeature::countSmartSeq()
     nGenePerCB.resize(nCB);
       
     countMatStride=2; //hard-coded for now, works for both Gene*/SJ and Velocyto
-    countCellGeneUMI.resize(nCB*Trans.nGe*countMatStride);
+    
+    uint64 ccgN=0;//total number of entries in the countCellGeneUMI
+    for (auto &cbf :  cbFeatureUMImap) {
+        ccgN+=cbf.size();
+    };
+    countCellGeneUMI.resize(ccgN*countMatStride);
     countCellGeneUMIindex.resize(nCB+1);
     countCellGeneUMIindex[0]=0;
     
     auto ind1=countCellGeneUMIindex[0];
     for (uint32 icb=0; icb<nCB; icb++) {//count UMIs
                 
-        for ( uint32 ig=0; ig<Trans.nGe; ig++) {
-            if (cbFeatureUMImap[icb].count(ig)==0)
-                continue;
+//         for ( uint32 ig=0; ig<Trans.nGe; ig++) {
+//             if (cbFeatureUMImap[icb].count(ig)==0)
+//                 continue;
+//             nGenePerCB[icb]++;
+//             uint64 numi=cbFeatureUMImap[icb][ig].size();
+//             nUMIperCB[icb]+=numi;
+//             
+//             countCellGeneUMI[ind1] = ig;
+//             countCellGeneUMI[ind1+1] = numi;
+//             ind1+=countMatStride;
+//         };
+        
+        for ( auto cbf=cbFeatureUMImap[icb].begin(); cbf!=cbFeatureUMImap[icb].end(); ++cbf ) {
             nGenePerCB[icb]++;
-            uint64 numi=cbFeatureUMImap[icb][ig].size();
+            uint64 numi=cbf->second.size();
             nUMIperCB[icb]+=numi;
             
-            countCellGeneUMI[ind1] = ig;
+            countCellGeneUMI[ind1] = cbf->first;
             countCellGeneUMI[ind1+1] = numi;
             ind1+=countMatStride;
         };
         
-//         for ( auto cbf=cbFeatureUMImap[icb].begin(); cbf!=cbFeatureUMImap[icb].end(); ++cbf ) {
-//             nGenePerCB[icb]++;
-//             uint64 numi=cbf->second.size();
-//             nUMIperCB[icb]+=numi;
-//             
-//             countCellGeneUMI[ind1] = cbf->first;
-//             countCellGeneUMI[ind1+1] = numi;
-//             ind1+=countMatStride;
-//         };
-//         
-//         uint32 *s1 = countCellGeneUMI.data()+countCellGeneUMIindex[icb]; //pointer to the start of this icb
-//         qsort((void*) s1, cbFeatureUMImap[icb].size(), countMatStride*sizeof(uint32), funCompareNumbers<uint32>);
+        uint32 *s1 = countCellGeneUMI.data()+countCellGeneUMIindex[icb]; //pointer to the start of this icb
+        qsort((void*) s1, cbFeatureUMImap[icb].size(), countMatStride*sizeof(uint32), funCompareNumbers<uint32>);
         
         countCellGeneUMIindex[icb+1]=ind1;
                 

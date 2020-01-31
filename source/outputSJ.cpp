@@ -19,9 +19,6 @@ int compareUint(const void* i1, const void* i2) {//compare uint arrays
 
 void outputSJ(ReadAlignChunk** RAchunk, Parameters& P) {//collapses junctions from all therads/chunks; outputs junctions to file
 
-//     system("echo `date` ..... Writing splice junctions >> Log.timing.out");
-
-
     Junction oneSJ(RAchunk[0]->RA->genOut);
     char** sjChunks = new char* [P.runThreadN+1];
     #define OUTSJ_limitScale 5
@@ -124,10 +121,12 @@ void outputSJ(ReadAlignChunk** RAchunk, Parameters& P) {//collapses junctions fr
 
     if (P.outFilterBySJoutStage!=1) {//output file
         ofstream outSJfileStream((P.outFileNamePrefix+"SJ.out.tab").c_str());
+        ofstream outSJtmpStream((P.outFileTmp+"SJ.start_gap.tsv").c_str());
         for (uint ii=0;ii<allSJ.N;ii++) {//write to file
             if ( P.outFilterBySJoutStage==2 || sjFilter[ii]  ) {
                 oneSJ.junctionPointer(allSJ.data,ii);
                 oneSJ.outputStream(outSJfileStream);//write to file
+                outSJtmpStream << *oneSJ.start <<'\t'<< *oneSJ.gap <<'\n';
                 P.sjAll[0].push_back(*oneSJ.start);
                 P.sjAll[1].push_back(*oneSJ.gap);
             };
