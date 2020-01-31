@@ -139,9 +139,15 @@ readFilesType               Fastx
 readFilesIn                 Read1 Read2
     string(s): paths to files that contain input read1 (and, if needed,  read2)
 
+readFilesManifest           -
+    string: file with the names of read files, one set of files per line, with two/three columns for SE/PE reads, formatted as: read1_file_name \tab read2_file_name \tab read_group_line. 
+            Spaces, but not tabs are allowed in file names.
+            If read_group_line does not start with ID:, it can only contain one ID field, and ID: will be added to it.  
+            If read_group_line starts with ID:, it can contain several fields separated by \tab, and everything will be be copied verbatim into SAM @RG header line.
+                            - 
+
 readFilesPrefix             -
     string: preifx for the read files names, i.e. it will be added in front of the strings in --readFilesIn
-                            -: no prefix
 
 readFilesCommand             -
     string(s): command line to execute for each of the input file. This command should generate FASTA or FASTQ text and send it to stdout
@@ -698,8 +704,9 @@ waspOutputMode              None
 ### STARsolo (single cell RNA-seq) parameters
 soloType                    None
     string(s): type of single-cell RNA-seq
-                            CB_UMI_Simple   ... (a.k.a. Droplet) one UMI and one Cell Barcode of fixed length in read2, e.g. Drop-seq and 10X Chromium
+                            CB_UMI_Simple   ... (a.k.a. Droplet) one UMI and one Cell Barcode of fixed length in read2, e.g. Drop-seq and 10X Chromium.
                             CB_UMI_Complex  ... one UMI of fixed length, but multiple Cell Barcodes of varying length, as well as adapters sequences are allowed in read2 only, e.g. inDrop.
+                            CB_samTagOut    ... output Cell Barcode as CR and/or CB SAm tag. No UMI counting. --readFilesIn cDNA_read1 [cDNA_read2 if paired-end] CellBarcode_read . Requires --outSAMtype BAM Unsorted [and/or SortedByCoordinate]
                             SmartSeq        ... Smart-seq: each cell in a separtate FASTQ (paired- or single-end), barcodes are corresponding read-groups, no UMI sequences, alginments deduplicated according to alignment start and end (after extending soft-clipped bases)
 
 soloCBwhitelist             -

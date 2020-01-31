@@ -20,7 +20,17 @@ void SoloFeature::statsOutput()
                 q30[imate] += g_statsAll.qualHist[imate][ix];
         };
     };
-    strOut << "Q30 Bases in CB+UMI," << double(q30[1])/ntot[1] <<'\n';
+    
+    if (pSolo.type==pSolo.SoloTypes::SmartSeq || pSolo.type==pSolo.SoloTypes::CB_samTagOut) {
+        if (P.readNmates==2) {
+            q30[0] += q30[1];
+            ntot[0] += ntot[1];
+        };
+        q30[1]=0;
+        ntot[1]=1;
+    };
+        
+    strOut << "Q30 Bases in CB+UMI,"   << double(q30[1])/ntot[1] <<'\n';
     strOut << "Q30 Bases in RNA read," << double(q30[0])/ntot[0] <<'\n';
 
     

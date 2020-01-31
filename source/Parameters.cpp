@@ -59,6 +59,8 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "readMapNumber", &readMapNumber));
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readNameSeparator", &readNameSeparator));
     parArray.push_back(new ParameterInfoScalar <uint32> (-1, -1, "readQualityScoreBase", &readQualityScoreBase));
+    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readFilesManifest", &readFilesManifest));
+
     //parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "readStrand", &pReads.strandString));
 
 
@@ -713,42 +715,16 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         inOut->logMain <<"WARNING: specified limitGenomeGenerateRAM="<<limitGenomeGenerateRAM<<" bytes appears to be too large, if you do not have enough memory the code will crash!\n"<<flush;
     };
 
-
-    {//read groups
-        if (outSAMattrRGline.at(0)!="-") {
-            string linefull;
-            for (uint ii=0;ii<outSAMattrRGline.size(); ii++) {//concatenate into one line
-                if (ii==0 || outSAMattrRGline.at(ii)==",") {//start new entry
-                    if (ii>0) ++ii;//skip comma
-                    outSAMattrRGlineSplit.push_back(outSAMattrRGline.at(ii)); //star new RG line with the first field which must be ID:xxx
-                    if (outSAMattrRGlineSplit.back().substr(0,3)!="ID:") {
-                        ostringstream errOut;
-                        errOut <<"EXITING because of FATAL INPUT ERROR: the first word of a line from --outSAMattrRGline="<<outSAMattrRGlineSplit.back()<<" does not start with ID:xxx read group identifier\n";
-                        errOut <<"SOLUTION: re-run STAR with all lines in --outSAMattrRGline starting with ID:xxx\n";
-                        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-                    };
-                    outSAMattrRG.push_back(outSAMattrRGlineSplit.back().substr(3)); //this adds the ID field
-                } else {//keep adding fields to this RG line, until the next comma
-                    outSAMattrRGlineSplit.back()+="\t" + outSAMattrRGline.at(ii);
-                };
-            };
-        };
-    };
-
     outSAMfilter.KeepOnlyAddedReferences=false;
     outSAMfilter.KeepAllAddedReferences=false;
     outSAMfilter.yes=true;
-    if (outSAMfilter.mode.at(0)=="KeepOnlyAddedReferences")
-    {
+    if (outSAMfilter.mode.at(0)=="KeepOnlyAddedReferences") {
         outSAMfilter.KeepOnlyAddedReferences=true;
-    } else if (outSAMfilter.mode.at(0)=="KeepAllAddedReferences")
-    {
+    } else if (outSAMfilter.mode.at(0)=="KeepAllAddedReferences") {
         outSAMfilter.KeepAllAddedReferences=true;
-    } else if (outSAMfilter.mode.at(0)=="None")
-    {
+    } else if (outSAMfilter.mode.at(0)=="None") {
       outSAMfilter.yes=false;
-    } else
-    {
+    } else {
         ostringstream errOut;
         errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented value for --outSAMfilter: "<<outSAMfilter.mode.at(0) <<"\n";
         errOut <<"SOLUTION: specify one of the allowed values: KeepOnlyAddedReferences or None\n";
@@ -763,14 +739,11 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     };
 
 
-    if (outMultimapperOrder.mode=="Old_2.4")
-    {
+    if (outMultimapperOrder.mode=="Old_2.4") {
         outMultimapperOrder.random=false;
-    } else if (outMultimapperOrder.mode=="Random")
-    {
+    } else if (outMultimapperOrder.mode=="Random") {
         outMultimapperOrder.random=true;
-    } else
-    {
+    } else {
         ostringstream errOut;
         errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented value for --outMultimapperOrder: "<<outMultimapperOrder.mode <<"\n";
         errOut <<"SOLUTION: specify one of the allowed values: Old_2.4 or SortedByCoordinate or Random\n";
@@ -778,36 +751,10 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     };
 
     //read parameters
-    if (readFilesType.at(0)=="Fastx") {
-        readFilesTypeN=1;
-    } else if (readFilesType.at(0)=="SAM"){
-        readFilesTypeN=10;
-    } else {
-        ostringstream errOut;
-        errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented value for --readFilesType: "<<readFilesType.at(0) <<"\n";
-        errOut <<"SOLUTION: specify one of the allowed values: Fastx or SAM\n";
-        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-    };
-
-    if (readFilesTypeN==1) {
-        readNmates=readFilesIn.size(); //for now the number of mates is defined by the number of input files
-    } else if (readFilesTypeN==10) {//find the number of mates from the SAM file
-        if (readFilesType.size()==2 && readFilesType.at(1)=="SE") {
-            readNmates=1;
-        } else if (readFilesType.size()==2 && readFilesType.at(1)=="PE") {
-            readNmates=2;
-        } else {
-            ostringstream errOut;
-            errOut <<"EXITING because of FATAL INPUT ERROR: --readFilesType SAM requires specifying SE or PE reads"<<"\n";
-            errOut <<"SOLUTION: specify --readFilesType SAM SE for single-end reads or --readFilesType SAM PE for paired-end reads\n";
-            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-        };
-    };
-    readNmatesIn=readNmates;
+    readFilesInit();
 
     //two-pass
-    if (parArray.at(twoPass.pass1readsN_par)->inputLevel>0  && twoPass.mode=="None")
-    {
+    if (parArray.at(twoPass.pass1readsN_par)->inputLevel>0  && twoPass.mode=="None") {
         ostringstream errOut;
         errOut << "EXITING because of fatal PARAMETERS error: --twopass1readsN is defined, but --twoPassMode is not defined\n";
         errOut << "SOLUTION: to activate the 2-pass mode, use --twopassMode Basic";
@@ -817,24 +764,21 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     twoPass.yes=false;
     twoPass.pass2=false;
     if (twoPass.mode!="None") {//2-pass parameters
-        if (runMode!="alignReads")
-        {
+        if (runMode!="alignReads") {
             ostringstream errOut;
             errOut << "EXITING because of fatal PARAMETERS error: 2-pass mapping option  can only be used with --runMode alignReads\n";
             errOut << "SOLUTION: remove --twopassMode option";
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
 
-        if (twoPass.mode!="Basic")
-        {
+        if (twoPass.mode!="Basic") {
             ostringstream errOut;
             errOut << "EXITING because of fatal PARAMETERS error: unrecognized value of --twopassMode="<<twoPass.mode<<"\n";
             errOut << "SOLUTION: for the 2-pass mode, use allowed values --twopassMode: Basic";
             exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
 
-        if (twoPass.pass1readsN==0)
-        {
+        if (twoPass.pass1readsN==0) {
             ostringstream errOut;
             errOut << "EXITING because of fatal PARAMETERS error: --twopass1readsN = 0 in the 2-pass mode\n";
             errOut << "SOLUTION: for the 2-pass mode, specify --twopass1readsN > 0. Use a very large number or -1 to map all reads in the 1st pass.\n";
@@ -1229,7 +1173,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
 
-    if (outSAMattrRG.size()>0 && !outSAMattrPresent.RG) {
+    if (outSAMattrRGline[0]!="-" && !outSAMattrPresent.RG) {
         outSAMattrOrder.push_back(ATTR_RG);
         outSAMattrOrderQuant.push_back(ATTR_RG);
         outSAMattrPresent.RG=true;

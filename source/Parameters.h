@@ -54,11 +54,13 @@ class Parameters {
         //read parameters
         vector <string> readFilesType;
         int readFilesTypeN;
-        string readFilesPrefix;
+        string readFilesPrefix, readFilesPrefixFinal;
         vector <string> readFilesIn, readFilesInTmp;
         uint32 readFilesN;
         vector <vector <string> > readFilesNames;
         vector <string> readFilesCommand;
+        vector <string> readFilesManifest;
+        string readFilesCommandString; //actual command string
         int readFilesIndex;
         pid_t readFilesCommandPID[MAX_N_MATES];
 
@@ -338,6 +340,7 @@ class Parameters {
     void scanAllLines (istream &streamIn, int inputLevel, int inputLevelRequested);
     void inputParameters (int argInN, char* argIn[]); //input parameters: default, from files, from command line
     void openReadsFiles();
+    void readFilesInit();
     void closeReadsFiles();
     void readSAMheader(const string readFilesCommandString, const vector<string> readFilesNames);
 
