@@ -83,6 +83,9 @@ void SoloFeature::countSmartSeq()
             ++readFeatSum->stats.V[readFeatSum->stats.nCellBarcodes];
     };
     
+    cbFeatureUMImap.clear();
+    cbFeatureUMImap.shrink_to_fit();
+    
     time(&rawTime);
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished collapsing UMIs" <<endl;
 };

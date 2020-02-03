@@ -70,8 +70,8 @@ std::ofstream &ofstrOpen (std::string fileName, std::string errorID, Parameters 
 };
 
 std::fstream &fstrOpen (std::string fileName, std::string errorID, Parameters &P) {//open file 'fileName', generate error if cannot open
-    //std::fstream &fStream = *new std::fstream(fileName.c_str(), std::fstream::in | std::fstream::out );
-    std::fstream &fStream = *new std::fstream(fileName.c_str(), std::fstream::in | std::fstream::out | std::fstream::trunc);
+    std::fstream &fStream = *new std::fstream(fileName.c_str(), std::fstream::in | std::fstream::out );
+    //std::fstream &fStream = *new std::fstream(fileName.c_str(), std::fstream::in | std::fstream::out | std::fstream::trunc);
 
     if (fStream.fail()) {//
         ostringstream errOut;

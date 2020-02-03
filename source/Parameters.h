@@ -35,6 +35,10 @@ class Parameters {
         string runDirPermIn; //permission for directores created at run-time
         int runRNGseed; //random number generator seed
 
+        struct {
+            int32 type;//0 no restart, 1 no mapping - restart from _STARtmp files
+        } runRestart; //restart options - in development
+        
         //parameters
         vector <string> parametersFiles;
 

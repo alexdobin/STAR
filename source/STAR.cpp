@@ -149,7 +149,8 @@ int main(int argInN, char* argIn[]) {
         RAchunk[ii]=new ReadAlignChunk(P, genomeMain, transcriptomeMain, ii);
     };
 
-    mapThreadsSpawn(P, RAchunk);
+    if (P.runRestart.type!=1)
+        mapThreadsSpawn(P, RAchunk);
 
     if (P.outFilterBySJoutStage==1) {//completed stage 1, go to stage 2
         P.inOut->logMain << "Completed stage 1 mapping of outFilterBySJout mapping\n"<<flush;
@@ -188,7 +189,8 @@ int main(int argInN, char* argIn[]) {
 
     //aggregate output junctions
     //collapse splice junctions from different threads/chunks, and output them
-    outputSJ(RAchunk,P);
+    if (P.runRestart.type!=1)
+        outputSJ(RAchunk,P);
 
     //solo counts
     Solo soloMain(RAchunk,P,*RAchunk[0]->chunkTr);

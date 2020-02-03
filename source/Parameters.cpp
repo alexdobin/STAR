@@ -288,6 +288,9 @@ Parameters::Parameters() {//initalize parameters info
 
 
 void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters: default, from files, from command line
+    
+    //hard-coded parameters
+    runRestart.type=1;
 
 ///////// Default parameters
 
@@ -472,12 +475,13 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 
     if (outTmpDir=="-") {
         outFileTmp=outFileNamePrefix +"_STARtmp/";
-        sysRemoveDir (outFileTmp);
+        if (runRestart.type!=1)
+            sysRemoveDir (outFileTmp);
     } else {
         outFileTmp=outTmpDir + "/";
     };
 
-    if (mkdir (outFileTmp.c_str(),runDirPerm)!=0) {
+    if (mkdir (outFileTmp.c_str(),runDirPerm)!=0 && runRestart.type!=1) {
         ostringstream errOut;
         errOut <<"EXITING because of fatal ERROR: could not make temporary directory: "<< outFileTmp<<"\n";
         errOut <<"SOLUTION: (i) please check the path and writing permissions \n (ii) if you specified --outTmpDir, and this directory exists - please remove it before running STAR\n"<<flush;
