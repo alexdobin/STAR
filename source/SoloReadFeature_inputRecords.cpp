@@ -1,46 +1,9 @@
 #include <cmath>
 #include "SoloReadFeature.h"
-#include "binarySearch2.h"
-#include "serviceFuns.cpp"
 #include "SoloCommon.h"
 #include "SoloFeature.h"
-
-bool inputFeatureUmi(fstream *strIn, int32 featureType, bool readInfoYes, array<vector<uint64>,2> &sjAll, uint64 &iread, int32 &cbmatch, uint32 &feature, uint64 &umi, vector<uint32> &featVecU32)
-{
-    if (!(*strIn >> umi)) //end of file
-        return false;
-
-    if (readInfoYes)
-        *strIn >> iread;
-
-    switch (featureType) {
-        case SoloFeatureTypes::Gene :
-        case SoloFeatureTypes::GeneFull :
-            *strIn >> feature;
-            break;
-
-        case SoloFeatureTypes::SJ :
-            uint64 sj[2];
-            *strIn >> sj[0] >> sj[1];
-            feature=(uint32) binarySearch2(sj[0],sj[1],sjAll[0].data(),sjAll[1].data(),sjAll[0].size());
-            break;
-
-        case SoloFeatureTypes::Transcript3p :
-            feature=0;
-            uint32 ntr, in1;
-            *strIn >> ntr;
-            featVecU32.resize(2*ntr);
-            for (uint32 ii=0; ii<2*ntr; ii++) {
-                *strIn >> in1;
-                featVecU32[ii]=in1;
-            };
-            break;
-        };
-
-    *strIn >> cbmatch;
-
-    return true;
-};
+#include "soloInputFeatureUMI.h"
+#include "serviceFuns.cpp"
 
 void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbReadCountTotal, vector<readInfoStruct> &readInfo, SoloFeature *soloFeat)
 {   
@@ -53,20 +16,14 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbRea
     int32 cbmatch;
     int64 cb;
     vector<uint32> trIdDist;
-    while (inputFeatureUmi(streamReads, featureType, readInfoYes, P.sjAll, iread, cbmatch, feature, umi, trIdDist)) {
+    while (soloInputFeatureUMI(streamReads, featureType, readInfoYes, P.sjAll, iread, cbmatch, feature, umi, trIdDist)) {
         if (feature == (uint32)(-1) && !readInfoYes) {//no feature => no record, this can happen for SJs
             streamReads->ignore((uint32)-1, '\n');
             //stats.V[stats.nNoFeature]++; //need separate category for this
             continue;
         };
 
-        if (pSolo.type==pSolo.SoloTypes::SmartSeq) {
-            *streamReads >> cb; //cbmatch==0 always, only one cb
-            soloFeat->cbFeatureUMImap[cb][feature].insert(umi);
-            soloFeat->nReadPerCB[cb]++;
-            stats.V[stats.nExactMatch]++;
-            
-        } else if (cbmatch<=1) {//single match
+        if (cbmatch<=1) {//single match
             *streamReads >> cb;
 
             if ( pSolo.CBmatchWL.oneExact && cbmatch==1 && cbReadCountTotal[cb]==0 && feature!=(uint32)(-1) ) {//single 1MM match, no exact matches to this CB

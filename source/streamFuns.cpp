@@ -70,16 +70,21 @@ std::ofstream &ofstrOpen (std::string fileName, std::string errorID, Parameters 
 };
 
 std::fstream &fstrOpen (std::string fileName, std::string errorID, Parameters &P) {//open file 'fileName', generate error if cannot open
-    std::fstream &fStream = *new std::fstream(fileName.c_str(), std::fstream::in | std::fstream::out );
+    //std::fstream &fStream = *new std::fstream(fileName.c_str(), std::fstream::in | std::fstream::out );
     //std::fstream &fStream = *new std::fstream(fileName.c_str(), std::fstream::in | std::fstream::out | std::fstream::trunc);
 
-    if (fStream.fail()) {//
+    std::fstream *fStreamP=new std::fstream(fileName.c_str(), std::fstream::in | std::fstream::out );
+    if (fStreamP->fail())
+        fStreamP = new std::fstream(fileName.c_str(), std::fstream::in | std::fstream::out | std::fstream::trunc);
+    
+    
+    if (fStreamP->fail()) {//
         ostringstream errOut;
         errOut << errorID<<": exiting because of *OUTPUT FILE* error: could not create input/output file "<< fileName <<"\n";
         errOut << "Solution: check that the path exists and you have write permission for this file\n";
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_FILE_OPEN, P);
     };
-    return fStream;
+    return *fStreamP;
 };
 
 std::ifstream & ifstrOpen (std::string fileName, std::string errorID, std::string solutionString, Parameters &P) {

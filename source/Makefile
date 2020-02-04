@@ -28,7 +28,7 @@ CFLAGS := -O3 -pipe -Wall -Wextra $(CFLAGS)
 
 
 ##########################################################################################################
-OBJECTS = SoloFeature_countSmartSeq.o \
+OBJECTS = soloInputFeatureUMI.o SoloFeature_countSmartSeq.o SoloFeature_redistributeReadsByCB.o \
 	SoloFeature_quantTranscript.o SoloFeature_sumThreads.o SoloFeature_countVelocyto.o SoloFeature_countCBgeneUMI.o \
 	Transcriptome_classifyAlign.o SoloFeature_cellFiltering.o \
 	SoloFeature_statsOutput.o bamSortByCoordinate.o SoloBarcode.o \

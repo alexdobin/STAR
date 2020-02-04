@@ -90,13 +90,15 @@ public:
     string clusterCBfile;
     
     //output
-    vector<string> outFileNames;
+    vector<string> outFileNames;    
+    bool samAttrYes;//post-processed SAM attributes: error-corrected CB and UMI
+    int32 samAttrFeature;//which feature to use for error correction
+    
+    //processing
+    uint32 redistrReadsNfiles; //numer of files to resditributes reads into
     
     //constants
     uint32 umiMaskLow, umiMaskHigh; //low/high half bit-mask or UMIs
-    
-    bool samAttrYes;//post-processed SAM attributes: error-corrected CB and UMI
-    int32 samAttrFeature;//which feature to use for error correction
 
     void initialize(Parameters *pPin);
     void umiSwapHalves(uint32 &umi);

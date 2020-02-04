@@ -35,6 +35,7 @@ public:
 
     uint32 *rGeneUMI;//mapped reads sorted by CB
     uint32 *indCB;//index of detected CBs in the whitelist
+    vector<uint32> indCBwl; //reverse of indCB: index of WL CBs in detected CB list
     uint32 *rCBn;//number of reads for detected CBs in the whitelist
     uint32 **rCBp;//array of pointers to each CB sub-array
 
@@ -59,6 +60,10 @@ public:
     array<vector<uint64>,2> sjAll;
     
     vector<readInfoStruct> readInfo; //corrected CB/UMI information for each read
+    
+    vector<uint32> redistrFilesCBindex, redistrFilesCBfirst; //redistr file for each CB, CB boundaries in redistributed files
+    vector<uint64> redistrFilesNreads; //number of reads in each file
+    fstream **redistrFilesStreams;
 
     SoloFeature(int32 feTy, Parameters &Pin, Transcriptome &inTrans, SoloReadBarcode *readBarSumIn, SoloFeature **soloFeatAll);
     void processRecords(ReadAlignChunk **RAchunk);
@@ -72,6 +77,7 @@ public:
     void addBAMtags(char *&bam0, uint32 &size0, char* bam1);
     void statsOutput();
     void cellFiltering();
+    void redistributeReadsByCB();
 };
 
 #endif

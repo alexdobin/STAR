@@ -11,6 +11,9 @@ void ParametersSolo::initialize(Parameters *pPin)
 {
     pP=pPin;
 
+    //constants - may turn into parameters in the future
+    redistrReadsNfiles = 3*pP->runThreadN;
+    
     barcodeStart=barcodeEnd=0; //this means that the entire barcodeRead is considered barcode. Will changed it for simple barcodes.
     yes = true;
     if (typeStr=="None") {

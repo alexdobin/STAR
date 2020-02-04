@@ -116,11 +116,12 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
 
 uint32 outputReadCB(fstream *streamOut, const uint64 iRead, const int32 featureType, SoloReadBarcode &soloBar, const ReadSoloFeatures &reFe, const ReadAnnotations &readAnnot)
 {   
-    //format of the temp output file
-    // UMI [iRead] type feature* cbMatchString
-    //             0=exact match, 1=one non-exact match, 2=multipe non-exact matches
-    //                   gene or sj[0] sj[1]
-    //                           CB or nCB {CB Qual, ...}
+    /*format of the temp output file
+     * UMI [iRead] type feature* cbMatchString
+     *             0=exact match, 1=one non-exact match, 2=multipe non-exact matches
+     *                   gene or sj[0] sj[1]
+     *                         CB or nCB {CB Qual, ...}
+     */
     
     if (soloBar.pSolo.type==soloBar.pSolo.SoloTypes::SmartSeq && featureType!=-1) {//need to calculate "UMI" from align start/end
         soloBar.umiB=reFe.alignOut[reFe.indAnnotTr]->chrStartLengthExtended();
@@ -136,9 +137,6 @@ uint32 outputReadCB(fstream *streamOut, const uint64 iRead, const int32 featureT
             
         case SoloFeatureTypes::Gene :
         case SoloFeatureTypes::GeneFull :
-//         case SoloFeatureTypes::VelocytoSpliced :
-//         case SoloFeatureTypes::VelocytoUnspliced :
-//         case SoloFeatureTypes::VelocytoAmbiguous :
             //just gene id
             *streamOut << soloBar.umiB <<' ';//UMI
             if ( iRead != (uint64)-1 )
