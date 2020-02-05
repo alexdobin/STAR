@@ -20,7 +20,8 @@ void SoloFeature::redistributeReadsByCB()
     
     uint64 nReadRecBin=nReadRec/pSolo.redistrReadsNfiles;
       
-    redistrFilesCBindex.push_back(0);
+    redistrFilesCBfirst.push_back(0);
+    redistrFilesCBindex.resize(nCB);
     uint64 nreads=0;
     uint32 ind=0;
     for (uint32 icb=0; icb<nCB; icb++){
@@ -28,20 +29,19 @@ void SoloFeature::redistributeReadsByCB()
         nreads += readFeatSum->cbReadCount[indCB[icb]];
         if (nreads>=nReadRecBin) {
             ind++;
-            redistrFilesCBfirst.push_back(icb);
+            redistrFilesCBfirst.push_back(icb+1);
             redistrFilesNreads.push_back(nreads);
             nreads=0;            
         };
     };
     if (nreads>0) {
-        redistrFilesCBfirst.push_back(nCB-1);
+        redistrFilesCBfirst.push_back(nCB);
         redistrFilesNreads.push_back(nreads);
     };
-    redistrFilesCBfirst.push_back(nCB);//this array size is number of non-empty files + 1
     
     //open output files
-    redistrFilesStreams = new fstream*[pSolo.redistrReadsNfiles];
-    for (uint32 ii=0; ii<pSolo.redistrReadsNfiles; ii++)
+    redistrFilesStreams.resize(redistrFilesNreads.size());
+    for (uint32 ii=0; ii<redistrFilesNreads.size(); ii++)
         redistrFilesStreams[ii] = &fstrOpen(P.outFileTmp + "solo"+SoloFeatureTypes::Names[featureType]+"_redistr_"+std::to_string(ii), ERROR_OUT, P);
 
     //main cycle
@@ -49,9 +49,12 @@ void SoloFeature::redistributeReadsByCB()
         readFeatAll[ii]->streamReads->flush();
         readFeatAll[ii]->streamReads->seekg(0,ios::beg);
         
-        while ( readFeatAll[ii]->streamReads->good() ) {
+        while ( true ) {
             string line1;
             getline(*readFeatAll[ii]->streamReads,line1);
+            if (line1.empty()) {
+                break;
+            };
             
             istringstream line1stream(line1);
             int64 cb1;            
@@ -60,7 +63,7 @@ void SoloFeature::redistributeReadsByCB()
                 line1stream >> cb1;
             line1stream >> cb1;
             
-            *redistrFilesStreams[redistrFilesCBindex[cb1]] << line1 <<'\n';
+            *redistrFilesStreams[redistrFilesCBindex[indCBwl[cb1]]] << line1 <<'\n';
             
         };
         //TODO: delete streamReads files one by one to save disk space

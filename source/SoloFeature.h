@@ -63,7 +63,7 @@ public:
     
     vector<uint32> redistrFilesCBindex, redistrFilesCBfirst; //redistr file for each CB, CB boundaries in redistributed files
     vector<uint64> redistrFilesNreads; //number of reads in each file
-    fstream **redistrFilesStreams;
+    vector <fstream*> redistrFilesStreams;
 
     SoloFeature(int32 feTy, Parameters &Pin, Transcriptome &inTrans, SoloReadBarcode *readBarSumIn, SoloFeature **soloFeatAll);
     void processRecords(ReadAlignChunk **RAchunk);

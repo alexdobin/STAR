@@ -50,7 +50,7 @@ void SoloFeature::countSmartSeq()
         //allocate arrays    
         cbFeatUMI[iCB1]=vFeatureUMI.begin();
         for (uint32 icb=iCB1+1; icb<iCB2; icb++) {
-            cbFeatUMI[icb] = cbFeatUMI[icb-1] + rguStride*readFeatSum->cbReadCount[indCB[icb-1]];
+            cbFeatUMI[icb] = cbFeatUMI[icb-1] + readFeatSum->cbReadCount[indCB[icb-1]];
         };        
         
         //input records
@@ -78,6 +78,10 @@ void SoloFeature::countSmartSeq()
         
         //collapse UMI, simple
         for (uint32 icb=iCB1; icb<iCB2; icb++) {
+            if (nReadPerCB[icb]==0) {
+                continue;
+            };
+            
             sort(cbFeatUMI[icb], cbFeatUMI[icb]+nReadPerCB[icb], 
                     [](const typeFeatureUMI &a, const typeFeatureUMI &b) 
                       {return (a.feature < b.feature) || ( a.feature == b.feature && a.umi < b.umi); });
