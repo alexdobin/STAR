@@ -37,7 +37,7 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int max
     };
 
     chimAligns.clear();
-    chimScoreBest=0;
+    int chimScoreBest=0;
     std::size_t bestChimAlign=0; // points to element of chimAligns with highest chimScoreBest
 
     int maxPossibleAlignScore = (int)(readLength[0]+readLength[1]);
@@ -104,7 +104,7 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int max
     if (chimScoreBest==0)
         return false;
 
-    chimN=0;
+    uint chimN=0;
     for (auto cAit=chimAligns.begin(); cAit<chimAligns.end(); cAit++) {
         //scan all chimeras, find the number within score range
         if (cAit->chimScore >= minScoreToConsider)
