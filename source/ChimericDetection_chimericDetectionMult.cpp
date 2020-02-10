@@ -1,6 +1,7 @@
 //#include "blocksOverlap.h"
 #include "ChimericDetection.h"
 #include "ChimericSegment.h"
+#include "ReadAlign.h"
 
 int chimericAlignScore (ChimericSegment & seg1, ChimericSegment & seg2)
 {
@@ -19,7 +20,7 @@ int chimericAlignScore (ChimericSegment & seg1, ChimericSegment & seg2)
 };
 
 /////////////////////////////////////////////////////////////
-bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int maxNonChimAlignScore, bool PEmerged_flag) {
+bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int maxNonChimAlignScore, ReadAlign *PEunmergedRA) {
 
 //     for (uint ii=0;ii<chimAligns.size();ii++) {//deallocate aligns
 //         if (chimAligns.at(ii).stitchingDone) {//al1,al2 were allocated
@@ -116,11 +117,20 @@ bool ChimericDetection::chimericDetectionMult(uint nW, uint *readLength, int max
     uint iTr = 0; //keep track of "HI" SAM attribute
     for (std::size_t i = 0; i < chimAligns.size(); i++) {//output chimeras within score range
         if (chimAligns[i].chimScore >= minScoreToConsider) {
+
             if (P.pCh.out.junctions)
-                chimAligns[i].chimericJunctionOutput(*ostreamChimJunction, chimN, maxNonChimAlignScore, PEmerged_flag, chimScoreBest, maxPossibleAlignScore);
-            if (P.pCh.out.bam)
+                chimAligns[i].chimericJunctionOutput(*ostreamChimJunction, chimN, maxNonChimAlignScore, PEunmergedRA != NULL, chimScoreBest, maxPossibleAlignScore);
+
+            if (P.pCh.out.bam) {
+                // convert merged SE chimera to PE chimera if this is a merged chimera
+                if (PEunmergedRA != NULL) {
+                    chimAligns[i].RA = PEunmergedRA;
+                    chimAligns[i].RA->peOverlapChimericSEtoPE(chimAligns[i].al1, chimAligns[i].al2, chimAligns[i].al1, chimAligns[i].al2);
+                };
                 chimAligns[i].chimericBAMoutput(chimAligns[i].al1, chimAligns[i].al2, chimAligns[i].RA, iTr, chimN, i == bestChimAlign, P);
+            };
             iTr++;
+
         };
     };
 

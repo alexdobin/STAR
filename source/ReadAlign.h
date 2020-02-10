@@ -52,6 +52,7 @@ class ReadAlign {
         ReadAlign *peMergeRA; //ReadAlign for merged PE mates
 
         ChimericDetection *chimDet;
+        void peOverlapChimericSEtoPE(const Transcript *seTrIn1, const Transcript *seTrIn2, Transcript *peTrOut1, Transcript *peTrOut2);
 
         SoloRead *soloRead; //counts reads per CB per and outputs CB/UMI/gene into file, per thread
 
