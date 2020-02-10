@@ -21,7 +21,7 @@ public:
     int32  cbMatch;//-1: no match, 0: exact, 1: 1 match with 1MM, >1: # of matches with 1MM
     string cbMatchString;//CB matches and qualities
     vector<uint64> cbMatchInd;//matches
-    uint32 *cbReadCountExact;
+    vector<uint32> cbReadCountExact;
     map <uint32,uint32> cbReadCountMap;//count read per CB for no WL
 
 

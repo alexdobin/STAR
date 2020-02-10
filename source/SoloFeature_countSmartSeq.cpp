@@ -41,6 +41,7 @@ void SoloFeature::countSmartSeq()
     } typeFeatureUMI;    
     vector<vector<typeFeatureUMI>::iterator> cbFeatUMI (nCB + 1);    
     
+    #pragma omp parallel for num_threads(P.runThreadN)
     for (uint32 ired=0; ired<redistrFilesCBfirst.size()-1; ired++) {//TODO: parallelize, each ired is independent here!
         vector<typeFeatureUMI> vFeatureUMI (redistrFilesNreads[ired]);
         
@@ -73,7 +74,6 @@ void SoloFeature::countSmartSeq()
             uint32 icb=indCBwl[cb];
             *( cbFeatUMI[icb] + nReadPerCB[icb] )={feature,umi};
             nReadPerCB[icb]++;
-            readFeatSum->stats.V[readFeatSum->stats.nExactMatch]++;            
         };
         
         //collapse UMI, simple
@@ -105,7 +105,7 @@ void SoloFeature::countSmartSeq()
     nUMIperCB.resize(nCB);
     nGenePerCB.resize(nCB);
       
-    countMatStride=2; //hard-coded for now, works for both Gene*/SJ and Velocyto
+    countMatStride=2;
     
     uint64 ccgN=0;//total number of entries in the countCellGeneUMI
     for (auto &cbf :  vCellFeatureCount) {
@@ -130,6 +130,7 @@ void SoloFeature::countSmartSeq()
     // sum stats
     uint32 nReadPerCBmax=0;
     for (uint32 icb=0; icb<nCB; icb++) {
+        
         nReadPerCBmax=max(nReadPerCBmax,nReadPerCB[icb]);
         readFeatSum->stats.V[readFeatSum->stats.nMatch] += nReadPerCB[icb];
                 
@@ -138,6 +139,8 @@ void SoloFeature::countSmartSeq()
             ++readFeatSum->stats.V[readFeatSum->stats.nCellBarcodes];        
     };
     
+    readFeatSum->stats.V[readFeatSum->stats.nExactMatch]=readFeatSum->stats.V[readFeatSum->stats.nMatch];            
+    
     time(&rawTime);
-    P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished collapsing UMIs" <<endl;
+    P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished SmartSeq counting" <<endl;
 };

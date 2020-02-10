@@ -16,10 +16,9 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     if (featureType==SoloFeatureTypes::SJ && P.sjAll[0].empty()) {
         ifstream &sjIn = ifstrOpen(P.outFileTmp+"SJ.start_gap.tsv",  ERROR_OUT, "SOLUTION: re-run STAR", P);
         P.sjAll[0].reserve(10000000);
-        P.sjAll[1].reserve(10000000);        
-        while ( sjIn.good() ) {
-            uint64 start1, gap1;
-            sjIn >> start1 >> gap1;
+        P.sjAll[1].reserve(10000000);
+        uint64 start1, gap1;
+        while ( sjIn >> start1 >> gap1 ) {            
             P.sjAll[0].emplace_back(start1);
             P.sjAll[1].emplace_back(gap1);
         };

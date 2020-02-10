@@ -14,12 +14,14 @@ void SoloFeature::redistributeReadsByCB()
     */
     
     //find boundaries for cells
-    uint64 nReadRec=0;
-    for ( uint32 ii=0; ii<nCB; ii++ )
-        nReadRec += readFeatSum->cbReadCount[ii];
+    uint64 nReadRec=std::accumulate(readFeatSum->cbReadCount.begin(), readFeatSum->cbReadCount.end(), 0LLU);
+    //for ( auto &cbrc : readFeatSum->cbReadCount )
+    //    nReadRec += cbrc;
     
     uint64 nReadRecBin=nReadRec/pSolo.redistrReadsNfiles;
-      
+    
+    P.inOut->logMain << "     Redistributing reads into "<< pSolo.redistrReadsNfiles <<"files; nReadRec="<< nReadRec <<";   nReadRecBin="<< nReadRecBin <<endl;    
+    
     redistrFilesCBfirst.push_back(0);
     redistrFilesCBindex.resize(nCB);
     uint64 nreads=0;
@@ -41,12 +43,14 @@ void SoloFeature::redistributeReadsByCB()
     
     //open output files
     redistrFilesStreams.resize(redistrFilesNreads.size());
-    for (uint32 ii=0; ii<redistrFilesNreads.size(); ii++)
-        redistrFilesStreams[ii] = &fstrOpen(P.outFileTmp + "solo"+SoloFeatureTypes::Names[featureType]+"_redistr_"+std::to_string(ii), ERROR_OUT, P);
+    for (uint32 ii=0; ii<redistrFilesNreads.size(); ii++) {
+        //open file with flagDelete=true
+        redistrFilesStreams[ii] = &fstrOpen(P.outFileTmp + "solo"+SoloFeatureTypes::Names[featureType]+"_redistr_"+std::to_string(ii), ERROR_OUT, P, true);
+    };
 
     //main cycle
     for (int ii=0; ii<P.runThreadN; ii++) {
-        readFeatAll[ii]->streamReads->flush();
+        readFeatAll[ii]->streamReads->clear();//this is needed if eof was reached before
         readFeatAll[ii]->streamReads->seekg(0,ios::beg);
         
         while ( true ) {
@@ -57,8 +61,8 @@ void SoloFeature::redistributeReadsByCB()
             };
             
             istringstream line1stream(line1);
-            int64 cb1;            
-            line1stream >> cb1 >> cb1 >> cb1;
+            uint64 cb1, umi;            
+            line1stream >> umi >> cb1 >> cb1;
             if (featureType==SoloFeatureTypes::SJ)
                 line1stream >> cb1;
             line1stream >> cb1;

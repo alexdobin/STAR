@@ -710,7 +710,8 @@ soloType                    None
                             SmartSeq        ... Smart-seq: each cell in a separtate FASTQ (paired- or single-end), barcodes are corresponding read-groups, no UMI sequences, alginments deduplicated according to alignment start and end (after extending soft-clipped bases)
 
 soloCBwhitelist             -
-    string(s): file(s) with whitelist(s) of cell barcodes. Only one file allowed with 
+    string(s): file(s) with whitelist(s) of cell barcodes. Only --soloType CB_UMI_Complexone allows more than one whitelist file.
+                            None            ... no whitelist: all cell barcodes are allowed
 
 soloCBstart                 1
     int>0: cell barcode start base

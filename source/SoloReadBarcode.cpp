@@ -10,10 +10,7 @@ SoloReadBarcode::SoloReadBarcode(Parameters &P) : P(P), pSolo(P.pSolo)
         stats.V[ii]=0;
 
     if (pSolo.cbWLyes) {
-        cbReadCountExact = new uint32[pSolo.cbWLsize];
-        for (uint32 ii=0; ii<pSolo.cbWLsize; ii++) {
-            cbReadCountExact[ii]=0;
-        };
+        cbReadCountExact.resize(pSolo.cbWLsize,0);
     };
 
     for (uint32 jj=0;jj<4;jj++) {

@@ -69,14 +69,18 @@ std::ofstream &ofstrOpen (std::string fileName, std::string errorID, Parameters 
     return ofStream;
 };
 
-std::fstream &fstrOpen (std::string fileName, std::string errorID, Parameters &P) {//open file 'fileName', generate error if cannot open
+std::fstream &fstrOpen (std::string fileName, std::string errorID, Parameters &P, bool flagDelete) {//open file 'fileName', generate error if cannot open
     //std::fstream &fStream = *new std::fstream(fileName.c_str(), std::fstream::in | std::fstream::out );
     //std::fstream &fStream = *new std::fstream(fileName.c_str(), std::fstream::in | std::fstream::out | std::fstream::trunc);
 
-    std::fstream *fStreamP=new std::fstream(fileName.c_str(), std::fstream::in | std::fstream::out );
-    if (fStreamP->fail())
+    std::fstream *fStreamP;
+    if (flagDelete) {//truncate the file if it exists
         fStreamP = new std::fstream(fileName.c_str(), std::fstream::in | std::fstream::out | std::fstream::trunc);
-    
+    } else {//try to open exising file
+        fStreamP=new std::fstream(fileName.c_str(), std::fstream::in | std::fstream::out );
+        if (fStreamP->fail()) //did not work <= file does not exist => open with trunc (the above command does not work on new file)
+            fStreamP = new std::fstream(fileName.c_str(), std::fstream::in | std::fstream::out | std::fstream::trunc);
+    };
     
     if (fStreamP->fail()) {//
         ostringstream errOut;

@@ -13,14 +13,13 @@ SoloReadFeature::SoloReadFeature(int32 feTy, Parameters &Pin, int iChunk)
     readInfoYes=pSolo.readInfoYes[featureType];
     
     if (pSolo.cbWLyes) {
-        cbReadCount = new uint32[pSolo.cbWLsize];
-        for (uint32 ii=0; ii<pSolo.cbWLsize; ii++) {
-            cbReadCount[ii]=0;
-        };
+        cbReadCount.resize(pSolo.cbWLsize,0);
+
     };
 
     if (iChunk>=0) {
-        streamReads = &fstrOpen(P.outFileTmp+"/solo"+SoloFeatureTypes::Names[featureType]+'_'+std::to_string(iChunk),ERROR_OUT, P);
+        //open with flagDelete=false, i.e. try to keep file if it exists
+        streamReads = &fstrOpen(P.outFileTmp+"/solo"+SoloFeatureTypes::Names[featureType]+'_'+std::to_string(iChunk), ERROR_OUT, P, false);
     };
     
     if (featureType==SoloFeatureTypes::Transcript3p)

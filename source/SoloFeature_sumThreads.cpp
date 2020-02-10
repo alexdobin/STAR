@@ -6,18 +6,19 @@
 #include "GlobalVariables.h"
 
 void SoloFeature::sumThreads(ReadAlignChunk **RAchunk)
-{      
-    ///////////////////////////// collect RAchunk->RA->soloRead->readFeat
+{   
+    //stats
     nReadsInput=g_statsAll.readN+1; //reserve 1 extra
-            
+
+    ///////////////////////////// collect RAchunk->RA->soloRead->readFeat            
     for (int ii=0; ii<P.runThreadN; ii++) {//point to
         readFeatAll[ii]= RAchunk[ii]->RA->soloRead->readFeat[pSolo.featureInd[featureType]];
-    };
-    
-    for (int ii=0; ii<P.runThreadN; ii++) {
-        readFeatSum->addCounts(*readFeatAll[ii]);
+        readFeatAll[ii]->streamReads->flush();
+        readFeatSum->addCounts(*readFeatAll[ii]);        
     };
 
+
+    // if WL was not defined
     if (!pSolo.cbWLyes) {//now we can define WL and counts ??? we do not need to do it for every feature???
         pSolo.cbWLsize=readFeatSum->cbReadCountMap.size();
         pSolo.cbWL.resize(pSolo.cbWLsize);
@@ -28,8 +29,8 @@ void SoloFeature::sumThreads(ReadAlignChunk **RAchunk)
             pSolo.cbWLstr[ii] = convertNuclInt64toString(pSolo.cbWL[ii],pSolo.cbL); 
             ii++;
         };
-        readFeatSum->cbReadCount = new uint32[pSolo.cbWLsize];
-        readBarSum->cbReadCountExact = new uint32[pSolo.cbWLsize];
+        readFeatSum->cbReadCount.resize(pSolo.cbWLsize);
+        readBarSum->cbReadCountExact.resize(pSolo.cbWLsize);
 
         uint64 icb=0;
         for (auto ii=readFeatSum->cbReadCountMap.cbegin(); ii!=readFeatSum->cbReadCountMap.cend(); ++ii) {
@@ -40,6 +41,26 @@ void SoloFeature::sumThreads(ReadAlignChunk **RAchunk)
         };
     };
 
+    // if restarting from _STARtmp/solo* file
+    if (P.runRestart.type==1) {//this could happen if the run is restarted. Would be better to save/load cbReadCount, or recalculate it from
+        for (int ii=0; ii<P.runThreadN; ii++) {
+            readFeatAll[ii]->streamReads->clear(); //just in case EOF was reached in previous reading
+            readFeatAll[ii]->streamReads->seekg(0,ios::beg);
+            string line1;
+            while (std::getline(*readFeatAll[ii]->streamReads, line1)) {
+                istringstream line1stream(line1);
+                uint64 cb1;            
+                line1stream >> cb1 >> cb1 >> cb1;
+                if (featureType==SoloFeatureTypes::SJ)
+                    line1stream >> cb1;
+                line1stream >> cb1;
+                //if (cb1>readFeatSum->cbReadCount.size())
+                //    continue;//this should not happen!
+                readFeatSum->cbReadCount[cb1]++;
+            };
+        };
+    };    
+    
     //detected CBs
     nCB=0;nReadsMapped=0;
     for (uint32 ii=0; ii<pSolo.cbWLsize; ii++) {

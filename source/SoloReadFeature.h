@@ -17,7 +17,7 @@ public:
 
     uint32 homoPolymer[4];//homopolymer constants
 
-    uint32 *cbReadCount;
+    vector<uint32> cbReadCount;
     map <uint32,uint32> cbReadCountMap;
     
     vector<uint32> transcriptDistCount;
@@ -35,7 +35,7 @@ public:
     void addCounts(const SoloReadFeature &soloCBin);
     void addStats(const SoloReadFeature &soloCBin);
     void statsOut(ofstream &streamOut);
-    void inputRecords(uint32 **cbP, uint32 cbPstride, uint32 *cbReadCountExact, vector<readInfoStruct> &readInfo, SoloFeature *soloFeat);
+    void inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32> &cbReadCountTotal, vector<readInfoStruct> &readInfo, SoloFeature *soloFeat);
 
 private:
     const int32 featureType;
