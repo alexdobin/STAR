@@ -139,26 +139,38 @@ void ParametersSolo::initialize(Parameters *pPin)
     };
     
     ////////////////////////////////////////////umiDedup
-    if (type==SoloTypes::SmartSeq) {//only "exact" umidedup
-        umiDedupYes={true,false,false};
-        umiDedupColumns={0};
-    } else {
-        umiDedupYes.resize(3,false);
-        umiDedupColumns.resize(umiDedup.size());
+    umiDedupColumns.resize(umiDedup.size());
+    if (type==SoloTypes::SmartSeq) {
         for (uint32 ii=0; ii<umiDedup.size(); ii++) {
             if (umiDedup[ii]=="Exact") {
-                umiDedupYes[0]=true;
                 umiDedupColumns[ii]=0;
-            } else if (umiDedup[ii]=="1MM_All") {
-                umiDedupYes[1]=true;
-                umiDedupColumns[ii]=1;
-            } else if (umiDedup[ii]=="1MM_Directional") {
-                umiDedupYes[2]=true;
-                umiDedupColumns[ii]=2;
+            } else if (umiDedup[ii]=="NoDedup") {
+                if (type!=SoloTypes::SmartSeq) {
+                    ostringstream errOut;
+                    errOut << "EXITING because of fatal PARAMETERS error: --soloUMIdedup NoDedup is allowed only for --soloType SmartSeq\n";
+                    errOut << "SOLUTION: used allowed options: Exact or 1MM_All or 1MM_Directional";
+                    exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+                };
+                umiDedupColumns[ii]=1;                
             } else {
                 ostringstream errOut;
-                errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in --soloUMIdedup="<<umiDedup[ii]<<"\n";
-                errOut << "SOLUTION: used allowed options: Exact -or- 1MM_All -or- 1MM_Directional";
+                errOut << "EXITING because of fatal PARAMETERS error: --soloUMIdedup="<<umiDedup[ii] <<" is not allowed for --soloType SmartSeq\n";
+                errOut << "SOLUTION: used allowed options: Exact or NoDedup";
+                exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+            };
+        };        
+    } else {
+        for (uint32 ii=0; ii<umiDedup.size(); ii++) {
+            if (umiDedup[ii]=="Exact") {
+                umiDedupColumns[ii]=0;
+            } else if (umiDedup[ii]=="1MM_All") {
+                umiDedupColumns[ii]=1;
+            } else if (umiDedup[ii]=="1MM_Directional") {
+                umiDedupColumns[ii]=2;                
+            } else {
+                ostringstream errOut;
+                errOut << "EXITING because of fatal PARAMETERS error: --soloUMIdedup="<<umiDedup[ii] <<" is not allowed for --soloType " << typeStr <<"\n";
+                errOut << "SOLUTION: used allowed options: Exact or 1MM_All or 1MM_Directional";
                 exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
             };
         };

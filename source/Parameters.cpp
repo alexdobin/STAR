@@ -330,8 +330,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                     val ='\"' + val + '\"';
                 };
                 commandLineFile += '\n' + key + ' ' + val;
-            }
-            else if (oneArg.substr(0,2)=="--") {//parameter name, cut --
+            } else if (oneArg.substr(0,2)=="--") {//parameter name, cut --
                 commandLineFile +='\n' + oneArg.substr(2);
             } else {//parameter value
                 if (oneArg.find_first_of(" \t")!=std::string::npos) {//there is white space in the argument, put "" around

@@ -71,7 +71,7 @@ public:
     //algorithms
     vector <string> umiDedup;
     vector <uint32> umiDedupColumns;
-    vector <bool> umiDedupYes;
+    //vector <bool> umiDedupYes;
     
     struct {
         string type;

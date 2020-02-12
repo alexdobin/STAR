@@ -30,7 +30,7 @@ void SoloFeature::countSmartSeq()
     
     typedef struct {
         uint32 feature;
-        uint32 count;
+        uint32 count[2];
     } typeFeatureCount;   
     
     vector<vector<typeFeatureCount>> vCellFeatureCount(nCB);
@@ -87,13 +87,14 @@ void SoloFeature::countSmartSeq()
                       {return (a.feature < b.feature) || ( a.feature == b.feature && a.umi < b.umi); });
                   
             vCellFeatureCount[icb].reserve(8192);
-            vCellFeatureCount[icb].push_back({cbFeatUMI[icb]->feature, 1});
+            vCellFeatureCount[icb].push_back({cbFeatUMI[icb]->feature, {1,1}});
             for (auto fu=cbFeatUMI[icb]+1; fu!=cbFeatUMI[icb]+nReadPerCB[icb]; fu++) {//cycle over all reads for this icb
                 if ( fu->feature != (fu-1)->feature ) {//compare to previous feature
-                    vCellFeatureCount[icb].push_back({fu->feature, 1});//create next feature entry
+                    vCellFeatureCount[icb].push_back({fu->feature, {1,0}});//create next feature entry
                 } else if ( fu->umi != (fu-1)->umi ) {//same feature, new umi
-                    vCellFeatureCount[icb].back().count++;//add 1
+                    vCellFeatureCount[icb].back().count[0]++;//add 1
                 };
+                vCellFeatureCount[icb].back().count[1]++;       
             };
         };
     };
@@ -105,7 +106,7 @@ void SoloFeature::countSmartSeq()
     nUMIperCB.resize(nCB);
     nGenePerCB.resize(nCB);
       
-    countMatStride=2;
+    countMatStride=3;
     
     uint64 ccgN=0;//total number of entries in the countCellGeneUMI
     for (auto &cbf :  vCellFeatureCount) {
@@ -123,7 +124,7 @@ void SoloFeature::countSmartSeq()
         
         nGenePerCB[icb]=vCellFeatureCount[icb].size();
         for (auto &cbf :  vCellFeatureCount[icb]) {
-            nUMIperCB[icb]+=cbf.count;
+            nUMIperCB[icb]+=cbf.count[pSolo.umiDedupColumns[0]];
         };
     };
 

@@ -104,7 +104,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                                 errOut << "EXITING because of FATAL ERROR in input read file: the total length of barcode sequence is "  << seq1.size() << " not equal to expected " <<P.pSolo.bL <<"\n"  ;
                                 errOut << "Read ID="<<readID<< "   Sequence="<<seq1<<"\n";
                                 errOut << "SOLUTION: make sure that the barcode read is the last file in --readFilesIn , and check that it has the correct formatting\n";
-                                errOut << "          If UMI+CB length is not equal to the barcode read length, specify barcode read length with --soloBarcodeReadLength\n";
+                                errOut << "          If UMI+CB length is not equal to the barcode read length, specify barcode read length with --soloBarcodeReadLength, or use --soloBarcodeReadLength 0 to avoid checking barcode read length.\n";
                                 exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
                             };
                             readID += ' ' + seq1;
