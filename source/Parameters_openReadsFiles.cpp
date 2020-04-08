@@ -22,7 +22,7 @@ void Parameters::openReadsFiles()
 
          vector<string> readsCommandFileName;
 
-         for (uint imate=0;imate<readFilesIn.size();imate++) {//open readIn files
+         for (uint imate=0;imate<readFilesNames.size();imate++) {//open readIn files
             ostringstream sysCom;
             sysCom << outFileTmp <<"tmp.fifo.read"<<imate+1;
             readFilesInTmp.push_back(sysCom.str());

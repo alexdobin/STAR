@@ -80,31 +80,21 @@ void Parameters::readFilesInit()
         ifstream & rfM = ifstrOpen(readFilesManifest[0], ERROR_OUT, "SOLUTION: check the path and permissions for readFilesManifest = " + readFilesManifest[0], *this);
         inOut->logMain << "Reading input file names and read groups from readFileManifest " << readFilesManifest[0] << endl;
 
+        readFilesNames.resize(2);
         string rfMline;
-        getline(rfM, rfMline);
-        
-        {//find the number of mates
+        while (getline(rfM, rfMline)) {
+        	if (rfMline.find_first_not_of(" \t")>=rfMline.size())
+        		continue; //skip blank lines
 
-            vector<string>rfMfields;
-            splitString(rfMline, '\t', rfMfields);
-
-            readNmates=0;
-            for (; readNmates<rfMfields.size(); readNmates++) {
-                if (rfMfields[readNmates].substr(0,3)=="ID:")
-                    break;
-            };
-            if (readNmates==rfMfields.size())
-                readNmates=rfMfields.size()-1; //no ID:column => last column is read group ID, no other columns in the RGline
-
-            readFilesNames.resize(readNmates);
-
-        };
-        
-        //first line is already read
-        while (!rfMline.empty()) {
             uint32 itab1=0, itab2=0;
-            for (uint32 imate=0; imate<readNmates; imate++) {
+            for (uint32 imate=0; imate<2; imate++) {//SE manifest 2nd column contains "-"
                 itab2=rfMline.find('\t',itab1);
+                if (itab2>=rfMline.size()) {
+                    ostringstream errOut;
+                    errOut <<"EXITING because of FATAL INPUT FILE error: readFileManifest file " << readFilesManifest[0] <<  " has to contain at least 3 tab separated columns\n";
+                    errOut <<"SOLUTION: fix the formatting of the readFileManifest file: Read1 <tab> Read2 <tab> ReadGroup. For single-end reads, use - in the 2nd column.\n";
+                    exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_INPUT_FILES, *this);
+                };
                 readFilesNames[imate].push_back( readFilesPrefixFinal + rfMline.substr(itab1,itab2-itab1) );
                 itab1=itab2+1;
                 
@@ -121,12 +111,12 @@ void Parameters::readFilesInit()
             
             inOut->logMain <<  outSAMattrRGlineSplit.back() <<'\n';
             
-            getline(rfM, rfMline);
         };
-        
-        readFilesN=readFilesNames[0].size();
-        
         rfM.close();
+        
+        readNmates = ( readFilesNames[1][0].back()=='-' ? 1 : 2);
+        readFilesNames.resize(readNmates);//resize if readFilesN=1
+        readFilesN = readFilesNames[0].size();
     };
 
     inOut->logMain << "Number of fastq files for each mate = " << readFilesN << endl;

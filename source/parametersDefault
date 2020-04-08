@@ -143,7 +143,7 @@ readFilesManifest           -
     string: file with the names of read files, one set of files per line, with two/three columns for SE/PE reads, formatted as: read1_file_name \tab read2_file_name \tab read_group_line. 
             Spaces, but not tabs are allowed in file names.
             If read_group_line does not start with ID:, it can only contain one ID field, and ID: will be added to it.  
-            If read_group_line starts with ID:, it can contain several fields separated by \tab, and everything will be be copied verbatim into SAM @RG header line.
+            If read_group_line starts with ID:, it can contain several fields separated by \tab, and all fields will be be copied verbatim into SAM @RG header line.
                             - 
 
 readFilesPrefix             -
