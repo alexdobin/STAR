@@ -68,7 +68,7 @@ void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, st
         uint32 size0=*((uint32*) bam0)+sizeof(uint32);
         
         if (solo.pSolo.samAttrYes)
-            solo.soloFeat[solo.pSolo.samAttrFeature]->addBAMtags(bam0,size0,bam1);
+            solo.soloFeat[solo.pSolo.featureInd[solo.pSolo.samAttrFeature]]->addBAMtags(bam0,size0,bam1);
         
         bgzf_write(bgzfBin, bam0, size0);
     };

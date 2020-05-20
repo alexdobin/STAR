@@ -86,8 +86,8 @@ void ParametersSolo::initialize(Parameters *pPin)
     };
 
     //////////////////////////////////// features
-    featureInd={-1};
-    featureYes={false};
+    featureInd.fill(-1);
+    featureYes.fill(false);
     for (uint32 ii=0; ii<SoloFeatureTypes::Names.size(); ii++) {
         for (auto &fin : featureIn) {
             if (fin==SoloFeatureTypes::Names[ii]) {
@@ -293,7 +293,6 @@ void ParametersSolo::initialize(Parameters *pPin)
 
     //SAM attributes
     samAttrYes=false;
-    samAttrFeature=SoloFeatureTypes::Gene;//hard-coded for now to follow Cell Ranger - error correction only done for feature=Gene
     if ( (pP->outSAMattrPresent.CB || pP->outSAMattrPresent.UB) && type!=SoloTypes::CB_samTagOut) {
         samAttrYes=true;
         if (!pP->outBAMcoord) {
@@ -304,9 +303,21 @@ void ParametersSolo::initialize(Parameters *pPin)
         };
     };
     
-    readInfoYes={false};
-    if (samAttrYes) //pSolo.samAttrFeature=0 by default, so need to check samAttrYes
+    readInfoYes.fill(false);
+    if (samAttrYes) {//pSolo.samAttrFeature=0 by default, so need to check samAttrYes
+    	if (featureYes[SoloFeatureTypes::Gene]) {
+    		samAttrFeature=SoloFeatureTypes::Gene;
+    	} else if (featureYes[SoloFeatureTypes::GeneFull]) {//if Gene is not defined
+    		samAttrFeature=SoloFeatureTypes::GeneFull;
+    	} else {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: CB and/or UB attributes in --outSAMattributes require --soloFeatures Gene OR/AND GeneFull.\n";
+            errOut << "SOLUTION: re-run STAR adding Gene AND/OR GeneFull to --soloFeatures\n";
+            exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+    	};
+
         readInfoYes[samAttrFeature]=true;
+    };
     if (featureYes[SoloFeatureTypes::VelocytoSimple] || featureYes[SoloFeatureTypes::Velocyto]) //turn readInfo on for Gene needed by VelocytoSimple
         readInfoYes[SoloFeatureTypes::Gene]=true;    
     
