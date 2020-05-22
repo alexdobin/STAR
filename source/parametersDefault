@@ -238,10 +238,10 @@ outSAMmode                      Full
                                 Full ... full SAM output
                                 NoQS ... full SAM but without quality scores
 
-outSAMstrandField                               None
+outSAMstrandField               None
     string: Cufflinks-like strand field flag
                                 None        ... not used
-                                intronMotif ... strand derived from the intron motif. Reads with inconsistent and/or non-canonical introns are filtered out.
+                                intronMotif ... strand derived from the intron motif. This option changes the output alignments: reads with inconsistent and/or non-canonical introns are filtered out.
 
 outSAMattributes                Standard
     string: a string of desired SAM attributes, in the order desired for the output SAM

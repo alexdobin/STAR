@@ -102,7 +102,7 @@ void ReadAlign::outputAlignments() {
                 chunkTr->classifyAlign(trMult, nTrOut, readAnnot);
             };            
             //transcripts
-            if ( P.quant.trSAM.yes ) {//NOTE: the transcripts are changed by this function (soft-clipping extended), cannot be reused
+            if ( P.quant.trSAM.yes ) {
                 quantTranscriptome(chunkTr, nTrOut, trMult,  alignTrAll);
             };
 

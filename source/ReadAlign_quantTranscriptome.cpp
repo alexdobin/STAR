@@ -9,9 +9,7 @@ uint ReadAlign::quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript 
     for (uint iag=0; iag<nAlignG; iag++) {//transform all alignments
 
         Transcript *align1=alignG[iag];
-        
-        align1->alignGenes={};
-        
+
         if (!P.quant.trSAM.indel && (align1->nDel>0 || align1->nIns>0) ) {
             //prevent indels if requested
             continue;
@@ -78,7 +76,7 @@ uint ReadAlign::quantTranscriptome (Transcriptome *Tr, uint nAlignG, Transcript 
         };
     };
 
-    //not used anymore, at Colin Dewey's request
+    //not used anymore per Colin Dewey's request
     //     if (nAlignT==0 && P.outSAMunmapped=="Within") {//read could be mapped to genome, but not transcriptome - output as unmapped
     //         uint unmapType=5;
     //         bool mateMapped[2]={false,false};
