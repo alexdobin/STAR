@@ -1,3 +1,5 @@
+* Fixed the long-standing seg-fault problem for small genomes.
+
 * Implemented STARsolo quantification for Smart-seq with --soloType SmartSeq option.
 * Change in STARsolo SJ output behavior: junctions are output even if reads do not match genes.
 * Fixed the problem in Solo Q30 Bases in Summary.csv average (#798).
