@@ -2,7 +2,8 @@
 * Fixed a bug with solo SJ output for large genomes.
 * Issue #784: Fixed a seg-fault in STARsolo for cases where no cell barcodes matched whitelist.  
 * Issue #798: Fixed the problem in Solo Q30 Bases in Summary.csv average (#798).
-* Issue #864: Fxied seg-fault for STARsolo runs with very small number of reads or cells.
+* Issue #864: Fixed seg-fault for STARsolo runs with very small number of reads or cells.
+* Issue #881: Check if --genomeDir exists, create if necessary.
 * Issue #902: Fixed seg-fault for STARsolo CB/UB SAM attributes output with --soloFeatures GeneFull only option.
 * Issue #907: Fixed the bug that prevented output of STARsolo GX/GN tags into the Aligned.out.bam if --quantMode TranscriptomeSAM is used.
 

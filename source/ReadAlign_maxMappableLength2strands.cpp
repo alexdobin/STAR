@@ -38,7 +38,7 @@ uint ReadAlign::maxMappableLength2strands(uint pieceStartIn, uint pieceLengthIn,
 
         //find SA boundaries
         uint Lind=Lmax;
-        while (Lind>0) {//check the precense of the prefix for Lind
+        while (Lind>0) {//check the presence of the prefix for Lind
             iSA1=mapGen.SAi[mapGen.genomeSAindexStart[Lind-1]+ind1]; // starting point for suffix array search.
             if ((iSA1 & mapGen.SAiMarkAbsentMaskC) == 0) {//prefix exists
                 break;
@@ -48,7 +48,7 @@ uint ReadAlign::maxMappableLength2strands(uint pieceStartIn, uint pieceLengthIn,
             };
         };
 
-        // define lower bound for suffix array range search.
+        // define upper bound for suffix array range search.
         if (mapGen.genomeSAindexStart[Lind-1]+ind1+1 < mapGen.genomeSAindexStart[Lind]) {//we are not at the end of the SA
             iSA2=((mapGen.SAi[mapGen.genomeSAindexStart[Lind-1]+ind1+1] & mapGen.SAiMarkNmask) & mapGen.SAiMarkAbsentMask) - 1;
         } else {

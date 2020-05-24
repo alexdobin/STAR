@@ -450,14 +450,15 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 ////////////////////////////////////////////////////// Calculate and check parameters
     iReadAll=0;
 
-    if (runDirPermIn=="User_RWX")
-    {
+    if (pGe.gDir.back()!='/') {
+    	pGe.gDir += '/';
+    };
+
+    if (runDirPermIn=="User_RWX") {
         runDirPerm=S_IRWXU;
-    } else if (runDirPermIn=="All_RWX")
-    {
+    } else if (runDirPermIn=="All_RWX") {
         runDirPerm= S_IRWXU | S_IRWXG | S_IRWXO;
-    } else
-    {
+    } else {
         ostringstream errOut;
         errOut << "EXITING because of FATAL INPUT ERROR: unrecognized option in --runDirPerm=" << runDirPerm << "\n";
         errOut << "SOLUTION: use one of the allowed values of --runDirPerm : 'User_RWX' or 'All_RWX' \n";
