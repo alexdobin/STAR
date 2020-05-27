@@ -1,6 +1,7 @@
 * Implemented --seedMapMin option (previously hard-coded) to define minimum seed length.
 * Fixed a bug with solo SJ output for large genomes.
 * Issue #784: Fixed a seg-fault in STARsolo for cases where no cell barcodes matched whitelist.  
+* Issue #843, #880: Throw an error if read file in --readFilesIn does not exist when using --readFilesCommand .
 * Issue #798: Fixed the problem in Solo Q30 Bases in Summary.csv average (#798).
 * Issue #864: Fixed seg-fault for STARsolo runs with very small number of reads or cells.
 * Issue #881: Check if --genomeDir exists, create if necessary.
