@@ -134,6 +134,7 @@ class Parameters {
         //output
         string outFileNamePrefix, outStd;
         string outTmpDir, outTmpKeep;
+        string outLogFileName;
 
         //SAM output
         string outBAMfileCoordName, outBAMfileUnsortedName, outQuantBAMfileName;

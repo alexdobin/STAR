@@ -120,6 +120,15 @@ void Genome::genomeGenerate() {
     //check parameters
 	createDirectory(pGe.gDir, P.runDirPerm, "--genomeDir", P);
 
+	{//move Log.out file into genome directory
+		string logfn=pGe.gDir+"Log.out";
+		if ( rename( P.outLogFileName.c_str(), logfn.c_str() ) ) {
+			warningMessage("Could not move Log.out file from " + P.outLogFileName + " into " + logfn + ". Will keep " + P.outLogFileName +"\n", \
+						   std::cerr, P.inOut->logMain, P);
+		} else {
+			P.outLogFileName=logfn;
+		};
+	};
     if (sjdbOverhang<=0 && (pGe.sjdbFileChrStartEnd.at(0)!="-" || pGe.sjdbGTFfile!="-")) {
         ostringstream errOut;
         errOut << "EXITING because of FATAL INPUT PARAMETER ERROR: for generating genome with annotations (--sjdbFileChrStartEnd or --sjdbGTFfile options)\n";

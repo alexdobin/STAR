@@ -1,3 +1,4 @@
+* For genome generation runs, the Log.out file is moved into the --genomeDir directory.
 * Implemented --seedMapMin option (previously hard-coded) to define minimum seed length.
 * Fixed a bug with solo SJ output for large genomes.
 * Issue #784: Fixed a seg-fault in STARsolo for cases where no cell barcodes matched whitelist.  

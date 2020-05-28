@@ -341,7 +341,8 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 //         outFileNamePrefix=pGe.gDir;
 //     };
 
-    inOut->logMain.open((outFileNamePrefix + "Log.out").c_str());
+    outLogFileName=outFileNamePrefix + "Log.out";
+    inOut->logMain.open(outLogFileName.c_str());
     if (inOut->logMain.fail()) {
         ostringstream errOut;
         errOut <<"EXITING because of FATAL ERROR: could not create output file: "<<outFileNamePrefix + "Log.out"<<"\n";
