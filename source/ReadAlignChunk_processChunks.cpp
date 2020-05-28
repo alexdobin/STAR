@@ -99,13 +99,17 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                         if (P.pSolo.type>0) {//record barcode sequence
                             string seq1;
                             getline(P.inOut->readIn[P.pSolo.barcodeRead],seq1);
-                            if (seq1.size() != P.pSolo.bL && P.pSolo.bL > 0) {
-                                ostringstream errOut;
-                                errOut << "EXITING because of FATAL ERROR in input read file: the total length of barcode sequence is "  << seq1.size() << " not equal to expected " <<P.pSolo.bL <<"\n"  ;
-                                errOut << "Read ID="<<readID<< "   Sequence="<<seq1<<"\n";
-                                errOut << "SOLUTION: make sure that the barcode read is the last file in --readFilesIn , and check that it has the correct formatting\n";
-                                errOut << "          If UMI+CB length is not equal to the barcode read length, specify barcode read length with --soloBarcodeReadLength\n";
-                                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
+                            if (seq1.size() != P.pSolo.bL) {
+                            	if (P.pSolo.bL > 0) {
+									ostringstream errOut;
+									errOut << "EXITING because of FATAL ERROR in input read file: the total length of barcode sequence is "  << seq1.size() << " not equal to expected " <<P.pSolo.bL <<"\n"  ;
+									errOut << "Read ID="<<readID<< "   Sequence="<<seq1<<"\n";
+									errOut << "SOLUTION: make sure that the barcode read is the last file in --readFilesIn , and check that it has the correct formatting\n";
+									errOut << "          If UMI+CB length is not equal to the barcode read length, specify barcode read length with --soloBarcodeReadLength\n";
+									exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
+                            	} else if (seq1.size()<P.pSolo.cbumiL) {//barcode sequence too short - append Ns
+                            		seq1.append(P.pSolo.cbumiL-seq1.size(), 'N');
+                            	};
                             };
                             readID += ' ' + seq1;
                             P.inOut->readIn[P.pSolo.barcodeRead].ignore(DEF_readNameSeqLengthMax,'\n');//skip to the end of 3rd ("+") line

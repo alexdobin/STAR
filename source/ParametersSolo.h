@@ -23,9 +23,9 @@ public:
     uint32 barcodeStart, barcodeEnd;//start/end of barcode sequence on barcodeRead
     
     //simple barcodes
-    uint32 cbS,cbL; //cell barcode start,length
-    uint32 umiS,umiL; //umi start,length
-    uint32 bL; //total barcode length
+    uint32 cbS, cbL; //cell barcode start,length
+    uint32 umiS, umiL; //umi start,length
+    uint32 bL, cbumiL; //total barcode sequene length, CB+UMI length. Former does may not be equal to the latter
 
     vector<string> cbPositionStr;
     string umiPositionStr;

@@ -1,14 +1,16 @@
-* The output directory in --outFileNamePrefix is checked and created if it does not exist.
-* For genome generation runs, the Log.out file is moved into the --genomeDir directory.
-* Implemented --seedMapMin option (previously hard-coded) to define minimum seed length.
-* Fixed a bug with solo SJ output for large genomes.
 * Issue #784: Fixed a seg-fault in STARsolo for cases where no cell barcodes matched whitelist.  
-* Issue #843, #880: Throw an error if read file in --readFilesIn does not exist when using --readFilesCommand .
 * Issue #798: Fixed the problem in Solo Q30 Bases in Summary.csv average (#798).
+* Issue #843, #880: Throw an error if read file in --readFilesIn does not exist when using --readFilesCommand .
 * Issue #864: Fixed seg-fault for STARsolo runs with very small number of reads or cells.
 * Issue #881: Check if --genomeDir exists, create if necessary.
+* Issue #882: Added 3rd column "Gene Expression" to solo features.tsv file for better compatibility with downstream tools.
 * Issue #902: Fixed seg-fault for STARsolo CB/UB SAM attributes output with --soloFeatures GeneFull only option.
 * Issue #907: Fixed the bug that prevented output of STARsolo GX/GN tags into the Aligned.out.bam if --quantMode TranscriptomeSAM is used.
+* Issue #910: The output directory in --outFileNamePrefix is checked and created if it does not exist.
+* If solo barcode read length is not checked (--soloBarcodeReadLength 0) and it is shorter than CB+UMI length, the barcode is padded with Ns and not counted.
+* For genome generation runs, the Log.out file is moved into the --genomeDir directory.
+* Fixed a bug with solo SJ output for large genomes.
+* Implemented --seedMapMin option (previously hard-coded) to define minimum seed length.
 
 STAR 2.7.3a 2019/10/08
 ======================
