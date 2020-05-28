@@ -1,3 +1,4 @@
+* The output directory in --outFileNamePrefix is checked and created if it does not exist.
 * For genome generation runs, the Log.out file is moved into the --genomeDir directory.
 * Implemented --seedMapMin option (previously hard-coded) to define minimum seed length.
 * Fixed a bug with solo SJ output for large genomes.
