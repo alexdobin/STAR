@@ -14,17 +14,27 @@ void createDirectory(const string dirPathIn, const mode_t dirPerm, const string 
 		if ( errno == EEXIST ) {//directory exists
 			P.inOut->logMain << dirParameter << " directory exists and will be overwritten: " << dirPath <<std::endl;
 		} else {//other error
-	        ostringstream errOut;
-	        exitWithError("EXITING because of fatal OUTPUT FILE error: could not create output directory: " + dirPath +
-	        			  " for " + dirParameter +
-						  "\n ERROR: " + strerror(errno) +
-	                      "\nSOLUTION: check the path and permissions. Create parent directories if necessary.\n",
-	                       std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
+			//will try to create parent directories
+			size_t i1=dirPath.find_first_of('/',1);
+			while (i1<dirPath.size()) {
+				string dirPath1=dirPath.substr(0,i1);
+				if (mkdir(dirPath1.c_str(), dirPerm) == -1) {
+					if ( !(errno == EEXIST) ) {//error
+				        exitWithError("EXITING because of fatal OUTPUT FILE error: could not create output directory: " + dirPath1 +
+				        			  " for " + dirParameter + " " + dirPathIn +
+									  "\n ERROR: " + strerror(errno) +
+				                      "\nSOLUTION: check the path and permissions.\n",
+				                       std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
+					};
+				};
+				i1=dirPath.find_first_of('/',i1+1);
+			};
+			P.inOut->logMain << dirParameter << " directory and its parents created: " << dirPath <<std::endl;
 		};
+    } else {
+    	P.inOut->logMain << dirParameter << " directory created: " << dirPath <<std::endl;
     };
-	P.inOut->logMain << dirParameter << " directory created: " << dirPath <<std::endl;
 };
-
 
 unsigned long long fstreamReadBig(std::ifstream &S, char* A, unsigned long long N) {
     unsigned long long C=0;
