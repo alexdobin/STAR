@@ -1,3 +1,4 @@
+* Fixed the long-standing seg-fault problem for small genomes.
 * Issue #784: Fixed a seg-fault in STARsolo for cases where no cell barcodes matched whitelist.  
 * Issue #798: Fixed the problem in Solo Q30 Bases in Summary.csv average (#798).
 * Issue #843, #880: Throw an error if read file in --readFilesIn does not exist when using --readFilesCommand .
