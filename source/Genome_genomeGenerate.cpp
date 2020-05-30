@@ -302,8 +302,7 @@ void Genome::genomeGenerate() {
         //uint saChunkN=((nSA/saChunkSize+1)/P.runThreadN+1)*P.runThreadN;//ensure saChunkN is divisible by P.runThreadN
         //saChunkSize=nSA/saChunkN+100000;//final chunk size
         if (P.runThreadN>1) saChunkSize=min(saChunkSize,nSA/(P.runThreadN-1));
-
-        uint saChunkN=nSA/saChunkSize;//estimate
+        uint saChunkN = nSA / saChunkSize + 1;//estimate
         uint* indPrefStart = new uint [saChunkN*2]; //start and stop, *2 just in case
         uint* indPrefChunkCount = new uint [saChunkN*2];
         indPrefStart[0]=0;
