@@ -145,7 +145,7 @@ Barcode geometry
    soloUMIposition             -
     string                  position of the UMI on the barcode read, same as soloCBposition
                             Example: inDrop (Zilionis et al, Nat. Protocols, 2017):
-                            --soloCBposition  3_9_3_14
+                            --soloUMIposition  3_9_3_14
 
    soloAdapterSequence         -
     string:                 adapter sequence to anchor barcodes.
@@ -161,8 +161,8 @@ Basic cell filtering
    ```
     soloCellFilter              CellRanger2.2 3000 0.99 10
         string(s):              cell filtering type and parameters
-                            CellRanger2.2   ... simple filtering of CellRanger 2.2, followed by thre numbers: number of expected cells, robust  maximum percentile for UMI count, maximum to minimum ratio for UMI count
-                            TopCells        ... only report top cells by UMI count, followed by the excat number of cells
+                            CellRanger2.2   ... simple filtering of CellRanger 2.2, followed by three numbers: number of expected cells, robust  maximum percentile for UMI count, maximum to minimum ratio for UMI count
+                            TopCells        ... only report top cells by UMI count, followed by the exact number of cells
                             None            ... do not output filtered cells
     ```
 * This filtering is used to produce summary statistics for filtered cells in the Summary.csv file, which is similar to CellRanger's summary and is useful for Quality Control.

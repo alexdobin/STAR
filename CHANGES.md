@@ -1,3 +1,10 @@
+STAR 2.7.4a 2020/06/01
+======================
+Fixing multiple bugs and issues.
+--------------------------------
+
+**This version requires re-generation of the genome indexes**
+
 * Fixed the long-standing seg-fault problem for small genomes.
 * Issue #784: Fixed a seg-fault in STARsolo for cases where no cell barcodes matched whitelist.  
 * Issue #798: Fixed the problem in Solo Q30 Bases in Summary.csv average (#798).
