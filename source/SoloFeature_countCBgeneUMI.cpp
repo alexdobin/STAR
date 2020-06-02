@@ -64,7 +64,7 @@ void SoloFeature::countCBgeneUMI()
     uint32 *umiArray = new uint32[nReadPerCBmax*umiArrayStride];//temp array for collapsing UMI
     
     countMatStride=4; //hard-coded for now, works for both Gene*/SJ and Velocyto
-    countCellGeneUMI.resize(nReadsMapped*countMatStride/5); //5 is heuristic, will be resized if needed
+    countCellGeneUMI.resize(nReadsMapped*countMatStride/5+16); //5 is heuristic, will be resized if needed
     countCellGeneUMIindex.resize(nCB+1);
     countCellGeneUMIindex[0]=0;
     

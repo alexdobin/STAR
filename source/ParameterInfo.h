@@ -5,7 +5,7 @@ class ParameterInfoBase {
 public:
     string nameString; //string that identifies parameter
     int inputLevel; //where the parameter was defined
-    int inputLevelAllowed; //at which inpurt level parameter definition is allowed
+    int inputLevelAllowed; //at which input level parameter definition is allowed
     virtual void inputValues(istringstream &streamIn) =0;
     friend std::ostream& operator<< (std::ostream& o, ParameterInfoBase const& b);
     virtual ~ParameterInfoBase() {};

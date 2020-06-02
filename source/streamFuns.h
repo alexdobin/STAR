@@ -11,6 +11,7 @@ fstream  &fstrOpen  (std::string fileName, std::string errorID, Parameters &P, b
 ofstream &ofstrOpen (std::string fileName, std::string errorID, Parameters &P);
 ifstream &ifstrOpen (std::string fileName, std::string errorID, std::string solutionString, Parameters &P);
 ifstream &ifstrOpenGenomeFile (std::string fileName, std::string errorID, Parameters &P);
+void createDirectory(const string dirPathIn, const mode_t dirPerm, const string dirParameter, Parameters &P);
 
 void copyFile(string fileIn, string fileOut);
 #endif

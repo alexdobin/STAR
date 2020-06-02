@@ -1,11 +1,17 @@
-* Fixed the long-standing seg-fault problem for small genomes.
-
 * Implemented STARsolo quantification for Smart-seq with --soloType SmartSeq option.
 * Change in STARsolo SJ output behavior: junctions are output even if reads do not match genes.
-* Fixed the problem in Solo Q30 Bases in Summary.csv average (#798).
-* Iimplemented --seedMapMin option (previously hard-coded) to define minimum seed length.
+* Implemented --seedMapMin option (previously hard-coded) to define minimum seed length.
+* Fixed the long-standing seg-fault problem for small genomes.
+* Issue #798: Fixed the problem in Solo Q30 Bases in Summary.csv average (#798).
+
 * Fixed a bug with solo SJ output for large genomes.
-* Fixed a seg-fault in STARsolo for cases where no cell barcodes matched whitelist (#784).  
+* Issue #784: Fixed a seg-fault in STARsolo for cases where no cell barcodes matched whitelist.  
+* Issue #843, #880: Throw an error if read file in --readFilesIn does not exist when using --readFilesCommand .
+* Issue #798: Fixed the problem in Solo Q30 Bases in Summary.csv average (#798).
+* Issue #864: Fixed seg-fault for STARsolo runs with very small number of reads or cells.
+* Issue #881: Check if --genomeDir exists, create if necessary.
+* Issue #902: Fixed seg-fault for STARsolo CB/UB SAM attributes output with --soloFeatures GeneFull only option.
+* Issue #907: Fixed the bug that prevented output of STARsolo GX/GN tags into the Aligned.out.bam if --quantMode TranscriptomeSAM is used.
 
 STAR 2.7.3a 2019/10/08
 ======================

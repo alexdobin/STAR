@@ -123,7 +123,7 @@ sjdbInsertSave                          Basic
 
 ### Variation parameters
 varVCFfile                              -
-    string: path to the VCF file that contains variation data.
+    string: path to the VCF file that contains variation data. The 10th column should contain the genotype information, e.g. 0/1
 
 ### Input Files
 inputBAMfile                -
@@ -260,10 +260,10 @@ outSAMmode                      Full
                                 Full ... full SAM output
                                 NoQS ... full SAM but without quality scores
 
-outSAMstrandField                               None
+outSAMstrandField               None
     string: Cufflinks-like strand field flag
                                 None        ... not used
-                                intronMotif ... strand derived from the intron motif. Reads with inconsistent and/or non-canonical introns are filtered out.
+                                intronMotif ... strand derived from the intron motif. This option changes the output alignments: reads with inconsistent and/or non-canonical introns are filtered out.
 
 outSAMattributes                Standard
     string: a string of desired SAM attributes, in the order desired for the output SAM
@@ -273,9 +273,9 @@ outSAMattributes                Standard
                                 All         ... NH HI AS nM NM MD jM jI MC ch
                                 variation:
                                 vA          ... variant allele
-                                vG          ... genomic coordiante of the variant overlapped by the read
-                                vW          ... indicates whether alignment passes (=1) or not (!=1) WASP filtering. Requires --waspOutputMode SAMtag
                                 ha          ... haplotype (1/2) when mapping to the diplod genome. Requires genome generated with --genomeTransformType Diploid
+                                vG          ... genomic coordinate of the variant overlapped by the read
+                                vW          ... 1 - alignment passes WASP filtering; 2,3,4,5,6,7 - alignment does not pass WASP filtering. Requires --waspOutputMode SAMtag.
                                 STARsolo:
                                 CR CY UR UY ... sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing
                                 CB UB       ... error-corrected cell barcodes and UMIs for solo* demultiplexing. Requires --outSAMtype BAM SortedByCoordinate.
@@ -735,9 +735,9 @@ soloBarcodeReadLength       1
 soloCBposition              -
     strings(s)              position of Cell Barcode(s) on the barcode read.
                             Presently only works with --soloType CB_UMI_Complex, and barcodes are assumed to be on Read2.
-                            Format for each barcode: startAnchor_startDistance_endAnchor_endDistance
-                            start(end)Anchor defines the anchor base for the CB: 0: read start; 1: read end; 2: adapter start; 3: adapter end
-                            start(end)Distance is the distance from the CB start(end) to the Anchor base
+                            Format for each barcode: startAnchor_startPosition_endAnchor_endPosition
+                            start(end)Anchor defines the Anchor Base for the CB: 0: read start; 1: read end; 2: adapter start; 3: adapter end
+                            start(end)Position is the 0-based position with of the CB start(end) with respect to the Anchor Base
                             String for different barcodes are separated by space.
                             Example: inDrop (Zilionis et al, Nat. Protocols, 2017):
                             --soloCBposition  0_0_2_-1  3_1_3_8

@@ -375,11 +375,11 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                         attrN+=bamAttrArrayWrite(soloRead->readBar->umiQual,"UY",attrOutArray+attrN);
                         break;
                     case ATTR_GX:
-                        if (readAnnot.geneConcordant.size()==1 && trOut.alignGenes.size()==1) //only output if read maps to a single gene
+                        if (readAnnot.geneConcordant.size()==1 && trOut.alignGenes.size()==1) //only output if read maps to a single gene, and this alignment maps to one gene
                             attrN+=bamAttrArrayWrite(chunkTr->geID[*trOut.alignGenes.begin()],"GX",attrOutArray+attrN);
                         break;
                     case ATTR_GN:
-                        if (readAnnot.geneConcordant.size()==1 && trOut.alignGenes.size()==1) //only output if read maps to a single gene
+                        if (readAnnot.geneConcordant.size()==1 && trOut.alignGenes.size()==1) //only output if read maps to a single gene, and this alignment maps to one gene
                             attrN+=bamAttrArrayWrite(chunkTr->geName[*trOut.alignGenes.begin()],"GN",attrOutArray+attrN);
                         break;                        
                         

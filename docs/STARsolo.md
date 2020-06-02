@@ -6,13 +6,13 @@ Major updates in STAR 2.7.3a (Oct 8 2019)
 * **Output enhancements:**
     * Summary.csv statistics output for raw and filtered cells useful for quick run quality assessment.
     * --soloCellFilter option for basic filtering of the cells, similar to the methods used by CellRanger 2.2.x.
-* [**Better compatibility with CellRanger 3.x.x:**](#matching-cellranger-3xx-results) 
+* [**Better compatibility with CellRanger 3.x.x:**](#matching-cellranger-3xx-results)
     * --soloUMIfiltering MultiGeneUMI option introduced in CellRanger 3.x.x for filtering UMI collisions between different genes.
     * --soloCBmatchWLtype 1MM_multi_pseudocounts option, introduced in CellRanger 3.x.x, which slightly changes the posterior probability calculation for CB with 1 mismatch.
 * [**Velocyto spliced/unspliced/ambiguous quantification:**](#velocyto-splicedunsplicedambiguous-quantification)
     * --soloFeatures Velocyto option to produce Spliced, Unspliced, and Ambiguous counts similar to the [velocyto.py](http://velocyto.org/) tool developed by [LaManno et al](https://doi.org/10.1038/s41586-018-0414-6). This option is under active development and the results may change in the future versions.
 * [**Support for complex barcodes, e.g. inDrop:**](#barcode-geometry)
-    * Complex barcodes in STARsolo with --soloType CB_UMI_Complex, --soloCBmatchWLtype --soloAdapterSequence, --soloAdapterMismatchesNmax, --soloCBposition,--soloUMIposition 
+    * Complex barcodes in STARsolo with --soloType CB_UMI_Complex, --soloCBmatchWLtype --soloAdapterSequence, --soloAdapterMismatchesNmax, --soloCBposition,--soloUMIposition
 * [**BAM tags:**](#bam-tags)
     * CB/UB for corrected CellBarcode/UMI
     * GX/GN for gene ID/name
@@ -20,10 +20,10 @@ Major updates in STAR 2.7.3a (Oct 8 2019)
 STARsolo
 -------------
 STARsolo is a turnkey solution for analyzing droplet single cell RNA sequencing data (e.g. 10X Genomics Chromium System) built directly into STAR code.
-STARsolo inputs the raw FASTQ reads files, and performs the following operations 
+STARsolo inputs the raw FASTQ reads files, and performs the following operations
 * error correction and demultiplexing of cell barcodes using user-input whitelist
 * mapping the reads to the reference genome using the standard STAR spliced read alignment algorithm
-* error correction and collapsing (deduplication) of Unique Molecular Identifiers (UMIa) 
+* error correction and collapsing (deduplication) of Unique Molecular Identifiers (UMIa)
 * quantification of per-cell gene expression by counting the number of reads per gene
 * quantification of other transcriptomic features: splice junctions; pre-mRNA; spliced/unspliced reads similar to Velocyto
 
@@ -39,36 +39,39 @@ Running STARsolo for 10X Chromium scRNA-seq data
     ```
    The genome index is the same as for normal STAR runs. </br>
    The parameters required to run STARsolo on 10X Chromium data are described below:
-   
+
 * The STAR solo algorithm is turned on with:
     ```
-    --soloType Droplet 
+    --soloType Droplet
     ```
     or, since 2.7.3a, with more descriptive:
     ```
-    --soloType CB_UMI_Simple 
+    --soloType CB_UMI_Simple
     ```    
-	
+
 * The CellBarcode whitelist has to be provided with:
 
-    ``` 
+    ```
     --soloCBwhitelist /path/to/cell/barcode/whitelist
     ```
-    The 10X Chromium whitelist file can be found inside the CellRanger distribution, 
-e.g. [10X-whitelist](https://kb.10xgenomics.com/hc/en-us/articles/115004506263-What-is-a-barcode-whitelist-).
+    The 10X Chromium [whitelist](https://kb.10xgenomics.com/hc/en-us/articles/115004506263-What-is-a-barcode-whitelist-) files can be found or inside the CellRanger distribution or on [GitHub/10XGenomics](https://github.com/10XGenomics/cellranger/tree/master/lib/python/cellranger/barcodes).
 Please make sure that the whitelist is compatible with the specific version of the 10X chemistry: V2 or V3. For instance, in CellRanger 3.1.0, the *V2 whitelist* is:
     ```
     cellranger-cs/3.1.0/lib/python/cellranger/barcodes/737K-august-2016.txt
+
+    https://github.com/10XGenomics/cellranger/raw/master/lib/python/cellranger/barcodes/737K-august-2016.txt
     ```
     and *V3 whitelist* (gunzip it for STAR):
     ```
     cellranger-cs/3.1.0/lib/python/cellranger/barcodes/3M-february-2018.txt.gz
+
+    https://github.com/10XGenomics/cellranger/raw/master/lib/python/cellranger/barcodes/3M-february-2018.txt.gz
     ```
 * The default barcode lengths (CB=16b, UMI=10b) work for 10X Chromium V2. For V3, specify:
     ```
     --soloUMIlen 12
     ```
-   
+
 * Importantly, in the --readFilesIn option, the 1st file has to be cDNA read, and the 2nd file has to be the barcode (cell+UMI) read, i.e.
   ```
   --readFilesIn cDNAfragmentSequence.fastq.gz CellBarcodeUMIsequence.fastq.gz
@@ -99,7 +102,7 @@ How to make STARsolo _raw_ gene counts (almost) identical to CellRanger's
     ```
     STAR  --runMode genomeGenerate --runThreadN ... --genomeDir ./ --genomeFastaFiles /path/to/genome.fa  --sjdbGTFfile /path/to/genes.gtf
     ```
-    
+
 * If you want to use your own GTF (e.g. newer version of ENSEMBL or GENCODE), you can generate the "filtered" GTF file using 10X's mkref tool:</br>
   [https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/advanced/references](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/advanced/references)
 
@@ -108,7 +111,7 @@ How to make STARsolo _raw_ gene counts (almost) identical to CellRanger's
     --genomeSAsparseD 3
     ```
     to the genome generation options, which is used by CellRanger to generate STAR genomes. It will generate sparse suffixs array whic has an additional benefit of fitting into 16GB of RAM. However, it also results in 30-50% reduction of speed.
-    
+
 * The considerations above are for *raw* counts, i.e. when cell filtering is not performed. To get *filtered* results, refer to [Basic cell filtering](#basic-cell-filtering) section.
 
 #### Matching CellRanger 3.x.x results
@@ -122,8 +125,8 @@ Barcode geometry
 * Simple barcode lengths and start positions on barcode reads are described with
   ```
   --soloCBstart, --soloCBlen, --soloUMIstart, --soloUMIlen
-  ``` 
-  which works with 
+  ```
+  which works with
   ```
   --soloType CB_UMI_Simple (a.k.a Droplet)
   ```
@@ -150,7 +153,7 @@ Barcode geometry
    soloAdapterMismatchesNmax   1
     int>0:                  maximum number of mismatches allowed in adapter sequence
     ```
-    
+
 --------------------------------------
 Basic cell filtering
 --------------------
@@ -163,7 +166,7 @@ Basic cell filtering
                             None            ... do not output filtered cells
     ```
 * This filtering is used to produce summary statistics for filtered cells in the Summary.csv file, which is similar to CellRanger's summary and is useful for Quality Control.
-* Recent versions of CellRanger switched to more advanced filtering done with the EmptyDrop tool developed by [Lun et al](https://doi.org/10.1186/s13059-019-1662-y). To obtain filtered counts similar to recent CellRanger versions, we need to run this tools on **raw** STARsolo output 
+* Recent versions of CellRanger switched to more advanced filtering done with the EmptyDrop tool developed by [Lun et al](https://doi.org/10.1186/s13059-019-1662-y). To obtain filtered counts similar to recent CellRanger versions, we need to run this tools on **raw** STARsolo output
 
 
 ------------------
@@ -186,9 +189,9 @@ Quantification of different transcriptomic features
       Note that Velocyto quantification requires Gene features
     * All the features can be conveniently quantified in one run:
         ```
-        --soloFeatures Gene GeneFull SJ Velocyto 
+        --soloFeatures Gene GeneFull SJ Velocyto
         ```
-        
+
 --------------------------------------
 BAM tags
 -----------------

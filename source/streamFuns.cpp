@@ -5,6 +5,26 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #define fstream_Chunk_Max 2147483647
+#include <cstring>
+
+void createDirectory(const string dirPathIn, const mode_t dirPerm, const string dirParameter, Parameters &P)
+{
+	string dirPath = dirPathIn.substr(0,dirPathIn.find_last_of('/')+1);
+	if (mkdir(dirPath.c_str(), dirPerm) == -1) {
+		if ( errno == EEXIST ) {//directory exists
+			P.inOut->logMain << dirParameter << " directory exists and will be overwritten: " << dirPath <<std::endl;
+		} else {//other error
+	        ostringstream errOut;
+	        exitWithError("EXITING because of fatal OUTPUT FILE error: could not create output directory: " + dirPath +
+	        			  " for " + dirParameter +
+						  "\n ERROR: " + strerror(errno) +
+	                      "\nSOLUTION: check the path and permissions. Create parent directories if necessary.\n",
+	                       std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
+		};
+    };
+	P.inOut->logMain << dirParameter << " directory created: " << dirPath <<std::endl;
+};
+
 
 unsigned long long fstreamReadBig(std::ifstream &S, char* A, unsigned long long N) {
     unsigned long long C=0;
