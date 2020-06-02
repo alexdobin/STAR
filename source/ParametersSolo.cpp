@@ -48,8 +48,9 @@ void ParametersSolo::initialize(Parameters *pPin)
             exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
         
+        cbumiL=cbL+umiL;
         if (bL==1)
-            bL=cbL+umiL;
+            bL=cbumiL;
         
         barcodeStart=min(cbS,umiS)-1;
         barcodeEnd=max(cbS+cbL,umiS+umiL)-2;
@@ -57,9 +58,10 @@ void ParametersSolo::initialize(Parameters *pPin)
     } else if (typeStr=="CB_UMI_Complex") {
         type=SoloTypes::CB_UMI_Complex;
         bL=0;
-        
+        cbumiL=0;
     } else if (typeStr=="CB_samTagOut") {
-        type=SoloTypes::CB_samTagOut;     
+        type=SoloTypes::CB_samTagOut;
+        cbumiL=cbL;
         if (bL==1)
             bL=cbL;
         

@@ -100,6 +100,15 @@ void Genome::genomeGenerate() {
     //check parameters
 	createDirectory(pGe.gDir, P.runDirPerm, "--genomeDir", P);
 
+	{//move Log.out file into genome directory
+		string logfn=pGe.gDir+"Log.out";
+		if ( rename( P.outLogFileName.c_str(), logfn.c_str() ) ) {
+			warningMessage("Could not move Log.out file from " + P.outLogFileName + " into " + logfn + ". Will keep " + P.outLogFileName +"\n", \
+						   std::cerr, P.inOut->logMain, P);
+		} else {
+			P.outLogFileName=logfn;
+		};
+	};
     if (sjdbOverhang<=0 && (pGe.sjdbFileChrStartEnd.at(0)!="-" || pGe.sjdbGTFfile!="-")) {
         ostringstream errOut;
         errOut << "EXITING because of FATAL INPUT PARAMETER ERROR: for generating genome with annotations (--sjdbFileChrStartEnd or --sjdbGTFfile options)\n";
@@ -219,8 +228,7 @@ void Genome::genomeGenerate() {
         //uint saChunkN=((nSA/saChunkSize+1)/P.runThreadN+1)*P.runThreadN;//ensure saChunkN is divisible by P.runThreadN
         //saChunkSize=nSA/saChunkN+100000;//final chunk size
         if (P.runThreadN>1) saChunkSize=min(saChunkSize,nSA/(P.runThreadN-1));
-
-        uint saChunkN=nSA/saChunkSize+1;//estimate
+        uint saChunkN = nSA / saChunkSize + 1;//estimate
         uint* indPrefStart = new uint [saChunkN*2]; //start and stop, *2 just in case
         uint* indPrefChunkCount = new uint [saChunkN*2];
         indPrefStart[0]=0;

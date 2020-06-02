@@ -34,7 +34,7 @@
 
 \newcommand{\sechyperref}[1]{\hyperref[#1]{Section \ref{#1}. \nameref{#1}}}
 
-\title{STAR manual 2.7.3a}
+\title{STAR manual 2.7.4a}
 \author{Alexander Dobin\\
 dobin@cshl.edu}
 \maketitle
@@ -262,7 +262,7 @@ For multi-mappers, all alignments except one are marked with 0x100 (secondary al
 By default, the order of the multi-mapping alignments for each read is not truly random.
 The \opt{outMultimapperOrder} \optv{Random} option outputs multiple alignments for each read in random order, and also also randomizes the choice of the primary alignment from the highest scoring alignments. Parameter \opt{runRNGseed} can be used to set the random generator seed. With this option, the ordering of multi-mapping alignments of each read, and the choice of the primary alignment will vary from run to run, unless only one thread is used and the seed is kept constant.
 
-The \opt{outSAMmultNmax} parameter limits the number of output alignments (SAM lines) for multimappers. For instance, \opt{outSAMmultNmax} \optv{1} will output exactly one SAM line for each mapped read. Note that \code{NH:i:} tag in STAR will still report the actual number of loci that the reads map to, while the the number of reported alignments for a read in the SAM file is \code{min(NH,--outSAMmultNMax)}.
+The \opt{outSAMmultNmax} parameter limits the number of output alignments (SAM lines) for multimappers. For instance, \opt{outSAMmultNmax} \optv{1} will output exactly one SAM line for each mapped read. Note that \code{NH:i:} tag in STAR will still report the actual number of loci that the reads map to, while the the number of reported alignments for a read in the SAM file is \code{min(NH,--outSAMmultNMax)}. If \opt{outSAMmultNmax} is equal to \optv{-1}, all the alignments are output according to the order specified in \opt{outMultimapperOrder} option. If \opt{outSAMmultNmax} is not equal to -1, than top-scoring alignments will always be output first, even for the default \opt{outMultimapperOrder} \optv{Old\_2.4} option.
 
 
 \subsubsection{SAM attributes.}
@@ -287,7 +287,7 @@ The SAM attributes can be specified by the user using \opt{outSAMattributes} \op
 \item[]
 \optv{vW} : 0/1 - alignment does not pass / passes WASP filtering. Requires --waspOutputMode SAMtag
 \item[]
-\optv{CR CY UR UY} : sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing, not error corrected
+\optv{CR CY UR UY} : STARsolo: sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing, not error corrected
 \item[]
 \optv{uT} : for unmapped reads, reason for not mapping:
            \begin{itemize}[noitemsep,topsep=-3pt]
@@ -322,6 +322,25 @@ output sorted by coordinate \ofilen{Aligned.sortedByCoord.out.bam} file, similar
 output both unsorted and sorted files.
 \end{itemize}
 
+\subsection{Unmapped reads.}
+Unmapped reads can be output into the SAM/BAM \ofilen{Aligned.*} file(s) with 
+\opt{outSAMunmapped} \optv{Within} option. \opt{outSAMunmapped} \optv{Within KeepPairs} will (redundantly) record unmapped mate for each alignment, and, in case of unsorted output, keep it adjacent to its mapped mate (this only affects multi-mapping reads).
+\optv{uT} SAM tag indicates reason for not mapping:
+\begin{itemize}[noitemsep]
+	\item[] 0 : no acceptable seed/windows, "Unmapped other" in the Log.final.out
+	\item[] 1 : best alignment shorter than min allowed mapped length, "Unmapped: too short" in the Log.final.out
+	\item[] 2 : best alignment has more mismatches than max allowed number of mismatches, "Unmapped: too many mismatches" in the Log.final.out
+	\item[] 3 : read maps to more loci than the max number of multimappng loci, "Multimapping: mapped to too many loci" in the Log.final.out
+	\item[] 4 : unmapped mate of a mapped paired-end read
+\end{itemize}
+
+\opt{outReadsUnmapped} \optv{Fastx} will output unmapped and partially mapped (i.e. mapped only one mate of a paired end read) reads into separate file(s) \ofilen{Unmapped.out.mate1(2)}, formatted the same way as input read files (i.e. FASTQ or FASTA). Appended to the read name line are tag to indicate mapping status of the read mates:
+\begin{itemize}[noitemsep,topsep=-3pt]
+	\item[] $00$: mates were not mapped;
+	\item[] $10$: 1st mate mapped, 2nd unmapped
+	\item[] $01$: 1st unmapped, 2nd mapped
+\end{itemize}
+
 \subsection{Splice junctions.}
 \ofilen{SJ.out.tab} contains high confidence collapsed splice junctions in tab-delimited format. 
 Note that STAR defines the junction start/end as intronic bases, while many other software define them as exonic bases.
@@ -333,7 +352,7 @@ The columns have the following meaning:
 \item[column 3:] last base of the intron (1-based)
 \item[column 4:] strand (0: undefined, 1: +, 2: -)
 \item[column 5:] intron motif: 0: non-canonical; 1: GT/AG, 2: CT/AC, 3: GC/AG, 4: CT/GC, 5: AT/AC, 6: GT/AT
-\item[column 6:] 0: unannotated, 1: annotated (only  if splice junctions database is used)
+\item[column 6:] 0: unannotated, 1: annotated in the splice junctions database. Note that in 2-pass mode, junctions detected in the 1st pass are reported as annotated, in addition to annotated junctions from GTF.
 \item[column 7:] number of uniquely mapping reads crossing the junction
 \item[column 8:] number of multi-mapping reads crossing the junction
 \item[column 9:] maximum spliced alignment overhang 

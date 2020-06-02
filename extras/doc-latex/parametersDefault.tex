@@ -120,7 +120,7 @@
 \begin{optTable}
 \optName{varVCFfile}
   \optValue{-}
-  \optLine{string: path to the VCF file that contains variation data.} 
+  \optLine{string: path to the VCF file that contains variation data. The 10th column should contain the genotype information, e.g. 0/1} 
 \end{optTable}
 \optSection{Input Files}\label{Input_Files}
 \begin{optTable}
@@ -143,7 +143,7 @@
   \optLine{string(s): paths to files that contain input read1 (and, if needed,  read2)} 
 \optName{readFilesPrefix}
   \optValue{-}
-  \optLine{string: preifx for the read files names, i.e. it will be added in front of the strings in --readFilesIn} 
+  \optLine{string: prefix for the read files names, i.e. it will be added in front of the strings in --readFilesIn} 
   \optLine{-: no prefix} 
 \optName{readFilesCommand}
   \optValue{-}
@@ -278,7 +278,7 @@
   \optLine{string: Cufflinks-like strand field flag} 
 \begin{optOptTable}
   \optOpt{None}   \optOptLine{not used}
-  \optOpt{intronMotif}   \optOptLine{strand derived from the intron motif. Reads with inconsistent and/or non-canonical introns are filtered out.}
+  \optOpt{intronMotif}   \optOptLine{strand derived from the intron motif. This option changes the output alignments: reads with inconsistent and/or non-canonical introns are filtered out.}
 \end{optOptTable}
 \optName{outSAMattributes}
   \optValue{Standard}
@@ -289,8 +289,8 @@
   \optOpt{Standard}   \optOptLine{NH HI AS nM}
   \optOpt{All}   \optOptLine{NH HI AS nM NM MD jM jI MC ch}
   \optOpt{vA}   \optOptLine{variant allele}
-  \optOpt{vG}   \optOptLine{genomic coordiante of the variant overlapped by the read}
-  \optOpt{vW}   \optOptLine{0/1 - alignment does not pass / passes WASP filtering. Requires --waspOutputMode SAMtag}
+  \optOpt{vG}   \optOptLine{genomic coordinate of the variant overlapped by the read}
+  \optOpt{vW}   \optOptLine{1 - alignment passes WASP filtering; 2,3,4,5,6,7 - alignment does not pass WASP filtering. Requires --waspOutputMode SAMtag.}
 \end{optOptTable}
   \optLine{STARsolo:} 
 \begin{optOptTable}
@@ -301,6 +301,7 @@
   \optLine{sS          ... sequence of the entire barcode (CB,UMI,adapter...)} 
 \begin{optOptTable}
   \optOpt{sQ}   \optOptLine{quality of the entire barcode}
+  \optOpt{GX GN}   \optOptLine{gene ID and gene name}
 \end{optOptTable}
   \optLine{Unsupported/undocumented:} 
 \begin{optOptTable}
@@ -374,7 +375,7 @@
 \end{optOptTable}
 \optName{outSAMmultNmax}
   \optValue{-1}
-  \optLine{int: max number of multiple alignments for a read that will be output to the SAM/BAM files.} 
+  \optLine{int: max number of multiple alignments for a read that will be output to the SAM/BAM files. Note that if this value is not equal to -1, the top scoring alignment will be output first} 
 \begin{optOptTable}
   \optOpt{-1}   \optOptLine{all alignments (up to --outFilterMultimapNmax) will be output}
 \end{optOptTable}
@@ -586,6 +587,9 @@
 \optName{seedSplitMin}
   \optValue{12}
   \optLine{int{\textgreater}0: min length of the seed sequences split by Ns or mate gap} 
+\optName{seedMapMin}
+  \optValue{5}
+  \optLine{int{\textgreater}0: min length of seeds to be mapped} 
 \optName{alignIntronMin}
   \optValue{21}
   \optLine{minimum intron size: genomic gap is considered intron if its length{\textgreater}=alignIntronMin, otherwise it is considered Deletion} 
@@ -830,9 +834,9 @@
   \optValue{-}
   \optLine{strings(s)              position of Cell Barcode(s) on the barcode read.} 
   \optLine{Presently only works with --soloType CB{\textunderscore}UMI{\textunderscore}Complex, and barcodes are assumed to be on Read2.} 
-  \optLine{Format for each barcode: startAnchor{\textunderscore}startDistance{\textunderscore}endAnchor{\textunderscore}endDistance} 
-  \optLine{start(end)Anchor defines the anchor base for the CB: 0: read start; 1: read end; 2: adapter start; 3: adapter end} 
-  \optLine{start(end)Distance is the distance from the CB start(end) to the Anchor base} 
+  \optLine{Format for each barcode: startAnchor{\textunderscore}startPosition{\textunderscore}endAnchor{\textunderscore}endPosition} 
+  \optLine{start(end)Anchor defines the Anchor Base for the CB: 0: read start; 1: read end; 2: adapter start; 3: adapter end} 
+  \optLine{start(end)Position is the 0-based position with of the CB start(end) with respect to the Anchor Base} 
   \optLine{String for different barcodes are separated by space.} 
   \optLine{Example: inDrop (Zilionis et al, Nat. Protocols, 2017):} 
   \optLine{--soloCBposition  0{\textunderscore}0{\textunderscore}2{\textunderscore}-1  3{\textunderscore}1{\textunderscore}3{\textunderscore}8} 

@@ -1,5 +1,5 @@
 ### versions
-versionGenome           2.7.1a
+versionGenome           2.7.4a
     string: earliest genome index version compatible with this STAR release. Please do not change this value!
 
 ### Parameter Files
@@ -149,7 +149,8 @@ readFilesManifest           -
                             - 
 
 readFilesPrefix             -
-    string: preifx for the read files names, i.e. it will be added in front of the strings in --readFilesIn
+    string: prefix for the read files names, i.e. it will be added in front of the strings in --readFilesIn
+                            -: no prefix
 
 readFilesCommand             -
     string(s): command line to execute for each of the input file. This command should generate FASTA or FASTQ text and send it to stdout

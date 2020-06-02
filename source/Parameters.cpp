@@ -9,6 +9,7 @@
 #include "GlobalVariables.h"
 #include "signalFromBAM.h"
 #include "bamRemoveDuplicates.h"
+#include "streamFuns.h"
 
 //for mkfifo
 #include <sys/stat.h>
@@ -344,12 +345,10 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         scanAllLines(parStreamCommandLine, 1, 2); //read only initial Command Line parameters
     };
 
-//     need to be careful since runMode and pGe.gDir are not Command-Line-Initial
-//     if (runMode=="genomeGenerate" && outFileNamePrefix=="./") {// for genome generation, output into pGe.gDir
-//         outFileNamePrefix=pGe.gDir;
-//     };
+	createDirectory(outFileNamePrefix, S_IRWXU, "--outFileNamePrefix", *this); //TODO: runDirPerm is hard-coded now. Need to load it from command-line
 
-    inOut->logMain.open((outFileNamePrefix + "Log.out").c_str());
+    outLogFileName=outFileNamePrefix + "Log.out";
+    inOut->logMain.open(outLogFileName.c_str());
     if (inOut->logMain.fail()) {
         ostringstream errOut;
         errOut <<"EXITING because of FATAL ERROR: could not create output file: "<<outFileNamePrefix + "Log.out"<<"\n";
@@ -462,6 +461,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     	pGe.gDir += '/';
     };
 
+    //directory permissions TODO: this needs to be done before outPrefixFileName is created
     if (runDirPermIn=="User_RWX") {
         runDirPerm=S_IRWXU;
     } else if (runDirPermIn=="All_RWX") {

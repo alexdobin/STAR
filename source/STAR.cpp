@@ -45,7 +45,8 @@ void usage(int usageType) {
     if (usageType==0) {//brief
         cout << "\nTo list all parameters, run STAR --help\n";
     } else {//full
-        cout <<'\n'<< parametersDefault;
+        cout.write(reinterpret_cast<char *> (parametersDefault),
+                   parametersDefault_len);
     };
     exit(0);
 }
