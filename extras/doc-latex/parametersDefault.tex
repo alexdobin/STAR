@@ -141,6 +141,15 @@
 \optName{readFilesIn}
   \optValue{Read1 Read2}
   \optLine{string(s): paths to files that contain input read1 (and, if needed,  read2)} 
+\optName{readFilesManifest}
+  \optValue{-}
+  \optLine{string: file with the names of read files, formatted as:} 
+  \optLine{Paired-End reads: read1{\textunderscore}file{\textunderscore}name \tab read2{\textunderscore}file{\textunderscore}name \tab read{\textunderscore}group{\textunderscore}line.} 
+  \optLine{Single-End reads: read1{\textunderscore}file{\textunderscore}name \tab - \tab read{\textunderscore}group{\textunderscore}line.} 
+  \optLine{Spaces, but not tabs are allowed in file names.} 
+  \optLine{If read{\textunderscore}group{\textunderscore}line does not start with ID:, it can only contain one ID field, and ID: will be added to it.} 
+  \optLine{If read{\textunderscore}group{\textunderscore}line starts with ID:, it can contain several fields separated by \tab, and all fields will be be copied verbatim into SAM @RG header line.} 
+  \optLine{-} 
 \optName{readFilesPrefix}
   \optValue{-}
   \optLine{string: prefix for the read files names, i.e. it will be added in front of the strings in --readFilesIn} 
@@ -288,7 +297,11 @@
   \optOpt{None}   \optOptLine{no attributes}
   \optOpt{Standard}   \optOptLine{NH HI AS nM}
   \optOpt{All}   \optOptLine{NH HI AS nM NM MD jM jI MC ch}
+\end{optOptTable}
+  \optLine{variation:} 
+\begin{optOptTable}
   \optOpt{vA}   \optOptLine{variant allele}
+  \optOpt{ha}   \optOptLine{haplotype (1/2) when mapping to the diplod genome. Requires genome generated with --genomeTransformType Diploid}
   \optOpt{vG}   \optOptLine{genomic coordinate of the variant overlapped by the read}
   \optOpt{vW}   \optOptLine{1 - alignment passes WASP filtering; 2,3,4,5,6,7 - alignment does not pass WASP filtering. Requires --waspOutputMode SAMtag.}
 \end{optOptTable}
@@ -805,12 +818,17 @@
   \optValue{None}
   \optLine{string(s): type of single-cell RNA-seq} 
 \begin{optOptTable}
-  \optOpt{CB{\textunderscore}UMI{\textunderscore}Simple}   \optOptLine{(a.k.a. Droplet) one UMI and one Cell Barcode of fixed length in read2, e.g. Drop-seq and 10X Chromium}
+  \optOpt{CB{\textunderscore}UMI{\textunderscore}Simple}   \optOptLine{(a.k.a. Droplet) one UMI and one Cell Barcode of fixed length in read2, e.g. Drop-seq and 10X Chromium.}
   \optOpt{CB{\textunderscore}UMI{\textunderscore}Complex}   \optOptLine{one UMI of fixed length, but multiple Cell Barcodes of varying length, as well as adapters sequences are allowed in read2 only, e.g. inDrop.}
+  \optOpt{CB{\textunderscore}samTagOut}   \optOptLine{output Cell Barcode as CR and/or CB SAm tag. No UMI counting. --readFilesIn cDNA{\textunderscore}read1 [cDNA{\textunderscore}read2 if paired-end] CellBarcode{\textunderscore}read . Requires --outSAMtype BAM Unsorted [and/or SortedByCoordinate]}
+  \optOpt{SmartSeq}   \optOptLine{Smart-seq: each cell in a separtate FASTQ (paired- or single-end), barcodes are corresponding read-groups, no UMI sequences, alginments deduplicated according to alignment start and end (after extending soft-clipped bases)}
 \end{optOptTable}
 \optName{soloCBwhitelist}
   \optValue{-}
-  \optLine{string(s): file(s) with whitelist(s) of cell barcodes. Only one file allowed with } 
+  \optLine{string(s): file(s) with whitelist(s) of cell barcodes. Only --soloType CB{\textunderscore}UMI{\textunderscore}Complexone allows more than one whitelist file.} 
+\begin{optOptTable}
+  \optOpt{None}   \optOptLine{no whitelist: all cell barcodes are allowed}
+\end{optOptTable}
 \optName{soloCBstart}
   \optValue{1}
   \optLine{int{\textgreater}0: cell barcode start base} 
@@ -879,7 +897,6 @@
   \optOpt{Gene}   \optOptLine{genes: reads match the gene transcript}
   \optOpt{SJ}   \optOptLine{splice junctions: reported in SJ.out.tab}
   \optOpt{GeneFull}   \optOptLine{full genes: count all reads overlapping genes' exons and introns}
-  \optOpt{Transcript3p}   \optOptLine{quantification of transcript for 3' protocols}
 \end{optOptTable}
 \optName{soloUMIdedup}
   \optValue{1MM{\textunderscore}All}
@@ -888,6 +905,7 @@
   \optOpt{1MM{\textunderscore}All}   \optOptLine{all UMIs with 1 mismatch distance to each other are collapsed (i.e. counted once)}
   \optOpt{1MM{\textunderscore}Directional}   \optOptLine{follows the "directional" method from the UMI-tools by Smith, Heger and Sudbery (Genome Research 2017).}
   \optOpt{Exact}   \optOptLine{only exactly matching UMIs are collapsed}
+  \optOpt{NoDedup}   \optOptLine{no deduplication of UMIs, count all reads. Allowed for --soloType SmartSeq}
 \end{optOptTable}
 \optName{soloUMIfiltering}
   \optValue{-}

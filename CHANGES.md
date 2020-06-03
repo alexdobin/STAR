@@ -1,4 +1,5 @@
 * Implemented STARsolo quantification for Smart-seq with --soloType SmartSeq option.
+* Implemented --readFilesManifest option to input a list of input read files.
 * Change in STARsolo SJ output behavior: junctions are output even if reads do not match genes.
 * Fixed a bug with solo SJ output for large genomes.
 
@@ -31,13 +32,13 @@ Major new features in STARsolo
 * **Output enhancements:**
     * Summary.csv statistics output for raw and filtered cells useful for quick run quality assessment.
     * --soloCellFilter option for basic filtering of the cells, similar to the methods used by CellRanger 2.2.x.
-* [**Better compatibility with CellRanger 3.x.x:**](docs/STARsolo.md#matching-cellranger-3xx-results) 
+* [**Better compatibility with CellRanger 3.x.x:**](docs/STARsolo.md#matching-cellranger-3xx-results)
     * --soloUMIfiltering MultiGeneUMI option introduced in CellRanger 3.x.x for filtering UMI collisions between different genes.
     * --soloCBmatchWLtype 1MM_multi_pseudocounts option, introduced in CellRanger 3.x.x, which slightly changes the posterior probability calculation for CB with 1 mismatch.
 * [**Velocyto spliced/unspliced/ambiguous quantification:**](docs/STARsolo.md#velocyto-splicedunsplicedambiguous-quantification)
     * --soloFeatures Velocyto option to produce Spliced, Unspliced, and Ambiguous counts similar to the [velocyto.py](http://velocyto.org/) tool developed by [LaManno et al](https://doi.org/10.1038/s41586-018-0414-6). This option is under active development and the results may change in the future versions.
 * [**Support for complex barcodes, e.g. inDrop:**](docs/STARsolo.md#barcode-geometry)
-    * Complex barcodes in STARsolo with --soloType CB_UMI_Complex, --soloCBmatchWLtype --soloAdapterSequence, --soloAdapterMismatchesNmax, --soloCBposition,--soloUMIposition 
+    * Complex barcodes in STARsolo with --soloType CB_UMI_Complex, --soloCBmatchWLtype --soloAdapterSequence, --soloAdapterMismatchesNmax, --soloCBposition,--soloUMIposition
 * [**BAM tags:**](#bam-tags)
     * CB/UB for corrected CellBarcode/UMI
     * GX/GN for gene ID/name
@@ -50,7 +51,7 @@ STAR 2.7.2d 2019/10/04
 
 STAR 2.7.2c 2019/10/02
 ======================
-* Fixed the problem with no output to Chimeric.out.sam 
+* Fixed the problem with no output to Chimeric.out.sam
 
 STAR 2.7.2b 2019/08/29
 ======================
@@ -235,7 +236,7 @@ STAR 2.5.2b 2016/08/19
 STAR 2.5.2a 2016/05/10
 ======================
 
-* Fixed the "GstrandBit" problem. 
+* Fixed the "GstrandBit" problem.
 * Fixed a bug introduced in 2.5.1a that caused problems with single-end alignments output in some cases.
 * Fixed a bug that can cause STARlong seg-faults in rare cases.
 * Fixed a bug that caused output of unmapped mates for single end alignments even with --outSAMunmapped None .
@@ -293,7 +294,7 @@ Major new features:
 -------------------
 * Implemented on the fly insertion of the extra sequences into the genome indexes.
 * Implemented --outSAMmultNmax parameter to limit the number of output alignments for multimappers.
-* Implemented --outMultimapperOrder Random option to output multiple alignments in random order. 
+* Implemented --outMultimapperOrder Random option to output multiple alignments in random order.
     This also randomizes the choice of the primary alignment. Parameter --runRNGseed can be used to set the random generator seed.
     With this option, the ordering of multi-mapping alignments of each read, and the choice of the primary alignment will vary from run to run, unless only one thread is used and the seed is kept constant.
 
@@ -373,7 +374,7 @@ STAR 2.4.1a 2015/04/17
 * Included link (submodule) to Brian Haas' STAR-Fusion code for detecting fusion transcript from STAR chimeric output:  https://github.com/STAR-Fusion/STAR-Fusion
 * Included Gery Vessere's shared memory implementation for POSIX and SysV. To compile STAR with POSIX shared memory, use `make POSIXSHARED`
 * New option "--chimOutType WithinBAM" to include chimeric alignments together with normal alignments in the main (sorted or unsorted) BAM file(s).
-* New option "--quantTranscriptomeBan Singleend" allows insertions, deletions ans soft-clips in the transcriptomic alignments, which are allowed by some expression quantification software (e.g. eXpress). 
+* New option "--quantTranscriptomeBan Singleend" allows insertions, deletions ans soft-clips in the transcriptomic alignments, which are allowed by some expression quantification software (e.g. eXpress).
 * New option "--alignEndsTypeExtension Extend5pOfRead1" to enforce full extension of the 5p of the read1, while all other ends undergo local alignment and may be soft-clipped.
 
 2.4.0k 03/30/2015
@@ -497,8 +498,8 @@ Fixed problem with FASTA reads input.
 Fixed problem with compilation, samtools/ZLIB related.
 
 2.3.1z9 06/19/2014
-2.3.1z8 
-2.3.1z7 
+2.3.1z8
+2.3.1z7
 Fixed problems with transcriptomic output.
 Changed --sjdbFileChrStartEnd importing to allow direct import from SJ.out.tab
 
@@ -517,7 +518,7 @@ Fixed chimeric output problems with --outFilterType BySJout option
 Added extra Log.out messages for multi-threaded jobs.
 
 2.3.1z1 03/13/2014
-SAM header changes: 
+SAM header changes:
     removed "cl:" attribute from the @PG line, output it as a separate comment line
     added --outSAMheaderHD, --outSAMheaderPG, --outSAMheaderCommentFile options
 Added --outTmpDir, which set the path forSTAr temporary directory independent of --outFileNamePrefix
@@ -613,4 +614,3 @@ Fixed possible issue which in some cases could have resulted in empty Chimeric.o
 Fixed incorrect processing of --sjdbGTFchrPrefix.
 
 2.3.0e
-

@@ -33,12 +33,6 @@ runRNGseed                      777
 
 
 ### Genome Parameters
-genomeType                  Full
-    string: type of genome to generate
-                            Full                ... full (normal) genome
-                            Transcriptome       ... genome consists of transcript sequences
-                            SuperTransriptome   ... genome consists of superTranscript sequences
-                            
 genomeDir                   ./GenomeDir/
     string: path to the directory where genome files are stored (for --runMode alignReads) or will be generated (for --runMode generateGenome)
 
@@ -76,6 +70,13 @@ genomeSAsparseD             1
 genomeSuffixLengthMax       -1
     int: maximum length of the suffixes, has to be longer than read length. -1 = infinite.
 
+#####UnderDevelopment_begin : not supported - do not use
+genomeType                  Full
+    string: type of genome to generate
+                            Full                ... full (normal) genome
+                            Transcriptome       ... genome consists of transcript sequences
+                            SuperTransriptome   ... genome consists of superTranscript sequences
+
 genomeTransformType         None
     string: type of genome transformation
                             None       ... no transformation
@@ -84,6 +85,7 @@ genomeTransformType         None
 
 genomeTransformVCF          -
     string: path to VCF file for genome transformation
+#####UnderDevelopment_end
 
 ### Splice Junctions Database
 sjdbFileChrStartEnd                     -
@@ -114,7 +116,7 @@ sjdbOverhang                            100
     int>0: length of the donor/acceptor sequence on each side of the junctions, ideally = (mate_length - 1)
 
 sjdbScore                               2
-    int: extra alignment score for alignmets that cross database junctions
+    int: extra alignment score for alignments that cross database junctions
 
 sjdbInsertSave                          Basic
     string: which files to save when sjdb junctions are inserted on the fly at the mapping step
@@ -144,9 +146,9 @@ readFilesManifest           -
             Paired-End reads: read1_file_name \tab read2_file_name \tab read_group_line.
             Single-End reads: read1_file_name \tab - \tab read_group_line.
             Spaces, but not tabs are allowed in file names.
-            If read_group_line does not start with ID:, it can only contain one ID field, and ID: will be added to it.  
+            If read_group_line does not start with ID:, it can only contain one ID field, and ID: will be added to it.
             If read_group_line starts with ID:, it can contain several fields separated by \tab, and all fields will be be copied verbatim into SAM @RG header line.
-                            - 
+                            -
 
 readFilesPrefix             -
     string: prefix for the read files names, i.e. it will be added in front of the strings in --readFilesIn
@@ -179,7 +181,7 @@ clip3pAdapterSeq            -
     string(s): adapter sequences to clip from 3p of each mate.  If one value is given, it will be assumed the same for both mates.
 
 clip3pAdapterMMp            0.1
-    double(s): max proportion of mismatches for 3p adpater clipping for each mate.  If one value is given, it will be assumed the same for both mates.
+    double(s): max proportion of mismatches for 3p adapter clipping for each mate.  If one value is given, it will be assumed the same for both mates.
 
 clip3pAfterAdapterNbases    0
     int(s): number of bases to clip from 3p of each mate after the adapter clipping. If one value is given, it will be assumed the same for both mates.
@@ -274,7 +276,7 @@ outSAMattributes                Standard
                                 All         ... NH HI AS nM NM MD jM jI MC ch
                                 variation:
                                 vA          ... variant allele
-                                ha          ... haplotype (1/2) when mapping to the diplod genome. Requires genome generated with --genomeTransformType Diploid
+                                ha          ... haplotype (1/2) when mapping to the diploid genome. Requires genome generated with --genomeTransformType Diploid
                                 vG          ... genomic coordinate of the variant overlapped by the read
                                 vW          ... 1 - alignment passes WASP filtering; 2,3,4,5,6,7 - alignment does not pass WASP filtering. Requires --waspOutputMode SAMtag.
                                 STARsolo:
@@ -500,7 +502,7 @@ scoreInsBase                 -2
     insertion extension penalty per base (in addition to scoreInsOpen)
 
 scoreStitchSJshift           1
-    maximum score reduction while searching for SJ boundaries inthe stitching step
+    maximum score reduction while searching for SJ boundaries in the stitching step
 
 
 ### Alignments and Seeding
@@ -512,7 +514,7 @@ seedSearchStartLmaxOverLread    1.0
     real: seedSearchStartLmax normalized to read length (sum of mates' lengths for paired-end reads)
 
 seedSearchLmax       0
-    int>=0: defines the maximum length of the seeds, if =0 max seed lengthis infinite
+    int>=0: defines the maximum length of the seeds, if =0 seed length is not limited
 
 seedMultimapNmax      10000
     int>0: only pieces that map fewer than this value are utilized in the stitching procedure
@@ -623,7 +625,7 @@ chimOutType                 Junctions
                             Junctions       ... Chimeric.out.junction
                             SeparateSAMold  ... output old SAM into separate Chimeric.out.sam file
                             WithinBAM       ... output into main aligned BAM files (Aligned.*.bam)
-                            WithinBAM HardClip  ... (default) hard-clipping in the CIGAR for supplemental chimeric alignments (defaultif no 2nd word is present)
+                            WithinBAM HardClip  ... (default) hard-clipping in the CIGAR for supplemental chimeric alignments (default if no 2nd word is present)
                             WithinBAM SoftClip  ... soft-clipping in the CIGAR for supplemental chimeric alignments
 
 chimSegmentMin              0
@@ -668,7 +670,7 @@ chimNonchimScoreDropMin         20
 chimOutJunctionFormat           0
     int: formatting type for the Chimeric.out.junction file
                                 0 ... no comment lines/headers
-                                1 ... comment lines at the end of the file: command line and Nreads: total, unique, multi
+                                1 ... comment lines at the end of the file: command line and Nreads: total, unique/multi-mapping
 
 ### Quantification of Annotations
 quantMode                   -
@@ -701,7 +703,7 @@ twopass1readsN              -1
 
 ### WASP parameters
 waspOutputMode              None
-    string: WASP allele-specific output type. This is re-implemenation of the original WASP mappability filtering by Bryce van de Geijn, Graham McVicker, Yoav Gilad & Jonathan K Pritchard. Please cite the original WASP paper: Nature Methods 12, 1061–1063 (2015), https://www.nature.com/articles/nmeth.3582 .
+    string: WASP allele-specific output type. This is re-implementation of the original WASP mappability filtering by Bryce van de Geijn, Graham McVicker, Yoav Gilad & Jonathan K Pritchard. Please cite the original WASP paper: Nature Methods 12, 1061–1063 (2015), https://www.nature.com/articles/nmeth.3582 .
                             SAMtag      ... add WASP tags to the alignments that pass WASP filtering
 
 ### STARsolo (single cell RNA-seq) parameters
@@ -710,10 +712,10 @@ soloType                    None
                             CB_UMI_Simple   ... (a.k.a. Droplet) one UMI and one Cell Barcode of fixed length in read2, e.g. Drop-seq and 10X Chromium.
                             CB_UMI_Complex  ... one UMI of fixed length, but multiple Cell Barcodes of varying length, as well as adapters sequences are allowed in read2 only, e.g. inDrop.
                             CB_samTagOut    ... output Cell Barcode as CR and/or CB SAm tag. No UMI counting. --readFilesIn cDNA_read1 [cDNA_read2 if paired-end] CellBarcode_read . Requires --outSAMtype BAM Unsorted [and/or SortedByCoordinate]
-                            SmartSeq        ... Smart-seq: each cell in a separtate FASTQ (paired- or single-end), barcodes are corresponding read-groups, no UMI sequences, alginments deduplicated according to alignment start and end (after extending soft-clipped bases)
+                            SmartSeq        ... Smart-seq: each cell in a separate FASTQ (paired- or single-end), barcodes are corresponding read-groups, no UMI sequences, alignments deduplicated according to alignment start and end (after extending soft-clipped bases)
 
 soloCBwhitelist             -
-    string(s): file(s) with whitelist(s) of cell barcodes. Only --soloType CB_UMI_Complexone allows more than one whitelist file.
+    string(s): file(s) with whitelist(s) of cell barcodes. Only --soloType CB_UMI_Complex allows more than one whitelist file.
                             None            ... no whitelist: all cell barcodes are allowed
 
 soloCBstart                 1
@@ -758,7 +760,7 @@ soloCBmatchWLtype           1MM_multi
     string:                 matching the Cell Barcodes to the WhiteList
                             Exact                   ... only exact matches allowed
                             1MM                     ... only one match in whitelist with 1 mismatched base allowed. Allowed CBs have to have at least one read with exact match.
-                            1MM_multi               ... multiple matches in whitelist with 1 mismatched base allowed, posterior probability calculation is used choose one of the matches. 
+                            1MM_multi               ... multiple matches in whitelist with 1 mismatched base allowed, posterior probability calculation is used choose one of the matches.
                                                         Allowed CBs have to have at least one read with exact match. Similar to CellRanger 2.2.0
                             1MM_multi_pseudocounts  ... same as 1MM_Multi, but pseudocounts of 1 are added to all whitelist barcodes.
                                                         Similar to CellRanger 3.x.x
@@ -774,7 +776,10 @@ soloFeatures                Gene
                             Gene            ... genes: reads match the gene transcript
                             SJ              ... splice junctions: reported in SJ.out.tab
                             GeneFull        ... full genes: count all reads overlapping genes' exons and introns
-                            Transcript3p   ... quantification of transcript for 3' protocols
+
+#####UnderDevelopment_begin : not supported - do not use
+                            Transcript3p    ... quantification of transcript for 3' protocols
+#####UnderDevelopment_end
 
 soloUMIdedup                1MM_All
     string(s):              type of UMI deduplication (collapsing) algorithm
@@ -794,9 +799,11 @@ soloOutFileNames            Solo.out/          features.tsv barcodes.tsv        
 
 soloCellFilter              CellRanger2.2 3000 0.99 10
     string(s):              cell filtering type and parameters
-                            CellRanger2.2   ... simple filtering of CellRanger 2.2, followed by thre numbers: number of expected cells, robust maximum percentile for UMI count, maximum to minimum ratio for UMI count
-                            TopCells        ... only report top cells by UMI count, followed by the excat number of cells
+                            CellRanger2.2   ... simple filtering of CellRanger 2.2, followed by three numbers: number of expected cells, robust maximum percentile for UMI count, maximum to minimum ratio for UMI count
+                            TopCells        ... only report top cells by UMI count, followed by the exact number of cells
                             None            ... do not output filtered cells
 
+#####UnderDevelopment_begin : not supported - do not use
 soloClusterCBfile           -
     string:                 file containing the cluster information for cell barcodes, two columns: CB cluster_index. Only used with --soloFeatures Transcript3p
+#####UnderDevelopment_end
