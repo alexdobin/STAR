@@ -57,8 +57,8 @@ void BAMbinSortUnmapped(uint32 iBin, uint nThreads, string dirBAMsort, Parameter
             uint32 size0=bamSize.at(it);
             
             if (solo.pSolo.samAttrYes)
-                solo.soloFeat[solo.pSolo.samAttrFeature]->addBAMtags(bam0,size0,bam1);            
-            
+	        solo.soloFeat[solo.pSolo.featureInd[solo.pSolo.samAttrFeature]]->addBAMtags(bam0,size0,bam1);
+
             bgzf_write(bgzfBin, bam0, size0);
             bamInStream[it].read(bamIn[it],sizeof(int32));//read record size
             if (bamInStream[it].good()) {
