@@ -7,11 +7,7 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
                     : mapGen(genomeIn), P(Pin), chunkTr(TrIn)
 {
     readNmates=P.readNmates;
-    winBin = new uintWinBin* [2];
-    winBin[0] = new uintWinBin [P.winBinN];
-    winBin[1] = new uintWinBin [P.winBinN];
-    memset(winBin[0],255,sizeof(winBin[0][0])*P.winBinN);
-    memset(winBin[1],255,sizeof(winBin[0][0])*P.winBinN);
+    winBin.resize(2, FastResetVector<uintWinBin>(P.winBinN, uintWinBinMax));
     //RNGs
     rngMultOrder.seed(P.runRNGseed*(iChunk+1));
     rngUniformReal0to1=std::uniform_real_distribution<double> (0.0, 1.0);
