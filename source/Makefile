@@ -13,19 +13,21 @@ CXX ?= g++
 
 # pre-defined flags
 LDFLAGS_shared := -pthread -Lhtslib -Bstatic -lhts -Bdynamic -lz
-LDFLAGS_static := -static -static-libgcc -pthread -Lhtslib -lhts -lz 
+LDFLAGS_static := -static -static-libgcc -pthread -Lhtslib -lhts -lz
 LDFLAGS_Mac :=-pthread -lz htslib/libhts.a
 LDFLAGS_Mac_static :=-pthread -lz -static-libgcc htslib/libhts.a
 LDFLAGS_gdb := $(LDFLAGS_shared)
 
 COMPTIMEPLACE := -D'COMPILATION_TIME_PLACE="$(shell echo `date` $(HOSTNAME):`pwd`)"'
 
-CXXFLAGS_common := -pipe -std=c++11 -Wall -Wextra -fopenmp $(COMPTIMEPLACE)
+# Defaults, can be overridden by make arguments or environment
+CXXFLAGS ?= -pipe -Wall -Wextra
+CFLAGS ?= -pipe -Wall -Wextra -O3
+
+# Unconditionally set essential flags and optimization options
+CXXFLAGS_common := -std=c++11 -fopenmp $(COMPTIMEPLACE)
 CXXFLAGS_main := -O3 $(CXXFLAGS_common)
-CXXFLAGS_gdb :=  -O0 -g $(CXXFLAGS_common)
-
-CFLAGS := -O3 -pipe -Wall -Wextra $(CFLAGS)
-
+CXXFLAGS_gdb := -O -g3 $(CXXFLAGS_common)
 
 ##########################################################################################################
 OBJECTS = soloInputFeatureUMI.o SoloFeature_countSmartSeq.o SoloFeature_redistributeReadsByCB.o \
@@ -67,7 +69,7 @@ OBJECTS = soloInputFeatureUMI.o SoloFeature_countSmartSeq.o SoloFeature_redistri
 	sjdbLoadFromFiles.o sjdbLoadFromStream.o sjdbPrepare.o sjdbBuildIndex.o sjdbInsertJunctions.o mapThreadsSpawn.o \
 	Parameters_readFilesInit.o Parameters_openReadsFiles.cpp Parameters_closeReadsFiles.cpp Parameters_readSAMheader.o \
 	bam_cat.o serviceFuns.o GlobalVariables.cpp \
-	BAMoutput.o BAMfunctions.o ReadAlign_alignBAM.o BAMbinSortByCoordinate.o signalFromBAM.o bamRemoveDuplicates.o BAMbinSortUnmapped.o 
+	BAMoutput.o BAMfunctions.o ReadAlign_alignBAM.o BAMbinSortByCoordinate.o signalFromBAM.o bamRemoveDuplicates.o BAMbinSortUnmapped.o
 
 SOURCES := $(wildcard *.cpp) $(wildcard *.c)
 
@@ -166,5 +168,3 @@ STARlongForMacStatic : CXXFLAGS := -D'COMPILE_FOR_LONG_READS' $(CXXFLAGSextra) $
 STARlongForMacStatic : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_Mac_static) $(LDFLAGS)
 STARlongForMacStatic : Depend.list parametersDefault.xxd $(OBJECTS)
 	$(CXX) -o STARlong $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
-
-

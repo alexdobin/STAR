@@ -2,6 +2,7 @@
 * Implemented --readFilesManifest option to input a list of input read files.
 * Change in STARsolo SJ output behavior: junctions are output even if reads do not match genes.
 * Fixed a bug with solo SJ output for large genomes.
+* Issue #883: Patch for FreeBSD in SharedMemory and Makefile improvements.
 * Issue #902: Fixed seg-fault for STARsolo CB/UB SAM attributes output with --soloFeatures GeneFull --outSAMunmapped Within options.
 * Issue #934: Fixed a problem with annotated junctions that was casuing very rare seg-faults.
 
