@@ -215,9 +215,14 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
                             jCan=mapGen.sjdbMotif[sjdbInd];
                             if (mapGen.sjdbMotif[sjdbInd]==0) {//shift to match annotations
                                 if (L<=mapGen.sjdbShiftLeft[sjdbInd] || trA->exons[trA->nExons-1][EX_L]<=mapGen.sjdbShiftLeft[sjdbInd]) {
+                                	//this is not needed, the check below rAend+jR >= rBend is enough
+                                	//it changes the results slightly, so will keep for now. Will remove in STAR3
                                     return -1000006;
                                 };
                                 jR += (int) mapGen.sjdbShiftLeft[sjdbInd];
+                                if ( rAend+jR >= rBend ) {//jR is shifted past rBend
+                                	return -1000006;
+                                };
                                 jjL=mapGen.sjdbShiftLeft[sjdbInd];
                                 jjR=mapGen.sjdbShiftRight[sjdbInd];
                             };

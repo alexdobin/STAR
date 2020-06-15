@@ -2,7 +2,8 @@
 * Implemented --readFilesManifest option to input a list of input read files.
 * Change in STARsolo SJ output behavior: junctions are output even if reads do not match genes.
 * Fixed a bug with solo SJ output for large genomes.
-* Fixed seg-fault for STARsolo CB/UB SAM attributes output with --soloFeatures GeneFull --outSAMunmapped Within options.
+* Issue #902: Fixed seg-fault for STARsolo CB/UB SAM attributes output with --soloFeatures GeneFull --outSAMunmapped Within options.
+* Issue #934: Fixed a problem with annotated junctions that was casuing very rare seg-faults.
 
 STAR 2.7.4a 2020/06/01
 ======================
