@@ -1,5 +1,10 @@
-STARsolo: mapping, demultiplexing and quantification for single cell RNA-seq
+**STARsolo**: mapping, demultiplexing and quantification for single cell RNA-seq
 =================================================================================
+
+Major updates in STAR 2.7.5a (2020/06/16)
+---------------------------------------
+* [**Smart-seq scRNA-seq process:**](#plate-based-Smart-seq-scRNA-seq)
+    * STARsolo now supports for the plate-based (a.k.a. Smart-seq) scRNAs-seq technologies.
 
 Major updates in STAR 2.7.3a (Oct 8 2019)
 -----------------------------------------
@@ -169,9 +174,9 @@ Basic cell filtering
 * Recent versions of CellRanger switched to more advanced filtering done with the EmptyDrop tool developed by [Lun et al](https://doi.org/10.1186/s13059-019-1662-y). To obtain filtered counts similar to recent CellRanger versions, we need to run this tools on **raw** STARsolo output
 
 
-------------------
+---------------------------------------------------
 Quantification of different transcriptomic features
------------------------
+---------------------------------------------------
 * In addition to the gene counts (deafult), STARsolo can calculate counts for other transcriptomic features:
     * pre-mRNA counts, useful for single-nucleus RNA-seq. This counts all read that overlap gene loci, i.e. included both exonic and intronic reads:
         ```
@@ -209,19 +214,46 @@ BAM tags
     --outSAMtype BAM SortedByCoordinate
     ```
 
+--------------------------------
+Different scRNA-seq technologies
+--------------------------------
+### Plate-based (Smart-seq) scRNA-seq
+Plate-based (Smart-seq) scRNA-seq technologies produce separate FASTQ files for each cell. Cell barcodes are not incorporated in the read sequences, and there are no UMIs. Typical STAR command for mapping and quantification of these file will look like:
+```
+--soloType SmartSeq --readFilesManifest /path/to/manifest.tsv --soloUMIdedup Exact --soloStrand Unstranded
+```
+
+* STARsolo `--soloType SmartSeq` option produces cell/gene (and other [features](#quantification-of-different-transcriptomic-features))
+count matrices, using rules similar to the droplet-based technologies. The differnces are (i) individual cells correspond to different FASTQ files,there are no Cell Barcode sequences, and "Cell IDs" have to be provided as input (ii) there are no UMI sequences, but reads can be deduplicated if they have identical start/end coordinates.
+
+* The convenient way to list all the FASTQ files and Cell IDs is to create a file manifest and supply it in `--readFilesManifest /path/to/manifest.tsv`. The manifest file should contain 3 tab-separated columns. For paired-end reads:
+```
+Read1-file-name \t Read2-file-name \t Cell-id
+```
+For single-end reads, the 2nd column should contain the dash - :
+```
+Read1-file-name \t - \t Cell-id
+```
+Cell-id can be any string without spaces. Cell-id will be added as ReadGroup tag (*RG:Z:*) for each read in the SAM/BAM output. If Cell-id starts with *ID:*, it can contain several fields separated by tab, and all the fields will be copied verbatim into SAM *@RG* header line.
+* Deduplication based on read start/end coordinates can be done with `--soloUMIdedup Exact` option. To avoid deduplication (e.g. for single-end reads) use `--soloUMIdedup NoDedup`. Both deduplication options can be used together `--soloUMIdedup Exact NoDedup` and will produce two columns in the *matrix.mtx* output.
+* Common Smart-seq protocols are unstranded and thus will require `--soloStrand Unstranded` option. If your protocol is stranded, you can can choose the proper `--soloStrand Forward` (default) or `--soloStrand Reverse` options.
+
 -------------------------------------------------------------
 ------------------------------------------------------
 --------------------------------------------------
-For completenes, all parameters that control STARsolo output are listed again below with defaults and short descriptions:
+All parameters that control STARsolo output are listed again below with defaults and short descriptions:
 ---------------------------------------
 ```
 soloType                    None
     string(s): type of single-cell RNA-seq
-                            CB_UMI_Simple   ... (a.k.a. Droplet) one UMI and one Cell Barcode of fixed length in read2, e.g. Drop-seq and 10X Chromium
+                            CB_UMI_Simple   ... (a.k.a. Droplet) one UMI and one Cell Barcode of fixed length in read2, e.g. Drop-seq and 10X Chromium.
                             CB_UMI_Complex  ... one UMI of fixed length, but multiple Cell Barcodes of varying length, as well as adapters sequences are allowed in read2 only, e.g. inDrop.
+                            CB_samTagOut    ... output Cell Barcode as CR and/or CB SAm tag. No UMI counting. --readFilesIn cDNA_read1 [cDNA_read2 if paired-end] CellBarcode_read . Requires --outSAMtype BAM Unsorted [and/or SortedByCoordinate]
+                            SmartSeq        ... Smart-seq: each cell in a separate FASTQ (paired- or single-end), barcodes are corresponding read-groups, no UMI sequences, alignments deduplicated according to alignment start and end (after extending soft-clipped bases)
 
 soloCBwhitelist             -
-    string(s): file(s) with whitelist(s) of cell barcodes. Only one file allowed with
+    string(s): file(s) with whitelist(s) of cell barcodes. Only --soloType CB_UMI_Complex allows more than one whitelist file.
+                            None            ... no whitelist: all cell barcodes are allowed
 
 soloCBstart                 1
     int>0: cell barcode start base
@@ -243,9 +275,9 @@ soloBarcodeReadLength       1
 soloCBposition              -
     strings(s)              position of Cell Barcode(s) on the barcode read.
                             Presently only works with --soloType CB_UMI_Complex, and barcodes are assumed to be on Read2.
-                            Format for each barcode: startAnchor_startDistance_endAnchor_endDistance
-                            start(end)Anchor defines the anchor base for the CB: 0: read start; 1: read end; 2: adapter start; 3: adapter end
-                            start(end)Distance is the distance from the CB start(end) to the Anchor base
+                            Format for each barcode: startAnchor_startPosition_endAnchor_endPosition
+                            start(end)Anchor defines the Anchor Base for the CB: 0: read start; 1: read end; 2: adapter start; 3: adapter end
+                            start(end)Position is the 0-based position with of the CB start(end) with respect to the Anchor Base
                             String for different barcodes are separated by space.
                             Example: inDrop (Zilionis et al, Nat. Protocols, 2017):
                             --soloCBposition  0_0_2_-1  3_1_3_8
@@ -281,13 +313,13 @@ soloFeatures                Gene
                             Gene            ... genes: reads match the gene transcript
                             SJ              ... splice junctions: reported in SJ.out.tab
                             GeneFull        ... full genes: count all reads overlapping genes' exons and introns
-                            Transcript3p   ... quantification of transcript for 3' protocols
 
 soloUMIdedup                1MM_All
     string(s):              type of UMI deduplication (collapsing) algorithm
                             1MM_All             ... all UMIs with 1 mismatch distance to each other are collapsed (i.e. counted once)
                             1MM_Directional     ... follows the "directional" method from the UMI-tools by Smith, Heger and Sudbery (Genome Research 2017).
                             Exact               ... only exactly matching UMIs are collapsed
+                            NoDedup             ... no deduplication of UMIs, count all reads. Allowed for --soloType SmartSeq
 
 soloUMIfiltering            -
     string(s)               type of UMI filtering
@@ -300,8 +332,10 @@ soloOutFileNames            Solo.out/          features.tsv barcodes.tsv        
 
 soloCellFilter              CellRanger2.2 3000 0.99 10
     string(s):              cell filtering type and parameters
-                            CellRanger2.2   ... simple filtering of CellRanger 2.2, followed by thre numbers: number of expected cells, robust maximum percentile for UMI count, maximum to minimum ratio for UMI count
-                            TopCells        ... only report top cells by UMI count, followed by the excat number of cells
+                            CellRanger2.2   ... simple filtering of CellRanger 2.2, followed by three numbers: number of expected cells, robust maximum percentile for UMI count, maximum to minimum ratio for UMI count
+                            TopCells        ... only report top cells by UMI count, followed by the exact number of cells
                             None            ... do not output filtered cells
 
+soloOutFormatFeaturesGeneField3 "Gene Expression"
+        string(s):                              field 3 in the Gene features.tsv file. If "-", then no 3rd field is output.
 ```

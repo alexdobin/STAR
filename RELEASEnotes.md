@@ -1,5 +1,27 @@
+STAR 2.7.5a 2020/06/16
+======================
+**Major new features:  
+~ support for Plate-based (Smart-seq) scRNA-seq  
+~ manifest file to list the input reads FASTQ files**
 
-STAR 2.7.3a 2020/06/01
+* Typical STAR command for mapping and quantification of plate-based (Smart-seq) scRNA-seq  will look like:
+```
+ --soloType SmartSeq --readFilesManifest /path/to/manifest.tsv --soloUMIdedup Exact --soloStrand Unstranded
+```
+For detailed description, see [Plate-based (Smart-seq) scRNA-seq](docs/STARsolo.md#plate-based-Smart-seq-scRNA-seq)
+
+* The convenient way to list a large number of reads FASTQ files and their IDs is to create a file manifest and supply it in `--readFilesManifest /path/to/manifest.tsv`. The manifest file should contain 3 tab-separated columns. For paired-end reads:
+```
+Read1-file-name \t Read2-file-name \t File-id
+```
+For single-end reads, the 2nd column should contain the dash - :
+```
+Read1-file-name \t - \t File-id
+```
+File-id can be any string without spaces. File-id will be added as ReadGroup tag (*RG:Z:*) for each read in the SAM/BAM output. If File-id starts with *ID:*, it can contain several fields separated by tab, and all the fields will be copied verbatim into SAM *@RG* header line.
+
+
+STAR 2.7.4a 2020/06/01
 ======================
 This release fixes multiple bugs and issues.  
 The biggest issue fixed was a seg-fault for small genome which previously required scaling down `--genomeSAindexNbases`. Such scaling is still recommended but is no longer required.  

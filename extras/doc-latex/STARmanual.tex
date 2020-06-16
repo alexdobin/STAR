@@ -179,10 +179,7 @@ For bzip2-compressed files, use
 
 \end{itemize}
 
-\subsection{Advanced options.}
-There are many advanced options that control STAR mapping behavior. All options are briefly described in the Section \sechyperref{Description_of_all_options}. 
-
-\subsubsection{Mapping multiple files in one run.}
+\subsection{Mapping multiple files in one run.}
 Multiple samples can be mapped in one run with a single output. This is equivalent to concatenating the read files before mapping, except that distinct read groups can be used in \opt{outSAMattrRGline} command to keep track of reads from different files. For single-end reads use a comma separated list (no spaces around commas), e.g.:
 
 \opt{readFilesIn} \optv{sample1.fq,sample2.fq,sample3.fq} 
@@ -199,7 +196,7 @@ For multiple read files, the corresponding read groups can be supplied with spac
 Note that this list is separated by commas surrounded by spaces (unlike \opt{readFilesIn} list).
 
 Another option for mapping multiple reads files, especially convenient for a very large number of files, is to create a file manifest and supply it in \opt{readFilesManifest} \optv{/path/to/manifest.tsv}.
-The manifest file should contain 3 tab-separated columns, paired-end reads: 
+The manifest file should contain 3 tab-separated columns. For paired-end reads: 
 
 \ofilen{read1-file-name $tab$ read2-file-name $tab$ read-group-line}
 
@@ -210,6 +207,9 @@ For single-end reads, the 2nd column should contain the dash -:
 Spaces, but not tabs are allowed in the file names.
 If read-group-line does not start with ID:, it can only contain one ID field, and ID: will be added to it.
 If read-group-line starts with ID:, it can contain several fields separated by $tab$, and all the fields will be copied verbatim into SAM @RG header line.
+
+\subsection{Advanced options.}
+There are many advanced options that control STAR mapping behavior. All options are briefly described in the Section \sechyperref{Description_of_all_options}. 
 
 \subsubsection{Using annotations at the mapping stage.}
 Since 2.4.1a, the annotations can be included on the fly at the mapping step, without including them at the genome generation step. You can specify \opt{sjdbGTFfile} \optvr{/path/to/ann.gtf} and/or \opt{sjdbFileChrStartEnd} \optvr{/path/to/sj.tab}, as well as \opt{sjdbOverhang}, and any other \opt{sjdb*} options. The genome indices can be generated with or  without another set of annotations/junctions. In the latter case the new junctions will added to the old ones. STAR will insert the junctions into genome indices on the fly before mapping, which takes 1~2 minutes. The on the fly genome indices can be saved (for reuse) with \opt{sjdbInsertSave} \optv{All}, into \optvr{\_STARgenome} directory inside the current run directory.
@@ -475,9 +475,6 @@ Note that line 4 and 6 here are BCR/ABL fusions. You would need to filter these 
 With \opt{quantMode} \optv{TranscriptomeSAM} option STAR will output alignments translated into transcript coordinates in the \ofilen{Aligned.toTranscriptome.out.bam} file (in addition to alignments in genomic coordinates in \ofilen{Aligned.*.sam/bam} files). These transcriptomic alignments can be used with various transcript quantification software that require reads to be mapped to transcriptome, such as RSEM or eXpress. For example, RSEM command line would look as follows: \codelines{rsem-calculate-expression ...  --bam Aligned.toTranscriptome.out.bam /path/to/RSEM/reference RSEM}
 
 Note, that STAR first aligns reads to entire genome, and only then searches for concordance between alignments and transcripts.This approach offers certain advantages compared to the alignment to transcriptome only, by not forcing the alignments to annotated transcripts. Note that \opt{outFilterMultimapNmax} filter only applies to genomic alignments. If an alignment passes this filter, it is converted to all possible transcriptomic alignments and all of them are output.
-
-
-
 
 By default, the output satisfies RSEM requirements: soft-clipping or indels are not allowed. Use \opt{quantTranscriptomeBan} \optv{Singleend} to allow insertions, deletions ans soft-clips in the transcriptomic alignments, which can be used by some expression quantification software (e.g. eXpress). 
 
