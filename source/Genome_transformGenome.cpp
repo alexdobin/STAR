@@ -82,7 +82,7 @@ void Genome::transformGenome(GTF *gtf)
         vcfStream.close();
     };
     
-    uint64 nGenome1, nG1allocNew;
+    uint64 nGenome1=0, nG1allocNew;
     char *Gnew=NULL, *G1new=NULL;
         
     if (pGe.transform.type==1) {//haploid: insert alternative alleles into genome sequence, create conversion-block file

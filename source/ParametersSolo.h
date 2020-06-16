@@ -91,9 +91,15 @@ public:
     
     //output
     vector<string> outFileNames;    
+    struct {
+    	string featuresGeneField3;
+    } outFormat;
+
     bool samAttrYes;//post-processed SAM attributes: error-corrected CB and UMI
     int32 samAttrFeature;//which feature to use for error correction
     
+
+
     //processing
     uint32 redistrReadsNfiles; //numer of files to resditributes reads into
     

@@ -2,9 +2,13 @@
 * Implemented --readFilesManifest option to input a list of input read files.
 * Change in STARsolo SJ output behavior: junctions are output even if reads do not match genes.
 * Fixed a bug with solo SJ output for large genomes.
+* N characters in --soloAdapterSequence are not counted as mismatches, allowing for multiple adapters (e.g. ddSeq).
+* SJ.out.tab is sym-linked as features.tsv for Solo SJ output.
+* Issue #882: 3rd field is now optional in Solo Gene features.tsv with --soloOutFormatFeaturesGeneField3.
 * Issue #883: Patch for FreeBSD in SharedMemory and Makefile improvements.
 * Issue #902: Fixed seg-fault for STARsolo CB/UB SAM attributes output with --soloFeatures GeneFull --outSAMunmapped Within options.
 * Issue #934: Fixed a problem with annotated junctions that was casuing very rare seg-faults.
+* Issue #936: Throw an error if an empty whitelist is provided to STARsolo.
 
 STAR 2.7.4a 2020/06/01
 ======================

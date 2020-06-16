@@ -231,6 +231,11 @@ void ParametersSolo::initialize(Parameters *pPin)
                     pP->inOut->logMain << "WARNING: CB whitelist sequence contains non-ACGT base and is ignored: " << seq1 <<endl;
                 };
             };
+            if (cbWL.size()==0) {//empty whitelist
+            	exitWithError("EXITING because of FATAL ERROR: CB whitelist file " + soloCBwhitelist[0] + \
+            			       " is empty. \nSOLUTION: provide non-empty whitelist.\n" , \
+							   std::cerr, pP->inOut->logMain, EXIT_CODE_INPUT_FILES, *pP);
+            };
         };
 
         std::sort(cbWL.begin(),cbWL.end());//sort

@@ -5,7 +5,7 @@
 #include "soloInputFeatureUMI.h"
 #include "serviceFuns.cpp"
 
-void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32> &cbReadCountTotal, vector<readInfoStruct> &readInfo, SoloFeature *soloFeat)
+void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32> &cbReadCountTotal, vector<readInfoStruct> &readInfo)
 {   
     streamReads->flush();
     streamReads->seekg(0,ios::beg);

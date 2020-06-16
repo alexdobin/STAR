@@ -107,7 +107,7 @@
   \optLine{int{\textgreater}0: length of the donor/acceptor sequence on each side of the junctions, ideally = (mate{\textunderscore}length - 1)} 
 \optName{sjdbScore}
   \optValue{2}
-  \optLine{int: extra alignment score for alignmets that cross database junctions} 
+  \optLine{int: extra alignment score for alignments that cross database junctions} 
 \optName{sjdbInsertSave}
   \optValue{Basic}
   \optLine{string: which files to save when sjdb junctions are inserted on the fly at the mapping step} 
@@ -143,12 +143,12 @@
   \optLine{string(s): paths to files that contain input read1 (and, if needed,  read2)} 
 \optName{readFilesManifest}
   \optValue{-}
-  \optLine{string: file with the names of read files, formatted as:} 
-  \optLine{Paired-End reads: read1{\textunderscore}file{\textunderscore}name \tab read2{\textunderscore}file{\textunderscore}name \tab read{\textunderscore}group{\textunderscore}line.} 
-  \optLine{Single-End reads: read1{\textunderscore}file{\textunderscore}name \tab - \tab read{\textunderscore}group{\textunderscore}line.} 
+  \optLine{string: path to the "manifest" file with the names of read files. The manifest file should contain 3 tab-separated columns:} 
+  \optLine{paired-end reads: read1{\textunderscore}file{\textunderscore}name $tab$ read2{\textunderscore}file{\textunderscore}name $tab$ read{\textunderscore}group{\textunderscore}line.} 
+  \optLine{single-end reads: read1{\textunderscore}file{\textunderscore}name $tab$ -               $tab$ read{\textunderscore}group{\textunderscore}line.} 
   \optLine{Spaces, but not tabs are allowed in file names.} 
   \optLine{If read{\textunderscore}group{\textunderscore}line does not start with ID:, it can only contain one ID field, and ID: will be added to it.} 
-  \optLine{If read{\textunderscore}group{\textunderscore}line starts with ID:, it can contain several fields separated by \tab, and all fields will be be copied verbatim into SAM @RG header line.} 
+  \optLine{If read{\textunderscore}group{\textunderscore}line starts with ID:, it can contain several fields separated by $tab$, and all fields will be be copied verbatim into SAM @RG header line.} 
   \optLine{-} 
 \optName{readFilesPrefix}
   \optValue{-}
@@ -182,7 +182,7 @@
   \optLine{string(s): adapter sequences to clip from 3p of each mate.  If one value is given, it will be assumed the same for both mates.} 
 \optName{clip3pAdapterMMp}
   \optValue{0.1}
-  \optLine{double(s): max proportion of mismatches for 3p adpater clipping for each mate.  If one value is given, it will be assumed the same for both mates.} 
+  \optLine{double(s): max proportion of mismatches for 3p adapter clipping for each mate.  If one value is given, it will be assumed the same for both mates.} 
 \optName{clip3pAfterAdapterNbases}
   \optValue{0}
   \optLine{int(s): number of bases to clip from 3p of each mate after the adapter clipping. If one value is given, it will be assumed the same for both mates.} 
@@ -301,7 +301,7 @@
   \optLine{variation:} 
 \begin{optOptTable}
   \optOpt{vA}   \optOptLine{variant allele}
-  \optOpt{ha}   \optOptLine{haplotype (1/2) when mapping to the diplod genome. Requires genome generated with --genomeTransformType Diploid}
+  \optOpt{ha}   \optOptLine{haplotype (1/2) when mapping to the diploid genome. Requires genome generated with --genomeTransformType Diploid}
   \optOpt{vG}   \optOptLine{genomic coordinate of the variant overlapped by the read}
   \optOpt{vW}   \optOptLine{1 - alignment passes WASP filtering; 2,3,4,5,6,7 - alignment does not pass WASP filtering. Requires --waspOutputMode SAMtag.}
 \end{optOptTable}
@@ -572,7 +572,7 @@
   \optLine{insertion extension penalty per base (in addition to scoreInsOpen)} 
 \optName{scoreStitchSJshift}
   \optValue{1}
-  \optLine{maximum score reduction while searching for SJ boundaries inthe stitching step} 
+  \optLine{maximum score reduction while searching for SJ boundaries in the stitching step} 
 \end{optTable}
 \optSection{Alignments and Seeding}\label{Alignments_and_Seeding}
 \begin{optTable}
@@ -584,7 +584,7 @@
   \optLine{real: seedSearchStartLmax normalized to read length (sum of mates' lengths for paired-end reads)} 
 \optName{seedSearchLmax}
   \optValue{0}
-  \optLine{int{\textgreater}=0: defines the maximum length of the seeds, if =0 max seed lengthis infinite} 
+  \optLine{int{\textgreater}=0: defines the maximum length of the seeds, if =0 seed length is not limited} 
 \optName{seedMultimapNmax}
   \optValue{10000}
   \optLine{int{\textgreater}0: only pieces that map fewer than this value are utilized in the stitching procedure} 
@@ -709,7 +709,7 @@
   \optOpt{Junctions}   \optOptLine{Chimeric.out.junction}
   \optOpt{SeparateSAMold}   \optOptLine{output old SAM into separate Chimeric.out.sam file}
   \optOpt{WithinBAM}   \optOptLine{output into main aligned BAM files (Aligned.*.bam)}
-  \optOpt{WithinBAM HardClip}   \optOptLine{(default) hard-clipping in the CIGAR for supplemental chimeric alignments (defaultif no 2nd word is present)}
+  \optOpt{WithinBAM HardClip}   \optOptLine{(default) hard-clipping in the CIGAR for supplemental chimeric alignments (default if no 2nd word is present)}
   \optOpt{WithinBAM SoftClip}   \optOptLine{soft-clipping in the CIGAR for supplemental chimeric alignments}
 \end{optOptTable}
 \optName{chimSegmentMin}
@@ -760,7 +760,7 @@
   \optLine{int: formatting type for the Chimeric.out.junction file} 
 \begin{optOptTable}
   \optOpt{0}   \optOptLine{no comment lines/headers}
-  \optOpt{1}   \optOptLine{comment lines at the end of the file: command line and Nreads: total, unique, multi}
+  \optOpt{1}   \optOptLine{comment lines at the end of the file: command line and Nreads: total, unique/multi-mapping}
 \end{optOptTable}
 \end{optTable}
 \optSection{Quantification of Annotations}\label{Quantification_of_Annotations}
@@ -807,7 +807,7 @@
 \begin{optTable}
 \optName{waspOutputMode}
   \optValue{None}
-  \optLine{string: WASP allele-specific output type. This is re-implemenation of the original WASP mappability filtering by Bryce van de Geijn, Graham McVicker, Yoav Gilad {\&} Jonathan K Pritchard. Please cite the original WASP paper: Nature Methods 12, 1061–1063 (2015), https://www.nature.com/articles/nmeth.3582 .} 
+  \optLine{string: WASP allele-specific output type. This is re-implementation of the original WASP mappability filtering by Bryce van de Geijn, Graham McVicker, Yoav Gilad {\&} Jonathan K Pritchard. Please cite the original WASP paper: Nature Methods 12, 1061–1063 (2015), https://www.nature.com/articles/nmeth.3582 .} 
 \begin{optOptTable}
   \optOpt{SAMtag}   \optOptLine{add WASP tags to the alignments that pass WASP filtering}
 \end{optOptTable}
@@ -821,11 +821,11 @@
   \optOpt{CB{\textunderscore}UMI{\textunderscore}Simple}   \optOptLine{(a.k.a. Droplet) one UMI and one Cell Barcode of fixed length in read2, e.g. Drop-seq and 10X Chromium.}
   \optOpt{CB{\textunderscore}UMI{\textunderscore}Complex}   \optOptLine{one UMI of fixed length, but multiple Cell Barcodes of varying length, as well as adapters sequences are allowed in read2 only, e.g. inDrop.}
   \optOpt{CB{\textunderscore}samTagOut}   \optOptLine{output Cell Barcode as CR and/or CB SAm tag. No UMI counting. --readFilesIn cDNA{\textunderscore}read1 [cDNA{\textunderscore}read2 if paired-end] CellBarcode{\textunderscore}read . Requires --outSAMtype BAM Unsorted [and/or SortedByCoordinate]}
-  \optOpt{SmartSeq}   \optOptLine{Smart-seq: each cell in a separtate FASTQ (paired- or single-end), barcodes are corresponding read-groups, no UMI sequences, alginments deduplicated according to alignment start and end (after extending soft-clipped bases)}
+  \optOpt{SmartSeq}   \optOptLine{Smart-seq: each cell in a separate FASTQ (paired- or single-end), barcodes are corresponding read-groups, no UMI sequences, alignments deduplicated according to alignment start and end (after extending soft-clipped bases)}
 \end{optOptTable}
 \optName{soloCBwhitelist}
   \optValue{-}
-  \optLine{string(s): file(s) with whitelist(s) of cell barcodes. Only --soloType CB{\textunderscore}UMI{\textunderscore}Complexone allows more than one whitelist file.} 
+  \optLine{string(s): file(s) with whitelist(s) of cell barcodes. Only --soloType CB{\textunderscore}UMI{\textunderscore}Complex allows more than one whitelist file.} 
 \begin{optOptTable}
   \optOpt{None}   \optOptLine{no whitelist: all cell barcodes are allowed}
 \end{optOptTable}
@@ -922,8 +922,8 @@
   \optValue{CellRanger2.2 3000 0.99 10}
   \optLine{string(s):              cell filtering type and parameters} 
 \begin{optOptTable}
-  \optOpt{CellRanger2.2}   \optOptLine{simple filtering of CellRanger 2.2, followed by thre numbers: number of expected cells, robust maximum percentile for UMI count, maximum to minimum ratio for UMI count}
-  \optOpt{TopCells}   \optOptLine{only report top cells by UMI count, followed by the excat number of cells}
+  \optOpt{CellRanger2.2}   \optOptLine{simple filtering of CellRanger 2.2, followed by three numbers: number of expected cells, robust maximum percentile for UMI count, maximum to minimum ratio for UMI count}
+  \optOpt{TopCells}   \optOptLine{only report top cells by UMI count, followed by the exact number of cells}
   \optOpt{None}   \optOptLine{do not output filtered cells}
 \end{optOptTable}
 \end{optTable}

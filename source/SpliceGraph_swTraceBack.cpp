@@ -1,7 +1,7 @@
-#include "SpliceGraph.h"
+//#include "SpliceGraph.h"
 
-void SpliceGraph::swTraceBack(array<typeSeqLen, 2> &alignEnds, array<typeSeqLen, 2> &alignStarts)
-{
+//void SpliceGraph::swTraceBack(array<typeSeqLen, 2> &alignEnds, array<typeSeqLen, 2> &alignStarts)
+//{
     
 //     uint32 row = alignEnds[0];    
 //     uint32 col = alignEnds[1];
@@ -16,4 +16,4 @@ void SpliceGraph::swTraceBack(array<typeSeqLen, 2> &alignEnds, array<typeSeqLen,
 //     };
 //     alignStarts[0]=row;
 //     alignStarts[1]=col;
-};
+//};

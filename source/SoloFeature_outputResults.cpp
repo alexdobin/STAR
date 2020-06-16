@@ -28,12 +28,21 @@ void SoloFeature::outputResults(bool cellFilterYes)
         case SoloFeatureTypes::Gene :
         case SoloFeatureTypes::GeneFull :
         case SoloFeatureTypes::Velocyto :
-        case SoloFeatureTypes::VelocytoSimple :            
+        case SoloFeatureTypes::VelocytoSimple :
+        {
             ofstream &geneStr=ofstrOpen(outputPrefix1+pSolo.outFileNames[1],ERROR_OUT, P);
-            for (uint32 ii=0; ii<Trans.nGe; ii++)
-                geneStr << Trans.geID[ii] <<"\t"<< (Trans.geName[ii].empty() ? Trans.geID[ii] : Trans.geName[ii]) <<"\tGene Expression\n";
+            for (uint32 ii=0; ii<Trans.nGe; ii++) {
+                geneStr << Trans.geID[ii] <<"\t"<< (Trans.geName[ii].empty() ? Trans.geID[ii] : Trans.geName[ii]);
+				if (pSolo.outFormat.featuresGeneField3!="-") {
+					geneStr <<'\t'<< pSolo.outFormat.featuresGeneField3;
+				};
+				geneStr << '\n';
+            };
             geneStr.close();
             break;
+        };
+        case SoloFeatureTypes::SJ :
+        	symlink("../../../SJ.out.tab", (outputPrefix1+pSolo.outFileNames[1]).c_str());
     };
 
     ////////////////////////////////////////////////////////////////////////////

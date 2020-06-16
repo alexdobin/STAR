@@ -318,11 +318,15 @@ uint localSearchNisMM(const char *x, uint nx, const char *y, uint ny, double pMM
 uint32 localAlignHammingDist(const string &text, const string &query, uint32 &pos)
 {
     uint32 distBest=query.size();
+    if (text.size()<query.size()) {//query is longer than text, no match
+    	return text.size()+1;
+    };
     for (uint32 ii=0; ii<text.size()-query.size()+1; ii++) {
         uint32 dist1=0;
         for (uint32 jj=0; jj<query.size(); jj++) {
-            if (text[jj+ii]!=query[jj])
+            if (query[jj]!='N' && text[jj+ii]!=query[jj]) {//N in query does not count as mismatch
                 ++dist1;
+            };
         };
         if (dist1<distBest) {
             distBest=dist1;

@@ -1,13 +1,16 @@
 *.o
 Depend.list
 
+.project
+
 # Don't track intermediary files from building the manual
-doc/*.aux
-doc/*.fdb_latexmk
-doc/*.fls
-doc/*.log
-doc/*.out
-doc/*.toc
+extras/doc-latex/*.aux
+extras/doc-latex/*.fdb_latexmk
+extras/doc-latex/*.fls
+extras/doc-latex/*.log
+extras/doc-latex/*.out
+extras/doc-latex/*.gz
+extras/doc-latex/*.toc
 
 # Don't track the STAR binary once it has being built
 source/STAR

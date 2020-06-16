@@ -28,8 +28,8 @@ void Genome::genomeOutLoad(){//allocate and load *output* Genome
     
     G=new char[nGenome];
     ifstream GenomeIn;
-    uint64 genomeFileSize = OpenStream("Genome", GenomeIn, nGenome);
-    uint64 genomeReadBytesN=fstreamReadBig(GenomeIn,G,nGenome);
+    //uint64 genomeFileSize = OpenStream("Genome", GenomeIn, nGenome);
+    //uint64 genomeReadBytesN=fstreamReadBig(GenomeIn,G,nGenome);
     GenomeIn.close();
     
     //record required genome parameters in P
