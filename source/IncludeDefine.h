@@ -22,6 +22,7 @@
 #include <limits>
 #include <stdint.h>
 #include <omp.h>
+#include <math.h>
 
 #include "VERSION"
 
