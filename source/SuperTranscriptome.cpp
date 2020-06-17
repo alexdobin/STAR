@@ -18,12 +18,12 @@ void SuperTranscriptome::sjCollapse()
             sjCollapsed[ sj[i].super ].push_back({sj[i].start, sj[i].end});
     };
     
-    ofstream & superTrSJ = ofstrOpen(P.pGe.gDir+"/superTranscriptSJcollapsed.tsv", ERROR_OUT, P);
+    ofstream & superTrSJstream = ofstrOpen(P.pGe.gDir+"/superTranscriptSJcollapsed.tsv", ERROR_OUT, P);
     for(uint64 i = 0; i < sjCollapsed.size(); i++) {
         for(auto &sj1 : sjCollapsed[i])
-            superTrSJ << i <<"\t"<< sj1[0] <<"\t"<< sj1[1] << "\n";
+            superTrSJstream << i <<"\t"<< sj1[0] <<"\t"<< sj1[1] << "\n";
     };
-    superTrSJ.close(); 
+    superTrSJstream.close();
 
     P.inOut->logMain << "Number of splice junctions in superTranscripts = " << sj.size() <<endl;
     P.inOut->logMain << "Number of collapsed splice junctions in superTranscripts = " << sjCollapsed.size() <<endl;
@@ -38,7 +38,7 @@ void SuperTranscriptome::load(char *G, vector<uint64> &chrStart, vector<uint64> 
         superTrs[ii].seqP=(uint8*)G+chrStart[ii];
     };
     
-    ifstream & superTrSJ = ifstrOpen(P.pGe.gDir+"/superTranscriptSJcollapsed.tsv", ERROR_OUT, "SOLUTION: re-generate the genome.", P);
+    ifstream & superTrSJstream = ifstrOpen(P.pGe.gDir+"/superTranscriptSJcollapsed.tsv", ERROR_OUT, "SOLUTION: re-generate the genome.", P);
     
     uint32 sutr=0,sutr1=0;
     vector<array<uint32,3>> sjC1;
@@ -48,7 +48,8 @@ void SuperTranscriptome::load(char *G, vector<uint64> &chrStart, vector<uint64> 
     
     while(true) {//load junctions, assume they are sorted by donor coordinate
         
-        bool inGood = (superTrSJ >> sutr);
+        superTrSJstream >> sutr;
+        bool inGood = superTrSJstream.good();
         
         if (sutr!=sutr1 || !inGood) {//new suTr
             //sort sj1 by acceptor position
@@ -77,14 +78,14 @@ void SuperTranscriptome::load(char *G, vector<uint64> &chrStart, vector<uint64> 
         };
         
         uint32 sjd, sja;
-        superTrSJ >> sjd >> sja;
+        superTrSJstream >> sjd >> sja;
         
         if (sjDonor1.empty() || sjDonor1.back() < sjd) 
             sjDonor1.push_back(sjd);
         
         sjC1.push_back({sjd,sja,(uint32)sjDonor1.size()-1});//record donor, acceptor, and position of the donor in sjDonor
     };
-    superTrSJ.close();
+    superTrSJstream.close();
     
     P.inOut->logMain << "Max number of splice junctions in a superTranscript = " << sjNmax <<endl;
     P.inOut->logMain << "Max number of donor sites in a superTranscript = " << sjDonorNmax <<endl;
