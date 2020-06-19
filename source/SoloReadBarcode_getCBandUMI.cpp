@@ -160,18 +160,34 @@ void SoloReadBarcode::getCBandUMI(const string &readNameExtra, const uint32 &rea
     bSeq=readNameExtra.substr(0,bLength);
     bQual=readNameExtra.substr(bLength+1,bLength);
 
-    if (pSolo.type==pSolo.SoloTypes::CB_UMI_Simple) {
+    if ( pSolo.type==pSolo.SoloTypes::CB_UMI_Simple ) {
         cbSeq=bSeq.substr(pSolo.cbS-1,pSolo.cbL);
         umiSeq=bSeq.substr(pSolo.umiS-1,pSolo.umiL);
         cbQual=bQual.substr(pSolo.cbS-1,pSolo.cbL);
         umiQual=bQual.substr(pSolo.umiS-1,pSolo.umiL);
         
-        if (!convertCheckUMI())
+        if (!convertCheckUMI()) {//UMI conversion
             return;
+        };
         
         matchCBtoWL(cbSeq, cbQual, pSolo.cbWL, cbMatch, cbMatchInd, cbMatchString);
-        
-    } else if (pSolo.type==pSolo.SoloTypes::CB_UMI_Complex) {
+
+
+    } else if ( pSolo.type==pSolo.SoloTypes::CB_samTagOut ) {//similar to CB_UMI_Simple, but no UMI, and define cbSeqCorrected
+        cbSeq=bSeq.substr(pSolo.cbS-1,pSolo.cbL);
+        umiSeq=bSeq.substr(pSolo.umiS-1,pSolo.umiL);
+        cbQual=bQual.substr(pSolo.cbS-1,pSolo.cbL);
+        umiQual=bQual.substr(pSolo.umiS-1,pSolo.umiL);
+
+        matchCBtoWL(cbSeq, cbQual, pSolo.cbWL, cbMatch, cbMatchInd, cbMatchString);
+
+        if ( cbMatch==0 || cbMatch==1 ) {
+        	cbSeqCorrected=pSolo.cbWLstr[cbMatchInd[0]];
+        } else {
+        	cbSeqCorrected="";
+        };
+
+    } else if ( pSolo.type==pSolo.SoloTypes::CB_UMI_Complex ) {
         
         cbSeq="";
         cbQual="";
@@ -234,18 +250,6 @@ void SoloReadBarcode::getCBandUMI(const string &readNameExtra, const uint32 &rea
         
         if (cbMatchGood) {
             cbMatchString=to_string(cbMatchInd[0]);
-        };
-        
-    ///////////////////////////////////////////////////////////////////////////    
-    } else if (pSolo.type==pSolo.SoloTypes::CB_samTagOut) {
-        //CB only, on read 3
-        cbSeq=bSeq.substr(pSolo.cbS-1,pSolo.cbL);
-        cbQual=bQual.substr(pSolo.cbS-1,pSolo.cbL);
-        matchCBtoWL(cbSeq, cbQual, pSolo.cbWL, cbMatch, cbMatchInd, cbMatchString);
-        if (cbMatch==0 || cbMatch==1) {
-            cbSeqCorrected=pSolo.cbWLstr[cbMatchInd[0]];
-        } else {
-            cbSeqCorrected="";
         };
         
     ///////////////////////////////////////////////////////////////////////////    

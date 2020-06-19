@@ -59,11 +59,15 @@ void ParametersSolo::initialize(Parameters *pPin)
         type=SoloTypes::CB_UMI_Complex;
         bL=0;
         cbumiL=0;
+
     } else if (typeStr=="CB_samTagOut") {
         type=SoloTypes::CB_samTagOut;
-        cbumiL=cbL;
+        cbumiL=cbL+umiL;
         if (bL==1)
-            bL=cbL;
+            bL=cbumiL;
+
+        barcodeStart=min(cbS,umiS)-1;
+        barcodeEnd=max(cbS+cbL,umiS+umiL)-2;
         
     } else if (typeStr=="SmartSeq") {
         type=SoloTypes::SmartSeq;     
@@ -339,6 +343,9 @@ void ParametersSolo::initialize(Parameters *pPin)
             errOut << "SOLUTION: re-run STAR with --outSAMtype BAM SortedByCoordinate ...\n";
             exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
+    } else if ( pP->outSAMattrPresent.UB && type==SoloTypes::CB_samTagOut) {
+    	exitWithError("EXITING because of fatal PARAMETERS error: UB attribute (corrected UMI) in --outSAMattributes cannot be used with --soloType CB_samTagOut \n" \
+                      "SOLUTION: instead, use UR (uncorrected UMI) in --outSAMattributes\n",   std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
     
     readInfoYes.fill(false);
