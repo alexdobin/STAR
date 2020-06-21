@@ -1,3 +1,4 @@
+* Docker build: switched to debian:stable-slim in the Dockerfile.
 * --soloType CB_samTagOut now allows output of (uncorrected) UMI sequences and quality scores with SAM tags UR and UY.
 
 STAR 2.7.5a 2020/06/16

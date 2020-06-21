@@ -1,4 +1,4 @@
-FROM debian:stretch-slim
+FROM debian:stable-slim
 
 MAINTAINER dobin@cshl.edu
 
@@ -11,6 +11,7 @@ RUN set -ex
 RUN apt-get update && \
     apt-get install -y --no-install-recommends ${PACKAGES} && \
     apt-get clean && \
+    g++ --version && \
     cd /home && \
     wget --no-check-certificate https://github.com/alexdobin/STAR/archive/${STAR_VERSION}.zip && \
     unzip ${STAR_VERSION}.zip && \
