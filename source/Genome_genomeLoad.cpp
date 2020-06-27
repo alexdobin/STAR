@@ -1,3 +1,4 @@
+#include <math.h>
 #include "Genome.h"
 #include "SuffixArrayFuns.h"
 #include "PackedArray.h"
