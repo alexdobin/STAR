@@ -210,8 +210,8 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
     //compact reads per gene
     uint32 gid1=-1;//current gID
     uint32 nGenes=0; //number of genes
-    uint32 *gID = new uint32[min(Trans.nGe,rN)+1]; //gene IDS
-    uint32 *gReadS = new uint32[min(Trans.nGe,rN)+1]; //start of gene reads TODO: allocate this array in the 2nd half of rGU
+    uint32 *gID = new uint32[min(featuresNumber,rN)+1]; //gene IDs
+    uint32 *gReadS = new uint32[min(featuresNumber,rN)+1]; //start of gene reads TODO: allocate this array in the 2nd half of rGU
     for (uint32 iR=0; iR<rN*rguStride; iR+=rguStride) {
         if (rGU[iR+rguG]!=gid1) {//record gene boundary
             gReadS[nGenes]=iR;

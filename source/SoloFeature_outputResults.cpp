@@ -76,20 +76,8 @@ void SoloFeature::outputResults(bool cellFilterYes)
         umiOutCol={0,1,2};
 
     //header
-    uint32 featureN=0;
-    switch (featureType) {
-        case SoloFeatureTypes::Gene :
-        case SoloFeatureTypes::GeneFull :
-        case SoloFeatureTypes::Velocyto :
-        case SoloFeatureTypes::VelocytoSimple :            
-            featureN=Trans.nGe;//genes
-            break;
-        case SoloFeatureTypes::SJ :
-            featureN=P.sjAll[0].size();//sj
-            break;
-    };
     countMatrixStream <<"%%MatrixMarket matrix coordinate integer general\n%\n";
-    countMatrixStream << featureN <<' '<< (cellFilterYes ? filteredCells.nCells : pSolo.cbWLsize) <<' '<< nCellGeneEntries << '\n';
+    countMatrixStream << featuresNumber <<' '<< (cellFilterYes ? filteredCells.nCells : pSolo.cbWLsize) <<' '<< nCellGeneEntries << '\n';
     
     uint32  cbInd1=0;
     for (uint32 icb=0; icb<nCB; icb++) {

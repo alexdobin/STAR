@@ -26,6 +26,17 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
         P.inOut->logMain <<"Read splice junctions for Solo SJ feature: "<< P.sjAll[0].size() <<endl;
     };
     
+    //number of features
+    switch (featureType) {
+    	case SoloFeatureTypes::Gene :
+    	case SoloFeatureTypes::GeneFull :
+    	case SoloFeatureTypes::Velocyto :
+    		featuresNumber=Trans.nGe;
+    		break;
+    	case SoloFeatureTypes::SJ :
+    		featuresNumber=P.sjAll[0].size();
+	};
+
     sumThreads(RAchunk);
     
     

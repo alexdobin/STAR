@@ -32,6 +32,7 @@ public:
     SoloReadBarcode *readBarSum;
 
     uint64 nReadsMapped, nCB, nReadsInput; //total number of mapped reads
+    uint32 featuresNumber; //number of features (i.e. genes, SJs, etc)
 
     uint32 *rGeneUMI;//mapped reads sorted by CB
     uint32 *indCB;//index of detected CBs in the whitelist
