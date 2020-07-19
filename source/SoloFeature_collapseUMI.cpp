@@ -89,7 +89,7 @@ uint32 graphNumberOfConnectedComponents(uint32 N, vector<array<uint32,2>> V, vec
     
     uint32 nConnComp=0;
     for (uint32 ii=0; ii<N; ii++) {
-        if (nodeEdges[ii].size()==0) {//this node is not connected, no need to check. Save time beacuse this happens often
+        if (nodeEdges[ii].size()==0) {//this node is not connected, no need to check. Save time because this happens often
             ++nConnComp;
         } else if (nodeColor[ii]==(uint32)-1) {//node not visited
             ++nConnComp;

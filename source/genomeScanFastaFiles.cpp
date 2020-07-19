@@ -44,7 +44,8 @@ uint genomeScanFastaFiles (Parameters &P, char* G, bool flagRun, Genome &mapGen)
                     mapGen.chrName.push_back(chrName1);
                 };
 
-                if (!flagRun && mapGen.chrStart.size()>0) mapGen.chrLength.push_back(N-mapGen.chrStart.at(mapGen.chrStart.size()-1)); //true length of the chr
+                if (!flagRun && mapGen.chrStart.size()>0) mapGen.chrLength.push_back(N-mapGen.chrStart.back()); //true length of the chr
+
 
                 if (N>0) {//pad the chromosomes to bins boudnaries
                     N = ( (N+1)/mapGen.genomeChrBinNbases+1 )*mapGen.genomeChrBinNbases;
@@ -52,7 +53,9 @@ uint genomeScanFastaFiles (Parameters &P, char* G, bool flagRun, Genome &mapGen)
 
                 if (!flagRun) {
                     mapGen.chrStart.push_back(N);
-                    P.inOut->logMain << mapGen.pGe.gFastaFiles.at(ii)<<" : chr # " << mapGen.chrStart.size()-1 << "  \""<<mapGen.chrName.at(mapGen.chrStart.size()-1)<<"\" chrStart: "<<N<<"\n"<<flush;
+                    P.inOut->logMain << mapGen.pGe.gFastaFiles.at(ii)<<" : chr # " << mapGen.chrStart.size()-1   \
+                    		         << "  \""<< mapGen.chrName.back() <<"\""       \
+									 << " chrStart: "<<N<<"\n"<<flush;
                 };
             } else {//char lines
                 if (flagRun) {
@@ -70,15 +73,17 @@ uint genomeScanFastaFiles (Parameters &P, char* G, bool flagRun, Genome &mapGen)
     };
 
     if (!flagRun)
-        mapGen.chrLength.push_back(N-mapGen.chrStart.at(mapGen.chrStart.size()-1)); //true length of the last chr
+        mapGen.chrLength.push_back(N-mapGen.chrStart.back()); //true length of the last chr
 
     N = ( (N+1)/mapGen.genomeChrBinNbases+1)*mapGen.genomeChrBinNbases;
 
     if (!flagRun) {
         mapGen.nChrReal=mapGen.chrStart.size();
         mapGen.chrStart.push_back(N); //last chromosome end+1
+        P.inOut->logMain << "Chromosome sequence lengths: \n";
         for (uint ii=0;ii<mapGen.nChrReal;ii++) {
             mapGen.chrNameIndex[mapGen.chrName[ii]]=ii;
+            P.inOut->logMain <<  mapGen.chrName[ii] <<"\t"<< mapGen.chrLength[ii] << "\n";
         };
     };
 

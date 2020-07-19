@@ -142,7 +142,14 @@ void Genome::genomeGenerate() {
     nGenome = genomeScanFastaFiles(P,NULL,false,*this);//first scan the fasta file to find all the sizes
     genomeSequenceAllocate(nGenome, nG1alloc, G, G1);
     genomeScanFastaFiles(P,G,true,*this);    //load the genome sequence
-    
+
+    uint64 nGenomeTrue=0;
+    for (auto &cl : chrLength)
+    	nGenomeTrue += cl;
+
+    P.inOut->logMain <<"Genome sequence total length = " << nGenomeTrue << "\n";
+    P.inOut->logMain <<"Genome size with padding = "<< nGenome <<"\n";
+
     //consensusSequence(); //replace with consensus allele 
         
     SjdbClass sjdbLoci; //will be filled in transcriptGeneSJ below
@@ -157,10 +164,10 @@ void Genome::genomeGenerate() {
     
     sjdbLoadFromFiles(P,sjdbLoci);//this will not be transformed. TODO prevent this parameter combination
 
-    if (pGe.gSAindexNbases > log2(nGenome)/2-1) {
+    if (pGe.gSAindexNbases > log2(nGenomeTrue)/2-1) {
         ostringstream warnOut; 
-        warnOut << "--genomeSAindexNbases " << pGe.gSAindexNbases << " is too large for the genome size=" << nGenome;
-        warnOut << ", which may cause seg-fault at the mapping step. Re-run genome generation with recommended --genomeSAindexNbases " << int(log2(nGenome)/2-1);
+        warnOut << "--genomeSAindexNbases " << pGe.gSAindexNbases << " is too large for the genome size=" << nGenomeTrue;
+        warnOut << ", which may cause seg-fault at the mapping step. Re-run genome generation with recommended --genomeSAindexNbases " << int(log2(nGenomeTrue)/2-1);
         warningMessage(warnOut.str(),P.inOut->logMain,std::cerr,P);
     };    
     
@@ -183,7 +190,7 @@ void Genome::genomeGenerate() {
     // GstrandBit
     GstrandBit = (char) (uint) floor(log(nGenome+P.limitSjdbInsertNsj*sjdbLength)/log(2))+1; //GstrandBit uses P.limitSjdbInsertNsj even if no insertion requested, in case it will be requested at the mapping stage
     if (GstrandBit<32) GstrandBit=32; //TODO: should not this be 31? Need to test for small genomes. TODO: use simple access function for SA
-    P.inOut->logMain <<"Estimated genome size="<<nGenome+P.limitSjdbInsertNsj*sjdbLength<<" = "<<nGenome<<" + "<<P.limitSjdbInsertNsj*sjdbLength<<"\n";
+    P.inOut->logMain <<"Estimated genome size with padding and SJs: total=genome+SJ="<<nGenome+P.limitSjdbInsertNsj*sjdbLength<<" = "<<nGenome<<" + "<<P.limitSjdbInsertNsj*sjdbLength<<"\n";
     P.inOut->logMain << "GstrandBit=" << int(GstrandBit) <<"\n";
     GstrandMask = ~(1LLU<<GstrandBit);
     SA.defineBits(GstrandBit+1,nSA);
