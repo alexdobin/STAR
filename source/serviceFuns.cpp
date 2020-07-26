@@ -99,6 +99,23 @@ inline int funCompareTypeShift (const void *a, const void *b) {
 
 };
 
+template <class arrayType, int arraySize, int Shift>
+inline int funCompareArraysShift (const void *a, const void *b) {
+    arrayType* va= ((arrayType*) a) + Shift;
+    arrayType* vb= ((arrayType*) b) + Shift;
+
+    for (int ii=0;ii<arraySize;ii++) {
+        if (va[ii]>vb[ii]) {
+            return 1;
+        } else if (va[ii]<vb[ii]) {
+            return -1;
+        };
+    };
+
+    return 0;
+
+};
+
 inline int splitString(const std::string &s, char delim, std::vector<std::string> &elems) {
     std::stringstream ss(s);
     std::string item;

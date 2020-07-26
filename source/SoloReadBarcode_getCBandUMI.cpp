@@ -135,12 +135,12 @@ bool SoloReadBarcode::convertCheckUMI()
 {//check UMIs, return if bad UMIs
     if (convertNuclStrToInt64(umiSeq,umiB)!=-1) {//convert and check for Ns
         stats.V[stats.nNinUMI]++;//UMIs are not allowed to have Ns
-        cbMatch=-23;
+        //cbMatch=-23;
         return false;
     };
     if (umiB==homoPolymer[0] || umiB==homoPolymer[1] || umiB==homoPolymer[2] || umiB==homoPolymer[3]) {
         stats.V[stats.nUMIhomopolymer]++;
-        cbMatch=-24;        
+        //cbMatch=-24;
         return false;
     };
     return true;
@@ -165,14 +165,18 @@ void SoloReadBarcode::getCBandUMI(const string &readNameExtra, const uint32 &rea
         umiSeq=bSeq.substr(pSolo.umiS-1,pSolo.umiL);
         cbQual=bQual.substr(pSolo.cbS-1,pSolo.cbL);
         umiQual=bQual.substr(pSolo.umiS-1,pSolo.umiL);
-        
+
+        matchCBtoWL(cbSeq, cbQual, pSolo.cbWL, cbMatch, cbMatchInd, cbMatchString);
+
         if (!convertCheckUMI()) {//UMI conversion
+        	if (cbMatch==0)
+        		cbReadCountExact[cbMatchInd[0]]++; //still need to count it as exact
+            cbMatch=-20;// mark "noUMI" case, this is probably not needed
+            cbMatchString="";
+            cbMatchInd.clear();
             return;
         };
         
-        matchCBtoWL(cbSeq, cbQual, pSolo.cbWL, cbMatch, cbMatchInd, cbMatchString);
-
-
     } else if ( pSolo.type==pSolo.SoloTypes::CB_samTagOut ) {//similar to CB_UMI_Simple, but no UMI, and define cbSeqCorrected
         cbSeq=bSeq.substr(pSolo.cbS-1,pSolo.cbL);
         umiSeq=bSeq.substr(pSolo.umiS-1,pSolo.umiL);

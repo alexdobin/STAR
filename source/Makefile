@@ -27,7 +27,7 @@ CFLAGS ?= -pipe -Wall -Wextra -O3
 # Unconditionally set essential flags and optimization options
 CXXFLAGS_common := -std=c++11 -fopenmp $(COMPTIMEPLACE)
 CXXFLAGS_main := -O3 $(CXXFLAGS_common)
-CXXFLAGS_gdb := -O -g3 $(CXXFLAGS_common)
+CXXFLAGS_gdb := -O0 -g3 $(CXXFLAGS_common)
 
 ##########################################################################################################
 OBJECTS = soloInputFeatureUMI.o SoloFeature_countSmartSeq.o SoloFeature_redistributeReadsByCB.o \

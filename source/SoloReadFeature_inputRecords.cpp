@@ -50,7 +50,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
             };
             
         } else {//multiple matches
-            float ptot=0.0,pmax=0.0;
+            double ptot=0.0,pmax=0.0;
             for (uint32 ii=0; ii<(uint32)cbmatch; ii++) {
                 uint32 cbin;
                 char  qin;
