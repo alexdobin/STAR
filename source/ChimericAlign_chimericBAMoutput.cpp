@@ -95,6 +95,7 @@ void ChimericAlign::chimericBAMoutput(Transcript *al1, Transcript *al2, ReadAlig
             memcpy( (void*) (RA->outBAMoneAlign[ii]+RA->outBAMoneAlignNbytes[ii]), tagSA1.c_str(), tagSA1.size()+1);//copy string including \0 at the end
             RA->outBAMoneAlignNbytes[ii]+=tagSA1.size()+1;
              * ( (uint32*) RA->outBAMoneAlign[ii] ) = RA->outBAMoneAlignNbytes[ii]-sizeof(uint32);
+	    free(b); // don't use bam_destroy1(), because bam_read1_fromArray does not allocate memory for b->data
         };
 
         if (P.outBAMunsorted) RA->outBAMunsorted->unsortedOneAlign(RA->outBAMoneAlign[ii], RA->outBAMoneAlignNbytes[ii], ii>0 ? 0 : bamBytesTotal);
