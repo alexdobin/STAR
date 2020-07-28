@@ -149,11 +149,14 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <string>   (-1, -1, "outFilterIntronStrands", &outFilterIntronStrands));
 
     //clipping
-    parArray.push_back(new ParameterInfoVector <uint>   (-1, -1, "clip5pNbases", &clip5pNbases));
-    parArray.push_back(new ParameterInfoVector <uint>   (-1, -1, "clip3pNbases", &clip3pNbases));
-    parArray.push_back(new ParameterInfoVector <uint>   (-1, -1, "clip3pAfterAdapterNbases", &clip3pAfterAdapterNbases));
-    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "clip3pAdapterSeq", &clip3pAdapterSeq));
-    parArray.push_back(new ParameterInfoVector <double> (-1, -1, "clip3pAdapterMMp", &clip3pAdapterMMp));
+    parArray.push_back(new ParameterInfoVector <uint32>   (-1, -1, "clip5pNbases", &pClip.in[0].N));
+    parArray.push_back(new ParameterInfoVector <uint32>   (-1, -1, "clip3pNbases", &pClip.in[1].N));
+    parArray.push_back(new ParameterInfoVector <uint32>   (-1, -1, "clip5pAfterAdapterNbases", &pClip.in[0].NafterAd));
+    parArray.push_back(new ParameterInfoVector <uint32>   (-1, -1, "clip3pAfterAdapterNbases", &pClip.in[1].NafterAd));
+    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "clip5pAdapterSeq", &pClip.in[0].adSeq));
+    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "clip3pAdapterSeq", &pClip.in[1].adSeq));
+    parArray.push_back(new ParameterInfoVector <double> (-1, -1, "clip5pAdapterMMp", &pClip.in[0].adMMp));
+    parArray.push_back(new ParameterInfoVector <double> (-1, -1, "clip3pAdapterMMp", &pClip.in[1].adMMp));
 
     //binning, anchors, windows
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "winBinNbits", &winBinNbits));
@@ -811,22 +814,10 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     if (runMode=="alignReads" && pGe.gLoad!="Remove" && pGe.gLoad!="LoadAndExit") {//open reads files to check if they are present
         openReadsFiles();
 
-        //check sizes of the mate files, if not the same, assume mates are not the same length
-        if (readNmates==1) {
-            readMatesEqualLengths=true;
-        } else if (readNmates > 2 && pSolo.typeStr=="None"){
+        if (readNmates > 2 && pSolo.typeStr=="None") {//could have >2 mates only for Solo
             ostringstream errOut;
             errOut <<"EXITING: because of fatal input ERROR: number of read mates files > 2: " <<readNmates << "\n";
             errOut <<"SOLUTION:specify only one or two files in the --readFilesIn option. If file names contain spaces, use quotes: \"file name\"\n";
-            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-        } else if (readMatesLengthsIn=="Equal") {
-            readMatesEqualLengths=true;
-        } else if (readMatesLengthsIn=="NotEqual") {
-            readMatesEqualLengths=false;
-        } else {
-            ostringstream errOut;
-            errOut <<"EXITING because of FATAL input ERROR: the value of the parameter readMatesLengthsIn=" << readMatesLengthsIn <<" is not among the allowed values: Equal or NotEqual\n";
-            errOut <<"SOLUTION: specify one of the allowed values: Equal or NotEqual\n";
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
 
@@ -870,28 +861,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     chunkOutBAMsizeBytes= (uint) int((1.0/BUFFER_InSizeFraction-1.0)*chunkInSizeBytesArray*2.0);
     chunkInSizeBytes=chunkInSizeBytesArray-2*(DEF_readSeqLengthMax+1)-2*DEF_readNameLengthMax;//to prevent overflow
 
-    //basic trimming: same adapter for both mates
-    if (clip5pNbases.size()==1 && readNmates>=2) 
-        clip5pNbases.push_back(clip5pNbases[0]);
-    if (clip3pNbases.size()==1 && readNmates>=2) 
-        clip3pNbases.push_back(clip3pNbases[0]);
-    if (clip3pAfterAdapterNbases.size()==1 && readNmates>=2) 
-        clip3pAfterAdapterNbases.push_back(clip3pAfterAdapterNbases[0]);
-
-    //adapter clipping: same adapter for both mates
-    if (clip3pAdapterSeq.size()==1 && readNmates>=2) 
-        clip3pAdapterSeq.push_back(clip3pAdapterSeq[0]);
-    if (clip3pAdapterMMp.size()==1 && readNmates>=2) 
-        clip3pAdapterMMp.push_back(clip3pAdapterMMp[0]);
-    for (uint imate=0;imate<min(2LLU,readNmates);imate++) {
-        if (clip3pAdapterSeq.at(imate).at(0)=='-') {// no clipping
-            clip3pAdapterSeq.at(imate).assign("");
-        } else {//clipping
-            clip3pAdapterSeqNum[imate]=new char [clip3pAdapterSeq.at(imate).length()];
-            convertNucleotidesToNumbers(clip3pAdapterSeq.at(imate).data(),clip3pAdapterSeqNum[imate],clip3pAdapterSeq.at(imate).length());
-            //inOut->fastaOutSeqs.open("Seqs.out.fasta");
-        };
-    };
+    pClip.initialize(this);
 
     //variation
     var.yes=false;
