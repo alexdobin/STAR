@@ -137,13 +137,15 @@ void ParametersSolo::initialize(Parameters *pPin)
         exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
 
-    if (featureYes[SoloFeatureTypes::Gene]) {
-        pP->quant.gene.yes=true;
-        pP->quant.yes = true;
-    };
-    if (featureYes[SoloFeatureTypes::GeneFull]) {
-        pP->quant.geneFull.yes=true;
-        pP->quant.yes = true;
+    if (type != SoloTypes::CB_samTagOut) {//gene quantification is needed
+        if (featureYes[SoloFeatureTypes::Gene]) {
+            pP->quant.gene.yes=true;
+            pP->quant.yes = true;
+        };
+        if (featureYes[SoloFeatureTypes::GeneFull]) {
+            pP->quant.geneFull.yes=true;
+            pP->quant.yes = true;
+        };
     };
     
     ////////////////////////////////////////////umiDedup
