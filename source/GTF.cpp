@@ -71,7 +71,7 @@ GTF::GTF(Genome &genome, Parameters &P, const string &dirOut, SjdbClass &sjdbLoc
             if (genome.pGe.sjdbGTFchrPrefix!="-") chr1=genome.pGe.sjdbGTFchrPrefix + chr1;
 
             if (genome.chrNameIndex.count(chr1)==0) {//chr not in Genome
-                P.inOut->logMain << "WARNING: while processing pGe.sjdbGTFfile=" << genome.pGe.sjdbGTFfile <<": chromosome '"<<chr1<<"' not found in Genome fasta files for line:\n";
+                P.inOut->logMain << "WARNING: while processing sjdbGTFfile=" << genome.pGe.sjdbGTFfile <<": chromosome '"<<chr1<<"' not found in Genome fasta files for line:\n";
                 P.inOut->logMain << oneLine <<"\n"<<flush;
                 continue; //do not process exons/transcripts on missing chromosomes
             };
@@ -79,6 +79,12 @@ GTF::GTF(Genome &genome, Parameters &P, const string &dirOut, SjdbClass &sjdbLoc
             uint64 ex1,ex2;
             char str1;
             oneLineStream >> ex1 >> ex2 >> ddd2 >> str1 >> ddd2; //read all fields except the last
+            if ( ex2 > genome.chrLength[genome.chrNameIndex[chr1]] ) {
+            	warningMessage("while processing sjdbGTFfile=" + genome.pGe.sjdbGTFfile + ", line:\n" + oneLine + "\n exon end = " + to_string(ex2) +  \
+            			       " is larger than the chromosome " + chr1 + " length = " + to_string(genome.chrLength[genome.chrNameIndex[chr1]] ) + " , will skip this exon\n", \
+							   std::cerr, P.inOut->logMain, P);
+            	continue;
+            };
             
             string oneLine1;
             getline(oneLineStream, oneLine1);//get the last field     
@@ -152,7 +158,7 @@ GTF::GTF(Genome &genome, Parameters &P, const string &dirOut, SjdbClass &sjdbLoc
     if (exonN==0) {
         ostringstream errOut;
         errOut << "Fatal INPUT FILE error, no valid ""exon"" lines in the GTF file: " << genome.pGe.sjdbGTFfile <<"\n";
-        errOut << "Solution: check the formatting of the GTF file. Most likely cause is the difference in chromosome naming between GTF and FASTA file.\n";
+        errOut << "Solution: check the formatting of the GTF file. One likely cause is the difference in chromosome naming between GTF and FASTA file.\n";
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
     };
 };

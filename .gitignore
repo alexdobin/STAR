@@ -2,6 +2,9 @@
 Depend.list
 
 .project
+.kdev4/
+source.kdev4
+
 
 # Don't track intermediary files from building the manual
 extras/doc-latex/*.aux

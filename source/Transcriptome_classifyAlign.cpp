@@ -22,11 +22,13 @@ int alignToTranscript(Transcript &aG, uint64 trS1, uint16 exN1, uint32 *exSE1, u
     //distTTS=trLen[tr1]-(gthaG.exons[iab][EX_G]-trS1-exSE1[2*ex1]+exLenCum1[ex1]+aG.exons[iab][EX_L]);
     //if trStr1==2: TTS=trLen[tr1]-TTS, TSS=trLen[tr1]-TSS
     
-    for (uint32 iab=0, ex1=0, bS=0, bE=0, eE=0, enS=0;
-                iab<aG.nExons; iab++) {//scan through all blocks of the align
+    for (uint32 iab=0, ex1=0, bS=0, bE=0, eE=0, enS=0;  iab<aG.nExons;  iab++) {//scan through all blocks of the align
 
         uint64 bEprev=bE;
 
+        if (aG.exons[iab][EX_G] < trS1) //this can happen for PE reads, when the 2nd mate protrudes to the left of the first
+            return -1;
+    
         bS=(uint32) (aG.exons[iab][EX_G]-trS1);//block start
         bE=bS+aG.exons[iab][EX_L]-1;//block end
 
