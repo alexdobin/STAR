@@ -1339,6 +1339,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     };
 
     alignEndsProtrude.nBasesMax=stoi(alignEndsProtrude.in.at(0),nullptr);
+    alignEndsProtrude.concordantPair=false;
     if (alignEndsProtrude.nBasesMax>0) {//allow ends protrusion
         if (alignEndsProtrude.in.at(1)=="ConcordantPair") {
             alignEndsProtrude.concordantPair=true;

@@ -49,8 +49,7 @@ void usage(int usageType) {
                    parametersDefault_len);
     };
     exit(0);
-}
-
+};
 
 int main(int argInN, char* argIn[]) {
     // If no argument is given, or the first argument is either '-h' or '--help', run usage()
