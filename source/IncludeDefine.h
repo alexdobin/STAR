@@ -152,6 +152,7 @@ typedef uint8_t uint8;
 #define EXIT_CODE_FILE_OPEN 109
 #define EXIT_CODE_FILE_WRITE 110
 #define EXIT_CODE_INCONSISTENT_DATA 111
+#define EXIT_CODE_FIFO 112
 
 //cleaned-end
 

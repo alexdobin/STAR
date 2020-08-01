@@ -269,26 +269,38 @@ outSAMstrandField               None
                                 intronMotif ... strand derived from the intron motif. This option changes the output alignments: reads with inconsistent and/or non-canonical introns are filtered out.
 
 outSAMattributes                Standard
-    string: a string of desired SAM attributes, in the order desired for the output SAM
-                                NH HI AS nM NM MD jM jI XS MC ch ... any combination in any order
+    string: a string of desired SAM attributes, in the order desired for the output SAM. Tags can be listed in any combination/order.
+                                ***Presets:
                                 None        ... no attributes
                                 Standard    ... NH HI AS nM
-                                All         ... NH HI AS nM NM MD jM jI MC ch
-                                variation:
+                                All         ... NH HI AS nM NM MD jM jI MC ch                                                                    
+                                ***Alignment:
+                                NH          ... number of loci the reads maps to: =1 for unique mappers, >1 for multimappers. Standard SAM tag.
+                                HI          ... multiple alignment index, starts with --outSAMattrIHstart (=1 by default). Standard SAM tag.
+                                AS          ... local alignment score, +1/-1 for matches/mismateches, score* penalties for indels and gaps. For PE reads, total score for two mates. Stadnard SAM tag.
+                                nM          ... number of mismatches. For PE reads, sum over two mates.
+                                NM          ... edit distance to the reference (number of mismatched + inserted + deleted bases) for each mate. Standard SAM tag.
+                                MD          ... string encoding mismatched and deleted reference bases (see standard SAM specifications). Standard SAM tag.
+                                jM          ... intron motifs for all junctions (i.e. N in CIGAR): 0: non-canonical; 1: GT/AG, 2: CT/AC, 3: GC/AG, 4: CT/GC, 5: AT/AC, 6: GT/AT. If splice junctions database is used, and a junction is annotated, 20 is added to its motif value.
+                                jI          ... start and end of introns for all junctions (1-based).
+                                XS          ... alignment strand according to --outSAMstrandField.
+                                MC          ... mate's CIGAR string. Standard SAM tag.
+                                ch          ... marks all segment of all chimeric alingments for --chimOutType WithinBAM output.
+                                ***Variation:
                                 vA          ... variant allele
-                                ha          ... haplotype (1/2) when mapping to the diploid genome. Requires genome generated with --genomeTransformType Diploid
-                                vG          ... genomic coordinate of the variant overlapped by the read
+                                vG          ... genomic coordinate of the variant overlapped by the read.
                                 vW          ... 1 - alignment passes WASP filtering; 2,3,4,5,6,7 - alignment does not pass WASP filtering. Requires --waspOutputMode SAMtag.
-                                STARsolo:
-                                CR CY UR UY ... sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing
+                                ***STARsolo:
+                                CR CY UR UY ... sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing.
+                                GX GN       ... gene ID and gene name.                                
                                 CB UB       ... error-corrected cell barcodes and UMIs for solo* demultiplexing. Requires --outSAMtype BAM SortedByCoordinate.
-                                sM          ... assessment of CB and UMI
-                                sS          ... sequence of the entire barcode (CB,UMI,adapter...)
-                                sQ          ... quality of the entire barcode
-                                GX GN       ... gene ID and gene name
-                                Unsupported/undocumented:
-                                rB          ... alignment block read/genomic coordinates
-                                vR          ... read coordinate of the variant
+                                sM          ... assessment of CB and UMI.
+                                sS          ... sequence of the entire barcode (CB,UMI,adapter).
+                                sQ          ... quality of the entire barcode.
+                                ***Unsupported/undocumented:
+                                ha          ... haplotype (1/2) when mapping to the diploid genome. Requires genome generated with --genomeTransformType Diploid .                               
+                                rB          ... alignment block read/genomic coordinates.
+                                vR          ... read coordinate of the variant.
 
 outSAMattrIHstart               1
     int>=0:                     start value for the IH attribute. 0 may be required by some downstream software, such as Cufflinks or StringTie.

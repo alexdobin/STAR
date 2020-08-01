@@ -34,7 +34,7 @@
 
 \newcommand{\sechyperref}[1]{\hyperref[#1]{Section \ref{#1}. \nameref{#1}}}
 
-\title{STAR manual 2.7.5a}
+\title{STAR manual 2.7.5b}
 \author{Alexander Dobin\\
 dobin@cshl.edu}
 \maketitle
@@ -292,28 +292,83 @@ The \opt{outSAMmultNmax} parameter limits the number of output alignments (SAM l
 
 
 \subsubsection{SAM attributes.}
-The SAM attributes can be specified by the user using \opt{outSAMattributes} \optvr{A1 A2 A3 ...} option which accept a list of 2-character SAM attributes. The implemented attributes are: \optv{NH HI NM MD AS nM jM jI XS}. By default, STAR outputs \optv{NH HI AS nM} attributes.
-\begin{itemize}
+The SAM attributes can be specified by the user using \opt{outSAMattributes} \optvr{A1 A2 A3 ...} option which accept a list of 2-character SAM attributes. The attributes can be listed in any order, and will be recorded in that order in the SAM file. By default, STAR outputs \optv{NH HI AS nM} attributes.
+
+\begin{itemize}[itemsep=1pt]
+\item[]	
+\textbf{Presets:}
+%
 \item[]
-\optv{NH HI NM MD} : have standard meaning as defined in the SAM format specifications.
+\optv{None} : No SAM attributes
+%
 \item[]
-\optv{AS} : id the local alignment score (paired for paired-end reads). 
+\optv{Standard} : NH HI AS nM
+%
 \item[]
-\optv{nM} : is the number of mismatches per (paired) alignment, not to be confused with \optv{NM}, which is the number of mismatches in each mate.
+\optv{All} : NH HI AS nM NM MD jM jI MC ch 	
+
+\textbf{Alignment:}
+%
+\item[]
+\optv{NH} : number of loci the reads maps to: $=1$ for unique mappers, $>1$ for multimappers. Standard SAM tag.
+%
+\item[]
+\optv{HI}  : multiple alignment index, starts with --outSAMattrIHstart ($=1$ by default). Standard SAM tag.
+%
+\item[]
+\optv{AS} : local alignment score, $+1/-1$ for matches/mismateches, score* penalties for indels and gaps. For PE reads, total score for two mates. Stadnard SAM tag.
+%
+\item[]
+\optv{NM} : edit distance to the reference (number of mismatched + inserted + deleted bases) for each mate. Standard SAM tag.
+%
+\item[]
+\optv{nM} : number of mismatches per (paired) alignment, not to be confused with \optv{NM}, which is the number of mismatches+indels in each mate.
+%
 \item[]
 \optv{jM:B:c,M1,M2,...} : intron motifs for all junctions (i.e. N in CIGAR): 0: non-canonical; 1: GT/AG, 2: CT/AC, 3: GC/AG, 4: CT/GC, 5: AT/AC, 6: GT/AT. If splice junctions database is used, and a junction is annotated, 20 is added to its motif value.
+%
+\item[]
+\optv{MD} : string encoding mismatched and deleted reference bases (see standard SAM specifications). Standard SAM tag.
+%
 \item[]
 \optv{jI:B:I,Start1,End1,Start2,End2,...} : Start and End of introns for all junctions (1-based).
+%
 \item[]
 \optv{jM jI} : attributes require samtools 0.1.18 or later, and were reported to be incompatible with some downstream tools such as Cufflinks.
+
+\textbf{Variation:}
+%
 \item[]
-\optv{vA} : variant allele
+\optv{vA} : variant allele.
+%
 \item[]
-\optv{vG} : genomic coordiante of the variant overlapped by the read
+\optv{vG} : genomic coordinate of the variant overlapped by the read.
+%
 \item[]
-\optv{vW} : WASP filtering tag, see detailed description in Section \ref{section:WASP}==. Requires --waspOutputMode SAMtag
+\optv{vW} : WASP filtering tag, see detailed description in Section \ref{section:WASP}. Requires \opt{waspOutputMode} \optv{SAMtag}.
+
+\textbf{STARsolo:}
+%
 \item[]
-\optv{CR CY UR UY} : STARsolo: sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing, not error corrected
+\optv{CR CY UR UY} : sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing, not error corrected.
+%
+\item[]
+\optv{GX GN} : gene ID and name.
+%
+\item[]
+\optv{CB UB} : error-corrected cell barcodes and UMIs for solo* demultiplexing. Requires \opt{outSAMtype} \optv{BAM SortedByCoordinate}.
+%
+\item[]
+\optv{sM} : assessment of CB and UMI.
+%
+\item[]
+\optv{sS} : sequence of the entire barcode (CB,UMI,adapter...).
+%
+\item[]
+\optv{sQ} : quality of the entire barcode.
+
+
+\textbf{Unmapped reads:}
 \item[]
 \optv{uT} : for unmapped reads, reason for not mapping:
            \begin{itemize}[noitemsep,topsep=-3pt]

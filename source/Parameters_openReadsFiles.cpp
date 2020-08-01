@@ -27,7 +27,13 @@ void Parameters::openReadsFiles()
             sysCom << outFileTmp <<"tmp.fifo.read"<<imate+1;
             readFilesInTmp.push_back(sysCom.str());
             remove(readFilesInTmp.at(imate).c_str());
-            mkfifo(readFilesInTmp.at(imate).c_str(), S_IRUSR | S_IWUSR );
+            if (mkfifo(readFilesInTmp.at(imate).c_str(), S_IRUSR | S_IWUSR ) != 0) {
+                exitWithError("Exiting because of *FATAL ERROR*: could not create FIFO file " + readFilesInTmp.at(imate) + "\n"
+                            + "SOLUTION: check the if run directory supports FIFO files.\n"
+                            + "If run partition does not support FIFO (e.g. Windows partitions FAT, NTFS), "
+                            + "re-run on a Linux partition, or point --outTmpDir to a Linux partition.\n"
+                            , std::cerr, inOut->logMain, EXIT_CODE_FIFO, *this);
+            };
 
             inOut->logMain << "\n   Input read files for mate "<< imate+1 <<" :\n";
 

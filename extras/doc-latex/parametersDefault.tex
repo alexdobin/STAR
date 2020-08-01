@@ -291,35 +291,47 @@
 \end{optOptTable}
 \optName{outSAMattributes}
   \optValue{Standard}
-  \optLine{string: a string of desired SAM attributes, in the order desired for the output SAM} 
+  \optLine{string: a string of desired SAM attributes, in the order desired for the output SAM. Tags can be listed in any combination/order.} 
+  \optLine{***Presets:} 
 \begin{optOptTable}
-  \optOpt{NH HI AS nM NM MD jM jI XS MC ch}   \optOptLine{any combination in any order}
   \optOpt{None}   \optOptLine{no attributes}
   \optOpt{Standard}   \optOptLine{NH HI AS nM}
   \optOpt{All}   \optOptLine{NH HI AS nM NM MD jM jI MC ch}
 \end{optOptTable}
-  \optLine{variation:} 
+  \optLine{***Alignment:} 
+\begin{optOptTable}
+  \optOpt{NH}   \optOptLine{number of loci the reads maps to: =1 for unique mappers, {\textgreater}1 for multimappers. Standard SAM tag.}
+  \optOpt{HI}   \optOptLine{multiple alignment index, starts with --outSAMattrIHstart (=1 by default). Standard SAM tag.}
+  \optOpt{AS}   \optOptLine{local alignment score, +1/-1 for matches/mismateches, score* penalties for indels and gaps. For PE reads, total score for two mates. Stadnard SAM tag.}
+  \optOpt{nM}   \optOptLine{number of mismatches. For PE reads, sum over two mates.}
+  \optOpt{NM}   \optOptLine{edit distance to the reference (number of mismatched + inserted + deleted bases) for each mate. Standard SAM tag.}
+  \optOpt{MD}   \optOptLine{string encoding mismatched and deleted reference bases (see standard SAM specifications). Standard SAM tag.}
+  \optOpt{jM}   \optOptLine{intron motifs for all junctions (i.e. N in CIGAR): 0: non-canonical; 1: GT/AG, 2: CT/AC, 3: GC/AG, 4: CT/GC, 5: AT/AC, 6: GT/AT. If splice junctions database is used, and a junction is annotated, 20 is added to its motif value.}
+  \optOpt{jI}   \optOptLine{start and end of introns for all junctions (1-based).}
+  \optOpt{XS}   \optOptLine{alignment strand according to --outSAMstrandField.}
+  \optOpt{MC}   \optOptLine{mate's CIGAR string. Standard SAM tag.}
+  \optOpt{ch}   \optOptLine{marks all segment of all chimeric alingments for --chimOutType WithinBAM output.}
+\end{optOptTable}
+  \optLine{***Variation:} 
 \begin{optOptTable}
   \optOpt{vA}   \optOptLine{variant allele}
-  \optOpt{ha}   \optOptLine{haplotype (1/2) when mapping to the diploid genome. Requires genome generated with --genomeTransformType Diploid}
-  \optOpt{vG}   \optOptLine{genomic coordinate of the variant overlapped by the read}
+  \optOpt{vG}   \optOptLine{genomic coordinate of the variant overlapped by the read.}
   \optOpt{vW}   \optOptLine{1 - alignment passes WASP filtering; 2,3,4,5,6,7 - alignment does not pass WASP filtering. Requires --waspOutputMode SAMtag.}
 \end{optOptTable}
-  \optLine{STARsolo:} 
+  \optLine{***STARsolo:} 
 \begin{optOptTable}
-  \optOpt{CR CY UR UY}   \optOptLine{sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing}
+  \optOpt{CR CY UR UY}   \optOptLine{sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing.}
+  \optOpt{GX GN}   \optOptLine{gene ID and gene name.}
   \optOpt{CB UB}   \optOptLine{error-corrected cell barcodes and UMIs for solo* demultiplexing. Requires --outSAMtype BAM SortedByCoordinate.}
-  \optOpt{sM}   \optOptLine{assessment of CB and UMI}
+  \optOpt{sM}   \optOptLine{assessment of CB and UMI.}
+  \optOpt{sS}   \optOptLine{sequence of the entire barcode (CB,UMI,adapter).}
+  \optOpt{sQ}   \optOptLine{quality of the entire barcode.}
 \end{optOptTable}
-  \optLine{sS          ... sequence of the entire barcode (CB,UMI,adapter...)} 
+  \optLine{***Unsupported/undocumented:} 
 \begin{optOptTable}
-  \optOpt{sQ}   \optOptLine{quality of the entire barcode}
-  \optOpt{GX GN}   \optOptLine{gene ID and gene name}
-\end{optOptTable}
-  \optLine{Unsupported/undocumented:} 
-\begin{optOptTable}
-  \optOpt{rB}   \optOptLine{alignment block read/genomic coordinates}
-  \optOpt{vR}   \optOptLine{read coordinate of the variant}
+  \optOpt{ha}   \optOptLine{haplotype (1/2) when mapping to the diploid genome. Requires genome generated with --genomeTransformType Diploid .}
+  \optOpt{rB}   \optOptLine{alignment block read/genomic coordinates.}
+  \optOpt{vR}   \optOptLine{read coordinate of the variant.}
 \end{optOptTable}
 \optName{outSAMattrIHstart}
   \optValue{1}

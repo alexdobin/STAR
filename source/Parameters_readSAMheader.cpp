@@ -18,7 +18,13 @@ void Parameters::readSAMheader(const string readFilesCommandString, const vector
 
     string tmpFifo=outFileTmp+"tmp.fifo.header";
     remove(tmpFifo.c_str());
-    mkfifo(tmpFifo.c_str(), S_IRUSR | S_IWUSR );
+    if (mkfifo(tmpFifo.c_str(), S_IRUSR | S_IWUSR ) != 0) {
+        exitWithError("Exiting because of *FATAL ERROR*: could not create FIFO file " + tmpFifo + "\n"
+                      + "SOLUTION: check the if run directory supports FIFO files.\n"
+                      + "If run partition does not support FIFO (e.g. Windows partitions FAT, NTFS), "
+                      + "re-run on a Linux partition, or point --outTmpDir to a Linux partition.\n"
+                      , std::cerr, inOut->logMain, EXIT_CODE_FIFO, *this);
+    };
 
     ifstream tmpFifoIn;
     for (uint32 ii=0; ii<readFilesNames.size(); ii++) {
