@@ -1,7 +1,16 @@
-* Issue #965: output genome sizes with and without padding into Log.out.
+STAR 2.7.5a --- 2020/08/01
+======================
+Bug-fix release.
+----------------
+
+* Issue #558: Fixed a bug that can cause a seg-fault in STARsolo run with paired-end reads that have protruding ends.
+* Issue #952: Increased the maximum allowed length of the SAM tags in the input SAM files.
 * Issue #955: fixed seg-fault-causing bug for --soloFeatures SJ option.
+* Issue #963: When reading GTF file, skip any exons that extend past the end of the chromosome, and give a warning.
+* Issue #965: output genome sizes with and without padding into Log.out.
 * Docker build: switched to debian:stable-slim in the Dockerfile.
 * --soloType CB_samTagOut now allows output of (uncorrected) UMI sequences and quality scores with SAM tags UR and UY.
+* Throw an error if FIFO file cannot be created on non-Linux partitions.
 
 STAR 2.7.5a 2020/06/16
 ======================

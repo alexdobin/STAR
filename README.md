@@ -1,7 +1,7 @@
 STAR 2.7
 ========
 Spliced Transcripts Alignment to a Reference
-© Alexander Dobin, 2009-2019
+© Alexander Dobin, 2009-2020
 https://www.ncbi.nlm.nih.gov/pubmed/23104886
 
 AUTHOR/SUPPORT
