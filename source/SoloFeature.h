@@ -31,7 +31,8 @@ public:
     SoloReadFeature *readFeatSum, **readFeatAll;
     SoloReadBarcode *readBarSum;
 
-    uint64 nReadsMapped, nCB, nReadsInput; //total number of mapped reads
+    uint64 nReadsMapped, nReadsInput; //total number of mapped reads
+    uint32 nCB;
     uint32 featuresNumber; //number of features (i.e. genes, SJs, etc)
 
     uint32 *rGeneUMI;//mapped reads sorted by CB
@@ -77,8 +78,10 @@ public:
     void outputResults(bool cellFilterYes);
     void addBAMtags(char *&bam0, uint32 &size0, char* bam1);
     void statsOutput();
-    void cellFiltering();
     void redistributeReadsByCB();
+    
+    void cellFiltering();
+    void emptyDrops_CR();
 };
 
 #endif

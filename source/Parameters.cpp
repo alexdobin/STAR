@@ -292,7 +292,7 @@ Parameters::Parameters() {//initalize parameters info
 void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters: default, from files, from command line
     
     //hard-coded parameters
-    runRestart.type=0;
+    runRestart.type=1;
 
 ///////// Default parameters
 

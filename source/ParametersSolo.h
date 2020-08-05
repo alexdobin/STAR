@@ -61,11 +61,19 @@ public:
     //cell filtering
     struct {
         vector<string> type;
-        double cr2maxPercentile;
-        double cr2expectedCells;
-        double cr2maxMinRatio;
-        uint64 cr2maxCellInd;
-        uint64 topCells;
+        uint32 topCells;
+        
+        struct {
+            double nExpectedCells;
+            double maxPercentile;
+            double maxMinRatio;
+        } knee;
+        
+        struct {
+            uint32 indMin, indMax; //min/max cell index, sorted by UMI counts,for empty cells
+            
+        } eDcr;//EmptyDrops-CellRanger
+        
     } cellFilter;
     
     //algorithms

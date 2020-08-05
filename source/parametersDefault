@@ -811,9 +811,10 @@ soloOutFileNames            Solo.out/          features.tsv barcodes.tsv        
 
 soloCellFilter              CellRanger2.2 3000 0.99 10
     string(s):              cell filtering type and parameters
-                            CellRanger2.2   ... simple filtering of CellRanger 2.2, followed by three numbers: number of expected cells, robust maximum percentile for UMI count, maximum to minimum ratio for UMI count
-                            TopCells        ... only report top cells by UMI count, followed by the exact number of cells
                             None            ... do not output filtered cells
+                            TopCells        ... only report top cells by UMI count, followed by the exact number of cells
+                            CellRanger2.2   ... simple filtering of CellRanger 2.2, followed by three numbers: number of expected cells, robust maximum percentile for UMI count, maximum to minimum ratio for UMI count
+                            EmptyDrops_CR 3000 0.99 10 45000 45000
 
 soloOutFormatFeaturesGeneField3	"Gene Expression"
 	string(s):				field 3 in the Gene features.tsv file. If "-", then no 3rd field is output.
