@@ -62,10 +62,7 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     //output nU per gene per CB
     outputResults(false); //unfiltered
     
-    if (pSolo.cellFilter.type[0]!="None" && (featureType==SoloFeatureTypes::Gene || featureType==SoloFeatureTypes::GeneFull)) {
-        cellFiltering();
-        outputResults(true);
-    };
+    cellFiltering();
     
     //summary stats output
     statsOutput();

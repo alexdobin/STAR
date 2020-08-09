@@ -19,6 +19,7 @@ runMode                         alignReads
                                 genomeGenerate         ... generate genome files
                                 inputAlignmentsFromBAM ... input alignments from BAM. Presently only works with --outWigType and --bamRemoveDuplicates.
                                 liftOver               ... lift-over of GTF files (--sjdbGTFfile) between genome assemblies using chain file(s) from --genomeChainFiles.
+                                soloCellFiltering      ... STARsolo cell filtering ("calling") without remapping
 
 runThreadN                      1
     int: number of threads to run STAR

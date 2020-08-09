@@ -71,7 +71,7 @@ void SoloFeature::sumThreads(ReadAlignChunk **RAchunk)
     };
     
     indCBwl.resize(pSolo.cbWLsize);
-    indCB = new uint32[nCB];
+    indCB.resize(nCB);
     nCB=0;//will count it again below
     for (uint32 ii=0; ii<pSolo.cbWLsize; ii++) {
         if (readFeatSum->cbReadCount[ii]>0) {

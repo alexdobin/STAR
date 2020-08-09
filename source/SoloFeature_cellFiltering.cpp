@@ -7,7 +7,10 @@ void SoloFeature::cellFiltering()
 
     if (pSolo.cellFilter.type[0]=="None" ||  nCB<1)
         return;
-       
+    if (featureType!=SoloFeatureTypes::Gene && featureType!=SoloFeatureTypes::GeneFull) {
+        return;
+    };
+
     //simple filtering first
     nUMIperCBsorted=nUMIperCB;
     qsort(nUMIperCBsorted.data(), nCB, sizeof(uint32), funCompareNumbersReverse<uint32>); //sort by gene number
@@ -82,5 +85,7 @@ void SoloFeature::cellFiltering()
     filteredCells.medianGenePerCell = filteredCells.nGenePerCell[filteredCells.nCells/2];
     filteredCells.medianReadPerCell = filteredCells.nReadPerCell[filteredCells.nCells/2];
     
+    outputResults(true);
+
     return;
 };

@@ -5,7 +5,7 @@
 
 void SoloFeature::emptyDrops_CR()
 {
-    
+    return;
     if (nCB<=pSolo.cellFilter.eDcr.indMin) {
         P.inOut->logMain << "emptyDrops_CR filtering: no empty cells found: nCB=" << nCB <<"   emptyCellMinIndex="<< pSolo.cellFilter.eDcr.indMin << "\n";
         return;

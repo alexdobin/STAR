@@ -21,7 +21,6 @@
 #include "Transcriptome.h"
 #include "signalFromBAM.h"
 #include "mapThreadsSpawn.h"
-#include "ErrorWarning.h"
 #include "SjdbClass.h"
 #include "sjdbInsertJunctions.h"
 #include "Variation.h"
@@ -69,15 +68,15 @@ int main(int argInN, char* argIn[]) {
     *(P.inOut->logStdOut) << timeMonthDayTime(g_statsAll.timeStart) << " ..... started STAR run\n" <<flush;
 
     //generate genome
-    if (P.runMode=="alignReads") {
-        //continue
-    } else if (P.runMode=="genomeGenerate") {
+    if ( P.runMode == "alignReads" || P.runMode == "soloCellFiltering" ) {
+        //nothing to do here
+    } else if ( P.runMode == "genomeGenerate" ) {
         Genome genomeMain(P, P.pGe);
         genomeMain.genomeGenerate();
         (void) sysRemoveDir (P.outFileTmp);
         P.inOut->logMain << "DONE: Genome generation, EXITING\n" << flush;
         exit(0);
-    } else if (P.runMode=="liftOver") {
+    } else if ( P.runMode == "liftOver" ) {
         for (uint ii=0; ii<P.pGe.gChainFiles.size();ii++) {
             Chain chain(P,P.pGe.gChainFiles.at(ii));
             chain.liftOverGTF(P.pGe.sjdbGTFfile,P.outFileNamePrefix+"GTFliftOver_"+to_string(ii+1)+".gtf");
@@ -96,8 +95,9 @@ int main(int argInN, char* argIn[]) {
    
     //calculate genome-related parameters
     Transcriptome *transcriptomeMain=NULL;
+    
     genomeMain.Var=new Variation(P, genomeMain.chrStart, genomeMain.chrNameIndex);
-
+    
     SjdbClass sjdbLoci;
 
     if (P.sjdbInsert.pass1) {
@@ -128,6 +128,8 @@ int main(int argInN, char* argIn[]) {
         transcriptomeMain=new Transcriptome(P);
     };
 
+    Solo soloCellFilter(P, *transcriptomeMain); //this will execute --runMode soloCellFiltering and exit
+    
     //initialize Stats
     g_statsAll.resetN();
     time(&g_statsAll.timeStartMap);

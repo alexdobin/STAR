@@ -3,20 +3,50 @@
 #include "streamFuns.h"
 
 Solo::Solo(ReadAlignChunk **RAchunkIn, Parameters &Pin, Transcriptome &inTrans)
-          :  RAchunk(RAchunkIn), P(Pin), Trans(inTrans), pSolo(P.pSolo)
+                       :  RAchunk(RAchunkIn), P(Pin), Trans(inTrans), pSolo(P.pSolo)
 {
-    if ( pSolo.type==0 )
+    if ( pSolo.type == 0 )
         return;
     
     readBarSum = new SoloReadBarcode(P);
     
-    if (pSolo.type==pSolo.SoloTypes::CB_samTagOut)
+    if ( pSolo.type == pSolo.SoloTypes::CB_samTagOut )
         return;
 
     soloFeat = new SoloFeature*[pSolo.nFeatures];
     for (uint32 ii=0; ii<pSolo.nFeatures; ii++)
         soloFeat[ii] = new SoloFeature(pSolo.features[ii], P, Trans, readBarSum, soloFeat);
 };
+
+///////////////////////////////////////////////////////////////////////////////////// post-mapping procssing only
+Solo::Solo(Parameters &Pin, Transcriptome &inTrans)
+          :  P(Pin), Trans(inTrans), pSolo(P.pSolo)
+{
+    if ( pSolo.type == 0 )
+        return;
+    
+    time_t timeCurrent;
+    
+    if ( P.runMode == "soloCellFiltering") {
+        time( &timeCurrent);
+        *P.inOut->logStdOut << timeMonthDayTime(timeCurrent) << " ..... starting SoloCellFiltering" <<endl;
+        
+        soloFeat = new SoloFeature*[pSolo.nFeatures];
+        for (uint32 ii=0; ii<pSolo.nFeatures; ii++) {
+            soloFeat[ii] = new SoloFeature(pSolo.features[ii], P, Trans, NULL, soloFeat);
+            soloFeat[ii]->loadRawMatrix();
+            soloFeat[ii]->cellFiltering();
+        };
+    } else {//return back to executing STAR
+        return;
+    };
+    
+    time( &timeCurrent);
+    *P.inOut->logStdOut << timeMonthDayTime(timeCurrent) << " ..... finished successfully\n" <<flush;
+    P.inOut->logMain  << "ALL DONE!\n" << flush;
+    exit(0);
+};
+
 
 ////////////////////////////////////////////////////////////////////////////////////
 void Solo::processAndOutput()

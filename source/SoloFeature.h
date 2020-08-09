@@ -36,11 +36,11 @@ public:
     uint32 featuresNumber; //number of features (i.e. genes, SJs, etc)
 
     uint32 *rGeneUMI;//mapped reads sorted by CB
-    uint32 *indCB;//index of detected CBs in the whitelist
-    vector<uint32> indCBwl; //reverse of indCB: index of WL CBs in detected CB list
     uint32 *rCBn;//number of reads for detected CBs in the whitelist
     uint32 **rCBp;//array of pointers to each CB sub-array
 
+    vector<uint32> indCB;//index of detected CBs in the whitelist
+    vector<uint32> indCBwl; //reverse of indCB: index of WL CBs in detected CB list
     vector<uint32> nUMIperCB, nUMIperCBsorted;//number of UMIs per CB, and the same sorted (descendant)
     vector<uint32> nGenePerCB;//number of genes (with >0 UMIs) per CB
     vector<uint32> nReadPerCB;//number of reads per CB
@@ -82,6 +82,7 @@ public:
     
     void cellFiltering();
     void emptyDrops_CR();
+    void loadRawMatrix();
 };
 
 #endif

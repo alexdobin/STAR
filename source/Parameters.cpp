@@ -292,7 +292,7 @@ Parameters::Parameters() {//initalize parameters info
 void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters: default, from files, from command line
     
     //hard-coded parameters
-    runRestart.type=1;
+    runRestart.type=0;
 
 ///////// Default parameters
 
@@ -353,7 +353,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     if (inOut->logMain.fail()) {
         ostringstream errOut;
         errOut <<"EXITING because of FATAL ERROR: could not create output file: "<<outFileNamePrefix + "Log.out"<<"\n";
-        errOut <<"Check if the path " << outFileNamePrefix << " exists and you have permissions to write there\n";
+        errOut <<"SOLUTION: check if the path " << outFileNamePrefix << " exists and you have permissions to write there\n";
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
 

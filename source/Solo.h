@@ -21,6 +21,9 @@ public:
     SoloReadBarcode *readBarSum;
 
     Solo(ReadAlignChunk **RAchunk, Parameters &Pin, Transcriptome &inTrans);
+    
+    Solo(Parameters &Pin, Transcriptome &inTrans);
+
     void processAndOutput();
 };
 

@@ -84,18 +84,36 @@ inline int funCompareArrays (const void *a, const void *b) {
 
 };
 
+template <class Type>
+inline int funCompareTypeSecondFirst (const void *a, const void *b) {
+    Type va= *( ((Type*) a) + 1 );
+    Type vb= *( ((Type*) b) + 1 );
+    Type va1= *( ((Type*) a) + 0 );
+    Type vb1= *( ((Type*) b) + 0 );
+
+    if (va>vb) {
+        return 1;
+    } else if (va==vb && va1>vb1) {
+        return 1;
+    } else if (va==vb && va1==vb1) {
+        return 0;
+    } else {
+        return -1;
+    };    
+};
+
 template <class Type, int Shift>
 inline int funCompareTypeShift (const void *a, const void *b) {
     Type va= *( ((Type*) a)+Shift );
     Type vb= *( ((Type*) b)+Shift );
 
     if (va>vb) {
-		return 1;
-	} else if (va==vb) {
-		return 0;
-	} else {
-		return -1;
-	};
+        return 1;
+    } else if (va==vb) {
+        return 0;
+    } else {
+        return -1;
+    };
 
 };
 
