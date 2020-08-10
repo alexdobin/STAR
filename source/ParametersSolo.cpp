@@ -370,16 +370,20 @@ void ParametersSolo::initialize(Parameters *pPin)
     
     //cell filtering
     if (cellFilter.type[0]=="CellRanger2.2") {
-        cellFilter.knee.nExpectedCells=stod(cellFilter.type[1]);
-        cellFilter.knee.maxPercentile=stod(cellFilter.type[2]);
-        cellFilter.knee.maxMinRatio=stod(cellFilter.type[3]);
+        cellFilter.knee.nExpectedCells=std::stod(cellFilter.type[1]);
+        cellFilter.knee.maxPercentile=std::stod(cellFilter.type[2]);
+        cellFilter.knee.maxMinRatio=std::stod(cellFilter.type[3]);
     } else if (cellFilter.type[0]=="EmptyDrops_CR") {
-        cellFilter.knee.nExpectedCells=stod(cellFilter.type[1]);
-        cellFilter.knee.maxPercentile=stod(cellFilter.type[2]);
-        cellFilter.knee.maxMinRatio=stod(cellFilter.type[3]);
-        cellFilter.eDcr.indMin=stoi(cellFilter.type[4]);
-        cellFilter.eDcr.indMax=cellFilter.eDcr.indMin+stoi(cellFilter.type[5]);
-        
+        cellFilter.knee.nExpectedCells=std::stod(cellFilter.type[1]);
+        cellFilter.knee.maxPercentile=std::stod(cellFilter.type[2]);
+        cellFilter.knee.maxMinRatio=std::stod(cellFilter.type[3]);
+        cellFilter.eDcr.indMin=std::stoi(cellFilter.type[4]);
+        cellFilter.eDcr.indMax=cellFilter.eDcr.indMin+std::stoi(cellFilter.type[5]);
+        cellFilter.eDcr.umiMin=std::stoi(cellFilter.type[6]);
+        cellFilter.eDcr.umiMinFracMedian=std::stod(cellFilter.type[7]);
+        cellFilter.eDcr.candMaxN=std::stoi(cellFilter.type[8]);
+        cellFilter.eDcr.FDR=std::stod(cellFilter.type[9]);
+        cellFilter.eDcr.simN=std::stoi(cellFilter.type[10]);
     } else if (cellFilter.type[0]=="TopCells") {
         
     } else if (cellFilter.type[0]=="None") {

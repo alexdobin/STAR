@@ -71,7 +71,11 @@ public:
         
         struct {
             uint32 indMin, indMax; //min/max cell index, sorted by UMI counts,for empty cells
-            
+            uint32 umiMin;
+            double umiMinFracMedian;
+            uint32 candMaxN;
+            double FDR;
+            uint32 simN;
         } eDcr;//EmptyDrops-CellRanger
         
     } cellFilter;

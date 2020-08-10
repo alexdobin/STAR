@@ -55,6 +55,8 @@ public:
     struct {
         uint64 nCells, nReadInCells, medianReadPerCell, meanReadPerCell, nUMIinCells, medianUMIperCell, meanUMIperCell, nGeneInCells, medianGenePerCell, meanGenePerCell, nGeneDetected;
         vector<uint32> nUMIperCell, nReadPerCell, nGenePerCell;
+        
+        uint32 nCellsSimple; //number of cells after simple filtering
     } filteredCells;
     
     string outputPrefix;

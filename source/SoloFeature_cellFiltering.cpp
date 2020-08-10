@@ -26,10 +26,12 @@ void SoloFeature::cellFiltering()
     };
     nUMImin=max(nUMImin,(uint32) 1);//cannot be zero
     
+    filteredCells.nCellsSimple=0;
     cellFilterVec.resize(nCB,false);
     for (uint32 icb=0; icb<nCB; icb++) {
         if (nUMIperCB[icb]>=nUMImin) {
             cellFilterVec[icb]=true;
+            filteredCells.nCellsSimple++;
         };
     };
     

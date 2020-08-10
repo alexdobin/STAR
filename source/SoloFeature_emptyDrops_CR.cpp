@@ -1,11 +1,15 @@
 #include "SoloFeature.h"
 #include "serviceFuns.cpp"
+#include "SimpleGoodTuring/sgt.h"
 #include <math.h>
 #include <unordered_set>
+#include <map>
+#include <random>
+
+double logMultinomialPDFsparse(vector<double> &ambProfileLogP, vector<uint32> countCellGeneUMI, uint32 stride, uint32 shift, int64 start, uint32 nGenes);
 
 void SoloFeature::emptyDrops_CR()
 {
-    return;
     if (nCB<=pSolo.cellFilter.eDcr.indMin) {
         P.inOut->logMain << "emptyDrops_CR filtering: no empty cells found: nCB=" << nCB <<"   emptyCellMinIndex="<< pSolo.cellFilter.eDcr.indMin << "\n";
         return;
@@ -19,7 +23,7 @@ void SoloFeature::emptyDrops_CR()
             featDet.insert(g1);
         };
     };
-    uint32 nFeatDet=featDet.size(); //total number of detected genes - this should have been done already?
+    uint32 featDetN=featDet.size(); //total number of detected genes - this should have been done already?
     
     //sum gene expression over the collection of empty cells
     typedef struct {uint32 index, count;} IndCount;
@@ -29,25 +33,161 @@ void SoloFeature::emptyDrops_CR()
         indCount[ii].count=nUMIperCB[ii];
     };
     std::sort(indCount.begin(), indCount.end(), [](const IndCount &ic1, const IndCount &ic2) {
-                                                    return ic1.count>ic2.count; //descending order
+                                                    return (ic1.count>ic2.count) || (ic1.count==ic2.count && ic1.index<ic2.index); //descending order by count, ascending by index
                                                 });
     
 
     //ambient gene counts
     vector<uint32> ambCount(featuresNumber,0);
-    for (uint32 icb=pSolo.cellFilter.eDcr.indMin; icb<min(nCB,pSolo.cellFilter.eDcr.indMax); icb++) {
-        for (uint32 ig=0; ig<nGenePerCB[icb]; ig++) {
-            uint32 irec = countCellGeneUMIindex[icb]+ig*countMatStride;
-            ambCount[countCellGeneUMI[irec+0]] += countCellGeneUMI[irec+1];
+    for (auto icb=pSolo.cellFilter.eDcr.indMin; icb<min(nCB,pSolo.cellFilter.eDcr.indMax); icb++) {
+        auto icb1 = indCount[icb].index;
+        for (uint32 ig=0; ig<nGenePerCB[icb1]; ig++) {
+            auto irec = countCellGeneUMIindex[icb1]+ig*countMatStride;
+            ambCount[countCellGeneUMI[irec+0]] += countCellGeneUMI[irec+2];
         };
     };
     
     //frequencies
-    unordered_map<uint32,uint32> ambCountFreq;
+    map<uint32,uint32> ambCountFreq; //ordered map is not really needed
     for (auto &ac: ambCount) {
         ambCountFreq[ac]++;
     };
+    ambCountFreq[0] -= (featuresNumber-featDetN); //subtract genes that were not detected in *any* cells
+    uint32 maxFreq = ambCountFreq.rbegin()->first;
     
-     
+    vector<double> ambCountFreqSGT(maxFreq+1);//up to max frequency
+    {//SGT estimate of ambient profile
+        SGT<uint32> sgt;
+        for (auto &cf: ambCountFreq) {
+            if (cf.first != 0)
+                sgt.add(cf.first, cf.second);
+        };
+        sgt.analyse();
+        
+        for (uint32 freq=0; freq<=maxFreq; freq++) {
+            sgt.estimate(freq, ambCountFreqSGT[freq]);
+        };
+        ambCountFreqSGT[0] /= ambCountFreq[0]; //divide freq=0 probability equally among all undetected genes in ambient profile
+        
+    };
+    
+    //ambient profile for all features
+    vector<double> ambProfileLogP(featuresNumber, 0.0);//logarithm
+    vector<double> ambProfilePnon0, ambProfileLogPnon0;//only non-0 genes
+    {
+        for (uint32 ig=0; ig<featuresNumber; ig++) {
+            if (featDet.count(ig)>0) {//this is only needed if normalization below is performed
+                ambProfileLogP[ig]=ambCountFreqSGT[ambCount[ig]];
+            };
+        };
+        
+        double norm1 = accumulate(ambProfileLogP.begin(), ambProfileLogP.end(), 0.0);
+        ambProfileLogPnon0.reserve(ambProfileLogP.size());
+        ambProfilePnon0.reserve(ambProfileLogP.size());
+        for (auto &cf: ambProfileLogP) {
+            if (cf>0) {
+                cf /= norm1;//normalization is just in case
+                ambProfilePnon0.push_back(cf);
+                cf = std::log(cf);
+                ambProfileLogPnon0.push_back(cf);
+            };
+        };
+    };
+    
+    //select candidate cells
+    uint32 iCandFirst, iCandLast; //first/last candidate cell in the descending sorted indCount
+    {
+        iCandFirst=filteredCells.nCellsSimple;//candidates start right after the cutoff for the simple filtering
+        uint32 minUMI = int(pSolo.cellFilter.eDcr.umiMinFracMedian * nUMIperCBsorted[filteredCells.nCellsSimple/2]);//this is not exactly median
+        minUMI = max(pSolo.cellFilter.eDcr.umiMin, minUMI);
+        for (iCandLast=iCandFirst; iCandLast<iCandFirst+pSolo.cellFilter.eDcr.candMaxN; iCandLast++) {
+            if (indCount[iCandLast].count<minUMI)
+                break;
+        };
+        --iCandLast;
+    };
+    P.inOut->logMain << "emptyDrops_CR filtering: number of candidate cells = " << iCandLast-iCandFirst+1 <<endl;
+
+    
+    //calculate observed probability for each candidate
+    vector<double> obsLogProb(iCandLast-iCandFirst+1);
+    for (uint32 icand=0; icand<obsLogProb.size(); icand++) {
+        auto icell=indCount[icand+iCandFirst].index;
+        obsLogProb[icand]=logMultinomialPDFsparse(ambProfileLogP, countCellGeneUMI, countMatStride, 2, countCellGeneUMIindex[icell], nGenePerCB[icell]);
+    };
+    
+    //simulate the probabilities for each cell count
+    vector<vector<double>> simLogProb(pSolo.cellFilter.eDcr.simN);
+    {
+        
+        std::discrete_distribution<uint32> distrAmb ( ambProfilePnon0.begin(), ambProfilePnon0.end() );
+        auto maxCount=indCount[iCandFirst].count;
+        for (uint64 isim=0; isim<simLogProb.size(); isim++) {
+            simLogProb[isim].resize(maxCount+1);
+            simLogProb[isim][0]=0;
+
+            std::mt19937 rngGen(19760110LLU*(isim+1));
+
+            vector<uint32> currCounts(ambProfilePnon0.size(), 0);
+            for (uint32 ic=1; ic<=maxCount; ic++) {
+                uint32 ig1 = distrAmb(rngGen);
+                currCounts[ig1]++;
+                simLogProb[isim][ic] = simLogProb[isim][ic-1] + ambProfileLogPnon0[ig1] + std::log(ic) - std::log(currCounts[ig1]);
+            };
+        };
+    };
+    
+    //p-values
+    typedef struct{uint32 index; double p; double padj;} IndPPadj;
+    vector<IndPPadj> pValues(obsLogProb.size());
+    {
+        for (uint32 icand=0; icand<obsLogProb.size(); icand++) {
+            pValues[icand].index=indCount[icand+iCandFirst].index;
+            auto count1=indCount[icand+iCandFirst].count;
+            
+            //auto funSumLess = [&] (uint32 n, vector<double> sp) { return n + (sp[count1]<obsLogProb[icand]); };
+            //uint32 nLowerP = std::accumulate<uint32>(simLogProb.begin(), simLogProb.end(), 0, funSumLess);
+            uint32 nLowerP=0;
+            //for (uint64 isim=0; isim<simLogProb.size(); isim++) {
+            for (auto &sp: simLogProb) {
+                nLowerP += ( sp[count1]<obsLogProb[icand] );
+            };
+
+            pValues[icand].p=double(1+nLowerP)/(1+simLogProb.size());
+        };
+        //BH
+        std::sort(pValues.begin(), pValues.end(), [](const IndPPadj &ip1, const IndPPadj &ip2) {return (ip1.p < ip2.p);} );
+        uint32 rank=0;
+        for (auto &ip: pValues) {
+            rank++;
+            ip.padj=ip.p*pValues.size()/rank;
+        };
+        for (auto ip=pValues.rbegin()+1; ip!=pValues.rend(); ++ip)
+            ip->padj = min(ip->padj, (ip-1)->padj); //make it non-decreasing
+    };
+    
+    uint32 extraCells=0;
+    for (auto &ip: pValues) {
+        if (ip.padj<=pSolo.cellFilter.eDcr.FDR) {
+            ++extraCells;
+            cellFilterVec[ip.index]=true;
+        };
+    };
+    
+    P.inOut->logMain << "emptyDrops_CR filtering: number of additional non-ambient cells = " << extraCells <<endl;
+    
     return;
+};
+
+double logMultinomialPDFsparse(vector<double> &ambProfileLogP, vector<uint32> countCellGeneUMI, uint32 stride, uint32 shift, int64 start, uint32 nGenes) {
+    uint32 sumCount=0;
+    double sumGammaLn=0.0, sumCountLogP=0.0;
+    for (uint32 ig=0; ig<nGenes; ig++) {
+        auto count1 = countCellGeneUMI[start+ig*stride+shift];
+        sumCount += count1;
+        sumGammaLn += std::lgamma(count1+1);
+        sumCountLogP += ambProfileLogP[countCellGeneUMI[start+ig*stride]] * count1;
+    };
+    
+    return std::lgamma(sumCount+1) - sumGammaLn + sumCountLogP;
 };
