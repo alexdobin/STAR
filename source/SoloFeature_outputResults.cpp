@@ -6,18 +6,11 @@
 #include "ErrorWarning.h"
 #include "SoloFeatureTypes.h"
 
-void SoloFeature::outputResults(bool cellFilterYes)
+void SoloFeature::outputResults(bool cellFilterYes, string outputPrefixMat)
 {    
-    //make directories
-    string outputPrefix1;
-    if (cellFilterYes) {
-        outputPrefix1 = outputPrefix + "/filtered/";
-    } else {
-        outputPrefix1 = outputPrefix + "/raw/";
-    };
-    
-    if (mkdir(outputPrefix1.c_str(),P.runDirPerm)!=0 && errno!=EEXIST) {//create directory
-        exitWithError("EXITING because of fatal OUTPUT FILE error: could not create Solo output directory" + outputPrefix1 + 
+    //make directories   
+    if (mkdir(outputPrefixMat.c_str(),P.runDirPerm)!=0 && errno!=EEXIST) {//create directory
+        exitWithError("EXITING because of fatal OUTPUT FILE error: could not create Solo output directory" + outputPrefixMat + 
                       "\nSOLUTION: check the path and permisssions\n",
                        std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
     };
@@ -30,7 +23,7 @@ void SoloFeature::outputResults(bool cellFilterYes)
         case SoloFeatureTypes::Velocyto :
         case SoloFeatureTypes::VelocytoSimple :
         {
-            ofstream &geneStr=ofstrOpen(outputPrefix1+pSolo.outFileNames[1],ERROR_OUT, P);
+            ofstream &geneStr=ofstrOpen(outputPrefixMat+pSolo.outFileNames[1],ERROR_OUT, P);
             for (uint32 ii=0; ii<Trans.nGe; ii++) {
                 geneStr << Trans.geID[ii] <<"\t"<< (Trans.geName[ii].empty() ? Trans.geID[ii] : Trans.geName[ii]);
 				if (pSolo.outFormat.featuresGeneField3!="-") {
@@ -42,12 +35,12 @@ void SoloFeature::outputResults(bool cellFilterYes)
             break;
         };
         case SoloFeatureTypes::SJ :
-        	symlink("../../../SJ.out.tab", (outputPrefix1+pSolo.outFileNames[1]).c_str());
+        	symlink("../../../SJ.out.tab", (outputPrefixMat+pSolo.outFileNames[1]).c_str());
     };
 
     ////////////////////////////////////////////////////////////////////////////
     //write barcodes.tsv
-    ofstream &cbStr=ofstrOpen(outputPrefix1+pSolo.outFileNames[2],ERROR_OUT, P);
+    ofstream &cbStr=ofstrOpen(outputPrefixMat+pSolo.outFileNames[2],ERROR_OUT, P);
     uint64 nCellGeneEntries=0;//total number of non-zero cell/gene combinations (entries in the output matrix)
     if (cellFilterYes) {//filtered cells
         for (uint32 icb=0; icb<nCB; icb++) {
@@ -67,7 +60,7 @@ void SoloFeature::outputResults(bool cellFilterYes)
 
     /////////////////////////////////////////////////////////////
     //output counting matrix
-    string matrixFileName=outputPrefix1+pSolo.outFileNames[3];
+    string matrixFileName=outputPrefixMat+pSolo.outFileNames[3];
     ofstream &countMatrixStream=ofstrOpen(matrixFileName,ERROR_OUT, P);
     
     

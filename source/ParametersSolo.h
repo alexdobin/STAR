@@ -121,6 +121,7 @@ public:
     void initialize(Parameters *pPin);
     void umiSwapHalves(uint32 &umi);
     void complexWLstrings();
+    void cellFiltering();
 private:
     Parameters *pP;
 };

@@ -126,8 +126,20 @@ inline int splitString(const std::string &s, char delim, std::vector<std::string
         maxL=max(maxL, (int)item.size());
         elems.push_back(item);
     };
-    return maxL;//returns mzx string size
+    return maxL;//returns max string size
 };
+
+/*
+ * std::vector<std::string>  splitString(const std::string &s, char delim) {
+    std::stringstream ss(s);
+    std::string item;
+    std::vector<std::string> elems;
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    };
+    return elems;
+};
+*/
 
 template <class argType>
 inline uint32 binarySearch1(argType x, argType *X, uint32 N) {

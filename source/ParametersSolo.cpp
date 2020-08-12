@@ -11,6 +11,12 @@ void ParametersSolo::initialize(Parameters *pPin)
 {
     pP=pPin;
 
+    cellFiltering();
+    if (pP->runMode=="soloCellFiltering") {//only filtering happens, do not need any other parameters
+        yes=true;
+        return;
+    };
+    
     //constants - may turn into parameters in the future
     redistrReadsNfiles = 3*pP->runThreadN;
     
@@ -333,7 +339,7 @@ void ParametersSolo::initialize(Parameters *pPin)
 
     time_t rawTime;
     time(&rawTime);
-    pP->inOut->logMain << timeMonthDayTime(rawTime) << "Finished reading, sorting and deduplicating CB whitelist sequences." <<endl;
+    pP->inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished reading, sorting and deduplicating CB whitelist sequences." <<endl;
 
     //SAM attributes
     samAttrYes=false;
@@ -367,31 +373,7 @@ void ParametersSolo::initialize(Parameters *pPin)
     };
     if (featureYes[SoloFeatureTypes::VelocytoSimple] || featureYes[SoloFeatureTypes::Velocyto]) //turn readInfo on for Gene needed by VelocytoSimple
         readInfoYes[SoloFeatureTypes::Gene]=true;    
-    
-    //cell filtering
-    if (cellFilter.type[0]=="CellRanger2.2") {
-        cellFilter.knee.nExpectedCells=std::stod(cellFilter.type[1]);
-        cellFilter.knee.maxPercentile=std::stod(cellFilter.type[2]);
-        cellFilter.knee.maxMinRatio=std::stod(cellFilter.type[3]);
-    } else if (cellFilter.type[0]=="EmptyDrops_CR") {
-        cellFilter.knee.nExpectedCells=std::stod(cellFilter.type[1]);
-        cellFilter.knee.maxPercentile=std::stod(cellFilter.type[2]);
-        cellFilter.knee.maxMinRatio=std::stod(cellFilter.type[3]);
-        cellFilter.eDcr.indMin=std::stoi(cellFilter.type[4]);
-        cellFilter.eDcr.indMax=cellFilter.eDcr.indMin+std::stoi(cellFilter.type[5]);
-        cellFilter.eDcr.umiMin=std::stoi(cellFilter.type[6]);
-        cellFilter.eDcr.umiMinFracMedian=std::stod(cellFilter.type[7]);
-        cellFilter.eDcr.candMaxN=std::stoi(cellFilter.type[8]);
-        cellFilter.eDcr.FDR=std::stod(cellFilter.type[9]);
-        cellFilter.eDcr.simN=std::stoi(cellFilter.type[10]);
-    } else if (cellFilter.type[0]=="TopCells") {
-        
-    } else if (cellFilter.type[0]=="None") {
-    } else {
-        exitWithError("EXITING because of fatal PARAMETERS error: unrecognized option in --soloCellFilterType=" + cellFilter.type[0] + "\nSOLUTION: use allowed options: CellRanger2.2 or None\n",
-                       std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
-    };
-    
+       
     //umi filtering
     umiFiltering.MultiGeneUMI=false;
     if (umiFiltering.type[0]=="MultiGeneUMI") {
@@ -473,5 +455,57 @@ void ParametersSolo::complexWLstrings() {
         cbWLstr[ii].pop_back();
         
         cbV[0].icb++;//shift by one for the next CB
+    };
+};
+
+void ParametersSolo::cellFiltering()
+{//cell filtering
+    string pars1;
+    for (auto s=cellFilter.type.begin()+1; s!=cellFilter.type.end(); s++)
+        pars1 += ' ' + *s; //concatenate parameters into one string - easier to process that way
+    
+    if (cellFilter.type[0]=="CellRanger2.2") {           
+        if (cellFilter.type.size()==1) {
+            pP->inOut->logMain << "ParametersSolo: using hardcoded filtering parameters for --soloCellFilterType CellRanger2.2" <<endl;
+            pars1="3000 0.99 10";
+        } else if (cellFilter.type.size()<4) {            
+            string errOut="EXITING because of fatal PARAMETERS error: --soloCellFilterType CellRanger2.2 requires exactly 3 numerical parameters";
+            errOut +=     "\nSOLUTION: re-run with --soloCellFilterType CellRanger2.2 <nExpectedCells> <maxPercentile> <maxMinRatio>\n";
+            exitWithError(errOut, std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+        };
+        
+        pP->inOut->logMain << "ParametersSolo: --soloCellFilterType CellRanger2.2 filtering parameters: " << pars1 <<endl;
+        istringstream parsStream(pars1);
+        parsStream >> cellFilter.knee.nExpectedCells >> cellFilter.knee.maxPercentile >> cellFilter.knee.maxMinRatio;
+
+    } else if (cellFilter.type[0]=="EmptyDrops_CR") {
+        if (cellFilter.type.size()==1) {
+            pP->inOut->logMain << "ParametersSolo: using hardcoded filtering parameters for --soloCellFilterType EmptyDrops_CR\n";
+            pars1="3000 0.99 10 45000 90000 500 0.01 20000 0.01 10000";
+        } else if (cellFilter.type.size()<11) {            
+            string errOut="EXITING because of fatal PARAMETERS error: --soloCellFilterType EmptyDrops_CR requires exactly 10 numerical parameters";
+            errOut +=     "\nSOLUTION: re-run with --soloCellFilterType EmptyDrops_CR ";
+            errOut +=     "<nExpectedCells> <maxPercentile> <maxMinRatio> <indMin> <indMax> <umiMin> <umiMinFracMedian> <candMaxN> <FDR> <simN>\n";
+            exitWithError(errOut, std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+        };
+
+        pP->inOut->logMain << "ParametersSolo: --soloCellFilterType EmptyDrops_CR filtering parameters: " << pars1 <<endl;
+        istringstream parsStream(pars1);
+        parsStream >> cellFilter.knee.nExpectedCells >> cellFilter.knee.maxPercentile >> cellFilter.knee.maxMinRatio;
+        parsStream >> cellFilter.eDcr.indMin >> cellFilter.eDcr.indMax >> cellFilter.eDcr.umiMin >> cellFilter.eDcr.umiMinFracMedian;
+        parsStream >> cellFilter.eDcr.candMaxN >> cellFilter.eDcr.FDR >> cellFilter.eDcr.simN;
+        
+    } else if (cellFilter.type[0]=="TopCells") {
+        if (cellFilter.type.size()<2) {
+            string errOut="EXITING because of fatal PARAMETERS error: number of cells not specified for --soloCellFilterType TopCells";
+            errOut +=     "\nSOLUTION: --soloCellFilterType TopCells <NumberOfCells>\n";
+            exitWithError(errOut, std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+        };
+        cellFilter.topCells=stoi(cellFilter.type[1]);
+    } else if (cellFilter.type[0]=="None") {
+        //nothing to do
+    } else {
+        exitWithError("EXITING because of fatal PARAMETERS error: unrecognized option in --soloCellFilterType=" + cellFilter.type[0] + "\nSOLUTION: use allowed options: CellRanger2.2 or None\n",
+                    std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
 };

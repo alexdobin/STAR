@@ -92,5 +92,16 @@ void SoloFeature::loadRawMatrix()
         nUMIperCB[nCB] += countCellGeneUMI[ii*countMatStride+2];
     };
     
+    {//load barcodes
+        ifstream &wlstream = ifstrOpen(outputPrefix1+pSolo.outFileNames[2], ERROR_OUT, "SOLUTION: check the path and permissions of the barcodes file", P);
+        pSolo.cbWLstr.resize(nCB1);
+        for (auto &cb: pSolo.cbWLstr)
+            std::getline(wlstream, cb);
+    };
+    
+    {//copy features
+        
+    };
+    
     return;
 };

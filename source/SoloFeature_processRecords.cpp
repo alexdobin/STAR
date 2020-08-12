@@ -60,7 +60,7 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     statsStream->close();
     
     //output nU per gene per CB
-    outputResults(false); //unfiltered
+    outputResults(false,  outputPrefix + "/raw/"); //unfiltered
     
     cellFiltering();
     
