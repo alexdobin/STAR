@@ -66,7 +66,7 @@ public:
     void resetMapG(uint); // reset map to 0 for Lread bases
     void add(Transcript*); // add
     intScore alignScore(char **Read1, char *G, Parameters &P);
-    int variationAdjust(const Genome &mapGen, char *R);
+    int variationAdjust(const Genome &mapGen, const char *R);
     string generateCigarP(); //generates CIGAR
     void peOverlapSEtoPE(uint* mSta, Transcript &t);
     void extractSpliceJunctions(vector<array<uint64,2>> &sjOut, bool &annotYes);

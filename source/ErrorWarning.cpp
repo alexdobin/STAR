@@ -5,7 +5,7 @@
 #include "TimeFunctions.h"
 #include "GlobalVariables.h"
 
-void exitWithError(string messageOut, ostream &streamOut1, ostream &streamOut2, int errorInt, Parameters &P) {
+void exitWithError(string messageOut, ostream &streamOut1, ostream &streamOut2, int errorInt, const Parameters &P) {
     time_t timeCurrent;
     time( &timeCurrent);
     if (P.runThreadN>1) pthread_mutex_lock(&g_threadChunks.mutexError);
