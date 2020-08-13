@@ -19,7 +19,7 @@ runMode                         alignReads
                                 genomeGenerate         ... generate genome files
                                 inputAlignmentsFromBAM ... input alignments from BAM. Presently only works with --outWigType and --bamRemoveDuplicates.
                                 liftOver               ... lift-over of GTF files (--sjdbGTFfile) between genome assemblies using chain file(s) from --genomeChainFiles.
-                                soloCellFiltering      ... STARsolo cell filtering ("calling") without remapping
+                                soloCellFiltering  </path/to/raw/count/dir/>   </path/to/output/prefix>    ... STARsolo cell filtering ("calling") without remapping, followed by the path to raw count directory and output (filtered) prefix
 
 runThreadN                      1
     int: number of threads to run STAR
@@ -814,8 +814,12 @@ soloCellFilter              CellRanger2.2 3000 0.99 10
     string(s):              cell filtering type and parameters
                             None            ... do not output filtered cells
                             TopCells        ... only report top cells by UMI count, followed by the exact number of cells
-                            CellRanger2.2   ... simple filtering of CellRanger 2.2, followed by three numbers: number of expected cells, robust maximum percentile for UMI count, maximum to minimum ratio for UMI count
-                            EmptyDrops_CR   ... 
+                            CellRanger2.2   ... simple filtering of CellRanger 2.2. 
+                                                Can be followed by numbers: number of expected cells, robust maximum percentile for UMI count, maximum to minimum ratio for UMI count
+                                                The harcoded values are from CellRanger: nExpectedCells=3000;  maxPercentile=0.99;  maxMinRatio=10
+                            EmptyDrops_CR   ... EmptyDrops filtering in CellRanger flavor. Please cite the original EmptyDrops paper: A.T.L Lun et al, Genome Biology, 20, 63 (2019): https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1662-y
+                                                Can be followed by 10 numeric parameters:  nExpectedCells   maxPercentile   maxMinRatio   indMin   indMax   umiMin   umiMinFracMedian   candMaxN   FDR   simN 
+                                                The harcoded values are from CellRanger:             3000            0.99            10    45000    90000      500               0.01      20000  0.01  10000
 
 soloOutFormatFeaturesGeneField3	"Gene Expression"
 	string(s):				field 3 in the Gene features.tsv file. If "-", then no 3rd field is output.

@@ -7,12 +7,18 @@
 void SoloFeature::loadRawMatrix()
 {    
     //make directories
-    string outputPrefix1;
-    outputPrefix1 = outputPrefix + "/raw/";
+    if (P.runModeIn.size()<3) {
+        string errOut = "Exiting because of fatal PARAMETER error: --runMode soloCellFiltering should contain paths to count matrix input directorry and output prefix.";
+        errOut       += "\nSOLUTION: re-run with --runMode soloCellFiltering </path/to/raw/count/dir/> </path/to/output/prefix>\n";
+        exitWithError(errOut, std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
+    };
+    
+    string inputPrefix = P.runModeIn[1] + '/';
+    outputPrefix = P.runModeIn[2];
 
     /////////////////////////////////////////////////////////////
-    //output counting matrix
-    string matrixFileName=outputPrefix1+pSolo.outFileNames[3];
+    //load counting matrix
+    string matrixFileName=inputPrefix+pSolo.outFileNames[3];
     ifstream &matStream=ifstrOpen(matrixFileName, ERROR_OUT, "SOLUTION: check path and permission for the matrix file" + matrixFileName, P);
 
     //header
@@ -93,14 +99,17 @@ void SoloFeature::loadRawMatrix()
     };
     
     {//load barcodes
-        ifstream &wlstream = ifstrOpen(outputPrefix1+pSolo.outFileNames[2], ERROR_OUT, "SOLUTION: check the path and permissions of the barcodes file", P);
+        ifstream &wlstream = ifstrOpen(inputPrefix+pSolo.outFileNames[2], ERROR_OUT, "SOLUTION: check the path and permissions of the barcodes file", P);
         pSolo.cbWLstr.resize(nCB1);
         for (auto &cb: pSolo.cbWLstr)
             std::getline(wlstream, cb);
     };
     
     {//copy features
-        
+        std::ifstream &infeat  = ifstrOpen(inputPrefix+ pSolo.outFileNames[1], ERROR_OUT, "SOLUTION: check the path and permissions of the features file", P);
+        std::ofstream &outfeat = ofstrOpen(outputPrefix+"filtered/"+pSolo.outFileNames[1], ERROR_OUT, P);
+        outfeat << infeat.rdbuf();
+        outfeat.close();
     };
     
     return;

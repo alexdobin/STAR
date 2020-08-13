@@ -87,14 +87,17 @@ int main(int argInN, char* argIn[]) {
         P.inOut->logMain << "EXITING because of INPUT ERROR: unknown value of input parameter runMode=" <<P.runMode<<endl<<flush;
         exit(1);
     };
+  
+    //transcripome placeholder
+    Transcriptome *transcriptomeMain=NULL;
+    
+    //this will execute --runMode soloCellFiltering and exit
+    Solo soloCellFilter(P, *transcriptomeMain); 
 
     ////////////////////////////////////////////////////////////////////////
     ///////////////////////////////// Genome
     Genome genomeMain (P, P.pGe);
     genomeMain.genomeLoad();
-   
-    //calculate genome-related parameters
-    Transcriptome *transcriptomeMain=NULL;
     
     genomeMain.Var=new Variation(P, genomeMain.chrStart, genomeMain.chrNameIndex);
     
@@ -127,8 +130,6 @@ int main(int argInN, char* argIn[]) {
     if ( P.quant.yes ) {//load transcriptome
         transcriptomeMain=new Transcriptome(P);
     };
-
-    Solo soloCellFilter(P, *transcriptomeMain); //this will execute --runMode soloCellFiltering and exit
     
     //initialize Stats
     g_statsAll.resetN();

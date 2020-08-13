@@ -7,7 +7,7 @@ void SoloFeature::cellFiltering()
 
     if (pSolo.cellFilter.type[0]=="None" ||  nCB<1)
         return;
-    if (featureType!=SoloFeatureTypes::Gene && featureType!=SoloFeatureTypes::GeneFull) {
+    if (featureType!=SoloFeatureTypes::Gene && featureType!=SoloFeatureTypes::GeneFull && featureType!=-1) {
         return;
     };
 
@@ -25,7 +25,7 @@ void SoloFeature::cellFiltering()
         nUMImin = int(round(nUMImax/pSolo.cellFilter.knee.maxMinRatio));
     };
     nUMImin=max(nUMImin,(uint32) 1);//cannot be zero
-    
+        
     filteredCells.nCellsSimple=0;
     cellFilterVec.resize(nCB,false);
     for (uint32 icb=0; icb<nCB; icb++) {
@@ -35,10 +35,11 @@ void SoloFeature::cellFiltering()
         };
     };
     
+    P.inOut->logMain << "cellFiltering: simple: nUMImax="<< nUMImax <<"; nUMImin="<< nUMImin <<"; nCellsSimple="<< filteredCells.nCellsSimple <<endl;
+
     if (pSolo.cellFilter.type[0]=="EmptyDrops_CR") {
         emptyDrops_CR();
     };
-    
     
     //filtering is done: cellFilterVec=true for kept cells, calculate statistics
     memset(&filteredCells,0,sizeof(filteredCells)); //init to 0 all stats
@@ -87,7 +88,7 @@ void SoloFeature::cellFiltering()
     filteredCells.medianGenePerCell = filteredCells.nGenePerCell[filteredCells.nCells/2];
     filteredCells.medianReadPerCell = filteredCells.nReadPerCell[filteredCells.nCells/2];
     
-    outputResults(true, outputPrefix + "/filtered/");
+    outputResults(true, outputPrefix + "filtered/");
 
     return;
 };

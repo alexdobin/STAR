@@ -22,7 +22,7 @@ public:
 
     Solo(ReadAlignChunk **RAchunk, Parameters &Pin, Transcriptome &inTrans);
     
-    Solo(Parameters &Pin, Transcriptome &inTrans);
+    Solo(Parameters &Pin, Transcriptome &inTrans);//for soloCellFiltering
 
     void processAndOutput();
 };

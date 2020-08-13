@@ -22,24 +22,19 @@ Solo::Solo(ReadAlignChunk **RAchunkIn, Parameters &Pin, Transcriptome &inTrans)
 Solo::Solo(Parameters &Pin, Transcriptome &inTrans)
           :  P(Pin), Trans(inTrans), pSolo(P.pSolo)
 {
-    if ( pSolo.type == 0 )
-        return;
-    
-    time_t timeCurrent;
-    
-    if ( P.runMode == "soloCellFiltering") {
-        time( &timeCurrent);
-        *P.inOut->logStdOut << timeMonthDayTime(timeCurrent) << " ..... starting SoloCellFiltering" <<endl;
+    if ( P.runMode != "soloCellFiltering")
+        return; //passing through, return back to executing STAR
         
-        soloFeat = new SoloFeature*[pSolo.nFeatures];
-        for (uint32 ii=0; ii<pSolo.nFeatures; ii++) {
-            soloFeat[ii] = new SoloFeature(pSolo.features[ii], P, Trans, NULL, soloFeat);
-            soloFeat[ii]->loadRawMatrix();
-            soloFeat[ii]->cellFiltering();
-        };
-    } else {//return back to executing STAR
-        return;
-    };
+    time_t timeCurrent;
+
+    time( &timeCurrent);
+    *P.inOut->logStdOut << timeMonthDayTime(timeCurrent) << " ..... starting SoloCellFiltering" <<endl;
+    
+    soloFeat = new SoloFeature*[1];
+    
+    soloFeat[0] = new SoloFeature(-1, P, Trans, NULL, soloFeat);
+    soloFeat[0]->loadRawMatrix();
+    soloFeat[0]->cellFiltering();
     
     time( &timeCurrent);
     *P.inOut->logStdOut << timeMonthDayTime(timeCurrent) << " ..... finished successfully\n" <<flush;

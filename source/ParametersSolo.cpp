@@ -14,6 +14,7 @@ void ParametersSolo::initialize(Parameters *pPin)
     cellFiltering();
     if (pP->runMode=="soloCellFiltering") {//only filtering happens, do not need any other parameters
         yes=true;
+        umiDedupColumns={1};
         return;
     };
     
