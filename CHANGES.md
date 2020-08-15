@@ -1,3 +1,4 @@
+* Issue #988: proceed reading from GTF after a warning that exon end is past chromosome end.
 * Issue #978: fixed corrupted transcriptInfo.tab in genome generation for cases where GTF file contains extra chromosomes not present in FASTA files.
 * Issue #945: otuput GX/GN for --soloFeatures GeneFull .
 
