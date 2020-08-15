@@ -374,13 +374,25 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                     case ATTR_UY:
                         attrN+=bamAttrArrayWrite(soloRead->readBar->umiQual,"UY",attrOutArray+attrN);
                         break;
+
                     case ATTR_GX:
-                        if (readAnnot.geneConcordant.size()==1 && trOut.alignGenes.size()==1) //only output if read maps to a single gene, and this alignment maps to one gene
-                            attrN+=bamAttrArrayWrite(chunkTr->geID[*trOut.alignGenes.begin()],"GX",attrOutArray+attrN);
+                        if ( P.quant.gene.yes ) {
+                            if (readAnnot.geneConcordant.size()==1 && trOut.alignGenes.size()==1) //only output if read maps to a single gene, and this alignment maps to one gene
+                                attrN+=bamAttrArrayWrite(chunkTr->geID[*trOut.alignGenes.begin()],"GX",attrOutArray+attrN);
+                        } else if ( P.quant.geneFull.yes ) {
+                            if ( readAnnot.geneFull.size()==1 ) //only output if read maps to a single gene
+                                attrN+=bamAttrArrayWrite(chunkTr->geID[*readAnnot.geneFull.begin()],"GX",attrOutArray+attrN);
+                        };
                         break;
+                            
                     case ATTR_GN:
-                        if (readAnnot.geneConcordant.size()==1 && trOut.alignGenes.size()==1) //only output if read maps to a single gene, and this alignment maps to one gene
-                            attrN+=bamAttrArrayWrite(chunkTr->geName[*trOut.alignGenes.begin()],"GN",attrOutArray+attrN);
+                        if ( P.quant.gene.yes ) {                        
+                            if (readAnnot.geneConcordant.size()==1 && trOut.alignGenes.size()==1) //only output if read maps to a single gene, and this alignment maps to one gene
+                                attrN+=bamAttrArrayWrite(chunkTr->geName[*trOut.alignGenes.begin()],"GN",attrOutArray+attrN);
+                        } else if ( P.quant.geneFull.yes ) {
+                            if ( readAnnot.geneFull.size()==1 ) //only output if read maps to a single gene
+                                attrN+=bamAttrArrayWrite(chunkTr->geName[*readAnnot.geneFull.begin()],"GN",attrOutArray+attrN);
+                        };                           
                         break;                        
                         
                     case ATTR_sM:
