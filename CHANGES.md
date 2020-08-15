@@ -1,3 +1,6 @@
+* Issue #978: fixed corrupted transcriptInfo.tab in genome generation for cases where GTF file contains extra chromosomes not present in FASTA files.
+* Issue #945: otuput GX/GN for --soloFeatures GeneFull .
+
 STAR 2.7.5b --- 2020/08/01
 ======================
 Bug-fix release.
