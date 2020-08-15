@@ -5,6 +5,12 @@
 #include "SequenceFuns.h"
 #include "GlobalVariables.h"
 
+inline void removeStringEndControl(string &str)
+{//removes control character (including space) from the end of the string
+    if (int(str.back())<33)
+        str.pop_back();
+};
+
 void ReadAlignChunk::processChunks() {//read-map-write chunks
     noReadsLeft=false; //true if there no more reads left in the file
     bool newFile=false; //new file marker in the input stream
@@ -79,6 +85,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                     if (P.outFilterBySJoutStage!=2) {//not the 2nd stage of the 2-stage mapping, read ID from the 1st read
                         string readID;
                         P.inOut->readIn[0] >> readID;
+                        removeStringEndControl(readID);
                         if (P.outSAMreadIDnumber) {
                             readID="@"+to_string(P.iReadAll);
                         };
@@ -87,9 +94,11 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                         if (P.inOut->readIn[0].peek()!='\n') {//2nd field exists
                             string field2;
                             P.inOut->readIn[0] >> field2;
-                            if (field2.length()>=3 && field2.at(1)==':' && field2.at(2)=='Y' && field2.at(3)==':' )
+                            if (field2.length()>=3 && field2[1]==':' && field2[2]=='Y' && field2[3]==':' )
                                 passFilterIllumina='Y';
                         };
+                        
+                        //add extra information to readID line
                         readID += ' '+ to_string(P.iReadAll)+' '+passFilterIllumina+' '+to_string(P.readFilesIndex);
 
                         //ignore the rest of the read name for both mates
@@ -99,6 +108,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                         if (P.pSolo.barcodeReadYes) {//record barcode sequence
                             string seq1;
                             getline(P.inOut->readIn[P.pSolo.barcodeRead],seq1);
+                            removeStringEndControl(seq1);
                             if (seq1.size() != P.pSolo.bL) {
                             	if (P.pSolo.bL > 0) {
 									ostringstream errOut;
@@ -114,6 +124,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                             readID += ' ' + seq1;
                             P.inOut->readIn[P.pSolo.barcodeRead].ignore(DEF_readNameSeqLengthMax,'\n');//skip to the end of 3rd ("+") line
                             getline(P.inOut->readIn[P.pSolo.barcodeRead],seq1); //read qualities
+                            removeStringEndControl(seq1);
                             readID += ' ' + seq1;
                             g_statsAll.qualHistCalc(1, seq1.c_str()+P.pSolo.barcodeStart, P.pSolo.barcodeEnd==0 ? seq1.size() : P.pSolo.barcodeEnd-P.pSolo.barcodeStart+1);
                         };
@@ -127,12 +138,19 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                     //copy 3 (4 for stage 2) lines: sequence, dummy, quality
                     for (uint imate=0; imate<P.readNmates; imate++) {
                         for (uint iline=(P.outFilterBySJoutStage==2 ? 0:1);iline<4;iline++) {
+                            uint64 origChunkStart=chunkInSizeBytesTotal[imate];
+                            
                             P.inOut->readIn[imate].getline(chunkIn[imate] + chunkInSizeBytesTotal[imate], DEF_readNameSeqLengthMax+1 );
-                            chunkInSizeBytesTotal[imate] += P.inOut->readIn[imate].gcount();
+                            chunkInSizeBytesTotal[imate] += P.inOut->readIn[imate].gcount(); //this includes the final \n
+                            
+                            if ( int(chunkIn[imate][chunkInSizeBytesTotal[imate]-2]) < 33 ) {//remove control char at the end if present
+                                chunkInSizeBytesTotal[imate]--;
+                            };
+                            
                             chunkIn[imate][chunkInSizeBytesTotal[imate]-1]='\n';
                             
                             if (iline==3 && P.outFilterBySJoutStage!=2) {
-                                g_statsAll.qualHistCalc(imate, chunkIn[imate] + chunkInSizeBytesTotal[imate] - P.inOut->readIn[imate].gcount(), P.inOut->readIn[imate].gcount());
+                                g_statsAll.qualHistCalc(imate, chunkIn[imate] + origChunkStart, chunkInSizeBytesTotal[imate] - origChunkStart);
                             };
                         };
                     };
@@ -151,18 +169,20 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                             P.inOut->readIn[imate].ignore(DEF_readNameSeqLengthMax,'\n');
 
                             chunkInSizeBytesTotal[imate] += sprintf(chunkIn[imate] + chunkInSizeBytesTotal[imate], " %llu %c %i \n", P.iReadAll, 'N', P.readFilesIndex);
-
-
                         };
-//                         else {//2nd stage of 2-stage mapping
-//                         read index and file index are already recorded with the read name, simply copy it
-//                         P.inOut->readIn[imate].getline(chunkIn[imate] + chunkInSizeBytesTotal[imate], DEF_readNameSeqLengthMax+1 );
-//                         };
+                        
+                        //read multi-line fasta
                         nextChar=P.inOut->readIn[imate].peek();
-                        while (nextChar!='@' && nextChar!='>' && nextChar!=' ' && nextChar!='\n' && P.inOut->readIn[imate].good()) {//read multi-line fasta
+                        while (nextChar!='@' && nextChar!='>' && nextChar!=' ' && nextChar!='\n' && P.inOut->readIn[imate].good()) {
                             P.inOut->readIn[imate].getline(chunkIn[imate] + chunkInSizeBytesTotal[imate], DEF_readSeqLengthMax + 1 );
-                            if (P.inOut->readIn[imate].gcount()<2) break; //no more input
-                            chunkInSizeBytesTotal[imate] += P.inOut->readIn[imate].gcount()-1;
+                            if (P.inOut->readIn[imate].gcount()<2) 
+                                break; //no more input
+                                
+                            chunkInSizeBytesTotal[imate] += P.inOut->readIn[imate].gcount()-1; //-1 because \n was counted, bu wee need to remove it
+                            if ( int(chunkIn[imate][chunkInSizeBytesTotal[imate]-1]) < 33 ) {//remove control char at the end if present
+                                chunkInSizeBytesTotal[imate]--;
+                            };
+                            
                             nextChar=P.inOut->readIn[imate].peek();
                         };
                         chunkIn[imate][chunkInSizeBytesTotal[imate]]='\n';
