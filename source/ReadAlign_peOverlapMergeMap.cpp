@@ -141,7 +141,7 @@ void ReadAlign::peMergeMates() {
     return;
 };
 
-void Transcript::peOverlapSEtoPE(uint* mateStart, Transcript &t) {//convert alignment from merged-SE to PE
+void Transcript::peOverlapSEtoPE(uint* mateStart, const Transcript &t) {//convert alignment from merged-SE to PE
 
     uint mLen[2];
     mLen[0]=readLength[t.Str];
@@ -293,3 +293,58 @@ void ReadAlign::peOverlapSEtoPE(ReadAlign &seRA) {//ReAdAlign: convert SE to PE 
 
     return;
 };
+
+void ReadAlign::peOverlapChimericSEtoPE(const Transcript *seTrIn1, const Transcript *seTrIn2, Transcript *peTrOut1, Transcript *peTrOut2) {
+
+    //convert merged into PE
+    Transcript tempTrChim[2];
+    tempTrChim[0]=*trInit;
+    tempTrChim[1]=*trInit;
+    tempTrChim[0].peOverlapSEtoPE(peOv.mateStart,*seTrIn1);
+    tempTrChim[1].peOverlapSEtoPE(peOv.mateStart,*seTrIn2);
+
+    uint segLen[2][2]; //segment length [tempTrChim][mate]
+    uint segEx[2];//last exon of the mate0 [tempTrChim]
+    uint segLmin=-1LLU, i1=0,i2=0;
+    for (uint ii=0; ii<2; ii++) {
+        segLen[ii][0]=0;
+        segLen[ii][1]=0;
+        for (uint iex=0; iex<tempTrChim[ii].nExons; iex++) {
+            if (tempTrChim[ii].exons[iex][EX_iFrag]==tempTrChim[ii].exons[0][EX_iFrag]) {
+                segLen[ii][0]+=tempTrChim[ii].exons[iex][EX_L];
+                segEx[ii]=iex;
+            } else {
+                segLen[ii][1]+=tempTrChim[ii].exons[iex][EX_L];
+            };
+        };
+        for (uint jj=0; jj<2; jj++) {
+            if (segLen[ii][jj]<segLmin || (segLen[ii][jj]==segLmin && tempTrChim[ii].exons[0][EX_G]>tempTrChim[ii-1].exons[0][EX_G])) {
+                segLmin=segLen[ii][jj];
+                i1=ii;//tempTrChim of the shortest segment length
+                i2=jj;//mate of the shortest segment length
+            };
+        };
+    };
+
+    if (i2==1) {//eliminate mate1: simply cut the exons that belong to mate1
+        tempTrChim[i1].nExons=segEx[i1]+1;
+    } else {//eliminate mate 0: shift mate1 exon to the beginning
+        for (uint iex=0; iex<tempTrChim[i1].nExons; iex++) {
+            uint iex1=iex+segEx[i1]+1;
+            for (uint ii=0; ii<EX_SIZE; ii++) {
+                tempTrChim[i1].exons[iex][ii]=tempTrChim[i1].exons[iex1][ii];
+            };
+            tempTrChim[i1].canonSJ[iex]=tempTrChim[i1].canonSJ[iex1];
+            tempTrChim[i1].sjAnnot[iex]=tempTrChim[i1].sjAnnot[iex1];
+            tempTrChim[i1].sjStr[iex]=tempTrChim[i1].sjStr[iex1];
+            tempTrChim[i1].shiftSJ[iex][0]=tempTrChim[i1].shiftSJ[iex1][0];
+            tempTrChim[i1].shiftSJ[iex][1]=tempTrChim[i1].shiftSJ[iex1][1];
+        };
+        tempTrChim[i1].nExons=tempTrChim[i1].nExons-segEx[i1]-1;
+    };
+
+    *peTrOut1=tempTrChim[0];
+    *peTrOut2=tempTrChim[1];
+    return;
+};
+
