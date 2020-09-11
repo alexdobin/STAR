@@ -1,3 +1,7 @@
+* Implemented --soloCellFilter EmptyDrops_CR option for cell filtering (calling) nearly identical to that of CellRanger 3 and 4.
+* Implemented --runMode soloCellFiltering option for cell filtering (calling) of the raw count matrix, without re-mapping.
+* PR: #1012: fix the bug with --soloCellFilter TopCells option
+
 STAR 2.7.5b --- 2020/08/01
 ======================
 Bug-fix release.

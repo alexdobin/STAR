@@ -9,12 +9,15 @@
 void SoloFeature::outputResults(bool cellFilterYes, string outputPrefixMat)
 {    
     //make directories   
+    createDirectory(outputPrefixMat,P.runDirPerm, "Solo output directory", P);
+    /* old way, does not work when parent directores are needed
     if (mkdir(outputPrefixMat.c_str(),P.runDirPerm)!=0 && errno!=EEXIST) {//create directory
         exitWithError("EXITING because of fatal OUTPUT FILE error: could not create Solo output directory" + outputPrefixMat + 
                       "\nSOLUTION: check the path and permisssions\n",
                        std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
     };
-            
+    */
+    
     /////////////////////////////////////////////////////////////
     //write features.tsv
     switch (featureType) {

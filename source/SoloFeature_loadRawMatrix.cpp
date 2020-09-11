@@ -13,8 +13,9 @@ void SoloFeature::loadRawMatrix()
         exitWithError(errOut, std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
     };
     
-    string inputPrefix = P.runModeIn[1] + '/';
-    outputPrefix = P.runModeIn[2];
+    string inputPrefix= P.runModeIn[1] + '/';
+    outputPrefix= P.runModeIn[2];
+    outputPrefixFiltered= outputPrefix;
 
     /////////////////////////////////////////////////////////////
     //load counting matrix
@@ -30,6 +31,12 @@ void SoloFeature::loadRawMatrix()
     uint32 nCB1; //number of features read from file
     uint64 nTot; //total number of entries
     matStream >> featuresNumber >> nCB1 >> nTot;
+    
+    if (nTot==0) {
+        exitWithError("Exiting because of fatal INPUT FILE error: no counts detected in " + matrixFileName + \
+                      "\nSOLUTION: check the formatting of the matrix file.\n", \
+                       std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
+    };
     
     /* do not need it - read the information from features file
     if (nfeat1 != featuresNumber) {
@@ -106,8 +113,9 @@ void SoloFeature::loadRawMatrix()
     };
     
     {//copy features
-        std::ifstream &infeat  = ifstrOpen(inputPrefix+ pSolo.outFileNames[1], ERROR_OUT, "SOLUTION: check the path and permissions of the features file", P);
-        std::ofstream &outfeat = ofstrOpen(outputPrefix+"filtered/"+pSolo.outFileNames[1], ERROR_OUT, P);
+        std::ifstream &infeat  = ifstrOpen(inputPrefix + pSolo.outFileNames[1], ERROR_OUT, "SOLUTION: check the path and permissions of the features file", P);
+        createDirectory(outputPrefixFiltered, P.runDirPerm, "Solo output directory", P);
+        std::ofstream &outfeat = ofstrOpen(outputPrefixFiltered + pSolo.outFileNames[1], ERROR_OUT, P);
         outfeat << infeat.rdbuf();
         outfeat.close();
     };

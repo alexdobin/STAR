@@ -59,7 +59,7 @@ public:
         uint32 nCellsSimple; //number of cells after simple filtering
     } filteredCells;
     
-    string outputPrefix;
+    string outputPrefix, outputPrefixFiltered;
     
     array<vector<uint64>,2> sjAll;
     

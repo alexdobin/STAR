@@ -88,7 +88,7 @@ void SoloFeature::cellFiltering()
     filteredCells.medianGenePerCell = filteredCells.nGenePerCell[filteredCells.nCells/2];
     filteredCells.medianReadPerCell = filteredCells.nReadPerCell[filteredCells.nCells/2];
     
-    outputResults(true, outputPrefix + "filtered/");
+    outputResults(true, outputPrefixFiltered);
 
     return;
 };

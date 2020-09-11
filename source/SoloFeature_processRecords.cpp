@@ -13,8 +13,11 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     time(&rawTime);
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Starting Solo post-map for " <<SoloFeatureTypes::Names[featureType] <<endl;
     
-    outputPrefix=P.outFileNamePrefix+pSolo.outFileNames[0];
-    outputPrefix += SoloFeatureTypes::Names[featureType] +'/';
+    outputPrefix= P.outFileNamePrefix+pSolo.outFileNames[0];
+    outputPrefix+= SoloFeatureTypes::Names[featureType] +'/';
+    outputPrefixFiltered= outputPrefix + "filtered/";
+    
+    
     if (mkdir(outputPrefix.c_str(),P.runDirPerm)!=0 && errno!=EEXIST) {//create directory
         ostringstream errOut;
         errOut << "EXITING because of fatal OUTPUT FILE error: could not create Solo output directory"<<outputPrefix<<"\n";
