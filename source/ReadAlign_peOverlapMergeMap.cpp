@@ -222,6 +222,11 @@ void Transcript::peOverlapSEtoPE(uint* mateStart, Transcript &t) {//convert alig
             };
 
             ++nExons;
+            if (nExons>MAX_N_EXONS) {//cannot transform this alignment to PE, too many exons
+                maxScore=0;
+                nExons=0;
+                return;
+            };
         };
         canonSJ[nExons-1]=-3; //marks "junction" between mates
         sjAnnot[nExons-1]=0;
@@ -268,28 +273,42 @@ void Transcript::peOverlapSEtoPE(uint* mateStart, Transcript &t) {//convert alig
 
 void ReadAlign::peOverlapSEtoPE(ReadAlign &seRA) {//ReAdAlign: convert SE to PE and copy
 
-    nW=seRA.nW;
-    memcpy((void*) nWinTr, (void*) seRA.nWinTr, nW*sizeof(*nWinTr));
+    //nW=seRA.nW;
+    //memcpy((void*) nWinTr, (void*) seRA.nWinTr, nW*sizeof(*nWinTr));
 
     uint trNtotal=0;
     intScore bestScore=-10*Lread;
     trBest=trArray;//just to initialize - to the 0th spot in the trArray
-    for (uint iW=0; iW<nW; iW++) {//scan windows
-        trAll[iW]=trArrayPointer+trNtotal;
-        for (uint iTr=0; iTr<nWinTr[iW]; iTr++) {//scan transcripts
-            ++trNtotal;
-            *trAll[iW][iTr]=*trInit;
-            trAll[iW][iTr]->peOverlapSEtoPE(peOv.mateStart, *seRA.trAll[iW][iTr]);
-            trAll[iW][iTr]->alignScore(Read1,mapGen.G,P);
-            if (trAll[iW][iTr]->maxScore > trAll[iW][0]->maxScore) {
-                swap(trAll[iW][iTr],trAll[iW][0]);
+    
+    uint64 iW1=0;
+    for (uint iW=0; iW<seRA.nW; iW++) {//scan windows
+        trAll[iW1]=trArrayPointer+trNtotal;
+        uint64 iTr1=0;
+        for (uint iTr=0; iTr<seRA.nWinTr[iW]; iTr++) {//scan transcripts
+            *trAll[iW1][iTr1]=*trInit;
+            
+            trAll[iW1][iTr1]->peOverlapSEtoPE(peOv.mateStart, *seRA.trAll[iW][iTr]);
+            if (trAll[iW1][iTr1]->nExons==0)
+                continue; //conversion did not work
+            
+            trAll[iW1][iTr1]->alignScore(Read1,mapGen.G,P);
+            if (trAll[iW1][iTr1]->maxScore > trAll[iW1][0]->maxScore) {
+                swap(trAll[iW][iTr1],trAll[iW][0]);
             };
+            
+            ++iTr1;
+            ++trNtotal;            
         };
-        if (trAll[iW][0]->maxScore>bestScore) {
-            trBest=trAll[iW][0];
-            bestScore=trBest->maxScore;
+        if (iTr1>0) {//if conversion worked for at least one align
+            nWinTr[iW1]=iTr1;
+            if (trAll[iW1][0]->maxScore > bestScore) {
+                trBest=trAll[iW1][0];
+                bestScore=trBest->maxScore;
+            };            
+            ++iW1;
         };
     };
 
+    nW=iW1;
     return;
 };

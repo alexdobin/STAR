@@ -5,6 +5,10 @@ intScore Transcript::alignScore(char **Read1, char *G, Parameters &P) {//re-calc
     maxScore=0;
     nMM=0;
     nMatch=0;
+    
+    if (nExons==0)
+        return maxScore;
+    
     char* R=Read1[roStr==0 ? 0:2];
     for (uint iex=0;iex<nExons;iex++) {
         for (uint ii=0;ii<exons[iex][EX_L];ii++) {
