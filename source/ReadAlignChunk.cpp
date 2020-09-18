@@ -96,6 +96,8 @@ ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome 
         delete RA->peMergeRA->chunkOutChimJunction;
         RA->peMergeRA->chunkOutChimJunction=RA->chunkOutChimJunction;//point to the same out-stream
         RA->peMergeRA->chimDet->ostreamChimJunction=RA->peMergeRA->chunkOutChimJunction;
+        RA->peMergeRA->outBAMunsorted=RA->outBAMunsorted;
+        RA->peMergeRA->outBAMcoord=RA->outBAMcoord;
     };
 };
 
