@@ -1,3 +1,8 @@
+* Issue #1008: fixed the problem with Unmapped.out.mate? output for --soloType CB_samTagOut output.
+* PR # 1012: fixed the bug with --soloCellFiltering TopCells option.
+* Issue #786: fixed the bug causing the *Different SJ motifs problem* for overlapping mates.
+* Issue #945: GX/GN can be output for all --soloType, as well as for non-solo runs.
+
 STAR 2.7.5c --- 2020/08/16
 ==========================
 Bug-fix release.

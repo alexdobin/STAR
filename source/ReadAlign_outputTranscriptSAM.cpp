@@ -344,6 +344,8 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
                 case ATTR_vG:
                 case ATTR_vA:
                 case ATTR_vW:
+                case ATTR_GX:
+                case ATTR_GN:                    
                     break;
                 default:
                     ostringstream errOut;

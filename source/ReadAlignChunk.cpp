@@ -77,13 +77,15 @@ ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome 
             chunkFstreamOpen(P.outFileTmp + "/Chimeric.out.junction.thread", iChunk, *RA->chunkOutChimJunction);
        };
     };
+
     if (P.outReadsUnmapped=="Fastx" ) {
-        chunkFstreamOpen(P.outFileTmp + "/Unmapped.out.mate1.thread",iChunk, RA->chunkOutUnmappedReadsStream[0]);
-        if (P.readNmatesIn==2) chunkFstreamOpen(P.outFileTmp + "/Unmapped.out.mate2.thread",iChunk, RA->chunkOutUnmappedReadsStream[1]);
+        for (uint32 imate=0; imate < P.readNmatesIn; imate++) 
+            chunkFstreamOpen(P.outFileTmp + "/Unmapped.out.mate"+ to_string(imate) +".thread",iChunk, RA->chunkOutUnmappedReadsStream[imate]);
     };
+
     if (P.outFilterType=="BySJout") {
         chunkFstreamOpen(P.outFileTmp + "/FilterBySJoutFiles.mate1.thread",iChunk, RA->chunkOutFilterBySJoutFiles[0]);
-        if (P.readNmates==2) chunkFstreamOpen(P.outFileTmp + "/FilterBySJoutFiles.mate2.thread",iChunk, RA->chunkOutFilterBySJoutFiles[1]);
+        if (P.readNmates==2) chunkFstreamOpen(P.outFileTmp + "/FilterBySJoutFiles.mate2.thread",iChunk, RA->chunkOutFilterBySJoutFiles[1]); //here we do not output barcode read
     };
 
     if (P.wasp.yes) {
