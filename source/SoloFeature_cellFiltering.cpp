@@ -21,7 +21,7 @@ void SoloFeature::cellFiltering()
         nUMImax = nUMIperCBsorted[min(nCB-1,pSolo.cellFilter.cr2maxCellInd)];//robust estimate of the max UMI
         nUMImin = int(nUMImax/pSolo.cellFilter.cr2maxMinRatio+0.5);
     } else if (pSolo.cellFilter.type[0]=="TopCells") {
-        nUMImin = nUMIperCBsorted[max(nCB-1,pSolo.cellFilter.topCells)];
+        nUMImin = nUMIperCBsorted[min(nCB-1,pSolo.cellFilter.topCells)];
     };
     nUMImin=max(nUMImin,(uint32) 1);//cannot be zero
     
