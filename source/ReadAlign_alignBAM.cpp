@@ -184,11 +184,8 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
 
             if (readFilter=='Y') samFLAG|=0x200; //not passing quality control
 
-            if (alignType==-11 || alignType==-12 || alignType==-13) {
-                samFLAG|=0x800; //mark chimeric alignments
-            } else {//only non-chimeric alignments will be marked as non-primary, since chimeric are already marked with 0x800
-                if (!trOut.primaryFlag) samFLAG|=0x100;//mark not primary align
-            };
+            if (alignType==-11 || alignType==-12 || alignType==-13) samFLAG|=0x800; //mark chimeric alignments
+            if (!trOut.primaryFlag) samFLAG|=0x100; //mark not primary align
 
             iEx1 = (imate==0 ? 0 : iExMate+1);
             iEx2 = (imate==0 ? iExMate : trOut.nExons-1);
@@ -374,13 +371,25 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                     case ATTR_UY:
                         attrN+=bamAttrArrayWrite(soloRead->readBar->umiQual,"UY",attrOutArray+attrN);
                         break;
+
                     case ATTR_GX:
-                        if (readAnnot.geneConcordant.size()==1 && trOut.alignGenes.size()==1) //only output if read maps to a single gene, and this alignment maps to one gene
-                            attrN+=bamAttrArrayWrite(chunkTr->geID[*trOut.alignGenes.begin()],"GX",attrOutArray+attrN);
+                        if ( P.quant.gene.yes ) {
+                            if (readAnnot.geneConcordant.size()==1 && trOut.alignGenes.size()==1) //only output if read maps to a single gene, and this alignment maps to one gene
+                                attrN+=bamAttrArrayWrite(chunkTr->geID[*trOut.alignGenes.begin()],"GX",attrOutArray+attrN);
+                        } else if ( P.quant.geneFull.yes ) {
+                            if ( readAnnot.geneFull.size()==1 ) //only output if read maps to a single gene
+                                attrN+=bamAttrArrayWrite(chunkTr->geID[*readAnnot.geneFull.begin()],"GX",attrOutArray+attrN);
+                        };
                         break;
+                            
                     case ATTR_GN:
-                        if (readAnnot.geneConcordant.size()==1 && trOut.alignGenes.size()==1) //only output if read maps to a single gene, and this alignment maps to one gene
-                            attrN+=bamAttrArrayWrite(chunkTr->geName[*trOut.alignGenes.begin()],"GN",attrOutArray+attrN);
+                        if ( P.quant.gene.yes ) {                        
+                            if (readAnnot.geneConcordant.size()==1 && trOut.alignGenes.size()==1) //only output if read maps to a single gene, and this alignment maps to one gene
+                                attrN+=bamAttrArrayWrite(chunkTr->geName[*trOut.alignGenes.begin()],"GN",attrOutArray+attrN);
+                        } else if ( P.quant.geneFull.yes ) {
+                            if ( readAnnot.geneFull.size()==1 ) //only output if read maps to a single gene
+                                attrN+=bamAttrArrayWrite(chunkTr->geName[*readAnnot.geneFull.begin()],"GN",attrOutArray+attrN);
+                        };                           
                         break;                        
                         
                     case ATTR_sM:

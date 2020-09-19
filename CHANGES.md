@@ -2,8 +2,32 @@
 * Implemented --runMode soloCellFiltering option for cell filtering (calling) of the raw count matrix, without re-mapping.
 * PR: #1012: fix the bug with --soloCellFilter TopCells option
 
+STAR 2.7.6a --- 2020/09/19
+==========================
+**Major new feature:**
+Output multimapping chimeric alignments in BAM format using
+```--chimMultimapNmax N>1 --chimOutType WithinBAM --outSAMtype BAM Unsorted [and/or] SortedByCoordinate```
+Many thanks to Sebastian @suhrig who implemented this feature!
+More detailed description from Sebastian in PR #802.
+
+**Minor features and bug fixes:**
+* Issue #1008: fixed the problem with Unmapped.out.mate? output for --soloType CB_samTagOut output.
+* PR # 1012: fixed the bug with --soloCellFiltering TopCells option.
+* Issue #786: fixed the bug causing the *Different SJ motifs problem* for overlapping mates.
+* Issue #945: GX/GN can be output for all --soloType, as well as for non-solo runs.
+
+STAR 2.7.5c --- 2020/08/16
+==========================
+Bug-fix release.
+----------------
+
+* Issue #988: proceed reading from GTF after a warning that exon end is past chromosome end.
+* Issue #978: fixed corrupted transcriptInfo.tab in genome generation for cases where GTF file contains extra chromosomes not present in FASTA files.
+* Issue #945: otuput GX/GN for --soloFeatures GeneFull .
+* Implemented removal of control characters from the ends of input read lines, for compatibility with files pre-processed on Windows.
+
 STAR 2.7.5b --- 2020/08/01
-======================
+==========================
 Bug-fix release.
 ----------------
 

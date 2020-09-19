@@ -62,10 +62,16 @@ class ReadAlign {
         ReadAlign *peMergeRA; //ReadAlign for merged PE mates
 
         ChimericDetection *chimDet;
+        void peOverlapChimericSEtoPE(const Transcript *seTrIn1, const Transcript *seTrIn2, Transcript *peTrOut1, Transcript *peTrOut2);
 
         SoloRead *soloRead; //counts reads per CB per and outputs CB/UMI/gene into file, per thread
         
         SpliceGraph *splGraph;
+
+	//input,output
+        char** outBAMoneAlign;
+        uint* outBAMoneAlignNbytes;
+        int alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint trChrStart, uint mateChr, uint mateStart, char mateStrand, int unmapType, bool *mateMapped, vector<int> outSAMattrOrder, char** outBAMarray, uint* outBAMarrayN);
 
     private:
         Parameters& P; //pointer to the parameters, will be initialized on construction
@@ -81,9 +87,6 @@ class ReadAlign {
         std::uniform_real_distribution<double> rngUniformReal0to1;//initialize in ReadAlign.cpp
 
         //input,output
-
-        char** outBAMoneAlign;
-        uint* outBAMoneAlignNbytes;
 
         ostringstream samStreamCIGAR, samStreamSJmotif, samStreamSJintron;
         vector <string> matesCIGAR;
@@ -165,10 +168,11 @@ class ReadAlign {
         void storeAligns (uint iDir, uint Shift, uint Nrep, uint L, uint indStartEnd[2], uint iFrag);
 
         bool outputTranscript(Transcript *trOut, uint nTrOut, ofstream *outBED);
+
         uint64 outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint mateChr, uint mateStart, char mateStrand, int unmapType, bool *mateMapped, ostream *outStream);
+
         uint64 outputSpliceGraphSAM(Transcript const &trOut, uint nTrOut, uint iTrOut, ostream *outStream);
 
-        int alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint trChrStart, uint mateChr, uint mateStart, char mateStrand, int unmapType, bool *mateMapped, vector<int> outSAMattrOrder, char** outBAMarray, uint* outBAMarrayN);
         void samAttrNM_MD (Transcript const &trOut, uint iEx1, uint iEx2, uint &tagNM, string &tagMD);
 
         void outputTranscriptSJ(Transcript const &trOut, uint nTrOut, OutSJ *outStream, uint sjReadStartN );

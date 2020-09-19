@@ -1004,208 +1004,13 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
     
-    //outSAMattributes
-    outSAMattrPresent.NH=false;//TODO re-write as class with constructor?
-    outSAMattrPresent.HI=false;
-    outSAMattrPresent.AS=false;
-    outSAMattrPresent.NM=false;
-    outSAMattrPresent.MD=false;
-    outSAMattrPresent.nM=false;
-    outSAMattrPresent.jM=false;
-    outSAMattrPresent.jI=false;
-    outSAMattrPresent.RG=false;
-    outSAMattrPresent.MC=false;
-    outSAMattrPresent.XS=false;
-    outSAMattrPresent.ch=false;
-
-    outSAMattrPresent.vA=false;
-    outSAMattrPresent.vG=false;
-    outSAMattrPresent.vW=false;
-    outSAMattrPresent.rB=false;
-    outSAMattrPresent.ha=false;
-
-    outSAMattrPresent.CR=false;
-    outSAMattrPresent.CY=false;
-    outSAMattrPresent.UR=false;
-    outSAMattrPresent.UY=false;
-    outSAMattrPresent.CB=false;
-    outSAMattrPresent.UB=false;
-    outSAMattrPresent.GX=false;
-    outSAMattrPresent.GN=false;
-    outSAMattrPresent.sM=false;
-    outSAMattrPresent.sS=false;    
-    outSAMattrPresent.sQ=false;
+    //SAM attributes
+    samAttributes();
     
-    //for quant SAM output only NH and HI flags
-    outSAMattrPresentQuant=outSAMattrPresent;
-    outSAMattrPresentQuant.NH=true;
-    outSAMattrPresentQuant.HI=true;
-    outSAMattrOrderQuant.push_back(ATTR_NH);
-    outSAMattrOrderQuant.push_back(ATTR_HI);
-
-    vector<string> vAttr1;
-    if (outSAMattributes.at(0)=="None") {
-    } else if (outSAMattributes.at(0)=="All"){
-        vAttr1={"NH","HI","AS","nM","NM","MD","jM","jI","MC","ch"};
-    } else if (outSAMattributes.at(0)=="Standard"){
-        vAttr1={"NH","HI","AS","nM"};
-    } else {
-        vAttr1=outSAMattributes;
-    };
-
-    for (uint ii=0;ii<vAttr1.size();ii++) {
-        if        (vAttr1.at(ii)== "NH") {
-            outSAMattrOrder.push_back(ATTR_NH);
-            outSAMattrPresent.NH=true;
-        } else if (vAttr1.at(ii)== "HI") {
-            outSAMattrOrder.push_back(ATTR_HI);
-            outSAMattrPresent.HI=true;
-        } else if (vAttr1.at(ii)== "AS") {
-            outSAMattrOrder.push_back(ATTR_AS);
-            outSAMattrPresent.AS=true;
-        } else if (vAttr1.at(ii)== "NM") {
-            outSAMattrOrder.push_back(ATTR_NM);
-            outSAMattrPresent.NM=true;
-        } else if (vAttr1.at(ii)== "MD") {
-            outSAMattrOrder.push_back(ATTR_MD);
-            outSAMattrPresent.MD=true;
-        } else if (vAttr1.at(ii)== "nM") {
-            outSAMattrOrder.push_back(ATTR_nM);
-            outSAMattrPresent.nM=true;
-        } else if (vAttr1.at(ii)== "jM") {
-            outSAMattrOrder.push_back(ATTR_jM);
-            outSAMattrPresent.jM=true;
-        } else if (vAttr1.at(ii)== "jI") {
-            outSAMattrOrder.push_back(ATTR_jI);
-            outSAMattrPresent.jI=true;
-        } else if (vAttr1.at(ii)== "vA") {
-            outSAMattrOrder.push_back(ATTR_vA);
-            outSAMattrPresent.vA=true;
-        } else if (vAttr1.at(ii)== "vG") {
-            outSAMattrOrder.push_back(ATTR_vG);
-            outSAMattrPresent.vG=true;
-        } else if (vAttr1.at(ii)== "vW") {
-            outSAMattrOrder.push_back(ATTR_vW);
-            outSAMattrPresent.vW=true;
-        } else if (vAttr1.at(ii)== "ha") {
-            outSAMattrOrder.push_back(ATTR_ha);
-            outSAMattrPresent.ha=true;            
-        } else if (vAttr1.at(ii)== "RG") {
-            outSAMattrOrder.push_back(ATTR_RG);
-            outSAMattrOrderQuant.push_back(ATTR_RG);
-            outSAMattrPresent.RG=true;
-        } else if (vAttr1.at(ii)== "rB") {
-            outSAMattrOrder.push_back(ATTR_rB);
-            outSAMattrOrderQuant.push_back(ATTR_rB);
-            outSAMattrPresent.rB=true;
-        } else if (vAttr1.at(ii)== "ch") {
-            outSAMattrOrder.push_back(ATTR_ch);
-            outSAMattrOrderQuant.push_back(ATTR_ch);
-            outSAMattrPresent.ch=true;
-        } else if (vAttr1.at(ii)== "MC") {
-            outSAMattrOrder.push_back(ATTR_MC);
-            outSAMattrOrderQuant.push_back(ATTR_MC);
-            outSAMattrPresent.MC=true;
-        } else if (vAttr1.at(ii)== "CR") {
-            outSAMattrOrder.push_back(ATTR_CR);
-            outSAMattrOrderQuant.push_back(ATTR_CR);
-            outSAMattrPresent.CR=true;
-        } else if (vAttr1.at(ii)== "CY") {
-            outSAMattrOrder.push_back(ATTR_CY);
-            outSAMattrOrderQuant.push_back(ATTR_CY);
-            outSAMattrPresent.CY=true;
-        } else if (vAttr1.at(ii)== "UR") {
-            outSAMattrOrder.push_back(ATTR_UR);
-            outSAMattrOrderQuant.push_back(ATTR_UR);
-            outSAMattrPresent.UR=true;
-        } else if (vAttr1.at(ii)== "UY") {
-            outSAMattrOrder.push_back(ATTR_UY);
-            outSAMattrOrderQuant.push_back(ATTR_UY);
-            outSAMattrPresent.UY=true;
-        } else if (vAttr1.at(ii)== "CB") {
-            outSAMattrOrder.push_back(ATTR_CB);
-            outSAMattrOrderQuant.push_back(ATTR_CB);
-            outSAMattrPresent.CB=true;
-        } else if (vAttr1.at(ii)== "UB") {
-            outSAMattrOrder.push_back(ATTR_UB);
-            outSAMattrOrderQuant.push_back(ATTR_UB);
-            outSAMattrPresent.UB=true;
-        } else if (vAttr1.at(ii)== "GX") {
-            outSAMattrOrder.push_back(ATTR_GX);
-            outSAMattrOrderQuant.push_back(ATTR_GX);
-            outSAMattrPresent.GX=true;            
-        } else if (vAttr1.at(ii)== "GN") {
-            outSAMattrOrder.push_back(ATTR_GN);
-            outSAMattrOrderQuant.push_back(ATTR_GN);
-            outSAMattrPresent.GN=true; 
-        } else if (vAttr1.at(ii)== "sM") {
-            outSAMattrOrder.push_back(ATTR_sM);
-            outSAMattrOrderQuant.push_back(ATTR_sM);
-            outSAMattrPresent.sM=true;
-        } else if (vAttr1.at(ii)== "sS") {
-            outSAMattrOrder.push_back(ATTR_sS);
-            outSAMattrOrderQuant.push_back(ATTR_sS);
-            outSAMattrPresent.sS=true;  
-        } else if (vAttr1.at(ii)== "sQ") {
-            outSAMattrOrder.push_back(ATTR_sQ);
-            outSAMattrOrderQuant.push_back(ATTR_sQ);
-            outSAMattrPresent.sQ=true;              
-        } else if (vAttr1.at(ii)== "XS") {
-            outSAMattrOrder.push_back(ATTR_XS);
-            outSAMattrPresent.XS=true;
-            if (outSAMstrandField.type!=1) {
-                inOut->logMain << "WARNING --outSAMattributes contains XS, therefore STAR will use --outSAMstrandField intronMotif" <<endl;
-                outSAMstrandField.type=1;
-            };
-        } else {
-            ostringstream errOut;
-            errOut <<"EXITING because of FATAL INPUT ERROR: unknown/unimplemented SAM atrribute (tag): "<<vAttr1.at(ii) <<"\n";
-            errOut <<"SOLUTION: re-run STAR with --outSAMattributes that contains only implemented attributes\n";
-            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-        };
-    };
-
-    if  (!var.yes && (outSAMattrPresent.vA | outSAMattrPresent.vG)) {
-        ostringstream errOut;
-        errOut <<"EXITING because of fatal PARAMETER error: --outSAMattributes contains vA and/or vG tag(s), but --varVCFfile is not set\n";
-        errOut <<"SOLUTION: re-run STAR with a --varVCFfile option, or without vA/vG tags in --outSAMattributes\n";
-        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-    };
-
-    if (!wasp.yes && outSAMattrPresent.vW) {
-        ostringstream errOut;
-        errOut <<"EXITING because of fatal PARAMETER error: --outSAMattributes contains vW tag, but --waspOutputMode is not set\n";
-        errOut <<"SOLUTION: re-run STAR with a --waspOutputMode option, or without vW tags in --outSAMattributes\n";
-        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-    };
-
-    if (outSAMattrRGline[0]!="-" && !outSAMattrPresent.RG) {
-        outSAMattrOrder.push_back(ATTR_RG);
-        outSAMattrOrderQuant.push_back(ATTR_RG);
-        outSAMattrPresent.RG=true;
-        inOut->logMain << "WARNING --outSAMattrRG defines a read group, therefore STAR will output RG attribute" <<endl;
-    } else if (outSAMattrRG.size()==0 && outSAMattrPresent.RG) {
-            ostringstream errOut;
-            errOut <<"EXITING because of FATAL INPUT ERROR: --outSAMattributes contains RG tag, but --outSAMattrRGline is not set\n";
-            errOut <<"SOLUTION: re-run STAR with a valid read group parameter --outSAMattrRGline\n";
-            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-    };
-
-    if (outSAMstrandField.type==1 && !outSAMattrPresent.XS) {
-        outSAMattrOrder.push_back(ATTR_XS);
-        inOut->logMain << "WARNING --outSAMstrandField=intronMotif, therefore STAR will output XS attribute" <<endl;
-    };
-
-    if (wasp.yes && !outSAMattrPresent.vW) {
-        outSAMattrOrder.push_back(ATTR_vW);
-        outSAMattrOrderQuant.push_back(ATTR_vW);
-        outSAMattrPresent.vW=true;
-        inOut->logMain << "WARNING --waspOutputMode is set, therefore STAR will output vW attribute" <<endl;
-    };
-
     //solo
     pSolo.initialize(this);
 
+    //alignEnds
     alignEndsType.ext[0][0]=false;
     alignEndsType.ext[0][1]=false;
     alignEndsType.ext[1][0]=false;
@@ -1393,8 +1198,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     inOut->logMain << "Finished loading and checking parameters\n" <<flush;
 };
 
-
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Parameters::scanAllLines (istream &streamIn, int inputLevel,  int inputLevelRequested) {//scan
 //     istringstream stringInStream (stringIn);
@@ -1469,6 +1272,3 @@ int Parameters::scanOneLine (string &lineIn, int inputLevel, int inputLevelReque
     };
     return 0;
 };
-
-
-

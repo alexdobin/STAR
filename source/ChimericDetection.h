@@ -17,16 +17,12 @@ class ChimericDetection {
         uint nW, *nWinTr;
         char** Read1;
         Genome &outGen;
-        uint *readLength;
 
     public:
-        uint chimN;
         vector <ChimericAlign> chimAligns;
-        bool chimRecord;
-        int chimScoreBest;
 
         ChimericDetection(Parameters &Pin, Transcript ***trAll, uint *nWinTr, char** Read1in, Genome &genomeIn, fstream *ostreamChimJunctionIn, ReadAlign *RA);
-        bool chimericDetectionMult(uint nWin, uint *readLengthIn, int maxNonChimAlignScore, bool PEmerged_flag);
+        bool chimericDetectionMult(uint nWin, uint *readLength, int maxNonChimAlignScore, ReadAlign *PEunmergedRA);
         fstream *ostreamChimJunction;
 };
 

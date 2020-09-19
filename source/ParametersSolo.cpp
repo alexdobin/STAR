@@ -144,6 +144,12 @@ void ParametersSolo::initialize(Parameters *pPin)
         exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
 
+    if (featureYes[SoloFeatureTypes::Velocyto] && type==SoloTypes::SmartSeq) {
+        string errOut = "EXITING because of fatal PARAMETERS error: --soloFeatures Velocyto is presently not compatible with --soloType SmartSeq .\n";
+        errOut       += "SOLUTION: re-run without --soloFeatures Velocyto .";
+        exitWithError(errOut, std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+    };
+    
     if (type != SoloTypes::CB_samTagOut) {//gene quantification is needed
         if (featureYes[SoloFeatureTypes::Gene]) {
             pP->quant.gene.yes=true;

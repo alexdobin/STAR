@@ -349,6 +349,7 @@ class Parameters {
     void readFilesInit();
     void closeReadsFiles();
     void readSAMheader(const string readFilesCommandString, const vector<string> readFilesNames);
-
+    void samAttributes();
+    void samAttrRequiresBAM(bool attrYes, string attrTag);
 };
 #endif  // Parameters.h

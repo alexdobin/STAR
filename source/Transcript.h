@@ -68,7 +68,7 @@ public:
     intScore alignScore(char **Read1, char *G, Parameters &P);
     int variationAdjust(const Genome &mapGen, char *R);
     string generateCigarP(); //generates CIGAR
-    void peOverlapSEtoPE(uint* mSta, Transcript &t);
+    void peOverlapSEtoPE(uint* mSta, const Transcript &t);
     void extractSpliceJunctions(vector<array<uint64,2>> &sjOut, bool &annotYes);
     
     uint64 chrStartLengthExtended();

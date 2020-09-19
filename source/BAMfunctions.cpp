@@ -59,9 +59,10 @@ int bam_read1_fromArray(char *bamChar, bam1_t *b) //modified from samtools bam_r
 	if (b->m_data < b->l_data) {
 		b->m_data = b->l_data;
 		kroundup32(b->m_data);
-		b->data = (uint8_t*)realloc(b->data, b->m_data);
-		if (!b->data)
-			return -4;
+// no need to realloc b->data, because it is overwritten later with bamChar
+//		b->data = (uint8_t*)realloc(b->data, b->m_data);
+//		if (!b->data)
+//			return -4;
 	}
 // // 	if (bgzf_read(fp, b->data, b->l_data) != b->l_data) return -4;
 // // 	//b->l_aux = b->l_data - c->n_cigar * 4 - c->l_qname - c->l_qseq - (c->l_qseq+1)/2;

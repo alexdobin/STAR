@@ -161,4 +161,8 @@ GTF::GTF(Genome &genome, Parameters &P, const string &dirOut, SjdbClass &sjdbLoc
         errOut << "Solution: check the formatting of the GTF file. One likely cause is the difference in chromosome naming between GTF and FASTA file.\n";
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
     };
+    
+    exonLoci.resize(exonN); //previous exonLoci.size() was an estimate, need to reszie to the actual value
+    
+    return;
 };
