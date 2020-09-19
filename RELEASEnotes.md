@@ -1,3 +1,11 @@
+STAR 2.7.6a --- 2020/09/19
+==========================
+**Major new feature:**
+Output multimapping chimeric alignments in BAM format using
+```--chimMultimapNmax N>1 --chimOutType WithinBAM --outSAMtype BAM Unsorted [and/or] SortedByCoordinate```
+Many thanks to Sebastian @suhrig who implemented this feature!
+More detailed description from Sebastian in PR #802.
+
 STAR 2.7.5a 2020/06/16
 ======================
 **Major new features:  

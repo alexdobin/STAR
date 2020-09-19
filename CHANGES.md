@@ -1,3 +1,12 @@
+STAR 2.7.6a --- 2020/09/19
+==========================
+**Major new feature:**
+Output multimapping chimeric alignments in BAM format using
+```--chimMultimapNmax N>1 --chimOutType WithinBAM --outSAMtype BAM Unsorted [and/or] SortedByCoordinate```
+Many thanks to Sebastian @suhrig who implemented this feature!
+More detailed description from Sebastian in PR #802.
+
+**Minor features and bug fixes:**
 * Issue #1008: fixed the problem with Unmapped.out.mate? output for --soloType CB_samTagOut output.
 * PR # 1012: fixed the bug with --soloCellFiltering TopCells option.
 * Issue #786: fixed the bug causing the *Different SJ motifs problem* for overlapping mates.
