@@ -37,12 +37,15 @@ GTF::GTF(Genome &genome, Parameters &P, const string &dirOut, SjdbClass &sjdbLoc
 
     exonN=0;
     while (sjdbStreamIn.good()) {//count the number of exons
-        string chr1,ddd2,featureType;
-        sjdbStreamIn >> chr1 >> ddd2 >> featureType;
+        
+        string oneLine,chr1,ddd2,featureType;
+        getline(sjdbStreamIn,oneLine);
+        istringstream oneLineStream (oneLine);
+
+        oneLineStream >> chr1 >> ddd2 >> featureType;
         if (chr1.substr(0,1)!="#" && featureType==genome.pGe.sjdbGTFfeatureExon) {
             exonN++;
         };
-        sjdbStreamIn.ignore(1000000000,'\n'); //ignore the rest of the line
     };
 
     if (exonN==0)         {
