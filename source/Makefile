@@ -30,7 +30,8 @@ CXXFLAGS_main := -O3 $(CXXFLAGS_common)
 CXXFLAGS_gdb := -O0 -g3 $(CXXFLAGS_common)
 
 ##########################################################################################################
-OBJECTS = SoloFeature_loadRawMatrix.o SoloFeature_emptyDrops_CR.o soloInputFeatureUMI.o SoloFeature_countSmartSeq.o SoloFeature_redistributeReadsByCB.o \
+OBJECTS = ParametersClip_initialize.o ClipMate_clip.o \
+	SoloFeature_loadRawMatrix.o SoloFeature_emptyDrops_CR.o soloInputFeatureUMI.o SoloFeature_countSmartSeq.o SoloFeature_redistributeReadsByCB.o \
 	SoloFeature_quantTranscript.o SoloFeature_sumThreads.o SoloFeature_countVelocyto.o SoloFeature_countCBgeneUMI.o \
 	Transcriptome_classifyAlign.o SoloFeature_cellFiltering.o \
 	SoloFeature_statsOutput.o bamSortByCoordinate.o SoloBarcode.o \

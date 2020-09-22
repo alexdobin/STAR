@@ -172,6 +172,14 @@ void SoloReadBarcode::getCBandUMI(const string &readNameExtra, const uint32 &rea
         
         matchCBtoWL(cbSeq, cbQual, pSolo.cbWL, cbMatch, cbMatchInd, cbMatchString);
 
+        if (!convertCheckUMI()) {//UMI conversion
+            if (cbMatch==0)
+                cbReadCountExact[cbMatchInd[0]]++; //still need to count it as exact before return
+            //cbMatch=-20;// mark "noUMI" case, this is not needed because convertCheckUMI should mark it as -23 or -24
+            cbMatchString="";
+            cbMatchInd.clear();
+            return;
+        };
 
     } else if ( pSolo.type==pSolo.SoloTypes::CB_samTagOut ) {//similar to CB_UMI_Simple, but no UMI, and define cbSeqCorrected
         cbSeq=bSeq.substr(pSolo.cbS-1,pSolo.cbL);

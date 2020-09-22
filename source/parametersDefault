@@ -175,9 +175,6 @@ readQualityScoreBase        33
 clip3pNbases                 0
     int(s): number(s) of bases to clip from 3p of each mate. If one value is given, it will be assumed the same for both mates.
 
-clip5pNbases                 0
-    int(s): number(s) of bases to clip from 5p of each mate. If one value is given, it will be assumed the same for both mates.
-
 clip3pAdapterSeq            -
     string(s): adapter sequences to clip from 3p of each mate.  If one value is given, it will be assumed the same for both mates.
 
@@ -187,6 +184,17 @@ clip3pAdapterMMp            0.1
 clip3pAfterAdapterNbases    0
     int(s): number of bases to clip from 3p of each mate after the adapter clipping. If one value is given, it will be assumed the same for both mates.
 
+clip5pNbases                 0
+    int(s): number(s) of bases to clip from 5p of each mate. If one value is given, it will be assumed the same for both mates.
+
+clip5pAdapterSeq            -
+    string(s): adapter sequences to clip from 5p of each mate.  If one value is given, it will be assumed the same for both mates.
+
+clip5pAdapterMMp            0.1
+    double(s): max proportion of mismatches for 5p adapter clipping for each mate.  If one value is given, it will be assumed the same for both mates.
+
+clip5pAfterAdapterNbases    0
+    int(s): number of bases to clip from 5p of each mate after the adapter clipping. If one value is given, it will be assumed the same for both mates.
 
 ### Limits
 limitGenomeGenerateRAM               31000000000

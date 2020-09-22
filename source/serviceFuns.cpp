@@ -84,6 +84,24 @@ inline int funCompareArrays (const void *a, const void *b) {
 
 };
 
+template <class arrayType, int arraySize, int Shift>
+inline int funCompareArraysShift (const void *a, const void *b) {
+    arrayType* va= ((arrayType*) a) + Shift;
+    arrayType* vb= ((arrayType*) b) + Shift;
+
+    for (int ii=0;ii<arraySize;ii++) {
+        if (va[ii]>vb[ii]) {
+            return 1;
+        } else if (va[ii]<vb[ii]) {
+            return -1;
+        };
+    };
+
+    return 0;
+
+};
+
+
 template <class Type>
 inline int funCompareTypeSecondFirst (const void *a, const void *b) {
     Type va= *( ((Type*) a) + 1 );

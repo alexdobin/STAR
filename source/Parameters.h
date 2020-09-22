@@ -10,6 +10,7 @@
 #include <signal.h>
 #include "ParametersChimeric.h"
 #include "ParametersSolo.h"
+#include "ParametersClip.h"
 #include "ParametersGenome.h"
 #include <vector>
 #include <array>
@@ -81,11 +82,7 @@ class Parameters {
         string outSAMreadID;
         bool outSAMreadIDnumber;
 
-        vector <uint> clip5pNbases, clip3pNbases, clip3pAfterAdapterNbases;
-        vector <double> clip3pAdapterMMp;
-        vector <string> clip3pAdapterSeq;
-        char *clip3pAdapterSeqNum[MAX_N_MATES];//adapter sequence - numerical
-        bool readMatesEqualLengths; //whether or not the read mates have the same length, true if onyl one mate
+        ParametersClip pClip;
 
         //align parameters
         uint alignSJoverhangMin,alignSJDBoverhangMin,alignSplicedMateMapLmin; //min SJ donor/acceptor length
