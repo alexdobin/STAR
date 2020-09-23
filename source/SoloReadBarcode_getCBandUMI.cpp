@@ -165,11 +165,7 @@ void SoloReadBarcode::getCBandUMI(const string &readNameExtra, const uint32 &rea
         umiSeq=bSeq.substr(pSolo.umiS-1,pSolo.umiL);
         cbQual=bQual.substr(pSolo.cbS-1,pSolo.cbL);
         umiQual=bQual.substr(pSolo.umiS-1,pSolo.umiL);
-        
-        if (!convertCheckUMI()) {//UMI conversion
-            return;
-        };
-        
+             
         matchCBtoWL(cbSeq, cbQual, pSolo.cbWL, cbMatch, cbMatchInd, cbMatchString);
 
         if (!convertCheckUMI()) {//UMI conversion
