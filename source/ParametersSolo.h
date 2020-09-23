@@ -56,8 +56,9 @@ public:
     
     //filtering
     char QSbase,QSmax;//quality score base and cutoff
+    //double cbMinP;//for CBs with non-exact matching to WL, min posterior probability
     float cbMinP;//for CBs with non-exact matching to WL, min posterior probability
-    
+
     //cell filtering
     struct {
         vector<string> type;
