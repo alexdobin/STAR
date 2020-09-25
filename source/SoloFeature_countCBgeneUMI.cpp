@@ -70,7 +70,11 @@ void SoloFeature::countCBgeneUMI()
     
     for (uint32 icb=0; icb<nCB; icb++) {//main collapse cycle
         
-        collapseUMI(icb, umiArray);
+        if (pSolo.umiDedupColumns[0]==3) {//1MM_CR option
+            collapseUMI_CR(icb, umiArray);
+        } else {
+            collapseUMI(icb, umiArray);
+        };
         
         readFeatSum->stats.V[readFeatSum->stats.nUMIs] += nUMIperCB[icb];
         if (nGenePerCB[icb]>0)

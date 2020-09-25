@@ -804,10 +804,11 @@ soloFeatures                Gene
 
 soloUMIdedup                1MM_All
     string(s):              type of UMI deduplication (collapsing) algorithm
-                            1MM_All             ... all UMIs with 1 mismatch distance to each other are collapsed (i.e. counted once)
+                            1MM_All             ... all UMIs with 1 mismatch distance to each other are collapsed (i.e. counted once).
                             1MM_Directional     ... follows the "directional" method from the UMI-tools by Smith, Heger and Sudbery (Genome Research 2017).
-                            Exact               ... only exactly matching UMIs are collapsed
-                            NoDedup             ... no deduplication of UMIs, count all reads. Allowed for --soloType SmartSeq
+                            Exact               ... only exactly matching UMIs are collapsed.
+                            NoDedup             ... no deduplication of UMIs, count all reads. Allowed for --soloType SmartSeq .
+                            1MM_CR              ... CellRanger2-4 algorithm for 1MM UMI collapsing.
 
 soloUMIfiltering            -
     string(s)               type of UMI filtering

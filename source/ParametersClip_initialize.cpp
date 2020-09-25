@@ -25,8 +25,10 @@ void ParametersClip::initialize(Parameters *pPin)
 {
 	pP=pPin;
 	yes=false;
+    
+    clipMates.resize(min(2LLU, pP->readNmates));//3rd read can only be barcode - do not trim it (for now).
 
-	if ( pP->readNmates==2 ) {//duplicate values for the 2nd mate
+	if ( clipMates.size()>1 ) {//duplicate values for the 2nd mate.
 		for (int ip=0; ip<2; ip++) {
 			if ( in[ip].N.size()==1 )
 				in[ip].N.push_back(in[ip].N[0]);
@@ -39,9 +41,7 @@ void ParametersClip::initialize(Parameters *pPin)
 		};
 	};
 
-	clipMates.resize(pP->readNmates);
-
-	for (uint32 im=0; im<pP->readNmates; im++) {
+	for (uint32 im=0; im<clipMates.size(); im++) {
 		for (int ip=0; ip<2; ip++) {//fill in the ip
 			clipMates[im].resize(2);
 			clipMates[im][ip].type=ip;

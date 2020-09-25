@@ -189,7 +189,15 @@ void ParametersSolo::initialize(Parameters *pPin)
             } else if (umiDedup[ii]=="1MM_All") {
                 umiDedupColumns[ii]=1;
             } else if (umiDedup[ii]=="1MM_Directional") {
-                umiDedupColumns[ii]=2;                
+                umiDedupColumns[ii]=2;
+            } else if (umiDedup[ii]=="1MM_CR") {
+                if ( ii>0 || umiDedup.size()>1 ) {//not allowed
+                    ostringstream errOut;
+                    errOut << "EXITING because of fatal PARAMETERS error: --soloUMIdedup 1MM_CR is not allowed for in combination with other options\n";
+                    errOut << "SOLUTION: specify --soloUMIdedup 1MM_CR only, or a combination of Exact and/or 1MM_All and/or 1MM_Directional";
+                    exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+                };
+                umiDedupColumns[0]=3;
             } else {
                 ostringstream errOut;
                 errOut << "EXITING because of fatal PARAMETERS error: --soloUMIdedup="<<umiDedup[ii] <<" is not allowed for --soloType " << typeStr <<"\n";

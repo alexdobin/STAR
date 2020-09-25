@@ -68,8 +68,11 @@ void SoloFeature::outputResults(bool cellFilterYes, string outputPrefixMat)
     
     
     vector <uint32> umiOutCol = pSolo.umiDedupColumns;
-    if (featureType==SoloFeatureTypes::Velocyto || featureType==SoloFeatureTypes::VelocytoSimple)
+    if ( featureType==SoloFeatureTypes::Velocyto || featureType==SoloFeatureTypes::VelocytoSimple ) {
         umiOutCol={0,1,2};
+    } else if ( pSolo.umiDedup[0]=="1MM_CR" ) {//only one column allowed
+        umiOutCol={0};
+    };
 
     //header
     countMatrixStream <<"%%MatrixMarket matrix coordinate integer general\n%\n";
