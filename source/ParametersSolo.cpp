@@ -222,7 +222,6 @@ void ParametersSolo::initialize(Parameters *pPin)
     QSbase=33;//TODO make these user-definable
     QSmax=33;
     cbMinP=0.975;
-    //cbMinP=0.975-(1e-9);//to avoid rounding errors when comparing to CR
 
     umiMaskLow=(uint32) ( (((uint64)1)<<umiL) - 1);
     umiMaskHigh=~umiMaskLow;

@@ -135,12 +135,12 @@ bool SoloReadBarcode::convertCheckUMI()
 {//check UMIs, return if bad UMIs
     if (convertNuclStrToInt64(umiSeq,umiB)!=-1) {//convert and check for Ns
         stats.V[stats.nNinUMI]++;//UMIs are not allowed to have Ns
-        cbMatch=-23;
+        umiCheck=-23;
         return false;
     };
     if (umiB==homoPolymer[0] || umiB==homoPolymer[1] || umiB==homoPolymer[2] || umiB==homoPolymer[3]) {
         stats.V[stats.nUMIhomopolymer]++;
-        cbMatch=-24;        
+        umiCheck=-24;        
         return false;
     };
     return true;
@@ -171,7 +171,7 @@ void SoloReadBarcode::getCBandUMI(const string &readNameExtra, const uint32 &rea
         if (!convertCheckUMI()) {//UMI conversion
             if (cbMatch==0)
                 cbReadCountExact[cbMatchInd[0]]++; //still need to count it as exact before return
-            //cbMatch=-20;// mark "noUMI" case, this is not needed because convertCheckUMI should mark it as -23 or -24
+            cbMatch=umiCheck;
             cbMatchString="";
             cbMatchInd.clear();
             return;
@@ -214,8 +214,10 @@ void SoloReadBarcode::getCBandUMI(const string &readNameExtra, const uint32 &rea
         };
 
         bool cbMatchGood=true;
-        if (!convertCheckUMI())
-            cbMatchGood=false;//CB matching will not be done, just extract the sequences
+        if (!convertCheckUMI()) {
+            cbMatchGood = false;//CB matching will not be done, just extract the sequences
+            cbMatch = umiCheck;
+        };
 
         cbMatchInd={0};
         for (auto &cb : pSolo.cbV) {//cycle over multiple barcodes

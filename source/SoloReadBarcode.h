@@ -18,7 +18,8 @@ public:
     string cbSeqCorrected;
     uint64 umiB;
     //int64  cbI;
-    int32  cbMatch;//-1: no match, 0: exact, 1: 1 match with 1MM, >1: # of matches with 1MM
+    int32 cbMatch;//-1: no match, 0: exact, 1: 1 match with 1MM, >1: # of matches with 1MM
+    int32 umiCheck;//umi check status
     string cbMatchString;//CB matches and qualities
     vector<uint64> cbMatchInd;//matches
     vector<uint32> cbReadCountExact;
