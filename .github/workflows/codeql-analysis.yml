@@ -61,10 +61,9 @@ jobs:
     # ✏️ If the Autobuild fails above, remove it and uncomment the following three lines
     #    and modify them (or add more) to build your code if your project
     #    uses a compiled language
-
     - run: |
-      cd STAR/source
-      make STAR
+        cd STAR/source
+        make STAR
 #      make bootstrap
 #      make release
 
