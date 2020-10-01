@@ -12,11 +12,11 @@ inline int funCompareSolo1 (const void *a, const void *b) {
     uint32 *va= (uint32*) a;
     uint32 *vb= (uint32*) b;
 
-    if (va[1]>vb[1]) {//ascending for 1st (counts)
+    if (va[1]>vb[1]) {
         return 1;
     } else if (va[1]<vb[1]) {
         return -1;
-    } else if (va[0]>vb[0]){//ascending for 0th (sequence)
+    } else if (va[0]>vb[0]){
         return 1;
     } else if (va[0]<vb[0]){
         return -1;
@@ -86,7 +86,7 @@ void SoloFeature::collapseUMI_CR(uint32 iCB, uint32 *umiArray)
         uint32 nU0=(iR1+umiArrayStride)/umiArrayStride;
         uint32 nU1=nU0;//2 types of 1MM collapsing
 
-        qsort(umiArray, nU0, umiArrayStride*sizeof(uint32), funCompareSolo1);//ascending by counts, ascending by UMI
+        qsort(umiArray, nU0, umiArrayStride*sizeof(uint32), funCompareSolo1);
         for (uint64 iu=0; iu<(nU0-1)*umiArrayStride; iu+=umiArrayStride) {
             uint64 iuu;
             for (iuu=(nU0-1)*umiArrayStride; iuu>iu; iuu-=umiArrayStride) {
@@ -94,32 +94,15 @@ void SoloFeature::collapseUMI_CR(uint32 iCB, uint32 *umiArray)
                 uint32 uuXor=umiArray[iu+0] ^ umiArray[iuu+0];
 
                 if ( (uuXor >> (__builtin_ctz(uuXor)/2)*2) <= 3 ) {//1MM
-                    umiArray[iu+0]  =  umiArray[iuu+0];//replace this one with the previous one
-                    /*
-                    if (umiArray[iuu+1] > umiArray[iu+1]) {
-                        umiArray[iuu+1] += umiArray[iu+1];//add the counts to the winning UMI
-                        umiArray[iu+1]  =  0;
-                    };
-                    */
+                    umiArray[iu+0]=umiArray[iuu+0];//replace this one with the previous one
                     break; //1MM
                 };
             };
         };
 
         if (pSolo.umiFiltering.MultiGeneUMI) {
-            qsort(umiArray, nU0, umiArrayStride*sizeof(uint32), funCompareArraysReverse<uint32,2>);//sort by UMI first and then by count, descendant
-            uint32 umi0=0, umitop=0; //umi is never 0=AAAA...
             for (uint64 iu=0; iu<nU0*umiArrayStride; iu+=umiArrayStride) {
-                uint32 umi1=umiArray[iu+0];
-                uint32 umic=umiArray[iu+1];
-                
-                if ( umi1!= umi0) {
-                    umitop=umic;
-                    umiGeneHash[umi1][gID[iG]] = umic;
-                    umi0=umi1;
-                } else if (umic<umitop) {
-                    umiGeneHash[umi1][gID[iG]] += umic;//this sums read counts over UMIs that were collapsed
-                };
+                umiGeneHash[umiArray[iu+0]][gID[iG]]+=umiArray[iu+1];//this sums read counts over UMIs that were collapsed
             };
         } else {
             qsort(umiArray, nU0, umiArrayStride*sizeof(uint32), funCompareNumbers<uint32>);

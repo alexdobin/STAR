@@ -96,22 +96,10 @@ bool Transcript::transformGenome(Genome &genOut, Transcript & A)
     };
     
     A.nExons=nB;
-    if (nB>0) {
-        A.Str = Str;
-
-//         if (A.exons[0][EX_G]>=genOut.nGenome) {//convert to +strand
-//             for (uint32 ib=0; ib<nB; ib++) {
-//                 A.exons[ib][EX_G]=2*genOut.nGenome-A.exons[ib][EX_G]-A.exons[ib][EX_L];
-//                 A.exons[ib][EX_R]=Lread-1-A.exons[ib][EX_R]-A.exons[ib][EX_L];
-//             };
-//             for (uint32 ib=0; ib<nB/2; ib++) {
-//                 swap(A.exons[ib],A.exons[nB-ib-1]);
-//             };
-//         };
-//         
+    if (nB==0)
+        return false; //transformation did not work
         
-        A.Chr = genOut.chrBin[A.exons[0][EX_G] >> genOut.pGe.gChrBinNbits];
-    };
+    A.Chr = genOut.chrBin[A.exons[0][EX_G] >> genOut.pGe.gChrBinNbits];
     
     {//recalculate canonSJ, sjAnnot
         A.sjAnnot[0]=0;
@@ -134,6 +122,6 @@ bool Transcript::transformGenome(Genome &genOut, Transcript & A)
         };
     };
     
-    return (nB>0);
+    return true;
 };
 
