@@ -41,43 +41,29 @@ void SoloReadBarcode::matchCBtoWL(string &cbSeq1, string &cbQual1, vector<uint64
     if (!pSolo.CBmatchWL.mm1) //only exact matches allowed
         return;
 
+    cbMatch1=0;
     if (posN>=0) {//one N
-        int64 cbI=-1;
         uint32 posNshift=2*(cbSeq1.size()-1-posN);//shift bits for posN
         for (uint32 jj=0; jj<4; jj++) {
             uint64 cbB11=cbB1^(jj<<posNshift);
             int64 cbI1=binarySearchExact<uint64>(cbB11,cbWL.data(),cbWL.size());
-            if (cbI1>=0) {
-                if (cbI>=0) {//had another match already
-                    //stats.V[stats.nTooMany]++;
-                    cbMatch1=-3;
-                    return;//with N in CB, do not allow matching >1 in WL
-                };
-                cbI=cbI1;
-            };
-        };
-        if (cbI>=0) {
-            cbMatchInd1.push_back((uint64) cbI);
-            cbMatchString1 = to_string(cbMatchInd1[0]);
-            cbMatch1=1;
-            return;
-        } else {//no match
-            //stats.V[stats.nNoMatch]++;
-            cbMatch1=-1;
-            return;
-        };
-    };
-
-    //look for 1MM; posN==-1, no Ns
-    cbMatch1=0;
-    for (uint32 ii=0; ii<cbSeq1.size(); ii++) {
-        for (uint32 jj=1; jj<4; jj++) {
-            int64 cbI1=binarySearchExact<uint64>(cbB1^(jj<<(ii*2)),cbWL.data(),cbWL.size());
             if (cbI1>=0) {//found match
                 //output all
                 cbMatchInd1.push_back(cbI1);
                 ++cbMatch1;
-                cbMatchString1 += ' ' +to_string(cbI1) + ' ' + cbQual1.at(cbSeq1.size()-1-ii);
+                cbMatchString1 += ' ' +to_string(cbI1) + ' ' + cbQual1[posN];
+            };
+        };
+    } else {//look for 1MM; posN==-1, no Ns
+        for (uint32 ii=0; ii<cbSeq1.size(); ii++) {
+            for (uint32 jj=1; jj<4; jj++) {
+                int64 cbI1=binarySearchExact<uint64>(cbB1^(jj<<(ii*2)),cbWL.data(),cbWL.size());
+                if (cbI1>=0) {//found match
+                    //output all
+                    cbMatchInd1.push_back(cbI1);
+                    ++cbMatch1;
+                    cbMatchString1 += ' ' +to_string(cbI1) + ' ' + cbQual1.at(cbSeq1.size()-1-ii);
+                };
             };
         };
     };
