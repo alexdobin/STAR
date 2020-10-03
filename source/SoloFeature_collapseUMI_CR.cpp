@@ -48,6 +48,8 @@ void SoloFeature::collapseUMI_CR(uint32 iCB, uint32 *umiArray)
     };
     gReadS[nGenes]=rguStride*rN;//so that gReadS[nGenes]-gReadS[nGenes-1] is the number of reads for nGenes, see below in qsort
 
+    unordered_map<uint32, uint32> umiMaxGeneCount;//for each umi, max counts of reads per gene
+    
     unordered_map <uint32, unordered_map<uint32,uint32>> umiGeneHash;
                    //UMI                 //Gene //Count
     unordered_map <uint32,uint32> geneCounts;
@@ -86,6 +88,14 @@ void SoloFeature::collapseUMI_CR(uint32 iCB, uint32 *umiArray)
         uint32 nU0=(iR1+umiArrayStride)/umiArrayStride;
         uint32 nU1=nU0;//2 types of 1MM collapsing
 
+        for (uint64 iu=0; iu<nU0*umiArrayStride; iu+=umiArrayStride) {
+            if ( umiMaxGeneCount.count(umiArray[iu+0]) == 0 ) {
+                umiMaxGeneCount[umiArray[iu+0]] = umiArray[iu+1];
+            } else {
+                umiMaxGeneCount[umiArray[iu+0]] = max(umiMaxGeneCount[umiArray[iu+0]], umiArray[iu+1]);
+            };
+        };
+        
         qsort(umiArray, nU0, umiArrayStride*sizeof(uint32), funCompareSolo1);
         for (uint64 iu=0; iu<(nU0-1)*umiArrayStride; iu+=umiArrayStride) {
             uint64 iuu;
@@ -131,7 +141,7 @@ void SoloFeature::collapseUMI_CR(uint32 iCB, uint32 *umiArray)
                     maxg=-1;
                 };
             };
-            if (maxg+1!=0)
+            if ( maxg+1!=0 && maxu>=umiMaxGeneCount[iu.first] )
                 geneCounts[maxg]++;
         };
 
