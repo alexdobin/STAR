@@ -50,7 +50,7 @@ void SoloFeature::collapseUMI_CR(uint32 iCB, uint32 *umiArray)
 
     unordered_map<uint32, uint32> umiMaxGeneCount;//for each umi, max counts of reads per gene
     
-    unordered_map <uint32, unordered_map<uint32,uint32>> umiGeneHash;
+    unordered_map <uint32, unordered_map<uint32,uint32>> umiGeneHash, umiGeneHash0;
                    //UMI                 //Gene //Count
     unordered_map <uint32,uint32> geneCounts;
 
@@ -87,15 +87,13 @@ void SoloFeature::collapseUMI_CR(uint32 iCB, uint32 *umiArray)
 
         uint32 nU0=(iR1+umiArrayStride)/umiArrayStride;
         uint32 nU1=nU0;//2 types of 1MM collapsing
-
-        for (uint64 iu=0; iu<nU0*umiArrayStride; iu+=umiArrayStride) {
-            if ( umiMaxGeneCount.count(umiArray[iu+0]) == 0 ) {
-                umiMaxGeneCount[umiArray[iu+0]] = umiArray[iu+1];
-            } else {
-                umiMaxGeneCount[umiArray[iu+0]] = max(umiMaxGeneCount[umiArray[iu+0]], umiArray[iu+1]);
+       
+        if (pSolo.umiFiltering.MultiGeneUMI) {
+            for (uint64 iu=0; iu<nU0*umiArrayStride; iu+=umiArrayStride) {
+                umiGeneHash0[umiArray[iu+0]][gID[iG]]+=umiArray[iu+1];//this sums read counts over UMIs that were collapsed
             };
-        };
-        
+        };       
+       
         qsort(umiArray, nU0, umiArrayStride*sizeof(uint32), funCompareSolo1);
         for (uint64 iu=0; iu<(nU0-1)*umiArrayStride; iu+=umiArrayStride) {
             uint64 iuu;
@@ -131,7 +129,9 @@ void SoloFeature::collapseUMI_CR(uint32 iCB, uint32 *umiArray)
     };
 
     if (pSolo.umiFiltering.MultiGeneUMI) {
+        
         for (auto &iu: umiGeneHash) {
+                       
             uint32 maxu=0, maxg=-1;
             for (auto &ig : iu.second) {
                 if (ig.second>maxu) {
@@ -141,8 +141,18 @@ void SoloFeature::collapseUMI_CR(uint32 iCB, uint32 *umiArray)
                     maxg=-1;
                 };
             };
-            if ( maxg+1!=0 && maxu>=umiMaxGeneCount[iu.first] )
+            if ( maxg+1==0 )
+                continue; //this umi is not counted for any gene
+            
+            for (auto &ig : umiGeneHash0[iu.first]) {//check that this umi/gene had also top count for uncorrected umis
+                if (ig.second>umiGeneHash0[iu.first][maxg]) {
+                    maxg=-1;
+                    break;
+                };
+            };
+            if ( maxg+1!=0 )
                 geneCounts[maxg]++;
+            
         };
 
         for (auto &ig: geneCounts) {
