@@ -131,21 +131,37 @@ void SoloFeature::collapseUMI_CR(uint32 iCB, uint32 *umiArray)
     if (pSolo.umiFiltering.MultiGeneUMI) {
         
         for (auto &iu: umiGeneHash) {
-                       
-            uint32 maxu=0, maxg=-1;
+
+            uint32 umi=iu.first;
+            /*uint32 maxub=0; //, maxgb=-1;
+            for (auto &ig : umiGeneHash0[iu.first]) {
+                maxub = max(maxub, ig.second);// find maxu before correction for this umi
+            };
+            */
+            
+            uint32 maxu=0, maxg=-1, maxub=0;
             for (auto &ig : iu.second) {
-                if (ig.second>maxu) {
-                    maxu=ig.second;
-                    maxg=ig.first;
-                } else if (ig.second==maxu) {
-                    maxg=-1;
+                uint32 g=ig.first;
+                uint32 c=ig.second; //count
+                uint32 cb=umiGeneHash0[umi][g]; //count-before
+                if (c > maxu) {//higher count than any previous - new best gene
+                    maxu=c;
+                    maxg=g;
+                    maxub=cb;//before-count for the best gene
+                } else if (c == maxu) {//same count as previous
+                    if (cb > maxub) {//count-before is higher, replace the best gene
+                        maxub=cb;
+                        maxg=g;
+                    } else if (cb == maxub) {//no good gene
+                        maxg=-1;
+                    }; //else, id cb<maxub, keep g as the best gene
                 };
             };
             if ( maxg+1==0 )
                 continue; //this umi is not counted for any gene
             
-            for (auto &ig : umiGeneHash0[iu.first]) {//check that this umi/gene had also top count for uncorrected umis
-                if (ig.second>umiGeneHash0[iu.first][maxg]) {
+            for (auto &ig : umiGeneHash0[umi]) {//check that this umi/gene had also top count for uncorrected umis
+                if (ig.second>umiGeneHash0[umi][maxg]) {
                     maxg=-1;
                     break;
                 };
