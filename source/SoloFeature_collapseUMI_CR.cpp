@@ -145,7 +145,7 @@ void SoloFeature::collapseUMI_CR(uint32 iCB, uint32 *umiArray)
                 continue; //this umi is not counted for any gene
             
             for (auto &ig : umiGeneHash0[iu.first]) {//check that this umi/gene has >= read count than any uncorrected
-                if (ig.second>maxu && ig.first!=maxg) {
+                if (ig.second>=maxu && ig.first!=maxg) {
                     maxg=-1;
                     break;
                 };
