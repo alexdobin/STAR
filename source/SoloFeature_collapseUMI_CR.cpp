@@ -52,7 +52,9 @@ void SoloFeature::collapseUMI_CR(uint32 iCB, uint32 *umiArray)
     
     unordered_map <uint32, unordered_map<uint32,uint32>> umiGeneHash, umiGeneHash0;
                    //UMI                 //Gene //Count
-    unordered_map <uint32,uint32> geneCounts;
+    map <uint32,uint32> geneCounts; //unordered_map to make it faster?
+    
+    unordered_map <uint32,uint32> umiCorrected;
 
     if (countCellGeneUMI.size() < countCellGeneUMIindex[iCB] + nGenes*countMatStride) //allocated vector too small
         countCellGeneUMI.resize(countCellGeneUMI.size()*2);
@@ -102,8 +104,11 @@ void SoloFeature::collapseUMI_CR(uint32 iCB, uint32 *umiArray)
                 uint32 uuXor=umiArray[iu+0] ^ umiArray[iuu+0];
 
                 if ( (uuXor >> (__builtin_ctz(uuXor)/2)*2) <= 3 ) {//1MM
-                    umiArray[iu+0]=umiArray[iuu+0];//replace this one with the previous one
-                    break; //1MM
+                    if (readInfo.size()>0) {//record corrections
+                        umiCorrected[umiArray[iu+0]]=umiArray[iuu+0];//replace iu with iuu
+                    };                    
+                    umiArray[iu+0]=umiArray[iuu+0];//replace iu with iuu
+                    break;
                 };
             };
         };
@@ -125,6 +130,18 @@ void SoloFeature::collapseUMI_CR(uint32 iCB, uint32 *umiArray)
             countCellGeneUMI[countCellGeneUMIindex[iCB+1]+0]=gID[iG];
             countCellGeneUMI[countCellGeneUMIindex[iCB+1]+1]=nU1;
             countCellGeneUMIindex[iCB+1] = countCellGeneUMIindex[iCB+1] + countMatStride;//iCB+1 accumulates the index
+        };
+        
+        if (readInfo.size()>0) {//record cb/umi for each read
+            for (uint32 iR=0; iR<gReadS[iG+1]-gReadS[iG]; iR+=rguStride) {//cycle over reads
+                uint64 iread1 = rGU1[iR+rguR];
+                readInfo[iread1].cb = indCB[iCB] ;
+                uint32 umi=rGU1[iR+rguU];
+                
+                if (umiCorrected.count(umi)>0)
+                    umi=umiCorrected[umi]; //correct UMI
+                readInfo[iread1].umi=umi;
+            };      
         };
     };
 
