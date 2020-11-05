@@ -1,3 +1,5 @@
+* Issue #1071: fixed a bug that can cause a crash for STARsolo runs with a small number of cells.
+
 STAR 2.7.6a --- 2020/09/19
 ==========================
 **Major new feature:**
