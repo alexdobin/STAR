@@ -224,7 +224,7 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
 
     
     if (countCellGeneUMI.size() < countCellGeneUMIindex[iCB] + nGenes*countMatStride) //allocated vector too small
-        countCellGeneUMI.resize(countCellGeneUMI.size()*2);
+        countCellGeneUMI.resize((countCellGeneUMIindex[iCB] + nGenes*countMatStride)*2);
     
     nGenePerCB[iCB]=0;
     nUMIperCB[iCB]=0;

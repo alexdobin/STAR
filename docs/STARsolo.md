@@ -135,7 +135,7 @@ Barcode geometry
   ```
   --soloType CB_UMI_Simple (a.k.a Droplet)
   ```
-* More complex barcodes are activated with ```--soloType CB_UMI_complex``` and are described with the following parameters
+* More complex barcodes are activated with ```--soloType CB_UMI_Complex``` and are described with the following parameters
   ```
   soloCBposition              -
     strings(s)              position of Cell Barcode(s) on the barcode read.
