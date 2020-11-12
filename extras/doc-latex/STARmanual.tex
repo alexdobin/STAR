@@ -121,7 +121,7 @@ The basic options to generate genome indices are as follows:
 \opt{sjdbOverhang} specifies the length of the genomic sequence around the annotated junction to be used in constructing the splice junctions database. Ideally, this length should be equal to the \optvr{ReadLength-1}, where \optvr{ReadLength} is the length of the reads. For instance, for Illumina 2x100b paired-end reads, the ideal value is 100-1=99. In case of reads of varying length, the ideal value is \optvr{max(ReadLength)-1}. \textbf{In most cases, the default value of 100 will work as well as the ideal value.}
 \end{itemize}
 
-Genome files comprise binary genome sequence, suffix arrays, text chromosome names/lengths, splice junctions coordinates, and transcripts/genes information. Most of these files use internal STAR format and are not intended to be utilized by the end user. It is strongly \textbf{not recommended} to change any of these file with one exception: you can rename the chromosome names in the chrName.txt keeping the order of the chromosomes in the file: the names from this file will be used in all output files (e.g. SAM/BAM).
+Genome files comprise binary genome sequence, suffix arrays, text chromosome names/lengths, splice junctions coordinates, and transcripts/genes information. Most of these files use internal STAR format and are not intended to be utilized by the end user. It is strongly \textbf{not recommended} to change any of these files with one exception: you can rename the chromosome names in the chrName.txt keeping the order of the chromosomes in the file: the names from this file will be used in all output files (e.g. SAM/BAM).
 
 \subsection{Advanced options.}
 \subsubsection{Which chromosomes/scaffolds/patches to include?}
