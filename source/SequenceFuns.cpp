@@ -1,4 +1,5 @@
 #include "SequenceFuns.h"
+#include <assert.h>  
 
 void complementSeqNumbers(char* ReadsIn, char* ReadsOut, uint Lread) {//complement the numeric sequences
     for (uint jj=0;jj<Lread;jj++) {
@@ -336,6 +337,53 @@ uint32 localAlignHammingDist(const string &text, const string &query, uint32 &po
     return distBest;
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+uint32 localSearchGeneral(const char *text, const uint32 textLen, const vector<char> &query, const int32 textStart, const int32 textEnd, double pMM, vector <uint32> vecMM, uint32 &nMM)
+{
+    assert(textEnd <= (int32)textLen);
+    assert(textStart + (int32)query.size() >= 0);
+
+    nMM=0;
+    
+    uint32 nMatchBest=0;
+    int32 posBest=textLen;
+    
+    int32 dirSearch = (textStart <= textEnd ? 1 : -1); //search direction
+    
+    for (int32 pos=textStart; pos!=textEnd; pos+=dirSearch) {
+        int32 qs = max(0, -pos);
+        int32 qe = min((uint32)query.size(), (uint32)(textLen-pos) );
+                       
+        uint32 nMatch1=0, nMM1=0;
+
+        for (uint32 iq=qs; iq<qe; iq++) {
+            if (text[pos+iq]>3) 
+                continue; //Ns in the text are not counted as matches or mismatches
+            if (text[pos+iq]==query[iq]) {
+                nMatch1++;
+            } else {
+                nMM1++;
+                if ( nMM1 > (uint32)(qe-qs)/2 ) {
+                    nMatch1=0;
+                    break; //too many mismatches
+                };
+            };
+        };
+        
+        //if ( (nMatch1>nMatchBest || (nMatch1==nMatchBest && nMM1<nMM)) && double(nMM1)<=double(nMatch1)*pMM ) {
+        if ( (nMatch1>nMatchBest || (nMatch1==nMatchBest && nMM1<nMM)) && nMM1<vecMM.size() && nMatch1>=vecMM[nMM1]) {
+            posBest=pos;
+            nMatchBest=nMatch1;
+            nMM=nMM1;
+        };        
+    };
+    
+    uint32 clippedL = (textStart <= textEnd ? -posBest+(int32)textLen : posBest+(int32)query.size() );
+    
+    return clippedL;
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 uint qualitySplit(char* r, char* q, uint L, char Qsplit, uint maxNsplit, uint  minLsplit, uint** splitR) {
     //splits the read r[L] by quality scores q[L], outputs in splitR - split coordinate/length - per base
     //returns number of good split regions

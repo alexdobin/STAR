@@ -19,6 +19,7 @@ uint chrFind(uint, uint, uint*); // find chromosome from global locus
 uint localSearch(const char*, uint, const char*, uint, double); //local search to clip adapter
 uint localSearchNisMM(const char *x, uint nx, const char *y, uint ny, double pMM);
 uint32 localAlignHammingDist(const string &text, const string &query, uint32 &pos);
+uint32 localSearchGeneral(const char *text, const uint32 textL, const vector<char> &query, const int32 textStart, const int32 textEnd, double pMM, vector <uint32> vecMM, uint32 &nMM);
 
 uint qualitySplit(char*, char*, uint, char, uint, uint, uint**);
 

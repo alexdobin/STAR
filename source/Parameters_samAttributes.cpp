@@ -34,6 +34,8 @@ void Parameters::samAttributes(){//everything related to SAM attributes
     outSAMattrPresent.sS=false;    
     outSAMattrPresent.sQ=false;
     
+    outSAMattrPresent.cN=false;
+    
     //for quant SAM output only NH and HI flags
     outSAMattrPresentQuant=outSAMattrPresent;
     outSAMattrPresentQuant.NH=true;
@@ -147,7 +149,11 @@ void Parameters::samAttributes(){//everything related to SAM attributes
         } else if (vAttr1.at(ii)== "sQ") {
             outSAMattrOrder.push_back(ATTR_sQ);
             outSAMattrOrderQuant.push_back(ATTR_sQ);
-            outSAMattrPresent.sQ=true;              
+            outSAMattrPresent.sQ=true;
+        } else if (vAttr1.at(ii)== "cN") {
+            outSAMattrOrder.push_back(ATTR_cN);
+            outSAMattrOrderQuant.push_back(ATTR_cN);
+            outSAMattrPresent.cN=true;             
         } else if (vAttr1.at(ii)== "XS") {
             outSAMattrOrder.push_back(ATTR_XS);
             outSAMattrPresent.XS=true;

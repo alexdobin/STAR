@@ -2,12 +2,12 @@
 #include "Parameters.h"
 #include "SequenceFuns.h"
 
-void ClipMate::clip(uint &Lread, char *SeqNum, uint32 &clippedN)
+uint32 ClipMate::clip(uint &Lread, char *SeqNum)
 {
 	clippedN=0;
 
 	if (type<0)
-		return; //no clip for this mate
+		return 0; //no clip for this mate
 
 	uint LreadOld=Lread;
 
@@ -21,16 +21,21 @@ void ClipMate::clip(uint &Lread, char *SeqNum, uint32 &clippedN)
 		} else {
 			Lread=0;
 			clippedN=LreadOld;
-			return;
 		}
 	};
 
-	uint32 clippedAdN=0;
 	if (adSeq.length()>0) {//clip adapter
 		if (type==0) {//5p
             //not implemented yet
-		} else {//3p
-			clippedAdN = Lread-localSearch(SeqNum, Lread, adSeqNum.data(), adSeqNum.size(), adMMp);
+		} else {//3p            
+            //clippedAdN = Lread-localSearch(SeqNum, Lread, adSeqNum.data(), adSeqNum.size(), adMMp);
+			uint64 clippedAdN1 = Lread-localSearch(SeqNum, Lread, adSeqNum.data(), adSeqNum.size(), adMMp);
+            
+            //clippedAdN = localSearchGeneral(SeqNum, Lread, adSeqNum, 0, Lread, adMMp,   clippedAdMM);
+            vector<uint32> vecMM({20, 23, 26, 30, 40, 50, 60, 70, 80, 90});
+            clippedAdN = localSearchGeneral(SeqNum, Lread, adSeqNum, 0, Lread, adMMp, vecMM,   clippedAdMM);
+            
+            Lread=Lread;
 		};
 
 		Lread -= clippedAdN;
@@ -47,7 +52,8 @@ void ClipMate::clip(uint &Lread, char *SeqNum, uint32 &clippedN)
     	} else {//0-length after clipping
     		Lread=0;
 			clippedN=LreadOld;
-			return;
     	};
     };
+    
+    return clippedN ;
 };

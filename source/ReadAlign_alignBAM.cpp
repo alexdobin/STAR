@@ -169,6 +169,10 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                 attrN+=bamAttrArrayWrite(soloRead->readBar->bSeq,"sS",attrOutArray+attrN);
             if (P.outSAMattrPresent.sQ)
                 attrN+=bamAttrArrayWrite(soloRead->readBar->bQual,"sQ",attrOutArray+attrN);
+            if (P.outSAMattrPresent.cN) {
+                vector <int32> v1={clip5pNtotal[imate],clip3pNtotal[imate]} ;
+                attrN+=bamAttrArrayWrite(v1,"cN",attrOutArray+attrN);
+            };
             
         } else {//this mate is mapped
             if (flagPaired) {//paired reads
@@ -301,6 +305,13 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                             attrN+=bamAttrArrayWrite('-',"XS",attrOutArray+attrN);
                         };
                         break;
+                        
+                    case ATTR_cN:
+                        {
+                            vector <int32> v1={clip5pNtotal[imate],clip3pNtotal[imate]} ;
+                            attrN+=bamAttrArrayWrite(v1,"cN",attrOutArray+attrN);
+                            break;
+                        };
                     case ATTR_NM:
                         if ( tagNM == (uint) -1 ) samAttrNM_MD (trOut, iEx1, iEx2, tagNM, tagMD);
                         attrN+=bamAttrArrayWriteInt(tagNM,"NM",attrOutArray+attrN,P);

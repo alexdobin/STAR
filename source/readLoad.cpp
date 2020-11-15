@@ -64,8 +64,8 @@ int readLoad(istream& readInStream, Parameters& P, uint32 iMate, uint& Lread, ui
 
     convertNucleotidesToNumbers(Seq,SeqNum,Lread);
 
-    P.pClip.clipMates[iMate][0].clip(Lread, SeqNum, clip5pNtotal); //5p clip
-    P.pClip.clipMates[iMate][1].clip(Lread, SeqNum, clip3pNtotal); //3p clip
+    clip5pNtotal=P.pClip.clipMates[iMate][0].clip(Lread, SeqNum); //5p clip
+    clip3pNtotal=P.pClip.clipMates[iMate][1].clip(Lread, SeqNum); //3p clip
 
     if (readName[0]=='@') {//fastq format, read qualities
         readFileType=2;

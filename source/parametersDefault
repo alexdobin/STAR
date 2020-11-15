@@ -149,11 +149,9 @@ readFilesManifest           -
             Spaces, but not tabs are allowed in file names.
             If read_group_line does not start with ID:, it can only contain one ID field, and ID: will be added to it.
             If read_group_line starts with ID:, it can contain several fields separated by $tab$, and all fields will be be copied verbatim into SAM @RG header line.
-                            -
 
 readFilesPrefix             -
     string: prefix for the read files names, i.e. it will be added in front of the strings in --readFilesIn
-                            -: no prefix
 
 readFilesCommand             -
     string(s): command line to execute for each of the input file. This command should generate FASTA or FASTQ text and send it to stdout
@@ -177,6 +175,7 @@ clip3pNbases                 0
 
 clip3pAdapterSeq            -
     string(s): adapter sequences to clip from 3p of each mate.  If one value is given, it will be assumed the same for both mates.
+                            polyA ... polyA sequence with the length equal to read length
 
 clip3pAdapterMMp            0.1
     double(s): max proportion of mismatches for 3p adapter clipping for each mate.  If one value is given, it will be assumed the same for both mates.
@@ -295,6 +294,7 @@ outSAMattributes                Standard
                                 XS          ... alignment strand according to --outSAMstrandField.
                                 MC          ... mate's CIGAR string. Standard SAM tag.
                                 ch          ... marks all segment of all chimeric alingments for --chimOutType WithinBAM output.
+                                cN          ... number of bases clipped from the read ends: 5' and 3'
                                 ***Variation:
                                 vA          ... variant allele
                                 vG          ... genomic coordinate of the variant overlapped by the read.

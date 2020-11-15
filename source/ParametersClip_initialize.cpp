@@ -10,8 +10,13 @@ void ClipMate::initialize(uint32 Nin, const string &adSeqIn, uint32 NafterAdin, 
 	if (adSeq=="-") {
 		adSeq="";
 	} else {
-		adSeqNum.resize(adSeq.size(),0);
-		convertNucleotidesToNumbers(adSeq.data(), adSeqNum.data(), adSeqNum.size());
+        if ( adSeq=="polyA") {
+            adSeqNum.clear(); //it should be empty, but just in case...
+            adSeqNum.resize(DEF_readSeqLengthMax, 0); //fill with A=0
+        } else {
+            adSeqNum.resize(adSeq.size(),0);
+            convertNucleotidesToNumbers(adSeq.data(), adSeqNum.data(), adSeqNum.size());
+        };
 	};
 
 	if (N==0 && adSeq=="")
