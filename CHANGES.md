@@ -1,6 +1,7 @@
 * Implemented --soloCellFilter EmptyDrops_CR option for cell filtering (calling) nearly identical to that of CellRanger 3 and 4.
 * Implemented --runMode soloCellFiltering option for cell filtering (calling) of the raw count matrix, without re-mapping.
 * PR: #1012: fix the bug with --soloCellFilter TopCells option
+* Issue #1040: fixed a bug causing rare seg-faults for paired-end --soloType SmartSeq runs.
 * Issue #1071: fixed a bug that can cause a crash for STARsolo runs with a small number of cells.
 
 STAR 2.7.6a --- 2020/09/19

@@ -33,13 +33,17 @@ int alignToTranscript(Transcript &aG, uint64 trS1, uint16 exN1, uint32 *exSE1, u
         bE=bS+aG.exons[iab][EX_L]-1;//block end
 
         if (iab==0 || aG.canonSJ[iab-1]==-3) {//start of alig, or jump to another mate
-            ex1=binarySearch1<uint32>(bS, exSE1, 2*exN1) / 2;// alignStart>=ex1start
+            if (!binarySearch_leLeft<uint32>(bS, exSE1, 2*exN1, ex1))
+                return -1; //bS is outside of exons for this transcript
+            ex1 = ex1/2;//ex1 index, with alignStart>=ex1start
         } else if (aG.canonSJ[iab-1]>=0) {//splice junction
             if (bEprev == eE && bS == enS) {//eE and enS are still from the old ex1
                 ++ex1; //junction agrees
             } else {
                 alignSJconcordant = false;
-                ex1=binarySearch1<uint32>(bS, exSE1, 2*exN1) / 2;// alignStart>=ex1start
+                if (!binarySearch_leLeft<uint32>(bS, exSE1, 2*exN1, ex1))
+                    return -1; //bS is outside of exons for this transcript
+                ex1 = ex1/2;//ex1 index, with alignStart>=ex1start
             };
         };
 
@@ -189,7 +193,7 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
         if (tr1==(uint32) -1) 
             continue; //this alignment is outside of range of all transcripts
 
-        uint64 aGend=aG.exons[aG.nExons-1][EX_G]+aG.exons[aG.nExons-1][EX_L]-1;
+        uint64 aGend=aG.exons[aG.nExons-1][EX_G]+aG.exons[aG.nExons-1][EX_L]-1; //TODO: this estimate does work if 2nd mate end is < 1st mate end
 
         ++tr1;
         do {//cycle back through all the transcripts
