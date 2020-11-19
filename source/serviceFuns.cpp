@@ -132,6 +132,33 @@ inline uint32 binarySearch1(argType x, argType *X, uint32 N) {
 };
 
 template <class argType>
+inline bool binarySearch_leLeft(argType x, argType *X, uint32 N, uint32 & i1) {
+    //binary search in the sorted list
+    //Retrun false if x is outside of X[0], X[N-1]
+    //Return i1 = index of the element which is <= x, the leftmost element if equal.
+    
+    if (x>X[N-1] || x<X[0]) 
+        return false;
+
+    i1=0;
+    uint32 i2=N-1, i3=N/2;
+    while (i2>i1+1) {//binary search
+        i3=(i1+i2)/2;
+        if (X[i3]>x) {
+            i2=i3;
+        } else {// X[i3] <= x
+            i1=i3;
+        };
+    };
+
+    while (i1>0 && x==X[i1-1]) 
+        --i1; //go left to check for equals
+        
+    return true;
+};
+
+
+template <class argType>
 inline int32 binarySearch1a(argType x, argType *X, int32 N) {
     //binary search in the sorted list
     //check the boundaries first
