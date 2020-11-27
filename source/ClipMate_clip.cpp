@@ -27,13 +27,15 @@ uint32 ClipMate::clip(uint &Lread, char *SeqNum)
 	if (adSeq.length()>0) {//clip adapter
 		if (type==0) {//5p
             //not implemented yet
+            vector<uint32> vecMM({20, 22, 24, 30, 40, 50, 60, 70, 80, 90});
+            clippedAdN = localSearchGeneral(SeqNum, Lread, adSeqNum, -(int32)adSeqNum.size()+1, (int32)Lread-(int32)adSeqNum.size(), adMMp, vecMM,   clippedAdMM);            
 		} else {//3p            
             //clippedAdN = Lread-localSearch(SeqNum, Lread, adSeqNum.data(), adSeqNum.size(), adMMp);
 			uint64 clippedAdN1 = Lread-localSearch(SeqNum, Lread, adSeqNum.data(), adSeqNum.size(), adMMp);
             
             //clippedAdN = localSearchGeneral(SeqNum, Lread, adSeqNum, 0, Lread, adMMp,   clippedAdMM);
             vector<uint32> vecMM({20, 23, 26, 30, 40, 50, 60, 70, 80, 90});
-            clippedAdN = localSearchGeneral(SeqNum, Lread, adSeqNum, 0, Lread, adMMp, vecMM,   clippedAdMM);
+            clippedAdN = localSearchGeneral(SeqNum, Lread, adSeqNum, Lread-1, -1, adMMp, vecMM,   clippedAdMM);
             
             Lread=Lread;
 		};

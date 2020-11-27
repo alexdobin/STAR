@@ -347,6 +347,8 @@ uint32 localSearchGeneral(const char *text, const uint32 textLen, const vector<c
     
     uint32 nMatchBest=0;
     int32 posBest=textLen;
+    uint32 clippedL = 0;
+
     
     int32 dirSearch = (textStart <= textEnd ? 1 : -1); //search direction
     
@@ -363,7 +365,7 @@ uint32 localSearchGeneral(const char *text, const uint32 textLen, const vector<c
                 nMatch1++;
             } else {
                 nMM1++;
-                if ( nMM1 > (uint32)(qe-qs)/2 ) {
+                if ( nMM1 >= vecMM.size() ) {
                     nMatch1=0;
                     break; //too many mismatches
                 };
@@ -371,15 +373,14 @@ uint32 localSearchGeneral(const char *text, const uint32 textLen, const vector<c
         };
         
         //if ( (nMatch1>nMatchBest || (nMatch1==nMatchBest && nMM1<nMM)) && double(nMM1)<=double(nMatch1)*pMM ) {
-        if ( (nMatch1>nMatchBest || (nMatch1==nMatchBest && nMM1<nMM)) && nMM1<vecMM.size() && nMatch1>=vecMM[nMM1]) {
+        if ( (nMatch1>nMatchBest || (nMatch1==nMatchBest && nMM1<nMM)) && nMM1<vecMM.size() && (qe-qs)>=vecMM[nMM1]) {
             posBest=pos;
             nMatchBest=nMatch1;
             nMM=nMM1;
+            clippedL = (uint32)(textStart <= textEnd ? posBest+(int32)query.size(): -posBest+(int32)textLen );
         };        
     };
-    
-    uint32 clippedL = (textStart <= textEnd ? -posBest+(int32)textLen : posBest+(int32)query.size() );
-    
+        
     return clippedL;
 };
 
