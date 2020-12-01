@@ -5,11 +5,9 @@
 #include "SequenceFuns.h"
 #include "GlobalVariables.h"
 
-inline void removeStringEndControl(string &str)
-{//removes control character (including space) from the end of the string
-    if (int(str.back())<33)
-        str.pop_back();
-};
+inline uint64 fastqReadOneLine(ifstream &streamIn, char *arrIn);
+inline void removeStringEndControl(string &str);
+
 
 void ReadAlignChunk::processChunks() {//read-map-write chunks
     noReadsLeft=false; //true if there no more reads left in the file
@@ -20,7 +18,8 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
 
             if (P.runThreadN>1) pthread_mutex_lock(&g_threadChunks.mutexInRead);
 
-            uint chunkInSizeBytesTotal[2]={0,0};
+            chunkInSizeBytesTotal={0,0};
+            
             while (chunkInSizeBytesTotal[0] < P.chunkInSizeBytes && chunkInSizeBytesTotal[1] < P.chunkInSizeBytes && P.inOut->readIn[0].good() && P.inOut->readIn[1].good()) {
                 char nextChar=P.inOut->readIn[0].peek();
                 if (P.iReadAll==P.readMapNumber) {//do not read any more reads
@@ -110,16 +109,16 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                             getline(P.inOut->readIn[P.pSolo.barcodeRead],seq1);
                             removeStringEndControl(seq1);
                             if (seq1.size() != P.pSolo.bL) {
-                            	if (P.pSolo.bL > 0) {
-									ostringstream errOut;
-									errOut << "EXITING because of FATAL ERROR in input read file: the total length of barcode sequence is "  << seq1.size() << " not equal to expected " <<P.pSolo.bL <<"\n"  ;
-									errOut << "Read ID="<<readID<< "   Sequence="<<seq1<<"\n";
-									errOut << "SOLUTION: make sure that the barcode read is the last file in --readFilesIn , and check that it has the correct formatting\n";
-									errOut << "          If UMI+CB length is not equal to the barcode read length, specify barcode read length with --soloBarcodeReadLength\n";
-									exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
-                            	} else if (seq1.size()<P.pSolo.cbumiL) {//barcode sequence too short - append Ns
-                            		seq1.append(P.pSolo.cbumiL-seq1.size(), 'N');
-                            	};
+                                if (P.pSolo.bL > 0) {
+                                    ostringstream errOut;
+                                    errOut << "EXITING because of FATAL ERROR in input read file: the total length of barcode sequence is "  << seq1.size() << " not equal to expected " <<P.pSolo.bL <<"\n"  ;
+                                    errOut << "Read ID="<<readID<< "   Sequence="<<seq1<<"\n";
+                                    errOut << "SOLUTION: make sure that the barcode read is the last file in --readFilesIn , and check that it has the correct formatting\n";
+                                    errOut << "          If UMI+CB length is not equal to the barcode read length, specify barcode read length with --soloBarcodeReadLength\n";
+                                    exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
+                                } else if (seq1.size()<P.pSolo.cbumiL) {//barcode sequence too short - append Ns
+                                    seq1.append(P.pSolo.cbumiL-seq1.size(), 'N');
+                                };
                             };
                             readID += ' ' + seq1;
                             P.inOut->readIn[P.pSolo.barcodeRead].ignore(DEF_readNameSeqLengthMax,'\n');//skip to the end of 3rd ("+") line
@@ -137,22 +136,22 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                     };
                     //copy 3 (4 for stage 2) lines: sequence, dummy, quality
                     for (uint imate=0; imate<P.readNmates; imate++) {
-                        for (uint iline=(P.outFilterBySJoutStage==2 ? 0:1);iline<4;iline++) {
-                            uint64 origChunkStart=chunkInSizeBytesTotal[imate];
-                            
-                            P.inOut->readIn[imate].getline(chunkIn[imate] + chunkInSizeBytesTotal[imate], DEF_readNameSeqLengthMax+1 );
-                            chunkInSizeBytesTotal[imate] += P.inOut->readIn[imate].gcount(); //this includes the final \n
-                            
-                            if ( int(chunkIn[imate][chunkInSizeBytesTotal[imate]-2]) < 33 ) {//remove control char at the end if present
-                                chunkInSizeBytesTotal[imate]--;
-                            };
-                            
-                            chunkIn[imate][chunkInSizeBytesTotal[imate]-1]='\n';
-                            
-                            if (iline==3 && P.outFilterBySJoutStage!=2) {
-                                g_statsAll.qualHistCalc(imate, chunkIn[imate] + origChunkStart, chunkInSizeBytesTotal[imate] - origChunkStart);
-                            };
+                        // read 1st line for 2nd stage only
+                        if (P.outFilterBySJoutStage == 2)
+                            chunkInSizeBytesTotal[imate] += fastqReadOneLine(P.inOut->readIn[imate], chunkIn[imate] + chunkInSizeBytesTotal[imate]);
+                        //sequence
+                        chunkInSizeBytesTotal[imate] += fastqReadOneLine(P.inOut->readIn[imate], chunkIn[imate] + chunkInSizeBytesTotal[imate]);
+                        //skip 3rd line, record '+'
+                        P.inOut->readIn[imate].ignore(DEF_readNameSeqLengthMax, '\n');
+                        chunkIn[imate][chunkInSizeBytesTotal[imate]] = '+';
+                        chunkIn[imate][chunkInSizeBytesTotal[imate]+1] = '\n';
+                        chunkInSizeBytesTotal[imate] += 2;
+                        //quality
+                        uint64 lenIn = fastqReadOneLine(P.inOut->readIn[imate], chunkIn[imate] + chunkInSizeBytesTotal[imate]);
+                        if (P.outFilterBySJoutStage != 2) {
+                                g_statsAll.qualHistCalc(imate, chunkIn[imate] + chunkInSizeBytesTotal[imate], lenIn);
                         };
+                        chunkInSizeBytesTotal[imate] += lenIn;
                     };
                 } else if (nextChar=='>') {//fasta, can be multiline, which is converted to single line
                     P.iReadAll++; //increment read number
@@ -275,3 +274,22 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
     if (P.runThreadN>1) pthread_mutex_unlock(&g_threadChunks.mutexLogMain);
 };
 
+inline uint64 fastqReadOneLine(ifstream &streamIn, char *arrIn)
+{
+    uint64 lenIn;
+    streamIn.getline(arrIn, DEF_readNameSeqLengthMax+1 );
+    lenIn = streamIn.gcount(); //=seqLength+1: includes \0 but not \n. We will replace \0 with \n
+    
+    if ( int(arrIn[lenIn-2]) < 33 ) {//remove control char at the end if present
+        --lenIn;
+    };
+    
+    arrIn[lenIn-1]='\n'; //replace \0 with \n
+    return lenIn;
+};
+
+inline void removeStringEndControl(string &str)
+{//removes control character (including space) from the end of the string
+    if (int(str.back())<33)
+        str.pop_back();
+};

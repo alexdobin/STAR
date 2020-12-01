@@ -145,6 +145,28 @@ void convertNucleotidesToNumbers(const char* R0, char* R1, const uint Lread) {//
                 };
 };
 
+void convertCapitalBasesToNum(uint8_t *rS, uint64_t N)
+{//only capital bases are allowed
+    for (int ib=0; ib<N; ib++) {
+        switch (rS[ib]) {
+            case 'A':
+                rS[ib]=0;
+                break;
+            case 'C':
+                rS[ib]=1;
+                break;        
+            case 'G':
+                rS[ib]=2;
+                break;   
+            case 'T':
+                rS[ib]=3;
+                break;   
+            default:
+                rS[ib]=4;
+        };
+    };
+};
+
 uint convertNucleotidesToNumbersRemoveControls(const char* R0, char* R1, const uint Lread) {//transform sequence  from ACGT into 0-1-2-3 code
     uint iR1=0;
     for (uint jj=0;jj<Lread;jj++) {

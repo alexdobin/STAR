@@ -25,19 +25,33 @@ uint32 ClipMate::clip(uint &Lread, char *SeqNum)
 	};
 
 	if (adSeq.length()>0) {//clip adapter
-		if (type==0) {//5p
-            //not implemented yet
-            vector<uint32> vecMM({20, 22, 24, 30, 40, 50, 60, 70, 80, 90});
-            clippedAdN = localSearchGeneral(SeqNum, Lread, adSeqNum, -(int32)adSeqNum.size()+1, (int32)Lread-(int32)adSeqNum.size(), adMMp, vecMM,   clippedAdMM);            
-		} else {//3p            
-            //clippedAdN = Lread-localSearch(SeqNum, Lread, adSeqNum.data(), adSeqNum.size(), adMMp);
-			uint64 clippedAdN1 = Lread-localSearch(SeqNum, Lread, adSeqNum.data(), adSeqNum.size(), adMMp);
-            
-            //clippedAdN = localSearchGeneral(SeqNum, Lread, adSeqNum, 0, Lread, adMMp,   clippedAdMM);
-            vector<uint32> vecMM({20, 23, 26, 30, 40, 50, 60, 70, 80, 90});
-            clippedAdN = localSearchGeneral(SeqNum, Lread, adSeqNum, Lread-1, -1, adMMp, vecMM,   clippedAdMM);
-            
-            Lread=Lread;
+        switch (type) {
+            case 0: {//5p - not tested yet
+                vector<uint32> vecMM({20, 22, 24, 30, 40, 50, 60, 70, 80, 90});
+                clippedAdN = localSearchGeneral(SeqNum, Lread, adSeqNum, -(int32)adSeqNum.size()+1, (int32)Lread-(int32)adSeqNum.size(), adMMp, vecMM,   clippedAdMM);     
+                memmove(SeqNum, SeqNum+clippedAdN, Lread-clippedAdN);
+                break;
+            };
+            case 1: {//3p            
+                clippedAdN = Lread-localSearch(SeqNum, Lread, adSeqNum.data(), adSeqNum.size(), adMMp);
+                break;
+                /* new way, not tested properly
+                uint64 clippedAdN1 = Lread-localSearch(SeqNum, Lread, adSeqNum.data(), adSeqNum.size(), adMMp);
+                
+                //clippedAdN = localSearchGeneral(SeqNum, Lread, adSeqNum, 0, Lread, adMMp,   clippedAdMM);
+                vector<uint32> vecMM({20, 23, 26, 30, 40, 50, 60, 70, 80, 90});
+                clippedAdN = localSearchGeneral(SeqNum, Lread, adSeqNum, Lread-1, -1, adMMp, vecMM,   clippedAdMM);
+                
+                Lread=Lread;
+                */
+            };
+            case 10: {//5p: CR4
+                clippedAdN = clippedInfo;
+                memmove(SeqNum, SeqNum+clippedAdN, Lread-clippedAdN);
+                break;
+            };
+            case 11: {//3p: CR4, polyA
+            };
 		};
 
 		Lread -= clippedAdN;

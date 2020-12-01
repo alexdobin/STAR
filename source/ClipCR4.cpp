@@ -1,0 +1,80 @@
+#include "ClipCR4.h"
+
+ClipCR4::ClipCR4()
+{
+    dbN = 64;
+    
+    scoreMatrix = {
+        1, -2, -2, -2, -2,
+       -2,  1, -2, -2, -2,
+       -2, -2,  1, -2, -2,
+       -2, -2, -2,  1, -2,
+       -2, -2, -2,  -2, 0
+    };
+    
+    readLen = 40;
+    alphabetLength = 5;
+    gapOpen = 2;
+    gapExt = 2;
+    
+    
+    dbSeqArr = new uint8_t[dbN*readLen];
+    dbSeqs = new uint8_t*[dbN];
+    for (int id=0; id<dbN; id++) {
+        dbSeqs[id]=dbSeqArr+id*readLen;
+    };
+    
+    dbSeqsLen = new int[dbN];
+    for (int id=0; id<dbN; id++) {
+        dbSeqsLen[id] = readLen; //rL;
+    };  
+    
+    storeClip.resize(dbN);
+    opalRes.resize(dbN);
+    opalResP = new OpalSearchResult*[dbN];
+    
+    for (int i = 0; i < dbN; i++) {
+        opalResP[i]=&opalRes[i];
+    };     
+
+};
+
+
+void ClipCR4::opalFillOneSeq(uint32 idb, char *seq, uint32 seqL)
+{
+    uint32 minLen = min(seqL, readLen);
+    
+    memcpy(dbSeqs[idb], seq, minLen);
+    
+    for (uint32 ib=0; ib<minLen; ib++) {//TODO: vectorize with multiplications, i.e. dbSeq= (seq=='C')+(seq=='G')*2+(seq=='T')*3+(seq=='N')*4
+        switch (dbSeqs[idb][ib]) {
+            case 'A':
+                dbSeqs[idb][ib]=0;
+                break;
+            case 'C':
+                dbSeqs[idb][ib]=1;
+                break;        
+            case 'G':
+                dbSeqs[idb][ib]=2;
+                break;   
+            case 'T':
+                dbSeqs[idb][ib]=3;
+                break;   
+            default:
+                dbSeqs[idb][ib]=4;
+        };
+    };
+    
+    if (seqL<readLen) //fill the rest of the sequence with Ns
+        memset(dbSeqs[idb]+seqL, 4, readLen-seqL);
+};
+
+void ClipCR4::opalAlign(uint8_t *query, uint32 queryLen)
+{
+    for (int idb = 0; idb < dbN; idb++) {
+        opalInitSearchResult(opalResP[idb]);
+    };    
+    int resultCode = opalSearchDatabase(query, queryLen, dbSeqs, dbN, dbSeqsLen,
+                                        gapOpen, gapExt, scoreMatrix.data(), alphabetLength, opalResP,
+                                        OPAL_SEARCH_SCORE_END, OPAL_MODE_OV, OPAL_OVERFLOW_BUCKETS);//, OPAL_OVERFLOW_SIMPLE);//
+};

@@ -17,12 +17,14 @@ public:
     Transcriptome *chunkTr;
 
     char **chunkIn; //space for the chunk of input reads
+    array<uint64,2> chunkInSizeBytesTotal;    
+    
     char *chunkOutBAM, *chunkOutBAM1;//space for the chunk of output SAM
     OutSJ *chunkOutSJ, *chunkOutSJ1;
 
     BAMoutput *chunkOutBAMcoord, *chunkOutBAMunsorted, *chunkOutBAMquant;
     Quantifications *chunkQuants;
-
+    
     istringstream** readInStream;
     ostringstream*  chunkOutBAMstream;
     ofstream chunkOutBAMfile;

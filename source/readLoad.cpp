@@ -63,13 +63,20 @@ int readLoad(istream& readInStream, Parameters& P, uint32 iMate, uint& Lread, ui
     LreadOriginal=Lread;
 
     convertNucleotidesToNumbers(Seq,SeqNum,Lread);
+    
+    if (readName[0]=='@') {//fastq format, read qualities
+        readFileType=2;
+        readInStream.get(P.pClip.clipMates[iMate][0].clippedInfo); //this is used if clipChunk is activated, only 5' for now
+        readInStream.ignore(); //ignore one char: \n
+    };
 
+    //cout << readName <<'\t' << (uint32) line3char << '\n';
+    
     clip5pNtotal=P.pClip.clipMates[iMate][0].clip(Lread, SeqNum); //5p clip
     clip3pNtotal=P.pClip.clipMates[iMate][1].clip(Lread, SeqNum); //3p clip
 
     if (readName[0]=='@') {//fastq format, read qualities
         readFileType=2;
-        readInStream.ignore(DEF_readNameLengthMax,'\n'); //extract header line
         readInStream.getline(Qual,DEF_readSeqLengthMax);//read qualities
         if ((uint) readInStream.gcount() != LreadOriginal+1) {//inconsistent read sequence and quality
             ostringstream errOut;

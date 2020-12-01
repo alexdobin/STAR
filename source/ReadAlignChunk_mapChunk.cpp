@@ -5,12 +5,19 @@
 #include SAMTOOLS_BGZF_H
 
 void ReadAlignChunk::mapChunk() {//map one chunk. Input reads stream has to be setup in RA->readInStream[ii]
+    
+    for (uint32 im=0; im<P.readNmates; im++) {//clipChunk
+        P.pClip.clipMates[im][0].clipChunk(chunkIn[im], chunkInSizeBytesTotal[im]);
+    };
+    
     RA->statsRA.resetN();
 
     for (uint ii=0;ii<P.readNmates;ii++) {//clear eof and rewind the input streams
         RA->readInStream[ii]->clear();
         RA->readInStream[ii]->seekg(0,ios::beg);
     };
+    
+    
 
     if ( P.outSAMorder == "PairedKeepInputOrder" && P.runThreadN>1 ) {//open chunk file
         ostringstream name1("");
