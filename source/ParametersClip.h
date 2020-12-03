@@ -17,7 +17,7 @@ public:
 	vector<char> adSeqNum;
 	double adMMp;
     
-    //clipped infor from clipChunk
+    //clipped info from clipChunk
     char clippedInfo;
     
     //clip results

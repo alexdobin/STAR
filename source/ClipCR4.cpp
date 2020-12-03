@@ -12,7 +12,7 @@ ClipCR4::ClipCR4()
        -2, -2, -2,  -2, 0
     };
     
-    readLen = 40;
+    readLen = 91;
     alphabetLength = 5;
     gapOpen = 2;
     gapExt = 2;
@@ -69,12 +69,39 @@ void ClipCR4::opalFillOneSeq(uint32 idb, char *seq, uint32 seqL)
         memset(dbSeqs[idb]+seqL, 4, readLen-seqL);
 };
 
-void ClipCR4::opalAlign(uint8_t *query, uint32 queryLen)
+void ClipCR4::opalAlign(uint8_t *query, uint32 queryLen, int dbN1)
 {
-    for (int idb = 0; idb < dbN; idb++) {
+    for (int idb = 0; idb < dbN1; idb++) {
         opalInitSearchResult(opalResP[idb]);
     };    
-    int resultCode = opalSearchDatabase(query, queryLen, dbSeqs, dbN, dbSeqsLen,
+    int resultCode = opalSearchDatabase(query, queryLen, dbSeqs, dbN1, dbSeqsLen,
                                         gapOpen, gapExt, scoreMatrix.data(), alphabetLength, opalResP,
                                         OPAL_SEARCH_SCORE_END, OPAL_MODE_OV, OPAL_OVERFLOW_BUCKETS);//, OPAL_OVERFLOW_SIMPLE);//
 };
+
+uint32 ClipCR4::polyTail3p(char *seq, uint32 seqLen)
+{//clip polyA tail
+    //hardcoded for CR4 trimming
+
+    uint32_t ib1=seqLen-1;
+    int32_t score=0, score1=0;
+    for (int32_t ib=1; ib<=seqLen; ib++) {
+        if ( seq[seqLen-ib] == 0 ) {//A-tail
+            score += 1; //+1 for matches
+            if (score*10 >= ib*7) {//score>=0.7*clipL
+                ib1 = ib;
+                score1 = score;
+            };
+        } else {
+            score -= 2; //-2 for mismatches
+            if ( ib-score > 27 ) 
+                break; //score drop is too big
+        };
+    };
+    if ( score1<20 )
+        ib1=0; //score is too small
+        
+    return ib1;
+};
+
+

@@ -1,3 +1,9 @@
+# usage:
+# cat Aligned.out.sam | awk -v strType=2 -f tagXSstrandedData.awk 
+# strType defines strandedness of the libraries: strType = mate whose strand is the same as RNA strand.
+# For instance, for Illumina Tru-seq, strType=2 - the 2nd mate's strand is the same as RNA.
+
+
 BEGIN {
     OFS="\t";
     strSym[0]="+";

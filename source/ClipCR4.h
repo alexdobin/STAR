@@ -19,8 +19,8 @@ public:
     //constructor
     ClipCR4();
     void opalFillOneSeq(uint32 idb, char *seq, uint32 seqL);
-    void opalAlign(uint8 *query, uint32 queryLen);
-    
+    void opalAlign(uint8 *query, uint32 queryLen, int dbN1);
+    uint32 polyTail3p(char *seq, uint32 seqLen);
     
 private:
 

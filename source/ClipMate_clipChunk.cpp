@@ -11,8 +11,11 @@ void ClipMate::clipChunk(char *chArr, uint64 chSize)
     
     char *chA1 = chArr;
     bool chGood = true; //=true after teh end of the chunk
-    while (chGood) {//cycle over all       
-        for (int idb=0; idb<cr4->dbN; idb++) {
+    while (chGood) {//cycle over all
+        
+        int dbN1 = cr4->dbN; //maybe changed to a smaller value in the loop
+        int idb = 0;
+        for ( ; idb<cr4->dbN; idb++) {
             chA1 = findChar(chA1, '\n')+1; //skip read name
             
             char *chA2 = findChar(chA1, '\n');
@@ -30,13 +33,14 @@ void ClipMate::clipChunk(char *chArr, uint64 chSize)
             chA1 = chA2 + 3 + rL + 1; //start of the next read: skip \n+\n, quality=read lengt, \n
             if (chA1 > chArr+chSize) {
                 chGood = false;
+                dbN1 = idb+1;
                 break;
             };
         };
 
-        cr4->opalAlign((uint8_t*) adSeqNum.data(), adSeqNum.size());
+        cr4->opalAlign((uint8_t*) adSeqNum.data(), adSeqNum.size(), dbN1);
 
-        for (int idb=0; idb<cr4->dbN; idb++) {//store results
+        for (int idb=0; idb<dbN1; idb++) {//store results
             int L = cr4->opalRes[idb].endLocationTarget+1;
             int S = cr4->opalRes[idb].score;
             
