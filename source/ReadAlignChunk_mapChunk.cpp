@@ -6,8 +6,9 @@
 
 void ReadAlignChunk::mapChunk() {//map one chunk. Input reads stream has to be setup in RA->readInStream[ii]
     
-    for (uint32 im=0; im<P.readNmates; im++) {//clipChunk
-        P.pClip.clipMates[im][0].clipChunk(chunkIn[im], chunkInSizeBytesTotal[im]);
+    //for (uint32 im=0; im<P.readNmates; im++) {//clipChunk
+    for (uint32 im=0; im<1; im++) {//hardcoded mate 1 5p onyl for now
+        RA->clipMates[im][0].clipChunk(chunkIn[im], chunkInSizeBytesTotal[im]);
     };
     
     RA->statsRA.resetN();

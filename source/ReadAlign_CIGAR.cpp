@@ -5,13 +5,13 @@ samStreamCIGAR.str(std::string());
 
         uint trimL;
         if (Str==0 && Mate==0) {
-            trimL=clip5pNtotal[Mate];
+            trimL=clipMates[Mate][0].clippedN;
         } else if (Str==0 && Mate==1) {
-            trimL=clip3pNtotal[Mate];
+            trimL=clipMates[Mate][1].clippedN;
         } else if (Str==1 && Mate==0) {
-            trimL=clip3pNtotal[Mate];
+            trimL=clipMates[Mate][1].clippedN;
         } else {
-            trimL=clip5pNtotal[Mate];
+            trimL=clipMates[Mate][0].clippedN;
         };
 
         uint trimL1 = trimL + trOut.exons[iEx1][EX_R] - (trOut.exons[iEx1][EX_R]<readLength[leftMate] ? 0 : readLength[leftMate]+1);

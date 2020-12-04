@@ -74,9 +74,9 @@ void ClipCR4::opalAlign(uint8_t *query, uint32 queryLen, int dbN1)
     for (int idb = 0; idb < dbN1; idb++) {
         opalInitSearchResult(opalResP[idb]);
     };    
-    int resultCode = opalSearchDatabase(query, queryLen, dbSeqs, dbN1, dbSeqsLen,
-                                        gapOpen, gapExt, scoreMatrix.data(), alphabetLength, opalResP,
-                                        OPAL_SEARCH_SCORE_END, OPAL_MODE_OV, OPAL_OVERFLOW_BUCKETS);//, OPAL_OVERFLOW_SIMPLE);//
+    opalSearchDatabase(query, queryLen, dbSeqs, dbN1, dbSeqsLen,
+                        gapOpen, gapExt, scoreMatrix.data(), alphabetLength, opalResP,
+                        OPAL_SEARCH_SCORE_END, OPAL_MODE_OV, OPAL_OVERFLOW_BUCKETS);//, OPAL_OVERFLOW_SIMPLE);//
 };
 
 uint32 ClipCR4::polyTail3p(char *seq, uint32 seqLen)
@@ -85,10 +85,10 @@ uint32 ClipCR4::polyTail3p(char *seq, uint32 seqLen)
 
     uint32_t ib1=seqLen-1;
     int32_t score=0, score1=0;
-    for (int32_t ib=1; ib<=seqLen; ib++) {
+    for (uint32_t ib=1; ib<=seqLen; ib++) {
         if ( seq[seqLen-ib] == 0 ) {//A-tail
             score += 1; //+1 for matches
-            if (score*10 >= ib*7) {//score>=0.7*clipL
+            if (score*10 >= (int)ib*7) {//score>=0.7*clipL
                 ib1 = ib;
                 score1 = score;
             };

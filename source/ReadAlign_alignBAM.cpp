@@ -170,7 +170,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
             if (P.outSAMattrPresent.sQ)
                 attrN+=bamAttrArrayWrite(soloRead->readBar->bQual,"sQ",attrOutArray+attrN);
             if (P.outSAMattrPresent.cN) {
-                vector <int32> v1={clip5pNtotal[imate],clip3pNtotal[imate]} ;
+                vector <int32> v1={clipMates[imate][0].clippedN,clipMates[imate][1].clippedN} ;
                 attrN+=bamAttrArrayWrite(v1,"cN",attrOutArray+attrN);
             };
             
@@ -212,13 +212,13 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
 
             uint trimL;
             if (Str==0 && Mate==0) {
-                trimL=clip5pNtotal[Mate];
+                trimL=clipMates[Mate][0].clippedN;
             } else if (Str==0 && Mate==1) {
-                trimL=clip3pNtotal[Mate];
+                trimL=clipMates[Mate][1].clippedN;
             } else if (Str==1 && Mate==0) {
-                trimL=clip3pNtotal[Mate];
+                trimL=clipMates[Mate][1].clippedN;
             } else {
-                trimL=clip5pNtotal[Mate];
+                trimL=clipMates[Mate][0].clippedN;
             };
 
             nCIGAR=0; //number of CIGAR operations
@@ -308,7 +308,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                         
                     case ATTR_cN:
                         {
-                            vector <int32> v1={clip5pNtotal[imate],clip3pNtotal[imate]} ;
+                            vector <int32> v1={clipMates[imate][0].clippedN,clipMates[imate][1].clippedN} ;
                             attrN+=bamAttrArrayWrite(v1,"cN",attrOutArray+attrN);
                             break;
                         };

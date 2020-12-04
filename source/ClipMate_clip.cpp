@@ -72,5 +72,5 @@ uint32 ClipMate::clip(uint &Lread, char *seqNum)
     	};
     };
     
-    return clippedN ;
+    return clippedN;
 };
