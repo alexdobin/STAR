@@ -863,8 +863,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     chunkOutBAMsizeBytes= (uint) int((1.0/BUFFER_InSizeFraction-1.0)*chunkInSizeBytesArray*2.0);
     chunkInSizeBytes=chunkInSizeBytesArray-2*(DEF_readSeqLengthMax+1)-2*DEF_readNameLengthMax;//to prevent overflow
 
-    pClip.initialize(this);
-
     //variation
     var.yes=false;
     if (var.vcfFile!="-") {

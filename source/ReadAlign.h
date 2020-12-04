@@ -14,6 +14,7 @@
 #include "SoloRead.h"
 #include "ReadAnnotations.h"
 #include "SpliceGraph.h"
+#include "ClipMate.h"
 
 #include <time.h>
 #include <random>
@@ -67,6 +68,8 @@ class ReadAlign {
         SoloRead *soloRead; //counts reads per CB per and outputs CB/UMI/gene into file, per thread
         
         SpliceGraph *splGraph;
+        
+        vector<vector<ClipMate>> clipMates;
 
 	//input,output
         char** outBAMoneAlign;
@@ -100,7 +103,6 @@ class ReadAlign {
         uint64 iMate;
         char readFilter; //Illumina not passed Y/N
         bool revertStrand; //what to do with the strand, according to strandType and iMate
-        uint32 clip3pNtotal[MAX_N_MATES], clip5pNtotal[MAX_N_MATES]; //total number of trimmed bases from 5p,3p
         int readFileType; //file type: 1=fasta; 2=fastq
 
         vector<string>readNameExtra;

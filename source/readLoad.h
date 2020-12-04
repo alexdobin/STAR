@@ -7,7 +7,7 @@
 
 int readLoad(istream& readInStream, Parameters& P, uint32 iMate, uint& Lread, uint& LreadOriginal, \
 		     char* readName, char* Seq, char* SeqNum, char* Qual, char* QualNum, \
-			 uint32 &clip3pNtotal, uint32 &clip5pNtotal, \
+			 vector<ClipMate> &clipOneMate, \
 			 uint &iReadAll, uint32 &readFilesIndex, char &readFilter, string &readNameExtra);
 
 #endif

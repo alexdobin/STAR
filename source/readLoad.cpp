@@ -2,9 +2,9 @@
 #include "ErrorWarning.h"
 
 int readLoad(istream& readInStream, Parameters& P, uint32 iMate, uint& Lread, uint& LreadOriginal, \
-		     char* readName, char* Seq, char* SeqNum, char* Qual, char* QualNum, \
-			 uint32 &clip3pNtotal, uint32 &clip5pNtotal, \
-			 uint &iReadAll, uint32 &readFilesIndex, char &readFilter, string &readNameExtra)
+            char* readName, char* Seq, char* SeqNum, char* Qual, char* QualNum, \
+            vector<ClipMate> clipOneMate, \
+            uint &iReadAll, uint32 &readFilesIndex, char &readFilter, string &readNameExtra)
 {//load one read from a stream
     int readFileType=0;
 
@@ -66,14 +66,14 @@ int readLoad(istream& readInStream, Parameters& P, uint32 iMate, uint& Lread, ui
     
     if (readName[0]=='@') {//fastq format, read qualities
         readFileType=2;
-        readInStream.get(P.pClip.clipMates[iMate][0].clippedInfo); //this is used if clipChunk is activated, only 5' for now
+        readInStream.get(clipOneMate[0].clippedInfo); //this is used if clipChunk is activated, only 5' for now
         readInStream.ignore(); //ignore one char: \n
     };
 
     //cout << readName <<'\t' << (uint32) line3char << '\n';
     
-    clip5pNtotal=P.pClip.clipMates[iMate][0].clip(Lread, SeqNum); //5p clip
-    clip3pNtotal=P.pClip.clipMates[iMate][1].clip(Lread, SeqNum); //3p clip
+    clipOneMate[0].clip(Lread, SeqNum); //5p clip
+    clipOneMate[1].clip(Lread, SeqNum); //3p clip
 
     if (readName[0]=='@') {//fastq format, read qualities
         readFileType=2;
