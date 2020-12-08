@@ -18,7 +18,7 @@ int bamAttrArrayWrite(char attr, const char* tagName, char* attrArray );
 int bamAttrArrayWrite(string &attr, const char* tagName, char* attrArray );
 int bamAttrArrayWrite(const vector<char> &attr, const char* tagName, char* attrArray );
 int bamAttrArrayWrite(const vector<int32> &attr, const char* tagName, char* attrArray );
-int bamAttrArrayWriteSAMtags(string &attrStr, char *attrArray);
+int bamAttrArrayWriteSAMtags(string &attrStr, char *attrArray, Parameters &P);
 
 template <class TintType>
 TintType bamAttributeInt(const char *bamAux, const char *attrName) {//not tested!!!

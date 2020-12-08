@@ -429,10 +429,8 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
             };
         };
 
-        if (P.readFilesTypeN==10) {
-//             if (readNameExtra[Mate].size()<1)
-//                 cout << iReadAll <<" " <<readName <<endl;
-            attrN+=bamAttrArrayWriteSAMtags(readNameExtra[Mate],attrOutArray+attrN);
+        if (P.readFilesTypeN==10 && !P.readFiles.samAttrKeepNone) {
+            attrN+=bamAttrArrayWriteSAMtags(readNameExtra[Mate], attrOutArray+attrN, P);
         };
 ////////////////////////////// prepare sequence and qualities
         char seqMate[DEF_readSeqLengthMax+1], qualMate[DEF_readSeqLengthMax+1];

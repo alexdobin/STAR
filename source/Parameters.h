@@ -86,9 +86,9 @@ class Parameters {
         
         //new: structure for readFiles parameters
         struct {
-            vector<string> samTagsKeepIn; //input vector of SAM tags to keep, if readFilesType=SAMtag
-            std::unordered_set<uint16_t> samTagsKeep;
-            bool samTagsKeepAll, samTagsKeepNone;
+            vector<string> samAttrKeepIn; //input vector of SAM tags to keep, if readFilesType=SAMtag
+            std::unordered_set<uint16_t> samAttrKeep;
+            bool samAttrKeepAll, samAttrKeepNone;
         } readFiles;
 
         ParametersClip pClip;

@@ -1,6 +1,7 @@
 #include "BAMfunctions.h"
 #include "htslib/htslib/kstring.h"
 
+
 string bam_cigarString (bam1_t *b) {//output CIGAR string
 //    kstring_t strK;
 //    kstring_t *str=&strK;
@@ -143,16 +144,20 @@ int bamAttrArrayWrite(const vector<int32> &attr, const char* tagName, char* attr
     return 4+sizeof(int32)+sizeof(int32)*attr.size();
 };
 
-int bamAttrArrayWriteSAMtags(string &attrStr, char *attrArray) {//write bam record into attrArray for string attribute attString
+int bamAttrArrayWriteSAMtags(string &attrStr, char *attrArray, Parameters &P) {//write bam record into attrArray for string attribute attString
     size_t pos1=0, pos2=0;
     int nattr=0;
     do {//cycle over multiple tags separated by tab
         pos2 = attrStr.find('\t',pos1);
-        string attr1 = attrStr.substr(pos1, pos2-pos1);
-        pos1=pos2+1;
+        string attr1 = attrStr.substr(pos1, pos2-pos1); //substring containing one tag
+        pos1=pos2+1; //for the next search
 
         if (attr1.empty())
             continue; //extra tab at the beginning, or consecutive tabs
+            
+        uint16_t tagn = * ( (uint16_t*) attr1.c_str() );
+        if ( !P.readFiles.samAttrKeepAll && P.readFiles.samAttrKeep.count(tagn)==0 )
+            continue; //skip tags not contained the list            
 
         switch (attr1.at(3)) {//TODO: support other tag types (vector tags)
             case 'i':
@@ -181,7 +186,7 @@ int bamAttrArrayWriteSAMtags(string &attrStr, char *attrArray) {//write bam reco
                 break;
             };
         };
-    } while (pos2!= string::npos);
+    } while (pos2 != string::npos);
 
     return nattr;
 };

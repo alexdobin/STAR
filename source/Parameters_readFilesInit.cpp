@@ -12,14 +12,14 @@ void Parameters::readFilesInit()
         readFilesTypeN=1;
     } else if (readFilesType.at(0) == "SAM"){
         readFilesTypeN=10;
-        readFiles.samTagsKeepAll = false;
-        readFiles.samTagsKeepNone = false;
-        if (readFiles.samTagsKeepIn.at(0) == "All") {
-            readFiles.samTagsKeepAll = true;
-        } else if (readFiles.samTagsKeepIn.at(0) == "None") {
-            readFiles.samTagsKeepNone = true;
+        readFiles.samAttrKeepAll = false;
+        readFiles.samAttrKeepNone = false;
+        if (readFiles.samAttrKeepIn.at(0) == "All") {
+            readFiles.samAttrKeepAll = true;
+        } else if (readFiles.samAttrKeepIn.at(0) == "None") {
+            readFiles.samAttrKeepNone = true;
         } else {
-            for (auto &tag: readFiles.samTagsKeepIn) {
+            for (auto &tag: readFiles.samAttrKeepIn) {
                 if (tag.size()!=2) {
                     exitWithError("EXITING because of FATAL PARAMETER ERROR: each SAM tags in --readFilesSAMtagsKeep should contain two letters\n\
                                   SOLUTION: specify only two-letter tags in --readFilesSAMtagsKeep.",
@@ -27,7 +27,7 @@ void Parameters::readFilesInit()
                 };
                 //array<char,2> taga = {tag[0], tag[1]};
                 uint16_t tagn = * ( (uint16_t*) tag.c_str() );
-                readFiles.samTagsKeep.insert(tagn);
+                readFiles.samAttrKeep.insert(tagn);
             };
         };
     } else {

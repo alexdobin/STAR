@@ -139,7 +139,7 @@ readFilesType               Fastx
                             SAM SE      ... SAM or BAM single-end reads; for BAM use --readFilesCommand samtools view
                             SAM PE      ... SAM or BAM paired-end reads; for BAM use --readFilesCommand samtools view
                             
-readFilesSAMtagsKeep        All
+readFilesSAMattrKeep        All
     string(s): for --readFilesType SAM SE/PE, which SAM tags to keep in the output BAM, e.g.: --readFilesSAMtagsKeep RG PL
                             All     ... keep all tags
                             None    ... do not keep any tags
