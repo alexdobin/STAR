@@ -193,7 +193,7 @@ void SoloFeature::emptyDrops_CR()
     for (auto &ip: pValues) {
         if (ip.padj<=pSolo.cellFilter.eDcr.FDR) {
             ++extraCells;
-            cellFilterVec[ip.index]=true;
+            filteredCells.filtVecBool[ip.index]=true;
         };
     };
     time(&rawTime);

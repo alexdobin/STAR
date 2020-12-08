@@ -19,13 +19,14 @@ public:
 class ParametersClip
 {//
 public:
-	bool yes; //trimming is performed
+	//bool yes; //trimming is performed
 
     vector<string> adapterType;
     
 	array<ReadClipInput,2> in;
 
-	void initialize(Parameters *pPin, vector<vector<ClipMate>> &clipMates);
+	void initialize(Parameters *pPin);
+    void initializeClipMates(vector<vector<ClipMate>> &clipMates);
         
 private:
 	Parameters *pP;

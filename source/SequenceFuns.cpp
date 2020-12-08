@@ -147,7 +147,7 @@ void convertNucleotidesToNumbers(const char* R0, char* R1, const uint Lread) {//
 
 void convertCapitalBasesToNum(uint8_t *rS, uint64_t N)
 {//only capital bases are allowed
-    for (int ib=0; ib<N; ib++) {
+    for (uint64_t ib=0; ib<N; ib++) {
         switch (rS[ib]) {
             case 'A':
                 rS[ib]=0;
@@ -360,6 +360,7 @@ uint32 localAlignHammingDist(const string &text, const string &query, uint32 &po
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*
 uint32 localSearchGeneral(const char *text, const uint32 textLen, const vector<char> &query, const int32 textStart, const int32 textEnd, double pMM, vector <uint32> vecMM, uint32 &nMM)
 {
     assert(textEnd <= (int32)textLen);
@@ -405,7 +406,7 @@ uint32 localSearchGeneral(const char *text, const uint32 textLen, const vector<c
         
     return clippedL;
 };
-
+*/
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 uint qualitySplit(char* r, char* q, uint L, char Qsplit, uint maxNsplit, uint  minLsplit, uint** splitR) {
     //splits the read r[L] by quality scores q[L], outputs in splitR - split coordinate/length - per base

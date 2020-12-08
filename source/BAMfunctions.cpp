@@ -154,7 +154,7 @@ int bamAttrArrayWriteSAMtags(string &attrStr, char *attrArray) {//write bam reco
         if (attr1.empty())
             continue; //extra tab at the beginning, or consecutive tabs
 
-        switch (attr1.at(3)) {
+        switch (attr1.at(3)) {//TODO: support other tag types (vector tags)
             case 'i':
             {
                 int32 a1=stol(attr1.substr(5));

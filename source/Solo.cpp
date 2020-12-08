@@ -19,10 +19,11 @@ Solo::Solo(ReadAlignChunk **RAchunkIn, Parameters &Pin, Transcriptome &inTrans)
 };
 
 ///////////////////////////////////////////////////////////////////////////////////// post-mapping procssing only
+//overloaded: only soloCellFiltering
 Solo::Solo(Parameters &Pin, Transcriptome &inTrans)
           :  P(Pin), Trans(inTrans), pSolo(P.pSolo)
 {
-    if ( P.runMode != "soloCellFiltering")
+    if ( P.runMode != "soloCellFiltering" )
         return; //passing through, return back to executing STAR
         
     time_t timeCurrent;

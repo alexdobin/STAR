@@ -138,6 +138,11 @@ readFilesType               Fastx
                             Fastx       ... FASTA or FASTQ
                             SAM SE      ... SAM or BAM single-end reads; for BAM use --readFilesCommand samtools view
                             SAM PE      ... SAM or BAM paired-end reads; for BAM use --readFilesCommand samtools view
+                            
+readFilesSAMtagsKeep        All
+    string(s): for --readFilesType SAM SE/PE, which SAM tags to keep in the output BAM, e.g.: --readFilesSAMtagsKeep RG PL
+                            All     ... keep all tags
+                            None    ... do not keep any tags
 
 readFilesIn                 Read1 Read2
     string(s): paths to files that contain input read1 (and, if needed,  read2)
@@ -194,6 +199,7 @@ clip3pAfterAdapterNbases    0
 clip5pNbases                 0
     int(s): number(s) of bases to clip from 5p of each mate. If one value is given, it will be assumed the same for both mates.
 
+#####UnderDevelopment_begin : not supported - do not use   
 clip5pAdapterSeq            -
     string(s): adapter sequences to clip from 5p of each mate.  If one value is given, it will be assumed the same for both mates.
 
@@ -202,6 +208,7 @@ clip5pAdapterMMp            0.1
 
 clip5pAfterAdapterNbases    0
     int(s): number of bases to clip from 5p of each mate after the adapter clipping. If one value is given, it will be assumed the same for both mates.
+#####UnderDevelopment_end
 
 ### Limits
 limitGenomeGenerateRAM               31000000000

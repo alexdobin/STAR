@@ -170,7 +170,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
             if (P.outSAMattrPresent.sQ)
                 attrN+=bamAttrArrayWrite(soloRead->readBar->bQual,"sQ",attrOutArray+attrN);
             if (P.outSAMattrPresent.cN) {
-                vector <int32> v1={clipMates[imate][0].clippedN,clipMates[imate][1].clippedN} ;
+                vector <int32> v1={(int32)clipMates[imate][0].clippedN, (int32)clipMates[imate][1].clippedN};
                 attrN+=bamAttrArrayWrite(v1,"cN",attrOutArray+attrN);
             };
             
@@ -308,7 +308,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                         
                     case ATTR_cN:
                         {
-                            vector <int32> v1={clipMates[imate][0].clippedN,clipMates[imate][1].clippedN} ;
+                            vector <int32> v1={(int32)clipMates[imate][0].clippedN, (int32)clipMates[imate][1].clippedN};
                             attrN+=bamAttrArrayWrite(v1,"cN",attrOutArray+attrN);
                             break;
                         };

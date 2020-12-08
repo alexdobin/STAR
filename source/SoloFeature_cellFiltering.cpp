@@ -26,11 +26,11 @@ void SoloFeature::cellFiltering()
     };
     nUMImin=max(nUMImin,(uint32) 1);//cannot be zero
         
-    filteredCells.nCellsSimple=0;
-    cellFilterVec.resize(nCB,false);
+    filteredCells.reset(nCB); //all stats to 0
+
     for (uint32 icb=0; icb<nCB; icb++) {
         if (nUMIperCB[icb]>=nUMImin) {
-            cellFilterVec[icb]=true;
+            filteredCells.filtVecBool[icb]=true;
             filteredCells.nCellsSimple++;
         };
     };
@@ -42,13 +42,12 @@ void SoloFeature::cellFiltering()
     };
     
     //filtering is done: cellFilterVec=true for kept cells, calculate statistics
-    memset(&filteredCells,0,sizeof(filteredCells)); //init to 0 all stats
 
     bool *geneDetected = new bool[featuresNumber];
     memset((void*) geneDetected, 0, featuresNumber);
 
     for (uint32 icb=0; icb<nCB; icb++) {
-        if (cellFilterVec[icb]) {
+        if (filteredCells.filtVecBool[icb]) {
             
             filteredCells.nCells++;
 

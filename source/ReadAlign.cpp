@@ -98,7 +98,7 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
     soloRead = new SoloRead (P, iChunk);
     
     //clipping
-    P.pClip.initialize(&P, clipMates);
+    P.pClip.initializeClipMates(clipMates);
 };
 
 void ReadAlign::resetN () {//reset resets the counters to 0 for a new read

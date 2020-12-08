@@ -47,7 +47,7 @@ void SoloFeature::outputResults(bool cellFilterYes, string outputPrefixMat)
     uint64 nCellGeneEntries=0;//total number of non-zero cell/gene combinations (entries in the output matrix)
     if (cellFilterYes) {//filtered cells
         for (uint32 icb=0; icb<nCB; icb++) {
-            if (cellFilterVec[icb]) {
+            if (filteredCells.filtVecBool[icb]) {
                 cbStr << pSolo.cbWLstr[indCB[icb]] <<'\n';
                 nCellGeneEntries += nGenePerCB[icb];
             };
@@ -81,7 +81,7 @@ void SoloFeature::outputResults(bool cellFilterYes, string outputPrefixMat)
     uint32  cbInd1=0;
     for (uint32 icb=0; icb<nCB; icb++) {
         if (cellFilterYes) {
-            if (cellFilterVec[icb]) {
+            if (filteredCells.filtVecBool[icb]) {
                 ++cbInd1;
             } else {
                 continue;

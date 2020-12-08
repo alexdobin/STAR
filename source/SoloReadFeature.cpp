@@ -14,7 +14,6 @@ SoloReadFeature::SoloReadFeature(int32 feTy, Parameters &Pin, int iChunk)
     
     if (pSolo.cbWLyes) {
         cbReadCount.resize(pSolo.cbWLsize,0);
-
     };
 
     if (iChunk>=0) {

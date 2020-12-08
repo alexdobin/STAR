@@ -14,6 +14,7 @@
 #include "ParametersGenome.h"
 #include <vector>
 #include <array>
+#include <unordered_set>
 
 class Parameters {
 
@@ -66,6 +67,7 @@ class Parameters {
         vector <vector <string> > readFilesNames;
         vector <string> readFilesCommand;
         vector <string> readFilesManifest;
+               
         string readFilesCommandString; //actual command string
         int readFilesIndex;
         pid_t readFilesCommandPID[MAX_N_MATES];
@@ -81,6 +83,13 @@ class Parameters {
 
         string outSAMreadID;
         bool outSAMreadIDnumber;
+        
+        //new: structure for readFiles parameters
+        struct {
+            vector<string> samTagsKeepIn; //input vector of SAM tags to keep, if readFilesType=SAMtag
+            std::unordered_set<uint16_t> samTagsKeep;
+            bool samTagsKeepAll, samTagsKeepNone;
+        } readFiles;
 
         ParametersClip pClip;
 

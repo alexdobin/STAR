@@ -12,6 +12,8 @@
 #include "SoloCommon.h"
 #include "SoloRead.h"
 
+#include "SoloFilteredCells.h"
+
 class SoloFeature {
 private:
     const int32 featureType;
@@ -50,16 +52,10 @@ public:
     uint32 countMatStride; //number of counts per entry in the count matrix
     
     vector<unordered_map<uint32, unordered_set<uint64>>> cbFeatureUMImap; //for SmartSeq counting
-    
-    vector<bool> cellFilterVec;
-    struct {
-        uint64 nCells, nReadInCells, medianReadPerCell, meanReadPerCell, nUMIinCells, medianUMIperCell, meanUMIperCell, nGeneInCells, medianGenePerCell, meanGenePerCell, nGeneDetected;
-        vector<uint32> nUMIperCell, nReadPerCell, nGenePerCell;
-        
-        uint32 nCellsSimple; //number of cells after simple filtering
-    } filteredCells;
-    
+       
     string outputPrefix, outputPrefixFiltered;
+    
+    SoloFilteredCells filteredCells;
     
     array<vector<uint64>,2> sjAll;
     

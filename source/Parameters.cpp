@@ -61,6 +61,7 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readNameSeparator", &readNameSeparator));
     parArray.push_back(new ParameterInfoScalar <uint32> (-1, -1, "readQualityScoreBase", &readQualityScoreBase));
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readFilesManifest", &readFilesManifest));
+    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readFilesSAMtagsKeep", &readFiles.samTagsKeepIn));
 
     //parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "readStrand", &pReads.strandString));
 
@@ -978,6 +979,9 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     
     //solo
     pSolo.initialize(this);
+    
+    //clipping
+    pClip.initialize(this);
 
     //alignEnds
     alignEndsType.ext[0][0]=false;
