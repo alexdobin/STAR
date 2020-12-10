@@ -49,7 +49,6 @@ void ReadAlign::outputAlignments() {
             };            
         };
 
-
         if (outFilterPassed) {
             if (nTr>1) {//multimappers
                 statsRA.mappedReadsM++;
@@ -91,7 +90,6 @@ void ReadAlign::outputAlignments() {
                 };
             };
 
-            
             //temporary: SAM output for SpliceGraph
             if (mapGen.pGe.gType==101) {
                 if (mapGen.genomeOut.convYes) {//convert to new genome
@@ -112,7 +110,7 @@ void ReadAlign::outputAlignments() {
                 return;
             };
             
-            soloRead->readBar->getCBandUMI(readNameExtra.at(0), readFilesIndex);
+            soloRead->readBar->getCBandUMI(readNameExtra[0], readFilesIndex, readName);
 
             //TODO maybe initialize readAnnot to all empty?
             //genes
@@ -213,7 +211,7 @@ void ReadAlign::outputAlignments() {
 
     if (unmapType>=0) {//unmapped reads
         statsRA.unmappedAll++;
-        soloRead->readBar->getCBandUMI(readNameExtra.at(0), readFilesIndex);
+        soloRead->readBar->getCBandUMI(readNameExtra.at(0), readFilesIndex, readName);
         soloRead->record(0, trMult, iReadAll, readAnnot);         
     };
 
@@ -257,6 +255,3 @@ void ReadAlign::outputAlignments() {
        };
     };
 };
-
-
-

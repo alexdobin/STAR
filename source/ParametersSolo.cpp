@@ -87,20 +87,57 @@ void ParametersSolo::initialize(Parameters *pPin)
         exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
 
-    if (type==SoloTypes::SmartSeq) {//no barcode read
-        pP->readNmates=pP->readNmatesIn; 
+    /////////////////////////////////////////////////////////////////////input read files
+    if (pP->readFilesTypeN != 10) {//input from FASTQ
+        if (type==SoloTypes::SmartSeq) {//no barcode read
+            //pP->readNmates=pP->readNmatesIn; 
+            barcodeRead=-1; 
+            barcodeReadYes=false;
+            //TODO: a lot of parameters should not be defined for SmartSeq option - check it here
+            //umiDedup
+        } else {//all other types require barcode read
+            if (pP->readNmatesIn<2) {
+                exitWithError("EXITING because of fatal PARAMETERS error: --soloType options (except SmartSeq) require 2 reads or 3 reads, where the last read is the barcode read.\n"
+                            "SOLUTION: specify 2 or 3 files in --readFilesIn",std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+            };
+            pP->readNmates=pP->readNmatesIn-1; //true mates, excluding barcode read
+            barcodeRead=pP->readNmates;//TODO make this flexible
+            barcodeReadYes=true;
+        };
+
+    } else if (pP->readFilesTypeN == 10) {//input from SAM
+        //pP->readNmates=pP->readNmatesIn;
         barcodeRead=-1; 
         barcodeReadYes=false;
-        //TODO: a lot of parameters should not be defined for SmartSeq option - check it here
-        //umiDedup
-    } else {//all other types require barcode read
-        if (pP->readNmatesIn<2) {
-            exitWithError("solo* options require 2 reads or 3 reads, where the last read is the barcode read.\n"
-                          "SOLUTION: specify 2 or 3 files in --readFilesIn",std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+            
+        if (samAtrrBarcodeSeq.at(0) == "-") {
+            exitWithError("EXITING because of fatal PARAMETERS error: --readFilesType SAM SE/PE requires --soloInputSAMattrBarcodeSeq.\n"
+                          "SOLUTION: specify input SAM attributes for barcode sequence in --soloInputSAMattrBarcodeSeq, and (optionally) quality with --soloInputSAMattrBarcodeQual", 
+                          std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
-        pP->readNmates=pP->readNmatesIn-1; //output mates    
-        barcodeRead=pP->readNmates;//TODO make this flexible
-        barcodeReadYes=true;
+        
+        if (samAtrrBarcodeQual.at(0) == "-") {
+            warningMessage(" since --readFilesType SAM SE/PE --soloInputSAMattrBarcodeQual - : qualities for barcode read will be replaced with 'H'", pP->inOut->logMain,std::cerr, *pP);
+            samAtrrBarcodeQual={};
+        };
+        
+        for (auto &tag: samAtrrBarcodeSeq) {
+            if (tag.size()!=2) {
+                exitWithError("EXITING because of fatal PARAMETERS error: --soloInputSAMattrBarcodeSeq attributes have to be two-letter strings.\n"
+                              "SOLUTION: specify correct two-letter strings in --soloInputSAMattrBarcodeSeq", 
+                              std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+            };
+            tag.insert(0,1,'\t');
+        };
+        
+        for (auto &tag: samAtrrBarcodeQual) {
+            if (tag.size()!=2) {
+                exitWithError("EXITING because of fatal PARAMETERS error: --soloInputSAMattrBarcodeQual attributes have to be two-letter strings.\n"
+                              "SOLUTION: specify correct two-letter strings in --soloInputSAMattrBarcodeQual", 
+                              std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+            };
+            tag.insert(0,1,'\t');
+        };        
     };
     
     ///////////////////////////////////////////////// soloStrand

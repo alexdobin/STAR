@@ -22,16 +22,9 @@ int readLoad(istream& readInStream, Parameters& P, uint& Lread, uint& LreadOrigi
     };
 
     readInStream >> iReadAll >> readFilter >> readFilesIndex; //extract read number
-
+    readInStream >> std::ws; //skip whitespace
+    
     getline(readInStream, readNameExtra);
-    if (!readNameExtra.empty()) {
-        size_t n1=readNameExtra.find_first_not_of(" \t");
-        if (n1!=std::string::npos) {
-            readNameExtra=readNameExtra.substr(n1);
-        } else {
-            readNameExtra="";
-        };
-    };
 
     readInStream.getline(Seq,DEF_readSeqLengthMax+1); //extract sequence
 

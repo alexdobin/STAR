@@ -24,6 +24,8 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                 char nextChar=P.inOut->readIn[0].peek();
                 if (P.iReadAll==P.readMapNumber) {//do not read any more reads
                     break;
+                    
+                ///////////////////////////////////////////////////////////////////////////////////// SAM                        
                 } else if (P.readFilesTypeN==10 && P.inOut->readIn[0].good() && P.outFilterBySJoutStage!=2) {//SAM input && not eof && not 2nd stage
 
                     string str1;
@@ -74,11 +76,15 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                                 revComplementNucleotides(seq1);
                                 reverse(qual1.begin(),qual1.end());
                             };
+                            
+                            g_statsAll.qualHistCalc(imate1, qual1.c_str(), qual1.size());
 
-                            getline(P.inOut->readIn[0],str1); //str1 is now all SAM attributes
+                            getline(P.inOut->readIn[0],str1); //rest of the SAM line: str1 is now all SAM attributes
                             chunkInSizeBytesTotal[imate1] += sprintf(chunkIn[imate1] + chunkInSizeBytesTotal[imate1], "%s\n%s\n+\n%s\n", str1.c_str(), seq1.c_str(), qual1.c_str());
                         };
                     };
+                    
+                ///////////////////////////////////////////////////////////////////////////////////// FASTQ    
                 } else if (nextChar=='@') {//fastq, not multi-line
                     P.iReadAll++; //increment read number
                     if (P.outFilterBySJoutStage!=2) {//not the 2nd stage of the 2-stage mapping, read ID from the 1st read
@@ -125,6 +131,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                             getline(P.inOut->readIn[P.pSolo.barcodeRead],seq1); //read qualities
                             removeStringEndControl(seq1);
                             readID += ' ' + seq1;
+                            //histogram for qualities
                             g_statsAll.qualHistCalc(1, seq1.c_str()+P.pSolo.barcodeStart, P.pSolo.barcodeEnd==0 ? seq1.size() : P.pSolo.barcodeEnd-P.pSolo.barcodeStart+1);
                         };
 
@@ -149,7 +156,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                         //quality
                         uint64 lenIn = fastqReadOneLine(P.inOut->readIn[imate], chunkIn[imate] + chunkInSizeBytesTotal[imate]);
                         if (P.outFilterBySJoutStage != 2) {
-                                g_statsAll.qualHistCalc(imate, chunkIn[imate] + chunkInSizeBytesTotal[imate], lenIn);
+                                g_statsAll.qualHistCalc(imate, chunkIn[imate] + chunkInSizeBytesTotal[imate], lenIn-1);//lenIn contains \n at the end
                         };
                         chunkInSizeBytesTotal[imate] += lenIn;
                     };
@@ -285,7 +292,7 @@ inline uint64 fastqReadOneLine(ifstream &streamIn, char *arrIn)
     };
     
     arrIn[lenIn-1]='\n'; //replace \0 with \n
-    return lenIn;
+    return lenIn; //lenIn contains \n at the end
 };
 
 inline void removeStringEndControl(string &str)

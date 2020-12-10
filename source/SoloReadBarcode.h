@@ -29,7 +29,7 @@ public:
     SoloReadBarcodeStats stats;
 
     SoloReadBarcode(Parameters &Pin);
-    void getCBandUMI(const string &readNameExtra, const uint32 &readFilesIndex);
+    void getCBandUMI(const string &readNameExtra, const uint32 &readFilesIndex, const char *readName);
     void addCounts(const SoloReadBarcode &rfIn);
     void addStats(const SoloReadBarcode &rfIn);
     void statsOut(ofstream &streamOut);
@@ -38,6 +38,8 @@ public:
     void addStats(const int32 cbMatch1);
     
 
+protected:
+    void readNameExtra();
 };
 
 #endif

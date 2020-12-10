@@ -38,6 +38,9 @@ public:
     string adapterSeq; //anchor sequence
     uint32 adapterMismatchesNmax;//max number of mismatches in the anchor
     
+    //input from SAM files
+    vector<string> samAtrrBarcodeSeq, samAtrrBarcodeQual;
+    
     //whitelist - general
     uint64 cbWLsize;
     bool cbWLyes;
@@ -110,11 +113,9 @@ public:
 
     bool samAttrYes;//post-processed SAM attributes: error-corrected CB and UMI
     int32 samAttrFeature;//which feature to use for error correction
-    
-
 
     //processing
-    uint32 redistrReadsNfiles; //numer of files to resditributes reads into
+    uint32 redistrReadsNfiles; //numer of files to resditribute reads into
     
     //constants
     uint32 umiMaskLow, umiMaskHigh; //low/high half bit-mask or UMIs

@@ -1,3 +1,5 @@
+* Implemented input from SAM/BAM for STARsolo, with options --soloInputSAMattrBarcodeSeq --soloInputSAMattrBarcodeQual to specify SAM tags for barcode read sequence and qualities.
+* Fixed an issue that was causing slighlty incorrect values of Implemented input from SAM/BAM for STARsolo. Fixed an issue that was causing slighlty understimated value of Q30 'Bases in RNA read' in Solo.out/Gene/Summary.csv
 * Implemented --soloCellFilter EmptyDrops_CR option for cell filtering (calling) nearly identical to that of CellRanger 3 and 4.
 * Implemented --runMode soloCellFiltering option for cell filtering (calling) of the raw count matrix, without re-mapping.
 * PR: #1012: fix the bug with --soloCellFilter TopCells option

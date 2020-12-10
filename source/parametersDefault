@@ -801,6 +801,16 @@ soloCBmatchWLtype           1MM_multi
                             1MM_multi_pseudocounts  ... same as 1MM_Multi, but pseudocounts of 1 are added to all whitelist barcodes.
                                                         Similar to CellRanger 3.x.x
 
+soloInputSAMattrBarcodeSeq  -
+    string(s):              when inputting reads from a SAM file (--readsFileType SAM SE/PE), these SAM attributes mark the barcode sequence (in proper order).
+                            For instance, for 10X CellRanger or STARsolo BAMs, use --soloInputSAMattrBarcodeSeq CR UR .
+                            This parameter is required when running STARsolo with input from SAM. 
+    
+soloInputSAMattrBarcodeQual  -
+    string(s):              when inputting reads from a SAM file (--readsFileType SAM SE/PE), these SAM attributes mark the barcode qualities (in proper order).
+                            For instance, for 10X CellRanger or STARsolo BAMs, use --soloInputSAMattrBarcodeQual CY UY .
+                            If this parameter is '-' (default), the quality 'H' will be assigned to all bases.
+
 soloStrand                  Forward
     string: strandedness of the solo libraries:
                             Unstranded  ... no strand information

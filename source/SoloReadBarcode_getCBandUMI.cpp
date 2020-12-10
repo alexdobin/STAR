@@ -1,6 +1,8 @@
 #include "SoloReadBarcode.h"
 #include "serviceFuns.cpp"
 #include "SequenceFuns.h"
+#include "ErrorWarning.h"
+#include "GlobalVariables.h"
 
 void SoloReadBarcode::matchCBtoWL(string &cbSeq1, string &cbQual1, vector<uint64> &cbWL, int32 &cbMatch1, vector<uint64> &cbMatchInd1, string &cbMatchString1)
 {
@@ -133,7 +135,7 @@ bool SoloReadBarcode::convertCheckUMI()
 };
 
 //////////////////////////////////////////////////////////////////////////////////////
-void SoloReadBarcode::getCBandUMI(const string &readNameExtra, const uint32 &readFilesIndex)
+void SoloReadBarcode::getCBandUMI(const string &readNameExtraIn, const uint32 &readFilesIndex, const char *readName)
 {
     if (pSolo.type==0)
         return;
@@ -142,10 +144,82 @@ void SoloReadBarcode::getCBandUMI(const string &readNameExtra, const uint32 &rea
     cbMatchString="";
     cbMatchInd.clear();
     
-    uint32 bLength = readNameExtra.find(' ',pSolo.bL);
-    bSeq=readNameExtra.substr(0,bLength);
-    bQual=readNameExtra.substr(bLength+1,bLength);
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////    
+    ////////// bSeq and bQual
+    if (P.readFilesTypeN != 10) {//not SAM: barcode seq/qual are at the beginning of readNameExtra
+        uint32 bLength = readNameExtraIn.find(' ',pSolo.bL);
+        bSeq=readNameExtraIn.substr(0,bLength);
+        bQual=readNameExtraIn.substr(bLength+1,bLength);
+        
+    } else {//SAM: barcode seq/qual is collected from SAM tags
+        string readNameExtraT = '\t' + readNameExtraIn;//\t needs to be in front of readNameExtra for efficient search
+        
+        bSeq = {};
+        for (auto &tag: pSolo.samAtrrBarcodeSeq) {
+            size_t pos1 = readNameExtraT.find(tag); //find tag
+            if ( pos1 == std::string::npos ) {
+                ostringstream errOut;
+                errOut << "EXITING because of FATAL ERROR in input read file: could not find barcode sequence SAM attribute "  << tag << " in read " <<readName <<"\n" ;
+                errOut << "with SAM attributes: "<< readNameExtraT <<"\n";
+                errOut << "SOLUTION: make sure that all reads in the input SAM/BAM have all attributes from --soloInputSAMattrBarcodeSeq\n";
+                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);                
+            };
+            pos1 +=6; //skip 6 chars, e.g. \tCB:Z:
+            size_t pos2 = readNameExtraT.find('\t', pos1); //find next \t
+            bSeq += readNameExtraT.substr(pos1,pos2-pos1);
+        };
+        
+        if (bSeq.size() != P.pSolo.bL) {
+            if (P.pSolo.bL > 0) {
+                ostringstream errOut;
+                errOut << "EXITING because of FATAL ERROR in input read file: the total length of barcode sequence is "  << bSeq.size() << " not equal to expected " << P.pSolo.bL <<"\n"  ;
+                errOut << "Read ID="<< readName <<" ;  Sequence="<< bSeq << " ;  Read SAM attributes: "<< readNameExtraT <<"\n";
+                errOut << "SOLUTION: make sure correct attributes are listed in --soloInputSAMattrBarcodeSeq\n";
+                errOut << "          If UMI+CB length is not equal to the barcode read length, specify barcode read length with --soloBarcodeReadLength\n";
+                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
+            } else if (bSeq.size()<P.pSolo.cbumiL) {//barcode sequence too short - append Ns
+                bSeq.append(P.pSolo.cbumiL-bSeq.size(), 'N');
+            };
+        };
 
+        bQual = {};        
+        if (pSolo.samAtrrBarcodeQual.size()==0) {//if quality tags are not supplied
+            bQual.resize(bSeq.size(), 'H');
+        } else {
+            for (auto &tag: pSolo.samAtrrBarcodeQual) {
+                size_t pos1 = readNameExtraT.find(tag); //find tag, and skip 6 chars, e.g. \tCB:Z:
+                if ( pos1 == std::string::npos ) {
+                    ostringstream errOut;
+                    errOut << "EXITING because of FATAL ERROR in input read file: could not find barcode qualities SAM attribute "  << tag << " in read " <<readName <<"\n" ;
+                    errOut << "with SAM attributes: "<< readNameExtraT <<"\n";
+                    errOut << "SOLUTION: make sure that all reads in the input SAM/BAM have all attributes from --soloInputSAMattrBarcodeQual\n";
+                    exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);                
+                };      
+                pos1 += 6; //skip 6 chars, e.g. \tCB:Z:
+                size_t pos2 = readNameExtraT.find('\t', pos1); //find next \t
+                bQual += readNameExtraT.substr(pos1,pos2-pos1);
+            };
+        };
+        
+        g_statsAll.qualHistCalc(1, bQual.c_str(), bQual.size());
+        
+        if (bQual.size() != P.pSolo.bL) {
+            if (P.pSolo.bL > 0) {
+                ostringstream errOut;
+                errOut << "EXITING because of FATAL ERROR in input read file: the total length of barcode qualities is "  << bQual.size() << " not equal to expected " << P.pSolo.bL <<"\n"  ;
+                errOut << "Read ID="<< readName <<" ;  Qualities="<< bQual << " ;  Read SAM attributes: "<< readNameExtraT <<"\n";
+                errOut << "SOLUTION: make sure correct attributes are listed in --soloInputSAMattrBarcodeQual\n";
+                errOut << "          If UMI+CB length is not equal to the barcode read length, specify barcode read length with --soloBarcodeReadLength\n";
+                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
+            } else if (bQual.size()<P.pSolo.cbumiL) {//barcode sequence too short - append Hs
+                bQual.append(P.pSolo.cbumiL-bQual.size(), 'H');
+            };
+        };
+    };
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////// cbSeq and umiSeq, and match CB to WL, different CB_UMI types
+    ///////////////////////////CB_UMI_Simple a.k.a Droplet
     if ( pSolo.type==pSolo.SoloTypes::CB_UMI_Simple ) {
         cbSeq=bSeq.substr(pSolo.cbS-1,pSolo.cbL);
         umiSeq=bSeq.substr(pSolo.umiS-1,pSolo.umiL);
@@ -163,6 +237,7 @@ void SoloReadBarcode::getCBandUMI(const string &readNameExtra, const uint32 &rea
             return;
         };
 
+    ///////////////////////////CB_samTagOut
     } else if ( pSolo.type==pSolo.SoloTypes::CB_samTagOut ) {//similar to CB_UMI_Simple, but no UMI, and define cbSeqCorrected
         cbSeq=bSeq.substr(pSolo.cbS-1,pSolo.cbL);
         umiSeq=bSeq.substr(pSolo.umiS-1,pSolo.umiL);
@@ -176,7 +251,8 @@ void SoloReadBarcode::getCBandUMI(const string &readNameExtra, const uint32 &rea
         } else {
         	cbSeqCorrected="";
         };
-
+        
+    ///////////////////////////CB_UMI_Complex
     } else if ( pSolo.type==pSolo.SoloTypes::CB_UMI_Complex ) {
         
         cbSeq="";
@@ -244,7 +320,7 @@ void SoloReadBarcode::getCBandUMI(const string &readNameExtra, const uint32 &rea
             cbMatchString=to_string(cbMatchInd[0]);
         };
         
-    ///////////////////////////////////////////////////////////////////////////    
+    ///////////////////////////SmartSeq  
     } else if (pSolo.type==pSolo.SoloTypes::SmartSeq) {        
         cbSeq=cbQual=cbSeqCorrected=""; //TODO make cbSeq=file label
         cbMatch=0;
