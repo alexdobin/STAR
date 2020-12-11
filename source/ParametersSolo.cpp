@@ -24,6 +24,8 @@ void ParametersSolo::initialize(Parameters *pPin)
     barcodeReadYes=false; //will select true later if needed
     barcodeStart=barcodeEnd=0; //this means that the entire barcodeRead is considered barcode. Will change it for simple barcodes.
 
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////--soloType
     yes = true;
     if (typeStr=="None") {
         type = SoloTypes::None;
@@ -87,7 +89,8 @@ void ParametersSolo::initialize(Parameters *pPin)
         exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
 
-    /////////////////////////////////////////////////////////////////////input read files
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////input read files
     if (pP->readFilesTypeN != 10) {//input from FASTQ
         if (type==SoloTypes::SmartSeq) {//no barcode read
             //pP->readNmates=pP->readNmatesIn; 
@@ -140,6 +143,7 @@ void ParametersSolo::initialize(Parameters *pPin)
         };        
     };
     
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////// soloStrand
     if (strandStr=="Unstranded") {
         strand=-1;
@@ -154,6 +158,7 @@ void ParametersSolo::initialize(Parameters *pPin)
         exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
 
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////// features
     featureInd.fill(-1);
     featureYes.fill(false);
@@ -198,6 +203,7 @@ void ParametersSolo::initialize(Parameters *pPin)
         };
     };
     
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////umiDedup
     umiDedupColumns.resize(umiDedup.size());
     if (type==SoloTypes::SmartSeq) {
@@ -219,7 +225,8 @@ void ParametersSolo::initialize(Parameters *pPin)
                 exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
             };
         };        
-    } else {
+        
+    } else {//not SmartSeq
         for (uint32 ii=0; ii<umiDedup.size(); ii++) {
             if (umiDedup[ii]=="Exact") {
                 umiDedupColumns[ii]=0;
@@ -230,7 +237,7 @@ void ParametersSolo::initialize(Parameters *pPin)
             } else if (umiDedup[ii]=="1MM_CR") {
                 if ( ii>0 || umiDedup.size()>1 ) {//not allowed
                     ostringstream errOut;
-                    errOut << "EXITING because of fatal PARAMETERS error: --soloUMIdedup 1MM_CR is not allowed for in combination with other options\n";
+                    errOut << "EXITING because of fatal PARAMETERS error: --soloUMIdedup 1MM_CR is not allowed in combination with other options\n";
                     errOut << "SOLUTION: specify --soloUMIdedup 1MM_CR only, or a combination of Exact and/or 1MM_All and/or 1MM_Directional";
                     exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
                 };
@@ -243,8 +250,10 @@ void ParametersSolo::initialize(Parameters *pPin)
             };
         };
     };
+    
     ///////////// finished parameters input
-
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
     //make output directory if needed
     if ( outFileNames[0].find_last_of("/") < outFileNames[0].size() ) {//need to create dir
         string dir1=pP->outFileNamePrefix+outFileNames[0].substr(0,outFileNames[0].find_last_of("/"));

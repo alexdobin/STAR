@@ -114,8 +114,11 @@ void SoloFeature::emptyDrops_CR()
                 break;
         };
         --iCandLast;
+        
         time(&rawTime);
         P.inOut->logMain << timeMonthDayTime(rawTime) << " ... candidate cells: minUMI="<< minUMI << "; number of candidate cells=" << iCandLast-iCandFirst+1 <<endl;
+        if (iCandLast<iCandFirst)
+            return; //no candidate cells to consider
     };
     
     //calculate observed probability for each candidate
