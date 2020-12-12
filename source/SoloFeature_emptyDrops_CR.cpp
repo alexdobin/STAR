@@ -18,7 +18,7 @@ void SoloFeature::emptyDrops_CR()
     time(&rawTime);
     P.inOut->logMain << timeMonthDayTime(rawTime) <<" ... starting emptyDrops_CR filtering" <<endl;
 
-    
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //find genes that were detected in all cells
     unordered_set<uint32> featDet;   
     for (uint32 icb=0; icb<nCB; icb++) {           
@@ -29,7 +29,8 @@ void SoloFeature::emptyDrops_CR()
     };
     uint32 featDetN=featDet.size(); //total number of detected genes - this should have been done already?
     
-    //sum gene expression over the collection of empty cells
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //indCount - total UMI per cell sorted descending
     typedef struct {uint32 index, count;} IndCount;
     vector<IndCount> indCount(nCB);
     for (uint32 ii=0; ii<nCB; ii++) {
@@ -40,7 +41,8 @@ void SoloFeature::emptyDrops_CR()
                                                     return (ic1.count>ic2.count) || (ic1.count==ic2.count && ic1.index<ic2.index); //descending order by count, ascending by index
                                                 });
     
-    //ambient gene counts
+    //////////////////////////////////////////////////////////////////////////////////////////
+    //ambient gene counts: sum gene expression over the collection of empty cells
     vector<uint32> ambCount(featuresNumber,0);
     for (auto icb=pSolo.cellFilter.eDcr.indMin; icb<min(nCB,pSolo.cellFilter.eDcr.indMax); icb++) {
         auto icb1 = indCount[icb].index;
@@ -52,14 +54,21 @@ void SoloFeature::emptyDrops_CR()
     time(&rawTime);
     P.inOut->logMain << timeMonthDayTime(rawTime) <<" ... finished ambient cells counting" <<endl;
     
+    ////////////////////////////////////////////////////////////////////
     //frequencies
     map<uint32,uint32> ambCountFreq; //ordered map is not really needed
     for (auto &ac: ambCount) {
         ambCountFreq[ac]++;
     };
+    if (ambCountFreq.size()<=1) {//only 0-frequency genes are in the empty cells. This is possible because nCB can contain ome cells with no genes - because of multigene
+        P.inOut->logMain << "emptyDrops_CR filtering: empty cells contain no genes\n";
+        return;
+    };
     ambCountFreq[0] -= (featuresNumber-featDetN); //subtract genes that were not detected in *any* cells
     uint32 maxFreq = ambCountFreq.rbegin()->first;
     
+    ///////////////////////////////////////////////////////////////////////
+    //SGT
     vector<double> ambCountFreqSGT(maxFreq+1);//up to max frequency
     {//SGT estimate of ambient profile
         SGT<uint32> sgt;

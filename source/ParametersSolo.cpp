@@ -570,3 +570,60 @@ void ParametersSolo::cellFiltering()
                     std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
 };
+
+void UMIdedup::initialize(ParametersSolo *pS)
+{
+    yes.B = {false};
+    yes.N = 0;
+    
+    for (uint32_t ii=0; ii<typesIn.size(); ii++) {
+        uint32_t it;
+        for (it=0; it<tN; ii++) {
+            if (typesIn[ii] == typeNames[it])
+                break; //found match
+        };
+        
+        if (it==tN) {//no match
+            std::string tall;
+            for (auto &t: typeNames)
+                tall +=" " + t; // concatenate allowd values
+            
+            exitWithError("EXITING because of fatal PARAMETERS error: unrecognzied option --soloUMIdedup = " + typesIn[ii] + '\n'
+                          + "SOLUTION: use allowed values" + tall + '\n'
+                          ,std::cerr, pS->pP->inOut->logMain, EXIT_CODE_PARAMETER, *pS->pP);
+        };
+        
+        yes.B[it] = true;
+        yes.N++;
+        
+        if (ii==0)
+            typeSAM = it; //which type to use for SAM UB - first entry in typesIn
+            
+        if (pS->type == pS->SoloTypes::SmartSeq && (yes.All || yes.Directional || yes.CR) )
+            exitWithError("EXITING because of fatal PARAMETERS error: --soloUMIdedup = " + typesIn[ii] + " is not allowed for --soloType SmartSeq\n"
+                    + "SOLUTION: use allowed options: Exact and/or NoDedup\n"
+                    ,std::cerr, pS->pP->inOut->logMain, EXIT_CODE_PARAMETER, *pS->pP);            
+    };
+    
+    countInd.I = {-1}; //marks types not used
+    if (yes.CR) {
+        if (yes.N>1)
+            exitWithError("EXITING because of fatal PARAMETERS error: --soloUMIdedup 1MM_CR is not allowed in combination with other options\n"
+                      "SOLUTION: specify --soloUMIdedup 1MM_CR only, or a combination of Exact and/or 1MM_All and/or 1MM_Directional"
+                      ,std::cerr, pS->pP->inOut->logMain, EXIT_CODE_PARAMETER, *pS->pP); 
+            
+        countInd.N = 1;
+        countInd.CR = 1; //starts from 1, since 0 is the gene
+        
+    } else if (pS->type == pS->SoloTypes::SmartSeq) {//this is fixed for now
+        countInd.N = 2;
+        countInd.Exact = 1; //starts from 1, since 0 is the gene
+        countInd.NoDedup = 2;
+    } else {
+        countInd.N = 3;
+        countInd.Exact = 1; //starts from 1, since 0 is the gene
+        countInd.All = 2;
+        countInd.Directional = 3;
+    };
+    countInd.sam = countInd.I[typeSAM];
+};

@@ -8,9 +8,39 @@
 #include "SoloFeatureTypes.h"
 
 class Parameters;
+class ParametersSolo;
+
+class UMIdedup {
+public:
+    const static uint32 tN = 5;
+    array<string,tN> typeNames { {"NoDedup", "Exact", "1MM_All", "1MM_Directional", "1MM_CR"} };
+    enum typeI : int32 {NoDedup=0, Exact=1, All=2, Directional=3, CR=4};
+    
+    struct {
+        uint32_t N;
+        array<bool,tN> B;
+        bool &NoDedup=B[0], &Exact=B[1], &All=B[2], &Directional=B[3], &CR=B[4]; 
+    } yes;
+
+    struct {
+        uint32_t N;
+        array<uint32_t,tN> I;
+        uint32_t &NoDedup=I[0], &Exact=I[1], &All=I[2], &Directional=I[3], &CR=I[4];
+        uint32_t sam; //index for SAM output
+    } countInd; //index in the countCellGennUMI
+    
+    vector<string> typesIn; //UMIdedup types from user options
+    vector<int32> types; //the above converted to typeI numbers
+    int32 typeSAM; //the type to be used in SAM output - for now just types[0]
+    
+    void initialize(ParametersSolo *pS);
+    
+};
 
 class ParametersSolo {
 public:
+    Parameters *pP;
+    
     //chemistry, library etc
     string typeStr;
     enum SoloTypes : int32 {None=0, CB_UMI_Simple=1, CB_UMI_Complex=2, CB_samTagOut=3, SmartSeq=4};
@@ -124,7 +154,5 @@ public:
     void umiSwapHalves(uint32 &umi);
     void complexWLstrings();
     void cellFiltering();
-private:
-    Parameters *pP;
 };
 #endif
