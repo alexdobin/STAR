@@ -255,9 +255,10 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
             //if ( umiArray[iR1+1]>nRumiMax) nRumiMax=umiArray[iR1+1];
         };
 
-        uint32 nU0=(iR1+umiArrayStride)/umiArrayStride;
-        uint32 nU1=nU0, nU2=nU0;//2 types of 1MM collapsing
-        uint32 graphN=0; //number of nodes
+        uint32 nR0 = (gReadS[iG+1]-gReadS[iG])/rguStride; //total number of reads
+        uint32 nU0 = (iR1+umiArrayStride)/umiArrayStride;
+        uint32 nU1 = nU0, nU2 = nU0;//2 types of 1MM collapsing
+        uint32 graphN = 0; //number of nodes
         vector<array<uint32,2>> graphConn;//node connections
         vector<uint32> graphComp;//for each node (color) - connected component number
         
@@ -274,18 +275,32 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
             uint32 nConnComp=graphNumberOfConnectedComponents(graphN, graphConn, graphComp);
             nU1 += nConnComp;
         };
-        
-        if (nU0>0) {
-            nGenePerCB[iCB]++;
-            nUMIperCB[iCB]+=nU1;
-            countCellGeneUMI[countCellGeneUMIindex[iCB+1]+0]=gID[iG];        
-            countCellGeneUMI[countCellGeneUMIindex[iCB+1]+1]=nU0;
-            countCellGeneUMI[countCellGeneUMIindex[iCB+1]+2]=nU1;
-            countCellGeneUMI[countCellGeneUMIindex[iCB+1]+3]=nU2;
-            countCellGeneUMIindex[iCB+1] = countCellGeneUMIindex[iCB+1] + countMatStride;//iCB+1 accumulates the index
+
+        {//fill the count matrix
+            countCellGeneUMI[countCellGeneUMIindex[iCB+1] + 0] = gID[iG];
+            if (pSolo.umiDedup.yes.Exact)
+                countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.Exact] = nU0;
+            if (pSolo.umiDedup.yes.All)
+                countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.All] = nU1;
+            if (pSolo.umiDedup.yes.Directional)
+                countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.Directional] = nU2;
+            if (pSolo.umiDedup.yes.NoDedup)
+                countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.Exact] = nR0;
+
+            uint32_t totcount=0;
+            for (uint32_t ii=countCellGeneUMIindex[iCB+1]+1; ii<countCellGeneUMIindex[iCB+1]+countMatStride; ii++) {
+                totcount += countCellGeneUMI[ii];
+            };
+            if (totcount>0) {//at least one umiDedup type is non-0
+                nGenePerCB[iCB]++;
+                nUMIperCB[iCB] += countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.main];
+                countCellGeneUMIindex[iCB+1] = countCellGeneUMIindex[iCB+1] + countMatStride;//iCB+1 accumulates the index
+            };
         };
-            
-        if (readInfo.size()>0 && nU0<=1) {//fill in readInfo: CB,UMI
+    
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //fill in readInfo
+        if (readInfo.size()>0 && nU0<=1) {//only one UMI
             for (uint32 iR=0; iR<gReadS[iG+1]-gReadS[iG]; iR+=rguStride) {//cycle over reads
                 if (rGU1[iR+rguU]==umiArray[0]) {//other UMIs were filtered out
                     uint64 iread1 = rGU1[iR+rguR];
@@ -293,7 +308,8 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
                     readInfo[iread1].umi = umiArray[0];
                 };
             };
-        } else if (readInfo.size()>0) {
+
+        } else if (readInfo.size()>0) {//multiple UMI. TODO output directional or exact UMI
             
             for (uint32 ii=0; ii<graphComp.size(); ii++) {//for non-conflicting colors, need to fill the colors correctly
                 if (graphComp[ii]==(uint32)-1)

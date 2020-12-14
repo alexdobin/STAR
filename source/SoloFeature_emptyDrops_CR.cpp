@@ -23,8 +23,9 @@ void SoloFeature::emptyDrops_CR()
     unordered_set<uint32> featDet;   
     for (uint32 icb=0; icb<nCB; icb++) {           
         for (uint32 ig=0; ig<nGenePerCB[icb]; ig++) {
-            uint32 g1 = countCellGeneUMI[countCellGeneUMIindex[icb]+ig*countMatStride];
-            featDet.insert(g1);
+            uint32 irec=countCellGeneUMIindex[icb]+ig*countMatStride;
+            if (countCellGeneUMI[irec + pSolo.umiDedup.countInd.main] > 0)
+                featDet.insert(countCellGeneUMI[irec]); //gene is present if it's count > 0 for 
         };
     };
     uint32 featDetN=featDet.size(); //total number of detected genes - this should have been done already?
@@ -48,7 +49,7 @@ void SoloFeature::emptyDrops_CR()
         auto icb1 = indCount[icb].index;
         for (uint32 ig=0; ig<nGenePerCB[icb1]; ig++) {
             auto irec = countCellGeneUMIindex[icb1]+ig*countMatStride;
-            ambCount[countCellGeneUMI[irec+0]] += countCellGeneUMI[irec+2];
+            ambCount[countCellGeneUMI[irec+0]] += countCellGeneUMI[irec + pSolo.umiDedup.countInd.main];
         };
     };    
     time(&rawTime);
@@ -141,7 +142,7 @@ void SoloFeature::emptyDrops_CR()
         
         for (uint32 icand=0; icand<obsLogProb.size(); icand++) {
             auto icell=indCount[icand+iCandFirst].index;
-            obsLogProb[icand]=logMultinomialPDFsparse(ambProfileLogP, countCellGeneUMI, countMatStride, 2, countCellGeneUMIindex[icell], nGenePerCB[icell], logFactorial);
+            obsLogProb[icand]=logMultinomialPDFsparse(ambProfileLogP, countCellGeneUMI, countMatStride, pSolo.umiDedup.countInd.main, countCellGeneUMIindex[icell], nGenePerCB[icell], logFactorial);
         };
         time(&rawTime);
     }

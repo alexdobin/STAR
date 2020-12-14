@@ -92,9 +92,9 @@ void SoloFeature::countSmartSeq()
                 if ( fu->feature != (fu-1)->feature ) {//compare to previous feature
                     vCellFeatureCount[icb].push_back({fu->feature, {1,0}});//create next feature entry
                 } else if ( fu->umi != (fu-1)->umi ) {//same feature, new umi
-                    vCellFeatureCount[icb].back().count[0]++;//add 1
+                    vCellFeatureCount[icb].back().count[pSolo.umiDedup.countInd.Exact]++;//collapsed UMI count
                 };
-                vCellFeatureCount[icb].back().count[1]++;       
+                vCellFeatureCount[icb].back().count[pSolo.umiDedup.countInd.NoDedup]++; //non-collapsed UMI count   
             };
         };
     };
@@ -106,7 +106,7 @@ void SoloFeature::countSmartSeq()
     nUMIperCB.resize(nCB);
     nGenePerCB.resize(nCB);
       
-    countMatStride=3;
+    countMatStride = pSolo.umiDedup.yes.N + 1;
     
     uint64 ccgN=0;//total number of entries in the countCellGeneUMI
     for (auto &cbf :  vCellFeatureCount) {
@@ -124,7 +124,7 @@ void SoloFeature::countSmartSeq()
         
         nGenePerCB[icb]=vCellFeatureCount[icb].size();
         for (auto &cbf :  vCellFeatureCount[icb]) {
-            nUMIperCB[icb]+=cbf.count[pSolo.umiDedupColumns[0]];
+            nUMIperCB[icb]+=cbf.count[pSolo.umiDedup.countInd.main];
         };
     };
 

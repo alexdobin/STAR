@@ -12,7 +12,7 @@ void SoloFeature::statsOutput()
     strOut << "Sequencing Saturation," << readFeatSum->stats.numSequencingSaturation() <<'\n';
     
     //quality scores
-    uint64 q30[2]={}, ntot[2]={};
+    uint64 q30[2]={0,0}, ntot[2]={0,0};
     for (uint32 imate=0; imate<2; imate++) {
         for (uint32 ix=0; ix<256; ix++) {
             ntot[imate] += g_statsAll.qualHist[imate][ix];

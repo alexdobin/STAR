@@ -84,7 +84,7 @@ void SoloFeature::countVelocyto()
     nUMIperCB.resize(nCB,0);
     nGenePerCB.resize(nCB,0);
        
-    countMatStride=4; //hard-coded for now, works for both Gene*/SJ and Velocyto
+    countMatStride=4; //spliced/unspliced/ambiguous
     countCellGeneUMI.resize(nReadsMapped*countMatStride/5+16); //5 is heuristic, will be resized if needed
     countCellGeneUMIindex.resize(nCB+1);
     countCellGeneUMIindex[0]=0;

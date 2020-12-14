@@ -14,18 +14,18 @@ void ParametersSolo::initialize(Parameters *pPin)
     cellFiltering();
     if (pP->runMode=="soloCellFiltering") {//only filtering happens, do not need any other parameters
         yes=true;
-        umiDedupColumns={1};
+        umiDedup.yes.N = 1;
+        umiDedup.countInd.main = 1;
         return;
     };
     
     //constants - may turn into parameters in the future
     redistrReadsNfiles = 3*pP->runThreadN;
     
-    barcodeReadYes=false; //will select true later if needed
-    barcodeStart=barcodeEnd=0; //this means that the entire barcodeRead is considered barcode. Will change it for simple barcodes.
-
     //////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////--soloType
+    barcodeReadYes=false; //will select true later if needed
+    barcodeStart=barcodeEnd=0; //this means that the entire barcodeRead is considered barcode. Will change it for simple barcodes.    
     yes = true;
     if (typeStr=="None") {
         type = SoloTypes::None;
@@ -121,7 +121,7 @@ void ParametersSolo::initialize(Parameters *pPin)
         
         if (samAtrrBarcodeQual.at(0) == "-") {
             warningMessage(" since --readFilesType SAM SE/PE --soloInputSAMattrBarcodeQual - : qualities for barcode read will be replaced with 'H'", pP->inOut->logMain,std::cerr, *pP);
-            samAtrrBarcodeQual={};
+            samAtrrBarcodeQual.clear();
         };
         
         for (auto &tag: samAtrrBarcodeSeq) {
@@ -205,51 +205,7 @@ void ParametersSolo::initialize(Parameters *pPin)
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////umiDedup
-    umiDedupColumns.resize(umiDedup.size());
-    if (type==SoloTypes::SmartSeq) {
-        for (uint32 ii=0; ii<umiDedup.size(); ii++) {
-            if (umiDedup[ii]=="Exact") {
-                umiDedupColumns[ii]=0;
-            } else if (umiDedup[ii]=="NoDedup") {
-                if (type!=SoloTypes::SmartSeq) {
-                    ostringstream errOut;
-                    errOut << "EXITING because of fatal PARAMETERS error: --soloUMIdedup NoDedup is allowed only for --soloType SmartSeq\n";
-                    errOut << "SOLUTION: used allowed options: Exact or 1MM_All or 1MM_Directional";
-                    exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
-                };
-                umiDedupColumns[ii]=1;                
-            } else {
-                ostringstream errOut;
-                errOut << "EXITING because of fatal PARAMETERS error: --soloUMIdedup="<<umiDedup[ii] <<" is not allowed for --soloType SmartSeq\n";
-                errOut << "SOLUTION: used allowed options: Exact or NoDedup";
-                exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
-            };
-        };        
-        
-    } else {//not SmartSeq
-        for (uint32 ii=0; ii<umiDedup.size(); ii++) {
-            if (umiDedup[ii]=="Exact") {
-                umiDedupColumns[ii]=0;
-            } else if (umiDedup[ii]=="1MM_All") {
-                umiDedupColumns[ii]=1;
-            } else if (umiDedup[ii]=="1MM_Directional") {
-                umiDedupColumns[ii]=2;
-            } else if (umiDedup[ii]=="1MM_CR") {
-                if ( ii>0 || umiDedup.size()>1 ) {//not allowed
-                    ostringstream errOut;
-                    errOut << "EXITING because of fatal PARAMETERS error: --soloUMIdedup 1MM_CR is not allowed in combination with other options\n";
-                    errOut << "SOLUTION: specify --soloUMIdedup 1MM_CR only, or a combination of Exact and/or 1MM_All and/or 1MM_Directional";
-                    exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
-                };
-                umiDedupColumns[0]=3;
-            } else {
-                ostringstream errOut;
-                errOut << "EXITING because of fatal PARAMETERS error: --soloUMIdedup="<<umiDedup[ii] <<" is not allowed for --soloType " << typeStr <<"\n";
-                errOut << "SOLUTION: used allowed options: Exact or 1MM_All or 1MM_Directional";
-                exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
-            };
-        };
-    };
+    umiDedup.initialize(this);
     
     ///////////// finished parameters input
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -573,45 +529,49 @@ void ParametersSolo::cellFiltering()
 
 void UMIdedup::initialize(ParametersSolo *pS)
 {
-    yes.B = {false};
     yes.N = 0;
-    
-    for (uint32_t ii=0; ii<typesIn.size(); ii++) {
-        uint32_t it;
-        for (it=0; it<tN; ii++) {
-            if (typesIn[ii] == typeNames[it])
+    countInd.I.fill((uint32_t) -1); //marks types not used
+    yes.B.fill(false);
+
+    for (uint32_t iin=0; iin<typesIn.size(); iin++) {
+        uint32_t itype;
+        for (itype=0; itype<tN; itype++) {
+            if (typesIn[iin] == typeNames[itype])
                 break; //found match
         };
         
-        if (it==tN) {//no match
+        if (itype==tN) {//no match
             std::string tall;
             for (auto &t: typeNames)
                 tall +=" " + t; // concatenate allowd values
             
-            exitWithError("EXITING because of fatal PARAMETERS error: unrecognzied option --soloUMIdedup = " + typesIn[ii] + '\n'
-                          + "SOLUTION: use allowed values" + tall + '\n'
+            exitWithError("EXITING because of fatal PARAMETERS error: unrecognzied option --soloUMIdedup = " + typesIn[iin] + '\n'
+                          + "SOLUTION: use allowed values: " + tall + '\n'
                           ,std::cerr, pS->pP->inOut->logMain, EXIT_CODE_PARAMETER, *pS->pP);
         };
         
-        yes.B[it] = true;
+        types.push_back(itype);
+        yes.B[itype] = true;
         yes.N++;
-        
-        if (ii==0)
-            typeSAM = it; //which type to use for SAM UB - first entry in typesIn
+        countInd.I[itype] = iin + 1; //for each type, which column itype's recorded in
             
         if (pS->type == pS->SoloTypes::SmartSeq && (yes.All || yes.Directional || yes.CR) )
-            exitWithError("EXITING because of fatal PARAMETERS error: --soloUMIdedup = " + typesIn[ii] + " is not allowed for --soloType SmartSeq\n"
+            exitWithError("EXITING because of fatal PARAMETERS error: --soloUMIdedup = " + typesIn[iin] + " is not allowed for --soloType SmartSeq\n"
                     + "SOLUTION: use allowed options: Exact and/or NoDedup\n"
                     ,std::cerr, pS->pP->inOut->logMain, EXIT_CODE_PARAMETER, *pS->pP);            
     };
     
-    countInd.I = {-1}; //marks types not used
-    if (yes.CR) {
-        if (yes.N>1)
-            exitWithError("EXITING because of fatal PARAMETERS error: --soloUMIdedup 1MM_CR is not allowed in combination with other options\n"
+    if (yes.CR && (yes.N>1)) {//TODO remove this limitation
+            exitWithError("EXITING because of fatal PARAMETERS error: --soloUMIdedup 1MM_CR is not allowed in combination with other UMI deduplication options\n"
                       "SOLUTION: specify --soloUMIdedup 1MM_CR only, or a combination of Exact and/or 1MM_All and/or 1MM_Directional"
                       ,std::cerr, pS->pP->inOut->logMain, EXIT_CODE_PARAMETER, *pS->pP); 
-            
+    };
+    
+    //hard-coded for now
+    typeMain = types[0]; //main is the 0th entry in typesIn
+    countInd.main = 1;   //hard-coded - 1 column is always main
+    
+    /*        
         countInd.N = 1;
         countInd.CR = 1; //starts from 1, since 0 is the gene
         
@@ -625,5 +585,6 @@ void UMIdedup::initialize(ParametersSolo *pS)
         countInd.All = 2;
         countInd.Directional = 3;
     };
-    countInd.sam = countInd.I[typeSAM];
+    countInd.main = countInd.I[typeMain];
+    */
 };

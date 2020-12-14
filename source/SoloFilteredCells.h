@@ -23,10 +23,10 @@ public:
     
     void reset(uint64 nCells) {
         C={0}; 
-        nUMIperCell={}; nUMIperCell.reserve(16384);
-        nReadPerCell={}; nReadPerCell.reserve(16384);
-        nGenePerCell={}; nGenePerCell.reserve(16384);
-        filtVecBool.resize(nCells, false);
+        nUMIperCell.clear();  nUMIperCell.reserve(16384);
+        nReadPerCell.clear(); nReadPerCell.reserve(16384);
+        nGenePerCell.clear(); nGenePerCell.reserve(16384);
+        filtVecBool.clear();  filtVecBool.resize(nCells, false);
     };
 };
 

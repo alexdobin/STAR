@@ -63,16 +63,16 @@ void SoloFeature::countCBgeneUMI()
     
     uint32 *umiArray = new uint32[nReadPerCBmax*umiArrayStride];//temp array for collapsing UMI
     
-    countMatStride=4; //hard-coded for now, works for both Gene*/SJ and Velocyto
+    countMatStride=pSolo.umiDedup.yes.N + 1;
     countCellGeneUMI.resize(nReadsMapped*countMatStride/5+16); //5 is heuristic, will be resized if needed
     countCellGeneUMIindex.resize(nCB+1);
     countCellGeneUMIindex[0]=0;
     
     for (uint32 icb=0; icb<nCB; icb++) {//main collapse cycle
         
-        if (pSolo.umiDedupColumns[0]==3) {//1MM_CR option
+        if (pSolo.umiDedup.yes.CR) {//1MM_CR option
             collapseUMI_CR(icb, umiArray);
-        } else {
+        } else {//all other options
             collapseUMI(icb, umiArray);
         };
         

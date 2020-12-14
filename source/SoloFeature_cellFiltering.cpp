@@ -41,9 +41,9 @@ void SoloFeature::cellFiltering()
         emptyDrops_CR();
     };
     
-    //filtering is done: cellFilterVec=true for kept cells, calculate statistics
+    //filtering is done: filtVecBool=true for kept cells, calculate statistics
 
-    bool *geneDetected = new bool[featuresNumber];
+    bool *geneDetected = new bool[featuresNumber]; //=true if a gene was detected in at least one cell
     memset((void*) geneDetected, 0, featuresNumber);
 
     for (uint32 icb=0; icb<nCB; icb++) {
@@ -51,18 +51,22 @@ void SoloFeature::cellFiltering()
             
             filteredCells.nCells++;
 
-            filteredCells.nUMIinCells += nUMIperCB[icb];
-            
-            filteredCells.nGeneInCells += nGenePerCB[icb];
-            filteredCells.nGenePerCell.push_back(nGenePerCB[icb]);
+            filteredCells.nUMIinCells += nUMIperCB[icb]; //nUMIperCB was calculated for umiDedup-main
             
             filteredCells.nReadInCells += nReadPerCB[icb];
             filteredCells.nReadPerCell.push_back(nReadPerCB[icb]);
             
+            uint32 ng1 = 0; //number of genes detected in this cell
             for (uint32 ig=0; ig<nGenePerCB[icb]; ig++) {
                 uint32 indG1=countCellGeneUMIindex[icb]+ig*countMatStride;
-                geneDetected[countCellGeneUMI[indG1]]=true;            
+                if (countCellGeneUMI[indG1 + pSolo.umiDedup.countInd.main] > 0) {
+                    geneDetected[countCellGeneUMI[indG1]] = true; //gene is present if it's count > 0 for 
+                    ng1++;
+                };
             };
+                        
+            filteredCells.nGeneInCells += ng1; //had to recalculate this since some gene counts could be 0
+            filteredCells.nGenePerCell.push_back(ng1);
         };
     };   
     

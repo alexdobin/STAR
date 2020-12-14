@@ -53,8 +53,9 @@ void SoloFeature::outputResults(bool cellFilterYes, string outputPrefixMat)
             };
         };
     } else {//unfiltered cells
-        for (uint64 ii=0; ii<pSolo.cbWLsize; ii++)
+        for (uint64 ii=0; ii<pSolo.cbWLsize; ii++) {
              cbStr << pSolo.cbWLstr[ii] <<'\n';
+        };
         for (uint32 icb=0; icb<nCB; icb++) {
             nCellGeneEntries += nGenePerCB[icb];
         };
@@ -66,16 +67,16 @@ void SoloFeature::outputResults(bool cellFilterYes, string outputPrefixMat)
     string matrixFileName=outputPrefixMat+pSolo.outFileNames[3];
     ofstream &countMatrixStream=ofstrOpen(matrixFileName,ERROR_OUT, P);
     
-    
-    vector <uint32> umiOutCol = pSolo.umiDedupColumns;
-    if ( featureType==SoloFeatureTypes::Velocyto || featureType==SoloFeatureTypes::VelocytoSimple ) {
-        umiOutCol={0,1,2};
-    } else if ( pSolo.umiDedup[0]=="1MM_CR" ) {//only one column allowed
-        umiOutCol={0};
-    };
-
     //header
-    countMatrixStream <<"%%MatrixMarket matrix coordinate integer general\n%\n";
+    countMatrixStream <<"%%MatrixMarket matrix coordinate integer general\n";
+    countMatrixStream <<'%';
+    if (pSolo.umiDedup.types.size()>0) {//otherwise the data was read from the file: --runMode SoloCellFitering
+        countMatrixStream <<" Columns: umiDedup:";
+        for (auto &tt: pSolo.umiDedup.types)
+            countMatrixStream << ' ' <<  pSolo.umiDedup.typeNames[tt];
+    }
+    countMatrixStream <<'\n';
+    
     countMatrixStream << featuresNumber <<' '<< (cellFilterYes ? filteredCells.nCells : pSolo.cbWLsize) <<' '<< nCellGeneEntries << '\n';
     
     uint32  cbInd1=0;
@@ -96,8 +97,8 @@ void SoloFeature::outputResults(bool cellFilterYes, string outputPrefixMat)
             //feature index, CB index
             countMatrixStream << countCellGeneUMI[indG1]+1 <<' '<< cbInd1;
 
-            for (uint32 ii=0; ii<umiOutCol.size(); ii++)
-                countMatrixStream <<' '<< countCellGeneUMI[indG1+1+umiOutCol[ii]];
+            for (uint32 ii=1; ii<countMatStride; ii++)
+                countMatrixStream <<' '<< countCellGeneUMI[indG1+ii];
             
             countMatrixStream << '\n';
         };

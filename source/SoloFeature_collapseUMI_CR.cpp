@@ -127,8 +127,8 @@ void SoloFeature::collapseUMI_CR(uint32 iCB, uint32 *umiArray)
             };
             nGenePerCB[iCB]++;
             nUMIperCB[iCB]+=nU1;
-            countCellGeneUMI[countCellGeneUMIindex[iCB+1]+0]=gID[iG];
-            countCellGeneUMI[countCellGeneUMIindex[iCB+1]+1]=nU1;
+            countCellGeneUMI[countCellGeneUMIindex[iCB+1] + 0] = gID[iG];
+            countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.CR] = nU1;
             countCellGeneUMIindex[iCB+1] = countCellGeneUMIindex[iCB+1] + countMatStride;//iCB+1 accumulates the index
         };
         
@@ -174,9 +174,9 @@ void SoloFeature::collapseUMI_CR(uint32 iCB, uint32 *umiArray)
 
         for (auto &ig: geneCounts) {
             nGenePerCB[iCB]++;
-            nUMIperCB[iCB]+=ig.second;
-            countCellGeneUMI[countCellGeneUMIindex[iCB+1]+0]=ig.first;
-            countCellGeneUMI[countCellGeneUMIindex[iCB+1]+1]=ig.second;
+            nUMIperCB[iCB] += ig.second;
+            countCellGeneUMI[countCellGeneUMIindex[iCB+1] + 0] = ig.first;
+            countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.CR] = ig.second;
             countCellGeneUMIindex[iCB+1] = countCellGeneUMIindex[iCB+1] + countMatStride;//iCB+1 accumulates the index
         };
 

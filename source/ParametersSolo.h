@@ -23,18 +23,20 @@ public:
     } yes;
 
     struct {
-        uint32_t N;
+        //uint32_t N;
         array<uint32_t,tN> I;
         uint32_t &NoDedup=I[0], &Exact=I[1], &All=I[2], &Directional=I[3], &CR=I[4];
-        uint32_t sam; //index for SAM output
+        uint32_t main; //index for SAM/stats/filtering output
     } countInd; //index in the countCellGennUMI
     
     vector<string> typesIn; //UMIdedup types from user options
     vector<int32> types; //the above converted to typeI numbers
-    int32 typeSAM; //the type to be used in SAM output - for now just types[0]
+    int32 typeMain; //the type to be used in SAM/stats/filtering output - for now just types[0]
     
     void initialize(ParametersSolo *pS);
     
+protected:
+    int it;
 };
 
 class ParametersSolo {
@@ -113,12 +115,8 @@ public:
         } eDcr;//EmptyDrops-CellRanger
         
     } cellFilter;
-    
-    //algorithms
-    vector <string> umiDedup;
-    vector <uint32> umiDedupColumns;
-    //vector <bool> umiDedupYes;
-    
+      
+    //CB match
     struct {
         string type;
         bool mm1; //1 mismatch allowed
@@ -127,6 +125,10 @@ public:
         bool mm1_multi_pc; //use psedocounts while calculating probabilities of multi-matches
     } CBmatchWL;
     
+    //UMIdedup
+    UMIdedup umiDedup;
+    
+    //multi-gene umi
     struct {
         vector<string> type;
         bool MultiGeneUMI;

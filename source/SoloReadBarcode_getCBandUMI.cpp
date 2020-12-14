@@ -300,7 +300,7 @@ void SoloReadBarcode::getCBandUMI(const string &readNameExtraIn, const uint32 &r
                 continue; //continue - to be able to record full cbSeq, cbQual, but no need to match to the WL
             
             int32 cbMatch1;
-            vector<uint64> cbMatchInd1={};
+            vector<uint64> cbMatchInd1;
             matchCBtoWL(cbSeq1, cbQual1, cb.wl[cbSeq1.size()], cbMatch1, cbMatchInd1, cbMatchString); //cbMatchString is not used for now, multiple matches are not allowed
             if (cbMatch1<0) {//no match
                 cbMatchGood=false;
