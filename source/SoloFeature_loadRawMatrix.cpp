@@ -61,8 +61,8 @@ void SoloFeature::loadRawMatrix()
                                                     });
     */
     
-    countMatStride=3;
-    countCellGeneUMI.resize(nTot*countMatStride);
+    countMatStride=3; //gene, cell, count. Recording cell at shift=1 is temporary: later will replace cell with count
+    countCellGeneUMI.resize(nTot*countMatStride,0);
     for (uint64 ii=0; ii<nTot; ii++) {
         matStream >> countCellGeneUMI[ii*countMatStride+0];//gene
         matStream >> countCellGeneUMI[ii*countMatStride+1];//cell
@@ -103,6 +103,7 @@ void SoloFeature::loadRawMatrix()
         };
         nGenePerCB[nCB]++;
         nUMIperCB[nCB] += countCellGeneUMI[ii*countMatStride+2];
+        countCellGeneUMI[ii*countMatStride+1]=countCellGeneUMI[ii*countMatStride+2];//replace cell with count to keep standard convention about countCellGeneUMI
     };
     
     {//load barcodes

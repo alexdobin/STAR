@@ -1,3 +1,6 @@
+* Different --soloUMIdedup counts, if requested, are recorded in separate .mtx files. 
+* Cell-filtered Velocyto matrices are generated using Gene cell filtering.
+* Velocyto spliced/unspliced/ambiguous counts are reported in separate .mtx files.
 * The UMI deduplication/correction specified in --soloUMIdedup is used for statistics output, filtering and UB tag in BAM output.
 * Implemented input from SAM/BAM for STARsolo, with options --soloInputSAMattrBarcodeSeq --soloInputSAMattrBarcodeQual to specify SAM tags for barcode read sequence and qualities.
 * Fixed an issue that was causing slighlty incorrect values of Implemented input from SAM/BAM for STARsolo. Fixed an issue that was causing slighlty understimated value of Q30 'Bases in RNA read' in Solo.out/Gene/Summary.csv

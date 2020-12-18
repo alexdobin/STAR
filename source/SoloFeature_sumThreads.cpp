@@ -70,7 +70,7 @@ void SoloFeature::sumThreads(ReadAlignChunk **RAchunk)
         };
     };
     
-    indCBwl.resize(pSolo.cbWLsize);
+    indCBwl.resize(pSolo.cbWLsize, (uint32) -1);
     indCB.resize(nCB);
     nCB=0;//will count it again below
     for (uint32 ii=0; ii<pSolo.cbWLsize; ii++) {

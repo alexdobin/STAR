@@ -14,8 +14,8 @@ void ParametersSolo::initialize(Parameters *pPin)
     cellFiltering();
     if (pP->runMode=="soloCellFiltering") {//only filtering happens, do not need any other parameters
         yes=true;
-        umiDedup.yes.N = 1;
-        umiDedup.countInd.main = 1;
+        umiDedup.typesIn = {"NoDedup"}; //this does not affect the results - the dedup had been done when raw matrix was generated
+        umiDedup.initialize(this);
         return;
     };
     

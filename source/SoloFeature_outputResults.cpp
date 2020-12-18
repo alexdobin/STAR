@@ -64,44 +64,50 @@ void SoloFeature::outputResults(bool cellFilterYes, string outputPrefixMat)
 
     /////////////////////////////////////////////////////////////
     //output counting matrix
-    string matrixFileName=outputPrefixMat+pSolo.outFileNames[3];
-    ofstream &countMatrixStream=ofstrOpen(matrixFileName,ERROR_OUT, P);
     
-    //header
-    countMatrixStream <<"%%MatrixMarket matrix coordinate integer general\n";
-    countMatrixStream <<'%';
-    if (pSolo.umiDedup.types.size()>0) {//otherwise the data was read from the file: --runMode SoloCellFitering
-        countMatrixStream <<" Columns: umiDedup:";
-        for (auto &tt: pSolo.umiDedup.types)
-            countMatrixStream << ' ' <<  pSolo.umiDedup.typeNames[tt];
-    }
-    countMatrixStream <<'\n';
-    
-    countMatrixStream << featuresNumber <<' '<< (cellFilterYes ? filteredCells.nCells : pSolo.cbWLsize) <<' '<< nCellGeneEntries << '\n';
-    
-    uint32  cbInd1=0;
-    for (uint32 icb=0; icb<nCB; icb++) {
-        if (cellFilterYes) {
-            if (filteredCells.filtVecBool[icb]) {
-                ++cbInd1;
-            } else {
-                continue;
-            };
-        } else {
-            cbInd1=indCB[icb]+1;
-        };
-        for (uint32 ig=0; ig<nGenePerCB[icb]; ig++) {
-            
-            uint32 indG1=countCellGeneUMIindex[icb]+ig*countMatStride;
-            
-            //feature index, CB index
-            countMatrixStream << countCellGeneUMI[indG1]+1 <<' '<< cbInd1;
+    for (uint32_t iCol=1; iCol<countMatStride; iCol++) {
 
-            for (uint32 ii=1; ii<countMatStride; ii++)
-                countMatrixStream <<' '<< countCellGeneUMI[indG1+ii];
+        string matrixFileName=outputPrefixMat;
+        if (featureType == SoloFeatureTypes::Velocyto) {
+            const array<string,3> velonames = {"spliced.mtx", "unspliced.mtx", "ambiguous.mtx"};
+            matrixFileName += velonames[iCol-1];
             
-            countMatrixStream << '\n';
+        } else if (iCol>1 && cellFilterYes) {
+            break; //if cellFilterYes, only output first iCol, since filtering is only done for it       
+            
+        } else if (pSolo.umiDedup.types.size()>1) {
+            matrixFileName += "umiDedup-" + pSolo.umiDedup.typeNames[pSolo.umiDedup.types[iCol-1]] + ".mtx";
+            
+        } else {
+            matrixFileName += pSolo.outFileNames[3];
         };
+        ofstream &countMatrixStream=ofstrOpen(matrixFileName,ERROR_OUT, P);
+        
+        //header
+        countMatrixStream <<"%%MatrixMarket matrix coordinate integer general\n";
+        countMatrixStream <<"%\n";
+        countMatrixStream << featuresNumber <<' '<< (cellFilterYes ? filteredCells.nCells : pSolo.cbWLsize) <<' '<< nCellGeneEntries << '\n';
+        
+        uint32  cbInd1=0;
+        for (uint32 icb=0; icb<nCB; icb++) {
+            if (cellFilterYes) {
+                if (filteredCells.filtVecBool[icb]) {
+                    ++cbInd1;
+                } else {
+                    continue;
+                };
+            } else {
+                cbInd1=indCB[icb]+1;
+            };
+            for (uint32 ig=0; ig<nGenePerCB[icb]; ig++) {
+                
+                uint32 indG1=countCellGeneUMIindex[icb]+ig*countMatStride;
+                
+                //feature index, CB index, count
+                countMatrixStream << countCellGeneUMI[indG1]+1 <<' '<< cbInd1 <<' '<< countCellGeneUMI[indG1+iCol] << '\n';
+            };
+        };
+
+        countMatrixStream.close();
     };
-    countMatrixStream.flush();
 };

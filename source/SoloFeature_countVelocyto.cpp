@@ -10,9 +10,7 @@ void SoloFeature::countVelocyto()
 {//velocyto counting gets info from Gene counting
     time_t rawTime;
 
-    vector<uint32> indWL(pSolo.cbWLsize, (uint32)-1); //index of WL in detected CB, i.e. reverse of indCB
-    for (uint32 ii=0; ii<nCB; ii++)
-        indWL[indCB[ii]]=ii;
+    nReadPerCB.resize(nCB);
 
     vector<unordered_map<typeUMI,vector<trTypeStruct>>> cuTrTypes (nCB);
     for (uint32 ii=0; ii<nCB; ii++)
@@ -33,9 +31,11 @@ void SoloFeature::countVelocyto()
             if (cb+1==0) {//TODO: put a filter on CBs here, e.g. UMI threshold
                 streamReads->ignore((uint32)-1, '\n');
                 continue;
-            };            
-            uint32 iCB=indWL[cb];
+            };
             typeUMI umi=soloFeatAll[pSolo.featureInd[SoloFeatureTypes::Gene]]->readInfo[iread].umi;
+
+            uint32 iCB=indCBwl[cb];
+            nReadPerCB[iCB]++;//simple estimate
             
             if (cuTrTypes[iCB].count(umi)>0 && cuTrTypes[iCB][umi].empty()) {//intersection is empty, no need to load this transcript
                 streamReads->ignore((uint32)-1, '\n');

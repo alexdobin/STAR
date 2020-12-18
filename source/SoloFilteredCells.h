@@ -18,12 +18,11 @@ public:
     uint64 &nGeneDetected       =C[10];
     uint64 &nCellsSimple        =C[11];
     
-    vector<uint32> nUMIperCell, nReadPerCell, nGenePerCell;
+    vector<uint32> nReadPerCell, nGenePerCell;
     vector<bool> filtVecBool;
     
     void reset(uint64 nCells) {
         C={0}; 
-        nUMIperCell.clear();  nUMIperCell.reserve(16384);
         nReadPerCell.clear(); nReadPerCell.reserve(16384);
         nGenePerCell.clear(); nGenePerCell.reserve(16384);
         filtVecBool.clear();  filtVecBool.resize(nCells, false);
