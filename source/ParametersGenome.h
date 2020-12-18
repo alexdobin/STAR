@@ -11,7 +11,7 @@ class ParametersGenome {//"constant" genome parameters - user input
         
         vector <string> gFastaFiles;
         vector <string> gChainFiles;
-        string gConsensusFile;
+        //string gConsensusFile; DEPRECATED
 
         struct {
             int32 type;

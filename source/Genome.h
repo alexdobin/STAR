@@ -74,7 +74,7 @@ public:
 
     void insertSequences();
 
-    void consensusSequence();
+    //void consensusSequence(); DEPRECATED
     
     void genomeGenerate();
     void writeChrInfo(const string dirOut);

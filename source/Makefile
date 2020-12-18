@@ -61,8 +61,7 @@ OBJECTS = soloInputFeatureUMI.o SoloFeature_countSmartSeq.o SoloFeature_redistri
 	stitchWindowAligns.o extendAlign.o stitchAlignToTranscript.o \
 	ChimericSegment.cpp ChimericAlign.cpp ChimericAlign_chimericJunctionOutput.o ChimericAlign_chimericBAMoutput.o ChimericAlign_chimericStitching.o \
 	Genome_genomeGenerate.o genomeParametersWrite.o genomeScanFastaFiles.o genomeSAindex.o \
-	Genome_insertSequences.o Genome_consensusSequence.o \
-	insertSeqSA.o funCompareUintAndSuffixes.o funCompareUintAndSuffixesMemcmp.o \
+	Genome_insertSequences.o insertSeqSA.o funCompareUintAndSuffixes.o funCompareUintAndSuffixesMemcmp.o \
 	TimeFunctions.o ErrorWarning.o streamFuns.o stringSubstituteAll.o \
 	Transcriptome.o Transcriptome_quantAlign.o Transcriptome_geneFullAlignOverlap.o \
 	ReadAlign_quantTranscriptome.o Quantifications.o Transcriptome_geneCountsAddAlign.o \
