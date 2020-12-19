@@ -44,7 +44,7 @@ void ReadAlign::samAttrNM_MD (Transcript const &trOut, uint iEx1, uint iEx2, uin
     tagNM=nMM+nI+nD;
 };
 
-int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint trChrStart, uint mateChr, uint mateStart, char mateStrand, int alignType, bool *mateMapped, vector<int> outSAMattrOrder, char** outBAMarray, uint* outBAMarrayN) {
+int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint trChrStart, uint mateChr, uint mateStart, char mateStrand, int alignType, bool *mateMap, vector<int> outSAMattrOrder, char** outBAMarray, uint* outBAMarrayN) {
     //return: number of lines (mates)
 
     //alignType>=0: unmapped reads
@@ -110,11 +110,11 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
         uint trimL1=0, trimR1=0;
 
         if (alignType>=0) {//this mate is unmapped
-            if (mateMapped!=NULL && mateMapped[imate]) continue; //this mate was mapped, do not record it as unmapped
+            if (mateMap!=NULL && mateMap[imate]) continue; //this mate was mapped, do not record it as unmapped
             samFLAG=0x4;
             if (P.readNmates==2) {//paired read
                 samFLAG|=0x1 + (imate==0 ? 0x40 : 0x80);
-                if (mateMapped[1-imate]) {//mate mapped
+                if (mateMap[1-imate]) {//mate mapped
                     if (trOut.Str!=(1-imate))
                     {//mate strand reverted
                        samFLAG|=0x20;
@@ -136,7 +136,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
 
             if (readFilter=='Y') samFLAG|=0x200; //not passing quality control
 
-            if (mateMapped[1-imate])
+            if (mateMap[1-imate])
             {//mate is mapped, fill the infromation from trOut
 
             };

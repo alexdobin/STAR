@@ -48,12 +48,15 @@ class ReadAlign {
         //transcripts (aligns)
         uint nW;
         uint *nWinTr; //number of recorded transcripts per window
-        Transcript trA, trA1, *trBest, *trInit; //transcript, best tr, next best tr, initialized tr
+        Transcript trA, trA1, *trInit; //transcript, best tr, next best tr, initialized tr
         Transcript ***trAll; //all transcripts for all windows
         Transcript *trArray; //linear array of transcripts to store all of them from all windows
         Transcript **trArrayPointer; //linear array of transcripts to store all of them from all windows
-        Transcript *trMult[MAX_N_MULTMAP];//multimapping transcripts
-        Transcript **trMultOut;//multimapping transcripts - converted to output genome
+        
+        Transcript *trMult[MAX_N_MULTMAP];//selected alignments - to the mapGen
+        Transcript **trMultGenOut;//multimapping transcripts - converted to output genome
+        Transcript *trBest, *trBestGenOut;//bset transcripts
+        
         Transcript *alignTrAll;//alignments to transcriptome        
 
         ReadAlign *waspRA; //ReadAlign for alternative WASP alignment
@@ -71,7 +74,7 @@ class ReadAlign {
 	//input,output
         char** outBAMoneAlign;
         uint* outBAMoneAlignNbytes;
-        int alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint trChrStart, uint mateChr, uint mateStart, char mateStrand, int unmapType, bool *mateMapped, vector<int> outSAMattrOrder, char** outBAMarray, uint* outBAMarrayN);
+        int alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint trChrStart, uint mateChr, uint mateStart, char mateStrand, int unmapType, bool *mateMap, vector<int> outSAMattrOrder, char** outBAMarray, uint* outBAMarrayN);
 
     private:
         Parameters& P; //pointer to the parameters, will be initialized on construction
@@ -94,7 +97,8 @@ class ReadAlign {
         intScore *scoreSeedToSeed, *scoreSeedBest;
         uint *scoreSeedBestInd, *seedChain, *scoreSeedBestMM;
 
-        bool outFilterPassed; //true if alignment passed all filter and is output to SAM/BAM
+        bool outFilterBySJoutPass; //true if alignment passed all filters and is output
+        bool outSAMfilterPass; //true if alignment passed SAM filter
 
         //read
         uint64 iMate;
@@ -140,7 +144,8 @@ class ReadAlign {
         uint storedLmin, uniqLmax, uniqLmaxInd, multLmax, multLmaxN, multNmin, multNminL, multNmax, multNmaxL;
         uint64 nTr, nTrMate; // number of transcripts called
         intScore maxScore;//maximum alignment score
-
+        bool mateMapped[2];
+        
         //old chimeric detection
         uint chimN, chimRepeat, chimStr;
         int chimMotif;
@@ -169,7 +174,7 @@ class ReadAlign {
 
         bool outputTranscript(Transcript *trOut, uint nTrOut, ofstream *outBED);
 
-        uint64 outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint mateChr, uint mateStart, char mateStrand, int unmapType, bool *mateMapped, ostream *outStream);
+        uint64 outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint mateChr, uint mateStart, char mateStrand, int unmapType, bool *mateMap, ostream *outStream);
 
         uint64 outputSpliceGraphSAM(Transcript const &trOut, uint nTrOut, uint iTrOut, ostream *outStream);
 
@@ -201,7 +206,13 @@ class ReadAlign {
         void peOverlapMergeMap();
         void peMergeMates();
         void peOverlapSEtoPE(ReadAlign &seRA);
-
+        
+        //output alignments functions
+        void outFilterBySJout();
+        void outReadsUnmapped();
+        void spliceGraphWriteSAM();
+        void alignedAnnotation();
+        void writeSAM(uint64 nTrOutSAM, Transcript **trOutSAM, Transcript *trBestSAM);
 
 };
 

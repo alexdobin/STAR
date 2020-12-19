@@ -59,9 +59,9 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
     trInit = new Transcript;
     
     if (mapGen.genomeOut.convYes) {//allocate output transcripts
-        trMultOut = new Transcript*[P.outFilterMultimapNmax];
+        trMultGenOut = new Transcript*[P.outFilterMultimapNmax];
         for (uint32 ii=0; ii<P.outFilterMultimapNmax; ii++) 
-            trMultOut[ii]=new Transcript;
+            trMultGenOut[ii]=new Transcript;
     };
     
     //read
@@ -100,9 +100,9 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
 
 void ReadAlign::resetN () {//reset resets the counters to 0 for a new read
     mapMarker=0;
-    nA=0;nP=0;nW=0;
-    nTr=0;nTrMate=0;
-    nUM[0]=0;nUM[1]=0;
+    nA=0; nP=0; nW=0;
+    nTr=0;
+    nUM[0]=0; nUM[1]=0;
     storedLmin=0; uniqLmax=0; uniqLmaxInd=0; multLmax=0; multLmaxN=0; multNminL=0; multNmin=0; multNmax=0; multNmaxL=0;
     chimN=0;
 

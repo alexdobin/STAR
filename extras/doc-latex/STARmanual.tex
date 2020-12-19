@@ -316,7 +316,7 @@ The SAM attributes can be specified by the user using \opt{outSAMattributes} \op
 \optv{HI}  : multiple alignment index, starts with --outSAMattrIHstart ($=1$ by default). Standard SAM tag.
 %
 \item[]
-\optv{AS} : local alignment score, $+1/-1$ for matches/mismateches, score* penalties for indels and gaps. For PE reads, total score for two mates. Stadnard SAM tag.
+\optv{AS} : local alignment score, $+1/-1$ for matches/mismateches, score* penalties for indels and gaps. For PE reads, total score for two mates. Standard SAM tag.
 %
 \item[]
 \optv{NM} : edit distance to the reference (number of mismatched + inserted + deleted bases) for each mate. Standard SAM tag.
@@ -397,7 +397,7 @@ STAR can output alignments directly in binary BAM format, thus saving time on co
 output unsorted \ofilen{Aligned.out.bam} file. The paired ends of an alignment are always adjacent, and multiple alignments of a read are adjacent as well. This "unsorted" file can be directly used with downstream software such as \code{HTseq}, without the need of name sorting. The order of the reads will match that of the input FASTQ(A) files only if one thread is used \opt{runThread} \optv{1}, and \opt{outFilterType} \opt{BySJout} is \textbf{not} used.
 \item[]
 \opt{outSAMtype} \optv{BAM SortedByCoordinate}\\
-output sorted by coordinate \ofilen{Aligned.sortedByCoord.out.bam} file, similar to \code{samtools sort} command.
+output sorted by coordinate \ofilen{Aligned.sortedByCoord.out.bam} file, similar to \code{samtools sort} command. If this option causes problems, it is recommended to reduce \opt{outBAMsortingThreadN} from the default $6$ to lower values (as low as 1).
 \item[]
 \opt{outSAMtype} \optv{BAM Unsorted SortedByCoordinate}\\
 output both unsorted and sorted files.
