@@ -87,6 +87,13 @@ genomeTransformType         None
 
 genomeTransformVCF          -
     string: path to VCF file for genome transformation
+    
+genomeTransformOutput       None
+    string(s)               which output to transform back to original genome
+                            SAM     ... SAM/BAM alignments
+                            SJ      ... splice junctions (SJ.out.tab)
+                            None    ... no transformation of the output
+                            
 #####UnderDevelopment_end
 
 ### Splice Junctions Database

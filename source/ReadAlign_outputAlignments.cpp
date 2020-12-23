@@ -22,15 +22,12 @@ void ReadAlign::outputAlignments() {
                 statsRA.transcriptStats(*(trMult[0]),Lread);
             };
 
-            //junction output for mapped reads (i.e. passed BySJout filtering)
-            //TODO junction output for converted genome. Do not record junction motif ot annotation, calculate it after final collapse
-            if ((P.outSJfilterReads=="All" || nTr==1)) {
-                uint sjReadStartN=chunkOutSJ->N;
-                for (uint64 iTr=0; iTr<nTr; iTr++) {//write all transcripts junctions
-                    outputTranscriptSJ (*(trMult[iTr]), nTr, chunkOutSJ, sjReadStartN);
-                };
-            };
-
+            if (!P.pGe.transform.outSAM) {
+                ReadAlign::recordSJ(nTr, trMult, chunkOutSJ); //this will set mateMapped
+            } else {
+                ReadAlign::recordSJ(alignsGenOut.alN, alignsGenOut.alMult, chunkOutSJ);
+            };            
+            
             ReadAlign::alignedAnnotation();
         };
 
@@ -39,13 +36,29 @@ void ReadAlign::outputAlignments() {
 
         soloRead->record((unmapType<0 ? nTr : 0), trMult, iReadAll, readAnnot); //need to supply nTr=0 for unmapped reads
 
-        ReadAlign::writeSAM(nTr, trMult, trBest); //this will set mateMapped    
+        if (!P.pGe.transform.outSAM) {
+            ReadAlign::writeSAM(nTr, trMult, trBest); //this will set mateMapped
+        } else {
+            ReadAlign::writeSAM(alignsGenOut.alN, alignsGenOut.alMult, alignsGenOut.alBest);
+        };
     };    
 
     if (unmapType>=0) {//unmapped reads
         statsRA.unmappedAll++; //include unmapType==4, i.e. one-mate alignments of PE reads - which may have been set in writeSAM above
         ReadAlign::outReadsUnmapped(); //uses mateMapped that was set in writeSAM above
     };    
+};
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+void ReadAlign::recordSJ(uint64 nTrO, Transcript **trO, OutSJ *cSJ)
+{//junction output for mapped reads (i.e. passed BySJout filtering)
+    if ( P.outSJfilterReads=="All" || nTrO==1 ) {
+        uint64 sjReadStartN=cSJ->N;
+        for (uint64 iTr=0; iTr<nTrO; iTr++) {//write all transcripts junctions
+            outputTranscriptSJ (*(trO[iTr]), nTrO, cSJ, sjReadStartN);
+        };
+    };
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -86,12 +99,8 @@ void ReadAlign::outFilterBySJout()
     };
     
     //SJ output for all reads, including those not passed bySJout filtering. This only needs to be at the 1st stage of BySJout filtering
-    if (P.outSJfilterReads=="All" || nTr==1) {
-        uint sjReadStartN=chunkOutSJ1->N;
-        for (uint iTr=0;iTr<nTr;iTr++) {//report SJs for all transcripts
-            outputTranscriptSJ (*(trMult[iTr]), nTr, chunkOutSJ1, sjReadStartN);
-        };
-    };            
+    ReadAlign::recordSJ(nTr, trMult, chunkOutSJ1); //this will set mateMapped
+         
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -252,10 +261,10 @@ void ReadAlign::spliceGraphWriteSAM()
     if (mapGen.genomeOut.convYes) {//convert to new genome
         nTrOutSAM=0;
         for (uint32 iTr=0; iTr<nTrOutSAM; iTr++) {//convert output transcripts into new genome
-            *trMultGenOut[nTrOutSAM] = *trMult[iTr];//copy information before conversion
-            if (trMult[iTr]->convertGenomeCigar(*mapGen.genomeOut.g, *trMultGenOut[nTrOutSAM])) {
+            *alignsGenOut.alMult[nTrOutSAM] = *trMult[iTr];//copy information before conversion
+            if (trMult[iTr]->convertGenomeCigar(*mapGen.genomeOut.g, *alignsGenOut.alMult[nTrOutSAM])) {
                 ++nTrOutSAM;
-                trMult[nTrOutSAM-1] = trMultGenOut[nTrOutSAM-1]; //point to new transcsript
+                trMult[nTrOutSAM-1] = alignsGenOut.alMult[nTrOutSAM-1]; //point to new transcsript
             };
         };
         nTrOutSAM=nTrOutSAM;

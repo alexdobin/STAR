@@ -52,10 +52,18 @@ class ReadAlign {
         Transcript ***trAll; //all transcripts for all windows
         Transcript *trArray; //linear array of transcripts to store all of them from all windows
         Transcript **trArrayPointer; //linear array of transcripts to store all of them from all windows
+
+        uint64 nTr; // number of transcripts called
+        Transcript *trMult[MAX_N_MULTMAP];//selected alignments - to the mapGen        
+        Transcript *trBest;//bset transcripts
         
-        Transcript *trMult[MAX_N_MULTMAP];//selected alignments - to the mapGen
-        Transcript **trMultGenOut;//multimapping transcripts - converted to output genome
-        Transcript *trBest, *trBestGenOut;//bset transcripts
+        struct {
+            bool yes;
+            uint64 alN;
+            Transcript **alMult;//multimapping transcripts - transformed to output genome
+            Transcript *alBest;//best align
+        } alignsGenOut;
+        
         
         Transcript *alignTrAll;//alignments to transcriptome        
 
@@ -142,7 +150,6 @@ class ReadAlign {
         char *swT;
 
         uint storedLmin, uniqLmax, uniqLmaxInd, multLmax, multLmaxN, multNmin, multNminL, multNmax, multNmaxL;
-        uint64 nTr, nTrMate; // number of transcripts called
         intScore maxScore;//maximum alignment score
         bool mateMapped[2];
         
@@ -213,6 +220,7 @@ class ReadAlign {
         void spliceGraphWriteSAM();
         void alignedAnnotation();
         void writeSAM(uint64 nTrOutSAM, Transcript **trOutSAM, Transcript *trBestSAM);
+        void recordSJ(uint64 nTrO, Transcript **trO, OutSJ *cSJ);
 
 };
 

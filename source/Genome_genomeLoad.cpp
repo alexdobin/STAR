@@ -441,17 +441,24 @@ void Genome::genomeLoad(){//allocate and load Genome
         pGe.transform.type=0;
     };    
     
-    if (pGe.transform.type != 0) {//convert genome coordinates
-        //genomeOut
-        P.pGeOut.gDir=pGe.gDir+"/normalGenome/";
-        genomeOut.convYes=true;
-        genomeOut.gapsAreJunctions=false;
-        genomeOut.convFile=pGe.gDir+"/transformGenomeBlocks.tsv";
+    if (pGe.transform.outYes) {
+        if (pGe.transform.type == 0) {
+            exitWithError("EXITING because of FATAL INPUT ERROR: outTransformOutput is set, but the genome " +pGe.gDir + " was generated without transformation\n"
+                           + "SOLUTION: use the default--outTransformOutput None, or re-generate the genome with transformation options.\n"
+                          ,std::cerr, P.inOut->logMain, EXIT_CODE_MEMORY_ALLOCATION, P);
+            
+        } else {//transform genome coordinates
+            //genomeOut
+            P.pGeOut.gDir=pGe.gDir+"/normalGenome/";
+            genomeOut.convYes=true;
+            genomeOut.gapsAreJunctions=false;
+            genomeOut.convFile=pGe.gDir+"/transformGenomeBlocks.tsv";
 
-        
-        genomeOut.g = new Genome(P,P.pGeOut);
-        genomeOut.g->genomeOut=genomeOut;
-        genomeOut.g->genomeOutLoad();
+            
+            genomeOut.g = new Genome(P,P.pGeOut);
+            genomeOut.g->genomeOut=genomeOut;
+            genomeOut.g->genomeOutLoad();
+        };
     };
     
     if (P.pGe.gLoad=="LoadAndExit" || P.pGe.gLoad=="Remove") {

@@ -49,6 +49,7 @@ Parameters::Parameters() {//initalize parameters info
     //parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "genomeConsensusFile", &pGe.gConsensusFile)); DEPRECATED
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "genomeTransformType", &pGe.transform.typeString));
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "genomeTransformVCF", &pGe.transform.vcfFile));
+    parArray.push_back(new ParameterInfoVector <string> (-1, -1, "genomeTransformOutput", &pGe.transform.output));
 
     //read
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "readFilesType", &readFilesType));
@@ -457,10 +458,8 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 
 ////////////////////////////////////////////////////// Calculate and check parameters
     iReadAll=0;
-
-    if (pGe.gDir.back()!='/') {
-    	pGe.gDir += '/';
-    };
+    
+    pGe.initialize(this);
 
     //directory permissions TODO: this needs to be done before outPrefixFileName is created
     if (runDirPermIn=="User_RWX") {
@@ -927,21 +926,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         errOut <<"SOLUTION: re-run STAR with --waspOutputMode ... and --outSAMtype BAM ... \n";
         exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
-
-    
-    //genome transformation
-    if (pGe.transform.typeString=="None") {
-        pGe.transform.type=0;
-    } else if (pGe.transform.typeString=="Haploid") {
-        pGe.transform.type=1;
-    } else if (pGe.transform.typeString=="Diploid") {
-        pGe.transform.type=2;
-    } else {
-        ostringstream errOut;
-        errOut << "EXITING because of FATAL INPUT ERROR: unrecognized option in --outTransformType=" << pGe.transform.typeString << "\n";
-        errOut << "SOLUTION: use one of the allowed values of --outWigType : 'None' or 'Haploid' or 'Diploid' \n";
-        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-    };        
     
     //quantification parameters
     quant.yes=false;
@@ -1042,20 +1026,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     #endif
 
     strcpy(genomeNumToNT,"ACGTN");
-    
-    if (pGe.gTypeString!="Full" && pGe.gTypeString!="Transcriptome" && pGe.gTypeString!="SuperTranscriptome") {
-        ostringstream errOut;
-        errOut << "EXITING because of FATAL parameter error: --genomeType=" << pGe.gTypeString << "\n";
-        errOut << "SOLUTION: use one of the allowed values of --genomeLoad : Full OR Transcriptome OR SuperTranscriptome\n" <<flush;
-        exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-    };
-
-    if (pGe.gLoad!="LoadAndKeep" && pGe.gLoad!="LoadAndRemove" && pGe.gLoad!="Remove" && pGe.gLoad!="LoadAndExit" && pGe.gLoad!="NoSharedMemory") {// find shared memory fragment
-        ostringstream errOut;
-        errOut << "EXITING because of FATAL INPUT ERROR: --genomeLoad=" << pGe.gLoad << "\n" <<flush;
-        errOut << "SOLUTION: use one of the allowed values of --genomeLoad : NoSharedMemory,LoadAndKeep,LoadAndRemove,LoadAndExit,Remove.\n" <<flush;
-        exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-    };
 
    //sjdb insert on the fly
     sjdbInsert.pass1=false;
@@ -1070,8 +1040,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
        sjdbInsert.yes=true;
     };
 
-    if (pGe.gLoad!="NoSharedMemory" && sjdbInsert.yes )
-    {
+    if (pGe.gLoad!="NoSharedMemory" && sjdbInsert.yes ) {
         ostringstream errOut;
         errOut << "EXITING because of fatal PARAMETERS error: on the fly junction insertion and 2-pass mappng cannot be used with shared memory genome \n" ;
         errOut << "SOLUTION: run STAR with --genomeLoad NoSharedMemory to avoid using shared memory\n" <<flush;
