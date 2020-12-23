@@ -34,6 +34,7 @@ void ReadAlign::outputAlignments() {
             ReadAlign::alignedAnnotation();
         };
 
+        //the operations below are both for mapped and unmapped reads
         soloRead->readBar->getCBandUMI(readNameExtra.at(0), readFilesIndex);
 
         soloRead->record((unmapType<0 ? nTr : 0), trMult, iReadAll, readAnnot); //need to supply nTr=0 for unmapped reads

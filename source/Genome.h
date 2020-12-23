@@ -71,6 +71,7 @@ public:
     void chrBinFill();
     void chrInfoLoad();
     void genomeSequenceAllocate(uint64 nGenomeIn, uint64 &nG1allocOut, char*& Gout, char*& G1out);
+    void loadSJDB(string &genDir);
 
     void insertSequences();
 

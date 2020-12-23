@@ -207,7 +207,7 @@ int main(int argInN, char* argIn[]) {
         RAchunk[0]->chunkFilesCat(P.inOut->outSAM, P.outFileTmp + "/Aligned.out.sam.chunk", g_threadChunks.chunkOutN);
     };
 
-    bamSortByCoordinate(P, RAchunk, genomeMain, soloMain);
+    bamSortByCoordinate(P, RAchunk, *genomeMain.genomeOut.g, soloMain);
     
     //wiggle output
     if (P.outWigFlags.yes) {

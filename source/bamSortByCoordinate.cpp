@@ -5,7 +5,7 @@
 #include "ErrorWarning.h"
 #include "bam_cat.h"
 
-void bamSortByCoordinate (Parameters &P, ReadAlignChunk **RAchunk, Genome &mainGenome, Solo &solo) {
+void bamSortByCoordinate (Parameters &P, ReadAlignChunk **RAchunk, Genome &genome, Solo &solo) {
     if (P.outBAMcoord) {//sort BAM if needed
         *P.inOut->logStdOut << timeMonthDayTime() << " ..... started sorting BAM\n" <<flush;
         P.inOut->logMain << timeMonthDayTime() << " ..... started sorting BAM\n" <<flush;
@@ -36,7 +36,7 @@ void bamSortByCoordinate (Parameters &P, ReadAlignChunk **RAchunk, Genome &mainG
                 errOut <<"SOLUTION: check that the disk is not full, increase the max number of open files with Linux command ulimit -n before running STAR";
                 exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
             };
-            outBAMwriteHeader(bgzfOut,P.samHeaderSortedCoord,mainGenome.chrNameAll,mainGenome.chrLengthAll);
+            outBAMwriteHeader(bgzfOut,P.samHeaderSortedCoord,genome.chrNameAll,genome.chrLengthAll);
             bgzf_close(bgzfOut);
         } else {//sort
             uint totalMem=0;
@@ -54,7 +54,7 @@ void bamSortByCoordinate (Parameters &P, ReadAlignChunk **RAchunk, Genome &mainG
                 if (binS==0) continue; //empty bin
 
                 if (ibin == nBins-1) {//last bin for unmapped reads
-                    BAMbinSortUnmapped(ibin,P.runThreadN,P.outBAMsortTmpDir, P, mainGenome, solo);
+                    BAMbinSortUnmapped(ibin,P.runThreadN,P.outBAMsortTmpDir, P, genome, solo);
                 } else {
                     uint newMem=binS+binN*24;
                     bool boolWait=true;
@@ -66,7 +66,7 @@ void bamSortByCoordinate (Parameters &P, ReadAlignChunk **RAchunk, Genome &mainG
                         };
                         sleep(0.1);
                     };
-                    BAMbinSortByCoordinate(ibin,binN,binS,P.runThreadN,P.outBAMsortTmpDir, P, mainGenome, solo);
+                    BAMbinSortByCoordinate(ibin,binN,binS,P.runThreadN,P.outBAMsortTmpDir, P, genome, solo);
                     #pragma omp critical
                     totalMem-=newMem;//"release" RAM
                 };
