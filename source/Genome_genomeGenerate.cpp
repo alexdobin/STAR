@@ -153,9 +153,9 @@ void Genome::genomeGenerate() {
     //consensusSequence(); //replace with consensus allele DEPRECATED
         
     SjdbClass sjdbLoci; //will be filled in transcriptGeneSJ below
-    GTF mainGTF(*this, P, pGe.gDir+(pGe.transform.type==0 ? "" : "/normalGenome/"), sjdbLoci); //this loads exonLoci and gene/transcript metadata only, sjdbLoci is not filled
+    GTF mainGTF(*this, P, pGe.gDir, sjdbLoci); //this loads exonLoci and gene/transcript metadata only, sjdbLoci is not filled
     
-    transformGenome(&mainGTF);
+    Genome::transformGenome(&mainGTF);
     
     mainGTF.superTranscript(); //this may change the genome into (Super)Transcriptome
 

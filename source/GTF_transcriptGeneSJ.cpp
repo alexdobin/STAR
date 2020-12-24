@@ -20,7 +20,9 @@
 #define GTF_exgeGeID(ii) ((ii)*GTF_exgeLoci_size+3)
 #define GTF_exgeTrID(ii) ((ii)*GTF_exgeLoci_size+4)
 
-uint64 GTF::transcriptGeneSJ(const string &dirOut) {//sort exonLoci by transcript ID and exon coordinates
+uint64 GTF::transcriptGeneSJ(const string &dirOut) 
+{//sort exonLoci by transcript ID and exon coordinates
+ //fills sjdbLoci from GTF junctions
     
     if (!gtfYes)
         return 0;

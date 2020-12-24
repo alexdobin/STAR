@@ -449,7 +449,7 @@ void Genome::genomeLoad(){//allocate and load Genome
             
         } else {//transform genome coordinates
             //genomeOut
-            P.pGeOut.gDir=pGe.gDir+"/normalGenome/";
+            P.pGeOut.gDir=pGe.gDir+"/OriginalGenome/";
             genomeOut.convYes=true;
             genomeOut.gapsAreJunctions=false;
             genomeOut.convFile=pGe.gDir+"/transformGenomeBlocks.tsv";

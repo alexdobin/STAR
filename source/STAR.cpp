@@ -68,13 +68,25 @@ int main(int argInN, char* argIn[]) {
 
     *(P.inOut->logStdOut) << timeMonthDayTime(g_statsAll.timeStart) << " ..... started STAR run\n" <<flush;
 
-    //generate genome
+    //runMode
     if (P.runMode=="alignReads") {
         //continue
     } else if (P.runMode=="genomeGenerate") {
-        Genome genomeMain(P, P.pGe);
-        genomeMain.genomeGenerate();
-        (void) sysRemoveDir (P.outFileTmp);
+        {//normal genome generation
+            Genome genomeMain(P, P.pGe);
+            genomeMain.genomeGenerate();
+        };
+        
+        if (P.pGe.transform.type>0) {//generate original genome, in addition to the transfomed generated above
+            P.pGe.transform.type = 0;
+            P.pGe.transform.typeString = "None";
+            P.pGe.transform.vcfFile = "-";
+            P.pGe.gDir += "/OriginalGenome/";
+            Genome genomeOrig(P, P.pGe);
+            genomeOrig.genomeGenerate();
+        };
+        
+        sysRemoveDir (P.outFileTmp);
         P.inOut->logMain << "DONE: Genome generation, EXITING\n" << flush;
         exit(0);
     } else if (P.runMode=="liftOver") {
