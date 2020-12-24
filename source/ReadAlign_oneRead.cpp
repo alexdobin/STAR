@@ -78,9 +78,9 @@ int ReadAlign::oneRead() {//process one read: load, map, write
     
     multMapSelect();
     
-    transformGenome();
-
-    mappedFilter();
+    mappedFilter();  
+    
+    transformGenome();//for now genome transformation happens after multimapper selection, and mapping filter
 
     if (!peOv.yes) {//if the alignment was not mates merged - otherwise the chimeric detection was already done
         chimericDetection();

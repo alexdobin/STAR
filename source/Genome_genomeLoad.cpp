@@ -371,58 +371,11 @@ void Genome::genomeLoad(){//allocate and load Genome
         return;
     };
 
-    insertSequences();
+    Genome::insertSequences();
 
-    chrBinFill();
+    Genome::chrBinFill();
 
-    //splice junctions database
-    if (nGenome==chrStart[nChrReal]) {//no sjdb
-        sjdbN=0;
-        sjGstart=chrStart[nChrReal]+1; //not sure why I need that
-    } else {//there are sjdb chromosomes
-        ifstream sjdbInfo((pGe.gDir+"/sjdbInfo.txt").c_str());
-        if (sjdbInfo.fail()) {
-            ostringstream errOut;
-            errOut << "EXITING because of FATAL error, could not open file " << (pGe.gDir+"/sjdbInfo.txt") <<"\n";
-            errOut << "SOLUTION: check that the path to genome files, specified in --genomeDir is correct and the files are present, and have user read permsissions\n" <<flush;
-            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
-        };
-
-
-        sjdbInfo >> sjdbN >> pGe.sjdbOverhang;
-        P.inOut->logMain << "Processing splice junctions database sjdbN=" <<sjdbN<<",   pGe.sjdbOverhang=" <<pGe.sjdbOverhang <<" \n";
-
-        sjChrStart=nChrReal;
-        sjGstart=chrStart[sjChrStart];
-
-        //fill the sj-db to genome translation array
-        sjDstart=new uint [sjdbN];
-        sjAstart=new uint [sjdbN];
-        sjdbStart=new uint [sjdbN];
-        sjdbEnd=new uint [sjdbN];
-
-        sjdbMotif=new uint8 [sjdbN];
-        sjdbShiftLeft=new uint8 [sjdbN];
-        sjdbShiftRight=new uint8 [sjdbN];
-        sjdbStrand=new uint8 [sjdbN];
-
-        for (uint ii=0;ii<sjdbN;ii++) {//get the info about junctions from sjdbInfo.txt
-            {
-                uint16 d1,d2,d3,d4;
-                sjdbInfo >> sjdbStart[ii] >> sjdbEnd[ii] >> d1 >> d2 >> d3 >> d4;
-                sjdbMotif[ii]      = (uint8) d1;
-                sjdbShiftLeft[ii]  = (uint8) d2;
-                sjdbShiftRight[ii] = (uint8) d3;
-                sjdbStrand[ii] = (uint8) d4;
-            };
-            sjDstart[ii]   = sjdbStart[ii]  - pGe.sjdbOverhang;
-            sjAstart[ii]   = sjdbEnd[ii] + 1;
-            if (sjdbMotif[ii]==0) {//shinon-canonical junctions back to their true coordinates
-                sjDstart[ii] += sjdbShiftLeft[ii];
-                sjAstart[ii] += sjdbShiftLeft[ii];
-            };
-        };
-    };
+    Genome::loadSJDB(pGe.gDir);
 
     //check and redefine some parameters
     //max intron size
@@ -488,20 +441,81 @@ void Genome::genomeLoad(){//allocate and load Genome
         pGe.transform.type=0;
     };    
     
-    if (pGe.transform.type != 0) {//convert genome coordinates
-        //genomeOut
-        P.pGeOut.gDir=pGe.gDir+"/normalGenome/";
-        genomeOut.convYes=true;
-        genomeOut.gapsAreJunctions=false;
-        genomeOut.convFile=pGe.gDir+"/transformGenomeBlocks.tsv";
+    if (pGe.transform.outYes) {
+        if (pGe.transform.type == 0) {
+            exitWithError("EXITING because of FATAL INPUT ERROR: outTransformOutput is set, but the genome " +pGe.gDir + " was generated without transformation\n"
+                           + "SOLUTION: use the default--outTransformOutput None, or re-generate the genome with transformation options.\n"
+                          ,std::cerr, P.inOut->logMain, EXIT_CODE_MEMORY_ALLOCATION, P);
+            
+        } else {//transform genome coordinates
+            //genomeOut
+            P.pGeOut.gDir=pGe.gDir+"/OriginalGenome/";
+            genomeOut.convYes=true;
+            genomeOut.gapsAreJunctions=false;
+            genomeOut.convFile=pGe.gDir+"/transformGenomeBlocks.tsv";
 
-        
-        genomeOut.g = new Genome(P,P.pGeOut);
-        genomeOut.g->genomeOut=genomeOut;
-        genomeOut.g->genomeOutLoad();
+            
+            genomeOut.g = new Genome(P,P.pGeOut);
+            genomeOut.g->genomeOut=genomeOut;
+            genomeOut.g->genomeOutLoad();
+        };
     };
     
     if (P.pGe.gLoad=="LoadAndExit" || P.pGe.gLoad=="Remove") {
         exit(0);
+    };
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 
+void Genome::loadSJDB(string &genDir)
+{
+    //splice junctions database
+    if (nGenome==chrStart[nChrReal]) {//no sjdb
+        sjdbN=0;
+        sjGstart=chrStart[nChrReal]+1; //not sure why I need that
+    } else {//there are sjdb chromosomes
+        ifstream sjdbInfo((genDir+"/sjdbInfo.txt").c_str());
+        if (sjdbInfo.fail()) {
+            ostringstream errOut;
+            errOut << "EXITING because of FATAL error, could not open file " << (genDir+"/sjdbInfo.txt") <<"\n";
+            errOut << "SOLUTION: check that the path to genome files, specified in --genomeDir is correct and the files are present, and have user read permsissions\n" <<flush;
+            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
+        };
+
+
+        sjdbInfo >> sjdbN >> pGe.sjdbOverhang;
+        P.inOut->logMain << "Processing splice junctions database sjdbN=" <<sjdbN<<",   pGe.sjdbOverhang=" <<pGe.sjdbOverhang <<" \n";
+
+        sjChrStart=nChrReal;
+        sjGstart=chrStart[sjChrStart];
+
+        //fill the sj-db to genome translation array
+        sjDstart=new uint [sjdbN];
+        sjAstart=new uint [sjdbN];
+        sjdbStart=new uint [sjdbN];
+        sjdbEnd=new uint [sjdbN];
+
+        sjdbMotif=new uint8 [sjdbN];
+        sjdbShiftLeft=new uint8 [sjdbN];
+        sjdbShiftRight=new uint8 [sjdbN];
+        sjdbStrand=new uint8 [sjdbN];
+
+        for (uint ii=0;ii<sjdbN;ii++) {//get the info about junctions from sjdbInfo.txt
+            {
+                uint16 d1,d2,d3,d4;
+                sjdbInfo >> sjdbStart[ii] >> sjdbEnd[ii] >> d1 >> d2 >> d3 >> d4;
+                sjdbMotif[ii]      = (uint8) d1;
+                sjdbShiftLeft[ii]  = (uint8) d2;
+                sjdbShiftRight[ii] = (uint8) d3;
+                sjdbStrand[ii] = (uint8) d4;
+            };
+            sjDstart[ii]   = sjdbStart[ii]  - pGe.sjdbOverhang;
+            sjAstart[ii]   = sjdbEnd[ii] + 1;
+            if (sjdbMotif[ii]==0) {//shinon-canonical junctions back to their true coordinates
+                sjDstart[ii] += sjdbShiftLeft[ii];
+                sjAstart[ii] += sjdbShiftLeft[ii];
+            };
+        };
     };
 };

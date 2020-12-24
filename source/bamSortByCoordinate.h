@@ -6,6 +6,6 @@
 #include "Genome.h"
 #include "Solo.h"
 
-void bamSortByCoordinate(Parameters &P, ReadAlignChunk **RAchunk, Genome &mainGenome, Solo &solo) ;
+void bamSortByCoordinate(Parameters &P, ReadAlignChunk **RAchunk, Genome &genome, Solo &solo) ;
 
 #endif

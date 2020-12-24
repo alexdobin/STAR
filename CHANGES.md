@@ -1,4 +1,4 @@
-* Different --soloUMIdedup counts, if requested, are recorded in separate .mtx files. 
+* Different --soloUMIdedup counts, if requested, are recorded in separate .mtx files.
 * Cell-filtered Velocyto matrices are generated using Gene cell filtering.
 * Velocyto spliced/unspliced/ambiguous counts are reported in separate .mtx files.
 * The UMI deduplication/correction specified in --soloUMIdedup is used for statistics output, filtering and UB tag in BAM output.

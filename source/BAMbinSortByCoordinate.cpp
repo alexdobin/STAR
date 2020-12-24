@@ -4,7 +4,7 @@
 #include "BAMfunctions.h"
 #include "SequenceFuns.h"
 
-void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, string dirBAMsort, Parameters &P, Genome &mapGen, Solo &solo) {
+void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, string dirBAMsort, Parameters &P, Genome &genome, Solo &solo) {
 
     if (binS==0) return; //nothing to do for empty bins
     //allocate arrays
@@ -60,7 +60,7 @@ void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, st
         exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
     };
 
-    outBAMwriteHeader(bgzfBin,P.samHeaderSortedCoord,mapGen.chrNameAll,mapGen.chrLengthAll);
+    outBAMwriteHeader(bgzfBin,P.samHeaderSortedCoord,genome.chrNameAll,genome.chrLengthAll);
     //send ordered aligns to bgzf one-by-one
     char bam1[BAM_ATTR_MaxSize];//temp array
     for (uint ia=0;ia<binN;ia++) {

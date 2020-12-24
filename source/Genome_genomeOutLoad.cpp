@@ -24,13 +24,16 @@ void Genome::genomeOutLoad(){//allocate and load *output* Genome
 
     //find chr starts from files
     chrInfoLoad();
-    nGenome=chrStart.back();
     
-    G=new char[nGenome];
+    
     ifstream GenomeIn;
-    //uint64 genomeFileSize = OpenStream("Genome", GenomeIn, nGenome);
-    //uint64 genomeReadBytesN=fstreamReadBig(GenomeIn,G,nGenome);
+    nGenome = OpenStream("Genome", GenomeIn, nGenome);
+    G=new char[nGenome];
+    //uint64 genomeReadBytesN = 
+    fstreamReadBig(GenomeIn,G,nGenome);
     GenomeIn.close();
+    
+    Genome::loadSJDB(pGe.gDir);
     
     //record required genome parameters in P
     pGe.gSAindexNbases=P1.pGe.gSAindexNbases;

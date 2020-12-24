@@ -2,7 +2,7 @@
 #include "SequenceFuns.h"
 #include "ErrorWarning.h"
 
-uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint mateChr, uint mateStart, char mateStrand, int unmapType, bool *mateMapped, ostream *outStream) {
+uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint mateChr, uint mateStart, char mateStrand, int unmapType, bool *mateMap, ostream *outStream) {
 
     if (P.outSAMmode=="None") return 0; //no SAM output
 
@@ -12,13 +12,13 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
     {//unmapped reads: SAM
         for (uint imate=0;imate<P.readNmates;imate++)
         {//cycle over mates
-            if (!mateMapped[imate])
+            if (!mateMap[imate])
             {
                 uint16 samFLAG=0x4;
                 if (P.readNmates==2)
                 {//paired read
                     samFLAG|=0x1 + (imate==0 ? 0x40 : 0x80);
-                    if (mateMapped[1-imate])
+                    if (mateMap[1-imate])
                     {//mate mapped
                         if ( trOut.Str != (1-imate) )
                         {
@@ -32,7 +32,7 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
 
                 if (readFilter=='Y') samFLAG|=0x200; //not passing quality control
 
-                if (mateMapped[1-imate] && !trOut.primaryFlag && P.outSAMunmapped.keepPairs)
+                if (mateMap[1-imate] && !trOut.primaryFlag && P.outSAMunmapped.keepPairs)
                 {//mapped mate is not primary, keep unmapped mate for each pair, hence need to mark some as not primary
                     samFLAG|=0x100;
                 };
@@ -40,7 +40,7 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
                 *outStream << readName+1 <<"\t"<< samFLAG \
                         <<"\t"<< '*' <<"\t"<< '0' <<"\t"<< '0' <<"\t"<< '*';
 
-                if (mateMapped[1-imate]) {//mate is mapped
+                if (mateMap[1-imate]) {//mate is mapped
                     *outStream <<"\t"<< genOut.chrName[trOut.Chr] <<"\t"<< trOut.exons[0][EX_G] + 1 - genOut.chrStart[trOut.Chr];
                 } else {
                     *outStream <<"\t"<< '*' <<"\t"<< '0';

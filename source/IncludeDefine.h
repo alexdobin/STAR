@@ -23,6 +23,7 @@
 #include <stdint.h>
 #include <omp.h>
 #include <math.h>
+#include <assert.h>
 
 #include "VERSION"
 

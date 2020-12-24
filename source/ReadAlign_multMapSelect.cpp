@@ -38,8 +38,6 @@ void ReadAlign::multMapSelect() {//select multiple mappers from all transcripts 
                 trMult[nTr]->Str = trAll[iW][0]->Str;
                 trMult[nTr]->roStr = trAll[iW][0]->roStr;
 
-                if ( (trAll[iW][iTr]->maxScore + P.outFilterMultimapScoreRange) >= maxScore) nTrMate++;
-
                 nTr++;
             };
         };
@@ -55,24 +53,6 @@ void ReadAlign::multMapSelect() {//select multiple mappers from all transcripts 
         trMult[iTr]->cStart=trMult[iTr]->gStart - mapGen.chrStart[trMult[iTr]->Chr];
     };
 
-//     if (P.outMultimapperOrder.sortCoord)
-//     {//sort multimappers by coordinate
-//         uint *s=new uint[nTr*2];
-//         Transcript **t=new Transcript*[nTr];
-//         for (uint itr=0; itr<nTr; itr++)
-//         {//fill the array of starts and pointers
-//             s[itr*2]=trMult[itr]->exons[0][EX_G];
-//             s[itr*2+1]=itr;
-//             t[itr]=trMult[itr];
-//         };
-//         qsort((void*) s, nTr, sizeof(uint)*2, funCompareUint1);
-//         for (uint itr=0; itr<nTr; itr++)
-//         {
-//             trMult[itr]=t[s[itr*2+1]];
-//         };
-//         delete [] s;
-//     };
-
     if (nTr==1){//unique mappers
         trMult[0]->primaryFlag=true;
     } else {//multimappers
@@ -85,6 +65,7 @@ void ReadAlign::multMapSelect() {//select multiple mappers from all transcripts 
                 };
             };
         };
+        
         if (P.outMultimapperOrder.random) {//shuffle separately the best aligns, and the rest
             for (int itr=nbest-1; itr>=1; itr--) {//Fisher-Yates-Durstenfeld-Knuth shuffle
                 int rand1=int (rngUniformReal0to1(rngMultOrder)*itr+0.5);
@@ -103,14 +84,11 @@ void ReadAlign::multMapSelect() {//select multiple mappers from all transcripts 
             };
         } else if (P.outMultimapperOrder.random || P.outSAMmultNmax != (uint) -1) {
             trMult[0]->primaryFlag=true;//mark as primary the first one in the random ordered list: best scoring aligns are already in front of the list
-    //         for (uint itr=0; itr<nTr; itr++)
-    //         {
-    //             if ( trMult[itr]->maxScore == maxScore ) trMult[itr]->primaryFlag=true;
-    //             break;
-    //         };
         } else {//old way
             trBest->primaryFlag=true;
         };
     };
+    
+    //TODO re-point trBest to the primary one. This should not make a difference in the output
 };
 

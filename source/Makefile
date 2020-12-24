@@ -46,7 +46,7 @@ OBJECTS = ParametersClip_initialize.o ClipMate_clip.o ClipCR4.o opal/opal.o Clip
 	GTF.o GTF_transcriptGeneSJ.o GTF_superTranscript.o SuperTranscriptome.o \
 	ReadAlign_outputAlignments.o  \
 	ReadAlign.o STAR.o \
-	SharedMemory.o PackedArray.o SuffixArrayFuns.o Parameters.o Parameters_samAttributes.o InOutStreams.o SequenceFuns.o Genome.o Stats.o \
+	SharedMemory.o PackedArray.o SuffixArrayFuns.o Parameters.o Parameters_samAttributes.o InOutStreams.o SequenceFuns.o Genome.o ParametersGenome.o Stats.o \
 	Transcript.o Transcript_alignScore.o Transcript_generateCigarP.o Chain.o \
 	Transcript_variationAdjust.o Variation.o ReadAlign_waspMap.o \
 	ReadAlign_storeAligns.o ReadAlign_stitchPieces.o ReadAlign_multMapSelect.o ReadAlign_mapOneRead.o readLoad.o \
@@ -62,8 +62,7 @@ OBJECTS = ParametersClip_initialize.o ClipMate_clip.o ClipCR4.o opal/opal.o Clip
 	stitchWindowAligns.o extendAlign.o stitchAlignToTranscript.o \
 	ChimericSegment.cpp ChimericAlign.cpp ChimericAlign_chimericJunctionOutput.o ChimericAlign_chimericBAMoutput.o ChimericAlign_chimericStitching.o \
 	Genome_genomeGenerate.o genomeParametersWrite.o genomeScanFastaFiles.o genomeSAindex.o \
-	Genome_insertSequences.o Genome_consensusSequence.o \
-	insertSeqSA.o funCompareUintAndSuffixes.o funCompareUintAndSuffixesMemcmp.o \
+	Genome_insertSequences.o insertSeqSA.o funCompareUintAndSuffixes.o funCompareUintAndSuffixesMemcmp.o \
 	TimeFunctions.o ErrorWarning.o streamFuns.o stringSubstituteAll.o \
 	Transcriptome.o Transcriptome_quantAlign.o Transcriptome_geneFullAlignOverlap.o \
 	ReadAlign_quantTranscriptome.o Quantifications.o Transcriptome_geneCountsAddAlign.o \
@@ -82,6 +81,10 @@ SOURCES := $(wildcard *.cpp) $(wildcard *.c)
 	$(CXX) -c $(CPPFLAGS) $(CFLAGS) $<
 
 all: STAR
+
+opal/opal.o : opal/opal.cpp opal/opal.h
+	cd opal && \
+	$(CXX) -c -O3 -std=c++11 -march=native opal.cpp
 
 .PHONY: clean
 clean:

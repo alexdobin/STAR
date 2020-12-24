@@ -67,13 +67,25 @@ int main(int argInN, char* argIn[]) {
 
     *(P.inOut->logStdOut) << timeMonthDayTime(g_statsAll.timeStart) << " ..... started STAR run\n" <<flush;
 
-    //generate genome
-    if ( P.runMode == "alignReads" || P.runMode == "soloCellFiltering" ) {
-        //nothing to do here
-    } else if ( P.runMode == "genomeGenerate" ) {
-        Genome genomeMain(P, P.pGe);
-        genomeMain.genomeGenerate();
-        (void) sysRemoveDir (P.outFileTmp);
+    //runMode
+    if ( P.runMode == "alignReads" || P.runMode == "soloCellFiltering" ){
+        //continue
+    } else if ( P.runMode=="genomeGenerate" ) {
+        {//normal genome generation
+            Genome genomeMain(P, P.pGe);
+            genomeMain.genomeGenerate();
+        };
+        
+        if (P.pGe.transform.type>0) {//generate original genome, in addition to the transfomed generated above
+            P.pGe.transform.type = 0;
+            P.pGe.transform.typeString = "None";
+            P.pGe.transform.vcfFile = "-";
+            P.pGe.gDir += "/OriginalGenome/";
+            Genome genomeOrig(P, P.pGe);
+            genomeOrig.genomeGenerate();
+        };
+        
+        sysRemoveDir (P.outFileTmp);
         P.inOut->logMain << "DONE: Genome generation, EXITING\n" << flush;
         exit(0);
     } else if ( P.runMode == "liftOver" ) {
@@ -210,7 +222,7 @@ int main(int argInN, char* argIn[]) {
         RAchunk[0]->chunkFilesCat(P.inOut->outSAM, P.outFileTmp + "/Aligned.out.sam.chunk", g_threadChunks.chunkOutN);
     };
 
-    bamSortByCoordinate(P, RAchunk, genomeMain, soloMain);
+    bamSortByCoordinate(P, RAchunk, *genomeMain.genomeOut.g, soloMain);
     
     //wiggle output
     if (P.outWigFlags.yes) {

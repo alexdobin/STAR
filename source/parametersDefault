@@ -55,8 +55,10 @@ genomeChainFiles            -
 genomeFileSizes             0
     uint(s)>0: genome files exact sizes in bytes. Typically, this should not be defined by the user.
 
-genomeConsensusFile         -
-    string: VCF file with consensus SNPs (i.e. alternative allele is the major (AF>0.5) allele)
+# DEPRECATED: please use --genomeTransformVCF and --genomeTransformType options instead.
+#genomeConsensusFile         -
+#    string: VCF file with consensus SNPs (i.e. alternative allele is the major (AF>0.5) allele)
+# DEPRECATED 
 
 ### Genome Indexing Parameters - only used with --runMode genomeGenerate
 genomeChrBinNbits           18
@@ -86,6 +88,13 @@ genomeTransformType         None
 
 genomeTransformVCF          -
     string: path to VCF file for genome transformation
+    
+genomeTransformOutput       None
+    string(s)               which output to transform back to original genome
+                            SAM     ... SAM/BAM alignments
+                            SJ      ... splice junctions (SJ.out.tab)
+                            None    ... no transformation of the output
+                            
 #####UnderDevelopment_end
 
 ### Splice Junctions Database

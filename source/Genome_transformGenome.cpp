@@ -33,6 +33,8 @@ void Genome::transformGenome(GTF *gtf)
 {
     if (pGe.transform.type==0)
         return;
+    
+    P.inOut->logMain << "transformGenome: processing VCF" << endl;
         
     map<string,vector<VariantInfo>> vcfVariants[pGe.transform.type];
     {//load VCF file: per chromosome, 1 or 2 haplotypes
@@ -68,6 +70,7 @@ void Genome::transformGenome(GTF *gtf)
                 vcfVariants[0][chr].push_back(var1);
             } else if (pGe.transform.type==2) {//diploid genome
                 for (uint32 ih=0; ih<2; ih++) {
+                    //TODO check that sample has proper format (i.e. 0|1 or 0/1 etc)
                     int32 gt=atoi(&sample.at(ih*2)); //process genotype info in the form of 0|1, i.e. 0th char and 2nd char
                     
                     if (gt==0) //ref haplotype - do not record
@@ -191,7 +194,7 @@ void Genome::transformChrLenStart(map<string,vector<VariantInfo>> &vcfVariants, 
                 vV1.push_back(v);
             g0=max(g0,v.pos+v.seq[0].size());
         };
-        P.inOut->logMain << chrName[ichr] <<" filtered out overlapping variants "<< (uint64)vV.size()-(uint64)vV1.size() <<'\n';
+        P.inOut->logMain << chrName[ichr] <<": filtered out overlapping variants = "<< (int64)vV.size()-(int64)vV1.size() <<"; remaining variants = "<< vV1.size() <<'\n';
         vV=vV1;
 
         for (const auto &v : vV) {
