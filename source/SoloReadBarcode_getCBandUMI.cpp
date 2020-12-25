@@ -46,10 +46,17 @@ void SoloReadBarcode::matchCBtoWL(string &cbSeq1, string &cbQual1, vector<uint64
     cbMatch1=0;
     if (posN>=0) {//one N
         uint32 posNshift=2*(cbSeq1.size()-1-posN);//shift bits for posN
+        bool matched = false;
         for (uint32 jj=0; jj<4; jj++) {
             uint64 cbB11=cbB1^(jj<<posNshift);
             int64 cbI1=binarySearchExact<uint64>(cbB11,cbWL.data(),cbWL.size());
             if (cbI1>=0) {//found match
+                if (matched) {
+                    cbMatchInd1.clear();
+                    cbMatch1=-3;
+                    break; //this is 2nd match, not allowed for N
+                };
+                matched = true;
                 //output all
                 cbMatchInd1.push_back(cbI1);
                 ++cbMatch1;

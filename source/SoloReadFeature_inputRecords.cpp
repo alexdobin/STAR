@@ -50,16 +50,15 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
             };
             
         } else {//multiple matches
-            double ptot=0.0,pmax=0.0;
+            float ptot=0.0,pmax=0.0;
             for (uint32 ii=0; ii<(uint32)cbmatch; ii++) {
                 uint32 cbin;
                 char  qin;
-                double pin;
                 *streamReads >> cbin >> qin;
                 if (cbReadCountTotal[cbin]>0) {//otherwise this cbin does not work
                     qin -= pSolo.QSbase;
                     qin = qin < pSolo.QSmax ? qin : pSolo.QSmax;
-                    pin=cbReadCountTotal[cbin]*std::pow(10.0,-qin/10.0);
+                    float pin=cbReadCountTotal[cbin]*std::pow(10.0,-qin/10.0);
                     ptot+=pin;
                     if (pin>pmax) {
                         cb=cbin;
