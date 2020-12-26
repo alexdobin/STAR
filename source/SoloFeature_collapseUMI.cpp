@@ -317,10 +317,10 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
 
             const uint32 bitTopMask=~(1<<31);
             vector<array<uint32,2>> umiBest(graphN,{0,0});
-            uint32 umiCorrN=0;//number of umi to error-correct
+            unordered_map<uintUMI,uint32> umiCorrColor;
             for (uint32 iu=0; iu<umiArrayStride*nU0; iu+=umiArrayStride) {
                 //switch low/high to recover original UMIs
-                pSolo.umiSwapHalves(umiArray[iu]);//halves were swapped, need to reurn back to UMIs
+                pSolo.umiSwapHalves(umiArray[iu]);//halves were swapped, need to return back to UMIs
                 //find best UMI (highest count) for each connected component
                 if (umiArray[iu+2]==def_MarkNoColor)
                     continue;
@@ -330,30 +330,18 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
                     umiBest[color1][0] = count1;
                     umiBest[color1][1] = umiArray[iu];
                 };              
-                //reuse umiArray: now the stride is 2, and it contains only UMI that may be error corrected and the colors
-                umiArray[umiCorrN*2]=umiArray[iu];
-                umiArray[umiCorrN*2+1]=color1;
-                ++umiCorrN;
+                umiCorrColor[umiArray[iu]] = color1;
             };
 
-            if (umiCorrN==0) {
-                umiArray[0]=(uint32)-1;//to make sure that no UMI can match this first element
-            } else {//sort UMIs
-                qsort(umiArray, umiCorrN, 2*sizeof(uint32), funCompareNumbers<uint32>);
-            };
-
-            uint32 iUmi=0;
             for (uint32 iR=0; iR<gReadS[iG+1]-gReadS[iG]; iR+=rguStride) {//cycle over reads
                 uint64 iread1 = rGU1[iR+rguR];
                 readInfo[iread1].cb = indCB[iCB] ;
 
-                if (iUmi < umiCorrN && rGU1[iR+rguU]>umiArray[iUmi*2]) //advance in the umiArray sorted list
-                    ++iUmi;
-
-                if (iUmi < umiCorrN && rGU1[iR+rguU]==umiArray[iUmi*2]) {//correct UMI
-                    readInfo[iread1].umi=umiBest[umiArray[iUmi*2+1]][1];
+                uintUMI umi = rGU1[iR+rguU];
+                if ( umiCorrColor.count(umi)>0 ) {//correct UMI
+                    readInfo[iread1].umi = umiBest[umiCorrColor[umi]][1];
                 } else {//no UMI correction
-                    readInfo[iread1].umi=rGU1[iR+rguU];
+                    readInfo[iread1].umi = umi;
                 };
             };
         };//else if (readInfo.size()>0)
