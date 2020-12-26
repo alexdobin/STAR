@@ -182,7 +182,6 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
     
     unordered_map <uint32, unordered_map<uint32,uint32>> umiGeneHash;
                    //UMI                 //Gene //Count
-    
     if (pSolo.umiFiltering.MultiGeneUMI) {
         for (uint32 iR=0; iR<rN*rguStride; iR+=rguStride) {
             umiGeneHash[rGU[iR+1]][rGU[iR]]++; 
@@ -242,7 +241,7 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
         for (uint32 iR=rguU; iR<gReadS[iG+1]-gReadS[iG]; iR+=rguStride) {//count and collapse identical UMIs
             
             if (pSolo.umiFiltering.MultiGeneUMI && umiGeneHash[rGU1[iR]][gID[iG]]==0)
-                continue;
+                continue;//multigene UMI is not recorded
             
             if (rGU1[iR]!=u1) {
                 iR1 += umiArrayStride;

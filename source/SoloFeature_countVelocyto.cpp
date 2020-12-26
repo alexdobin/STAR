@@ -12,7 +12,7 @@ void SoloFeature::countVelocyto()
 
     nReadPerCB.resize(nCB);
 
-    vector<unordered_map<typeUMI,vector<trTypeStruct>>> cuTrTypes (nCB);
+    vector<unordered_map<uintUMI,vector<trTypeStruct>>> cuTrTypes (nCB);
     for (uint32 ii=0; ii<nCB; ii++)
         cuTrTypes[ii].reserve(readFeatSum->cbReadCount[ii] > 100 ? readFeatSum->cbReadCount[ii] : readFeatSum->cbReadCount[ii]/5); //heuristics...
     
@@ -32,7 +32,7 @@ void SoloFeature::countVelocyto()
                 streamReads->ignore((uint32)-1, '\n');
                 continue;
             };
-            typeUMI umi=soloFeatAll[pSolo.featureInd[SoloFeatureTypes::Gene]]->readInfo[iread].umi;
+            uintUMI umi=soloFeatAll[pSolo.featureInd[SoloFeatureTypes::Gene]]->readInfo[iread].umi;
 
             uint32 iCB=indCBwl[cb];
             nReadPerCB[iCB]++;//simple estimate

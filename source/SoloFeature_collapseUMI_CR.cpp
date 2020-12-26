@@ -50,13 +50,13 @@ void SoloFeature::collapseUMI_CR(uint32 iCB, uint32 *umiArray)
 
     //unordered_map<uint32, uint32> umiMaxGeneCount;//for each umi, max counts of reads per gene
     
-    unordered_map <uint32, unordered_map<uint32,uint32>> umiGeneHash, umiGeneHash0;
+    unordered_map <uintUMI, unordered_map<uint32,uint32>> umiGeneHash, umiGeneHash0;
                    //UMI                 //Gene //Count
     
-    unordered_map <uint32,uint32> umiCorrected;
+    vector<unordered_map <uintUMI,uintUMI>> umiCorrected(nGenes);
 
-    if (countCellGeneUMI.size() < countCellGeneUMIindex[iCB] + nGenes*countMatStride) //allocated vector too small
-        countCellGeneUMI.resize(countCellGeneUMI.size()*2);
+    if (countCellGeneUMI.size() < countCellGeneUMIindex[iCB] + nGenes*countMatStride)
+        countCellGeneUMI.resize((countCellGeneUMI.size() + nGenes*countMatStride )*2);//allocated vector too small
     
     nGenePerCB[iCB]=0;
     nUMIperCB[iCB]=0;
@@ -104,7 +104,7 @@ void SoloFeature::collapseUMI_CR(uint32 iCB, uint32 *umiArray)
 
                 if ( (uuXor >> (__builtin_ctz(uuXor)/2)*2) <= 3 ) {//1MM
                     if (readInfo.size()>0) {//record corrections
-                        umiCorrected[umiArray[iu+0]]=umiArray[iuu+0];//replace iu with iuu
+                        umiCorrected[iG][umiArray[iu+0]]=umiArray[iuu+0];//replace iu with iuu
                     };                    
                     umiArray[iu+0]=umiArray[iuu+0];//replace iu with iuu
                     break;
@@ -117,19 +117,7 @@ void SoloFeature::collapseUMI_CR(uint32 iCB, uint32 *umiArray)
                 umiGeneHash[umiArray[iu+0]][iG]+=umiArray[iu+1];//this sums read counts over UMIs that were collapsed
             };
 
-            if (readInfo.size()>0) {//record cb/umi for each read
-                for (uint32 iR=0; iR<gReadS[iG+1]-gReadS[iG]; iR+=rguStride) {//cycle over reads
-                    uint64 iread1 = rGU1[iR+rguR];
-                    readInfo[iread1].cb = indCB[iCB] ;
-                    uint32 umi=rGU1[iR+rguU];
-                    
-                    if (umiCorrected.count(umi)>0)
-                        umi=umiCorrected[umi]; //correct UMI
-                    readInfo[iread1].umi=umi;
-                };      
-            };            
-
-        } else {//MultiGeneUMI
+        } else {//no MultiGeneUMI
             qsort(umiArray, nU0, umiArrayStride*sizeof(uint32), funCompareNumbers<uint32>);
             nU1=1;
             for (uint64 iu=umiArrayStride; iu<nU0*umiArrayStride; iu+=umiArrayStride) {
@@ -142,6 +130,18 @@ void SoloFeature::collapseUMI_CR(uint32 iCB, uint32 *umiArray)
             countCellGeneUMI[countCellGeneUMIindex[iCB+1] + 0] = gID[iG];
             countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.CR] = nU1;
             countCellGeneUMIindex[iCB+1] = countCellGeneUMIindex[iCB+1] + countMatStride;//iCB+1 accumulates the index
+
+            if (readInfo.size()>0) {//record cb/umi for each read
+                for (uint32 iR=0; iR<gReadS[iG+1]-gReadS[iG]; iR+=rguStride) {//cycle over reads
+                    uint64 iread1 = rGU1[iR+rguR];
+                    readInfo[iread1].cb = indCB[iCB] ;
+                    uint32 umi=rGU1[iR+rguU];
+                    
+                    if (umiCorrected[iG].count(umi)>0)
+                        umi=umiCorrected[iG][umi]; //correct UMI
+                    readInfo[iread1].umi=umi;
+                };      
+            };            
         };
 
     };
@@ -149,8 +149,8 @@ void SoloFeature::collapseUMI_CR(uint32 iCB, uint32 *umiArray)
     if (pSolo.umiFiltering.MultiGeneUMI) {
         
         vector<uint32> geneCounts(nGenes,0);
-        vector<unordered_set<uint32>> geneUmiHash;
         
+        vector<unordered_set<uintUMI>> geneUmiHash;
         if (readInfo.size()>0)
             geneUmiHash.resize(nGenes);
         
@@ -201,13 +201,14 @@ void SoloFeature::collapseUMI_CR(uint32 iCB, uint32 *umiArray)
                     readInfo[iread1].cb = indCB[iCB] ;
                     uint32 umi=rGU1[iR+rguU];
                     
-                    if (umiCorrected.count(umi)>0)
-                        umi=umiCorrected[umi]; //correct UMI
+                    if (umiCorrected[iG].count(umi)>0)
+                        umi=umiCorrected[iG][umi]; //correct UMI
 
+                    //cout << iG << "-" << iR << " " <<flush ;
                     if (geneUmiHash[iG].count(umi)>0) {
                         readInfo[iread1].umi=umi;
                     } else {
-                        readInfo[iread1].umi=0;
+                        readInfo[iread1].umi=(uintUMI) -1;
                     };
                 };
             };

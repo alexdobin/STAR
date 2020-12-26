@@ -1,3 +1,5 @@
+* For --soloUMIfiltering MultiGeneUMI option, the reads with multi-gene UMIs will have UB tag "-" in BAM output.
+* If UMI or CB are not defined, the UB and CB tags in BAM output will contain "-" (instead of lacking these tags).
 * Different --soloUMIdedup counts, if requested, are recorded in separate .mtx files.
 * Cell-filtered Velocyto matrices are generated using Gene cell filtering.
 * Velocyto spliced/unspliced/ambiguous counts are reported in separate .mtx files.

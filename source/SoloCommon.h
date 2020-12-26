@@ -11,11 +11,11 @@ typedef struct{
     uint8  type;
 } trTypeStruct;
 
-typedef uint32 typeUMI;
+typedef uint32 uintUMI;
 
 
 
-#define typeUMIbits 32
+#define uintUMIbits 32
 #define velocytoTypeGeneBits 4
 #define velocytoTypeGeneBitShift 28
 
