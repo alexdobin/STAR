@@ -54,11 +54,12 @@ genomeChainFiles            -
 
 genomeFileSizes             0
     uint(s)>0: genome files exact sizes in bytes. Typically, this should not be defined by the user.
-
-# DEPRECATED: please use --genomeTransformVCF and --genomeTransformType options instead.
-#genomeConsensusFile         -
-#    string: VCF file with consensus SNPs (i.e. alternative allele is the major (AF>0.5) allele)
-# DEPRECATED 
+    
+genomeTransformOutput       None
+    string(s)               which output to transform back to original genome
+                            SAM     ... SAM/BAM alignments
+                            SJ      ... splice junctions (SJ.out.tab)
+                            None    ... no transformation of the output        
 
 ### Genome Indexing Parameters - only used with --runMode genomeGenerate
 genomeChrBinNbits           18
@@ -72,14 +73,7 @@ genomeSAsparseD             1
 
 genomeSuffixLengthMax       -1
     int: maximum length of the suffixes, has to be longer than read length. -1 = infinite.
-
-#####UnderDevelopment_begin : not supported - do not use
-genomeType                  Full
-    string: type of genome to generate
-                            Full                ... full (normal) genome
-                            Transcriptome       ... genome consists of transcript sequences
-                            SuperTransriptome   ... genome consists of superTranscript sequences
-
+    
 genomeTransformType         None
     string: type of genome transformation
                             None       ... no transformation
@@ -88,14 +82,23 @@ genomeTransformType         None
 
 genomeTransformVCF          -
     string: path to VCF file for genome transformation
+
+
     
-genomeTransformOutput       None
-    string(s)               which output to transform back to original genome
-                            SAM     ... SAM/BAM alignments
-                            SJ      ... splice junctions (SJ.out.tab)
-                            None    ... no transformation of the output
-                            
+#####UnderDevelopment_begin : not supported - do not use
+genomeType                  Full
+    string: type of genome to generate
+                            Full                ... full (normal) genome
+                            Transcriptome       ... genome consists of transcript sequences
+                            SuperTransriptome   ... genome consists of superTranscript sequences
 #####UnderDevelopment_end
+
+# DEPRECATED: please use --genomeTransformVCF and --genomeTransformType options instead.
+#genomeConsensusFile         -
+#    string: VCF file with consensus SNPs (i.e. alternative allele is the major (AF>0.5) allele)
+# DEPRECATED 
+
+
 
 ### Splice Junctions Database
 sjdbFileChrStartEnd                     -

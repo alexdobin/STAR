@@ -7,10 +7,19 @@
 * The UMI deduplication/correction specified in --soloUMIdedup is used for statistics output, filtering and UB tag in BAM output.
 * Implemented --soloUMIdedup NoDedup option for counting reads per gene, i.e. no UMI deduplication
 * Implemented input from SAM/BAM for STARsolo, with options --soloInputSAMattrBarcodeSeq --soloInputSAMattrBarcodeQual to specify SAM tags for barcode read sequence and qualities.
-* Fixed an issue that was causing slighlty incorrect values of Implemented input from SAM/BAM for STARsolo. Fixed an issue that was causing slighlty understimated value of Q30 'Bases in RNA read' in Solo.out/Gene/Summary.csv
+* Fixed an issue that was causing slightly incorrect values of Implemented input from SAM/BAM for STARsolo. Fixed an issue that was causing slightly underestimated value of Q30 'Bases in RNA read' in Solo.out/Gene/Summary.csv
 * Implemented --soloCellFilter EmptyDrops_CR option for cell filtering (calling) nearly identical to that of CellRanger 3 and 4.
 * Implemented --runMode soloCellFiltering option for cell filtering (calling) of the raw count matrix, without re-mapping.
 * PR: #1012: fix the bug with --soloCellFilter TopCells option
+
+STAR 2.7.7a --- 2020/12/28
+==========================
+**Major new feature: STARconsensus: mapping RNA-seq reads to consensus genome.**
+* Insert (consensus) variants from a VCF file into the reference genome at the genome generation step with ```--genomeTransformVCF Variants.vcf --genomeTransformType Haploid```
+* Map to the transformed genome. Alignments (SAM/BAM) and spliced junctions (SJ.out.tab) can be transformed back to the original (reference) coordinates with ```--genomeTransformOutput SAM and/or SJ```
+
+**Minor bug fixes:**
+* Deprecated ```--genomeConsensusFile``` option. Please use ```--genomeTransformVCF``` and ```--genomeTransformType``` options instead.
 * Issue #1040: fixed a bug causing rare seg-faults for paired-end --soloType SmartSeq runs.
 * Issue #1071: fixed a bug that can cause a crash for STARsolo runs with a small number of cells.
 
