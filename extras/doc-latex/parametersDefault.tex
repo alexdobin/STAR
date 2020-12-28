@@ -57,9 +57,14 @@
 \optName{genomeFileSizes}
   \optValue{0}
   \optLine{uint(s){\textgreater}0: genome files exact sizes in bytes. Typically, this should not be defined by the user.} 
-\optName{genomeConsensusFile}
-  \optValue{-}
-  \optLine{string: VCF file with consensus SNPs (i.e. alternative allele is the major (AF{\textgreater}0.5) allele)} 
+\optName{genomeTransformOutput}
+  \optValue{None}
+  \optLine{string(s)               which output to transform back to original genome} 
+\begin{optOptTable}
+  \optOpt{SAM}   \optOptLine{SAM/BAM alignments}
+  \optOpt{SJ}   \optOptLine{splice junctions (SJ.out.tab)}
+  \optOpt{None}   \optOptLine{no transformation of the output}
+\end{optOptTable}
 \end{optTable}
 \optSection{Genome Indexing Parameters - only used with --runMode genomeGenerate}\label{Genome_Indexing_Parameters_-_only_used_with_--runMode_genomeGenerate}
 \begin{optTable}
@@ -75,6 +80,17 @@
 \optName{genomeSuffixLengthMax}
   \optValue{-1}
   \optLine{int: maximum length of the suffixes, has to be longer than read length. -1 = infinite.} 
+\optName{genomeTransformType}
+  \optValue{None}
+  \optLine{string: type of genome transformation} 
+\begin{optOptTable}
+  \optOpt{None}   \optOptLine{no transformation}
+  \optOpt{Haploid}   \optOptLine{replace reference alleles with alternative alleles from VCF file (e.g. consensus allele)}
+  \optOpt{Diploid}   \optOptLine{create two haplotypes for each chromosome listed in VCF file, for genotypes 1|2, assumes perfect phasing (e.g. personal genome)}
+\end{optOptTable}
+\optName{genomeTransformVCF}
+  \optValue{-}
+  \optLine{string: path to VCF file for genome transformation} 
 \end{optTable}
 \optSection{Splice Junctions Database}\label{Splice_Junctions_Database}
 \begin{optTable}

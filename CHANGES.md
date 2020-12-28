@@ -1,4 +1,11 @@
-* Deprecated --genomeConsensusFile option. Please use --genomeTransformVCF and --genomeTransformType options instead.
+mSTAR 2.7.7a --- 2020/12/28
+==========================
+**Major new feature: STARconsensus: mapping RNA-seq reads to consensus genome.**
+* Insert (consensus) variants from a VCF file into the reference genome at the genome generation step with ```--genomeTransformVCF Variants.vcf --genomeTransformType Haploid```
+* Map to the transformed genome. Alignments (SAM/BAM) and spliced junctions (SJ.out.tab) can be transformed back to the original (reference) coordinates with ```--genomeTransformOutput SAM and/or SJ```
+
+**Minor bug fixes:**
+* Deprecated ```--genomeConsensusFile``` option. Please use ```--genomeTransformVCF``` and ```--genomeTransformType``` options instead.
 * Issue #1040: fixed a bug causing rare seg-faults for paired-end --soloType SmartSeq runs.
 * Issue #1071: fixed a bug that can cause a crash for STARsolo runs with a small number of cells.
 

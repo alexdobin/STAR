@@ -34,7 +34,7 @@
 
 \newcommand{\sechyperref}[1]{\hyperref[#1]{Section \ref{#1}. \nameref{#1}}}
 
-\title{STAR manual 2.7.6a}
+\title{STAR manual 2.7.7a}
 \author{Alexander Dobin\\
 dobin@cshl.edu}
 \maketitle
@@ -613,6 +613,22 @@ WASP filtering is activated with \opt{waspOutputMode} \optv{SAMtag}, which will 
 
 \optv{vW:i:7} - read overlaps too many variants
 
+\section{STARconsensus}
+STARconsensus allows for mapping RNA-seq reads to consensus genome. It was introduced in STAR 2.7.7a (2020/12/28).
+
+\begin{itemize}
+\item 
+Provide the VCF file with consensus SNVs and InDels at the genome generation stage with  \opt{genomeTransformVC} \optv{ Variants.vcf}  \opt{genomeTransformType} \optv{Haploid}.
+The alternative alleles in this VCF will be inserted to the reference genome to create a "transformed" genome.
+Both the genome sequence and transcript/gene annotations are transformed.
+
+\item
+At the mapping stage, the reads will be mapped to the tranformed (consensus) genome.
+The quantification in the transformed annotations can be performed with standard \opt{quantMode} \optv{TranscriptomeSAM} and/or \optv{GeneCounts} options.
+If desired, alignments (SAM/BAM) and spliced junctions (SJ.out.tab) can be transformed back to the original (reference) coordinates with \opt{genomeTransformOutput} \optv{SAM} and/or \optv{SJ}.
+This is useful if downstream processing relies on reference coordinates.
+\end{itemize}
+
 \section{Detection of multimapping chimeras.}
 Previous STAR chimeric detection algorithm only detected uniquely mapping chimeras, which reduced its sensitivity in some cases.
 The new algorithm can detect and output multimapping chimeras. Presently, the only output into Chimeric.out.junction is supported.
@@ -638,19 +654,8 @@ STARsolo inputs the raw FASTQ reads files, and performs the following operations
 STARsolo output is designed to be a drop-in replacement for 10X CellRanger gene quantification output.
 It follows CellRanger logic for cell barcode whitelisting and UMI deduplication, and produces nearly identical gene counts in the same format. At the same time STARsolo is ~10 times faster than the CellRanger.
 
-The STAR solo algorithm is turned on with: \opt{soloType} \optv{Droplet}. 
-
-Presently, the cell barcode whitelist has to be provided with:
-
-\opt{soloCBwhitelist} \optvr{/path/to/cell/barcode/whitelist}
-
-The 10X Chromium whitelist file can be found inside the CellRanger distribution, e.g. \url{https://kb.10xgenomics.com/hc/en-us/articles/115004506263-What-is-a-barcode-whitelist-}. Please make sure that the whitelist is compatible with the specific version of the 10X chemistry (V1,V2,V3 etc).
-
-Importantly, in the --readFilesIn option, the 1st FASTQ file has to be cDNA read, and the 2nd FASTQ file has to be the barcode (cell+UMI) read, i.e. 
-
-\opt{readFilesIn} \optvr{cDNAfragmentSequence.fastq.gz CellBarcodeUMIsequence.fastq.gz}.
-
-Other solo* options can be found in the Section \ref{STARsolo_(single_cell_RNA-seq)_parameters}.
+STARsolo solo* options can be found in the Section \ref{STARsolo_(single_cell_RNA-seq)_parameters}.
+For more detailed description, please see \url{https://github.com/alexdobin/STAR/blob/master/docs/STARsolo.md}.
 
 \subsection{Feature statistics summaries.}
 Feature statistics summaries are recorded in the \optvr{Solo.out/} directory in files \optvr{<Feature>.stats} where  features are those used in the \opt{soloFeatures} option, e.g.  \optvr{Gene.stats}. The following metrics are recorded:
