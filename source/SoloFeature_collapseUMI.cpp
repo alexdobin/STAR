@@ -48,7 +48,7 @@ void collapseUMIwith1MMlowHalf(uint32 *umiArr, uint32 umiArrayStride, uint32 umi
                 };
             };
 
-            //directional collapse
+            //"directional" collapse from the UMI-tools by Smith, Heger and Sudbery (Genome Research 2017).
             if ( (umiArr[iuu+1] & bitTop) == 0 && (umiArr[iu+1] & bitTopMask)>(2*(umiArr[iuu+1] & bitTopMask)-1) ) {//iuu is duplicate of iu
                 umiArr[iuu+1] |= bitTop;
                 --nU2;//subtract the duplicated UMIs
@@ -104,102 +104,28 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
 {
                                  
     uint32 *rGU=rCBp[iCB];
-    uint32 rN=nReadPerCB[iCB];
-
-    if (featureType==SoloFeatureTypes::Velocyto) {//special processing, by UMI
-        qsort(rGU, rN, rguStride*sizeof(uint32), funCompareTypeShift<uint32, 1>);//sort by the UMI
-        
-//         unordered_map<uint32, array<uint32,3>>> geneCountHash;
-        
-        uint32 g1=(uint32)-1;//gene undefined for the first entry, for correct multigene identification
-        bool multigene=false;//initial condition, to process first record
-        uint32 gVelo=0;
-        
-        uint32 iRrec=0;
-        for (uint32 iR=0; iR<rN*rguStride; iR+=rguStride) {//cycle over reads
-            
-            //process UMI
-            uint32 g2=((rGU[iR] << velocytoTypeGeneBits) >> velocytoTypeGeneBits);//remove top 2 bits
-            gVelo = gVelo | ( rGU[iR] >> velocytoTypeGeneBitShift );
-            if (g2!=g1 && g1+1!=0)
-                multigene=true;
-            g1=g2;
-            
-            //IF end of array OR new UMI in the next record
-            if (iR==(rN-1)*rguStride || rGU[iR+1]!=rGU[iR+3]) {//output this gene IF: past the end of array OR peeked ahead, and the umi is different
-                if (!multigene) {//record this gene
-                    rGU[iRrec]=g1;
-                    ++iRrec;
-
-                    bitset<velocytoTypeGeneBits> gV (gVelo);
-                    if (!gV.test(AlignVsTranscript::ExonIntronSpan)) {//all UMIs are spanning models
-                        rGU[iRrec]=2; //unspliced 
-                    } else if (gV.test(AlignVsTranscript::Concordant)) {//>=1 purely exonic tr 
-                        if (!gV.test(AlignVsTranscript::Intron) && !gV.test(AlignVsTranscript::ExonIntron)) {//0 purely intronic && 0 mixed
-                            rGU[iRrec]=1; //spliced 
-                        } else {//>=1 purely exonic and >=1 purely intronic or mixed
-                            rGU[iRrec]=3; //ambiguous
-                        };
-                    } else {//0 exonic, >=1 intronic and/or >=1 mixed
-                        rGU[iRrec]=2;//unspliced
-                    };
-                    ++iRrec;
-                };
-
-                g1=(uint32)-1;
-                gVelo=0;
-                multigene=false;
-            };
-        };
-        
-        countCellGeneUMIindex[iCB+1]=countCellGeneUMIindex[iCB];
-        nGenePerCB[iCB]=0;
-        nUMIperCB[iCB]=iRrec/2;
-        
-        if (iRrec==0) //all multigenes. nothing to trecord
-            return;
+    uint32 rN=nReadPerCB[iCB];   
     
-        if (countCellGeneUMI.size() < countCellGeneUMIindex[iCB] + (iRrec/2)*countMatStride) //allocated vector too small
-            countCellGeneUMI.resize(countCellGeneUMI.size()*2);        
-        
-        qsort(rGU, iRrec/2, 2*sizeof(uint32), funCompareNumbers<uint32>);//sort by the gene
-
-        countCellGeneUMIindex[iCB+1] -= countMatStride;//it will be added back for the first entry
-        g1=(uint32)-1;//for the first entry to trigger new gene record
-        for (uint32 iR=0; iR<iRrec; iR+=2) {
-            if (rGU[iR]!=g1) {//new gene
-                g1=rGU[iR];
-                nGenePerCB[iCB]++;
-                
-                countCellGeneUMIindex[iCB+1] += countMatStride;//iCB+1 accumulates the index                
-                countCellGeneUMI[countCellGeneUMIindex[iCB+1]+0]=g1;
-            };
-            countCellGeneUMI[countCellGeneUMIindex[iCB+1]+rGU[iR+1]]++;
-        };
-        countCellGeneUMIindex[iCB+1] += countMatStride;
-        return;
-    };    
-    
-    unordered_map <uint32, unordered_map<uint32,uint32>> umiGeneHash;
+    unordered_map <uintUMI, unordered_map<uint32,uint32>> umiGeneHash;
                    //UMI                 //Gene //Count
     if (pSolo.umiFiltering.MultiGeneUMI) {
         for (uint32 iR=0; iR<rN*rguStride; iR+=rguStride) {
             umiGeneHash[rGU[iR+1]][rGU[iR]]++; 
         };
 
-        for (auto &iu : umiGeneHash) {
+        for (auto &iu : umiGeneHash) {//loop over all UMIs
             if (iu.second.size()==1)
                 continue;
             uint32 maxu=0;
-            for (auto &ig : iu.second) {
+            for (auto &ig : iu.second) {//loop over genes for a given UMI
                 if (maxu<ig.second)
-                    maxu=ig.second;
+                    maxu=ig.second; //find gene with maximum count
             };
             if (maxu==1)
-                maxu=2;//to kill UMIs with 1 read to one gene, 1 read to another gense
+                maxu=2;//to kill UMIs with 1 read to one gene, 1 read to another gene
             for (auto &ig : iu.second) {
                 if (maxu>ig.second)
-                    ig.second=0;
+                    ig.second=0; //kills Gene with read count *strictly* < maximum count
             };
         };
     };
@@ -240,8 +166,10 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
         uint32 u1=-1;
         for (uint32 iR=rguU; iR<gReadS[iG+1]-gReadS[iG]; iR+=rguStride) {//count and collapse identical UMIs
             
-            if (pSolo.umiFiltering.MultiGeneUMI && umiGeneHash[rGU1[iR]][gID[iG]]==0)
-                continue;//multigene UMI is not recorded
+            if (pSolo.umiFiltering.MultiGeneUMI && umiGeneHash[rGU1[iR]][gID[iG]]==0) {//multigene UMI is not recorded
+                rGU1[iR] = (uintUMI) -1; //mark multigene UMI, so that UB tag will be set to -
+                continue;
+            };
             
             if (rGU1[iR]!=u1) {
                 iR1 += umiArrayStride;
@@ -261,7 +189,7 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
         vector<array<uint32,2>> graphConn;//node connections
         vector<uint32> graphComp;//for each node (color) - connected component number
         
-        if (nU0>1) {//collapse with 1MM
+        if ( nU0>1 && (pSolo.umiDedup.yes.All || pSolo.umiDedup.yes.Directional) ) {//collapse with 1MM. TODO split All and Directional calculations
             collapseUMIwith1MMlowHalf(umiArray, umiArrayStride, pSolo.umiMaskLow, nU0, nU1, nU2, graphN, graphConn);
 
             //exchange low and high half of UMIs, re-sort, and look for 1MM again
@@ -284,7 +212,7 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
             if (pSolo.umiDedup.yes.Directional)
                 countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.Directional] = nU2;
             if (pSolo.umiDedup.yes.NoDedup)
-                countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.Exact] = nR0;
+                countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.NoDedup] = nR0;
 
             uint32_t totcount=0;
             for (uint32_t ii=countCellGeneUMIindex[iCB+1]+1; ii<countCellGeneUMIindex[iCB+1]+countMatStride; ii++) {
@@ -297,19 +225,21 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
             };
         };
     
+        if (readInfo.size()==0)
+            continue; //no readInfo
+            
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //fill in readInfo
-        if (readInfo.size()>0 && nU0<=1) {//only one UMI
+        if (nU0<=1 || pSolo.umiDedup.typeMain==UMIdedup::typeI::Exact || pSolo.umiDedup.typeMain==UMIdedup::typeI::NoDedup ) {
+            //only one UMI, or Exact, or NoDedup - no UMI correction
             for (uint32 iR=0; iR<gReadS[iG+1]-gReadS[iG]; iR+=rguStride) {//cycle over reads
-                if (rGU1[iR+rguU]==umiArray[0]) {//other UMIs were filtered out
-                    uint64 iread1 = rGU1[iR+rguR];
-                    readInfo[iread1].cb = indCB[iCB] ;
-                    readInfo[iread1].umi = umiArray[0];
-                };
+                uint64 iread1 = rGU1[iR+rguR];
+                readInfo[iread1].cb = indCB[iCB];
+                readInfo[iread1].umi = rGU1[iR+rguU];
             };
 
-        } else if (readInfo.size()>0) {//multiple UMI. TODO output directional or exact UMI
-            
+        //} else if ( pSolo.umiDedup.typeMain==UMIdedup::typeI::All ) {
+        } else {//multiple UMI. TODO output directional or exact UMI
             for (uint32 ii=0; ii<graphComp.size(); ii++) {//for non-conflicting colors, need to fill the colors correctly
                 if (graphComp[ii]==(uint32)-1)
                     graphComp[ii]=ii;
@@ -323,7 +253,7 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
                 pSolo.umiSwapHalves(umiArray[iu]);//halves were swapped, need to return back to UMIs
                 //find best UMI (highest count) for each connected component
                 if (umiArray[iu+2]==def_MarkNoColor)
-                    continue;
+                    continue; //UMI is not corrected
                 uint32 color1=graphComp[umiArray[iu+2]];
                 uint32 count1=umiArray[iu+1] & bitTopMask;
                 if (umiBest[color1][0] < count1) {
@@ -344,6 +274,6 @@ void SoloFeature::collapseUMI(uint32 iCB, uint32 *umiArray)
                     readInfo[iread1].umi = umi;
                 };
             };
-        };//else if (readInfo.size()>0)
-    };
+        };//readInfo
+    };//for (uint32 iG=0; iG<nGenes; iG++) {//collapse UMIs for each gene
 };

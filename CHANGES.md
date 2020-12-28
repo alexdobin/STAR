@@ -1,9 +1,11 @@
+* Implemented --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts which allows 1MM multimatching to WL for barcodes with N-bases (to better match CellRanger >= 3.0.0).
 * For --soloUMIfiltering MultiGeneUMI option, the reads with multi-gene UMIs will have UB tag "-" in BAM output.
 * If UMI or CB are not defined, the UB and CB tags in BAM output will contain "-" (instead of lacking these tags).
 * Different --soloUMIdedup counts, if requested, are recorded in separate .mtx files.
 * Cell-filtered Velocyto matrices are generated using Gene cell filtering.
 * Velocyto spliced/unspliced/ambiguous counts are reported in separate .mtx files.
 * The UMI deduplication/correction specified in --soloUMIdedup is used for statistics output, filtering and UB tag in BAM output.
+* Implemented --soloUMIdedup NoDedup option for counting reads per gene, i.e. no UMI deduplication
 * Implemented input from SAM/BAM for STARsolo, with options --soloInputSAMattrBarcodeSeq --soloInputSAMattrBarcodeQual to specify SAM tags for barcode read sequence and qualities.
 * Fixed an issue that was causing slighlty incorrect values of Implemented input from SAM/BAM for STARsolo. Fixed an issue that was causing slighlty understimated value of Q30 'Bases in RNA read' in Solo.out/Gene/Summary.csv
 * Implemented --soloCellFilter EmptyDrops_CR option for cell filtering (calling) nearly identical to that of CellRanger 3 and 4.

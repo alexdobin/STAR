@@ -51,10 +51,10 @@ void SoloReadBarcode::matchCBtoWL(string &cbSeq1, string &cbQual1, vector<uint64
             uint64 cbB11=cbB1^(jj<<posNshift);
             int64 cbI1=binarySearchExact<uint64>(cbB11,cbWL.data(),cbWL.size());
             if (cbI1>=0) {//found match
-                if (matched) {
+                if (!pSolo.CBmatchWL.mm1_multi_Nbase && matched) {
                     cbMatchInd1.clear();
                     cbMatch1=-3;
-                    break; //this is 2nd match, not allowed for N
+                    break; //this is 2nd match, not allowed for N-bases
                 };
                 matched = true;
                 //output all

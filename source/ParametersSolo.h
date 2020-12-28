@@ -123,6 +123,7 @@ public:
         bool mm1_multi; //1 mismatch, multiple matches to WL allowed
         bool oneExact; //CBs require at least one exact match
         bool mm1_multi_pc; //use psedocounts while calculating probabilities of multi-matches
+        bool mm1_multi_Nbase; //allow multimatching to WL for CBs with N-bases
     } CBmatchWL;
     
     //UMIdedup
