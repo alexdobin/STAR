@@ -27,12 +27,12 @@ void SoloFeature::countVelocyto()
         
         uint64 iread;
         while (*streamReads >> iread) {//until the end of file
-            uint64 cb=soloFeatAll[pSolo.featureInd[SoloFeatureTypes::Gene]]->readInfo[iread].cb;
-            if (cb+1==0) {//TODO: put a filter on CBs here, e.g. UMI threshold
+            uintCB cb=soloFeatAll[pSolo.featureInd[SoloFeatureTypes::Gene]]->readInfo[iread].cb;
+            uintUMI umi=soloFeatAll[pSolo.featureInd[SoloFeatureTypes::Gene]]->readInfo[iread].umi;
+            if (cb == (uintCB)-1 || umi == (uintUMI)-1 ) {//CB and/or UMI undefined.   TODO: put a filter on CBs here, e.g. UMI threshold
                 streamReads->ignore((uint32)-1, '\n');
                 continue;
             };
-            uintUMI umi=soloFeatAll[pSolo.featureInd[SoloFeatureTypes::Gene]]->readInfo[iread].umi;
 
             uint32 iCB=indCBwl[cb];
             nReadPerCB[iCB]++;//simple estimate

@@ -12,6 +12,7 @@ typedef struct{
 } trTypeStruct;
 
 typedef uint32 uintUMI;
+typedef uint64 uintCB;
 
 
 
