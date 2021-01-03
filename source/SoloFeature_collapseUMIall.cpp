@@ -116,6 +116,8 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
         };
 
         uint32 nU0 = (iR1+umiArrayStride)/umiArrayStride;//number of UMIs after simple exact collapse
+        if (nU0==0)
+            continue; //noUMI - nothing to record
        
         if (pSolo.umiFiltering.MultiGeneUMI_CR) {
             for (uint64 iu=0; iu<nU0*umiArrayStride; iu+=umiArrayStride) {
@@ -123,27 +125,11 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
             };
         };       
        
-        uint32 nU1 = nU0;
-        qsort(umiArray, nU0, umiArrayStride*sizeof(uint32), funCompareSolo1);
-        for (uint64 iu=0; iu<(nU0-1)*umiArrayStride; iu+=umiArrayStride) {
-            for (uint64 iuu=(nU0-1)*umiArrayStride; iuu>iu; iuu-=umiArrayStride) {
-
-                uint32 uuXor = umiArray[iu+0] ^ umiArray[iuu+0];
-
-                if ( (uuXor >> (__builtin_ctz(uuXor)/2)*2) <= 3 ) {//1MM
-                    if (readInfo.size()>0) {//record corrections
-                        umiCorrected[iG][umiArray[iu+0]]=umiArray[iuu+0];//replace iu with iuu
-                    };                    
-                    umiArray[iu+0]=umiArray[iuu+0];//replace iu with iuu
-                    --nU1;
-                    break;
-                };
-            };
-        };
+        uint32 nU1 = umiArrayCorrect_CR(nU0, umiArray, readInfo.size()>0, umiCorrected[iG]);
 
         if (pSolo.umiFiltering.MultiGeneUMI_CR) {//just fill the umiGeneHash - will calculate UMI counts later
             for (uint64 iu=0; iu<nU0*umiArrayStride; iu+=umiArrayStride) {
-                umiGeneHash[umiArray[iu+0]][iG]+=umiArray[iu+1];//this sums read counts over UMIs that were collapsed
+                umiGeneHash[umiArray[iu+2]][iG]+=umiArray[iu+1];//this sums read counts over UMIs that were collapsed
             };
 
         } else {//no MultiGeneUMI_CR - calculate and record UMI counts
@@ -236,4 +222,33 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
             };
         };
     };
+};
+
+uint32 SoloFeature::umiArrayCorrect_CR(uint32 nU0, uintUMI *umiArr, bool readInfoRec, unordered_map <uintUMI,uintUMI> &umiCorr)
+{
+    uint32 nU1 = nU0;
+    qsort(umiArr, nU0, umiArrayStride*sizeof(uint32), funCompareSolo1);
+    for (uint64 iu=0; iu<nU0*umiArrayStride; iu+=umiArrayStride) {
+        
+        umiArr[iu+2] = umiArr[iu+0]; //stores corrected UMI for 1MM_CR and 1MM_Directional
+        for (uint64 iuu=(nU0-1)*umiArrayStride; iuu>iu; iuu-=umiArrayStride) {
+
+            uint32 uuXor = umiArr[iu+0] ^ umiArr[iuu+0];
+
+            if ( (uuXor >> (__builtin_ctz(uuXor)/2)*2) <= 3 ) {//1MM                 
+                umiArr[iu+2]=umiArr[iuu+0];//replace iu with iuu
+                --nU1;
+                break;
+            };
+        };
+    };
+    
+    if (readInfoRec) {//record corrections
+        for (uint64 iu=0; iu<nU0*umiArrayStride; iu+=umiArrayStride) {
+            if (umiArr[iu+0] != umiArr[iu+2])
+                umiCorr[umiArr[iu+0]]=umiArr[iu+2];
+        };
+    };
+    
+    return nU1;
 };

@@ -236,8 +236,12 @@ void SoloReadBarcode::getCBandUMI(const string &readNameExtraIn, const uint32 &r
         matchCBtoWL(cbSeq, cbQual, pSolo.cbWL, cbMatch, cbMatchInd, cbMatchString);
 
         if (!convertCheckUMI()) {//UMI conversion
+            #ifdef MATCH_CellRanger
+            // this is what CR does - will not use it to avoid differences with / 2.7.6a
+            // this affects <10 reads raw, only 1 UMI count filtered
             if (cbMatch==0)
-                cbReadCountExact[cbMatchInd[0]]++; //still need to count it as exact before return
+                cbReadCountExact[cbMatchInd[0]]++; //still need to count it as exact before return, even if UMI is not good
+            #endif
             cbMatch=umiCheck;
             cbMatchString="";
             cbMatchInd.clear();

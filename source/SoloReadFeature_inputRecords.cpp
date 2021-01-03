@@ -50,7 +50,12 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
             };
             
         } else {//multiple matches
-            float ptot=0.0,pmax=0.0;
+            #ifdef MATCH_CellRanger
+            double ptot=0.0, pmax=0.0, pin;
+            #else
+            float ptot=0.0, pmax=0.0, pin;
+            #endif
+
             for (uint32 ii=0; ii<(uint32)cbmatch; ii++) {
                 uint32 cbin;
                 char  qin;
@@ -58,7 +63,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
                 if (cbReadCountTotal[cbin]>0) {//otherwise this cbin does not work
                     qin -= pSolo.QSbase;
                     qin = qin < pSolo.QSmax ? qin : pSolo.QSmax;
-                    float pin=cbReadCountTotal[cbin]*std::pow(10.0,-qin/10.0);
+                    pin=cbReadCountTotal[cbin]*std::pow(10.0,-qin/10.0);
                     ptot+=pin;
                     if (pin>pmax) {
                         cb=cbin;

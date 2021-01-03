@@ -91,9 +91,13 @@ public:
     
     //filtering
     char QSbase,QSmax;//quality score base and cutoff
-    //double cbMinP;//for CBs with non-exact matching to WL, min posterior probability
-    float cbMinP;//for CBs with non-exact matching to WL, min posterior probability
 
+    #ifdef MATCH_CellRanger
+    double cbMinP;//for CBs with non-exact matching to WL, min posterior probability
+    #else
+    float cbMinP;//for CBs with non-exact matching to WL, min posterior probability
+    #endif
+    
     //cell filtering
     struct {
         vector<string> type;

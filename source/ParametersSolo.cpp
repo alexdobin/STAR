@@ -397,7 +397,11 @@ void ParametersSolo::initialize(Parameters *pPin)
     if (umiFiltering.type[0]=="MultiGeneUMI") {
         umiFiltering.MultiGeneUMI=true;
     } else if (umiFiltering.type[0]=="MultiGeneUMI_CR") {
-        umiFiltering.MultiGeneUMI_CR=true;        
+        umiFiltering.MultiGeneUMI_CR=true;
+        if (umiDedup.typesIn.size()>1 || umiDedup.typesIn.at(0) != "1MM_CR")
+            exitWithError("EXITING because of fatal PARAMETERS error: --soloUMIfiltering MultiGeneUMI_CR only works with --soloUMIdedup 1MM_CR"
+                          "\nSOLUTION: rerun with --soloUMIfiltering MultiGeneUMI_CR --soloUMIdedup 1MM_CR \n",
+                      std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     } else if (umiFiltering.type[0]=="-") {
         //nothing to do
     } else {
