@@ -393,12 +393,16 @@ void ParametersSolo::initialize(Parameters *pPin)
        
     //umi filtering
     umiFiltering.MultiGeneUMI=false;
+    umiFiltering.MultiGeneUMI_CR=false;
     if (umiFiltering.type[0]=="MultiGeneUMI") {
         umiFiltering.MultiGeneUMI=true;
+    } else if (umiFiltering.type[0]=="MultiGeneUMI_CR") {
+        umiFiltering.MultiGeneUMI_CR=true;        
     } else if (umiFiltering.type[0]=="-") {
         //nothing to do
     } else {
-        exitWithError("EXITING because of fatal PARAMETERS error: unrecognized option in --soloUMIfiltering=" + umiFiltering.type[0] + "\nSOLUTION: use allowed options: - OR MultiGeneUMI\n",
+        exitWithError("EXITING because of fatal PARAMETERS error: unrecognized option in --soloUMIfiltering=" + umiFiltering.type[0] 
+                      + "\nSOLUTION: use allowed options: - or MultiGeneUMI or MultiGeneUMI_CR \n",
                       std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
     

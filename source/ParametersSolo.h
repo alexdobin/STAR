@@ -133,6 +133,7 @@ public:
     struct {
         vector<string> type;
         bool MultiGeneUMI;
+        bool MultiGeneUMI_CR;
     } umiFiltering;
     
     //clusters
