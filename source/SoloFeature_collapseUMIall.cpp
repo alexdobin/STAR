@@ -133,6 +133,13 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
             };
 
         } else {//no MultiGeneUMI_CR - calculate and record UMI counts
+            
+            unordered_set<uintUMI> umiC;
+            for (uint64 iu=0; iu<nU0*umiArrayStride; iu+=umiArrayStride) {
+                umiC.insert(umiArray[iu+2]);
+            };
+            nU1 = umiC.size();
+            
             nGenePerCB[iCB]++;
             nUMIperCB[iCB]+=nU1;
             countCellGeneUMI[countCellGeneUMIindex[iCB+1] + 0] = gID[iG];
