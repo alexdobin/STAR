@@ -70,7 +70,7 @@ void SoloFeature::countCBgeneUMI()
     
     for (uint32 icb=0; icb<nCB; icb++) {//main collapse cycle
         
-        if (pSolo.umiDedup.yes.CR) {//1MM_CR option
+        if (!pSolo.umiDedup.yes.All) {//1MM_CR option
             collapseUMIall(icb, umiArray);
         } else {//all other options
             collapseUMI(icb, umiArray);

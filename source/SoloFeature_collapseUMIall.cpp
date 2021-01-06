@@ -123,42 +123,58 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
             for (uint64 iu=0; iu<nU0*umiArrayStride; iu+=umiArrayStride) {
                 umiGeneHash0[umiArray[iu+0]][iG]+=umiArray[iu+1];//this sums read counts over UMIs that were collapsed
             };
-        };       
-       
-        uint32 nU1 = umiArrayCorrect_CR(nU0, umiArray, readInfo.size()>0, umiCorrected[iG]);
-
-        if (pSolo.umiFiltering.MultiGeneUMI_CR) {//just fill the umiGeneHash - will calculate UMI counts later
-            for (uint64 iu=0; iu<nU0*umiArrayStride; iu+=umiArrayStride) {
+            
+            umiArrayCorrect_CR(nU0, umiArray, readInfo.size()>0, false, umiCorrected[iG]);
+            
+            for (uint64 iu=0; iu<nU0*umiArrayStride; iu+=umiArrayStride) {//just fill the umiGeneHash - will calculate UMI counts later
                 umiGeneHash[umiArray[iu+2]][iG]+=umiArray[iu+1];//this sums read counts over UMIs that were collapsed
             };
 
-        } else {//no MultiGeneUMI_CR - calculate and record UMI counts
-            
-            unordered_set<uintUMI> umiC;
-            for (uint64 iu=0; iu<nU0*umiArrayStride; iu+=umiArrayStride) {
-                umiC.insert(umiArray[iu+2]);
-            };
-            nU1 = umiC.size();
-            
-            nGenePerCB[iCB]++;
-            nUMIperCB[iCB]+=nU1;
-            countCellGeneUMI[countCellGeneUMIindex[iCB+1] + 0] = gID[iG];
-            countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.CR] = nU1;
-            countCellGeneUMIindex[iCB+1] = countCellGeneUMIindex[iCB+1] + countMatStride;//iCB+1 accumulates the index
+            continue; //done with MultiGeneUMI_CR
+        };
+        
+        //no MultiGeneUMI_CR - calculate and record UMI counts
+        if (pSolo.umiDedup.yes.NoDedup)
+            countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.NoDedup] = nR0;
 
-            if (readInfo.size()>0) {//record cb/umi for each read
-                for (uint32 iR=0; iR<gReadS[iG+1]-gReadS[iG]; iR+=rguStride) {//cycle over reads
-                    uint64 iread1 = rGU1[iR+rguR];
-                    readInfo[iread1].cb = indCB[iCB] ;
-                    uint32 umi=rGU1[iR+rguU];
-                    
-                    if (umiCorrected[iG].count(umi)>0)
-                        umi=umiCorrected[iG][umi]; //correct UMI
-                    readInfo[iread1].umi=umi;
-                };      
-            };            
+        if (pSolo.umiDedup.yes.Exact)
+            countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.Exact] = nU0;
+        
+        //if (pSolo.umiDedup.yes.All)
+        //    countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.All] = nU1;        
+        
+        if (pSolo.umiDedup.yes.CR)
+            countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.CR] = 
+                umiArrayCorrect_CR(nU0, umiArray, readInfo.size()>0 && pSolo.umiDedup.typeMain==UMIdedup::typeI::CR, true, umiCorrected[iG]);
+
+        if (pSolo.umiDedup.yes.Directional)
+            countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.Directional] = 
+                umiArrayCorrect_Directional(nU0, umiArray, readInfo.size()>0 && pSolo.umiDedup.typeMain==UMIdedup::typeI::Directional, true, umiCorrected[iG]);
+        
+        {//check any count>0 and finalize record for this gene
+            uint32 totcount=0;
+            for (uint32 ii=countCellGeneUMIindex[iCB+1]+1; ii<countCellGeneUMIindex[iCB+1]+countMatStride; ii++) {
+                totcount += countCellGeneUMI[ii];
+            };
+            if (totcount>0) {//at least one umiDedup type is non-0
+                countCellGeneUMI[countCellGeneUMIindex[iCB+1] + 0] = gID[iG];
+                nGenePerCB[iCB]++;
+                nUMIperCB[iCB] += countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.main];
+                countCellGeneUMIindex[iCB+1] = countCellGeneUMIindex[iCB+1] + countMatStride;//iCB+1 accumulates the index
+            };
         };
 
+        if (readInfo.size()>0) {//record cb/umi for each read
+            for (uint32 iR=0; iR<gReadS[iG+1]-gReadS[iG]; iR+=rguStride) {//cycle over reads
+                uint64 iread1 = rGU1[iR+rguR];
+                readInfo[iread1].cb = indCB[iCB] ;
+                uint32 umi=rGU1[iR+rguU];
+                
+                if (umiCorrected[iG].count(umi)>0)
+                    umi=umiCorrected[iG][umi]; //correct UMI
+                readInfo[iread1].umi=umi;
+            };      
+        };            
     };
 
     if (pSolo.umiFiltering.MultiGeneUMI_CR) {
@@ -231,10 +247,10 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
     };
 };
 
-uint32 SoloFeature::umiArrayCorrect_CR(uint32 nU0, uintUMI *umiArr, bool readInfoRec, unordered_map <uintUMI,uintUMI> &umiCorr)
+uint32 SoloFeature::umiArrayCorrect_CR(const uint32 nU0, uintUMI *umiArr, const bool readInfoRec, const bool nUMIyes, unordered_map <uintUMI,uintUMI> &umiCorr)
 {
-    uint32 nU1 = nU0;
     qsort(umiArr, nU0, umiArrayStride*sizeof(uint32), funCompareSolo1);
+    
     for (uint64 iu=0; iu<nU0*umiArrayStride; iu+=umiArrayStride) {
         
         umiArr[iu+2] = umiArr[iu+0]; //stores corrected UMI for 1MM_CR and 1MM_Directional
@@ -244,7 +260,6 @@ uint32 SoloFeature::umiArrayCorrect_CR(uint32 nU0, uintUMI *umiArr, bool readInf
 
             if ( (uuXor >> (__builtin_ctz(uuXor)/2)*2) <= 3 ) {//1MM                 
                 umiArr[iu+2]=umiArr[iuu+0];//replace iu with iuu
-                --nU1;
                 break;
             };
         };
@@ -257,5 +272,49 @@ uint32 SoloFeature::umiArrayCorrect_CR(uint32 nU0, uintUMI *umiArr, bool readInf
         };
     };
     
-    return nU1;
+    if (!nUMIyes) {
+        return 0;
+    } else {
+        unordered_set<uintUMI> umiC;
+        for (uint64 iu=0; iu<nU0*umiArrayStride; iu+=umiArrayStride) {
+            umiC.insert(umiArr[iu+2]);
+        };
+       return umiC.size();
+    };
+};
+
+uint32 SoloFeature::umiArrayCorrect_Directional(const uint32 nU0, uintUMI *umiArr, const bool readInfoRec, const bool nUMIyes, unordered_map <uintUMI,uintUMI> &umiCorr)
+{
+    qsort(umiArr, nU0, umiArrayStride*sizeof(uint32), funCompareSolo1);
+    
+    for (uint64 iu=0; iu<nU0*umiArrayStride; iu+=umiArrayStride) {
+        
+        umiArr[iu+2] = umiArr[iu+0]; //stores corrected UMI for 1MM_CR and 1MM_Directional
+        for (uint64 iuu=(nU0-1)*umiArrayStride; iuu>iu; iuu-=umiArrayStride) {
+
+            uint32 uuXor = umiArr[iu+0] ^ umiArr[iuu+0];
+
+            if ( (uuXor >> (__builtin_ctz(uuXor)/2)*2) <= 3 && umiArr[iuu+1] > 2*umiArr[iu+1]-1 ) {//1MM                 
+                umiArr[iu+2]=umiArr[iuu+0];//replace iu with iuu
+                break;
+            };
+        };
+    };
+    
+    if (readInfoRec) {//record corrections
+        for (uint64 iu=0; iu<nU0*umiArrayStride; iu+=umiArrayStride) {
+            if (umiArr[iu+0] != umiArr[iu+2])
+                umiCorr[umiArr[iu+0]]=umiArr[iu+2];
+        };
+    };
+    
+    if (!nUMIyes) {
+        return 0;
+    } else {
+        unordered_set<uintUMI> umiC;
+        for (uint64 iu=0; iu<nU0*umiArrayStride; iu+=umiArrayStride) {
+            umiC.insert(umiArr[iu+2]);
+        };
+       return umiC.size();
+    };
 };

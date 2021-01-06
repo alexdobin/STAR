@@ -576,11 +576,11 @@ void UMIdedup::initialize(ParametersSolo *pS)
                     ,std::cerr, pS->pP->inOut->logMain, EXIT_CODE_PARAMETER, *pS->pP);            
     };
     
-    if (yes.CR && (yes.N>1)) {//TODO remove this limitation
-            exitWithError("EXITING because of fatal PARAMETERS error: --soloUMIdedup 1MM_CR is not allowed in combination with other UMI deduplication options\n"
-                      "SOLUTION: specify --soloUMIdedup 1MM_CR only, or a combination of Exact and/or 1MM_All and/or 1MM_Directional"
-                      ,std::cerr, pS->pP->inOut->logMain, EXIT_CODE_PARAMETER, *pS->pP); 
-    };
+//     if (yes.CR && (yes.N>1)) {//TODO remove this limitation
+//             exitWithError("EXITING because of fatal PARAMETERS error: --soloUMIdedup 1MM_CR is not allowed in combination with other UMI deduplication options\n"
+//                       "SOLUTION: specify --soloUMIdedup 1MM_CR only, or a combination of Exact and/or 1MM_All and/or 1MM_Directional"
+//                       ,std::cerr, pS->pP->inOut->logMain, EXIT_CODE_PARAMETER, *pS->pP); 
+//     };
     
     //hard-coded for now
     typeMain = types[0]; //main is the 0th entry in typesIn
