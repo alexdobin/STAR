@@ -225,10 +225,6 @@ void Parameters::samAttributes(){//everything related to SAM attributes
     samAttrRequiresBAM(outSAMattrPresent.GX, "GX");
     samAttrRequiresBAM(outSAMattrPresent.GN, "GN");      
 
-    if (outSAMattrPresent.GX || outSAMattrPresent.GN) {//turn on quantification          
-        quant.gene.yes=true;
-        quant.yes = true;        
-    };
 };
 
 void Parameters:: samAttrRequiresBAM(bool attrYes, string attrTag) {
