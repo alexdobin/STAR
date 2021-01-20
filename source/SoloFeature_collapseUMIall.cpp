@@ -5,7 +5,6 @@
 #include <unordered_map>
 #include "SoloCommon.h"
 #include <bitset>
-
 #define def_MarkNoColor  (uint32) -1
 
 inline int funCompareSolo1 (const void *a, const void *b) {
@@ -290,17 +289,21 @@ uint32 SoloFeature::umiArrayCorrect_CR(const uint32 nU0, uintUMI *umiArr, const 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 uint32 SoloFeature::umiArrayCorrect_Directional(const uint32 nU0, uintUMI *umiArr, const bool readInfoRec, const bool nUMIyes, unordered_map <uintUMI,uintUMI> &umiCorr)
 {
-    qsort(umiArr, nU0, umiArrayStride*sizeof(uint32), funCompareSolo1);
+    qsort(umiArr, nU0, umiArrayStride*sizeof(uint32), funCompareNumbersReverseShift<uint32, 1>);//TODO no need to sort by sequence here, only by count. 
     
-    for (uint64 iu=0; iu<nU0*umiArrayStride; iu+=umiArrayStride) {
+    for (uint64 iu=0; iu<nU0*umiArrayStride; iu+=umiArrayStride)
+        umiArr[iu+2] = umiArr[iu+0]; //initialized - it will store corrected UMI for 1MM_CR and 1MM_Directional
+
+    uint32 nU1 = nU0;
+    for (uint64 iu=umiArrayStride; iu<nU0*umiArrayStride; iu+=umiArrayStride) {
         
-        umiArr[iu+2] = umiArr[iu+0]; //stores corrected UMI for 1MM_CR and 1MM_Directional
-        for (uint64 iuu=(nU0-1)*umiArrayStride; iuu>iu; iuu-=umiArrayStride) {
+        for (uint64 iuu=0; iuu<iu; iuu+=umiArrayStride) {
 
             uint32 uuXor = umiArr[iu+0] ^ umiArr[iuu+0];
 
-            if ( (uuXor >> (__builtin_ctz(uuXor)/2)*2) <= 3 && umiArr[iuu+1] > 2*umiArr[iu+1]-1 ) {//1MM                 
-                umiArr[iu+2]=umiArr[iuu+0];//replace iu with iuu
+            if ( (uuXor >> (__builtin_ctz(uuXor)/2)*2) <= 3 && umiArr[iuu+1] > (2*umiArr[iu+1]-1) ) {//1MM && directional condition
+                umiArr[iu+2]=umiArr[iuu+2];//replace iuu with iu-corrected
+                nU1--;
                 break;
             };
         };
@@ -320,7 +323,9 @@ uint32 SoloFeature::umiArrayCorrect_Directional(const uint32 nU0, uintUMI *umiAr
         for (uint64 iu=0; iu<nU0*umiArrayStride; iu+=umiArrayStride) {
             umiC.insert(umiArr[iu+2]);
         };
-       return umiC.size();
+        if (umiC.size()!=nU1)
+            cout << nU1 <<" "<< umiC.size()<<endl;
+        return umiC.size();
     };
 };
 

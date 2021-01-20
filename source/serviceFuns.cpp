@@ -36,6 +36,19 @@ template <class numT> int funCompareNumbersReverse (const void *a, const void *b
     };
 };
 
+template <class numT, int Shift> int funCompareNumbersReverseShift (const void *a, const void *b) {
+    numT va= *((numT*) a + Shift);
+    numT vb= *((numT*) b + Shift);
+
+    if (va>vb) {
+        return -1;
+    } else if (va==vb) {
+        return 0;
+    } else {
+        return 1;
+    };
+};
+
 
 inline int funCompareUint1 (const void *a, const void *b) {
     uint va= *((uint*) a);
@@ -117,7 +130,6 @@ inline int funCompareArraysShift (const void *a, const void *b) {
     return 0;
 
 };
-
 
 template <class Type>
 inline int funCompareTypeSecondFirst (const void *a, const void *b) {
