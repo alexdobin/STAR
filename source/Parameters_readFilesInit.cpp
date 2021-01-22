@@ -163,6 +163,6 @@ void Parameters::readFilesInit()
         };
     };
     
-    readNmatesIn=readNmates;    
+    readNends=readNmates;    
     
 };

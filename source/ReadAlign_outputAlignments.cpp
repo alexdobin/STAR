@@ -245,10 +245,10 @@ void ReadAlign::outReadsUnmapped()
                 chunkOutUnmappedReadsStream[im] << Qual0[im] <<"\n";
             };
        };
-       if (P.readNmatesIn > P.readNmates) {//need to output 2nd (barcode) read, FASTQ only
-           chunkOutUnmappedReadsStream[P.readNmatesIn-1] << readNameMates[0] <<"\n";
-           chunkOutUnmappedReadsStream[P.readNmatesIn-1] << soloRead->readBar->bSeq <<"\n+\n";
-           chunkOutUnmappedReadsStream[P.readNmatesIn-1] << soloRead->readBar->bQual <<"\n";
+       if (P.readNends > P.readNmates) {//need to output 2nd (barcode) read, FASTQ only
+           chunkOutUnmappedReadsStream[P.readNends-1] << readNameMates[0] <<"\n";
+           chunkOutUnmappedReadsStream[P.readNends-1] << soloRead->readBar->bSeq <<"\n+\n";
+           chunkOutUnmappedReadsStream[P.readNends-1] << soloRead->readBar->bQual <<"\n";
        };
     };
 };

@@ -104,7 +104,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                         readID += ' '+ to_string(P.iReadAll)+' '+passFilterIllumina+' '+to_string(P.readFilesIndex);
 
                         //ignore the rest of the read name for both mates
-                        for (uint imate=0; imate<P.readNmatesIn; imate++)
+                        for (uint imate=0; imate<P.readNends; imate++)
                             P.inOut->readIn[imate].ignore(DEF_readNameSeqLengthMax,'\n');
 
                         //copy the same readID to both mates
@@ -131,7 +131,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                     };
                 } else if (nextChar=='>') {//fasta, can be multiline, which is converted to single line
                     P.iReadAll++; //increment read number
-                    for (uint imate=0; imate<P.readNmatesIn; imate++) {
+                    for (uint imate=0; imate<P.readNends; imate++) {
                         if (P.outFilterBySJoutStage!=2) {//not the 2nd stage of the 2-stage mapping
 
                             if (P.outSAMreadID=="Number") {
@@ -237,7 +237,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
             if (P.runThreadN>1)
                 pthread_mutex_lock(&g_threadChunks.mutexOutUnmappedFastx);
 
-            for (uint ii=0;ii<P.readNmatesIn;ii++) {
+            for (uint ii=0;ii<P.readNends;ii++) {
                 chunkFstreamCat (RA->chunkOutUnmappedReadsStream[ii],P.inOut->outUnmappedReadsStream[ii], false, g_threadChunks.mutexOutUnmappedFastx);
             };
 

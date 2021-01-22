@@ -93,23 +93,23 @@ void ParametersSolo::initialize(Parameters *pPin)
     ////////////////////////////////////////////////input read files
     if (pP->readFilesTypeN != 10) {//input from FASTQ
         if (type==SoloTypes::SmartSeq) {//no barcode read
-            //pP->readNmates=pP->readNmatesIn; 
+            //pP->readNmates=pP->readNends; 
             barcodeRead=-1; 
             barcodeReadYes=false;
             //TODO: a lot of parameters should not be defined for SmartSeq option - check it here
             //umiDedup
         } else {//all other types require barcode read
-            if (pP->readNmatesIn<2) {
+            if (pP->readNends<2) {
                 exitWithError("EXITING because of fatal PARAMETERS error: --soloType options (except SmartSeq) require 2 reads or 3 reads, where the last read is the barcode read.\n"
                             "SOLUTION: specify 2 or 3 files in --readFilesIn",std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
             };
-            pP->readNmates=pP->readNmatesIn-1; //true mates, excluding barcode read
+            pP->readNmates=pP->readNends-1; //true mates, excluding barcode read
             barcodeRead=pP->readNmates;//TODO make this flexible
             barcodeReadYes=true;
         };
 
     } else if (pP->readFilesTypeN == 10) {//input from SAM
-        //pP->readNmates=pP->readNmatesIn;
+        //pP->readNmates=pP->readNends;
         barcodeRead=-1; 
         barcodeReadYes=false;
             

@@ -79,7 +79,7 @@ ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome 
     };
 
     if (P.outReadsUnmapped=="Fastx" ) {
-        for (uint32 imate=0; imate < P.readNmatesIn; imate++) 
+        for (uint32 imate=0; imate < P.readNends; imate++) 
             chunkFstreamOpen(P.outFileTmp + "/Unmapped.out.mate"+ to_string(imate) +".thread",iChunk, RA->chunkOutUnmappedReadsStream[imate]);
     };
 

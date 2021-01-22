@@ -74,7 +74,7 @@ class Parameters {
 
         uint readMapNumber;
         uint iReadAll;
-        uint readNmates, readNmatesIn;
+        uint readNmates, readNends;
         string readMatesLengthsIn;
         uint32 readQualityScoreBase;
 
