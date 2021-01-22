@@ -27,7 +27,7 @@ void Genome::genomeOutLoad(){//allocate and load *output* Genome
     
     
     ifstream GenomeIn;
-    nGenome = OpenStream("Genome", GenomeIn, nGenome);
+    nGenome = OpenStream("Genome", GenomeIn, 0);
     G=new char[nGenome];
     //uint64 genomeReadBytesN = 
     fstreamReadBig(GenomeIn,G,nGenome);
