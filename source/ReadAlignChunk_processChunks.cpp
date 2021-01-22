@@ -110,31 +110,6 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                         for (uint imate=0; imate<P.readNmatesIn; imate++)
                             P.inOut->readIn[imate].ignore(DEF_readNameSeqLengthMax,'\n');
 
-                        if (P.pSolo.barcodeReadYes) {//record barcode sequence
-                            string seq1;
-                            getline(P.inOut->readIn[P.pSolo.barcodeRead],seq1);
-                            removeStringEndControl(seq1);
-                            if (seq1.size() != P.pSolo.bL) {
-                                if (P.pSolo.bL > 0) {
-                                    ostringstream errOut;
-                                    errOut << "EXITING because of FATAL ERROR in input read file: the total length of barcode sequence is "  << seq1.size() << " not equal to expected " <<P.pSolo.bL <<"\n"  ;
-                                    errOut << "Read ID="<<readID<< "   Sequence="<<seq1<<"\n";
-                                    errOut << "SOLUTION: make sure that the barcode read is the last file in --readFilesIn , and check that it has the correct formatting\n";
-                                    errOut << "          If UMI+CB length is not equal to the barcode read length, specify barcode read length with --soloBarcodeReadLength\n";
-                                    exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
-                                } else if (seq1.size()<P.pSolo.cbumiL) {//barcode sequence too short - append Ns
-                                    seq1.append(P.pSolo.cbumiL-seq1.size(), 'N');
-                                };
-                            };
-                            readID += ' ' + seq1;
-                            P.inOut->readIn[P.pSolo.barcodeRead].ignore(DEF_readNameSeqLengthMax,'\n');//skip to the end of 3rd ("+") line
-                            getline(P.inOut->readIn[P.pSolo.barcodeRead],seq1); //read qualities
-                            removeStringEndControl(seq1);
-                            readID += ' ' + seq1;
-                            //histogram for qualities
-                            g_statsAll.qualHistCalc(1, seq1.c_str()+P.pSolo.barcodeStart, P.pSolo.barcodeEnd==0 ? seq1.size() : P.pSolo.barcodeEnd-P.pSolo.barcodeStart+1);
-                        };
-
                         //copy the same readID to both mates
                         for (uint imate=0; imate<P.readNmates; imate++) {
                             chunkInSizeBytesTotal[imate] += 1 + readID.copy(chunkIn[imate] + chunkInSizeBytesTotal[imate], readID.size(),0);
