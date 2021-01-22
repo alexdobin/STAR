@@ -14,9 +14,7 @@ int readLoad(istream& readInStream, Parameters& P, uint& Lread, uint& LreadOrigi
     readInStream >> readName; //TODO check that it does not overflow the array
     if (strlen(readName)>=DEF_readNameLengthMax-1) {
         ostringstream errOut;
-        errOut << "EXITING because of FATAL ERROR in reads input: read name is too long:" << readInStream.gcount()<<"\n";
-        errOut << "Read Name="<<readName<<"\n";
-        errOut << "DEF_readNameLengthMax="<<DEF_readNameLengthMax<<"\n";
+        errOut << "EXITING because of FATAL ERROR in reads input: read name is too long:" << readInStream.gcount()<<"\nRead Name="<<readName<<"\nDEF_readNameLengthMax="<<DEF_readNameLengthMax<<'\n';
         errOut << "SOLUTION: increase DEF_readNameLengthMax in IncludeDefine.h and re-compile STAR\n";
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
     };
@@ -30,7 +28,7 @@ int readLoad(istream& readInStream, Parameters& P, uint& Lread, uint& LreadOrigi
 
     Lread=0;
     for (int ii=0; ii<readInStream.gcount()-1; ii++) {
-        if (int(Seq[ii])>=32) {
+        if (int(Seq[ii])>=32) {//omitting control characters
             Seq[Lread]=Seq[ii];
             ++Lread;
         };
@@ -39,16 +37,12 @@ int readLoad(istream& readInStream, Parameters& P, uint& Lread, uint& LreadOrigi
     if (Lread<1) {
         ostringstream errOut;
         errOut << "EXITING because of FATAL ERROR in reads input: short read sequence line: " << Lread <<"\n";
-        errOut << "Read Name="<<readName<<"\n";
-        errOut << "Read Sequence=\""<<Seq<<"\"\n";
-        errOut << "DEF_readNameLengthMax="<<DEF_readNameLengthMax<<"\n";
-        errOut << "DEF_readSeqLengthMax="<<DEF_readSeqLengthMax<<"\n";
+        errOut << "Read Name="<< readName <<'\n'<< "Read Sequence=\"" << Seq <<"\"\nDEF_readNameLengthMax="<< DEF_readNameLengthMax <<'\n'<< "DEF_readSeqLengthMax="<<DEF_readSeqLengthMax<<'\n';
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
     };
     if (Lread>DEF_readSeqLengthMax) {
         ostringstream errOut;
-        errOut << "EXITING because of FATAL ERROR in reads input: Lread>=" << Lread << "   while DEF_readSeqLengthMax=" << DEF_readSeqLengthMax <<"\n";
-        errOut << "Read Name="<<readName<<"\n";
+        errOut << "EXITING because of FATAL ERROR in reads input: Lread>=" << Lread << "   while DEF_readSeqLengthMax=" << DEF_readSeqLengthMax <<'\n'<< "Read Name="<<readName<<'\n';
         errOut << "SOLUTION: increase DEF_readSeqLengthMax in IncludeDefine.h and re-compile STAR\n";
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
     };
@@ -74,10 +68,7 @@ int readLoad(istream& readInStream, Parameters& P, uint& Lread, uint& LreadOrigi
         if ((uint) readInStream.gcount() != LreadOriginal+1) {//inconsistent read sequence and quality
             ostringstream errOut;
             errOut << "EXITING because of FATAL ERROR in reads input: quality string length is not equal to sequence length\n";
-            errOut << readName<<"\n";
-            errOut << Seq <<"\n";
-            errOut << Qual <<"\n";
-            errOut << "SOLUTION: fix your fastq file\n";
+            errOut << readName <<'\n'<< Seq <<'\n'<< Qual <<'\n'<< "SOLUTION: fix your fastq file\n";
             exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         };
         if (P.outQSconversionAdd!=0) {
@@ -102,14 +93,15 @@ int readLoad(istream& readInStream, Parameters& P, uint& Lread, uint& LreadOrigi
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
     };
 
-    for (uint ii=0;ii<Lread;ii++) {//for now: qualities are all 1
-        if (SeqNum[ii]<4) {
-            QualNum[ii]=1;
-        } else {
-            QualNum[ii]=0;
-        };
-    };
-
+    /* QualNum is not used anymore
+     *   for (uint ii=0;ii<Lread;ii++) {//for now: qualities are all 1
+     *       if (SeqNum[ii]<4) {
+     *           QualNum[ii]=1;
+     *       } else {
+     *           QualNum[ii]=0;
+     *       };
+     *   };
+    */
     //trim read name
     for (uint ii=0; ii<P.readNameSeparatorChar.size(); ii++) {
         char* pSlash=strchr(readName,P.readNameSeparatorChar.at(ii)); //trim everything after ' '

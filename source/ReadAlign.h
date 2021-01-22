@@ -42,6 +42,8 @@ class ReadAlign {
 
         uint outFilterMismatchNmaxTotal;
         uint Lread, readLength[MAX_N_MATES], readLengthOriginal[MAX_N_MATES], readLengthPair, readLengthPairOriginal;
+        string readBarcodeSeq; //Solo barcode sequence
+        
         intScore maxScoreMate[MAX_N_MATES];
 
         uint32 readFilesIndex;
