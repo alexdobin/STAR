@@ -1,5 +1,4 @@
 #include "ReadAlignChunk.h"
-#include "GlobalVariables.h"
 #include "ThreadControl.h"
 #include "ErrorWarning.h"
 #include "SequenceFuns.h"
@@ -77,8 +76,6 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                                 reverse(qual1.begin(),qual1.end());
                             };
                             
-                            g_statsAll.qualHistCalc(imate1, qual1.c_str(), qual1.size());
-
                             getline(P.inOut->readIn[0],str1); //rest of the SAM line: str1 is now all SAM attributes
                             chunkInSizeBytesTotal[imate1] += sprintf(chunkIn[imate1] + chunkInSizeBytesTotal[imate1], "%s\n%s\n+\n%s\n", str1.c_str(), seq1.c_str(), qual1.c_str());
                         };
@@ -130,9 +127,6 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                         chunkInSizeBytesTotal[imate] += 2;
                         //quality
                         uint64 lenIn = fastqReadOneLine(P.inOut->readIn[imate], chunkIn[imate] + chunkInSizeBytesTotal[imate]);
-                        if (P.outFilterBySJoutStage != 2) {
-                                g_statsAll.qualHistCalc(imate, chunkIn[imate] + chunkInSizeBytesTotal[imate], lenIn-1);//lenIn contains \n at the end
-                        };
                         chunkInSizeBytesTotal[imate] += lenIn;
                     };
                 } else if (nextChar=='>') {//fasta, can be multiline, which is converted to single line

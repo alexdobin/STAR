@@ -1,7 +1,9 @@
 #include "ReadAlign.h"
 #include "readLoad.h"
+#include "readBarcodeLoad.h"
 #include "SequenceFuns.h"
 #include "ErrorWarning.h"
+#include "GlobalVariables.h"
 
 int ReadAlign::oneRead() {//process one read: load, map, write
 
@@ -53,6 +55,14 @@ int ReadAlign::oneRead() {//process one read: load, map, write
 
     };
 
+    if (P.outFilterBySJoutStage != 2) {
+        for (uint32 imate=0; imate<P.readNmates; imate++)
+            g_statsAll.qualHistCalc(imate, Qual0[imate], readLengthOriginal[imate]);
+    };
+    
+    loadBarcodeRead(P, readInStream, readBarcodeSeq, readBarcodeQual);
+    
+    
     readFileType=readStatus[0];
 
     complementSeqNumbers(Read1[0],Read1[1],Lread); //returns complement of Reads[ii]
@@ -104,31 +114,4 @@ int ReadAlign::oneRead() {//process one read: load, map, write
 
 };
 
-void loadBarcodeRead(Parameters &P, istream *readInStream)
-{
-    if (P.pSolo.barcodeReadYes) {//record barcode sequence
-        string seq1;
-        getline(P.inOut->readIn[P.pSolo.barcodeRead],seq1);
-        removeStringEndControl(seq1);
-        if (seq1.size() != P.pSolo.bL) {
-            if (P.pSolo.bL > 0) {
-                ostringstream errOut;
-                errOut << "EXITING because of FATAL ERROR in input read file: the total length of barcode sequence is "  << seq1.size() << " not equal to expected " <<P.pSolo.bL <<"\n"  ;
-                errOut << "Read ID="<<readID<< "   Sequence="<<seq1<<"\n";
-                errOut << "SOLUTION: make sure that the barcode read is the last file in --readFilesIn , and check that it has the correct formatting\n";
-                errOut << "          If UMI+CB length is not equal to the barcode read length, specify barcode read length with --soloBarcodeReadLength\n";
-                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
-            } else if (seq1.size()<P.pSolo.cbumiL) {//barcode sequence too short - append Ns
-                seq1.append(P.pSolo.cbumiL-seq1.size(), 'N');
-            };
-        };
-        readID += ' ' + seq1;
-        P.inOut->readIn[P.pSolo.barcodeRead].ignore(DEF_readNameSeqLengthMax,'\n');//skip to the end of 3rd ("+") line
-        getline(P.inOut->readIn[P.pSolo.barcodeRead],seq1); //read qualities
-        removeStringEndControl(seq1);
-        readID += ' ' + seq1;
-        //histogram for qualities
-        g_statsAll.qualHistCalc(1, seq1.c_str()+P.pSolo.barcodeStart, P.pSolo.barcodeEnd==0 ? seq1.size() : P.pSolo.barcodeEnd-P.pSolo.barcodeStart+1);
-    };
-};
 

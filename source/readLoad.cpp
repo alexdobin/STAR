@@ -26,13 +26,16 @@ int readLoad(istream& readInStream, Parameters& P, uint& Lread, uint& LreadOrigi
 
     readInStream.getline(Seq,DEF_readSeqLengthMax+1); //extract sequence
 
-    Lread=0;
-    for (int ii=0; ii<readInStream.gcount()-1; ii++) {
-        if (int(Seq[ii])>=32) {//omitting control characters
-            Seq[Lread]=Seq[ii];
-            ++Lread;
+    Lread=readInStream.gcount()-1;
+    
+    /* control characters at the end of the lines are removed in processChunks
+        for (int ii=0; ii<readInStream.gcount()-1; ii++) {
+            if (int(Seq[ii])>=32) {//omitting control characters
+                Seq[Lread]=Seq[ii];
+                ++Lread;
+            };
         };
-    };
+    */
 
     if (Lread<1) {
         ostringstream errOut;
@@ -82,7 +85,7 @@ int readLoad(istream& readInStream, Parameters& P, uint& Lread, uint& LreadOrigi
                 Qual[ii]=qs;
             };
         };
-
+    
     } else if (readName[0]=='>') {//fasta format, assign Qtop to all qualities
         readFileType=1;
         for (uint ii=0;ii<LreadOriginal;ii++) Qual[ii]='A';
