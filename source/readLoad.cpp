@@ -20,7 +20,6 @@ int readLoad(istream& readInStream, Parameters& P, uint& Lread, uint& LreadOrigi
     };
 
     readInStream >> iReadAll >> readFilter >> readFilesIndex; //extract read number
-    readInStream >> std::ws; //skip whitespace
     
     getline(readInStream, readNameExtra);
 

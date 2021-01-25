@@ -32,7 +32,7 @@ void ReadAlign::outputAlignments() {
         };
 
         //the operations below are both for mapped and unmapped reads
-        soloRead->readBar->getCBandUMI(readNameExtra[0], readFilesIndex, readName);
+        soloRead->readBar->getCBandUMI(readBarcodeSeq, readBarcodeQual, readNameExtra[0], readFilesIndex, readName);
 
         soloRead->record((unmapType<0 ? nTr : 0), trMult, iReadAll, readAnnot); //need to supply nTr=0 for unmapped reads
 
