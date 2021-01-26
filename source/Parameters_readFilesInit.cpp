@@ -132,8 +132,8 @@ void Parameters::readFilesInit()
         };
         rfM.close();
         
-        readNmates = ( readFilesNames[1][0].back()=='-' ? 1 : 2);
-        readFilesNames.resize(readNmates);//resize if readFilesN=1
+        readNends = ( readFilesNames[1][0].back()=='-' ? 1 : 2);
+        readFilesNames.resize(readNends);//resize if readFilesN=1
         readFilesN = readFilesNames[0].size();
     };
 
@@ -149,12 +149,12 @@ void Parameters::readFilesInit()
     };    
     
     if (readFilesTypeN==1) {
-        readNmates=readFilesNames.size(); //for now the number of mates is defined by the number of input files
+        readNends=readFilesNames.size(); //for now the number of mates is defined by the number of input files
     } else if (readFilesTypeN==10) {//find the number of mates from the SAM file
         if (readFilesType.size()==2 && readFilesType.at(1)=="SE") {
-            readNmates=1;
+            readNends=1;
         } else if (readFilesType.size()==2 && readFilesType.at(1)=="PE") {
-            readNmates=2;
+            readNends=2;
         } else {
             ostringstream errOut;
             errOut <<"EXITING because of FATAL INPUT ERROR: --readFilesType SAM requires specifying SE or PE reads"<<"\n";
@@ -163,6 +163,5 @@ void Parameters::readFilesInit()
         };
     };
     
-    readNends=readNmates;    
-    
+    readNmates=readNends; //this may be changed later if one of the reads is barcode rea
 };

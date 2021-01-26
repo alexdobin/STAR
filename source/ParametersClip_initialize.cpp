@@ -35,7 +35,7 @@ void ParametersClip::initialize(Parameters *pPin)
 
 void ParametersClip::initializeClipMates(vector<vector<ClipMate>> &clipMates)
 {        
-    clipMates.resize(min(2LLU, pP->readNmates));//3rd read can only be barcode - do not trim it (for now).
+    clipMates.resize(min(2LLU, pP->readNmates));//not readNends: because we only clip mates, not barcode reads
 
     for (uint32 im=0; im<clipMates.size(); im++) {
         

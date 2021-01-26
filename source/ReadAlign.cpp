@@ -6,7 +6,7 @@
 ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk)
                     : mapGen(genomeIn), genOut(*genomeIn.genomeOut.g), P(Pin), chunkTr(TrIn)
 {
-    readNmates=P.readNmates;
+    readNmates=P.readNmates; //not readNends
     //RNGs
     rngMultOrder.seed(P.runRNGseed*(iChunk+1));
     rngUniformReal0to1=std::uniform_real_distribution<double> (0.0, 1.0);
@@ -71,11 +71,11 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
     Qual0 = new char*[2];
     Qual0[0]  = new char [DEF_readSeqLengthMax+1];
     Qual0[1]  = new char [DEF_readSeqLengthMax+1];
-    readNameMates=new char* [P.readNmates];
-    for (uint ii=0; ii<P.readNmates; ii++) {
+    readNameMates=new char* [P.readNends];
+    for (uint ii=0; ii<P.readNends; ii++) {
         readNameMates[ii]=new char [DEF_readNameLengthMax];
     };
-    readNameExtra.resize(P.readNmates);
+    readNameExtra.resize(P.readNends);
     readName = readNameMates[0];
     Read1 = new char*[3];
     Read1[0]=new char[DEF_readSeqLengthMax+1]; Read1[1]=new char[DEF_readSeqLengthMax+1]; Read1[2]=new char[DEF_readSeqLengthMax+1];
@@ -83,9 +83,9 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
     Qual1[0]=new char[DEF_readSeqLengthMax+1]; Qual1[1]=new char[DEF_readSeqLengthMax+1];
     
     //outBAM
-    outBAMoneAlignNbytes = new uint [P.readNmates+2]; //extra piece for chimeric reads
-    outBAMoneAlign = new char* [P.readNmates+2]; //extra piece for chimeric reads
-    for (uint ii=0; ii<P.readNmates+2; ii++) {
+    outBAMoneAlignNbytes = new uint [P.readNmates+2]; //extra piece for chimeric reads //not readNends: this is alignment
+    outBAMoneAlign = new char* [P.readNmates+2]; //extra piece for chimeric reads //not readNends: this is alignment
+    for (uint ii=0; ii<P.readNmates+2; ii++) {//not readNends: this is alignment
         outBAMoneAlign[ii]=new char [BAMoutput_oneAlignMaxBytes];
     };
     resetN();
@@ -109,7 +109,7 @@ void ReadAlign::resetN () {//reset resets the counters to 0 for a new read
     storedLmin=0; uniqLmax=0; uniqLmaxInd=0; multLmax=0; multLmaxN=0; multNminL=0; multNmin=0; multNmax=0; multNmaxL=0;
     chimN=0;
 
-    for (uint ii=0; ii<P.readNmates; ii++) {
+    for (uint ii=0; ii<P.readNmates; ii++) {//not readNends: this is alignment
         maxScoreMate[ii]=0;
     };
 };

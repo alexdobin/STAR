@@ -818,15 +818,15 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     if (runMode=="alignReads" && pGe.gLoad!="Remove" && pGe.gLoad!="LoadAndExit") {//open reads files to check if they are present
         openReadsFiles();
 
-        if (readNmates > 2 && pSolo.typeStr=="None") {//could have >2 mates only for Solo
+        if (readNends > 2 && pSolo.typeStr=="None") {//could have >2 mates only for Solo
             ostringstream errOut;
-            errOut <<"EXITING: because of fatal input ERROR: number of read mates files > 2: " <<readNmates << "\n";
+            errOut <<"EXITING: because of fatal input ERROR: number of read mates files > 2: " <<readNends << "\n";
             errOut <<"SOLUTION:specify only one or two files in the --readFilesIn option. If file names contain spaces, use quotes: \"file name\"\n";
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };
 
         if ( runMode=="alignReads" && outReadsUnmapped=="Fastx" ) {//open unmapped reads file
-            for (uint imate=0;imate<readNmates;imate++) {
+            for (uint imate=0;imate<readNends;imate++) {
                 ostringstream ff;
                 ff << outFileNamePrefix << "Unmapped.out.mate" << imate+1;
                 inOut->outUnmappedReadsStream[imate].open(ff.str().c_str());
@@ -1078,7 +1078,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     } else if (outSAMunmapped.mode.at(0)=="Within" && outSAMunmapped.mode.at(1)=="KeepPairs") {
         outSAMunmapped.yes=true;
         outSAMunmapped.within=true;
-        if (readNmates==2)
+        if (readNmates==2) //not readNends, since this control output of alignments
             outSAMunmapped.keepPairs=true;
     } else {
         ostringstream errOut;

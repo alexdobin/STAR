@@ -10,30 +10,24 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
 
     if (unmapType>=0)
     {//unmapped reads: SAM
-        for (uint imate=0;imate<P.readNmates;imate++)
-        {//cycle over mates
-            if (!mateMap[imate])
-            {
+        for (uint imate=0;imate<P.readNmates;imate++) {//cycle over mates //not readNends: this is alignment
+            if (!mateMap[imate]) {
                 uint16 samFLAG=0x4;
-                if (P.readNmates==2)
-                {//paired read
+                if (P.readNmates==2) {//paired read //not readNends: this is alignment
                     samFLAG|=0x1 + (imate==0 ? 0x40 : 0x80);
-                    if (mateMap[1-imate])
-                    {//mate mapped
-                        if ( trOut.Str != (1-imate) )
-                        {
+                    if (mateMap[1-imate]) {//mate mapped
+                        if ( trOut.Str != (1-imate) ) {
                             samFLAG|=0x20;//mate strand reverted
                         };
-                    } else
-                    {//mate unmapped
+                    } else {//mate unmapped
                         samFLAG|=0x8;
                     };
                 };
 
-                if (readFilter=='Y') samFLAG|=0x200; //not passing quality control
+                if (readFilter=='Y') 
+                    samFLAG|=0x200; //not passing quality control
 
-                if (mateMap[1-imate] && !trOut.primaryFlag && P.outSAMunmapped.keepPairs)
-                {//mapped mate is not primary, keep unmapped mate for each pair, hence need to mark some as not primary
+                if (mateMap[1-imate] && !trOut.primaryFlag && P.outSAMunmapped.keepPairs) {//mapped mate is not primary, keep unmapped mate for each pair, hence need to mark some as not primary
                     samFLAG|=0x100;
                 };
 
@@ -54,14 +48,13 @@ uint ReadAlign::outputTranscriptSAM(Transcript const &trOut, uint nTrOut, uint i
                     *outStream << "\t" <<readNameExtra[imate];
                 };
                 *outStream <<"\n";
-
             };
         };
         return (uint)outStream->tellp()-outStreamPos0;
     };//if (unmapType>=0 && outStream != NULL) //unmapped reads: SAM
 
 
-    bool flagPaired = P.readNmates==2;
+    bool flagPaired = P.readNmates==2; //not readNends: this is alignment
     string CIGAR;
 
     //for SAM output need to split mates

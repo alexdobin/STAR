@@ -20,18 +20,17 @@ void SoloFeature::quantTranscript()
     std::set<uint32> clusterInd; //cluster index for each cluster - the integer from clusterCBfile 
     {//load cluster information
         ifstream &clusterStream = ifstrOpen(pSolo.clusterCBfile, ERROR_OUT, "SOLUTION: check the path and permissions of the cluster CB file: " + pSolo.clusterCBfile, P);
-        //std::set<uint32> clusterInd; //all cluster indexes
         string seq1;
         while (clusterStream >> seq1) {
             uint32 icl1;
             clusterStream >> icl1;
             uint64 cb1;
             if (convertNuclStrToInt64(seq1,cb1)) {//convert to 2-bit format
-                auto cb1it=std::equal_range(pSolo.cbWL.begin(), pSolo.cbWL.end(), cb1);
-                uint32 cb1ind=(uint32) (cb1it.first-pSolo.cbWL.begin());
-                if (cb1ind < pSolo.cbWL.size()) {
-                    clusterCBind[cb1ind]=icl1;
-                    clusterInd.emplace(icl1);
+                auto cb1it=std::equal_range(pSolo.cbWL.begin(), pSolo.cbWL.end(), cb1); //find iterator in WL matching cb1
+                uint32 cb1ind=(uint32) (cb1it.first-pSolo.cbWL.begin()); //substract WL.begin iterator to find index in WL
+                if (cb1ind < pSolo.cbWL.size()) {//otherwise cb1 is not in WL
+                    clusterCBind[cb1ind]=icl1; //map: key=CB, value=cluster index
+                    clusterInd.emplace(icl1);  //ordered set of cluster indexes
                 } else {
                     P.inOut->logMain << "WARNING: cluster CB sequence not present in whitelist and is ignored: " << seq1 <<endl;
                 };
@@ -41,7 +40,7 @@ void SoloFeature::quantTranscript()
         };
     };
     
-    auto &trDistCount=readFeatSum->transcriptDistCount;
+    auto &trDistCount=readFeatSum->transcriptDistCount; //transcriptDistCount is accumulated while mapping, from reads that map uniquely
     vector<double> trDistFun(trDistCount.size(),0.0);
     vector<double> trDistFunTrFactor(Trans.nTr,0.0);
     
@@ -59,11 +58,11 @@ void SoloFeature::quantTranscript()
         //cut when becomes non-monotonic
         uint32 imax=1000;
         while (trDistFun[imax+1]>trDistFun[imax])
-            imax++;
+            imax++; //find maximum going forward from imax=1000
         P.inOut->logMain << "SoloQuant: distance distribution past maximum = " << imax <<endl;
         
         while (trDistFun[imax+1]<trDistFun[imax])
-            imax++;
+            imax++; //find first minimum after the maximum found above
         P.inOut->logMain << "SoloQuant: distance distribution cutoff = " << imax <<endl;
         
         trDistFun.resize(imax);
@@ -86,7 +85,7 @@ void SoloFeature::quantTranscript()
                 trDistFunTrFactor[ii]=-std::log(trDistFunCum[Trans.trLen[ii]-1]);
         
         for (auto & ff : trDistFun)
-            ff = std::log(ff);
+            ff = std::log(ff); //now trDistFun is log of dist function
         
     };
     
@@ -94,7 +93,7 @@ void SoloFeature::quantTranscript()
         uint32 tr;
         double d;
     } transcriptDistProbStruct;
-    
+    //key=cluster index, key=CB/umi, value=vector of <trID, sum{trDistFun[distance3p]}> for each read with the same umi
     map<uint32, unordered_map<uint64,vector<transcriptDistProbStruct>>> mapTrDist;
     
     //////////// input records
@@ -147,13 +146,13 @@ void SoloFeature::quantTranscript()
 
             for (uint32 iold=0; iold<mapTrDist[cbCl][umi].size(); iold++) {//intersection of old with new
                 while (inew < tD.size() && mapTrDist[cbCl][umi][iold].tr>tD[inew].tr) //move through the sorted lists
-                    ++inew;
+                    ++inew; //inew advances if old_trID>new_trID
 
                 if (inew == tD.size() ) //end of tD reached
                     break;
 
-                if (mapTrDist[cbCl][umi][iold].tr == tD[inew].tr) {//add new log probability to the 
-                    tD1.push_back({  tD[inew].tr, mapTrDist[cbCl][umi][iold].d + tD[inew].d  });
+                if (mapTrDist[cbCl][umi][iold].tr == tD[inew].tr) {//found match old_trID==new_trID 
+                    tD1.push_back({  tD[inew].tr, mapTrDist[cbCl][umi][iold].d + tD[inew].d  });//add new log probability to the existing one
                 };
             };
             mapTrDist[cbCl][umi]=tD1;//replace with intersection
@@ -165,7 +164,7 @@ void SoloFeature::quantTranscript()
  
     map<uint32, vector<double>> clusterExpression; //per cluster, relative abundance
     //TODO parallelize this loop
-    for (auto & mapTrDist1 : mapTrDist) {
+    for (auto & mapTrDist1 : mapTrDist) {//loop over cell clusters
         auto &clTrDist=mapTrDist1.second;
         
         vector<double> trUnique(Trans.nTr,0), trInitial(Trans.nTr,0);//counts of unique read for each transcripts (i.e. reads that map uniquely only to this transcript)
@@ -173,29 +172,29 @@ void SoloFeature::quantTranscript()
         
         {//pre-process mapTrDist: 
             auto clTrDist1=clTrDist.begin();
-            while ( clTrDist1!=clTrDist.end() ) {
+            while ( clTrDist1!=clTrDist.end() ) {//loop over UMIs
                 auto &trDist=clTrDist1->second;
                 
                 if (trDist.size()==0) {
                     clTrDist1=clTrDist.erase(clTrDist1);
-                    nUMI0++;
+                    nUMI0++;//these are cases where the intersection of transcript from different reads with the same UMI is *empty*
                     continue;
                 } else if (trDist.size()==1) {
                     trUnique[trDist[0].tr]++;
                     trInitial[trDist[0].tr] += 1.0;
                     clTrDist1=clTrDist.erase(clTrDist1);
-                    nUMI1++;
+                    nUMI1++;//only one transcript in the intersection, i.e. unique mappers
                     nUMItot++;
                     continue;
                 };
                 
                 double max1= std::max_element(trDist.begin(), trDist.end(), [](const transcriptDistProbStruct &t1, const transcriptDistProbStruct &t2) {
                                                                                    return (t1.d<t2.d);
-                                                                                 }) -> d;
-                for (auto & tt : trDist) {
-                    trInitial[tt.tr] += 1.0/trDist.size();//for initialization, split each count between multimappers evenly
-                    tt.d =std::exp(tt.d-max1);
-                };
+                                                                                 }) -> d; //finds maximum d
+                for (auto & tt : trDist) {//loop over transcripts in the UMI
+                    trInitial[tt.tr] += 1.0/trDist.size();//for initialization, split each count between multimappers evenly and add it to unique mappers
+                    tt.d =std::exp(tt.d-max1);//from sum(log(prob)) to product(prob), dividing by the max element to avoid underflow
+                };                            //this constant factor does not matter, since only the ratios of tt.d matter
                 
                 nUMItot++;
                 clTrDist1++;
@@ -217,7 +216,7 @@ void SoloFeature::quantTranscript()
         auto *thOldP = &thOldNew[0];
         auto *thNewP = &thOldNew[1];
         
-        vector<bool> trConverged(trInitial.size(), false);
+        vector<bool> trConverged(trInitial.size(), false); //if true, this transcript is converged - then it's not updated in EM
         
         for (uint32 iteration=0; iteration<10000; iteration++) {//main EM loop
             auto &thNew = *thNewP;
@@ -231,13 +230,13 @@ void SoloFeature::quantTranscript()
                 auto &trDist=clTrDist1.second;
                 
                 double denom1=0.0;
-                for  (auto & td : trDist) {
+                for  (auto & td : trDist) {//loop over transcripts in one UMI: caclulate denomiator
                     denom1 += td.d * thOld[td.tr];
                 };
                 
-                for  (auto & td : trDist) {
+                for  (auto & td : trDist) {//loop over transcripts in one UMI: update thNew
                     if (!trConverged[td.tr])
-                        thNew[td.tr] += td.d * thOld[td.tr] / denom1;
+                        thNew[td.tr] += td.d * thOld[td.tr] / denom1; //adding to unique counts
                 };
             };
             

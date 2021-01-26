@@ -9,7 +9,7 @@ string Transcript::generateCigarP()
     stringstream samStreamCIGAR;
 
     uint leftMate=0;
-    if (readNmates>1) leftMate=Str;
+    if (readNmates>1) leftMate=Str; //not readNends: this is alignment
 
     uint trimL=exons[0][EX_R] - (exons[0][EX_R]<readLengthOriginal[leftMate] ? 0 : readLengthOriginal[leftMate]+1);
     if (trimL>0) {

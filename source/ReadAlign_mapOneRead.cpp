@@ -33,7 +33,7 @@ int ReadAlign::mapOneRead() {
     trInit->readLengthOriginal=readLengthOriginal;
     trInit->readLengthPairOriginal=readLengthPairOriginal;
     trInit->readLength=readLength;
-    trInit->readNmates=readNmates;
+    trInit->readNmates=readNmates; //not readNends: this is alignment
     trInit->readName=readName;
 
     trBest=trInit;

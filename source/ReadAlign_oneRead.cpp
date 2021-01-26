@@ -12,7 +12,7 @@ int ReadAlign::oneRead() {//process one read: load, map, write
 
 
     readStatus[0]=readLoad(*(readInStream[0]), P, readLength[0], readLengthOriginal[0], readNameMates[0], Read0[0], Read1[0], Qual0[0], Qual1[0], clipMates[0], iReadAll, readFilesIndex, readFilter, readNameExtra[0]);
-    if (P.readNmates==2) {//read the 2nd mate
+    if (P.readNmates==2) {//read the 2nd mate - barcode reads is loaded by loadBarcodeRead below, not readNends
         readStatus[1]=readLoad(*(readInStream[1]), P, readLength[1], readLengthOriginal[1], readNameMates[1], Read0[1], Read1[0]+readLength[0]+1, Qual0[1], Qual1[0]+readLength[0]+1, clipMates[1], iReadAll, readFilesIndex, readFilter, readNameExtra[1]);
 
         if (readStatus[0]!=readStatus[1]) {
@@ -56,7 +56,7 @@ int ReadAlign::oneRead() {//process one read: load, map, write
     };
 
     if (P.outFilterBySJoutStage != 2) {
-        for (uint32 imate=0; imate<P.readNmates; imate++)
+        for (uint32 imate=0; imate<P.readNmates; imate++) //collect stats for mates, barcode reads stats is collected in loadBarcodeRead, not readNends
             g_statsAll.qualHistCalc(imate, Qual0[imate], readLengthOriginal[imate]);
     };
     

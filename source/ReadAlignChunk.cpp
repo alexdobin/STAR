@@ -17,10 +17,10 @@ ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome 
 
     RA->iRead=0;
 
-    chunkIn=new char* [P.readNmates];
-    readInStream=new istringstream* [P.readNmates];
-//     readInStream=new istringstream* [P.readNmates];
-    for (uint ii=0;ii<P.readNmates;ii++) {
+    chunkIn=new char* [P.readNends];
+    readInStream=new istringstream* [P.readNends];
+    
+    for (uint ii=0;ii<P.readNends;ii++) {
        chunkIn[ii]=new char[P.chunkInSizeBytesArray];//reserve more space to finish loading one read
        memset(chunkIn[ii],'\n',P.chunkInSizeBytesArray);
        readInStream[ii] = new istringstream;
@@ -85,7 +85,7 @@ ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome 
 
     if (P.outFilterType=="BySJout") {
         chunkFstreamOpen(P.outFileTmp + "/FilterBySJoutFiles.mate1.thread",iChunk, RA->chunkOutFilterBySJoutFiles[0]);
-        if (P.readNmates==2) chunkFstreamOpen(P.outFileTmp + "/FilterBySJoutFiles.mate2.thread",iChunk, RA->chunkOutFilterBySJoutFiles[1]); //here we do not output barcode read
+        if (P.readNends==2) chunkFstreamOpen(P.outFileTmp + "/FilterBySJoutFiles.mate2.thread",iChunk, RA->chunkOutFilterBySJoutFiles[1]); //here we do not output barcode read
     };
 
     if (P.wasp.yes) {

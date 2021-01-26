@@ -35,7 +35,7 @@ void ReadAlign::chimericDetectionOldOutput() {
 
         for (uint iTr=0;iTr<chimN;iTr++)
         {//write all chimeric pieces to Chimeric.out.sam/junction
-            if (P.readNmates==2) {//PE: need mate info
+            if (P.readNmates==2) {//PE: need mate info //not readNends: this is alignment
                 uint iex=0;
                 if ( trChim[1-iTr].exons[0][EX_iFrag] != trChim[1-iTr].exons[trChim[1-iTr].nExons-1][EX_iFrag] )
                 {//the other segment has 2 mates, need to find the opposite mate

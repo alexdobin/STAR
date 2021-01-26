@@ -41,7 +41,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                         P.iReadAll++; //increment read number
 
                         uint imate1=0;
-                        for (uint imate=0;imate<P.readNmates;imate++) {
+                        for (uint imate=0;imate<P.readNmates;imate++) {//not readNends: this is SAM input
                             if (imate>0)
                                 P.inOut->readIn[0] >> str1; //for imate=0 str1 was already read
                             uint flag;
@@ -50,7 +50,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
 
                             if (imate==1) {//2nd line is always opposite of the 1st one
                                 imate1=1-imate1;
-                            } else if (P.readNmates==2 && (flag & 0x80)) {
+                            } else if (P.readNmates==2 && (flag & 0x80)) {//not readNends: this is SAM input
                                 imate1=1;
                             } else {
                                 imate1=0;
@@ -108,13 +108,13 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                             P.inOut->readIn[imate].ignore(DEF_readNameSeqLengthMax,'\n');
 
                         //copy the same readID to both mates
-                        for (uint imate=0; imate<P.readNmates; imate++) {
+                        for (uint imate=0; imate<P.readNends; imate++) {
                             chunkInSizeBytesTotal[imate] += 1 + readID.copy(chunkIn[imate] + chunkInSizeBytesTotal[imate], readID.size(),0);
                             chunkIn[imate][chunkInSizeBytesTotal[imate]-1]='\n';
                         };
                     };
                     //copy 3 (4 for stage 2) lines: sequence, dummy, quality
-                    for (uint imate=0; imate<P.readNmates; imate++) {
+                    for (uint imate=0; imate<P.readNends; imate++) {
                         // read 1st line for 2nd stage only
                         if (P.outFilterBySJoutStage == 2)
                             chunkInSizeBytesTotal[imate] += fastqReadOneLine(P.inOut->readIn[imate], chunkIn[imate] + chunkInSizeBytesTotal[imate]);
@@ -202,13 +202,14 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                 g_threadChunks.chunkInN++;
             };
 
-            for (uint imate=0; imate<P.readNmates; imate++) chunkIn[imate][chunkInSizeBytesTotal[imate]]='\n';//extra empty line at the end of the chunks
+            for (uint imate=0; imate<P.readNends; imate++) 
+                chunkIn[imate][chunkInSizeBytesTotal[imate]]='\n';//extra empty line at the end of the chunks
 
             if (P.runThreadN>1) pthread_mutex_unlock(&g_threadChunks.mutexInRead);
 
         } else {//read from one file per thread
             noReadsLeft=true;
-            for (uint imate=0; imate<P.readNmates; imate++) {
+            for (uint imate=0; imate<P.readNends; imate++) {
                 RA->chunkOutFilterBySJoutFiles[imate].flush();
                 RA->chunkOutFilterBySJoutFiles[imate].seekg(0,ios::beg);
                 RA->readInStream[imate]=& RA->chunkOutFilterBySJoutFiles[imate];

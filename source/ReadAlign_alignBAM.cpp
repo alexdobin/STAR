@@ -67,7 +67,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
     uint16 samFLAG=0;
 
 
-    bool flagPaired = P.readNmates==2;
+    bool flagPaired = P.readNmates==2; //not readNends: this is about alignments
 
     uint nMates=1;
     if (alignType<0) {//mapped reads: SAM
@@ -96,7 +96,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
         calcCIGAR(trOut, nMates, iExMate, leftMate);
     };
 
-    for (uint imate=0;imate < (alignType<0 ? nMates:P.readNmates);imate++) {
+    for (uint imate=0;imate < (alignType<0 ? nMates:P.readNmates);imate++) { //not readNends: this is about alignments
 
         uint iEx1=0;
         uint iEx2=0;
@@ -112,7 +112,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
         if (alignType>=0) {//this mate is unmapped
             if (mateMap!=NULL && mateMap[imate]) continue; //this mate was mapped, do not record it as unmapped
             samFLAG=0x4;
-            if (P.readNmates==2) {//paired read
+            if (P.readNmates==2) {//paired read, //not readNends: this is about alignments
                 samFLAG|=0x1 + (imate==0 ? 0x40 : 0x80);
                 if (mateMap[1-imate]) {//mate mapped
                     if (trOut.Str!=(1-imate))

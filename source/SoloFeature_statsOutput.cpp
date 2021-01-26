@@ -22,7 +22,7 @@ void SoloFeature::statsOutput()
     };
     
     if (pSolo.type==pSolo.SoloTypes::SmartSeq || pSolo.type==pSolo.SoloTypes::CB_samTagOut) {
-        if (P.readNmates==2) {
+        if (P.readNmates==2) {//not readNends: this is alignment
             q30[0] += q30[1];
             ntot[0] += ntot[1];
         };

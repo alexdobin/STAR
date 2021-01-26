@@ -9,9 +9,9 @@ void loadBarcodeRead(Parameters &P, istream **readInStream, string &seq1, string
         
     string readID;        
     getline(*readInStream[P.pSolo.barcodeRead],readID);
-    *readInStream[P.pSolo.barcodeRead] >> seq1;
+    getline(*readInStream[P.pSolo.barcodeRead], seq1);
     readInStream[P.pSolo.barcodeRead]->ignore(DEF_readNameSeqLengthMax,'\n');//skip to the end of 3rd ("+") line
-    *readInStream[P.pSolo.barcodeRead] >> qual1;
+    getline(*readInStream[P.pSolo.barcodeRead], qual1);
     
     if (seq1.size() != qual1.size()) {
         ostringstream errOut;

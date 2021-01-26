@@ -3,7 +3,7 @@
 
 void ReadAlign::peOverlapMergeMap() {
 
-    if (!P.peOverlap.yes || P.readNmates!=2 ) {//no peOverlap
+    if (!P.peOverlap.yes || P.readNmates!=2 ) {//no peOverlap //not readNends: this is alignment
         peOv.yes=false;
         return;
     };
@@ -122,7 +122,7 @@ void ReadAlign::peMergeMates() {
     readLength[1]=0;
     readLengthOriginal[0]=Lread;
     readLengthOriginal[1]=0;
-    readNmates=1;
+    readNmates=1; //not readNends: this is alignment
 
     //fill Read1[1,2]
     complementSeqNumbers(Read1[0],Read1[1],Lread); //returns complement of Reads[ii]
