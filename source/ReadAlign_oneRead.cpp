@@ -8,22 +8,23 @@
 int ReadAlign::oneRead() {//process one read: load, map, write
 
     //load read name, sequence, quality from the streams into internal arrays
-    int readStatus[2];
+    int readStatus[P.readNends];
 
-
-    readStatus[0]=readLoad(*(readInStream[0]), P, readLength[0], readLengthOriginal[0], readNameMates[0], Read0[0], Read1[0], Qual0[0], Qual1[0], clipMates[0], iReadAll, readFilesIndex, readFilter, readNameExtra[0]);
-    if (P.readNmates==2) {//read the 2nd mate - barcode reads is loaded by loadBarcodeRead below, not readNends
-        readStatus[1]=readLoad(*(readInStream[1]), P, readLength[1], readLengthOriginal[1], readNameMates[1], Read0[1], Read1[0]+readLength[0]+1, Qual0[1], Qual1[0]+readLength[0]+1, clipMates[1], iReadAll, readFilesIndex, readFilter, readNameExtra[1]);
-
-        if (readStatus[0]!=readStatus[1]) {
+    for (uint32 im=0; im<P.readNends; im++) {
+        readStatus[im] = readLoad(*(readInStream[im]), P, readLength[im], readLengthOriginal[im], readNameMates[im], Read0[im], Read1[im], Qual0[im], clipMates[im], iReadAll, readFilesIndex, readFilter, readNameExtra[im]);
+        if (readStatus[im] != readStatus[0]) {//check if the end of file was reached or not for all files
             ostringstream errOut;
-            errOut << "EXITING because of FATAL ERROR: Read1 and Read2 are not consistent, reached the end of the one before the other one\n";
+            errOut << "EXITING because of FATAL ERROR: read files are not consistent, reached the end of the one before the other one\n";
             errOut << "SOLUTION: Check you your input files: they may be corrupted\n";
             exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
-        } else if (readStatus[0]==-1) {//finished with the stream
-            return -1;
         };
+    };
 
+    if (readStatus[0]==-1) {//finished with the stream
+        return -1;
+    };    
+    
+    if (P.readNmates==2) {//read the 2nd mate - barcode reads is loaded by loadBarcodeRead below, not readNends
         //combine two reads together
         Lread=readLength[0]+readLength[1]+1;
         readLengthPairOriginal=readLengthOriginal[0]+readLengthOriginal[1]+1;
@@ -35,12 +36,13 @@ int ReadAlign::oneRead() {//process one read: load, map, write
             exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         };
 
-        Read1[0][readLength[0]]=MARK_FRAG_SPACER_BASE; //marker for spacer base
-        Qual1[0][readLength[0]]=0;
-        complementSeqNumbers(Read1[0]+readLength[0]+1,Read1[0]+readLength[0]+1,readLength[1]); //returns complement of Reads[ii]
+        //marker for spacer base
+        Read1[0][readLength[0]]=MARK_FRAG_SPACER_BASE;
+        
+        //copy 2nd mate into Read1[0] & reverse-complement
+        complementSeqNumbers(Read1[1],Read1[0]+readLength[0]+1,readLength[1]);//complement. Here Read1[1] is still the 2nd mate's numeric-sequence. Later Read1[1] will be reverse complement of the combined read.
         for (uint ii=0;ii<readLength[1]/2;ii++) {
-            swap(Read1[0][Lread-ii-1],Read1[0][ii+readLength[0]+1]); //reverse complement
-            swap(Qual1[0][Lread-ii-1],Qual1[0][ii+readLength[0]+1]); //reverse complement   ??? was Qualof the second mate populated
+            swap(Read1[0][Lread-ii-1],Read1[0][ii+readLength[0]+1]); //reverse
         };
 
     } else {//1 mate
@@ -60,15 +62,13 @@ int ReadAlign::oneRead() {//process one read: load, map, write
             g_statsAll.qualHistCalc(imate, Qual0[imate], readLengthOriginal[imate]);
     };
     
-    loadBarcodeRead(P, readInStream, readBarcodeSeq, readBarcodeQual);
-    
+    //loadBarcodeRead(P, readInStream, readBarcodeSeq, readBarcodeQual);
     
     readFileType=readStatus[0];
 
     complementSeqNumbers(Read1[0],Read1[1],Lread); //returns complement of Reads[ii]
     for (uint ii=0;ii<Lread;ii++) {//reverse
         Read1[2][Lread-ii-1]=Read1[1][ii];
-        Qual1[1][Lread-ii-1]=Qual1[0][ii];
     };
 
     statsRA.readN++;

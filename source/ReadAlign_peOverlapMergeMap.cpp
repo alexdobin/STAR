@@ -128,14 +128,6 @@ void ReadAlign::peMergeMates() {
     complementSeqNumbers(Read1[0],Read1[1],Lread); //returns complement of Reads[ii]
     for (uint ii=0;ii<Lread;ii++) {//reverse
         Read1[2][Lread-ii-1]=Read1[1][ii];
-        if (Read1[1][ii]<4) {
-            Qual1[0][ii]=1;
-            Qual1[1][Lread-ii-1]=1;
-        } else {
-            Qual1[0][ii]=0;
-            Qual1[1][Lread-ii-1]=0;
-        };
-
     };
 
     return;

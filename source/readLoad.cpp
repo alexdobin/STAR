@@ -2,8 +2,7 @@
 #include "ErrorWarning.h"
 
 int readLoad(istream& readInStream, Parameters& P, uint& Lread, uint& LreadOriginal, \
-            char* readName, char* Seq, char* SeqNum, char* Qual, char* QualNum, \
-            vector<ClipMate> &clipOneMate, \
+            char* readName, char* Seq, char* SeqNum, char* Qual, vector<ClipMate> &clipOneMate, \
             uint &iReadAll, uint32 &readFilesIndex, char &readFilter, string &readNameExtra)
 {//load one read from a stream
     int readFileType=0;
@@ -32,15 +31,6 @@ int readLoad(istream& readInStream, Parameters& P, uint& Lread, uint& LreadOrigi
     readInStream.getline(Seq,DEF_readSeqLengthMax+1); //extract sequence
 
     Lread=readInStream.gcount()-1;
-    
-    /* control characters at the end of the lines are removed in processChunks
-        for (int ii=0; ii<readInStream.gcount()-1; ii++) {
-            if (int(Seq[ii])>=32) {//omitting control characters
-                Seq[Lread]=Seq[ii];
-                ++Lread;
-            };
-        };
-    */
 
     if (Lread<1) {
         ostringstream errOut;
@@ -101,15 +91,6 @@ int readLoad(istream& readInStream, Parameters& P, uint& Lread, uint& LreadOrigi
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
     };
 
-    /* QualNum is not used anymore
-     *   for (uint ii=0;ii<Lread;ii++) {//for now: qualities are all 1
-     *       if (SeqNum[ii]<4) {
-     *           QualNum[ii]=1;
-     *       } else {
-     *           QualNum[ii]=0;
-     *       };
-     *   };
-    */
     //trim read name TODO this is needed only for one mate
     for (uint ii=0; ii<P.readNameSeparatorChar.size(); ii++) {
         char* pSlash=strchr(readName,P.readNameSeparatorChar.at(ii)); //trim everything after ' '

@@ -78,9 +78,9 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
     readNameExtra.resize(P.readNends);
     readName = readNameMates[0];
     Read1 = new char*[3];
-    Read1[0]=new char[DEF_readSeqLengthMax+1]; Read1[1]=new char[DEF_readSeqLengthMax+1]; Read1[2]=new char[DEF_readSeqLengthMax+1];
-    Qual1=new char*[2]; //modified QSs for scoring
-    Qual1[0]=new char[DEF_readSeqLengthMax+1]; Qual1[1]=new char[DEF_readSeqLengthMax+1];
+    Read1[0]=new char[DEF_readSeqLengthMax+1]; 
+    Read1[1]=new char[DEF_readSeqLengthMax+1]; 
+    Read1[2]=new char[DEF_readSeqLengthMax+1];
     
     //outBAM
     outBAMoneAlignNbytes = new uint [P.readNmates+2]; //extra piece for chimeric reads //not readNends: this is alignment

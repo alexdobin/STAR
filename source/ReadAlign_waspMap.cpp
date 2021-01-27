@@ -101,6 +101,4 @@ void ReadAlign::copyRead(ReadAlign &r) {//copy read information only
     
     for (uint ii=0;ii<=2;ii++)
         memcpy(Read1[ii],r.Read1[ii],Lread);//need to copy since it will be changed
-    Qual1=r.Qual1;
-
 };

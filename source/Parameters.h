@@ -333,7 +333,6 @@ class Parameters {
         ParametersChimeric pCh;
 
         //splitting
-        char Qsplit;
         uint maxNsplit;
 
         //not really parameters, but global variables:

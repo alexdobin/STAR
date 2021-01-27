@@ -459,7 +459,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
 
     ///////////////////////////////////////// Old variables
     //splitting
-    Qsplit=0;
     maxNsplit=10;
 
 

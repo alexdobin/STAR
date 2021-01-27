@@ -408,14 +408,15 @@ uint32 localSearchGeneral(const char *text, const uint32 textLen, const vector<c
 };
 */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-uint qualitySplit(char* r, char* q, uint L, char Qsplit, uint maxNsplit, uint  minLsplit, uint** splitR) {
+uint qualitySplit(char* r,uint L, uint maxNsplit, uint  minLsplit, uint** splitR) {
     //splits the read r[L] by quality scores q[L], outputs in splitR - split coordinate/length - per base
     //returns number of good split regions
     uint iR=0,iS=0,iR1,LgoodMin=0, iFrag=0;
     while ( (iR<L) & (iS<maxNsplit) ) { //main cycle
         //find next good base
-        while ( (iR<L) && ( (q[iR]<Qsplit) || (r[iR]>3) ) ) {
-            if (r[iR]==MARK_FRAG_SPACER_BASE) iFrag++; //count read fragments
+        while ( iR<L && r[iR]>3 ) {
+            if (r[iR]==MARK_FRAG_SPACER_BASE) 
+                iFrag++; //count read fragments
             iR++;
         };
 
@@ -424,7 +425,7 @@ uint qualitySplit(char* r, char* q, uint L, char Qsplit, uint maxNsplit, uint  m
         iR1=iR;
 
         //find the next bad base
-        while ( iR<L && q[iR]>=Qsplit && r[iR]<=3 ) {
+        while ( iR<L && r[iR]<=3 ) {
             iR++;
         };
 

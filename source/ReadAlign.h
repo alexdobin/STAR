@@ -126,7 +126,6 @@ class ReadAlign {
         char** Qual0;
         char** readNameMates;
         char* readName;
-        char** Qual1; //modified QSs for scoring
 
         uint readNmates;
         //split

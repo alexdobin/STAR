@@ -21,7 +21,7 @@ uint localSearchNisMM(const char *x, uint nx, const char *y, uint ny, double pMM
 uint32 localAlignHammingDist(const string &text, const string &query, uint32 &pos);
 uint32 localSearchGeneral(const char *text, const uint32 textL, const vector<char> &query, const int32 textStart, const int32 textEnd, double pMM, vector <uint32> vecMM, uint32 &nMM);
 
-uint qualitySplit(char*, char*, uint, char, uint, uint, uint**);
+uint qualitySplit(char*, uint, uint, uint, uint**);
 
 int32 convertNuclStrToInt32(const string S, uint32 &intOut);
 string convertNuclInt32toString(const uint32 nuclNum, const uint32 L);
