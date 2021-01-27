@@ -1,3 +1,4 @@
+* Read clipping options --clip* now require specifying the values for all read mates, even if they are identical.
 * Fixed a problem with GX/GN tag output for --soloFeatures GeneFull option: #796.
 * Implemented --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts which allows 1MM multimatching to WL for barcodes with N-bases (to better match CellRanger >= 3.0.0).
 * For --soloUMIfiltering MultiGeneUMI option, the reads with multi-gene UMIs will have UB tag "-" in BAM output.

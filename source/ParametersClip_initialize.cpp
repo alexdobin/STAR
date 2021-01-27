@@ -31,11 +31,48 @@ void ParametersClip::initialize(Parameters *pPin)
         in[1].adSeq[0] = "A";
     };
 
+    array<string,2> p53={"5","3"};
+    
+    for (int ip=0; ip<2; ip++) {//if no clipping, repeat for all mates
+        if (in[ip].adSeq[0]=="-") {
+            in[ip].adSeq.resize(pP->readNmates, "-");
+            in[ip].adMMp.resize(pP->readNmates, 0);
+        };
+            
+        if (in[ip].N[0]==0)
+            in[ip].N.resize(pP->readNmates, 0);
+            
+        if (in[ip].NafterAd[0]==0)
+            in[ip].NafterAd.resize(pP->readNmates, 0);        
+    };
+    
+    for (int ip=0; ip<2; ip++) {//check that readNmates values are provided
+        if (in[ip].adSeq.size() != pP->readNmates) {
+            exitWithError("EXITING because of fatal PARAMETER error: --clip" +p53[ip]+ "pAdapterSeq needs to contain " +to_string(pP->readNmates)+ " values to match the number of mates."\
+                           , std::cerr, pPin->inOut->logMain, EXIT_CODE_PARAMETER, *pPin);
+        };
+            
+        if (in[ip].adMMp.size() != pP->readNmates) {
+            exitWithError("EXITING because of fatal PARAMETER error: --clip" +p53[ip]+ "pAdapterMMp needs to contain " +to_string(pP->readNmates)+ " values to match the number of mates."\
+                            , std::cerr, pPin->inOut->logMain, EXIT_CODE_PARAMETER, *pPin);
+        };
+            
+        if (in[ip].NafterAd.size() != pP->readNmates) {
+            exitWithError("EXITING because of fatal PARAMETER error: --clip" +p53[ip]+ "pAfterAdapterNbases needs to contain " +to_string(pP->readNmates)+ " values to match the number of mates."\
+                            , std::cerr, pPin->inOut->logMain, EXIT_CODE_PARAMETER, *pPin);
+        };
+        
+        if (in[ip].N.size() != pP->readNmates) {
+            exitWithError("EXITING because of fatal PARAMETER error: --clip" +p53[ip]+ "pNbases needs to contain " +to_string(pP->readNmates)+ " values to match the number of mates."\
+                            , std::cerr, pPin->inOut->logMain, EXIT_CODE_PARAMETER, *pPin);
+        };  
+    };
+    
 };
 
 void ParametersClip::initializeClipMates(vector<vector<ClipMate>> &clipMates)
 {        
-    clipMates.resize(min(2LLU, pP->readNmates));//not readNends: because we only clip mates, not barcode reads
+    clipMates.resize(pP->readNends);
 
     for (uint32 im=0; im<clipMates.size(); im++) {
         
@@ -48,12 +85,15 @@ void ParametersClip::initializeClipMates(vector<vector<ClipMate>> &clipMates)
                 clipMates[im][ip].type += 10;
             };            
             
-            if (im==0) {
-                clipMates[0][ip].initialize(in[ip].N[0], in[ip].adSeq[0], in[ip].NafterAd[0], in[ip].adMMp[0]);
-            } else if (im==1) {
+            if (im<pP->readNmates) {//true mates
+                clipMates[im][ip].initialize(in[ip].N[im], in[ip].adSeq[im], in[ip].NafterAd[im], in[ip].adMMp[im]);
+            } else {//barcode read, no clipping
                 //back() effectively duplicates the values for 2nd mate - if only one value was given in paramerter input
-                clipMates[1][ip].initialize(in[ip].N.back(), in[ip].adSeq.back(), in[ip].NafterAd.back(), in[ip].adMMp.back()); 
+                clipMates[im][ip].initialize(0, "-", 0, 0); 
             };
         };
-    }; 
+    };
+    
+    
+    
 };

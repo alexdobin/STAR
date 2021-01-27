@@ -142,7 +142,7 @@ bool SoloReadBarcode::convertCheckUMI()
 };
 
 //////////////////////////////////////////////////////////////////////////////////////
-void SoloReadBarcode::getCBandUMI(const string &readBarcodeSeq, const string &readBarcodeQual, const string &readNameExtraIn, const uint32 &readFilesIndex, const char *readName)
+void SoloReadBarcode::getCBandUMI(char **readSeq, char **readQual, uint64 *readLen, const string &readNameExtraIn, const uint32 &readFilesIndex, const char *readName)
 {
     if (pSolo.type==0)
         return;
@@ -154,8 +154,8 @@ void SoloReadBarcode::getCBandUMI(const string &readBarcodeSeq, const string &re
     ///////////////////////////////////////////////////////////////////////////////////////////////////////    
     ////////// bSeq and bQual
     if (P.readFilesTypeN != 10) {//not SAM: barcode seq/qual are at the beginning of readNameExtra
-        bSeq=readBarcodeSeq;
-        bQual=readBarcodeQual;
+        bSeq=std::string(readSeq[pSolo.barcodeRead], readLen[pSolo.barcodeRead]);
+        bQual=std::string(readQual[pSolo.barcodeRead], readLen[pSolo.barcodeRead]);
         
     } else {//SAM: barcode seq/qual is collected from SAM tags
         uint32 pos1 = readNameExtraIn.find_first_not_of(" \t"); //to remove whitespace
