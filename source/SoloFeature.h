@@ -11,21 +11,22 @@
 
 #include "SoloCommon.h"
 #include "SoloRead.h"
+#include "ReadAlignChunk.h"
 
 #include "SoloFilteredCells.h"
 
 class SoloFeature {
 private:
-    const int32 featureType;
-
     Parameters &P;
+    ReadAlignChunk **RAchunk;    
     Transcriptome &Trans;
-
+    
+    const int32 featureType;   
+    SoloFeature **soloFeatAll;
+    
     static const uint32 umiArrayStride=3;
     enum {rguG, rguU, rguR};
     uint32 rguStride;
-    
-    SoloFeature **soloFeatAll;
     
 public:
     ParametersSolo &pSolo;
@@ -65,9 +66,9 @@ public:
     vector<uint64> redistrFilesNreads; //number of reads in each file
     vector <fstream*> redistrFilesStreams;
 
-    SoloFeature(int32 feTy, Parameters &Pin, Transcriptome &inTrans, SoloReadBarcode *readBarSumIn, SoloFeature **soloFeatAll);
-    void processRecords(ReadAlignChunk **RAchunk);
-    void sumThreads(ReadAlignChunk **RAchunk);
+    SoloFeature(Parameters &Pin, ReadAlignChunk **RAchunk, Transcriptome &inTrans, int32 feTy, SoloReadBarcode *readBarSumIn, SoloFeature **soloFeatAll);
+    void processRecords();
+    void sumThreads();
     void countSmartSeq();
     void countCBgeneUMI();
     void countVelocyto();
@@ -79,7 +80,6 @@ public:
     uint32 umiArrayCorrect_CR         (const uint32 nU0, uintUMI *umiArr, const bool readInfoRec, const bool nUMIyes, unordered_map <uintUMI,uintUMI> &umiCorr);
     uint32 umiArrayCorrect_Directional(const uint32 nU0, uintUMI *umiArr, const bool readInfoRec, const bool nUMIyes, unordered_map <uintUMI,uintUMI> &umiCorr);
     uint32 umiArrayCorrect_Graph      (const uint32 nU0, uintUMI *umiArr, const bool readInfoRec, const bool nUMIyes, unordered_map <uintUMI,uintUMI> &umiCorr);
-
 
     void outputResults(bool cellFilterYes, string outputPrefixMat);
     void addBAMtags(char *&bam0, uint32 &size0, char* bam1);

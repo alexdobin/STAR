@@ -19,6 +19,8 @@ SoloReadBarcode::SoloReadBarcode(Parameters &P) : P(P), pSolo(P.pSolo)
             homoPolymer[jj]=(homoPolymer[jj]<<2)+jj;
         };
     };
+    
+    qualHist.fill(0);
 };
 
 void SoloReadBarcode::addCounts(const SoloReadBarcode &rfIn)
@@ -28,6 +30,9 @@ void SoloReadBarcode::addCounts(const SoloReadBarcode &rfIn)
             cbReadCountExact[ii] += rfIn.cbReadCountExact[ii];
         };
     };
+        
+    for (uint32 ii=0; ii<qualHist.size(); ii++)
+        qualHist[ii] += rfIn.qualHist[ii];
 };
 
 void SoloReadBarcode::addStats(const SoloReadBarcode &rfIn)

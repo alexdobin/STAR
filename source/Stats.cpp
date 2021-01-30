@@ -11,8 +11,6 @@ void Stats::resetN() {//zero all counters
     for (uint ii=0; ii<SJ_MOTIF_SIZE; ii++) {
         splicesN[ii]=0;
     };
-
-    qualHist={{}};
 };
 
 Stats::Stats() {//constructor
@@ -156,16 +154,3 @@ void Stats::writeLines(ofstream &streamOut, const vector<int> outType, const str
     };
 };
 
-void Stats::qualHistCalc(const uint64 imate, const char* qual, const uint64 len)
-{//calculates histogram of quality scores for each imate        
-    for (uint64 ix=0; ix<len; ix++) {
-            qualHist[imate][(uint8)qual[ix]]++;
-    };
-};
-
-//void Stats::qualHistCalcSolo(const uint64 imate, const char* qual, const vector<uint32> stlen)// start1, const uint64 len1, const uint64 len1,)
-//{//calculates histogram of quality scores for each imate        
-//     for (uint64 ix=0; ix<len; ix++) {
-//             qualHist[imate][(uint8)qual[ix]]++;
-//     };
-//};

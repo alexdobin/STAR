@@ -4,7 +4,7 @@
 #include "SequenceFuns.h"
 #include "ErrorWarning.h"
 
-void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
+void SoloFeature::processRecords()
 {
     if (pSolo.type==0)
         return;
@@ -16,7 +16,6 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     outputPrefix= P.outFileNamePrefix+pSolo.outFileNames[0];
     outputPrefix+= SoloFeatureTypes::Names[featureType] +'/';
     outputPrefixFiltered= outputPrefix + "filtered/";
-    
     
     if (mkdir(outputPrefix.c_str(),P.runDirPerm)!=0 && errno!=EEXIST) {//create directory
         ostringstream errOut;
@@ -50,8 +49,7 @@ void SoloFeature::processRecords(ReadAlignChunk **RAchunk)
     		featuresNumber=P.sjAll[0].size();
 	};
 
-    sumThreads(RAchunk);
-    
+    SoloFeature::sumThreads();
     
     //call counting method
     if (featureType==SoloFeatureTypes::Velocyto) {

@@ -48,6 +48,9 @@ class ReadAlign {
 
         uint32 readFilesIndex;
         
+        //quality histogram
+        array<array<uint64,256>,MAX_N_MATES> qualHist;
+        
         //transcripts (aligns)
         uint nW;
         uint *nWinTr; //number of recorded transcripts per window

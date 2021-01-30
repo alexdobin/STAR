@@ -24,9 +24,6 @@ class Stats {
         uint chimericAll;
 
         time_t timeStart, timeStartMap, timeFinishMap, timeLastReport, timeFinish;
-
-        //quality
-        array<array<uint64,256>,2> qualHist;
         
         Stats ();
         void resetN();

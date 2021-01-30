@@ -5,7 +5,7 @@
 #include "Stats.h"
 #include "GlobalVariables.h"
 
-void SoloFeature::sumThreads(ReadAlignChunk **RAchunk)
+void SoloFeature::sumThreads()
 {   
     //stats
     nReadsInput=g_statsAll.readN+1; //reserve 1 extra
@@ -15,9 +15,8 @@ void SoloFeature::sumThreads(ReadAlignChunk **RAchunk)
         readFeatAll[ii]= RAchunk[ii]->RA->soloRead->readFeat[pSolo.featureInd[featureType]];
         readFeatAll[ii]->streamReads->flush();
         readFeatSum->addCounts(*readFeatAll[ii]);        
-    };
-
-
+    };       
+    
     // if WL was not defined
     if (!pSolo.cbWLyes) {//now we can define WL and counts ??? we do not need to do it for every feature???
         pSolo.cbWLsize=readFeatSum->cbReadCountMap.size();

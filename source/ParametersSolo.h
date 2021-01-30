@@ -51,7 +51,7 @@ public:
     string strandStr;
     int32 strand;   
     
-    uint32 barcodeRead;//which read is the barcode read = 0,1,2?
+    uint32 barcodeRead, barcodeReadIn;//which read is the barcode read = 0,1,2?
     uint32 barcodeStart, barcodeEnd;//start/end of barcode sequence on barcodeRead
     bool barcodeReadYes;
     

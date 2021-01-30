@@ -82,6 +82,9 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
     Read1[1]=new char[DEF_readSeqLengthMax+1]; 
     Read1[2]=new char[DEF_readSeqLengthMax+1];
     
+    for (auto &q: qualHist)
+        q.fill(0);
+    
     //outBAM
     outBAMoneAlignNbytes = new uint [P.readNmates+2]; //extra piece for chimeric reads //not readNends: this is alignment
     outBAMoneAlign = new char* [P.readNmates+2]; //extra piece for chimeric reads //not readNends: this is alignment

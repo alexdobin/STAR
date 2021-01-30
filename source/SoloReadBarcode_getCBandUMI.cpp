@@ -213,9 +213,7 @@ void SoloReadBarcode::getCBandUMI(char **readSeq, char **readQual, uint64 *readL
                 bQual += readNameExtraT.substr(pos1,pos2-pos1);
             };
         };
-        
-        g_statsAll.qualHistCalc(1, bQual.c_str(), bQual.size());
-        
+                
         if (bQual.size() != P.pSolo.bL) {
             if (P.pSolo.bL > 0) {
                 ostringstream errOut;
@@ -227,7 +225,11 @@ void SoloReadBarcode::getCBandUMI(char **readSeq, char **readQual, uint64 *readL
             } else if (bQual.size()<P.pSolo.cbumiL) {//barcode sequence too short - append Hs
                 bQual.append(P.pSolo.cbumiL-bQual.size(), 'H');
             };
-        };
+        };            
+    };
+
+    for (uint64 ix=0; ix<bQual.size(); ix++) {
+        qualHist[(uint8)bQual[ix]]++;
     };
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -783,6 +783,12 @@ soloBarcodeReadLength       1
                             1   ... equal to sum of soloCBlen+soloUMIlen
                             0   ... not defined, do not check
 
+soloBarcodeMate             0                            
+    int: identifies which read mate contains the barcode (CB+UMI) sequence
+                            0   ... barcode sequence is on separate read, which should always be the last file in the --readFilesIn listed
+                            1   ... barcode sequence is a part of mate 1
+                            2   ... barcode sequence is a part of mate 2
+
 soloCBposition              -
     strings(s)              position of Cell Barcode(s) on the barcode read.
                             Presently only works with --soloType CB_UMI_Complex, and barcodes are assumed to be on Read2.

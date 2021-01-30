@@ -24,6 +24,14 @@ int ReadAlign::oneRead() {//process one read: load, map, write
         return -1;
     };    
     
+    if (P.outFilterBySJoutStage != 2) {
+        for (uint32 im=0; im<P.readNmates; im++) {//not readNends: the barcode quality will be calculated separately
+            for (uint64 ix=0; ix<readLength[im]; ix++) {
+                qualHist[im][(uint8)Qual0[im][ix]]++;
+            };
+        };
+    };
+    
     if (P.readNmates==2) {//read the 2nd mate - barcode reads is loaded by loadBarcodeRead below, not readNends
         //combine two reads together
         Lread=readLength[0]+readLength[1]+1;
@@ -56,14 +64,7 @@ int ReadAlign::oneRead() {//process one read: load, map, write
         readLength[1]=0;
 
     };
-
-    if (P.outFilterBySJoutStage != 2) {
-        for (uint32 imate=0; imate<P.readNmates; imate++) //collect stats for mates, barcode reads stats is collected in loadBarcodeRead, not readNends
-            g_statsAll.qualHistCalc(imate, Qual0[imate], readLengthOriginal[imate]);
-    };
-    
-    //loadBarcodeRead(P, readInStream, readBarcodeSeq, readBarcodeQual);
-    
+      
     readFileType=readStatus[0];
 
     complementSeqNumbers(Read1[0],Read1[1],Lread); //returns complement of Reads[ii]

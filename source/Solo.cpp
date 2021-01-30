@@ -15,7 +15,7 @@ Solo::Solo(ReadAlignChunk **RAchunkIn, Parameters &Pin, Transcriptome &inTrans)
 
     soloFeat = new SoloFeature*[pSolo.nFeatures];
     for (uint32 ii=0; ii<pSolo.nFeatures; ii++)
-        soloFeat[ii] = new SoloFeature(pSolo.features[ii], P, Trans, readBarSum, soloFeat);
+        soloFeat[ii] = new SoloFeature(P, RAchunk, Trans, pSolo.features[ii], readBarSum, soloFeat);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////// post-mapping procssing only
@@ -33,7 +33,7 @@ Solo::Solo(Parameters &Pin, Transcriptome &inTrans)
     
     soloFeat = new SoloFeature*[1];
     
-    soloFeat[0] = new SoloFeature(-1, P, Trans, NULL, soloFeat);
+    soloFeat[0] = new SoloFeature(P, NULL, Trans, -1, NULL, soloFeat);
     soloFeat[0]->loadRawMatrix();
     soloFeat[0]->cellFiltering();
     
@@ -71,7 +71,7 @@ void Solo::processAndOutput()
         P.inOut->logMain    << timeMonthDayTime() << " ..... started Solo counting\n" <<flush;
 
         for (uint32 ii=0; ii<pSolo.nFeatures; ii++) {
-            soloFeat[ii]->processRecords(RAchunk);
+            soloFeat[ii]->processRecords();
         };
 
         *P.inOut->logStdOut << timeMonthDayTime() << " ..... finished Solo counting\n" <<flush;

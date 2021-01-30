@@ -10,28 +10,33 @@ void SoloFeature::statsOutput()
     strOut << "Number of Reads," << g_statsAll.readN <<'\n';
     strOut << "Reads With Valid Barcodes," << 1.0 - double( readBarSum->stats.numInvalidBarcodes() + readFeatSum->stats.numInvalidBarcodes() )/g_statsAll.readN <<'\n';
     strOut << "Sequencing Saturation," << readFeatSum->stats.numSequencingSaturation() <<'\n';
+
     
-    //quality scores
-    uint64 q30[2]={0,0}, ntot[2]={0,0};
-    for (uint32 imate=0; imate<2; imate++) {
+    
+    if (pSolo.type != pSolo.SoloTypes::SmartSeq) {//qualHist for CB+UMI
+        uint64 q30=0, ntot=0;
         for (uint32 ix=0; ix<256; ix++) {
-            ntot[imate] += g_statsAll.qualHist[imate][ix];
+            ntot += readBarSum->qualHist[ix];
             if (ix >= (P.readQualityScoreBase + 30))
-                q30[imate] += g_statsAll.qualHist[imate][ix];
+                q30 += readBarSum->qualHist[ix];
         };
+           
+        strOut << "Q30 Bases in CB+UMI,"   << double(q30)/ntot <<'\n';
     };
     
-    if (pSolo.type==pSolo.SoloTypes::SmartSeq || pSolo.type==pSolo.SoloTypes::CB_samTagOut) {
-        if (P.readNmates==2) {//not readNends: this is alignment
-            q30[0] += q30[1];
-            ntot[0] += ntot[1];
+    {//qualHist for RNA
+        uint64 q30=0, ntot=0;
+        for (int ichunk=0; ichunk<P.runThreadN; ichunk++) {
+            for (uint32 imate=0; imate<P.readNmates; imate++) {
+                for (uint32 ix=0; ix<256; ix++) {
+                    ntot += RAchunk[ichunk]->RA->qualHist[imate][ix];
+                    if (ix >= (P.readQualityScoreBase + 30))
+                        q30 += RAchunk[ichunk]->RA->qualHist[imate][ix];
+                };
+            };
         };
-        q30[1]=0;
-        ntot[1]=1;
-    };
-        
-    strOut << "Q30 Bases in CB+UMI,"   << double(q30[1])/ntot[1] <<'\n';
-    strOut << "Q30 Bases in RNA read," << double(q30[0])/ntot[0] <<'\n';
+        strOut << "Q30 Bases in RNA read," << double(q30)/ntot <<'\n';
+    };    
 
     
     strOut << "Reads Mapped to Genome: Unique+Multiple," << double(g_statsAll.mappedReadsU+g_statsAll.mappedReadsM)/g_statsAll.readN <<'\n';

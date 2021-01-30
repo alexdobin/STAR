@@ -30,9 +30,7 @@ void ParametersClip::initialize(Parameters *pPin)
         in[0].adSeq[0] = "AAGCAGTGGTATCAACGCAGAGTACATGGG";
         in[1].adSeq[0] = "A";
     };
-
-    array<string,2> p53={"5","3"};
-    
+   
     for (int ip=0; ip<2; ip++) {//if no clipping, repeat for all mates
         if (in[ip].adSeq[0]=="-") {
             in[ip].adSeq.resize(pP->readNmates, "-");
@@ -46,6 +44,8 @@ void ParametersClip::initialize(Parameters *pPin)
             in[ip].NafterAd.resize(pP->readNmates, 0);        
     };
     
+    array<string,2> p53={"5","3"};
+
     for (int ip=0; ip<2; ip++) {//check that readNmates values are provided
         if (in[ip].adSeq.size() != pP->readNmates) {
             exitWithError("EXITING because of fatal PARAMETER error: --clip" +p53[ip]+ "pAdapterSeq needs to contain " +to_string(pP->readNmates)+ " values to match the number of mates."\
@@ -67,7 +67,6 @@ void ParametersClip::initialize(Parameters *pPin)
                             , std::cerr, pPin->inOut->logMain, EXIT_CODE_PARAMETER, *pPin);
         };  
     };
-    
 };
 
 void ParametersClip::initializeClipMates(vector<vector<ClipMate>> &clipMates)
@@ -93,7 +92,4 @@ void ParametersClip::initializeClipMates(vector<vector<ClipMate>> &clipMates)
             };
         };
     };
-    
-    
-    
 };

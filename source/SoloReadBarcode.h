@@ -25,7 +25,7 @@ public:
     vector<uint32> cbReadCountExact;
     map <uint32,uint32> cbReadCountMap;//count read per CB for no WL
 
-
+    array<uint64,256> qualHist;
     SoloReadBarcodeStats stats;
 
     SoloReadBarcode(Parameters &Pin);

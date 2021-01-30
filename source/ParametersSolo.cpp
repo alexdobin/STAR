@@ -91,26 +91,42 @@ void ParametersSolo::initialize(Parameters *pPin)
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////input read files
+    barcodeRead=-1; 
+    barcodeReadYes=false;
+    
     if (pP->readFilesTypeN != 10) {//input from FASTQ
         if (type==SoloTypes::SmartSeq) {//no barcode read
-            barcodeRead=-1; 
-            barcodeReadYes=false;
+
             //TODO: a lot of parameters should not be defined for SmartSeq option - check it here
         } else {//all other types require barcode read
-            if (pP->readNends<2) {
-                exitWithError("EXITING because of fatal PARAMETERS error: --soloType options (except SmartSeq) require 2 reads or 3 reads, where the last read is the barcode read.\n"
-                            "SOLUTION: specify 2 or 3 files in --readFilesIn",std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
-            };
-            pP->readNmates=pP->readNends-1; //true mates, excluding barcode read
-            barcodeRead=pP->readNends-1;//TODO make this flexible
-            barcodeReadYes=true;
-        };
-
-    } else if (pP->readFilesTypeN == 10) {//input from SAM
-        //pP->readNmates=pP->readNends;
-        barcodeRead=-1; 
-        barcodeReadYes=false;
             
+            if (barcodeReadIn == 0) {//barcode read is separate - needs to be the last read in --readFilesIn
+                if (pP->readNends < 2) {
+                    exitWithError("EXITING because of fatal PARAMETERS error: --soloType options (except SmartSeq) require 2 reads or 3 reads, where the last read is the barcode read.\n"
+                                "SOLUTION: specify 2 or 3 files in --readFilesIn",std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+                };
+                pP->readNmates = pP->readNends-1; //true mates, excluding barcode read
+                barcodeRead = pP->readNends-1;//the barcode read is always the last one 
+            } else if (barcodeReadIn >= pP->readNends) {
+                exitWithError("EXITING because of fatal PARAMETERS error: --soloBarcodeMate " +to_string(barcodeReadIn)+ "is larger than number of mates " + to_string(pP->readNends) +
+                                "\nSOLUTION: specify --soloBarcodeMate <= than the number of mates.",std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+            } else {//barcode sequence is in one of the mates
+                if (type != SoloTypes::CB_UMI_Simple) {
+                    exitWithError("EXITING because of fatal PARAMETERS error: --soloBarcodeMate " +to_string(barcodeReadIn)+ ">0 for is not allowed for --soloType " + typeStr +
+                                    "\nSOLUTION: specify --soloBarcodeMate 0   or   --soloType CB_UMI_Simple",std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+                };
+                
+                barcodeRead = barcodeReadIn-1;
+                barcodeReadYes = true;
+                    
+                if ( pP->pClip.in[0].N[barcodeRead] == 0 && pP->pClip.in[1].N[barcodeRead] == 0 ){//clipping not specified for the mate with barcodes
+                    exitWithError("EXITING because of fatal PARAMETERS error: --soloBarcodeMate " +to_string(barcodeReadIn)+ " specifies that barcode sequence is a part of the mate " +to_string(barcodeReadIn)+
+                                    ", which requires clipping the barcode off this mate."
+                                    "\nSOLUTION: clip the barcode sequence from 5' or/and 3' with --clip5pNbases   or/and --clip3pNbases . The values for mate1 and mate2 have to specified, specify 0 for no clipping.",std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+                };
+            };
+        };
+    } else if (pP->readFilesTypeN == 10) {//input from SAM
         if (samAtrrBarcodeSeq.at(0) == "-") {
             exitWithError("EXITING because of fatal PARAMETERS error: --readFilesType SAM SE/PE requires --soloInputSAMattrBarcodeSeq.\n"
                           "SOLUTION: specify input SAM attributes for barcode sequence in --soloInputSAMattrBarcodeSeq, and (optionally) quality with --soloInputSAMattrBarcodeQual", 
