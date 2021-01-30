@@ -23,8 +23,8 @@ void ParametersClip::initialize(Parameters *pPin)
     if (adapterType[0]=="CellRanger4") {
         
         if (in[1].adSeq.size()>1 || in[1].adSeq[0]!="-") {
-            exitWithError("EXITING because of fatal PARAMETER error: --clipAdapterType CellRanger4 uses fixed sequences for 5' (TSO) and 3' (polyA) adapters.\
-                           \nSOLUTION: Do not use --clip3pAdapter* or --clip5pAdapter* options.\n", std::cerr, pPin->inOut->logMain, EXIT_CODE_PARAMETER, *pPin);
+            exitWithError("EXITING because of fatal PARAMETER error: --clipAdapterType CellRanger4 uses fixed sequences for 5' (TSO) and 3' (polyA) adapters."
+                          "\nSOLUTION: Do not use --clip3pAdapter* or --clip5pAdapter* options.\n", std::cerr, pPin->inOut->logMain, EXIT_CODE_PARAMETER, *pPin);
         };
         
         in[0].adSeq[0] = "AAGCAGTGGTATCAACGCAGAGTACATGGG";
@@ -48,22 +48,26 @@ void ParametersClip::initialize(Parameters *pPin)
 
     for (int ip=0; ip<2; ip++) {//check that readNmates values are provided
         if (in[ip].adSeq.size() != pP->readNmates) {
-            exitWithError("EXITING because of fatal PARAMETER error: --clip" +p53[ip]+ "pAdapterSeq needs to contain " +to_string(pP->readNmates)+ " values to match the number of mates."\
+            exitWithError("EXITING because of fatal PARAMETER error: --clip" +p53[ip]+ "pAdapterSeq has to contain " +to_string(pP->readNmates)+ " values to match the number of mates."
+                            "\nSOLUTION: specify " +to_string(pP->readNmates)+ "values in --clip" +p53[ip]+ "pAdapterSeq , for no clipping use -"
                            , std::cerr, pPin->inOut->logMain, EXIT_CODE_PARAMETER, *pPin);
         };
             
         if (in[ip].adMMp.size() != pP->readNmates) {
-            exitWithError("EXITING because of fatal PARAMETER error: --clip" +p53[ip]+ "pAdapterMMp needs to contain " +to_string(pP->readNmates)+ " values to match the number of mates."\
+            exitWithError("EXITING because of fatal PARAMETER error: --clip" +p53[ip]+ "pAdapterMMp has to contain " +to_string(pP->readNmates)+ " values to match the number of mates."
+                            "\nSOLUTION: specify " +to_string(pP->readNmates)+ "values in --clip" +p53[ip]+ "pAdapterMMp"
                             , std::cerr, pPin->inOut->logMain, EXIT_CODE_PARAMETER, *pPin);
         };
             
         if (in[ip].NafterAd.size() != pP->readNmates) {
-            exitWithError("EXITING because of fatal PARAMETER error: --clip" +p53[ip]+ "pAfterAdapterNbases needs to contain " +to_string(pP->readNmates)+ " values to match the number of mates."\
+            exitWithError("EXITING because of fatal PARAMETER error: --clip" +p53[ip]+ "pAfterAdapterNbases has to contain " +to_string(pP->readNmates)+ " values to match the number of mates."
+                            "\nSOLUTION: specify " +to_string(pP->readNmates)+ "values in --clip" +p53[ip]+ "pAfterAdapterNbases , for no clipping use 0"
                             , std::cerr, pPin->inOut->logMain, EXIT_CODE_PARAMETER, *pPin);
         };
         
         if (in[ip].N.size() != pP->readNmates) {
-            exitWithError("EXITING because of fatal PARAMETER error: --clip" +p53[ip]+ "pNbases needs to contain " +to_string(pP->readNmates)+ " values to match the number of mates."\
+            exitWithError("EXITING because of fatal PARAMETER error: --clip" +p53[ip]+ "pNbases has to contain " +to_string(pP->readNmates)+ " values to match the number of mates."
+                            "\nSOLUTION: specify " +to_string(pP->readNmates)+ "values in --clip" +p53[ip]+ "pNbases , for no clipping use 0"
                             , std::cerr, pPin->inOut->logMain, EXIT_CODE_PARAMETER, *pPin);
         };  
     };
