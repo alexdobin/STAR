@@ -10,8 +10,6 @@ void SoloFeature::statsOutput()
     strOut << "Number of Reads," << g_statsAll.readN <<'\n';
     strOut << "Reads With Valid Barcodes," << 1.0 - double( readBarSum->stats.numInvalidBarcodes() + readFeatSum->stats.numInvalidBarcodes() )/g_statsAll.readN <<'\n';
     strOut << "Sequencing Saturation," << readFeatSum->stats.numSequencingSaturation() <<'\n';
-
-    
     
     if (pSolo.type != pSolo.SoloTypes::SmartSeq) {//qualHist for CB+UMI
         uint64 q30=0, ntot=0;
@@ -37,7 +35,6 @@ void SoloFeature::statsOutput()
         };
         strOut << "Q30 Bases in RNA read," << double(q30)/ntot <<'\n';
     };    
-
     
     strOut << "Reads Mapped to Genome: Unique+Multiple," << double(g_statsAll.mappedReadsU+g_statsAll.mappedReadsM)/g_statsAll.readN <<'\n';
     strOut << "Reads Mapped to Genome: Unique," << double(g_statsAll.mappedReadsU)/g_statsAll.readN <<'\n';

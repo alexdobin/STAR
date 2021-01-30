@@ -26,14 +26,13 @@ int ReadAlign::oneRead() {//process one read: load, map, write
     
     if (P.outFilterBySJoutStage != 2) {
         for (uint32 im=0; im<P.readNmates; im++) {//not readNends: the barcode quality will be calculated separately
-            for (uint64 ix=0; ix<readLength[im]; ix++) {
+            for (uint64 ix=clipMates[im][0].clippedN; ix<readLengthOriginal[im]-clipMates[im][1].clippedN; ix++) {
                 qualHist[im][(uint8)Qual0[im][ix]]++;
             };
         };
     };
     
-    if (P.readNmates==2) {//read the 2nd mate - barcode reads is loaded by loadBarcodeRead below, not readNends
-        //combine two reads together
+    if (P.readNmates==2) {//combine two mates together
         Lread=readLength[0]+readLength[1]+1;
         readLengthPairOriginal=readLengthOriginal[0]+readLengthOriginal[1]+1;
         if (Lread>DEF_readSeqLengthMax) {

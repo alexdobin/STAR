@@ -66,7 +66,7 @@ void ParametersSolo::initialize(Parameters *pPin)
         
     } else if (typeStr=="CB_UMI_Complex") {
         type=SoloTypes::CB_UMI_Complex;
-        bL=0;
+        bL=0;//no fixed length for barcode sequence
         cbumiL=0;
 
     } else if (typeStr=="CB_samTagOut") {
@@ -107,7 +107,7 @@ void ParametersSolo::initialize(Parameters *pPin)
                 };
                 pP->readNmates = pP->readNends-1; //true mates, excluding barcode read
                 barcodeRead = pP->readNends-1;//the barcode read is always the last one 
-            } else if (barcodeReadIn >= pP->readNends) {
+            } else if (barcodeReadIn > pP->readNends) {
                 exitWithError("EXITING because of fatal PARAMETERS error: --soloBarcodeMate " +to_string(barcodeReadIn)+ "is larger than number of mates " + to_string(pP->readNends) +
                                 "\nSOLUTION: specify --soloBarcodeMate <= than the number of mates.",std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
             } else {//barcode sequence is in one of the mates

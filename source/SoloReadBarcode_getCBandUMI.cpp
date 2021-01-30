@@ -228,7 +228,7 @@ void SoloReadBarcode::getCBandUMI(char **readSeq, char **readQual, uint64 *readL
         };            
     };
 
-    for (uint64 ix=0; ix<bQual.size(); ix++) {
+    for (uint64 ix=0; ix<( P.pSolo.bL>0 ? P.pSolo.bL : bQual.size() ); ix++) {//bL==0 use the whole barcode read for quality scores histogram
         qualHist[(uint8)bQual[ix]]++;
     };
 
