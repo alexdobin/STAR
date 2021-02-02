@@ -18,6 +18,7 @@ SoloFeature::SoloFeature(Parameters &Pin, ReadAlignChunk **RAchunk, Transcriptom
             break;
         case SoloFeatureTypes::SJ :
             featuresNumber=P.sjAll[0].size();
+            break;
         default:
             featuresNumber = -1; //undefined
     };    
