@@ -147,6 +147,16 @@ void SoloReadBarcode::getCBandUMI(char **readSeq, char **readQual, uint64 *readL
     if (pSolo.type==0)
         return;
 
+///////////////////////////SmartSeq  
+    if (pSolo.type==pSolo.SoloTypes::SmartSeq) {        
+        cbSeq=cbQual=cbSeqCorrected=""; //TODO make cbSeq=file label
+        cbMatch=0;
+        cbMatchInd={readFilesIndex};
+        cbMatchString=to_string(cbMatchInd[0]);
+        addStats(cbMatch);
+        return;
+    };    
+    
     cbMatch=-1;
     cbMatchString="";
     cbMatchInd.clear();
@@ -338,14 +348,6 @@ void SoloReadBarcode::getCBandUMI(char **readSeq, char **readQual, uint64 *readL
         if (cbMatchGood) {
             cbMatchString=to_string(cbMatchInd[0]);
         };
-        
-    ///////////////////////////SmartSeq  
-    } else if (pSolo.type==pSolo.SoloTypes::SmartSeq) {        
-        cbSeq=cbQual=cbSeqCorrected=""; //TODO make cbSeq=file label
-        cbMatch=0;
-        cbMatchInd={readFilesIndex};
-        cbMatchString=to_string(cbMatchInd[0]);
-        //umiB=rand()%5; for testing
     };
     
     addStats(cbMatch);

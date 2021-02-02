@@ -96,10 +96,8 @@ void ParametersSolo::initialize(Parameters *pPin)
     
     if (pP->readFilesTypeN != 10) {//input from FASTQ
         if (type==SoloTypes::SmartSeq) {//no barcode read
-
             //TODO: a lot of parameters should not be defined for SmartSeq option - check it here
         } else {//all other types require barcode read
-            
             if (barcodeReadIn == 0) {//barcode read is separate - needs to be the last read in --readFilesIn
                 if (pP->readNends < 2) {
                     exitWithError("EXITING because of fatal PARAMETERS error: --soloType options (except SmartSeq) require 2 reads or 3 reads, where the last read is the barcode read.\n"
@@ -127,10 +125,17 @@ void ParametersSolo::initialize(Parameters *pPin)
             };
         };
     } else if (pP->readFilesTypeN == 10) {//input from SAM
+        if (typeStr=="SmartSeq") {
+            exitWithError("EXITING because of fatal PARAMETERS error: --readFilesType SAM SE/PE cannot be used with --soloType SmartSeq\n"
+                          "SOLUTION: for Smart-seq input from BAM files, use --soloType CB_UMI_Simple , create whitelist of SmartSeq file names, and specify the SAM tag that records these file names in --soloInputSAMattrBarcodeSeq"
+                          , std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+        };            
+            
+        
         if (samAtrrBarcodeSeq.at(0) == "-") {
             exitWithError("EXITING because of fatal PARAMETERS error: --readFilesType SAM SE/PE requires --soloInputSAMattrBarcodeSeq.\n"
-                          "SOLUTION: specify input SAM attributes for barcode sequence in --soloInputSAMattrBarcodeSeq, and (optionally) quality with --soloInputSAMattrBarcodeQual", 
-                          std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+                          "SOLUTION: specify input SAM attributes for barcode sequence in --soloInputSAMattrBarcodeSeq, and (optionally) quality with --soloInputSAMattrBarcodeQual"
+                          , std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
         
         if (samAtrrBarcodeQual.at(0) == "-") {

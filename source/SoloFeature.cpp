@@ -8,4 +8,17 @@ SoloFeature::SoloFeature(Parameters &Pin, ReadAlignChunk **RAchunk, Transcriptom
         readFeatSum = new SoloReadFeature(featureType,P,-1);
         readFeatAll = new SoloReadFeature*[P.runThreadN];
     };
+    
+    //number of features
+    switch (featureType) {
+        case SoloFeatureTypes::Gene :
+        case SoloFeatureTypes::GeneFull :
+        case SoloFeatureTypes::Velocyto :
+            featuresNumber=Trans.nGe;
+            break;
+        case SoloFeatureTypes::SJ :
+            featuresNumber=P.sjAll[0].size();
+        default:
+            featuresNumber = -1; //undefined
+    };    
 };
