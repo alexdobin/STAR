@@ -12,20 +12,20 @@ class ParametersSolo;
 
 class UMIdedup {
 public:
-    const static uint32 tN = 5;
-    array<string,tN> typeNames { {"NoDedup", "Exact", "1MM_All", "1MM_Directional", "1MM_CR"} };
-    enum typeI : int32 {NoDedup=0, Exact=1, All=2, Directional=3, CR=4};
+    const static uint32 tN = 6;
+    array<string,tN> typeNames { {"NoDedup", "Exact", "1MM_All", "1MM_Directional", "1MM_CR", "1MM_Directional_UMItools"} };
+    enum typeI : int32 { NoDedup=0, Exact=1, All=2, Directional=3, CR=4, Directional_UMItools=5 };
     
     struct {
         uint32_t N;
         array<bool,tN> B;
-        bool &NoDedup=B[0], &Exact=B[1], &All=B[2], &Directional=B[3], &CR=B[4]; 
+        bool &NoDedup=B[0], &Exact=B[1], &All=B[2], &Directional=B[3], &CR=B[4], &Directional_UMItools=B[5]; 
     } yes;
 
     struct {
         //uint32_t N;
         array<uint32_t,tN> I;
-        uint32_t &NoDedup=I[0], &Exact=I[1], &All=I[2], &Directional=I[3], &CR=I[4];
+        uint32_t &NoDedup=I[0], &Exact=I[1], &All=I[2], &Directional=I[3], &CR=I[4], &Directional_UMItools=I[5];
         uint32_t main; //index for SAM/stats/filtering output
     } countInd; //index in the countCellGennUMI
     

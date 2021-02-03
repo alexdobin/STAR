@@ -1,3 +1,4 @@
+* Implemented --soloUMIdedup 1M_Directional_UMItools options to match UMI-tools method by Smith, Heger and Sudbery (Genome Research 2017).
 * Read clipping options --clip* now require specifying the values for all read mates, even if they are identical.
 * Fixed a problem with GX/GN tag output for --soloFeatures GeneFull option: #796.
 * Implemented --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts which allows 1MM multimatching to WL for barcodes with N-bases (to better match CellRanger >= 3.0.0).

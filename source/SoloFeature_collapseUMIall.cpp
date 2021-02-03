@@ -145,7 +145,11 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
                 
             if (pSolo.umiDedup.yes.Directional)
                 countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.Directional] = 
-                    umiArrayCorrect_Directional(nU0, umiArray, readInfo.size()>0 && pSolo.umiDedup.typeMain==UMIdedup::typeI::Directional, true, umiCorrected[iG]);
+                    umiArrayCorrect_Directional(nU0, umiArray, readInfo.size()>0 && pSolo.umiDedup.typeMain==UMIdedup::typeI::Directional, true, umiCorrected[iG], 0);
+                    
+            if (pSolo.umiDedup.yes.Directional_UMItools)
+                countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.Directional_UMItools] = 
+                    umiArrayCorrect_Directional(nU0, umiArray, readInfo.size()>0 && pSolo.umiDedup.typeMain==UMIdedup::typeI::Directional_UMItools, true, umiCorrected[iG], -1);                    
                 
             //this changes umiArray, so it should be last call
             if (pSolo.umiDedup.yes.All)
@@ -287,7 +291,7 @@ uint32 SoloFeature::umiArrayCorrect_CR(const uint32 nU0, uintUMI *umiArr, const 
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-uint32 SoloFeature::umiArrayCorrect_Directional(const uint32 nU0, uintUMI *umiArr, const bool readInfoRec, const bool nUMIyes, unordered_map <uintUMI,uintUMI> &umiCorr)
+uint32 SoloFeature::umiArrayCorrect_Directional(const uint32 nU0, uintUMI *umiArr, const bool readInfoRec, const bool nUMIyes, unordered_map <uintUMI,uintUMI> &umiCorr, const int32 dirCountAdd)
 {
     qsort(umiArr, nU0, umiArrayStride*sizeof(uint32), funCompareNumbersReverseShift<uint32, 1>);//TODO no need to sort by sequence here, only by count. 
     
@@ -301,7 +305,7 @@ uint32 SoloFeature::umiArrayCorrect_Directional(const uint32 nU0, uintUMI *umiAr
 
             uint32 uuXor = umiArr[iu+0] ^ umiArr[iuu+0];
 
-            if ( (uuXor >> (__builtin_ctz(uuXor)/2)*2) <= 3 && umiArr[iuu+1] > (2*umiArr[iu+1]-1) ) {//1MM && directional condition
+            if ( (uuXor >> (__builtin_ctz(uuXor)/2)*2) <= 3 && umiArr[iuu+1] >= (2*umiArr[iu+1]+dirCountAdd) ) {//1MM && directional condition
                 umiArr[iu+2]=umiArr[iuu+2];//replace iuu with iu-corrected
                 nU1--;
                 break;
