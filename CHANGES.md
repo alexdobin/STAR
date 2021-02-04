@@ -1,3 +1,5 @@
+* Issue #1107: fixed a bug causing seg-fault for --soloType SmartSeq with only one (pair of) fastq file(s)
+* Issue #1129: fixed an issue with short barcode sequences and --soloBarcodeReadLength 0
 * Implemented --soloUMIdedup 1M_Directional_UMItools options to match UMI-tools method by Smith, Heger and Sudbery (Genome Research 2017).
 * Read clipping options --clip* now require specifying the values for all read mates, even if they are identical.
 * Fixed a problem with GX/GN tag output for --soloFeatures GeneFull option: #796.

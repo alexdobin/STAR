@@ -191,19 +191,6 @@ void SoloReadBarcode::getCBandUMI(char **readSeq, char **readQual, uint64 *readL
             size_t pos2 = readNameExtraT.find('\t', pos1); //find next \t
             bSeq += readNameExtraT.substr(pos1,pos2-pos1);
         };
-        
-        if (bSeq.size() != P.pSolo.bL) {
-            if (P.pSolo.bL > 0) {
-                ostringstream errOut;
-                errOut << "EXITING because of FATAL ERROR in input read file: the total length of barcode sequence is "  << bSeq.size() << " not equal to expected " << P.pSolo.bL <<"\n"  ;
-                errOut << "Read ID="<< readName <<" ;  Sequence="<< bSeq << " ;  Read SAM attributes: "<< readNameExtraT <<"\n";
-                errOut << "SOLUTION: make sure correct attributes are listed in --soloInputSAMattrBarcodeSeq\n";
-                errOut << "          If UMI+CB length is not equal to the barcode read length, specify barcode read length with --soloBarcodeReadLength\n";
-                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
-            } else if (bSeq.size()<P.pSolo.cbumiL) {//barcode sequence too short - append Ns
-                bSeq.append(P.pSolo.cbumiL-bSeq.size(), 'N');
-            };
-        };
 
         bQual = {};        
         if (pSolo.samAtrrBarcodeQual.size()==0) {//if quality tags are not supplied
@@ -224,18 +211,28 @@ void SoloReadBarcode::getCBandUMI(char **readSeq, char **readQual, uint64 *readL
             };
         };
                 
-        if (bQual.size() != P.pSolo.bL) {
-            if (P.pSolo.bL > 0) {
-                ostringstream errOut;
-                errOut << "EXITING because of FATAL ERROR in input read file: the total length of barcode qualities is "  << bQual.size() << " not equal to expected " << P.pSolo.bL <<"\n"  ;
-                errOut << "Read ID="<< readName <<" ;  Qualities="<< bQual << " ;  Read SAM attributes: "<< readNameExtraT <<"\n";
-                errOut << "SOLUTION: make sure correct attributes are listed in --soloInputSAMattrBarcodeQual\n";
-                errOut << "          If UMI+CB length is not equal to the barcode read length, specify barcode read length with --soloBarcodeReadLength\n";
-                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
-            } else if (bQual.size()<P.pSolo.cbumiL) {//barcode sequence too short - append Hs
-                bQual.append(P.pSolo.cbumiL-bQual.size(), 'H');
-            };
+        if (bQual.size() != bSeq.size()) {
+            ostringstream errOut;
+            errOut << "EXITING because of FATAL ERROR in input read file: the total length of barcode qualities is "  << bQual.size() << " not equal to the sequence length " << bSeq.size() <<"\n"  ;
+            errOut << "Read ID="<< readName <<" ;  Qualities="<< bQual <<" ;  Sequence="<< bSeq << " ;  Read SAM attributes: "<< readNameExtraT <<"\n";
+            errOut << "SOLUTION: make sure correct attributes are listed in --soloInputSAMattrBarcodeQual\n";
+            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
         };            
+    };
+    
+    if (bSeq.size() != P.pSolo.bL) {//bSeq.size == bQual.size here, this should have been checked before
+        if (P.pSolo.bL > 0) {
+            ostringstream errOut;
+            errOut << "EXITING because of FATAL ERROR in input read file: the total length of barcode sequence is "  << bSeq.size() << " not equal to expected " << P.pSolo.bL <<"\n" <<
+                      "Read ID=" << readName <<" ;  Sequence=" << bSeq <<'\n' <<
+                      "SOLUTION: check the formatting of input read files.\n" <<
+                      "If UMI+CB length is not equal to the barcode read length, specify barcode read length with --soloBarcodeReadLength\n" <<
+                      "To avoid checking of barcode read length, specify --soloBarcodeReadLength 0" ;
+            exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
+        } else if (bSeq.size()<P.pSolo.cbumiL) {//barcode sequence too short - append Ns, will work only if P.pSolo.cbumiL>0
+            bSeq.append(P.pSolo.cbumiL-bSeq.size(), 'N');
+            bQual.append(P.pSolo.cbumiL-bQual.size(), 'H');
+        };
     };
 
     for (uint64 ix=0; ix<( P.pSolo.bL>0 ? P.pSolo.bL : bQual.size() ); ix++) {//bL==0 use the whole barcode read for quality scores histogram
