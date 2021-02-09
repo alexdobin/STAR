@@ -27,7 +27,7 @@ void ParametersSolo::initialize(Parameters *pPin)
     barcodeReadYes=false; //will select true later if needed
     barcodeStart=barcodeEnd=0; //this means that the entire barcodeRead is considered barcode. Will change it for simple barcodes.    
     yes = true;
-    if (typeStr=="None") {
+    if (typeStr=="None" || typeStr=="SmartSeq") {
         type = SoloTypes::None;
         yes = false;
         samAttrYes = false;
@@ -37,8 +37,8 @@ void ParametersSolo::initialize(Parameters *pPin)
           || pP->outSAMattrPresent.sS  || pP->outSAMattrPresent.sQ  || pP->outSAMattrPresent.sM
            ) {
             ostringstream errOut;
-            errOut <<"EXITING because of FATAL INPUT ERROR: --outSAMattributes contains CR/CY/UR/UY/CB/UB tags, but --soloType is not set\n";
-            errOut <<"SOLUTION: re-run STAR without these attribures, or with --soloType set\n";
+            errOut <<"EXITING because of FATAL INPUT ERROR: --outSAMattributes contains CR/CY/UR/UY/CB/UB tags which are not allowed for --soloType " << typeStr <<'\n';
+            errOut <<"SOLUTION: re-run STAR without these attribures\n";
             exitWithError(errOut.str(), std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };        
         return;
