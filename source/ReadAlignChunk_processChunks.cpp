@@ -27,30 +27,54 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                 ///////////////////////////////////////////////////////////////////////////////////// SAM                        
                 } else if (P.readFilesTypeN==10 && P.inOut->readIn[0].good() && P.outFilterBySJoutStage!=2) {//SAM input && not eof && not 2nd stage
 
-                    string str1;
 
                     if (nextChar=='@') {//with SAM input linest that start with @ are headers
-                        getline(P.inOut->readIn[0], str1); //read line and skip it
+                        P.inOut->readIn[0].ignore(DEF_readNameSeqLengthMax,'\n'); //read line and skip it
                         continue;
                     };
 
+                    string str1;
                     P.inOut->readIn[0] >> str1;
                     if (str1=="FILE") {
                         newFile=true;
                     } else {
                         P.iReadAll++; //increment read number
 
+                        uint64 flag1; 
+                        P.inOut->readIn[0] >> flag1;
                         uint imate1=0;
                         for (uint imate=0;imate<P.readNmates;imate++) {//not readNends: this is SAM input
-                            if (imate>0)
-                                P.inOut->readIn[0] >> str1; //for imate=0 str1 was already read
-                            uint flag;
-                            P.inOut->readIn[0] >>flag; //read name and flag
-                            char passFilterIllumina=(flag & 0x800 ? 'Y' : 'N');
+                            if (imate>0) {
+                                string str2;
+                                uint64 flag2;
+                                P.inOut->readIn[0] >> str2; //for imate=0 str1 was already read
+                                P.inOut->readIn[0] >> flag2; //read name and flag
+                                
+                                if ( str1 != str2 ) {
+                                    ostringstream errOut;
+                                    errOut << ERROR_OUT <<" EXITING because of FATAL ERROR in input BAM file: the consecutive lines in paired-end BAM have different read IDs:\n"
+                                           << str1 <<"   vs   "<< str2 << '\n'
+                                           << "\n SOLUTION: fix BAM file formatting. Paired-end reads should be always consecutive lines, with exactly 2 lines per paired-end read" ;
+                                    exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
+                                };
+                                
+                                if (! ( ((flag1 & 0x40) && (flag2 & 0x80)) || ((flag2 & 0x40) && (flag1 & 0x80)) ) ) {
+                                    ostringstream errOut;
+                                    errOut << ERROR_OUT <<" EXITING because of FATAL ERROR in input BAM file: the consecutive lines in paired-end BAM have wrong mate FLAG bits:\n"
+                                           << str1 <<"   "<< flag1 <<"   vs   "<< str2 <<"   "<< flag2 << '\n'
+                                           << "\n SOLUTION: fix BAM file formatting. Paired-end reads should be always consecutive lines, with exactly 2 lines per paired-end read."
+                                           << " Mate1 should have 0x40 bit set in the FLAG, Mate2 should have 0x80 bit set in the FLAG";
+                                    exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
+                                };
+                                
+                                str1 = str2;   //used below for both mates
+                                flag1 = flag2; //used below for both mates
+                            };
+                            char passFilterIllumina=(flag1 & 0x800 ? 'Y' : 'N');
 
                             if (imate==1) {//2nd line is always opposite of the 1st one
                                 imate1=1-imate1;
-                            } else if (P.readNmates==2 && (flag & 0x80)) {//not readNends: this is SAM input
+                            } else if (P.readNmates==2 && (flag1 & 0x80)) {//not readNends: this is SAM input
                                 imate1=1;
                             } else {
                                 imate1=0;
@@ -66,18 +90,20 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                             //iReadAll, passFilterIllumina, passFilterIllumina
                             chunkInSizeBytesTotal[imate1] += sprintf(chunkIn[imate1] + chunkInSizeBytesTotal[imate1], " %llu %c %i", P.iReadAll, passFilterIllumina, P.readFilesIndex);
 
+                            string dummy;
                             for (int ii=3; ii<=9; ii++)
-                                P.inOut->readIn[0] >> str1; //skip fields until sequence
+                                P.inOut->readIn[0] >> dummy; //skip fields until sequence
 
                             string seq1,qual1;
                             P.inOut->readIn[0]  >> seq1 >> qual1;
-                            if (flag & 0x10) {//sequence reverse-coomplemented
+                            if (flag1 & 0x10) {//sequence reverse-coomplemented
                                 revComplementNucleotides(seq1);
                                 reverse(qual1.begin(),qual1.end());
                             };
                             
-                            getline(P.inOut->readIn[0],str1); //rest of the SAM line: str1 is now all SAM attributes
-                            chunkInSizeBytesTotal[imate1] += sprintf(chunkIn[imate1] + chunkInSizeBytesTotal[imate1], "%s\n%s\n+\n%s\n", str1.c_str(), seq1.c_str(), qual1.c_str());
+                            string attrs;
+                            getline(P.inOut->readIn[0], attrs); //rest of the SAM line: str1 is now all SAM attributes - it's added to the read ID line (1st "fastq" line)
+                            chunkInSizeBytesTotal[imate1] += sprintf(chunkIn[imate1] + chunkInSizeBytesTotal[imate1], "%s\n%s\n+\n%s\n", attrs.c_str(), seq1.c_str(), qual1.c_str());
                         };
                     };
                     

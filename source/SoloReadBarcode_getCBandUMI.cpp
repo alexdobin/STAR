@@ -220,7 +220,7 @@ void SoloReadBarcode::getCBandUMI(char **readSeq, char **readQual, uint64 *readL
         };            
     };
     
-    if (bSeq.size() != P.pSolo.bL) {//bSeq.size == bQual.size here, this should have been checked before
+    if ( bSeq.size() != P.pSolo.bL ) {//check barcodeRead length. bSeq.size == bQual.size here, this should have been checked before
         if (P.pSolo.bL > 0) {
             ostringstream errOut;
             errOut << "EXITING because of FATAL ERROR in input read file: the total length of barcode sequence is "  << bSeq.size() << " not equal to expected " << P.pSolo.bL <<"\n" <<
@@ -235,8 +235,10 @@ void SoloReadBarcode::getCBandUMI(char **readSeq, char **readQual, uint64 *readL
         };
     };
 
-    for (uint64 ix=0; ix<( P.pSolo.bL>0 ? P.pSolo.bL : bQual.size() ); ix++) {//bL==0 use the whole barcode read for quality scores histogram
-        qualHist[(uint8)bQual[ix]]++;
+    if ( pSolo.type != pSolo.SoloTypes::CB_UMI_Simple ) {
+        for (uint64 ix=0; ix<( P.pSolo.bL>0 ? P.pSolo.bL : bQual.size() ); ix++) {//bL==0 use the whole barcode read for quality scores histogram
+            qualHist[(uint8)bQual[ix]]++;
+        };
     };
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -247,6 +249,13 @@ void SoloReadBarcode::getCBandUMI(char **readSeq, char **readQual, uint64 *readL
         umiSeq=bSeq.substr(pSolo.umiS-1,pSolo.umiL);
         cbQual=bQual.substr(pSolo.cbS-1,pSolo.cbL);
         umiQual=bQual.substr(pSolo.umiS-1,pSolo.umiL);
+        
+        for (uint64 ix=0; ix<cbQual.size(); ix++) {
+            qualHist[(uint8)cbQual[ix]]++;
+        };
+        for (uint64 ix=0; ix<umiQual.size(); ix++) {
+            qualHist[(uint8)umiQual[ix]]++;
+        };
              
         matchCBtoWL(cbSeq, cbQual, pSolo.cbWL, cbMatch, cbMatchInd, cbMatchString);
 

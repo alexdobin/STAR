@@ -24,10 +24,22 @@ void ParametersSolo::initialize(Parameters *pPin)
     
     //////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////--soloType
-    barcodeReadYes=false; //will select true later if needed
     barcodeStart=barcodeEnd=0; //this means that the entire barcodeRead is considered barcode. Will change it for simple barcodes.    
     yes = true;
-    if (typeStr=="None" || typeStr=="SmartSeq") {
+    if (typeStr=="None" || typeStr=="SmartSeq") {//solo SAM attributes not allowed
+            
+        if (   pP->outSAMattrPresent.CR  || pP->outSAMattrPresent.CY  || pP->outSAMattrPresent.UR 
+            || pP->outSAMattrPresent.UY  || pP->outSAMattrPresent.CB  || pP->outSAMattrPresent.UB
+            || pP->outSAMattrPresent.sS  || pP->outSAMattrPresent.sQ  || pP->outSAMattrPresent.sM
+           ) {
+            ostringstream errOut;
+            errOut <<"EXITING because of FATAL INPUT ERROR: --outSAMattributes contains CR/CY/UR/UY/CB/UB tags which are not allowed for --soloType " << typeStr <<'\n';
+            errOut <<"SOLUTION: re-run STAR without these attribures\n";
+            exitWithError(errOut.str(), std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+        };        
+    };
+    
+    if (typeStr=="None") {
         type = SoloTypes::None;
         yes = false;
         samAttrYes = false;
@@ -41,7 +53,7 @@ void ParametersSolo::initialize(Parameters *pPin)
             errOut <<"SOLUTION: re-run STAR without these attribures\n";
             exitWithError(errOut.str(), std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };        
-        return;
+        return;        
     } else if (typeStr=="CB_UMI_Simple" || typeStr=="Droplet") {
         type=SoloTypes::CB_UMI_Simple;        
         if (umiL > 16) {
@@ -92,7 +104,7 @@ void ParametersSolo::initialize(Parameters *pPin)
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////input read files
     barcodeRead=-1; 
-    barcodeReadYes=false;
+    barcodeReadSeparate=false;
     
     if (pP->readFilesTypeN != 10) {//input from FASTQ
         if (type==SoloTypes::SmartSeq) {//no barcode read
@@ -100,8 +112,9 @@ void ParametersSolo::initialize(Parameters *pPin)
         } else {//all other types require barcode read
             if (barcodeReadIn == 0) {//barcode read is separate - needs to be the last read in --readFilesIn
                 if (pP->readNends < 2) {
-                    exitWithError("EXITING because of fatal PARAMETERS error: --soloType options (except SmartSeq) require 2 reads or 3 reads, where the last read is the barcode read.\n"
-                                "SOLUTION: specify 2 or 3 files in --readFilesIn",std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+                    exitWithError("EXITING because of fatal PARAMETERS error: --soloType (except SmartSeq) with --soloBarcodeMate 0 (default) require 2 reads or 3 reads, where the last read is the barcode read.\n"
+                                  "SOLUTION: if barcode is in a separate mate, specify it as the last file in --readFilesIn. If barcode sequence is a part of one of the mates, specify that mate with --soloBarcodeMate 1 (or 2 or 3)"
+                                  ,std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
                 };
                 pP->readNmates = pP->readNends-1; //true mates, excluding barcode read
                 barcodeRead = pP->readNends-1;//the barcode read is always the last one 
@@ -115,7 +128,8 @@ void ParametersSolo::initialize(Parameters *pPin)
                 };
                 
                 barcodeRead = barcodeReadIn-1;
-                barcodeReadYes = true;
+                barcodeReadSeparate = true;
+                bL = 0; //>0 only for separate barcode read
                     
                 if ( pP->pClip.in[0].N[barcodeRead] == 0 && pP->pClip.in[1].N[barcodeRead] == 0 ){//clipping not specified for the mate with barcodes
                     exitWithError("EXITING because of fatal PARAMETERS error: --soloBarcodeMate " +to_string(barcodeReadIn)+ " specifies that barcode sequence is a part of the mate " +to_string(barcodeReadIn)+

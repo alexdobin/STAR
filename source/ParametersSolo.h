@@ -53,7 +53,7 @@ public:
     
     uint32 barcodeRead, barcodeReadIn;//which read is the barcode read = 0,1,2?
     uint32 barcodeStart, barcodeEnd;//start/end of barcode sequence on barcodeRead
-    bool barcodeReadYes;
+    bool barcodeReadSeparate;
     
     //simple barcodes
     uint32 cbS, cbL; //cell barcode start,length

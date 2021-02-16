@@ -47,7 +47,8 @@ void SoloFeature::statsOutput()
     strOut << "Reads Mapped to "<< mapfeat << ": Unique " << SoloFeatureTypes::Names[featureType] <<"s," << double( readFeatSum->stats.numMappedToTranscriptomeUnique() )/g_statsAll.readN <<'\n';
     
     if (pSolo.cellFilter.type[0]!="None" && (featureType==SoloFeatureTypes::Gene || featureType==SoloFeatureTypes::GeneFull)) {
-        if (pSolo.cellFilter.type[0]=="CellRanger2.2") {
+        //if (pSolo.cellFilter.type[0]=="CellRanger2.2") 
+        {
             strOut << "Estimated Number of Cells," << filteredCells.nCells <<'\n';
 
             strOut << "Reads in Cells Mapped to Unique " << SoloFeatureTypes::Names[featureType] << "s," << filteredCells.nReadInCells <<'\n';
