@@ -2,7 +2,7 @@ FROM debian:stable-slim
 
 MAINTAINER dobin@cshl.edu
 
-ARG STAR_VERSION=2.7.7a
+ARG STAR_VERSION=2.7.8a
 
 ENV PACKAGES gcc g++ make wget zlib1g-dev unzip
 

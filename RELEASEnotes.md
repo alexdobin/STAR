@@ -1,3 +1,17 @@
+STAR 2.7.8a --- 2021/02/21
+===========================
+**Major STARsolo updates and many bug fixes**
+
+* [**Cell calling (filtering) similar to CellRanger:**](docs/STARsolo.md#emptydrop-like-filtering)
+    * ```--soloCellFilter EmptyDrops_CR``` option for cell filtering (calling) nearly identical to that of CellRanger 3 and 4
+    * ```--runMode soloCellFiltering``` option for cell filtering (calling) of the raw count matrix, without re-mapping
+* [**Input from BAM files for STARsolo:**](docs/STARsolo.md#input-reads-from-bam-files)
+    * Input from unmapped or mapped SAM/BAM for STARsolo, with options ```--soloInputSAMattrBarcodeSeq``` and ```--soloInputSAMattrBarcodeQual``` to specify SAM tags for the barcode read sequence and qualities
+* [**Read trimming similar to CellRanger4:**](docs/STARsolo.md#matching-cellranger-4xx-and-5xx-results)
+    * ```--clipAdapterType CellRanger4``` option for 5' TSO adapter and 3' polyA-tail clipping of the reads to better match CellRanger >= 4.0.0 mapping results
+* [**Support for barcodes embedded in mates (such as 10X 5' protocol):**](docs/STARsolo.md#barcode-and-cdna-on-the-same-mate)
+    * ```--soloBarcodeMate``` to support scRNA-seq protocols in which one of the paired-end mates contains both barcode sequence and cDNA (e.g. 10X 5' protocol)
+
 STAR 2.7.7a --- 2020/12/28
 ==========================
 **Major new feature:
@@ -16,7 +30,9 @@ STAR 2.7.6a --- 2020/09/19
 ==========================
 **Major new feature:**
 Output multimapping chimeric alignments in BAM format using
-```--chimMultimapNmax N>1 --chimOutType WithinBAM --outSAMtype BAM Unsorted [and/or] SortedByCoordinate```
+```
+--chimMultimapNmax N>1 --chimOutType WithinBAM --outSAMtype BAM Unsorted [and/or] SortedByCoordinate
+```
 Many thanks to Sebastian @suhrig who implemented this feature!
 More detailed description from Sebastian in PR #802.
 

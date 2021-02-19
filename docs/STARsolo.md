@@ -1,26 +1,18 @@
 **STARsolo**: mapping, demultiplexing and quantification for single cell RNA-seq
 =================================================================================
 
-Major updates in STAR 2.7.5a (2020/06/16)
----------------------------------------
-* [**Smart-seq scRNA-seq process:**](#plate-based-Smart-seq-scRNA-seq)
-    * STARsolo now supports for the plate-based (a.k.a. Smart-seq) scRNAs-seq technologies.
-
-Major updates in STAR 2.7.3a (Oct 8 2019)
+Major updates in STAR 2.7.8a (2021/02/21)
 -----------------------------------------
-* **Output enhancements:**
-    * Summary.csv statistics output for raw and filtered cells useful for quick run quality assessment.
-    * --soloCellFilter option for basic filtering of the cells, similar to the methods used by CellRanger 2.2.x.
-* [**Better compatibility with CellRanger 3.x.x:**](#matching-cellranger-3xx-results)
-    * --soloUMIfiltering MultiGeneUMI option introduced in CellRanger 3.x.x for filtering UMI collisions between different genes.
-    * --soloCBmatchWLtype 1MM_multi_pseudocounts option, introduced in CellRanger 3.x.x, which slightly changes the posterior probability calculation for CB with 1 mismatch.
-* [**Velocyto spliced/unspliced/ambiguous quantification:**](#velocyto-splicedunsplicedambiguous-quantification)
-    * --soloFeatures Velocyto option to produce Spliced, Unspliced, and Ambiguous counts similar to the [velocyto.py](http://velocyto.org/) tool developed by [LaManno et al](https://doi.org/10.1038/s41586-018-0414-6). This option is under active development and the results may change in the future versions.
-* [**Support for complex barcodes, e.g. inDrop:**](#barcode-geometry)
-    * Complex barcodes in STARsolo with --soloType CB_UMI_Complex, --soloCBmatchWLtype --soloAdapterSequence, --soloAdapterMismatchesNmax, --soloCBposition,--soloUMIposition
-* [**BAM tags:**](#bam-tags)
-    * CB/UB for corrected CellBarcode/UMI
-    * GX/GN for gene ID/name
+* [**Cell calling (filtering) similar to CellRanger:**](#emptydrop-like-filtering)
+    * ```--soloCellFilter EmptyDrops_CR``` option for cell filtering (calling) nearly identical to that of CellRanger 3 and 4
+    * ```--runMode soloCellFiltering``` option for cell filtering (calling) of the raw count matrix, without re-mapping
+* [**Input from BAM files for STARsolo:**](#input-reads-from-bam-files)
+    * Input from unmapped or mapped SAM/BAM for STARsolo, with options ```--soloInputSAMattrBarcodeSeq``` and ```--soloInputSAMattrBarcodeQual``` to specify SAM tags for the barcode read sequence and qualities
+* [**Read trimming similar to CellRanger4:**](#matching-cellranger-4xx-and-5xx-results)
+    * ```--clipAdapterType CellRanger4``` option for 5' TSO adapter and 3' polyA-tail clipping of the reads to better match CellRanger >= 4.0.0 mapping results
+* [**Support for barcodes embedded in mates (such as 10X 5' protocol):**](#barcode-and-cdna-on-the-same-mate)
+    * ```--soloBarcodeMate``` to support scRNA-seq protocols in which one of the paired-end mates contains both barcode sequence and cDNA (e.g. 10X 5' protocol)
+
 
 STARsolo
 -------------
@@ -66,7 +58,7 @@ Please make sure that the whitelist is compatible with the specific version of t
 
     https://github.com/10XGenomics/cellranger/raw/master/lib/python/cellranger/barcodes/737K-august-2016.txt
     ```
-    and *V3 whitelist* (gunzip it for STAR):
+    and *V3 whitelist* (gunzip it for STARsolo):
     ```
     cellranger-cs/3.1.0/lib/python/cellranger/barcodes/3M-february-2018.txt.gz
 
@@ -98,10 +90,15 @@ How to make STARsolo _raw_ gene counts (almost) identical to CellRanger's
   [https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest ](https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest)</br>
   For the best match, the annotations in CellRanger run and STARsolo run should be exactly the same.
 
-* The FASTA and GTF files
+* The FASTA and GTF files, for one of the older releases:
     ```
     refdata-cellranger-GRCh38-3.0.0/genes/genes.gtf
-    refdata-cellranger-GRCh38-3.0.0/genes/genome.fa
+    refdata-cellranger-GRCh38-3.0.0/fasta/genome.fa
+    ```
+    or, for the latest release:
+    ```
+    refdata-gex-GRCh38-2020-A/genes/genes.gtf
+    refdata-gex-GRCh38-2020-A/fasta/genome.fa
     ```
     have to be used in STAR genome index generation step before mapping:
     ```
@@ -115,66 +112,94 @@ How to make STARsolo _raw_ gene counts (almost) identical to CellRanger's
     ```
     --genomeSAsparseD 3
     ```
-    to the genome generation options, which is used by CellRanger to generate STAR genomes. It will generate sparse suffixs array whic has an additional benefit of fitting into 16GB of RAM. However, it also results in 30-50% reduction of speed.
+    to the genome generation options, which is used by CellRanger to generate STAR genomes. It will generate sparse suffixs array which has an additional benefit of fitting into 16GB of RAM. However, it also results in 30-50% reduction of speed.
 
-* The considerations above are for *raw* counts, i.e. when cell filtering is not performed. To get *filtered* results, refer to [Basic cell filtering](#basic-cell-filtering) section.
+* The considerations above are for *raw* counts, i.e. when cell filtering (calling) is not performed. To get *filtered* cells, refer to [Cell filtering (calling)](#Cell-filtering-calling) section.
 
 #### Matching CellRanger 3.x.x results
 * By default, cell barcode and UMI collapsing parameters are designed to give the best agreement with CellRanger 2.x.x. CellRanger 3.x.x introduced some minor changes to this algorithm. To get the best agreement between STARsolo and CellRanger 3.x.x, add these parameters:
     ```
-    --soloUMIfiltering MultiGeneUMI --soloCBmatchWLtype 1MM_multi_pseudocounts
+    --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts --soloUMIfiltering MultiGeneUMI_CR --soloUMIdedup 1MM_CR
     ```
+
+#### Matching CellRanger 4.x.x and 5.x.x results
+* Starting from CellRanger 4.0, the TSO adapter sequence is clipped from the 5' of the cDNA read, and polyA-tail is trimmed from the 3'. For the best mathch to CellRanger >= 4.0, use these parameters:
+    ```
+    --clipAdapterType CellRanger4 --outFilterScoreMin 30
+    --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts --soloUMIfiltering MultiGeneUMI_CR --soloUMIdedup 1MM_CR  
+    ```
+The adapter clipping utilizes vectorized Smith-Waterman algorithm from Opal package by Martin Šošić: https://github.com/Martinsos/opal
+
 -----------------
 Barcode geometry
 -------------------
-* Simple barcode lengths and start positions on barcode reads are described with
-  ```
-  --soloCBstart, --soloCBlen, --soloUMIstart, --soloUMIlen
-  ```
-  which works with
-  ```
-  --soloType CB_UMI_Simple (a.k.a Droplet)
-  ```
-* More complex barcodes are activated with ```--soloType CB_UMI_Complex``` and are described with the following parameters
-  ```
-  soloCBposition              -
-    strings(s)              position of Cell Barcode(s) on the barcode read.
-                            Presently only works with --soloType CB_UMI_Complex, and barcodes are assumed to be on Read2.
-                            Format for each barcode: startAnchor_startDistance_endAnchor_endDistance
-                            start(end)Anchor defines the anchor base for the CB: 0: read start; 1: read end; 2: adapter start; 3: adapter end
-                            start(end)Distance is the distance from the CB start(end) to the Anchor base
-                            String for different barcodes are separated by space.
-                            Example: inDrop (Zilionis et al, Nat. Protocols, 2017):
-                            --soloCBposition  0_0_2_-1  3_1_3_8
+#### Simple barcodes
+Simple barcode lengths and start positions on barcode reads are described with
+```
+--soloCBstart, --soloCBlen, --soloUMIstart, --soloUMIlen
+```
+which works with
+```
+--soloType CB_UMI_Simple (a.k.a Droplet)
+```
+#### Barcode and cDNA on the same mate
+By default, it is assumed that the barcode is located on one of the mates of paired-end read, while cDNA is on the other mate. However, in some scRNA-seq protocols the barcode and cDNA sequences are located on the same mate. In this case, we can specify the mate on which the barcode is located (1 or 2) with ```--soloBarcodeMate```. Also, the barcode/adapter sequences have to be clipped (leaving only cDNA) with ```--clip5pNbases``` or ```--clip3pNbases```.
 
-   soloUMIposition             -
-    string                  position of the UMI on the barcode read, same as soloCBposition
-                            Example: inDrop (Zilionis et al, Nat. Protocols, 2017):
-                            --soloUMIposition  3_9_3_14
+For instance, for the **10X 5' protocol**, the 1st mate contains the barcode at the 5', with 16b CB, 10b UMI and 13b adapter (39b total). If the 1st mate is sequenced longer than 39b, the remaining bases are cDNA that can be mapped together with the 2nd mate (which contains only cDNA):
+```
+--soloBarcodeMate 1   --clip5pNbases 39 0
+--soloType CB_UMI_Simple   --soloCBstart 1   --soloCBlen 16   --soloUMIstart 17   --soloUMIlen 10
+--readFilesIn read1.fq read2.fq
+```
 
-   soloAdapterSequence         -
-    string:                 adapter sequence to anchor barcodes.
+#### Complex barcodes
+More complex barcodes are activated with ```--soloType CB_UMI_Complex``` and are described with the following parameters
+```
+soloCBposition              -
+strings(s)              position of Cell Barcode(s) on the barcode read.
+                        Presently only works with --soloType CB_UMI_Complex, and barcodes are assumed to be on Read2.
+                        Format for each barcode: startAnchor_startDistance_endAnchor_endDistance
+                        start(end)Anchor defines the anchor base for the CB: 0: read start; 1: read end; 2: adapter start; 3: adapter end
+                        start(end)Distance is the distance from the CB start(end) to the Anchor base
+                        String for different barcodes are separated by space.
+                        Example: inDrop (Zilionis et al, Nat. Protocols, 2017):
+                        --soloCBposition  0_0_2_-1  3_1_3_8
 
-   soloAdapterMismatchesNmax   1
-    int>0:                  maximum number of mismatches allowed in adapter sequence
-    ```
+soloUMIposition             -
+string                  position of the UMI on the barcode read, same as soloCBposition
+                        Example: inDrop (Zilionis et al, Nat. Protocols, 2017):
+                        --soloUMIposition  3_9_3_14
+
+soloAdapterSequence         -
+string:                 adapter sequence to anchor barcodes.
+
+soloAdapterMismatchesNmax   1
+int>0:                  maximum number of mismatches allowed in adapter sequence
+```
+
+
 
 --------------------------------------
-Basic cell filtering
+Cell filtering (calling)
 --------------------
-* Since 2.7.3a, in addition to raw, unfiltered output of gene/cell counts, STARsolo performs simple (knee-like) filtering of the cells, similar to the methods used by CellRanger 2.2.x. This is turned on by default and is controlled by:
-   ```
-    soloCellFilter              CellRanger2.2 3000 0.99 10
-        string(s):              cell filtering type and parameters
-                            CellRanger2.2   ... simple filtering of CellRanger 2.2, followed by three numbers: number of expected cells, robust  maximum percentile for UMI count, maximum to minimum ratio for UMI count
-                            TopCells        ... only report top cells by UMI count, followed by the exact number of cells
-                            None            ... do not output filtered cells
-    ```
-* This filtering is used to produce summary statistics for filtered cells in the Summary.csv file, which is similar to CellRanger's summary and is useful for Quality Control.
-* Recent versions of CellRanger switched to more advanced filtering done with the EmptyDrop tool developed by [Lun et al](https://doi.org/10.1186/s13059-019-1662-y). To obtain filtered counts similar to recent CellRanger versions, we need to run this tools on **raw** STARsolo output
+In addition to raw, unfiltered output of gene/cell counts, STARsolo performs cell filtering (a.k.a. cell calling), which aims to select a subset of cells that are likely to be "real" cells as opposed to empty droplets (containing ambient RNA).
+Two types of filtering are presently implemented: simple (knee-like) and advanced EmptyDrop-like. The selected filtering is also used to produce summary statistics for filtered cells in the Summary.csv file, which is similar to CellRanger's summary and is useful for Quality Control.
 
+#### Knee filtering
+Knee filtering is similar to the method used by CellRanger 2.2.x. This is turned on by default and is controlled by:
+```
+--soloCellFilter  CellRanger2.2
+```
+You can also add three numbers for this option (default values are given in parenthesis): the number of expected cells (3000), robust  maximum percentile for UMI count (0.99), maximum to minimum ratio for UMI count (10).
 
----------------------------------------------------
+#### EmptyDrop-like filtering
+CellRanger 3.0.0 use advanced filtering based on the EmptyDrop algorithm developed by [Lun et al](https://doi.org/10.1186/s13059-019-1662-y). This algorithm calls extra cells compared to the knee filtering, allowing for cells that have relatively fewer UMIs but are transcriptionally different from the ambient RNA. In STARsolo, this filtering can be activated by:
+```
+--soloCellFilter  EmptyDrops_CR
+```
+It can be followed by 10 numeric parameters:  nExpectedCells (3000),   maxPercentile (0.99),   maxMinRatio (10),   indMin (45000), indMax (90000),  umiMin (500),  umiMinFracMedian (0.01),  candMaxN (20000),  FDR (0.01),  simN (10000).
+
+--------------------------------------------------
 Quantification of different transcriptomic features
 ---------------------------------------------------
 * In addition to the gene counts (deafult), STARsolo can calculate counts for other transcriptomic features:
@@ -209,10 +234,31 @@ BAM tags
 * CY/UY: quality score for CellBarcode/UMI
 * GX/GN: for gene ID/names
 * sS/sQ: for sequence/quality combined CellBarcode and UMI;  sM for barcode match status.
-* CB/UB: **corrected** CellBarcode/UMI. Note, that these tags require sorted BAM output, i.e. we need to add:
+* CB/UB: **corrected** CellBarcode/UMI. Note, that these tags require sorted BAM output, i.e. we need to add the following option:
     ```
     --outSAMtype BAM SortedByCoordinate
     ```
+
+---------------------------------------
+Input reads from BAM files.
+-------------------------------
+The read sequences and barcodes can be input from SAM (or BAM) files, both unmapped (uBAM) and previously mapped (e.g. Cellranger's BAM):
+```
+--readFilesIn input.bam --readFilesType SAM SE
+```
+In case of BAM files, use ```samtools view``` command to convert to BAM:
+```
+--readFilesCommand samtools view -F 0x100
+```
+The file should contain one line for each read. For previously mapped file it can be achieved by filtering out non-primary alignments as show above. Note that unmapped reads have to be included in the file to be remapped.
+We need to specify which SAM attributes correspond to seqeunces/qualities of cell barcodes (CR/CY) and UMIs (UR/UY):
+```
+--soloInputSAMattrBarcodeSeq CR UR    --soloInputSAMattrBarcodeQual CY UY
+```
+If you wish to omit some, All or None of the SAM attributes in the output BAM file (if you requested one), use ```--readFilesSAMattrKeep``` option. For previously mapped files, ```--readFilesSAMattrKeep None``` is often the best option to avoid duplicated SAM attributes in the BAM output.
+
+If you request coordinate-sorted BAM output, and use a coordinate-sorted mapped BAM input (such as CellRanger's possorted BAM), it may result in slow sorting and require large amountss of RAM. In this case, it is recommended to shuffle the alignments before mapping with ```samtools bamshuf``` command.
+
 
 --------------------------------
 Different scRNA-seq technologies
@@ -235,7 +281,7 @@ For single-end reads, the 2nd column should contain the dash - :
 Read1-file-name \t - \t Cell-id
 ```
 Cell-id can be any string without spaces. Cell-id will be added as ReadGroup tag (*RG:Z:*) for each read in the SAM/BAM output. If Cell-id starts with *ID:*, it can contain several fields separated by tab, and all the fields will be copied verbatim into SAM *@RG* header line.
-* Deduplication based on read start/end coordinates can be done with `--soloUMIdedup Exact` option. To avoid deduplication (e.g. for single-end reads) use `--soloUMIdedup NoDedup`. Both deduplication options can be used together `--soloUMIdedup Exact NoDedup` and will produce two columns in the *matrix.mtx* output.
+* Deduplication based on read start/end coordinates can be done with `--soloUMIdedup Exact` option. To avoid deduplication (e.g. for single-end reads) use `--soloUMIdedup NoDedup`. Both deduplication options can be used together `--soloUMIdedup Exact NoDedup` and will produce two *.mtx* matrices.
 * Common Smart-seq protocols are unstranded and thus will require `--soloStrand Unstranded` option. If your protocol is stranded, you can can choose the proper `--soloStrand Forward` (default) or `--soloStrand Reverse` options.
 
 -------------------------------------------------------------
@@ -272,6 +318,12 @@ soloBarcodeReadLength       1
                             1   ... equal to sum of soloCBlen+soloUMIlen
                             0   ... not defined, do not check
 
+soloBarcodeMate             0                            
+    int: identifies which read mate contains the barcode (CB+UMI) sequence
+                            0   ... barcode sequence is on separate read, which should always be the last file in the --readFilesIn listed
+                            1   ... barcode sequence is a part of mate 1
+                            2   ... barcode sequence is a part of mate 2
+
 soloCBposition              -
     strings(s)              position of Cell Barcode(s) on the barcode read.
                             Presently only works with --soloType CB_UMI_Complex, and barcodes are assumed to be on Read2.
@@ -295,12 +347,23 @@ soloAdapterMismatchesNmax   1
 
 soloCBmatchWLtype           1MM_multi
     string:                 matching the Cell Barcodes to the WhiteList
-                            Exact                   ... only exact matches allowed
-                            1MM                     ... only one match in whitelist with 1 mismatched base allowed. Allowed CBs have to have at least one read with exact match.
-                            1MM_multi               ... multiple matches in whitelist with 1 mismatched base allowed, posterior probability calculation is used choose one of the matches.
-                                                        Allowed CBs have to have at least one read with exact match. Similar to CellRanger 2.2.0
-                            1MM_multi_pseudocounts  ... same as 1MM_Multi, but pseudocounts of 1 are added to all whitelist barcodes.
-                                                        Similar to CellRanger 3.x.x
+                            Exact                           ... only exact matches allowed
+                            1MM                             ... only one match in whitelist with 1 mismatched base allowed. Allowed CBs have to have at least one read with exact match.
+                            1MM_multi                       ... multiple matches in whitelist with 1 mismatched base allowed, posterior probability calculation is used choose one of the matches.
+                                                                Allowed CBs have to have at least one read with exact match. This option matches best with CellRanger 2.2.0
+                            1MM_multi_pseudocounts          ... same as 1MM_Multi, but pseudocounts of 1 are added to all whitelist barcodes.
+                            1MM_multi_Nbase_pseudocounts    ... same as 1MM_multi_pseudocounts, multimatching to WL is allowed for CBs with N-bases. This option matches best with CellRanger >= 3.0.0
+
+
+soloInputSAMattrBarcodeSeq  -
+    string(s):              when inputting reads from a SAM file (--readsFileType SAM SE/PE), these SAM attributes mark the barcode sequence (in proper order).
+                            For instance, for 10X CellRanger or STARsolo BAMs, use --soloInputSAMattrBarcodeSeq CR UR .
+                            This parameter is required when running STARsolo with input from SAM.
+
+soloInputSAMattrBarcodeQual  -
+    string(s):              when inputting reads from a SAM file (--readsFileType SAM SE/PE), these SAM attributes mark the barcode qualities (in proper order).
+                            For instance, for 10X CellRanger or STARsolo BAMs, use --soloInputSAMattrBarcodeQual CY UY .
+                            If this parameter is '-' (default), the quality 'H' will be assigned to all bases.
 
 soloStrand                  Forward
     string: strandedness of the solo libraries:
@@ -316,15 +379,19 @@ soloFeatures                Gene
 
 soloUMIdedup                1MM_All
     string(s):              type of UMI deduplication (collapsing) algorithm
-                            1MM_All             ... all UMIs with 1 mismatch distance to each other are collapsed (i.e. counted once)
-                            1MM_Directional     ... follows the "directional" method from the UMI-tools by Smith, Heger and Sudbery (Genome Research 2017).
-                            Exact               ... only exactly matching UMIs are collapsed
-                            NoDedup             ... no deduplication of UMIs, count all reads. Allowed for --soloType SmartSeq
+                            1MM_All                     ... all UMIs with 1 mismatch distance to each other are collapsed (i.e. counted once).
+                            1MM_Directional_UMItools    ... follows the "directional" method from the UMI-tools by Smith, Heger and Sudbery (Genome Research 2017).
+                            1MM_Directional             ... same as 1MM_Directional_UMItools, but with more stringent criteria for duplicate UMIs
+                            Exact                       ... only exactly matching UMIs are collapsed.
+                            NoDedup                     ... no deduplication of UMIs, count all reads.
+                            1MM_CR                      ... CellRanger2-4 algorithm for 1MM UMI collapsing.
 
 soloUMIfiltering            -
     string(s)               type of UMI filtering
-                            -               ... basic filtering: remove UMIs with N and homopolymers (similar to CellRanger 2.2.0)
-                            MultiGeneUMI    ... remove lower-count UMIs that map to more than one gene (introduced in CellRanger 3.x.x)
+                            -               ... basic filtering: remove UMIs with N and homopolymers (similar to CellRanger 2.2.0).
+                            MultiGeneUMI    ... basic + remove lower-count UMIs that map to more than one gene.
+                            MultiGeneUMI_CR ... basic + remove lower-count UMIs that map to more than one gene, matching CellRanger > 3.0.0 .
+                                                Only works with --soloUMIdedup 1MM_CR
 
 soloOutFileNames            Solo.out/          features.tsv barcodes.tsv        matrix.mtx
     string(s)               file names for STARsolo output:
@@ -332,10 +399,15 @@ soloOutFileNames            Solo.out/          features.tsv barcodes.tsv        
 
 soloCellFilter              CellRanger2.2 3000 0.99 10
     string(s):              cell filtering type and parameters
-                            CellRanger2.2   ... simple filtering of CellRanger 2.2, followed by three numbers: number of expected cells, robust maximum percentile for UMI count, maximum to minimum ratio for UMI count
-                            TopCells        ... only report top cells by UMI count, followed by the exact number of cells
                             None            ... do not output filtered cells
+                            TopCells        ... only report top cells by UMI count, followed by the exact number of cells
+                            CellRanger2.2   ... simple filtering of CellRanger 2.2.
+                                                Can be followed by numbers: number of expected cells, robust maximum percentile for UMI count, maximum to minimum ratio for UMI count
+                                                The harcoded values are from CellRanger: nExpectedCells=3000;  maxPercentile=0.99;  maxMinRatio=10
+                            EmptyDrops_CR   ... EmptyDrops filtering in CellRanger flavor. Please cite the original EmptyDrops paper: A.T.L Lun et al, Genome Biology, 20, 63 (2019): https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1662-y
+                                                Can be followed by 10 numeric parameters:  nExpectedCells   maxPercentile   maxMinRatio   indMin   indMax   umiMin   umiMinFracMedian   candMaxN   FDR   simN
+                                                The harcoded values are from CellRanger:             3000            0.99            10    45000    90000      500               0.01      20000  0.01  10000
 
-soloOutFormatFeaturesGeneField3 "Gene Expression"
-        string(s):                              field 3 in the Gene features.tsv file. If "-", then no 3rd field is output.
+soloOutFormatFeaturesGeneField3	"Gene Expression"
+	string(s):				field 3 in the Gene features.tsv file. If "-", then no 3rd field is output.
 ```

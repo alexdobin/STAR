@@ -1,21 +1,36 @@
-* Issue #1107: fixed a bug causing seg-fault for --soloType SmartSeq with only one (pair of) fastq file(s)
-* Issue #1129: fixed an issue with short barcode sequences and --soloBarcodeReadLength 0
-* Implemented --soloUMIdedup 1M_Directional_UMItools options to match UMI-tools method by Smith, Heger and Sudbery (Genome Research 2017).
-* Read clipping options --clip* now require specifying the values for all read mates, even if they are identical.
-* Fixed a problem with GX/GN tag output for --soloFeatures GeneFull option: #796.
-* Implemented --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts which allows 1MM multimatching to WL for barcodes with N-bases (to better match CellRanger >= 3.0.0).
-* For --soloUMIfiltering MultiGeneUMI option, the reads with multi-gene UMIs will have UB tag "-" in BAM output.
+STAR 2.7.8a --- 2021/02/21 ::: Major STARsolo updates
+=====================================================
+
+**Major new features:**
+* ```--runMode soloCellFiltering``` option for cell filtering (calling) of the raw count matrix, without re-mapping
+* Input from SAM/BAM for STARsolo, with options ```--soloInputSAMattrBarcodeSeq``` and ```--soloInputSAMattrBarcodeQual``` to specify SAM tags for the barcode read sequence and qualities
+* ```--clipAdapterType CellRanger4``` option for 5' TSO adapter and 3' polyA-tail clipping of the reads to better match CellRanger >= 4.0.0 mapping results
+* ```--soloBarcodeMate``` to support scRNA-seq protocols in which one of the paired-end mates contains both barcode sequence and cDNA (e.g. 10X 5' protocol)
+
+**New options:**
+* ```--soloCellFilter EmptyDrops_CR``` option for cell filtering (calling) nearly identical to that of CellRanger 3 and 4
+* ```--readFilesSAMattrKeep``` to specify which SAM attributes from the input SAM to keep in the output
+* ```--soloUMIdedup 1M_Directional_UMItools``` option matching the "directional" method in UMI-tools Smith, Heger and Sudbery (Genome Research 2017)
+* ```--soloUMIdedup NoDedup``` option for counting reads per gene, i.e. no UMI deduplication
+* ```--soloUMIdedup 1MM_CR``` option for 1 mismatch UMI deduplication similar to CellRanger >= 3.0
+* ```--soloUMIfiltering MultiGeneUMI_CR``` option filters lower-count UMIs that map to more than one gene matching CellRanger >= 3.0
+* ```--soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts``` options which allows 1MM multimatching to WL for barcodes with N-bases (to better match CellRanger >= 3.0)
+
+**Changes in behavior:**
+* The UMI deduplication/correction specified in ```--soloUMIdedup``` is used for statistics output, filtering and UB tag in BAM output.
 * If UMI or CB are not defined, the UB and CB tags in BAM output will contain "-" (instead of missing these tags).
-* Different --soloUMIdedup counts, if requested, are recorded in separate .mtx files.
+* For ```--soloUMIfiltering MultiGeneUMI``` option, the reads with multi-gene UMIs will have UB tag "-" in BAM output.
+* Different ```--soloUMIdedup``` counts, if requested, are recorded in separate .mtx files.
 * Cell-filtered Velocyto matrices are generated using Gene cell filtering.
 * Velocyto spliced/unspliced/ambiguous counts are reported in separate .mtx files.
-* The UMI deduplication/correction specified in --soloUMIdedup is used for statistics output, filtering and UB tag in BAM output.
-* Implemented --soloUMIdedup NoDedup option for counting reads per gene, i.e. no UMI deduplication
-* Implemented input from SAM/BAM for STARsolo, with options --soloInputSAMattrBarcodeSeq --soloInputSAMattrBarcodeQual to specify SAM tags for barcode read sequence and qualities.
-* Fixed an issue that was causing slightly incorrect values of Implemented input from SAM/BAM for STARsolo. Fixed an issue that was causing slightly underestimated value of Q30 'Bases in RNA read' in Solo.out/Gene/Summary.csv
-* Implemented --soloCellFilter EmptyDrops_CR option for cell filtering (calling) nearly identical to that of CellRanger 3 and 4.
-* Implemented --runMode soloCellFiltering option for cell filtering (calling) of the raw count matrix, without re-mapping.
-* PR: #1012: fix the bug with --soloCellFilter TopCells option
+* Read clipping options ```--clip*``` now require specifying the values for all read mates, even if they are identical.
+
+**Bug fixes:**
+* Issue #1107: fixed a bug causing seg-fault for ```--soloType SmartSeq``` with only one (pair of) fastq file(s)
+* Issue #1129: fixed an issue with short barcode sequences and ```--soloBarcodeReadLength 0```
+* Issue  #796: Fixed a problem with GX/GN tag output for ```--soloFeatures GeneFull``` option
+* PR: #1012: fix the bug with ```--soloCellFilter TopCells``` option
+* Fixed an issue that was causing slightly underestimated value of Q30 'Bases in RNA read' in ```Solo.out/Gene/Summary.csv```
 
 STAR 2.7.7a --- 2020/12/28
 ==========================

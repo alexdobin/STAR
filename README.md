@@ -1,18 +1,19 @@
 STAR 2.7
 ========
 Spliced Transcripts Alignment to a Reference
-© Alexander Dobin, 2009-2020
+© Alexander Dobin, 2009-2021
 https://www.ncbi.nlm.nih.gov/pubmed/23104886
 
 AUTHOR/SUPPORT
 ==============
-Alex Dobin, dobin@cshl.edu
+Alex Dobin, dobin@cshl.edu </br>
+https://github.com/alexdobin/STAR/issues </br>
 https://groups.google.com/d/forum/rna-star
 
 HARDWARE/SOFTWARE REQUIREMENTS
 ==============================
   * x86-64 compatible processors
-  * 64 bit Linux or Mac OS X 
+  * 64 bit Linux or Mac OS X
 
 MANUAL
 ======
@@ -35,9 +36,9 @@ Download the latest [release from](https://github.com/alexdobin/STAR/releases) a
 
 ```bash
 # Get latest STAR source from releases
-wget https://github.com/alexdobin/STAR/archive/2.7.7a.tar.gz
-tar -xzf 2.7.7a.tar.gz
-cd STAR-2.7.7a
+wget https://github.com/alexdobin/STAR/archive/2.7.8a.tar.gz
+tar -xzf 2.7.8a.tar.gz
+cd STAR-2.7.8a
 
 # Alternatively, get STAR source using git
 git clone https://github.com/alexdobin/STAR.git
@@ -57,7 +58,7 @@ Compile under Mac OS X
 
 ```bash
 # 1. Install brew (http://brew.sh/)
-# 2. Install gcc with brew: 
+# 2. Install gcc with brew:
 $ brew install gcc --without-multilib
 # 3. Build STAR:
 # run 'make' in the source directory
@@ -104,5 +105,5 @@ Please contact the author for a list of recommended parameters for much larger o
 FUNDING
 =======
 The developmenr of STAR is supported by the National Human Genome Research Institute of
-the National Institutes of Health under Award Number R01HG009318. 
+the National Institutes of Health under Award Number R01HG009318.
 The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health.
