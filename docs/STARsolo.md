@@ -199,6 +199,15 @@ CellRanger 3.0.0 use advanced filtering based on the EmptyDrop algorithm develop
 ```
 It can be followed by 10 numeric parameters:  nExpectedCells (3000),   maxPercentile (0.99),   maxMinRatio (10),   indMin (45000), indMax (90000),  umiMin (500),  umiMinFracMedian (0.01),  candMaxN (20000),  FDR (0.01),  simN (10000).
 
+
+#### Cell filtering of previously generated raw matrix
+It is possible to run only the filtering algorithm (without the need to re-map) inputting the previously generated **raw** matrix:
+```
+STAR --runMode soloCellFiltering  /path/to/count/dir/raw/   /path/to/output/prefix   --soloCellFilter EmptyDrops_CR
+```
+The */path/to/count/dir/raw/* directory should contain the **"raw"** *barcodes.tsv*, *features.tsv*,  and *matrix.mtx* files generated in a previos STARsolo run.
+The output will contain the filtered files.
+
 --------------------------------------------------
 Quantification of different transcriptomic features
 ---------------------------------------------------
