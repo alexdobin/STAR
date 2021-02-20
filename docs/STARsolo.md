@@ -1,7 +1,7 @@
 **STARsolo**: mapping, demultiplexing and quantification for single cell RNA-seq
 =================================================================================
 
-Major updates in STAR 2.7.8a (2021/02/21)
+Major updates in STAR 2.7.8a (2021/02/20)
 -----------------------------------------
 * [**Cell calling (filtering) similar to CellRanger:**](#emptydrop-like-filtering)
     * ```--soloCellFilter EmptyDrops_CR``` option for cell filtering (calling) nearly identical to that of CellRanger 3 and 4

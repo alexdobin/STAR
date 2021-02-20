@@ -8,6 +8,7 @@
 \usepackage{changepage}
 \usepackage[top=1in, bottom=1in, left=0.7in, right=0.7in]{geometry}
 \usepackage{enumitem}
+\usepackage{tocloft}
 
 \begin{document}
 \hypersetup{
@@ -38,6 +39,12 @@
 \author{Alexander Dobin\\
 dobin@cshl.edu}
 \maketitle
+
+%\setlength{\cftsubsecindent}{8em} % to control spacing between number and title in the ToC
+\makeatletter
+\renewcommand*\l@subsection{\@dottedtocline{2}{1.8em}{2.7 em}}
+\renewcommand*\l@subsubsection{\@dottedtocline{2}{4.5em}{2.7 em}}
+\makeatother
 \tableofcontents
 
 \newpage
@@ -121,7 +128,7 @@ The basic options to generate genome indices are as follows:
 \opt{sjdbOverhang} specifies the length of the genomic sequence around the annotated junction to be used in constructing the splice junctions database. Ideally, this length should be equal to the \optvr{ReadLength-1}, where \optvr{ReadLength} is the length of the reads. For instance, for Illumina 2x100b paired-end reads, the ideal value is 100-1=99. In case of reads of varying length, the ideal value is \optvr{max(ReadLength)-1}. \textbf{In most cases, the default value of 100 will work as well as the ideal value.}
 \end{itemize}
 
-Genome files comprise binary genome sequence, suffix arrays, text chromosome names/lengths, splice junctions coordinates, and transcripts/genes information. Most of these files use internal STAR format and are not intended to be utilized by the end user. It is strongly \textbf{not recommended} to change any of these file with one exception: you can rename the chromosome names in the chrName.txt keeping the order of the chromosomes in the file: the names from this file will be used in all output files (e.g. SAM/BAM).
+Genome files comprise binary genome sequence, suffix arrays, text chromosome names/lengths, splice junctions coordinates, and transcripts/genes information. Most of these files use internal STAR format and are not intended to be utilized by the end user. It is strongly \textbf{not recommended} to change any of these files with one exception: you can rename the chromosome names in the chrName.txt while keeping the order of the chromosomes in this file: the chromosome names from this file will be used in all output files (e.g. SAM/BAM).
 
 \subsection{Advanced options.}
 \subsubsection{Which chromosomes/scaffolds/patches to include?}
@@ -537,7 +544,7 @@ By default, the output satisfies RSEM requirements: soft-clipping or indels are 
 With \opt{quantMode} \optv{GeneCounts} option STAR will count number reads per gene while mapping. 
 A read is counted if it overlaps (1nt or more) one and only one gene. Both ends of the paired-end read are checked for overlaps. 
 The counts coincide with those produced by htseq-count with default parameters.
-This option requires annotations (GTF or GFF with --sjdbGTFfile option) used at the genome generation step, or at the mapping step.
+This option requires annotations in GTF format (i.e. \emph{gene\_id} tag for each exon) specified in \opt{sjdbGTFfile} at the genome generation step or at the mapping step provided in option.
 STAR outputs read counts per gene into ReadsPerGene.out.tab file with 4 columns which correspond to different strandedness options:
 \begin{itemize}[leftmargin=1in]
 \item[column 1:] gene ID

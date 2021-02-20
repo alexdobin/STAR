@@ -154,6 +154,13 @@
   \optOpt{SAM SE}   \optOptLine{SAM or BAM single-end reads; for BAM use --readFilesCommand samtools view}
   \optOpt{SAM PE}   \optOptLine{SAM or BAM paired-end reads; for BAM use --readFilesCommand samtools view}
 \end{optOptTable}
+\optName{readFilesSAMattrKeep}
+  \optValue{All}
+  \optLine{string(s): for --readFilesType SAM SE/PE, which SAM tags to keep in the output BAM, e.g.: --readFilesSAMtagsKeep RG PL} 
+\begin{optOptTable}
+  \optOpt{All}   \optOptLine{keep all tags}
+  \optOpt{None}   \optOptLine{do not keep any tags}
+\end{optOptTable}
 \optName{readFilesIn}
   \optValue{Read1 Read2}
   \optLine{string(s): paths to files that contain input read1 (and, if needed,  read2)} 
@@ -165,11 +172,9 @@
   \optLine{Spaces, but not tabs are allowed in file names.} 
   \optLine{If read{\textunderscore}group{\textunderscore}line does not start with ID:, it can only contain one ID field, and ID: will be added to it.} 
   \optLine{If read{\textunderscore}group{\textunderscore}line starts with ID:, it can contain several fields separated by $tab$, and all fields will be be copied verbatim into SAM @RG header line.} 
-  \optLine{-} 
 \optName{readFilesPrefix}
   \optValue{-}
   \optLine{string: prefix for the read files names, i.e. it will be added in front of the strings in --readFilesIn} 
-  \optLine{-: no prefix} 
 \optName{readFilesCommand}
   \optValue{-}
   \optLine{string(s): command line to execute for each of the input file. This command should generate FASTA or FASTQ text and send it to stdout} 
@@ -187,21 +192,35 @@
 \optName{readQualityScoreBase}
   \optValue{33}
   \optLine{int{\textgreater}=0: number to be subtracted from the ASCII code to get Phred quality score} 
+\end{optTable}
+\optSection{Read Clipping}\label{Read_Clipping}
+\begin{optTable}
+\optName{clipAdapterType}
+  \optValue{Hamming}
+  \optLine{string:                 adapter clipping type} 
+\begin{optOptTable}
+  \optOpt{Hamming}   \optOptLine{adapter clipping based on Hamming distance, with the number of mismatches controlled by --clip5pAdapterMMp}
+  \optOpt{CellRanger4}   \optOptLine{5p and 3p adapter clipping similar to CellRanger4. Utilizes Opal package by Martin Šošić: https://github.com/Martinsos/opal}
+  \optOpt{None}   \optOptLine{no adapter clipping, all other clip* parameters are disregarded}
+\end{optOptTable}
 \optName{clip3pNbases}
   \optValue{0}
   \optLine{int(s): number(s) of bases to clip from 3p of each mate. If one value is given, it will be assumed the same for both mates.} 
-\optName{clip5pNbases}
-  \optValue{0}
-  \optLine{int(s): number(s) of bases to clip from 5p of each mate. If one value is given, it will be assumed the same for both mates.} 
 \optName{clip3pAdapterSeq}
   \optValue{-}
   \optLine{string(s): adapter sequences to clip from 3p of each mate.  If one value is given, it will be assumed the same for both mates.} 
+\begin{optOptTable}
+  \optOpt{polyA}   \optOptLine{polyA sequence with the length equal to read length}
+\end{optOptTable}
 \optName{clip3pAdapterMMp}
   \optValue{0.1}
   \optLine{double(s): max proportion of mismatches for 3p adapter clipping for each mate.  If one value is given, it will be assumed the same for both mates.} 
 \optName{clip3pAfterAdapterNbases}
   \optValue{0}
   \optLine{int(s): number of bases to clip from 3p of each mate after the adapter clipping. If one value is given, it will be assumed the same for both mates.} 
+\optName{clip5pNbases}
+  \optValue{0}
+  \optLine{int(s): number(s) of bases to clip from 5p of each mate. If one value is given, it will be assumed the same for both mates.} 
 \end{optTable}
 \optSection{Limits}\label{Limits}
 \begin{optTable}
@@ -327,6 +346,7 @@
   \optOpt{XS}   \optOptLine{alignment strand according to --outSAMstrandField.}
   \optOpt{MC}   \optOptLine{mate's CIGAR string. Standard SAM tag.}
   \optOpt{ch}   \optOptLine{marks all segment of all chimeric alingments for --chimOutType WithinBAM output.}
+  \optOpt{cN}   \optOptLine{number of bases clipped from the read ends: 5' and 3'}
 \end{optOptTable}
   \optLine{***Variation:} 
 \begin{optOptTable}
@@ -876,6 +896,14 @@
   \optOpt{1}   \optOptLine{equal to sum of soloCBlen+soloUMIlen}
   \optOpt{0}   \optOptLine{not defined, do not check}
 \end{optOptTable}
+\optName{soloBarcodeMate}
+  \optValue{0}
+  \optLine{int: identifies which read mate contains the barcode (CB+UMI) sequence} 
+\begin{optOptTable}
+  \optOpt{0}   \optOptLine{barcode sequence is on separate read, which should always be the last file in the --readFilesIn listed}
+  \optOpt{1}   \optOptLine{barcode sequence is a part of mate 1}
+  \optOpt{2}   \optOptLine{barcode sequence is a part of mate 2}
+\end{optOptTable}
 \optName{soloCBposition}
   \optValue{-}
   \optLine{strings(s)              position of Cell Barcode(s) on the barcode read.} 
@@ -905,11 +933,21 @@
   \optOpt{1MM}   \optOptLine{only one match in whitelist with 1 mismatched base allowed. Allowed CBs have to have at least one read with exact match.}
   \optOpt{1MM{\textunderscore}multi}   \optOptLine{multiple matches in whitelist with 1 mismatched base allowed, posterior probability calculation is used choose one of the matches.}
 \end{optOptTable}
-  \optLine{Allowed CBs have to have at least one read with exact match. Similar to CellRanger 2.2.0} 
+  \optLine{Allowed CBs have to have at least one read with exact match. This option matches best with CellRanger 2.2.0} 
 \begin{optOptTable}
   \optOpt{1MM{\textunderscore}multi{\textunderscore}pseudocounts}   \optOptLine{same as 1MM{\textunderscore}Multi, but pseudocounts of 1 are added to all whitelist barcodes.}
+  \optOpt{1MM{\textunderscore}multi{\textunderscore}Nbase{\textunderscore}pseudocounts}   \optOptLine{same as 1MM{\textunderscore}multi{\textunderscore}pseudocounts, multimatching to WL is allowed for CBs with N-bases. This option matches best with CellRanger {\textgreater}= 3.0.0}
 \end{optOptTable}
-  \optLine{Similar to CellRanger 3.x.x} 
+\optName{soloInputSAMattrBarcodeSeq}
+  \optValue{-}
+  \optLine{string(s):              when inputting reads from a SAM file (--readsFileType SAM SE/PE), these SAM attributes mark the barcode sequence (in proper order).} 
+  \optLine{For instance, for 10X CellRanger or STARsolo BAMs, use --soloInputSAMattrBarcodeSeq CR UR .} 
+  \optLine{This parameter is required when running STARsolo with input from SAM. } 
+\optName{soloInputSAMattrBarcodeQual}
+  \optValue{-}
+  \optLine{string(s):              when inputting reads from a SAM file (--readsFileType SAM SE/PE), these SAM attributes mark the barcode qualities (in proper order).} 
+  \optLine{For instance, for 10X CellRanger or STARsolo BAMs, use --soloInputSAMattrBarcodeQual CY UY .} 
+  \optLine{If this parameter is '-' (default), the quality 'H' will be assigned to all bases.} 
 \optName{soloStrand}
   \optValue{Forward}
   \optLine{string: strandedness of the solo libraries:} 
@@ -930,18 +968,22 @@
   \optValue{1MM{\textunderscore}All}
   \optLine{string(s):              type of UMI deduplication (collapsing) algorithm} 
 \begin{optOptTable}
-  \optOpt{1MM{\textunderscore}All}   \optOptLine{all UMIs with 1 mismatch distance to each other are collapsed (i.e. counted once)}
-  \optOpt{1MM{\textunderscore}Directional}   \optOptLine{follows the "directional" method from the UMI-tools by Smith, Heger and Sudbery (Genome Research 2017).}
-  \optOpt{Exact}   \optOptLine{only exactly matching UMIs are collapsed}
-  \optOpt{NoDedup}   \optOptLine{no deduplication of UMIs, count all reads. Allowed for --soloType SmartSeq}
+  \optOpt{1MM{\textunderscore}All}   \optOptLine{all UMIs with 1 mismatch distance to each other are collapsed (i.e. counted once).}
+  \optOpt{1MM{\textunderscore}Directional{\textunderscore}UMItools}   \optOptLine{follows the "directional" method from the UMI-tools by Smith, Heger and Sudbery (Genome Research 2017).}
+  \optOpt{1MM{\textunderscore}Directional}   \optOptLine{same as 1MM{\textunderscore}Directional{\textunderscore}UMItools, but with more stringent criteria for duplicate UMIs}
+  \optOpt{Exact}   \optOptLine{only exactly matching UMIs are collapsed.}
+  \optOpt{NoDedup}   \optOptLine{no deduplication of UMIs, count all reads.}
+  \optOpt{1MM{\textunderscore}CR}   \optOptLine{CellRanger2-4 algorithm for 1MM UMI collapsing.}
 \end{optOptTable}
 \optName{soloUMIfiltering}
   \optValue{-}
   \optLine{string(s)               type of UMI filtering} 
 \begin{optOptTable}
-  \optOpt{-}   \optOptLine{basic filtering: remove UMIs with N and homopolymers (similar to CellRanger 2.2.0)}
-  \optOpt{MultiGeneUMI}   \optOptLine{remove lower-count UMIs that map to more than one gene (introduced in CellRanger 3.x.x)}
+  \optOpt{-}   \optOptLine{basic filtering: remove UMIs with N and homopolymers (similar to CellRanger 2.2.0).}
+  \optOpt{MultiGeneUMI}   \optOptLine{basic + remove lower-count UMIs that map to more than one gene.}
+  \optOpt{MultiGeneUMI{\textunderscore}CR}   \optOptLine{basic + remove lower-count UMIs that map to more than one gene, matching CellRanger {\textgreater} 3.0.0 .}
 \end{optOptTable}
+  \optLine{Only works with --soloUMIdedup 1MM{\textunderscore}CR} 
 \optName{soloOutFileNames}
   \optValue{Solo.out/ features.tsv barcodes.tsv matrix.mtx}
   \optLine{string(s)               file names for STARsolo output:} 
@@ -950,10 +992,17 @@
   \optValue{CellRanger2.2 3000 0.99 10}
   \optLine{string(s):              cell filtering type and parameters} 
 \begin{optOptTable}
-  \optOpt{CellRanger2.2}   \optOptLine{simple filtering of CellRanger 2.2, followed by three numbers: number of expected cells, robust maximum percentile for UMI count, maximum to minimum ratio for UMI count}
-  \optOpt{TopCells}   \optOptLine{only report top cells by UMI count, followed by the exact number of cells}
   \optOpt{None}   \optOptLine{do not output filtered cells}
+  \optOpt{TopCells}   \optOptLine{only report top cells by UMI count, followed by the exact number of cells}
+  \optOpt{CellRanger2.2}   \optOptLine{simple filtering of CellRanger 2.2.}
 \end{optOptTable}
+  \optLine{Can be followed by numbers: number of expected cells, robust maximum percentile for UMI count, maximum to minimum ratio for UMI count} 
+  \optLine{The harcoded values are from CellRanger: nExpectedCells=3000;  maxPercentile=0.99;  maxMinRatio=10} 
+\begin{optOptTable}
+  \optOpt{EmptyDrops{\textunderscore}CR}   \optOptLine{EmptyDrops filtering in CellRanger flavor. Please cite the original EmptyDrops paper: A.T.L Lun et al, Genome Biology, 20, 63 (2019): https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1662-y}
+\end{optOptTable}
+  \optLine{Can be followed by 10 numeric parameters:  nExpectedCells   maxPercentile   maxMinRatio   indMin   indMax   umiMin   umiMinFracMedian   candMaxN   FDR   simN } 
+  \optLine{The harcoded values are from CellRanger:             3000            0.99            10    45000    90000      500               0.01      20000  0.01  10000} 
 \optName{soloOutFormatFeaturesGeneField3}
   \optValue{"Gene Expression"}
   \optLine{string(s):				field 3 in the Gene features.tsv file. If "-", then no 3rd field is output.} 

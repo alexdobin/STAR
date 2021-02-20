@@ -1,4 +1,4 @@
-STAR 2.7.8a --- 2021/02/21
+STAR 2.7.8a --- 2021/02/20
 ===========================
 **Major STARsolo updates and many bug fixes**
 
