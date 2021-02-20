@@ -68,7 +68,7 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
     Read0 = new char*[P.readNends];
     Qual0 = new char*[P.readNends];
     readNameMates=new char* [P.readNends];
-    for (int ii=0; ii<P.readNends; ii++) {
+    for (uint32 ii=0; ii<P.readNends; ii++) {
         readNameMates[ii]= new char [DEF_readNameLengthMax];
         Read0[ii]        = new char [DEF_readSeqLengthMax+1];
         Qual0[ii]        = new char [DEF_readSeqLengthMax+1];        
