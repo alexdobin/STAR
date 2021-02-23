@@ -88,7 +88,7 @@ opal/opal.o : opal/opal.cpp opal/opal.h
 
 .PHONY: clean
 clean:
-	rm -f *.o STAR STARstatic STARlong Depend.list
+	rm -f *.o opal/opal.o STAR STARstatic STARlong Depend.list
 
 .PHONY: clean_solo
 clean_solo:
