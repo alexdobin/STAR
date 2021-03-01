@@ -199,7 +199,6 @@ CellRanger 3.0.0 use advanced filtering based on the EmptyDrop algorithm develop
 ```
 It can be followed by 10 numeric parameters:  nExpectedCells (3000),   maxPercentile (0.99),   maxMinRatio (10),   indMin (45000), indMax (90000),  umiMin (500),  umiMinFracMedian (0.01),  candMaxN (20000),  FDR (0.01),  simN (10000).
 
-
 #### Cell filtering of previously generated raw matrix
 It is possible to run only the filtering algorithm (without the need to re-map) inputting the previously generated **raw** matrix:
 ```
@@ -259,7 +258,7 @@ In case of BAM files, use ```samtools view``` command to convert to BAM:
 ```
 --readFilesCommand samtools view -F 0x100
 ```
-The file should contain one line for each read. For previously mapped file it can be achieved by filtering out non-primary alignments as show above. Note that unmapped reads have to be included in the file to be remapped.
+The file should contain one line for each read. For previously mapped file it can be achieved by filtering out non-primary alignments as shown above. Note that unmapped reads have to be included in the file to be remapped.
 We need to specify which SAM attributes correspond to seqeunces/qualities of cell barcodes (CR/CY) and UMIs (UR/UY):
 ```
 --soloInputSAMattrBarcodeSeq CR UR    --soloInputSAMattrBarcodeQual CY UY
