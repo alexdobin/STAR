@@ -89,7 +89,7 @@ SOURCES := $(wildcard *.cpp) $(wildcard *.c)
 %.o : %.c
 	$(CXX) -c $(CPPFLAGS) $(CFLAGS) $<
 
-all: cleanCompileInfo STAR
+all: STAR
 
 opal/opal.o : opal/opal.cpp opal/opal.h
 	cd opal && \
@@ -97,25 +97,21 @@ opal/opal.o : opal/opal.cpp opal/opal.h
 
 .PHONY: clean
 clean:
-	'rm' -f *.o opal/opal.o STAR STARstatic STARlong Depend.list parametersDefault.xxd
+	rm -f *.o STAR STARstatic STARlong Depend.list
 
 .PHONY: clean_solo
 clean_solo:
-	'rm' -f Solo*.o
+	rm -f Solo*.o
 
 .PHONY: CLEAN
 CLEAN:
-	'rm' -f *.o STAR Depend.list
+	rm -f *.o STAR Depend.list
 	$(MAKE) -C htslib clean
 
 .PHONY: cleanRelease
 cleanRelease:
-	'rm' -f *.o Depend.list
+	rm -f *.o Depend.list
 	$(MAKE) -C htslib clean
-
-.PHONY: cleanCompileInfo
-cleanCompileInfo:
-	'rm' -f STAR.o Parameters.o
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),cleanRelease)
