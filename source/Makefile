@@ -18,7 +18,16 @@ LDFLAGS_Mac :=-pthread -lz htslib/libhts.a
 LDFLAGS_Mac_static :=-pthread -lz -static-libgcc htslib/libhts.a
 LDFLAGS_gdb := $(LDFLAGS_shared)
 
-COMPTIMEPLACE := -D'COMPILATION_TIME_PLACE="$(shell echo `date` $(HOSTNAME):`pwd`)"'
+DATE_FMT = --iso-8601=seconds
+ifdef SOURCE_DATE_EPOCH
+    BUILD_DATE ?= $(shell date -u -d "@$(SOURCE_DATE_EPOCH)" "$(DATE_FMT)" 2>/dev/null || date -u -r "$(SOURCE_DATE_EPOCH)" "$(DATE_FMT)" 2>/dev/null || date -u "$(DATE_FMT)")
+else
+    BUILD_DATE ?= $(shell date "$(DATE_FMT)")
+endif
+
+BUILD_PLACE ?= $(HOSTNAME):$(shell pwd)
+
+COMPTIMEPLACE := -D'COMPILATION_TIME_PLACE="$(BUILD_DATE) $(BUILD_PLACE)"'
 
 # Defaults, can be overridden by make arguments or environment
 CXXFLAGS ?= -pipe -Wall -Wextra
