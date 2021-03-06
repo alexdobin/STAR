@@ -65,7 +65,7 @@ int main(int argInN, char* argIn[]) {
     Parameters P; //all parameters
     P.inputParameters(argInN, argIn);
 
-    *(P.inOut->logStdOut) << timeMonthDayTime(g_statsAll.timeStart) << " ..... started STAR run\n" <<flush;
+    *(P.inOut->logStdOut) << timeMonthDayTime(g_statsAll.timeStart) << " ..... started STAR run (" << argIn[0] << ")\n" <<flush;
 
     //runMode
     if ( P.runMode == "alignReads" || P.runMode == "soloCellFiltering" ){
