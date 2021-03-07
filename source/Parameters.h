@@ -229,6 +229,11 @@ class Parameters {
         string outFilterType; //type of filtering
         int outFilterBySJoutStage; //indicates the stage of filtering by SJout
 
+        struct {
+            vector<string> type;
+            bool yes;
+        } outSJ;
+        
         //output filtering SJs
         string outSJfilterReads;
         vector <int32> outSJfilterCountUniqueMin, outSJfilterCountTotalMin;
@@ -270,7 +275,7 @@ class Parameters {
 
         //storage limits
         uint64 limitGenomeGenerateRAM;
-        uint64 limitIObufferSize; //max size of the in/out buffer, bytes
+        vector<uint64> limitIObufferSize; //max size of the in/out buffer, bytes
         uint64 limitOutSAMoneReadBytes;
         uint64 limitOutSJoneRead, limitOutSJcollapsed;
         uint64 limitBAMsortRAM;

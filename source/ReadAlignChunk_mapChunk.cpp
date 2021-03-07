@@ -62,7 +62,9 @@ void ReadAlignChunk::mapChunk() {//map one chunk. Input reads stream has to be s
         };
 
         //collapse SJ buffer if needed
-        if ( chunkOutSJ->N > P.limitOutSJcollapsed ) {//this means the number of collapsed junctions is larger than the chunks size
+        if ( !P.outSJ.yes ) {
+            //do nothing
+        } else if ( chunkOutSJ->N > P.limitOutSJcollapsed ) {//this means the number of collapsed junctions is larger than the chunks size
             ostringstream errOut;
             errOut <<"EXITING because of fatal error: buffer size for SJ output is too small\n";
             errOut <<"Solution: increase input parameter --limitOutSJoneRead\n";
@@ -78,7 +80,9 @@ void ReadAlignChunk::mapChunk() {//map one chunk. Input reads stream has to be s
         };
 
         //collapse SJ1 buffer if needed
-        if ( chunkOutSJ1->N > P.limitOutSJcollapsed ) {//this means the number of collapsed junctions is larger than the chunks size
+        if ( P.outFilterBySJoutStage != 1 ) {//no outFilterBySJoutStage
+            //do nothing
+        } else if ( chunkOutSJ1->N > P.limitOutSJcollapsed ) {//this means the number of collapsed junctions is larger than the chunks size
             ostringstream errOut;
             errOut <<"EXITING because of fatal error: buffer size for SJ output is too small\n";
             errOut <<"Solution: increase input parameter --limitOutSJoneRead\n";

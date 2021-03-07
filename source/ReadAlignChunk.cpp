@@ -63,11 +63,22 @@ ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome 
         RA->outBAMquant=NULL;
     };
 
-    chunkOutSJ=new OutSJ (P.limitOutSJcollapsed, P, mapGen);
-    chunkOutSJ1=new OutSJ (P.limitOutSJcollapsed, P, mapGen);
+    if (P.outSJ.yes) {
+        chunkOutSJ  = new OutSJ (P.limitOutSJcollapsed, P, mapGen);
+        RA->chunkOutSJ  = chunkOutSJ;
+    } else {
+        RA->chunkOutSJ  = NULL;
+    };
 
-    RA->chunkOutSJ=chunkOutSJ;
-    RA->chunkOutSJ1=chunkOutSJ1;
+    if (P.outFilterBySJoutStage == 1) {
+        chunkOutSJ1 = new OutSJ (P.limitOutSJcollapsed, P, mapGen);
+        RA->chunkOutSJ1 = chunkOutSJ1;
+    } else {
+        RA->chunkOutSJ1  = NULL;
+    };
+
+    
+    
 
     if (P.pCh.segmentMin>0) {
        if (P.pCh.out.samOld) {

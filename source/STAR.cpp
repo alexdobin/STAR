@@ -206,7 +206,7 @@ int main(int argInN, char* argIn[]) {
 
     //aggregate output junctions
     //collapse splice junctions from different threads/chunks, and output them
-    if (P.runRestart.type!=1)
+    if (P.runRestart.type!=1 && P.outSJ.yes)
         outputSJ(RAchunk,P);
 
     //solo counts

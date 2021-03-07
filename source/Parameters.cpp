@@ -76,7 +76,7 @@ Parameters::Parameters() {//initalize parameters info
 
     //limits
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitGenomeGenerateRAM", &limitGenomeGenerateRAM));
-    parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitIObufferSize", &limitIObufferSize));
+    parArray.push_back(new ParameterInfoVector <uint64>   (-1, -1, "limitIObufferSize", &limitIObufferSize));
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitOutSAMoneReadBytes", &limitOutSAMoneReadBytes));
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitOutSJcollapsed", &limitOutSJcollapsed));
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "limitOutSJoneRead", &limitOutSJoneRead));
@@ -117,8 +117,10 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <uint>     (-1, -1, "outSAMattrIHstart", &outSAMattrIHstart));
     parArray.push_back(new ParameterInfoScalar <int>        (-1, -1, "outSAMtlen", &outSAMtlen));
 
-
-   //output SJ filtering
+    //outSJ
+    parArray.push_back(new ParameterInfoVector <string>     (-1, -1, "outSJtype", &outSJ.type));
+    
+    //output SJ filtering
     parArray.push_back(new ParameterInfoScalar <string>  (-1, -1, "outSJfilterReads", &outSJfilterReads));
     parArray.push_back(new ParameterInfoVector <int32>   (-1, -1, "outSJfilterCountUniqueMin", &outSJfilterCountUniqueMin));
     parArray.push_back(new ParameterInfoVector <int32>   (-1, -1, "outSJfilterCountTotalMin", &outSJfilterCountTotalMin));
@@ -832,17 +834,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                 inOut->outUnmappedReadsStream[imate].open(ff.str().c_str());
             };
         };
-
-        if (outFilterType=="Normal") {
-            outFilterBySJoutStage=0;
-        } else if (outFilterType=="BySJout") {
-            outFilterBySJoutStage=1;
-        } else {
-            ostringstream errOut;
-            errOut <<"EXITING because of FATAL input ERROR: unknown value of parameter outFilterType: " << outFilterType <<"\n";
-            errOut <<"SOLUTION: specify one of the allowed values: Normal | BySJout\n";
-            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-        };
     };
 
     if (outSAMmapqUnique<0 || outSAMmapqUnique>255) {
@@ -851,20 +842,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             errOut <<"SOLUTION: specify outSAMmapqUnique within the range of 0 to 255\n";
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
-
-    // in/out buffers
-    #define BUFFER_InSizeFraction 0.5
-    if (limitIObufferSize<limitOutSJcollapsed*Junction::dataSize+1000000) {
-        ostringstream errOut;
-        errOut <<"EXITING because of FATAL INPUT ERROR: --limitIObufferSize="<<limitIObufferSize <<" is too small for ";
-        errOut << "--limitOutSJcollapsed*"<<Junction::dataSize<<"="<< limitOutSJcollapsed<<"*"<<Junction::dataSize<<"="<<limitOutSJcollapsed*Junction::dataSize<<"\n";
-        errOut <<"SOLUTION: re-run STAR with larger --limitIObufferSize or smaller --limitOutSJcollapsed\n";
-        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-    };
-    chunkInSizeBytesArray=(uint) int((limitIObufferSize-limitOutSJcollapsed*Junction::dataSize)*BUFFER_InSizeFraction)/2;
-    chunkOutBAMsizeBytes= (uint) int((1.0/BUFFER_InSizeFraction-1.0)*chunkInSizeBytesArray*2.0);
-    chunkInSizeBytes=chunkInSizeBytesArray-2*(DEF_readSeqLengthMax+1)-2*DEF_readNameLengthMax;//to prevent overflow
-
+        
     //variation
     var.yes=false;
     if (var.vcfFile!="-") {
@@ -1128,7 +1106,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         alignSoftClipAtReferenceEnds.yes=false;
     } else {
         ostringstream errOut;
-        errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in of --alignSoftClipAtReferenceEnds="<<alignSoftClipAtReferenceEnds.in<<"\n";
+        errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in --alignSoftClipAtReferenceEnds   "<<alignSoftClipAtReferenceEnds.in<<"\n";
         errOut << "SOLUTION: use allowed option: Yes or No";
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
@@ -1138,6 +1116,64 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         outSAMreadIDnumber=true;
     };
 
+
+    //////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////// these parameters do not depend on other parameters
+    /////////////////////////////////////////////////////////////////////////////////
+    
+    ////////////////////////////////////////////////////////// limitIObufferSize
+    /* old before 2.7.9
+    // in/out buffers
+    #define BUFFER_InSizeFraction 0.5
+    if (limitIObufferSize<limitOutSJcollapsed*Junction::dataSize+1000000) {
+        ostringstream errOut;
+        errOut <<"EXITING because of FATAL INPUT ERROR: --limitIObufferSize="<<limitIObufferSize <<" is too small for ";
+        errOut << "--limitOutSJcollapsed*"<<Junction::dataSize<<"="<< limitOutSJcollapsed<<"*"<<Junction::dataSize<<"="<<limitOutSJcollapsed*Junction::dataSize<<"\n";
+        errOut <<"SOLUTION: re-run STAR with larger --limitIObufferSize or smaller --limitOutSJcollapsed\n";
+        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
+    chunkInSizeBytesArray=(uint) int((limitIObufferSize-limitOutSJcollapsed*Junction::dataSize)*BUFFER_InSizeFraction)/2;
+    chunkOutBAMsizeBytes= (uint) int((1.0/BUFFER_InSizeFraction-1.0)*chunkInSizeBytesArray*2.0);
+    chunkInSizeBytes=chunkInSizeBytesArray-2*(DEF_readSeqLengthMax+1)-2*DEF_readNameLengthMax;//to prevent overflow
+    */
+    
+    if (limitIObufferSize.size() != 2) 
+        exitWithError("EXITING because of FATAL input ERROR: --limitIObufferSize requires 2 numbers since 2.7.9a.\n"
+                      "SOLUTION: specify 2 numbers in --limitIObufferSize : size of input and output buffers in bytes.\n"
+                        , std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    
+    chunkInSizeBytesArray = limitIObufferSize[0]/readNends; //array size
+    chunkInSizeBytes = chunkInSizeBytesArray-2*(DEF_readSeqLengthMax+1)-2*DEF_readNameLengthMax; //to prevent overflow - array is bigger to allow loading one read
+    chunkOutBAMsizeBytes = limitIObufferSize[1];
+    
+    
+    ///////////////////////////////////////////////////////// outSJ
+    if (outSJ.type[0] == "None") {
+        outSJ.yes = false;
+    } else if (outSJ.type[0] == "Standard") {
+        outSJ.yes = true;
+    } else {
+        exitWithError("EXITING because of FATAL input ERROR: unrecognized option in --outSJtype   " + outSJ.type[0] + '\n' +
+                      "SOLUTION: use one of the allowed options: --outSJtype   Standard    OR    None\n"
+                        , std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
+
+    if (outFilterType=="Normal") {
+        outFilterBySJoutStage=0;
+    } else if (outFilterType=="BySJout") {
+        if (!outSJ.yes)
+            exitWithError("EXITING because of FATAL input ERROR: --outFilterType BySJout requires --outSJtype Standard\n"
+                      "SOLUTION: --outFilterType Normal    OR   --outFilterType BySJout --outSJtype Standard\n"
+                        , std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+            
+        outFilterBySJoutStage=1;
+    } else {
+        ostringstream errOut;
+        errOut <<"EXITING because of FATAL input ERROR: unknown value of parameter outFilterType: " << outFilterType <<"\n";
+        errOut <<"SOLUTION: specify one of the allowed values: Normal | BySJout\n";
+        exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };    
+    
     ////////////////////////////////////////////////
     inOut->logMain << "Finished loading and checking parameters\n" <<flush;
 };

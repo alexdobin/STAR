@@ -1,3 +1,5 @@
+* Modified option: ---limitIObufferSize now requires two numbers - separate sizes for input and output buffers
+* New option: --outSJtype None   to omit outputting splice junctions to SJ.out.tab
 * PR #1164: SOURCE_DATE_EPOCH to make the build more reproducible
 * PR #1156: clean opal/opal.o
 * PR #1157: print STAR command line and version information to stdout

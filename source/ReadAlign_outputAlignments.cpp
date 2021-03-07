@@ -53,6 +53,9 @@ void ReadAlign::outputAlignments() {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void ReadAlign::recordSJ(uint64 nTrO, Transcript **trO, OutSJ *cSJ)
 {//junction output for mapped reads (i.e. passed BySJout filtering)
+    if (!P.outSJ.yes)
+        return; //no SJ output
+    
     if ( P.outSJfilterReads=="All" || nTrO==1 ) {
         uint64 sjReadStartN=cSJ->N;
         for (uint64 iTr=0; iTr<nTrO; iTr++) {//write all transcripts junctions
