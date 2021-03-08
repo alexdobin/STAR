@@ -32,7 +32,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
             };
 
             if (!pSolo.cbWLyes) //if no-WL, the full cbInteger was recorded - now has to be placed in order
-                cb=binarySearchExact<uint64>(cb,pSolo.cbWL.data(),pSolo.cbWLsize);
+                cb=binarySearchExact<uintCB>(cb, pSolo.cbWL.data(), pSolo.cbWLsize);
 
             //record feature ingle-number feature
             if (feature != (uint32)(-1)) {

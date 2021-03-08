@@ -18,7 +18,7 @@ public:
     uint32 homoPolymer[4];//homopolymer constants
 
     vector<uint32> cbReadCount;
-    map <uint32,uint32> cbReadCountMap;
+    map <uintCB,uint32> cbReadCountMap;
     
     vector<uint32> transcriptDistCount;
     
