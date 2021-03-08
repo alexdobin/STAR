@@ -48,7 +48,7 @@ uint32 ClipMate::clip(uint &Lread, char *seqNum)
                 */
             };
             case 10: {//5p: CR4
-                clippedAdN = clippedInfo;
+                clippedAdN = min( (uint32)clippedInfo, (uint32)Lread );
                 memmove(seqNum, seqNum+clippedAdN, Lread-clippedAdN);
                 break;
             };

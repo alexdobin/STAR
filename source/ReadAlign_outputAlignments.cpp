@@ -34,6 +34,11 @@ void ReadAlign::outputAlignments() {
         //the operations below are both for mapped and unmapped reads
         soloRead->readBar->getCBandUMI(Read0, Qual0, readLengthOriginal, readNameExtra[0], readFilesIndex, readName);
 
+        //transcripts: need to be run after CB/UMI are obtained to output CR/UR tags
+        if ( P.quant.trSAM.yes ) {
+            quantTranscriptome(chunkTr, nTr, trMult,  alignTrAll);
+        };        
+        
         soloRead->record((unmapType<0 ? nTr : 0), trMult, iReadAll, readAnnot); //need to supply nTr=0 for unmapped reads
 
         if (!P.pGe.transform.outSAM) {
@@ -285,8 +290,4 @@ void ReadAlign::alignedAnnotation()
     if ( P.quant.gene.yes ) {
         chunkTr->classifyAlign(trMult, nTr, readAnnot);
     };            
-    //transcripts
-    if ( P.quant.trSAM.yes ) {
-        quantTranscriptome(chunkTr, nTr, trMult,  alignTrAll);
-    };
 };

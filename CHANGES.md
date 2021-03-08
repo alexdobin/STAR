@@ -1,7 +1,10 @@
+* Issue #1167: STARsolo CR/UR SAM tags are scrambled in TranscriptomeSAM file Aligned.toTranscriptome.out.bam. This bug appeared in 2.7.7a.
+* Issue #1166: seg-fault for STARsolo --soloCBwhitelist None (no whitelist) with barcodes longer than 16b
+* Fixed a bug causing seg-faults with --clipAdapterType CellRanger4 option.
 * PR #1164: SOURCE_DATE_EPOCH to make the build more reproducible
 * PR #1156: clean opal/opal.o
 * PR #1157: print STAR command line and version information to stdout
-* New script extras/scripts/calcUMIperCell.aw to calculate total number of UMIs per cell and filtering status from STARsolo metrix.mtx
+* New script extras/scripts/calcUMIperCell.awk to calculate total number of UMIs per cell and filtering status from STARsolo metrix.mtx
 
 STAR 2.7.8a --- 2021/02/20 ::: Major STARsolo updates
 =====================================================
