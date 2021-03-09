@@ -82,6 +82,8 @@ void ClipCR4::opalAlign(uint8_t *query, uint32 queryLen, int dbN1)
 uint32 ClipCR4::polyTail3p(char *seq, uint32 seqLen)
 {//clip polyA tail
     //hardcoded for CR4 trimming
+    if (seqLen<20)
+        return 0; //do not trim reads that are too short
 
     uint32_t ib1=seqLen-1;
     int32_t score=0, score1=0;
