@@ -5,22 +5,8 @@
 #include <unordered_map>
 #include "SoloCommon.h"
 
-inline int funCompareSolo1 (const void *a, const void *b) {
-    uint32 *va= (uint32*) a;
-    uint32 *vb= (uint32*) b;
-
-    if (va[1]>vb[1]) {
-        return 1;
-    } else if (va[1]<vb[1]) {
-        return -1;
-    } else if (va[0]>vb[0]){
-        return 1;
-    } else if (va[0]<vb[0]){
-        return -1;
-    } else {
-        return 0;
-    };
-};
+inline int funCompareSolo1 (const void *a, const void *b);          //defined below
+inline int funCompare_uint32_1_2_0 (const void *a, const void *b);
 
 void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray) 
 {
@@ -30,9 +16,8 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
     
     qsort(rGU,rN,rguStride*sizeof(uint32),funCompareNumbers<uint32>); //sort by gene index
 
-    //compact reads per gene
     uint32 gid1=-1;//current gID
-    uint32 nGenes=0; //number of genes
+    uint32 nGenes=0, nGenesMult=0; //number of genes
     uint32 *gID = new uint32[min(featuresNumber,rN)+1]; //gene IDs
     uint32 *gReadS = new uint32[min(featuresNumber,rN)+1]; //start of gene reads TODO: allocate this array in the 2nd half of rGU
     for (uint32 iR=0; iR<rN*rguStride; iR+=rguStride) {
@@ -40,17 +25,19 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
             gReadS[nGenes]=iR;
             gid1=rGU[iR+rguG];
             gID[nGenes]=gid1;
-            ++nGenes;
+            
+            ++nGenes;            
+            if (gid1>=geneMultMark)
+                ++nGenesMult;
         };
     };
     gReadS[nGenes]=rguStride*rN;//so that gReadS[nGenes]-gReadS[nGenes-1] is the number of reads for nGenes, see below in qsort
-
-    //unordered_map<uint32, uint32> umiMaxGeneCount;//for each umi, max counts of reads per gene
-    
+    nGenes -= nGenesMult;//unique only gene
+   
     unordered_map <uintUMI, unordered_map<uint32,uint32>> umiGeneHash, umiGeneHash0;
                    //UMI                 //Gene //Count
     if (pSolo.umiFiltering.MultiGeneUMI) {
-        for (uint32 iR=0; iR<rN*rguStride; iR+=rguStride) {
+        for (uint32 iR=0; iR<gReadS[nGenes]; iR+=rguStride) {
             umiGeneHash[rGU[iR+1]][rGU[iR]]++; 
         };
 
@@ -58,7 +45,7 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
             if (iu.second.size()==1)
                 continue;
             uint32 maxu=0;
-            for (auto &ig : iu.second) {//loop over genes for a given UMI
+            for (const auto &ig : iu.second) {//loop over genes for a given UMI
                 if (maxu<ig.second)
                     maxu=ig.second; //find gene with maximum count
             };
@@ -189,10 +176,10 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
         if (readInfo.size()>0)
             geneUmiHash.resize(nGenes);
         
-        for (auto &iu: umiGeneHash) {//loop over UMIs for all genes
+        for (const auto &iu: umiGeneHash) {//loop over UMIs for all genes
                        
             uint32 maxu=0, maxg=-1;
-            for (auto &ig : iu.second) {
+            for (const auto &ig : iu.second) {
                 if (ig.second>maxu) {
                     maxu=ig.second;
                     maxg=ig.first;
@@ -204,7 +191,7 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
             if ( maxg+1==0 )
                 continue; //this umi is not counted for any gene, because two genes have the same read count for this UMI
             
-            for (auto &ig : umiGeneHash0[iu.first]) {//check that this umi/gene had also top count for uncorrected umis
+            for (const auto &ig : umiGeneHash0[iu.first]) {//check that this umi/gene had also top count for uncorrected umis
                 if (ig.second>umiGeneHash0[iu.first][maxg]) {
                     maxg=-1;
                     break;
@@ -249,7 +236,161 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
             };
         };
     };
+    
+    if (nGenesMult>0) {//process multigene reads
+        uint32 indDedup = pSolo.umiDedup.countInd.main; //for now only do it for main Dedup
+               
+        std::vector<vector<uint32>> umiGenes;
+        umiGenes.reserve(256);
+        {//for each umi, count number of reads per gene. 
+         //Output umiGenes: only genes with nReads = nReads-for-this-UMI will be kept for this UMI
+            uint32 *rGUm = rGU + gReadS[nGenes];
+            uint32 nRm=( gReadS[nGenes+nGenesMult] - gReadS[nGenes] ) / rguStride;
+            
+            //sort by UMI, then by read, then by gene
+            qsort(rGUm, nRm, rguStride*sizeof(uint32), funCompare_uint32_1_2_0);//there is no need to sort by read or gene actually
+            
+            std::unordered_map<uint32, uint32> geneReadCount; //number of reads per gene
+            uint32 nRumi=0;
+            bool skipUMI=false;
+            uintUMI umiPrev = (uintUMI)-1;
+            uintRead readPrev = (uintRead)-1;
+            for (uint32 iR=0; iR<nRm*rguStride; iR+=rguStride) {//for each umi, find intersection of genes from each read
+                uintUMI umi1 = rGUm[iR+1];
+                if (umi1!=umiPrev) {//starting new UMI
+                    umiPrev = umi1;                
+                    if (umiGeneHash.count(umi1)>0) {
+                        skipUMI = true;//this UMI is skipped because it was among uniquely mapped
+                    } else {
+                        skipUMI = false;//new good umi
+                        geneReadCount.clear();
+                        nRumi=0;
+                        readPrev = (uintRead)-1;
+                    };
+                };
+                
+                if (skipUMI)
+                    continue; //this UMI is skipped because it was among uniquely mapped
+                
+                uintRead read1 = rGUm[iR+2];
+                if (read1 != readPrev) {
+                    ++nRumi;
+                    readPrev = read1;
+                };
+                
+                uint32 g1 = rGUm[iR+0] ^ geneMultMark; //XOR to unset the geneMultMark bit
+                geneReadCount[g1]++;
+                
+                if (iR == nRm*rguStride-rguStride || umi1 != rGUm[iR+1+rguStride]) {//record this umi
+                    uint32 ng=0;
+                    for (const auto &gg: geneReadCount) {
+                        if (gg.second == nRumi)
+                            ++ng;
+                    };
+                    vector<uint32> vg;
+                    vg.reserve(ng);//this and above is to construct vector of precise size, for efficiency?
+                    for (const auto &gg: geneReadCount) {
+                        if (gg.second == nRumi)
+                            vg.push_back(gg.first);
+                    };                
+                    umiGenes.push_back(vg);
+                };
+            };
+        };
+        
+        std::unordered_map<uint32,uint32> genesM; //genes to quantify
+        
+        {//collect all genes, replace geneID with index in umiGenes
+            uint32 ng = 0;
+            for (auto &uu: umiGenes) {
+                for (auto &gg: uu) {
+                    if (genesM.count(gg) == 0) {//new gene
+                        genesM[gg]=ng;
+                        ++ng;
+                    };
+                    gg = genesM[gg];
+                };
+            };
+        };
+        
+        vector<double> gEu(genesM.size());
+        {//collect unique gene counts
+            for (uint32 igm=countCellGeneUMIindex[iCB]; igm<countCellGeneUMIindex[iCB+1]; igm+=countMatStride) {
+                uint32 g1 = countCellGeneUMI[igm];
+                if (genesM.count(g1)>0)
+                    gEu[genesM[g1]]=(double)countCellGeneUMI[igm+indDedup];
+            };
+        };
+        
+        vector<double> gE1 = gEu;
+        {//gE1=uniformly distribute multigene UMIs
+            for (auto &ug: umiGenes) {
+                for (auto &gg: ug) {
+                    gE1[gg] += 1.0 / double(ug.size()); // 1/n_genes_umi
+                };
+            };
+        };
+        
+        vector<double> gE2 = gEu;
+        {//gE2=distribute UMI proportionally to gE1
+            for (auto &ug: umiGenes) {
+                double norm1 = 0.0;
+                for (auto &gg: ug)
+                    norm1 += gE1[gg];
+                
+                if (norm1==0.0)
+                    continue; //this should not happen since gE1 is non-zero for all genes involved
+                norm1 = 1.0 / norm1;
+                
+                for (auto &gg: ug) {
+                    gE2[gg] += gE1[gg]*norm1; //each umi is
+                };
+            };
+        };
+        
+        int a=1;
+    };
 };
+
+////////////////////////////////////////////////////////////////////////////// sorting functions
+inline int funCompareSolo1 (const void *a, const void *b) {
+    uint32 *va= (uint32*) a;
+    uint32 *vb= (uint32*) b;
+
+    if (va[1]>vb[1]) {
+        return 1;
+    } else if (va[1]<vb[1]) {
+        return -1;
+    } else if (va[0]>vb[0]){
+        return 1;
+    } else if (va[0]<vb[0]){
+        return -1;
+    } else {
+        return 0;
+    };
+};
+
+inline int funCompare_uint32_1_2_0 (const void *a, const void *b) {
+    uint32 *va= (uint32*) a;
+    uint32 *vb= (uint32*) b;
+
+    if (va[1]>vb[1]) {
+        return 1;
+    } else if (va[1]<vb[1]) {
+        return -1;
+    } else if (va[2]>vb[2]){
+        return 1;
+    } else if (va[2]<vb[2]){
+        return -1;
+    } else if (va[0]>vb[0]){
+        return 1;
+    } else if (va[0]<vb[0]){
+        return -1;
+    } else {
+        return 0;
+    };
+};
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 uint32 SoloFeature::umiArrayCorrect_CR(const uint32 nU0, uintUMI *umiArr, const bool readInfoRec, const bool nUMIyes, unordered_map <uintUMI,uintUMI> &umiCorr)

@@ -42,12 +42,12 @@ protected:
 class ParametersSolo {
 public:
     Parameters *pP;
-    
+    bool yes;
+
     //chemistry, library etc
     string typeStr;
     enum SoloTypes : int32 {None=0, CB_UMI_Simple=1, CB_UMI_Complex=2, CB_samTagOut=3, SmartSeq=4};
     SoloTypes type;
-    bool yes;
     string strandStr;
     int32 strand;   
     
@@ -79,6 +79,10 @@ public:
     vector<string> soloCBwhitelist;
     vector <uint64> cbWL;    
     vector<string> cbWLstr;
+    
+    struct {
+        bool yes; // include reads mapping to multiple features
+    } multiMappers;
     
     //features
     vector<string> featureIn;//string of requested features

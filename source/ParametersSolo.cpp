@@ -297,9 +297,9 @@ void ParametersSolo::initialize(Parameters *pPin)
                 };
             };
             if (cbWL.size()==0) {//empty whitelist
-            	exitWithError("EXITING because of FATAL ERROR: CB whitelist file " + soloCBwhitelist[0] + \
-            			       " is empty. \nSOLUTION: provide non-empty whitelist.\n" , \
-							   std::cerr, pP->inOut->logMain, EXIT_CODE_INPUT_FILES, *pP);
+                exitWithError("EXITING because of FATAL ERROR: CB whitelist file " + soloCBwhitelist[0] + \
+                               " is empty. \nSOLUTION: provide non-empty whitelist.\n" , \
+                               std::cerr, pP->inOut->logMain, EXIT_CODE_INPUT_FILES, *pP);
             };
         };
 
@@ -405,22 +405,22 @@ void ParametersSolo::initialize(Parameters *pPin)
             exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
     } else if ( pP->outSAMattrPresent.UB && type==SoloTypes::CB_samTagOut) {
-    	exitWithError("EXITING because of fatal PARAMETERS error: UB attribute (corrected UMI) in --outSAMattributes cannot be used with --soloType CB_samTagOut \n" \
+        exitWithError("EXITING because of fatal PARAMETERS error: UB attribute (corrected UMI) in --outSAMattributes cannot be used with --soloType CB_samTagOut \n" \
                       "SOLUTION: instead, use UR (uncorrected UMI) in --outSAMattributes\n",   std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
     
     readInfoYes.fill(false);
     if (samAttrYes) {//pSolo.samAttrFeature=0 by default, so need to check samAttrYes
-    	if (featureYes[SoloFeatureTypes::Gene]) {
-    		samAttrFeature=SoloFeatureTypes::Gene;
-    	} else if (featureYes[SoloFeatureTypes::GeneFull]) {//if Gene is not defined
-    		samAttrFeature=SoloFeatureTypes::GeneFull;
-    	} else {
+        if (featureYes[SoloFeatureTypes::Gene]) {
+            samAttrFeature=SoloFeatureTypes::Gene;
+        } else if (featureYes[SoloFeatureTypes::GeneFull]) {//if Gene is not defined
+            samAttrFeature=SoloFeatureTypes::GeneFull;
+        } else {
             ostringstream errOut;
             errOut << "EXITING because of fatal PARAMETERS error: CB and/or UB attributes in --outSAMattributes require --soloFeatures Gene OR/AND GeneFull.\n";
             errOut << "SOLUTION: re-run STAR adding Gene AND/OR GeneFull to --soloFeatures\n";
             exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
-    	};
+        };
 
         readInfoYes[samAttrFeature]=true;
     };
@@ -484,6 +484,11 @@ void ParametersSolo::initialize(Parameters *pPin)
             exitWithError("EXITING because of fatal PARAMETERS error: unrecognized option in --soloCBmatchWLtype " +CBmatchWL.type + "\nSOLUTION: use allowed options: Exact or 1MM or 1MM_multi or 1MM_multi_pseudocounts 1MM_multi_Nbase_pseudocounts\n",
                         std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
+    };
+    
+    {//multimappers
+        multiMappers.yes = true;
+        readInfoYes[samAttrFeature]=true; //TODOL we only need readInfoRec here, not readInfo Array
     };
     
 };

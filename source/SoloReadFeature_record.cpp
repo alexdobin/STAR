@@ -7,6 +7,7 @@
 class ReadSoloFeatures {
 public:
     uint32 gene;
+    vector<uint32> geneMult;
     vector<array<uint64,2>> sj;
     bool sjAnnot;
     uint32 indAnnotTr; //index of the annotated transcript
@@ -40,6 +41,18 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
                         stats.V[stats.nAmbigFeature]++;//multigene
                         if (nTr>1)
                             stats.V[stats.nAmbigFeatureMultimap]++;//multigene caused by multimapper
+                            
+                        if (pSolo.multiMappers.yes) {//output multimappers
+                            reFe.geneMult.resize(readGe->size());
+                            uint32 ii=0;
+                            for (auto &g: *readGe) {//set high bit to mark multimappers
+                                reFe.geneMult[ii] = g | geneMultMark;
+                                ++ii;
+                            };
+                            
+                            reFe.indAnnotTr = ( featureType==SoloFeatureTypes::Gene ? readAnnot.geneConcordantTr : readAnnot.geneFullTr );//TODO deal carefully with start/end collapsing for SmartSeq                  
+                            nFeat = outputReadCB(streamReads, iRead, featureType, soloBar, reFe, readAnnot);
+                        };
                     } else {//good gene
                         reFe.gene = *readGe->begin();
                         reFe.indAnnotTr = ( featureType==SoloFeatureTypes::Gene ? readAnnot.geneConcordantTr : readAnnot.geneFullTr );                        
@@ -137,11 +150,21 @@ uint32 outputReadCB(fstream *streamOut, const uint64 iRead, const int32 featureT
             
         case SoloFeatureTypes::Gene :
         case SoloFeatureTypes::GeneFull :
-            //just gene id
-            *streamOut << soloBar.umiB <<' ';//UMI
-            if ( iRead != (uint64)-1 )
-                *streamOut << iRead <<' ';//iRead
-            *streamOut << reFe.gene <<' '<< soloBar.cbMatch <<' '<< soloBar.cbMatchString <<'\n';;
+            
+            if (reFe.geneMult.size()==0) {
+                //just gene id
+                *streamOut << soloBar.umiB <<' ';//UMI
+                if ( iRead != (uint64)-1 )
+                    *streamOut << iRead <<' ';//iRead
+                *streamOut << reFe.gene <<' '<< soloBar.cbMatch <<' '<< soloBar.cbMatchString <<'\n';;
+            } else {
+                for (auto &g : reFe.geneMult) {
+                    *streamOut << soloBar.umiB <<' ';//UMI
+                    *streamOut << iRead <<' ';//iRead is always output for multiGene
+                    *streamOut << g <<' '<< soloBar.cbMatch <<' '<< soloBar.cbMatchString <<'\n';;
+                };
+                nout = reFe.geneMult.size();
+            };
             break;
             
         case SoloFeatureTypes::SJ :
