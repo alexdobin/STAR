@@ -52,6 +52,12 @@ public:
     vector<uint32> countCellGeneUMIindex;//index of CBs in the count matrix
     uint32 countMatStride; //number of counts per entry in the count matrix
     
+    struct {
+        vector<double> m;
+        vector<uint32> i;
+        uint32 s;
+    } countMatMult;
+    
     vector<unordered_map<uint32, unordered_set<uint64>>> cbFeatureUMImap; //for SmartSeq counting
        
     string outputPrefix, outputPrefixFiltered;

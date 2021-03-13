@@ -42,7 +42,7 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
                         if (nTr>1)
                             stats.V[stats.nAmbigFeatureMultimap]++;//multigene caused by multimapper
                             
-                        if (pSolo.multiMappers.yes) {//output multimappers
+                        if (pSolo.multiMap.yes.multi) {//output multimappers
                             reFe.geneMult.resize(readGe->size());
                             uint32 ii=0;
                             for (auto &g: *readGe) {//set high bit to mark multimappers

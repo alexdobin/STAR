@@ -65,7 +65,7 @@ void SoloFeature::outputResults(bool cellFilterYes, string outputPrefixMat)
     /////////////////////////////////////////////////////////////
     //output counting matrix
     
-    for (uint32_t iCol=1; iCol<countMatStride; iCol++) {
+    for (uint32 iCol=1; iCol<countMatStride; iCol++) {
 
         string matrixFileName=outputPrefixMat;
         if (featureType == SoloFeatureTypes::Velocyto) {
@@ -109,5 +109,69 @@ void SoloFeature::outputResults(bool cellFilterYes, string outputPrefixMat)
         };
 
         countMatrixStream.close();
+    };
+    
+    //////////////////////////////////////////// output unique+multimappers
+    if (pSolo.multiMap.yes.multi && !cellFilterYes && (featureType == SoloFeatureTypes::Gene || featureType == SoloFeatureTypes::GeneFull) ) {
+        
+        for (uint32 iMult=1; iMult<pSolo.multiMap.tN; iMult++) {
+            if (!pSolo.multiMap.yes.B[iMult])
+                continue; //no output for this type
+                
+            
+            for (uint32 iDed=1; iDed<countMatStride; iDed++) {
+                string matrixFileName=outputPrefixMat + "UniqueAndMult-" + pSolo.multiMap.typeNames[iMult];
+                
+                if (pSolo.umiDedup.types.size()>1) {
+                    matrixFileName += "_umiDedup-" + pSolo.umiDedup.typeNames[pSolo.umiDedup.types[iDed-1]];
+                };
+                
+                matrixFileName += ".mtx";
+                
+                string countMatOutString;
+                countMatOutString.reserve(100000000);
+                nCellGeneEntries = 0;
+                
+                uint32  cbInd1=0;
+                for (uint32 icb=0; icb<nCB; icb++) {
+                    cbInd1=indCB[icb]+1;
+                    
+                    /*
+                    for (uint32 igm=countCellGeneUMIindex[icb]; igm<countCellGeneUMIindex[icb+1]; igm+=countMatStride) {
+                                               
+                        //feature index, CB index, count
+                        countMatOutString += to_string(countCellGeneUMI[igm]+1) +' '+ to_string(cbInd1) +' '+ to_string(countCellGeneUMI[igm+iDed]) + '\n';
+                        
+                        ++nCellGeneEntries;
+                    };
+                    */
+                    
+                    //sum unique+multiple
+                    for (uint32 igm1=countCellGeneUMIindex[icb]; igm1<countCellGeneUMIindex[icb+1]; igm1+=countMatStride) {
+                                               
+                        auto g1 = countCellGeneUMI[igm1];
+                        auto c1 = countCellGeneUMI[igm1+iDed];
+                        
+                        while (g2<g1 && igm2 < countMatMult.i[icb+1]) {
+                        };
+                        //feature index, CB index, count
+                        countMatOutString += to_string(g1+1) +' '+ to_string(cbInd1) +' '+ to_string(c1) +'\n';
+                        
+                        ++nCellGeneEntries;
+                    };
+                    
+                };
+
+                ofstream &countMatrixStream=ofstrOpen(matrixFileName,ERROR_OUT, P);
+                
+                //header
+                countMatrixStream <<"%%MatrixMarket matrix coordinate float general\n";
+                countMatrixStream <<"%\n";
+                countMatrixStream << featuresNumber <<' '<< pSolo.cbWLsize <<' '<< nCellGeneEntries << '\n';
+                countMatrixStream << countMatOutString;
+
+                countMatrixStream.close();
+            };
+        };
     };
 };

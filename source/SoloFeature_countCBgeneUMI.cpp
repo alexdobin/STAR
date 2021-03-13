@@ -62,11 +62,17 @@ void SoloFeature::countCBgeneUMI()
     nGenePerCB.resize(nCB);
     
     uint32 *umiArray = new uint32[nReadPerCBmax*umiArrayStride];//temp array for collapsing UMI
-    
-    countMatStride=pSolo.umiDedup.yes.N + 1;
+                     //dedup options        //gene ID
+    countMatStride = pSolo.umiDedup.yes.N + 1;
     countCellGeneUMI.resize(nReadsMapped*countMatStride/5+16); //5 is heuristic, will be resized if needed
-    countCellGeneUMIindex.resize(nCB+1);
-    countCellGeneUMIindex[0]=0;
+    countCellGeneUMIindex.resize(nCB+1, 0);
+    
+    if (pSolo.multiMap.yes.multi) {
+                    //gene   //uniform  //rescue
+        countMatMult.s = 1 + 1 + (pSolo.multiMap.yes.Rescue ? pSolo.umiDedup.yes.N : 0);
+        countMatMult.m.resize(nReadsMapped*countMatMult.s/5+16);
+        countMatMult.i.resize(nCB+1, 0);
+    };
     
     for (uint32 icb=0; icb<nCB; icb++) {//main collapse cycle
         

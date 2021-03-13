@@ -35,8 +35,35 @@ public:
     
     void initialize(ParametersSolo *pS);
     
-protected:
-    int it;
+//protected:
+//    int it;
+};
+
+class MultiMappers {
+public:
+    const static uint32 tN = 3;
+    array<string,tN> typeNames { {"Unique", "Uniform", "Rescue"} };
+    enum typeI : int32 { Unique=0, Uniform=1, Rescue=2 };
+    
+    struct {
+        bool multi; //if multimappers are requested
+        uint32_t N;
+        array<bool,tN> B;
+        bool &Unique=B[0], &Uniform=B[1], &Rescue=B[2];
+    } yes;
+
+    struct {
+        //uint32_t N;
+        array<uint32_t,tN> I;
+        uint32_t &Unique=I[0], &Uniform=I[1], &Rescue=I[2];
+        uint32_t main; //index for SAM/stats/filtering output
+    } countInd; //index in the countCellGennUMI
+    
+    vector<string> typesIn; //UMIdedup types from user options
+    vector<int32> types; //the above converted to typeI numbers
+    int32 typeMain; //the type to be used in SAM/stats/filtering output - for now just types[0]
+    
+    void initialize(ParametersSolo *pS);
 };
 
 class ParametersSolo {
@@ -80,9 +107,7 @@ public:
     vector <uint64> cbWL;    
     vector<string> cbWLstr;
     
-    struct {
-        bool yes; // include reads mapping to multiple features
-    } multiMappers;
+    MultiMappers multiMap;
     
     //features
     vector<string> featureIn;//string of requested features

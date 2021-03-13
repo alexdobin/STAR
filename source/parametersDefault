@@ -843,7 +843,7 @@ soloStrand                  Forward
                             Reverse     ... read strand opposite to the original RNA molecule
 
 soloFeatures                Gene
-    string(s):              genomic features for which the UMI counts per Cell Barcode are collected
+    string(s): genomic features for which the UMI counts per Cell Barcode are collected
                             Gene            ... genes: reads match the gene transcript
                             SJ              ... splice junctions: reported in SJ.out.tab
                             GeneFull        ... full genes: count all reads overlapping genes' exons and introns
@@ -851,6 +851,12 @@ soloFeatures                Gene
 #####UnderDevelopment_begin : not supported - do not use
                             Transcript3p    ... quantification of transcript for 3' protocols
 #####UnderDevelopment_end
+
+soloMultiMappers            Unique
+    string(s): counting method for reads mapping to multiple genes           
+                            Unique  ... count only reads that map to unique genes
+                            Uniform ... uniformly distribute multi-genic UMIs to all genes
+                            Rescue  ... distribute UMIs proportionally to unique+uniform counts (~ first iteartion of EM)
 
 soloUMIdedup                1MM_All
     string(s):              type of UMI deduplication (collapsing) algorithm

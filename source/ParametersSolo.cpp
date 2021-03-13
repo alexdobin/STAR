@@ -338,29 +338,7 @@ void ParametersSolo::initialize(Parameters *pPin)
         };
         
         umiV.extractPositionsFromString(umiPositionStr);
-        
-        /* debug
-        cbV[0].length=16;
-        cbV[0].anchorType=0;
-        cbV[0].anchorDist=0;
-        cbV[0].pos=0;
-        
-        umiV.length=10;
-        umiV.anchorType=0;
-        umiV.anchorDist=0;
-        umiV.pos=16;
-
-        //hard-coded inDrop
-        cbV.resize(2);
-        cbV[0].anchorType={0,2};
-        cbV[0].anchorDist={0,-1};//CB ends one base before the start of the anchor
-        cbV[1].anchorType={3,3};
-        cbV[1].anchorDist={1,8};//CB starts 1 base after the end of the anchor  
-        umiV.anchorType={3,3};
-        umiV.anchorDist={9,14};
-        ///////////////////
-        */
-        
+              
         umiV.adapterLength=adapterSeq.size();//one adapter for all
         cbWLsize=1;
         for (uint32 icb=0; icb<cbV.size(); icb++) {//cycle over WL files
@@ -482,14 +460,15 @@ void ParametersSolo::initialize(Parameters *pPin)
             CBmatchWL.mm1_multi_Nbase = true;
         } else {
             exitWithError("EXITING because of fatal PARAMETERS error: unrecognized option in --soloCBmatchWLtype " +CBmatchWL.type + "\nSOLUTION: use allowed options: Exact or 1MM or 1MM_multi or 1MM_multi_pseudocounts 1MM_multi_Nbase_pseudocounts\n",
-                        std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+                            std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
     };
     
-    {//multimappers
-        multiMappers.yes = true;
-        readInfoYes[samAttrFeature]=true; //TODOL we only need readInfoRec here, not readInfo Array
-    };
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////// MultiMappers
+    multiMap.initialize(this);
+    if (multiMap.yes.multi)
+        readInfoYes[samAttrFeature]=true; //TODO we only need readInfoRec here, not readInfo Array
     
 };
 
@@ -599,7 +578,7 @@ void UMIdedup::initialize(ParametersSolo *pS)
         if (itype==tN) {//no match
             std::string tall;
             for (auto &t: typeNames)
-                tall +=" " + t; // concatenate allowd values
+                tall +=" " + t; // concatenate allowed values
             
             exitWithError("EXITING because of fatal PARAMETERS error: unrecognzied option --soloUMIdedup = " + typesIn[iin] + '\n'
                           + "SOLUTION: use allowed values: " + tall + '\n'
@@ -616,31 +595,44 @@ void UMIdedup::initialize(ParametersSolo *pS)
                     + "SOLUTION: use allowed options: Exact and/or NoDedup\n"
                     ,std::cerr, pS->pP->inOut->logMain, EXIT_CODE_PARAMETER, *pS->pP);            
     };
-    
-//     if (yes.CR && (yes.N>1)) {//TODO remove this limitation
-//             exitWithError("EXITING because of fatal PARAMETERS error: --soloUMIdedup 1MM_CR is not allowed in combination with other UMI deduplication options\n"
-//                       "SOLUTION: specify --soloUMIdedup 1MM_CR only, or a combination of Exact and/or 1MM_All and/or 1MM_Directional"
-//                       ,std::cerr, pS->pP->inOut->logMain, EXIT_CODE_PARAMETER, *pS->pP); 
-//     };
+       
+    //hard-coded for now
+    typeMain = types[0]; //main is the 0th entry in typesIn
+    countInd.main = 1;   //hard-coded - 1 column is always main
+};
+
+void MultiMappers::initialize(ParametersSolo* pS)
+{
+    yes.N = 0;
+    countInd.I.fill((uint32_t) -1); //marks types not used
+    yes.B.fill(false);
+
+    for (uint32_t iin=0; iin<typesIn.size(); iin++) {
+        uint32_t itype;
+        for (itype=0; itype<tN; itype++) {
+            if (typesIn[iin] == typeNames[itype])
+                break; //found match
+        };
+        
+        if (itype==tN) {//no match
+            std::string tall;
+            for (auto &t: typeNames)
+                tall +=" " + t; // concatenate allowed values
+            
+            exitWithError("EXITING because of fatal PARAMETERS error: unrecognzied option --soloMultiMappers = " + typesIn[iin] + '\n'
+                          + "SOLUTION: use allowed values: " + tall + '\n'
+                          ,std::cerr, pS->pP->inOut->logMain, EXIT_CODE_PARAMETER, *pS->pP);
+        };
+        
+        types.push_back(itype);
+        yes.B[itype] = true;
+        yes.N++;
+        countInd.I[itype] = iin + 1; //for each type, which column itype's recorded in     
+    };
     
     //hard-coded for now
     typeMain = types[0]; //main is the 0th entry in typesIn
     countInd.main = 1;   //hard-coded - 1 column is always main
     
-    /*        
-        countInd.N = 1;
-        countInd.CR = 1; //starts from 1, since 0 is the gene
-        
-    } else if (pS->type == pS->SoloTypes::SmartSeq) {//this is fixed for now
-        countInd.N = 2;
-        countInd.Exact = 1; //starts from 1, since 0 is the gene
-        countInd.NoDedup = 2;
-    } else {
-        countInd.N = 3;
-        countInd.Exact = 1; //starts from 1, since 0 is the gene
-        countInd.All = 2;
-        countInd.Directional = 3;
-    };
-    countInd.main = countInd.I[typeMain];
-    */
+    yes.multi = yes.Uniform | yes.Rescue;
 };
