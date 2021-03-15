@@ -59,9 +59,14 @@ void SoloFeature::processRecords()
     readFeatSum->statsOut(*statsStream);
     statsStream->close();
     
+    time(&rawTime);
+    P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Solo: writing raw matrix" <<endl;
+
     //output nU per gene per CB
     outputResults(false,  outputPrefix + "/raw/"); //unfiltered
     
+    time(&rawTime);
+    P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Solo: cell filtering" <<endl;    
     cellFiltering();
     
     //summary stats output

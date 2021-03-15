@@ -33,15 +33,16 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
     };
     gReadS[nGenes]=rguStride*rN;//so that gReadS[nGenes]-gReadS[nGenes-1] is the number of reads for nGenes, see below in qsort
     nGenes -= nGenesMult;//unique only gene
-   
-    unordered_map <uintUMI, unordered_map<uint32,uint32>> umiGeneHash, umiGeneHash0;
+    
+    //unordered_map <uintUMI, unordered_set<uint32>> umiGeneMap;
+    unordered_map <uintUMI, unordered_map<uint32,uint32>> umiGeneMapCount, umiGeneMapCount0;
                    //UMI                 //Gene //Count
     if (pSolo.umiFiltering.MultiGeneUMI) {
         for (uint32 iR=0; iR<gReadS[nGenes]; iR+=rguStride) {
-            umiGeneHash[rGU[iR+1]][rGU[iR]]++; 
+            umiGeneMapCount[rGU[iR+1]][rGU[iR]]++; 
         };
 
-        for (auto &iu : umiGeneHash) {//loop over all UMIs
+        for (auto &iu : umiGeneMapCount) {//loop over all UMIs
             if (iu.second.size()==1)
                 continue;
             uint32 maxu=0;
@@ -57,6 +58,20 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
             };
         };
     };
+    
+    if (pSolo.umiFiltering.MultiGeneUMI_All) {
+        for (uint32 iR=0; iR<gReadS[nGenes]; iR+=rguStride) {
+            umiGeneMapCount[rGU[iR+1]][rGU[iR]]++; 
+        };
+
+        for (auto &iu : umiGeneMapCount) {//loop over all UMIs
+            if (iu.second.size()>1) {
+                for (auto &ig : iu.second)
+                    ig.second=0; //kill all genes for this UMI
+            };
+        };
+    };    
+    
     
     vector<unordered_map <uintUMI,uintUMI>> umiCorrected(nGenes);
 
@@ -81,7 +96,7 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
         uint32 iR1=-umiArrayStride; //number of distinct UMIs for this gene
         uint32 u1=-1;
         for (uint32 iR=rguU; iR<gReadS[iG+1]-gReadS[iG]; iR+=rguStride) {//count and collapse identical UMIs
-            if (pSolo.umiFiltering.MultiGeneUMI && umiGeneHash[rGU1[iR]][gID[iG]]==0) {//multigene UMI is not recorded
+            if (pSolo.umiFiltering.MultiGeneUMI && umiGeneMapCount[rGU1[iR]][gID[iG]]==0) {//multigene UMI is not recorded
                 if ( pSolo.umiDedup.typeMain != UMIdedup::typeI::NoDedup ) //for NoDedup, the UMI filtering is not done
                     rGU1[iR] = (uintUMI) -1; //mark multigene UMI, so that UB tag will be set to -
                 continue;
@@ -104,13 +119,13 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
                 continue; //nothing to count
                 
             for (uint64 iu=0; iu<nU0*umiArrayStride; iu+=umiArrayStride) {
-                umiGeneHash0[umiArray[iu+0]][iG]+=umiArray[iu+1];//this sums read counts over UMIs that were collapsed
+                umiGeneMapCount0[umiArray[iu+0]][iG]+=umiArray[iu+1];//this sums read counts over UMIs that were collapsed
             };
                 
             umiArrayCorrect_CR(nU0, umiArray, readInfo.size()>0, false, umiCorrected[iG]);
                 
-            for (uint64 iu=0; iu<nU0*umiArrayStride; iu+=umiArrayStride) {//just fill the umiGeneHash - will calculate UMI counts later
-                umiGeneHash[umiArray[iu+2]][iG]+=umiArray[iu+1];//this sums read counts over UMIs that were collapsed
+            for (uint64 iu=0; iu<nU0*umiArrayStride; iu+=umiArrayStride) {//just fill the umiGeneMapCount - will calculate UMI counts later
+                umiGeneMapCount[umiArray[iu+2]][iG]+=umiArray[iu+1];//this sums read counts over UMIs that were collapsed
             };
                 
             continue; //done with MultiGeneUMI_CR, readInfo will be filled later
@@ -176,7 +191,7 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
         if (readInfo.size()>0)
             geneUmiHash.resize(nGenes);
         
-        for (const auto &iu: umiGeneHash) {//loop over UMIs for all genes
+        for (const auto &iu: umiGeneMapCount) {//loop over UMIs for all genes
                        
             uint32 maxu=0, maxg=-1;
             for (const auto &ig : iu.second) {
@@ -191,8 +206,8 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
             if ( maxg+1==0 )
                 continue; //this umi is not counted for any gene, because two genes have the same read count for this UMI
             
-            for (const auto &ig : umiGeneHash0[iu.first]) {//check that this umi/gene had also top count for uncorrected umis
-                if (ig.second>umiGeneHash0[iu.first][maxg]) {
+            for (const auto &ig : umiGeneMapCount0[iu.first]) {//check that this umi/gene had also top count for uncorrected umis
+                if (ig.second>umiGeneMapCount0[iu.first][maxg]) {
                     maxg=-1;
                     break;
                 };
@@ -237,6 +252,9 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
         };
     };
     
+    if (pSolo.multiMap.yes.multi)
+        countMatMult.i[iCB+1] = countMatMult.i[iCB];
+    
     if (nGenesMult>0) {//process multigene reads
                
         std::vector<vector<uint32>> umiGenes;
@@ -258,7 +276,7 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
                 uintUMI umi1 = rGUm[iR+1];
                 if (umi1!=umiPrev) {//starting new UMI
                     umiPrev = umi1;                
-                    if (umiGeneHash.count(umi1)>0) {
+                    if (umiGeneMapCount.count(umi1)>0) {
                         skipUMI = true;//this UMI is skipped because it was among uniquely mapped
                     } else {
                         skipUMI = false;//new good umi

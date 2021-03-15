@@ -165,8 +165,10 @@ public:
     //multi-gene umi
     struct {
         vector<string> type;
-        bool MultiGeneUMI;
-        bool MultiGeneUMI_CR;
+        bool MultiGeneUMI       = false;
+        bool MultiGeneUMI_All   = false;
+        bool yes                = false; //true for non-CR
+        bool MultiGeneUMI_CR    = false;
     } umiFiltering;
     
     //clusters

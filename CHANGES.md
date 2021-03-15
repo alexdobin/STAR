@@ -1,3 +1,4 @@
+* New option: --soloUMIfiltering MultiGeneUMI_All to filter out all UMIs mapping to multiple genes (for uniquely mapping reads)
 * Modified option: ---limitIObufferSize now requires two numbers - separate sizes for input and output buffers
 * New option: --outSJtype None   to omit outputting splice junctions to SJ.out.tab
 

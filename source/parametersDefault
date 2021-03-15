@@ -868,9 +868,10 @@ soloUMIdedup                1MM_All
                             1MM_CR                      ... CellRanger2-4 algorithm for 1MM UMI collapsing.
 
 soloUMIfiltering            -
-    string(s)               type of UMI filtering
+    string(s)               type of UMI filtering (for reads uniquely mapping to genes)
                             -               ... basic filtering: remove UMIs with N and homopolymers (similar to CellRanger 2.2.0).
                             MultiGeneUMI    ... basic + remove lower-count UMIs that map to more than one gene.
+                            MultiGeneUMI    ... basic + remove all UMIs that map to more than one gene.
                             MultiGeneUMI_CR ... basic + remove lower-count UMIs that map to more than one gene, matching CellRanger > 3.0.0 .
                                                 Only works with --soloUMIdedup 1MM_CR
                                                 
