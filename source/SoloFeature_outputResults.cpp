@@ -114,10 +114,7 @@ void SoloFeature::outputResults(bool cellFilterYes, string outputPrefixMat)
     //////////////////////////////////////////// output unique+multimappers
     if (pSolo.multiMap.yes.multi && !cellFilterYes && (featureType == SoloFeatureTypes::Gene || featureType == SoloFeatureTypes::GeneFull) ) {
                           //skipping unique
-        for (uint32 iMult=1; iMult<pSolo.multiMap.tN; iMult++) {
-            if (!pSolo.multiMap.yes.B[iMult])
-                continue; //no output for this type
-                
+        for (const auto &iMult: pSolo.multiMap.types) {               
             for (uint32 iDed=0; iDed<pSolo.umiDedup.yes.N; iDed++) {
                 string matrixFileName=outputPrefixMat + "UniqueAndMult-" + pSolo.multiMap.typeNames[iMult];
                 if (pSolo.umiDedup.types.size()>1) {
@@ -125,21 +122,14 @@ void SoloFeature::outputResults(bool cellFilterYes, string outputPrefixMat)
                 };
                 matrixFileName += ".mtx";
 
-                uint32 mIndex = 0;
-                switch(iMult) {
-                    case (pSolo.multiMap.typeI::Uniform):
-                        mIndex = 1;
-                        break;
-                    case (pSolo.multiMap.typeI::Rescue):
-                        mIndex = 2+iDed;    
-                };
-                
+                uint32 mIndex = pSolo.multiMap.countInd.I[iMult] + iDed;
+                    
                 //string matOutString;
                 //matOutString.reserve(100000000);
                 std::ostringstream matOutStringStream;//(matOutString);
-                
+                    
                 nCellGeneEntries = 0;
-                
+                    
                 uint32  cbInd1=0;
                 for (uint32 icb=0; icb<nCB; icb++) {
                     cbInd1=indCB[icb]+1;
@@ -166,8 +156,8 @@ void SoloFeature::outputResults(bool cellFilterYes, string outputPrefixMat)
                         auto igm1 = countCellGeneUMIindex[icb];
                         auto igm2 = countMatMult.i[icb];
                         while ( igm1<countCellGeneUMIindex[icb+1] || igm2<countMatMult.i[icb+1] ) {
-                            uint32 g1,c1,g2;
-                            double c2;
+                            uint32 g1,c1=0,g2;
+                            double c2=0;
                             
                             if (igm1<countCellGeneUMIindex[icb+1]) {
                                 g1 = countCellGeneUMI[igm1];

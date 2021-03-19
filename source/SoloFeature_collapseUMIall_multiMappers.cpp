@@ -331,16 +331,16 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
         };
         
        
-        vector<double> gE1(genesM.size(), 0);
-        {//gE1=uniformly distribute multigene UMIs
+        vector<double> gEuniform(genesM.size(), 0);
+        {//gEuniform=uniformly distribute multigene UMIs
             for (auto &ug: umiGenes) {
                 for (auto &gg: ug) {
-                    gE1[gg] += 1.0 / double(ug.size()); // 1/n_genes_umi
+                    gEuniform[gg] += 1.0 / double(ug.size()); // 1/n_genes_umi
                 };
             };
         };
 
-        vector<vector<double>> gE2(pSolo.umiDedup.yes.N);
+        vector<vector<double>> gErescue(pSolo.umiDedup.yes.N);
         if (pSolo.multiMap.yes.Rescue) {
             
             for (uint32 indDedup=0; indDedup < pSolo.umiDedup.yes.N; indDedup++) {
@@ -353,54 +353,154 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
                     };
                 };
                 
-                gE2[indDedup].resize(genesM.size(), 0);
-                {//gE2=distribute UMI proportionally to gE1+gEu
+                gErescue[indDedup].resize(genesM.size(), 0);
+                {//gErescue=distribute UMI proportionally to gEuniform+gEu
                     for (auto &ug: umiGenes) {
                         double norm1 = 0.0;
                         for (auto &gg: ug)
-                            norm1 += gE1[gg]+gEu[gg];
+                            norm1 += gEuniform[gg]+gEu[gg];
                         
                         if (norm1==0.0)
-                            continue; //this should not happen since gE1 is non-zero for all genes involved
+                            continue; //this should not happen since gEuniform is non-zero for all genes involved
                         norm1 = 1.0 / norm1;
                         
                         for (auto &gg: ug) {
-                            gE2[indDedup][gg] += (gE1[gg]+gEu[gg])*norm1;
+                            gErescue[indDedup][gg] += (gEuniform[gg]+gEu[gg])*norm1;
                         };
                     };
                 };
             };
         };
         
-        {//write to countMatMult
-            uint32 ig=0;
-            for (const auto &gm: genesM) {
-                countMatMult.m[countMatMult.i[iCB+1] + 0] = gm.first;
-                countMatMult.m[countMatMult.i[iCB+1] + 1] = gE1[ig];
-                if (pSolo.multiMap.yes.Rescue) {
-                    for (uint32 indDedup=0; indDedup < pSolo.umiDedup.yes.N; indDedup++) {
-                        countMatMult.m[countMatMult.i[iCB+1] + 2 + indDedup] = gE2[indDedup][ig];
+        vector<vector<double>> gEpropUnique(pSolo.umiDedup.yes.N);
+        if (pSolo.multiMap.yes.PropUnique) {
+            
+            for (uint32 indDedup=0; indDedup < pSolo.umiDedup.yes.N; indDedup++) {
+                vector<double> gEu(genesM.size(), 0);
+                {//collect unique gene counts
+                    for (uint32 igm=countCellGeneUMIindex[iCB]; igm<countCellGeneUMIindex[iCB+1]; igm+=countMatStride) {
+                        uint32 g1 = countCellGeneUMI[igm];
+                        if (genesM.count(g1)>0)
+                            gEu[genesM[g1]]=(double)countCellGeneUMI[igm+1+indDedup];
                     };
                 };
-                ++ig;
-                countMatMult.i[iCB+1] += countMatMult.s;
-            };
-        };
-            
-        /*
-        //record multi
-        countMatMult.i[iCB]; igm<countCellGeneUMIindex[iCB+1]; igm+=countMatStride) {
-            uint32 g1 = countCellGeneUMI[igm];
-            if (genesM.count(g1)>0) {
-                if (pSolo.multiMap.yes.Rescue) {           
-                    for (uint32 indDedup=0; indDedup < pSolo.umiDedup.yes.N; indDedup++)
-                        countCellGeneUMI[igm+1+pSolo.umiDedup.yes.N+indDedup] = gE2[indDedup][g1];
+                
+                gEpropUnique[indDedup].resize(genesM.size(), 0);
+                {//gErescue=distribute UMI proportionally to gEuniform+gEu
+                    for (auto &ug: umiGenes) {
+                        double norm1 = 0.0;
+                        for (auto &gg: ug)
+                            norm1 += gEu[gg];
+                        
+                        if (norm1==0.0) {//this UMI has no genes with unique mappers - distribute it uniformly
+                            for (auto &gg: ug)
+                                gEpropUnique[indDedup][gg] += 1.0 / double(ug.size());
+                        } else {//this UMI has genes with unique mappers - distribute it proportionally to unique mappers
+                            norm1 = 1.0 / norm1;
+                            for (auto &gg: ug)
+                                gEpropUnique[indDedup][gg] += gEu[gg]*norm1;
+                        };
+                    };
                 };
             };
-        };        
-        */
+        };
         
-        int a=1;
+        vector<vector<double>> gEem(pSolo.umiDedup.yes.N);
+        if (pSolo.multiMap.yes.EM) {
+                
+            for (uint32 indDedup=0; indDedup < pSolo.umiDedup.yes.N; indDedup++) {
+                vector<double> gEu(genesM.size(), 0);
+                {//collect unique gene counts
+                    for (uint32 igm=countCellGeneUMIindex[iCB]; igm<countCellGeneUMIindex[iCB+1]; igm+=countMatStride) {
+                        uint32 g1 = countCellGeneUMI[igm];
+                        if (genesM.count(g1)>0)
+                            gEu[genesM[g1]]=(double)countCellGeneUMI[igm+1+indDedup];
+                    };
+                };
+                
+                {//gEem = EM
+                    
+                    vector<double> gEM1 = gEuniform;
+                    for (uint32 ii=0; ii<gEM1.size(); ii++)
+                        gEM1[ii] += gEu[ii]; //start with sum of unique and uniform
+                        
+                    vector<double> gEM2(genesM.size(), 0);
+                        
+                    auto *gEM1p=&gEM1;
+                    auto *gEM2p=&gEM2;
+                                                
+                    double maxAbsChange=1;
+                    uint32 iterI=0;
+                    while(true) {
+                        ++iterI;
+                        
+                        auto &gEMold=*gEM1p; //for convenience - to use instead of pointer
+                        auto &gEMnew=*gEM2p;
+                        
+                        std::copy(gEu.begin(), gEu.end(), gEMnew.begin());//gEMnew is initialized with unique counts
+                        
+                        for (auto &gg: gEMold) {//zero-out very small counts
+                            if (gg<0.01) //hardcoded
+                                gg=0;
+                        };
+                        
+                        for (auto &ug: umiGenes) {
+                            double norm1 = 0.0;
+                            for (auto &gg: ug) //cycle over genes for this umi
+                                norm1 += gEMold[gg];
+                                
+                            norm1 = 1.0 / norm1;
+                                
+                            for (auto &gg: ug) {
+                                gEMnew[gg] += gEMold[gg]*norm1;
+                            };
+                        };
+                        
+                        maxAbsChange=0.0;
+                        for (uint32 ii=0; ii<gEMnew.size(); ii++) {
+                            double change1 = abs(gEMnew[ii]-gEMold[ii]);
+                            if (change1 > maxAbsChange)
+                                maxAbsChange = change1;
+                        };
+                        
+                        if (maxAbsChange < 0.01 || iterI>100) {//hardcoded
+                            gEem[indDedup] = gEMnew;
+                            break;
+                        };
+                        
+                        swap(gEM1p, gEM2p); //swap new and old for the next interation of EM
+                    };
+                        
+                    for (uint32 ii=0; ii<gEM1.size(); ii++)
+                        gEem[indDedup][ii] -= gEu[ii]; //gEem contains only multimapper counts
+                };
+                
+            };
+        };        
+        
+        {//write to countMatMult
+            for (const auto &gm: genesM) {
+                countMatMult.m[countMatMult.i[iCB+1] + 0] = gm.first;
+                    
+                for (uint32 indDedup=0; indDedup < pSolo.umiDedup.yes.N; indDedup++) {
+                    uint32 ind1 = countMatMult.i[iCB+1] + indDedup;
+                    
+                    if (pSolo.multiMap.yes.Uniform)
+                        countMatMult.m[ind1 + pSolo.multiMap.countInd.Uniform] = gEuniform[gm.second];
+                        
+                    if (pSolo.multiMap.yes.Rescue)
+                        countMatMult.m[ind1 + pSolo.multiMap.countInd.Rescue] = gErescue[indDedup][gm.second];
+                        
+                    if (pSolo.multiMap.yes.PropUnique)
+                        countMatMult.m[ind1 + pSolo.multiMap.countInd.PropUnique] = gEpropUnique[indDedup][gm.second];
+                        
+                    if (pSolo.multiMap.yes.EM)
+                        countMatMult.m[ind1 + pSolo.multiMap.countInd.EM] = gEem[indDedup][gm.second];                    
+                    
+                    countMatMult.i[iCB+1] += countMatMult.s;
+                };
+            };
+        };
     };
 };
 

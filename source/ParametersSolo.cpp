@@ -469,9 +469,10 @@ void ParametersSolo::initialize(Parameters *pPin)
     //////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////// MultiMappers
     multiMap.initialize(this);
-    if (multiMap.yes.multi)
-        readInfoYes[samAttrFeature]=true; //TODO we only need readInfoRec here, not readInfo Array
-    
+    if (multiMap.yes.multi) {
+        readInfoYes[SoloFeatureTypes::Gene]=true; //TODO we only need readInfoRec here, not readInfo Array
+        readInfoYes[SoloFeatureTypes::GeneFull]=true; //TODO we only need readInfoRec here, not readInfo Array
+    };
 };
 
 /////////////////////////////////
@@ -606,11 +607,11 @@ void UMIdedup::initialize(ParametersSolo *pS)
 void MultiMappers::initialize(ParametersSolo* pS)
 {
     yes.N = 0;
-    countInd.I.fill((uint32_t) -1); //marks types not used
+    countInd.I.fill((uint32) -1); //marks types not used
     yes.B.fill(false);
 
-    for (uint32_t iin=0; iin<typesIn.size(); iin++) {
-        uint32_t itype;
+    for (uint32 iin=0; iin<typesIn.size(); iin++) {
+        uint32 itype;
         for (itype=0; itype<tN; itype++) {
             if (typesIn[iin] == typeNames[itype])
                 break; //found match
@@ -626,10 +627,19 @@ void MultiMappers::initialize(ParametersSolo* pS)
                           ,std::cerr, pS->pP->inOut->logMain, EXIT_CODE_PARAMETER, *pS->pP);
         };
         
+        if (itype == typeI::Unique)
+            continue; //Unique type does not have to be recorded TODO use it to perform filtering and stats
+
+        
         types.push_back(itype);
         yes.B[itype] = true;
         yes.N++;
-        countInd.I[itype] = iin + 1; //for each type, which column itype's recorded in     
+    };
+    
+    uint32 ind1=1; //start
+    for (const auto &itype : types) {
+        countInd.I[itype] = ind1;
+        ind1 += pS->umiDedup.yes.N;
     };
     
     //hard-coded for now

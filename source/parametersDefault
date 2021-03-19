@@ -857,6 +857,7 @@ soloMultiMappers            Unique
                             Unique  ... count only reads that map to unique genes
                             Uniform ... uniformly distribute multi-genic UMIs to all genes
                             Rescue  ... distribute UMIs proportionally to unique+uniform counts (~ first iteartion of EM)
+                            PropUnique ... distribute UMIs proportionally to unique mappers, if present, and uniformly if not.
 
 soloUMIdedup                1MM_All
     string(s):              type of UMI deduplication (collapsing) algorithm

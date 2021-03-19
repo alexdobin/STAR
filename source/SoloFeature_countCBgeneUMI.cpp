@@ -69,7 +69,7 @@ void SoloFeature::countCBgeneUMI()
     
     if (pSolo.multiMap.yes.multi) {
                     //gene   //uniform  //rescue
-        countMatMult.s = 1 + 1 + (pSolo.multiMap.yes.Rescue ? pSolo.umiDedup.yes.N : 0);
+        countMatMult.s = 1 + pSolo.multiMap.yes.N * pSolo.umiDedup.yes.N;
         countMatMult.m.resize(nReadsMapped*countMatMult.s/5+16);
         countMatMult.i.resize(nCB+1, 0);
     };

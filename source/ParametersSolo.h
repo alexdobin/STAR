@@ -41,21 +41,21 @@ public:
 
 class MultiMappers {
 public:
-    const static uint32 tN = 3;
-    array<string,tN> typeNames { {"Unique", "Uniform", "Rescue"} };
-    enum typeI : int32 { Unique=0, Uniform=1, Rescue=2 };
+    const static uint32 tN = 5;
+    array<string,tN> typeNames { {"Unique", "Uniform", "Rescue", "PropUnique", "EM"} };
+    enum typeI : int32 { Unique=0, Uniform=1, Rescue=2, PropUnique=3, EM=4 };
     
     struct {
         bool multi; //if multimappers are requested
         uint32_t N;
         array<bool,tN> B;
-        bool &Unique=B[0], &Uniform=B[1], &Rescue=B[2];
+        bool &Unique=B[0], &Uniform=B[1], &Rescue=B[2], &PropUnique=B[3], &EM=B[4] ;
     } yes;
 
     struct {
         //uint32_t N;
         array<uint32_t,tN> I;
-        uint32_t &Unique=I[0], &Uniform=I[1], &Rescue=I[2];
+        uint32_t &Unique=I[0], &Uniform=I[1], &Rescue=I[2], &PropUnique=I[3], &EM=I[4];
         uint32_t main; //index for SAM/stats/filtering output
     } countInd; //index in the countCellGennUMI
     
