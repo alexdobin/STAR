@@ -636,6 +636,11 @@ void MultiMappers::initialize(ParametersSolo* pS)
         yes.N++;
     };
     
+    if (yes.N==0) {//only Unique, no multimappers
+        yes.multi=false;
+        return;
+    };
+    
     uint32 ind1=1; //start
     for (const auto &itype : types) {
         countInd.I[itype] = ind1;
