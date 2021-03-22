@@ -239,6 +239,7 @@ template <class argType>
 inline int32 binarySearch1a(argType x, argType *X, int32 N) {
     //binary search in the sorted list
     //check the boundaries first
+    //1a returns the last X element that is <= x
 
     if (x>X[N-1]) {
         return N-1;
@@ -256,7 +257,8 @@ inline int32 binarySearch1a(argType x, argType *X, int32 N) {
         };
     };
 
-    while (i1<N-1 && x==X[i1+1]) ++i1; //go forward to check for equals
+    while (i1<N-1 && x==X[i1+1]) 
+        ++i1; //go forward to check for equals
     return i1;
 };
 
