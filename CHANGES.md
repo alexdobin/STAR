@@ -1,3 +1,4 @@
+* Issue #1177: Added file checks for the --inputBAMfile .
 * Issue #1167: STARsolo CR/UR SAM tags are scrambled in TranscriptomeSAM file Aligned.toTranscriptome.out.bam. This bug appeared in 2.7.7a.
 * Issue #1166: seg-fault for STARsolo --soloCBwhitelist None (no whitelist) with barcodes longer than 16b
 * Fixed a bug causing seg-faults with --clipAdapterType CellRanger4 option.
