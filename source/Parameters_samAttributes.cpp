@@ -223,8 +223,12 @@ void Parameters::samAttributes(){//everything related to SAM attributes
     samAttrRequiresBAM(outSAMattrPresent.vA, "vA");
     samAttrRequiresBAM(outSAMattrPresent.vW, "vW");
     samAttrRequiresBAM(outSAMattrPresent.GX, "GX");
-    samAttrRequiresBAM(outSAMattrPresent.GN, "GN");      
-
+    samAttrRequiresBAM(outSAMattrPresent.GN, "GN");
+    
+    if (outSAMattrPresent.GX || outSAMattrPresent.GN) {
+        quant.gene.yes=true;
+        quant.yes=true;
+    };
 };
 
 void Parameters:: samAttrRequiresBAM(bool attrYes, string attrTag) {
