@@ -6,7 +6,8 @@
 #include <vector>
 
 extern "C" {
-#include <immintrin.h> // AVX2 and lower
+#define SIMDE_ENABLE_NATIVE_ALIASES
+#include <simde_avx2.h> // AVX2 and lower
 }
 
 #include "opal.h"
