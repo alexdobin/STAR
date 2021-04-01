@@ -1,3 +1,4 @@
+* Issue #1180: Output the actual number of alignments in NH attributes even if --outSAMmultNmax is set to a smaller value.
 * Issue #1190: Allow GX/GN output for non-STARsolo runs.
 * Issue #1177: Added file checks for the --inputBAMfile .
 * Issue #1167: STARsolo CR/UR SAM tags are scrambled in TranscriptomeSAM file Aligned.toTranscriptome.out.bam. This bug appeared in 2.7.7a.
