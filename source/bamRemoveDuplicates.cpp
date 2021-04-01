@@ -118,6 +118,11 @@ void bamRemoveDuplicates(const string bamFileName, const string bamFileNameOut, 
     bamA=bam_init1();
 
     BGZF *bamIn=bgzf_open(bamFileName.c_str(),"r");
+    if (bamIn==NULL) {
+        exitWithError("EXITING because of fatal ERROR: could not open --inputBAMfile " + bamFileName +
+                      "SOLUTION: check that file   " + bamFileName + "   exists and has proper read permissions."
+                        , std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
+    };
     bam_hdr_t *bamHeader=bam_hdr_read(bamIn);
 
     BGZF *bgzfOut;

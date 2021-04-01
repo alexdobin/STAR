@@ -42,17 +42,7 @@ void ParametersSolo::initialize(Parameters *pPin)
     if (typeStr=="None") {
         type = SoloTypes::None;
         yes = false;
-        samAttrYes = false;
-        //solo SAM attributes not allowed
-        if ( pP->outSAMattrPresent.CR || pP->outSAMattrPresent.CY || pP->outSAMattrPresent.UR 
-          || pP->outSAMattrPresent.UY  || pP->outSAMattrPresent.CB  || pP->outSAMattrPresent.UB
-          || pP->outSAMattrPresent.sS  || pP->outSAMattrPresent.sQ  || pP->outSAMattrPresent.sM
-           ) {
-            ostringstream errOut;
-            errOut <<"EXITING because of FATAL INPUT ERROR: --outSAMattributes contains CR/CY/UR/UY/CB/UB tags which are not allowed for --soloType " << typeStr <<'\n';
-            errOut <<"SOLUTION: re-run STAR without these attribures\n";
-            exitWithError(errOut.str(), std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
-        };        
+        samAttrYes = false;     
         return;        
     } else if (typeStr=="CB_UMI_Simple" || typeStr=="Droplet") {
         type=SoloTypes::CB_UMI_Simple;        

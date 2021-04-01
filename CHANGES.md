@@ -1,8 +1,11 @@
 * New option: --soloUMIfiltering MultiGeneUMI_All to filter out all UMIs mapping to multiple genes (for uniquely mapping reads)
 * Modified option: ---limitIObufferSize now requires two numbers - separate sizes for input and output buffers
 * New option: --outSJtype None   to omit outputting splice junctions to SJ.out.tab
-
-
+* PR #1163: SIMDe takes care of correct SIMD extensions based on -m g++ flag: compilation option CXXFLAGS_SIMD is preset to -mavx2, but can be to the desired target architecture. Many thanks to Michael R. Crusoe @mr-c, Evan Nemerson @nemequ and Steffen Möller @smoe!
+* Simple script to convert BED spliced junctions (SJ.out.tab) to BED12 for UCSC display: extras/scripts/sjBED12.awk
+* Issue #1180: Output the actual number of alignments in NH attributes even if --outSAMmultNmax is set to a smaller value.
+* Issue #1190: Allow GX/GN output for non-STARsolo runs.
+* Issue #1177: Added file checks for the --inputBAMfile .
 * Issue #1167: STARsolo CR/UR SAM tags are scrambled in TranscriptomeSAM file Aligned.toTranscriptome.out.bam. This bug appeared in 2.7.7a.
 * Issue #1166: seg-fault for STARsolo --soloCBwhitelist None (no whitelist) with barcodes longer than 16b
 * Fixed a bug causing seg-faults with --clipAdapterType CellRanger4 option.
