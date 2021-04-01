@@ -1,3 +1,4 @@
+* Simple script to convert BED spliced junctions (SJ.out.tab) to BED12 for UCSC display: extras/scripts/sjBED12.awk
 * Issue #1180: Output the actual number of alignments in NH attributes even if --outSAMmultNmax is set to a smaller value.
 * Issue #1190: Allow GX/GN output for non-STARsolo runs.
 * Issue #1177: Added file checks for the --inputBAMfile .
