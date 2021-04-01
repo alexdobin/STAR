@@ -1,3 +1,4 @@
+* PR #1163: SIMDe takes care of correct SIMD extensions based on -m g++ flag: compilation option CXXFLAGS_SIMD is preset to -mavx2, but can be to the desired target architecture. Many thanks to Michael R. Crusoe @mr-c, Evan Nemerson @nemequ and Steffen Möller @smoe!
 * Simple script to convert BED spliced junctions (SJ.out.tab) to BED12 for UCSC display: extras/scripts/sjBED12.awk
 * Issue #1180: Output the actual number of alignments in NH attributes even if --outSAMmultNmax is set to a smaller value.
 * Issue #1190: Allow GX/GN output for non-STARsolo runs.
