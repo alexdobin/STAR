@@ -72,7 +72,6 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
         };
     };    
     
-    
     vector<unordered_map <uintUMI,uintUMI>> umiCorrected(nGenes);
 
     if (countCellGeneUMI.size() < countCellGeneUMIindex[iCB] + nGenes*countMatStride)
@@ -81,8 +80,9 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
     nGenePerCB[iCB]=0;
     nUMIperCB[iCB]=0;
     countCellGeneUMIindex[iCB+1]=countCellGeneUMIindex[iCB];
+    
     /////////////////////////////////////////////
-    /////////// main cycle over genes
+    /////////// main cycle over genes with unique-gene-mappers
     for (uint32 iG=0; iG<nGenes; iG++) {//collapse UMIs for each gene
         uint32 *rGU1=rGU+gReadS[iG];
             
@@ -235,7 +235,7 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
                 uint32 *rGU1=rGU+gReadS[iG];            
                 for (uint32 iR=0; iR<gReadS[iG+1]-gReadS[iG]; iR+=rguStride) {//cycle over reads
                     uint64 iread1 = rGU1[iR+rguR];
-                    readInfo[iread1].cb = indCB[iCB] ;
+                    readInfo[iread1].cb = indCB[iCB];
                     uint32 umi=rGU1[iR+rguU];
                     
                     if (umiCorrected[iG].count(umi)>0)
@@ -252,11 +252,21 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
         };
     };
     
+    //////////////////////////////////////////multi-gene reads
+    //////////////////////////////////////////
     if (pSolo.multiMap.yes.multi)
         countMatMult.i[iCB+1] = countMatMult.i[iCB];
     
     if (nGenesMult>0) {//process multigene reads
-               
+        
+        if (readInfo.size()>0) {
+            for (uint32 iR=gReadS[nGenes]; iR<gReadS[nGenes+nGenesMult]; iR+=rguStride) {//cycle over multi-gene reads to record their CB and UMI, no corrections
+                uint64 iread1 = rGU[iR+rguR];
+                readInfo[iread1].cb = indCB[iCB];
+                readInfo[iread1].umi = rGU[iR+rguU];
+            };
+        };
+        
         std::vector<vector<uint32>> umiGenes;
         umiGenes.reserve(256);
         {//for each umi, count number of reads per gene. 

@@ -114,8 +114,9 @@ cleanCompileInfo:
 	'rm' -f STAR.o Parameters.o
 
 ifneq ($(MAKECMDGOALS),clean)
-ifneq ($(MAKECMDGOALS),cleanRelease)
 ifneq ($(MAKECMDGOALS),CLEAN)
+ifneq ($(MAKECMDGOALS),CLEAN)
+ifneq ($(MAKECMDGOALS),clean_solo)
 ifneq ($(MAKECMDGOALS),STARforMac)
 ifneq ($(MAKECMDGOALS),STARforMacGDB)
 Depend.list: $(SOURCES) parametersDefault.xxd htslib
@@ -123,6 +124,7 @@ Depend.list: $(SOURCES) parametersDefault.xxd htslib
 	'rm' -f ./Depend.list
 	$(CXX) $(CXXFLAGS_common) -MM $^ >> Depend.list
 include Depend.list
+endif
 endif
 endif
 endif
