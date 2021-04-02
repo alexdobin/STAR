@@ -362,7 +362,7 @@ void ParametersSolo::initialize(Parameters *pPin)
     time(&rawTime);
     pP->inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished reading, sorting and deduplicating CB whitelist sequences." <<endl;
 
-    //SAM attributes
+    //////////////////////////////////////////////////////////////SAM attributes
     samAttrYes=false;
     if ( (pP->outSAMattrPresent.CB || pP->outSAMattrPresent.UB) && type!=SoloTypes::CB_samTagOut) {
         samAttrYes=true;
@@ -377,6 +377,7 @@ void ParametersSolo::initialize(Parameters *pPin)
                       "SOLUTION: instead, use UR (uncorrected UMI) in --outSAMattributes\n",   std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
     
+    ////////////////////////////////////////////////////////////////readInfo
     readInfoYes.fill(false);
     if (samAttrYes) {//pSolo.samAttrFeature=0 by default, so need to check samAttrYes
         if (featureYes[SoloFeatureTypes::Gene]) {
@@ -393,9 +394,11 @@ void ParametersSolo::initialize(Parameters *pPin)
         readInfoYes[samAttrFeature]=true;
     };
     if (featureYes[SoloFeatureTypes::VelocytoSimple] || featureYes[SoloFeatureTypes::Velocyto]) //turn readInfo on for Gene needed by VelocytoSimple
-        readInfoYes[SoloFeatureTypes::Gene]=true;    
+        readInfoYes[SoloFeatureTypes::Gene]=true;
+    
+    readIndexYes = readInfoYes;
        
-    //umi filtering
+    ///////////////////////////////////////////////////////////////////umi filtering
     if (umiFiltering.type[0]=="MultiGeneUMI") {
         umiFiltering.MultiGeneUMI = true;
         umiFiltering.yes = true;
@@ -460,8 +463,8 @@ void ParametersSolo::initialize(Parameters *pPin)
     /////////////////////////////////////////////// MultiMappers
     multiMap.initialize(this);
     if (multiMap.yes.multi) {
-        readInfoYes[SoloFeatureTypes::Gene]=true; //TODO we only need readInfoRec here, not readInfo Array
-        readInfoYes[SoloFeatureTypes::GeneFull]=true; //TODO we only need readInfoRec here, not readInfo Array
+        readIndexYes[SoloFeatureTypes::Gene]=true; //TODO we only need readInfoRec here, not readInfo Array
+        readIndexYes[SoloFeatureTypes::GeneFull]=true; //TODO we only need readInfoRec here, not readInfo Array
     };
 };
 

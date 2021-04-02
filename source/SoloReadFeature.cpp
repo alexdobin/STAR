@@ -10,7 +10,8 @@ SoloReadFeature::SoloReadFeature(int32 feTy, Parameters &Pin, int iChunk)
 //     if (pSolo.type==pSolo.SoloTypes::CB_samTagOut)
 //         return;
     
-    readInfoYes=pSolo.readInfoYes[featureType];
+    readInfoYes = pSolo.readInfoYes[featureType];
+    readIndexYes = pSolo.readIndexYes[featureType];
     
     if (pSolo.cbWLyes) {
         cbReadCount.resize(pSolo.cbWLsize,0);

@@ -8,8 +8,10 @@ void SoloFeature::countCBgeneUMI()
     time_t rawTime;
     
     rguStride=2;
-    if (pSolo.readInfoYes[featureType]) {
+    if (pSolo.readIndexYes[featureType])
         rguStride=3; //to keep readI column
+
+    if (pSolo.readInfoYes[featureType]) {
         readInfo.resize(nReadsInput,{(uint64)-1,(uint32)-1});
         time(&rawTime);
         P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Allocated and initialized readInfo array, nReadsInput = " << nReadsInput <<endl;        
