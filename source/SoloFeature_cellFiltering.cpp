@@ -82,8 +82,9 @@ void SoloFeature::cellFiltering()
 
             filteredCells.nUMIinCells += nUMIperCB[icb]; //nUMIperCB was calculated for umiDedup-main
             
-            filteredCells.nReadInCells += nReadPerCB[icb];
-            filteredCells.nReadPerCell.push_back(nReadPerCB[icb]);
+            filteredCells.nReadInCells += nReadPerCBtotal[icb];
+            filteredCells.nReadInCellsUnique += nReadPerCBunique[icb];            
+            filteredCells.nReadPerCellUnique.push_back(nReadPerCBunique[icb]);
             
             uint32 ng1 = 0; //number of genes detected in this cell
             for (uint32 ig=0; ig<nGenePerCB[icb]; ig++) {
@@ -110,15 +111,15 @@ void SoloFeature::cellFiltering()
     };
     
     filteredCells.meanUMIperCell = filteredCells.nUMIinCells / filteredCells.nCells;
-    filteredCells.meanReadPerCell = filteredCells.nReadInCells / filteredCells.nCells;
+    filteredCells.meanReadPerCellUnique = filteredCells.nReadInCellsUnique / filteredCells.nCells;
     filteredCells.meanGenePerCell = filteredCells.nGeneInCells / filteredCells.nCells;
     
-    sort(filteredCells.nReadPerCell.begin(), filteredCells.nReadPerCell.end());
+    sort(filteredCells.nReadPerCellUnique.begin(), filteredCells.nReadPerCellUnique.end());
     sort(filteredCells.nGenePerCell.begin(), filteredCells.nGenePerCell.end());
 
     filteredCells.medianUMIperCell = nUMIperCBsorted[filteredCells.nCells/2];
     filteredCells.medianGenePerCell = filteredCells.nGenePerCell[filteredCells.nCells/2];
-    filteredCells.medianReadPerCell = filteredCells.nReadPerCell[filteredCells.nCells/2];
+    filteredCells.medianReadPerCellUnique = filteredCells.nReadPerCellUnique[filteredCells.nCells/2];
     
     //////////////////////////////////////////////////////////////////output filtered matrix
     outputResults(true, outputPrefixFiltered);

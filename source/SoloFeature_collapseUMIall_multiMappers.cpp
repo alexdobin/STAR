@@ -12,12 +12,12 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
 {
                                  
     uint32 *rGU=rCBp[iCB];
-    uint32 rN=nReadPerCB[iCB]; 
+    uint32 rN=nReadPerCB[iCB]; //with multimappers, this is the number of all aligns, not reads
     
     qsort(rGU,rN,rguStride*sizeof(uint32),funCompareNumbers<uint32>); //sort by gene index
 
-    uint32 gid1=-1;//current gID
-    uint32 nGenes=0, nGenesMult=0; //number of genes
+    uint32 gid1 = -1;//current gID
+    uint32 nGenes = 0, nGenesMult = 0; //number of genes
     uint32 *gID = new uint32[min(featuresNumber,rN)+1]; //gene IDs
     uint32 *gReadS = new uint32[min(featuresNumber,rN)+1]; //start of gene reads TODO: allocate this array in the 2nd half of rGU
     for (uint32 iR=0; iR<rN*rguStride; iR+=rguStride) {
@@ -33,6 +33,8 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
     };
     gReadS[nGenes]=rguStride*rN;//so that gReadS[nGenes]-gReadS[nGenes-1] is the number of reads for nGenes, see below in qsort
     nGenes -= nGenesMult;//unique only gene
+    nReadPerCBunique[iCB] = gReadS[nGenes]/rguStride; //number of unique reads for this CB
+    nReadPerCBtotal[iCB] = nReadPerCBunique[iCB];
     
     //unordered_map <uintUMI, unordered_set<uint32>> umiGeneMap;
     unordered_map <uintUMI, unordered_map<uint32,uint32>> umiGeneMapCount, umiGeneMapCount0;
@@ -303,6 +305,7 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
                 if (read1 != readPrev) {
                     ++nRumi;
                     readPrev = read1;
+                    nReadPerCBtotal[iCB]++;
                 };
                 
                 uint32 g1 = rGUm[iR+0] ^ geneMultMark; //XOR to unset the geneMultMark bit

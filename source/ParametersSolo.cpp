@@ -463,6 +463,11 @@ void ParametersSolo::initialize(Parameters *pPin)
     /////////////////////////////////////////////// MultiMappers
     multiMap.initialize(this);
     if (multiMap.yes.multi) {
+        if (type==SoloTypes::CB_samTagOut || type==SoloTypes::SmartSeq) {
+            exitWithError("EXITING because of fatal PARAMETERS error: multimapping options do not work for --soloType " +typeStr+ 
+                          "\nSOLUTION: use default option --soloMultiMappers Unique\n",
+                            std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+        };
         readIndexYes[SoloFeatureTypes::Gene]=true; //TODO we only need readInfoRec here, not readInfo Array
         readIndexYes[SoloFeatureTypes::GeneFull]=true; //TODO we only need readInfoRec here, not readInfo Array
     };

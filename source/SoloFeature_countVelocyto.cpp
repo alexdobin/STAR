@@ -151,7 +151,10 @@ void SoloFeature::countVelocyto()
             countCellGeneUMIindex[iCB+1] += countMatStride;
         };
     };
-
+    
+    //for now only unique mappers are considered for velocyto
+    nReadPerCBtotal = nReadPerCB;
+    nReadPerCBunique = nReadPerCB;
     
     time(&rawTime);
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Velocyto counting: finished collapsing UMIs" <<endl;

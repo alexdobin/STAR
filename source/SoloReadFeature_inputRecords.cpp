@@ -8,7 +8,7 @@
 void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32> &cbReadCountTotal, vector<readInfoStruct> &readInfo)
 {   
     streamReads->flush();
-    streamReads->seekg(0,ios::beg);
+    streamReads->seekg(0,std::ios::beg);
 
     //////////////////////////////////////////// standard features
     uint32 feature;

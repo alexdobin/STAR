@@ -63,17 +63,33 @@ void SoloFeature::loadRawMatrix()
     
     countMatStride=3; //gene, cell, count. Recording cell at shift=1 is temporary: later will replace cell with count
     countCellGeneUMI.resize(nTot*countMatStride,0);
+    
+    //countMatMult.s = 3;
+    //countMatMult.m.resize(nTot*countMatStride,0.0);
+    
     for (uint64 ii=0; ii<nTot; ii++) {
         matStream >> countCellGeneUMI[ii*countMatStride+0];//gene
-        matStream >> countCellGeneUMI[ii*countMatStride+1];//cell
-        matStream >> countCellGeneUMI[ii*countMatStride+2];//count: for now, only allow one value per cell/gene
+        --countCellGeneUMI[ii*countMatStride+0]; //0-based gene
         
-        --countCellGeneUMI[ii*countMatStride+0];
-        --countCellGeneUMI[ii*countMatStride+1];
+        matStream >> countCellGeneUMI[ii*countMatStride+1];//cell
+        --countCellGeneUMI[ii*countMatStride+1]; //0-based cell
+        
+        double count1;
+        matStream >> count1;
+        countCellGeneUMI[ii*countMatStride+2] = std::round(count1);
+        
+        /* to keep fractional part
+        matStream >> countMatMult.m[ii*countMatStride+2];//count: for now, only allow one value per cell/gene 
+        countCellGeneUMI[ii*countMatStride+2] = std::round(countMatMult.m[ii*countMatStride+2]); //round to integer
+        countMatMult.m[ii*countMatStride+2] -= countCellGeneUMI[ii*countMatStride+2]; //just the fractional part
+        countMatMult.m[ii*countMatStride+0] = countCellGeneUMI[ii*countMatStride+0];
+        countMatMult.m[ii*countMatStride+1] = countCellGeneUMI[ii*countMatStride+1];
+        */
     };
     
     qsort((void*) countCellGeneUMI.data(), nTot, countMatStride*sizeof(countCellGeneUMI[0]), funCompareTypeSecondFirst<uint32>);
-
+    
+    
     //count number of detected cell
     nCB=0;
     uint32 ciprev=(uint32) -1;

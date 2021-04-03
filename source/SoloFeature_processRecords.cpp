@@ -53,6 +53,9 @@ void SoloFeature::processRecords()
             countCBgeneUMI();
         };
     };
+    
+    if (!(pSolo.multiMap.yes.multi && (featureType==SoloFeatureTypes::Gene || featureType==SoloFeatureTypes::GeneFull)))
+        readFeatSum->stats.V[readFeatSum->stats.nMatch] += readFeatSum->stats.V[readFeatSum->stats.nAmbigFeature];   
 
     //output
     ofstream *statsStream = &ofstrOpen(outputPrefix+"Features.stats",ERROR_OUT, P);
