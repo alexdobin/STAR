@@ -13,7 +13,7 @@
 * PR #1164: SOURCE_DATE_EPOCH to make the build more reproducible
 * PR #1156: clean opal/opal.o
 * PR #1157: print STAR command line and version information to stdout
-* New script extras/scripts/calcUMIperCell.awk to calculate total number of UMIs per cell and filtering status from STARsolo metrix.mtx
+* New script extras/scripts/calcUMIperCell.awk to calculate total number of UMIs per cell and filtering status from STARsolo matrix.mtx
 
 STAR 2.7.8a --- 2021/02/20 ::: Major STARsolo updates
 =====================================================

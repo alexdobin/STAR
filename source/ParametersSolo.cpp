@@ -223,9 +223,8 @@ void ParametersSolo::initialize(Parameters *pPin)
         if (featureYes[SoloFeatureTypes::GeneFull]) {
             pP->quant.geneFull.yes=true;
             pP->quant.yes = true;
-        } else if (pP->outSAMattrPresent.GX || pP->outSAMattrPresent.GN) {//turn on quantification if no GeneFull or Gene, but GX/GN requested        
-            pP->quant.gene.yes=true;
-            pP->quant.yes = true;        
+            if (!featureYes[SoloFeatureTypes::Gene]) 
+                pP->quant.gene.yes=false; //if GeneFull is requested, but Gene is not, turn it off - it could have been turned on because of GX/GN attributes
         };
     };
     
