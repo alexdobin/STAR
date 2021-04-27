@@ -870,11 +870,11 @@ soloUMIdedup                1MM_All
 
 soloUMIfiltering            -
     string(s)               type of UMI filtering (for reads uniquely mapping to genes)
-                            -               ... basic filtering: remove UMIs with N and homopolymers (similar to CellRanger 2.2.0).
-                            MultiGeneUMI    ... basic + remove lower-count UMIs that map to more than one gene.
-                            MultiGeneUMI    ... basic + remove all UMIs that map to more than one gene.
-                            MultiGeneUMI_CR ... basic + remove lower-count UMIs that map to more than one gene, matching CellRanger > 3.0.0 .
-                                                Only works with --soloUMIdedup 1MM_CR
+                            -                  ... basic filtering: remove UMIs with N and homopolymers (similar to CellRanger 2.2.0).
+                            MultiGeneUMI       ... basic + remove lower-count UMIs that map to more than one gene.
+                            MultiGeneUMI_All   ... basic + remove all UMIs that map to more than one gene.
+                            MultiGeneUMI_CR    ... basic + remove lower-count UMIs that map to more than one gene, matching CellRanger > 3.0.0 .
+                                                   Only works with --soloUMIdedup 1MM_CR
                                                 
 soloOutFileNames            Solo.out/          features.tsv barcodes.tsv        matrix.mtx
     string(s)               file names for STARsolo output:
