@@ -42,17 +42,7 @@ void ParametersSolo::initialize(Parameters *pPin)
     if (typeStr=="None") {
         type = SoloTypes::None;
         yes = false;
-        samAttrYes = false;
-        //solo SAM attributes not allowed
-        if ( pP->outSAMattrPresent.CR || pP->outSAMattrPresent.CY || pP->outSAMattrPresent.UR 
-          || pP->outSAMattrPresent.UY  || pP->outSAMattrPresent.CB  || pP->outSAMattrPresent.UB
-          || pP->outSAMattrPresent.sS  || pP->outSAMattrPresent.sQ  || pP->outSAMattrPresent.sM
-           ) {
-            ostringstream errOut;
-            errOut <<"EXITING because of FATAL INPUT ERROR: --outSAMattributes contains CR/CY/UR/UY/CB/UB tags which are not allowed for --soloType " << typeStr <<'\n';
-            errOut <<"SOLUTION: re-run STAR without these attribures\n";
-            exitWithError(errOut.str(), std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
-        };        
+        samAttrYes = false;     
         return;        
     } else if (typeStr=="CB_UMI_Simple" || typeStr=="Droplet") {
         type=SoloTypes::CB_UMI_Simple;        
@@ -233,9 +223,8 @@ void ParametersSolo::initialize(Parameters *pPin)
         if (featureYes[SoloFeatureTypes::GeneFull]) {
             pP->quant.geneFull.yes=true;
             pP->quant.yes = true;
-        } else if (pP->outSAMattrPresent.GX || pP->outSAMattrPresent.GN) {//turn on quantification if no GeneFull or Gene, but GX/GN requested        
-            pP->quant.gene.yes=true;
-            pP->quant.yes = true;        
+            if (!featureYes[SoloFeatureTypes::Gene]) 
+                pP->quant.gene.yes=false; //if GeneFull is requested, but Gene is not, turn it off - it could have been turned on because of GX/GN attributes
         };
     };
     
@@ -372,7 +361,7 @@ void ParametersSolo::initialize(Parameters *pPin)
     time(&rawTime);
     pP->inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished reading, sorting and deduplicating CB whitelist sequences." <<endl;
 
-    //SAM attributes
+    //////////////////////////////////////////////////////////////SAM attributes
     samAttrYes=false;
     if ( (pP->outSAMattrPresent.CB || pP->outSAMattrPresent.UB) && type!=SoloTypes::CB_samTagOut) {
         samAttrYes=true;
@@ -387,6 +376,7 @@ void ParametersSolo::initialize(Parameters *pPin)
                       "SOLUTION: instead, use UR (uncorrected UMI) in --outSAMattributes\n",   std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
     
+    ////////////////////////////////////////////////////////////////readInfo
     readInfoYes.fill(false);
     if (samAttrYes) {//pSolo.samAttrFeature=0 by default, so need to check samAttrYes
         if (featureYes[SoloFeatureTypes::Gene]) {
@@ -403,9 +393,11 @@ void ParametersSolo::initialize(Parameters *pPin)
         readInfoYes[samAttrFeature]=true;
     };
     if (featureYes[SoloFeatureTypes::VelocytoSimple] || featureYes[SoloFeatureTypes::Velocyto]) //turn readInfo on for Gene needed by VelocytoSimple
-        readInfoYes[SoloFeatureTypes::Gene]=true;    
+        readInfoYes[SoloFeatureTypes::Gene]=true;
+    
+    readIndexYes = readInfoYes;
        
-    //umi filtering
+    ///////////////////////////////////////////////////////////////////umi filtering
     if (umiFiltering.type[0]=="MultiGeneUMI") {
         umiFiltering.MultiGeneUMI = true;
         umiFiltering.yes = true;
@@ -470,8 +462,13 @@ void ParametersSolo::initialize(Parameters *pPin)
     /////////////////////////////////////////////// MultiMappers
     multiMap.initialize(this);
     if (multiMap.yes.multi) {
-        readInfoYes[SoloFeatureTypes::Gene]=true; //TODO we only need readInfoRec here, not readInfo Array
-        readInfoYes[SoloFeatureTypes::GeneFull]=true; //TODO we only need readInfoRec here, not readInfo Array
+        if (type==SoloTypes::CB_samTagOut || type==SoloTypes::SmartSeq) {
+            exitWithError("EXITING because of fatal PARAMETERS error: multimapping options do not work for --soloType " +typeStr+ 
+                          "\nSOLUTION: use default option --soloMultiMappers Unique\n",
+                            std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+        };
+        readIndexYes[SoloFeatureTypes::Gene]=true; //TODO we only need readInfoRec here, not readInfo Array
+        readIndexYes[SoloFeatureTypes::GeneFull]=true; //TODO we only need readInfoRec here, not readInfo Array
     };
 };
 

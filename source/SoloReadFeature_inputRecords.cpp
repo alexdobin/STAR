@@ -8,7 +8,7 @@
 void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32> &cbReadCountTotal, vector<readInfoStruct> &readInfo)
 {   
     streamReads->flush();
-    streamReads->seekg(0,ios::beg);
+    streamReads->seekg(0,std::ios::beg);
 
     //////////////////////////////////////////// standard features
     uint32 feature;
@@ -16,8 +16,8 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
     int32 cbmatch;
     int64 cb;
     vector<uint32> trIdDist;
-    while (soloInputFeatureUMI(streamReads, featureType, readInfoYes, P.sjAll, iread, cbmatch, feature, umi, trIdDist)) {
-        if (feature == (uint32)(-1) && !readInfoYes) {//no feature => no record, this can happen for SJs
+    while (soloInputFeatureUMI(streamReads, featureType, readIndexYes, P.sjAll, iread, cbmatch, feature, umi, trIdDist)) {
+        if (feature == (uint32)(-1) && !readIndexYes) {//no feature => no record, this can happen for SJs
             streamReads->ignore((uint32)-1, '\n');
             //stats.V[stats.nNoFeature]++; //need separate category for this
             continue;
@@ -38,13 +38,13 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
             if (feature != (uint32)(-1)) {
                 cbP[cb][0]=feature;
                 cbP[cb][1]=umi;
-                if (readInfoYes) {
+                if (readIndexYes) {
                     cbP[cb][2]=iread;
                 };
                 cbP[cb]+=cbPstride;
                 if (cbmatch==0)
                     stats.V[stats.nExactMatch]++;
-            } else {//no feature - record readInfo
+            } else if (readInfoYes) {//no feature - record readInfo
                 readInfo[iread].cb=cb;
                 readInfo[iread].umi=umi;
             };
@@ -76,11 +76,11 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
                 if (feature != (uint32)(-1)) {
                     cbP[cb][0]=feature;
                     cbP[cb][1]=umi;
-                    if (readInfoYes) {
+                    if (readIndexYes) {
                         cbP[cb][2]=iread;
                     };
                     cbP[cb]+=cbPstride;
-                } else {//no feature - record readInfo
+                } else if (readInfoYes) {//no feature - record readInfo
                     readInfo[iread].cb=cb;
                     readInfo[iread].umi=umi;
                 };    

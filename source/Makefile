@@ -1,4 +1,4 @@
-# user may define these whole flags
+# user may define the whole sets of flags
 # LDFLAGS
 # CPPFLAGS
 # CXXFLAGS
@@ -32,6 +32,7 @@ COMPTIMEPLACE := -D'COMPILATION_TIME_PLACE="$(BUILD_DATE) $(BUILD_PLACE)"'
 # Defaults, can be overridden by make arguments or environment
 CXXFLAGS ?= -pipe -Wall -Wextra
 CFLAGS ?= -pipe -Wall -Wextra -O3
+CXXFLAGS_SIMD ?= -mavx2
 
 # Unconditionally set essential flags and optimization options
 CXXFLAGS_common := -std=c++11 -fopenmp $(COMPTIMEPLACE)
@@ -89,37 +90,33 @@ SOURCES := $(wildcard *.cpp) $(wildcard *.c)
 %.o : %.c
 	$(CXX) -c $(CPPFLAGS) $(CFLAGS) $<
 
-all: cleanCompileInfo STAR
+all: cleanCompileInfo STAR$(SFX)
 
 opal/opal.o : opal/opal.cpp opal/opal.h
 	cd opal && \
-	$(CXX) -c -O3 -std=c++11 -march=native opal.cpp
+	$(CXX) -c -I./ -std=c++11 $(CPPFLAGS) $(CXXFLAGS) $(CXXFLAGSextra) $(CXXFLAGS_SIMD) opal.cpp
 
 .PHONY: clean
 clean:
 	'rm' -f *.o opal/opal.o STAR STARstatic STARlong Depend.list parametersDefault.xxd
 
+.PHONY: CLEAN
+CLEAN: clean
+	$(MAKE) -C htslib clean
+
+
 .PHONY: clean_solo
 clean_solo:
 	'rm' -f Solo*.o
-
-.PHONY: CLEAN
-CLEAN:
-	'rm' -f *.o STAR Depend.list
-	$(MAKE) -C htslib clean
-
-.PHONY: cleanRelease
-cleanRelease:
-	'rm' -f *.o Depend.list
-	$(MAKE) -C htslib clean
 
 .PHONY: cleanCompileInfo
 cleanCompileInfo:
 	'rm' -f STAR.o Parameters.o
 
 ifneq ($(MAKECMDGOALS),clean)
-ifneq ($(MAKECMDGOALS),cleanRelease)
 ifneq ($(MAKECMDGOALS),CLEAN)
+ifneq ($(MAKECMDGOALS),CLEAN)
+ifneq ($(MAKECMDGOALS),clean_solo)
 ifneq ($(MAKECMDGOALS),STARforMac)
 ifneq ($(MAKECMDGOALS),STARforMacGDB)
 Depend.list: $(SOURCES) parametersDefault.xxd htslib
@@ -127,6 +124,7 @@ Depend.list: $(SOURCES) parametersDefault.xxd htslib
 	'rm' -f ./Depend.list
 	$(CXX) $(CXXFLAGS_common) -MM $^ >> Depend.list
 include Depend.list
+endif
 endif
 endif
 endif
@@ -141,30 +139,32 @@ htslib/libhts.a :
 parametersDefault.xxd: parametersDefault
 	xxd -i parametersDefault > parametersDefault.xxd
 
-STAR : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_main) $(CXXFLAGS)
-STAR : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_shared) $(LDFLAGS)
-STAR : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STAR $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
+STAR$(SFX) : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_main) $(CXXFLAGS)
+STAR$(SFX) : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_shared) $(LDFLAGS)
+STAR$(SFX) : Depend.list parametersDefault.xxd $(OBJECTS)
+	$(CXX) -o STAR$(SFX) $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
+
+STARstatic$(SFX) : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_main) $(CXXFLAGS)
+STARstatic$(SFX) : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_static) $(LDFLAGS)
+STARstatic$(SFX) : Depend.list parametersDefault.xxd $(OBJECTS)
+	$(CXX) -o STAR$(SFX) $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
+
+STARlong$(SFX) : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_main) -D'COMPILE_FOR_LONG_READS' $(CXXFLAGS)
+STARlong$(SFX) : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_shared) $(LDFLAGS)
+STARlong$(SFX) : Depend.list parametersDefault.xxd $(OBJECTS)
+	$(CXX) -o STARlong$(SFX) $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
+
+STARlongStatic$(SFX) : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_main) -D'COMPILE_FOR_LONG_READS' $(CXXFLAGS)
+STARlongStatic$(SFX) : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_static) $(LDFLAGS)
+STARlongStatic$(SFX) : Depend.list parametersDefault.xxd $(OBJECTS)
+	$(CXX) -o STARlong$(SFX) $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
+
+
 
 POSIXSHARED : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_main) -DPOSIX_SHARED_MEM $(CXXFLAGS)
 POSIXSHARED : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_shared) $(LDFLAGS)
 POSIXSHARED : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STAR $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
-
-STARstatic : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_main) $(CXXFLAGS)
-STARstatic : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_static) $(LDFLAGS)
-STARstatic : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STAR $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
-
-STARlong : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_main) -D'COMPILE_FOR_LONG_READS' $(CXXFLAGS)
-STARlong : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_shared) $(LDFLAGS)
-STARlong : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STARlong $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
-
-STARlongStatic : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_main) -D'COMPILE_FOR_LONG_READS' $(CXXFLAGS)
-STARlongStatic : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_static) $(LDFLAGS)
-STARlongStatic : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STARlong $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
+	$(CXX) -o STAR$(SFX) $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
 
 gdb : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_gdb) $(CXXFLAGS)
 gdb : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_gdb) $(LDFLAGS)

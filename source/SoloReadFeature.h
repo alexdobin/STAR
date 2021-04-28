@@ -22,7 +22,7 @@ public:
     
     vector<uint32> transcriptDistCount;
     
-    bool readInfoYes;
+    bool readInfoYes ,readIndexYes;
 
     fstream *streamReads;
 

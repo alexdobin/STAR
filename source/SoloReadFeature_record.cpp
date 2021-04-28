@@ -56,7 +56,7 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
                     } else {//good gene
                         reFe.gene = *readGe->begin();
                         reFe.indAnnotTr = ( featureType==SoloFeatureTypes::Gene ? readAnnot.geneConcordantTr : readAnnot.geneFullTr );                        
-                        nFeat = outputReadCB(streamReads, (readInfoYes ? iRead : (uint64)-1), featureType, soloBar, reFe, readAnnot);
+                        nFeat = outputReadCB(streamReads, (readIndexYes ? iRead : (uint64)-1), featureType, soloBar, reFe, readAnnot);
                     };
                 };
                 break;
@@ -72,7 +72,7 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
                         stats.V[stats.nNoFeature]++;
                     } else {//good junction
                         reFe.indAnnotTr=0;                        
-                        nFeat = outputReadCB(streamReads, (readInfoYes ? iRead : (uint64)-1), featureType, soloBar, reFe, readAnnot);
+                        nFeat = outputReadCB(streamReads, (readIndexYes ? iRead : (uint64)-1), featureType, soloBar, reFe, readAnnot);
                     };
                 };                  
                 break;

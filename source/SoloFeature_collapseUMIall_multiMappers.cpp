@@ -12,12 +12,12 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
 {
                                  
     uint32 *rGU=rCBp[iCB];
-    uint32 rN=nReadPerCB[iCB]; 
+    uint32 rN=nReadPerCB[iCB]; //with multimappers, this is the number of all aligns, not reads
     
     qsort(rGU,rN,rguStride*sizeof(uint32),funCompareNumbers<uint32>); //sort by gene index
 
-    uint32 gid1=-1;//current gID
-    uint32 nGenes=0, nGenesMult=0; //number of genes
+    uint32 gid1 = -1;//current gID
+    uint32 nGenes = 0, nGenesMult = 0; //number of genes
     uint32 *gID = new uint32[min(featuresNumber,rN)+1]; //gene IDs
     uint32 *gReadS = new uint32[min(featuresNumber,rN)+1]; //start of gene reads TODO: allocate this array in the 2nd half of rGU
     for (uint32 iR=0; iR<rN*rguStride; iR+=rguStride) {
@@ -33,6 +33,8 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
     };
     gReadS[nGenes]=rguStride*rN;//so that gReadS[nGenes]-gReadS[nGenes-1] is the number of reads for nGenes, see below in qsort
     nGenes -= nGenesMult;//unique only gene
+    nReadPerCBunique[iCB] = gReadS[nGenes]/rguStride; //number of unique reads for this CB
+    nReadPerCBtotal[iCB] = nReadPerCBunique[iCB];
     
     //unordered_map <uintUMI, unordered_set<uint32>> umiGeneMap;
     unordered_map <uintUMI, unordered_map<uint32,uint32>> umiGeneMapCount, umiGeneMapCount0;
@@ -72,7 +74,6 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
         };
     };    
     
-    
     vector<unordered_map <uintUMI,uintUMI>> umiCorrected(nGenes);
 
     if (countCellGeneUMI.size() < countCellGeneUMIindex[iCB] + nGenes*countMatStride)
@@ -81,8 +82,9 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
     nGenePerCB[iCB]=0;
     nUMIperCB[iCB]=0;
     countCellGeneUMIindex[iCB+1]=countCellGeneUMIindex[iCB];
+    
     /////////////////////////////////////////////
-    /////////// main cycle over genes
+    /////////// main cycle over genes with unique-gene-mappers
     for (uint32 iG=0; iG<nGenes; iG++) {//collapse UMIs for each gene
         uint32 *rGU1=rGU+gReadS[iG];
             
@@ -235,7 +237,7 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
                 uint32 *rGU1=rGU+gReadS[iG];            
                 for (uint32 iR=0; iR<gReadS[iG+1]-gReadS[iG]; iR+=rguStride) {//cycle over reads
                     uint64 iread1 = rGU1[iR+rguR];
-                    readInfo[iread1].cb = indCB[iCB] ;
+                    readInfo[iread1].cb = indCB[iCB];
                     uint32 umi=rGU1[iR+rguU];
                     
                     if (umiCorrected[iG].count(umi)>0)
@@ -252,11 +254,21 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
         };
     };
     
+    //////////////////////////////////////////multi-gene reads
+    //////////////////////////////////////////
     if (pSolo.multiMap.yes.multi)
         countMatMult.i[iCB+1] = countMatMult.i[iCB];
     
     if (nGenesMult>0) {//process multigene reads
-               
+        
+        if (readInfo.size()>0) {
+            for (uint32 iR=gReadS[nGenes]; iR<gReadS[nGenes+nGenesMult]; iR+=rguStride) {//cycle over multi-gene reads to record their CB and UMI, no corrections
+                uint64 iread1 = rGU[iR+rguR];
+                readInfo[iread1].cb = indCB[iCB];
+                readInfo[iread1].umi = rGU[iR+rguU];
+            };
+        };
+        
         std::vector<vector<uint32>> umiGenes;
         umiGenes.reserve(256);
         {//for each umi, count number of reads per gene. 
@@ -293,6 +305,7 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
                 if (read1 != readPrev) {
                     ++nRumi;
                     readPrev = read1;
+                    nReadPerCBtotal[iCB]++;
                 };
                 
                 uint32 g1 = rGUm[iR+0] ^ geneMultMark; //XOR to unset the geneMultMark bit

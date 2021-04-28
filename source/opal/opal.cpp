@@ -6,7 +6,8 @@
 #include <vector>
 
 extern "C" {
-#include <immintrin.h> // AVX2 and lower
+#define SIMDE_ENABLE_NATIVE_ALIASES
+#include <simde_avx2.h> // AVX2 and lower
 }
 
 #include "opal.h"
@@ -14,7 +15,8 @@ extern "C" {
 
 // I define aliases for SSE intrinsics, so they can be used in code not depending on SSE generation.
 // If available, AVX2 is used because it has two times bigger register, thus everything is two times faster.
-#ifdef __AVX2__
+// #ifdef __AVX2__
+#if 1     //A.D.: now SIMDe will be taking care of the SIMD
 
 const int SIMD_REG_SIZE = 256; //!< number of bits in register
 typedef __m256i __mxxxi; //!< represents register containing integers
@@ -1437,8 +1439,10 @@ extern int opalSearchDatabase(
     unsigned char** db, int dbLength, int dbSeqLengths[],
     int gapOpen, int gapExt, int* scoreMatrix, int alphabetLength,
     OpalSearchResult* results[], const int searchType, int mode, int overflowMethod) {
-#if !defined(__SSE4_1__) && !defined(__AVX2__)
-    return OPAL_ERR_NO_SIMD_SUPPORT;
+// A.D.: this will not happen since SIMDe always takes care of correct SIMD extensions
+#if 0
+//#if !defined(__SSE4_1__) && !defined(__AVX2__)
+//    return OPAL_ERR_NO_SIMD_SUPPORT;
 #else
     // Calculate score and end location.
     int status;

@@ -884,8 +884,6 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     
     //quantification parameters
     quant.yes=false;
-    quant.geneFull.yes=false;
-    quant.gene.yes=false;
     quant.geCount.yes=false;
     quant.trSAM.yes=false;
     quant.trSAM.bamYes=false;
@@ -929,6 +927,10 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
             };
         };
     };
+    //these may be set in STARsolo or in SAM attributes
+    quant.geneFull.yes=false;
+    quant.gene.yes=false;
+    
 
     outSAMstrandField.type=0; //none
     if (outSAMstrandField.in=="None") {

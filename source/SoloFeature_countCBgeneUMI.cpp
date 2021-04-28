@@ -8,8 +8,10 @@ void SoloFeature::countCBgeneUMI()
     time_t rawTime;
     
     rguStride=2;
-    if (pSolo.readInfoYes[featureType]) {
+    if (pSolo.readIndexYes[featureType])
         rguStride=3; //to keep readI column
+
+    if (pSolo.readInfoYes[featureType]) {
         readInfo.resize(nReadsInput,{(uint64)-1,(uint32)-1});
         time(&rawTime);
         P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Allocated and initialized readInfo array, nReadsInput = " << nReadsInput <<endl;        
@@ -45,12 +47,14 @@ void SoloFeature::countCBgeneUMI()
     for (uint32 iCB=0; iCB<nCB; iCB++) {
         nReadPerCB[iCB] = (rCBpa[indCB[iCB]]-rCBp[iCB])/rguStride;  //number of reads that were matched to WL, rCBpa accumulated reference to the last element+1
         nReadPerCBmax=max(nReadPerCBmax,nReadPerCB[iCB]);
-        readFeatSum->stats.V[readFeatSum->stats.nMatch] += nReadPerCB[iCB];
-    };
-
+        //readFeatSum->stats.V[readFeatSum->stats.nMatch] += nReadPerCB[iCB];
+    };    
+    
     for (int ii=0; ii<P.runThreadN; ii++) {
         readFeatSum->addStats(*readFeatAll[ii]);
     };
+    
+    //readFeatSum->stats.calcUnique(pSolo.multiMap.yes.multi && (featureType==SoloFeatureTypes::Gene || featureType==SoloFeatureTypes::GeneFull));    
 
     time(&rawTime);
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished reading reads from Solo files nCB="<<nCB <<", nReadPerCBmax="<<nReadPerCBmax;
@@ -74,15 +78,20 @@ void SoloFeature::countCBgeneUMI()
         countMatMult.i.resize(nCB+1, 0);
     };
     
+    nReadPerCBtotal.resize(nCB);
+    nReadPerCBunique.resize(nCB);
     for (uint32 icb=0; icb<nCB; icb++) {//main collapse cycle
         
         collapseUMIall(icb, umiArray);
         
         readFeatSum->stats.V[readFeatSum->stats.nUMIs] += nUMIperCB[icb];
-        if (nGenePerCB[icb]>0)
+        if (nGenePerCB[icb]>0) //nGenePerCB contains only unique
             ++readFeatSum->stats.V[readFeatSum->stats.nCellBarcodes];
+        
+        readFeatSum->stats.V[readFeatSum->stats.nMatch] += nReadPerCBtotal[icb];        
+        readFeatSum->stats.V[readFeatSum->stats.nMatchUnique ] += nReadPerCBunique[icb];        
     };
-    
+        
     delete[] rGeneUMI;
     //delete[] rCBp;
     

@@ -40,29 +40,29 @@ void SoloFeature::statsOutput()
     strOut << "Reads Mapped to Genome: Unique," << double(g_statsAll.mappedReadsU)/g_statsAll.readN <<'\n';
     
     string mapfeat=SoloFeatureTypes::Names[featureType];
-    if (featureType==SoloFeatureTypes::Gene || featureType==SoloFeatureTypes::GeneFull)
-        mapfeat="Transcriptome";
+    //if (featureType==SoloFeatureTypes::Gene || featureType==SoloFeatureTypes::GeneFull)
+    //    mapfeat="Transcriptome";
     
-    strOut << "Reads Mapped to "<< mapfeat << ": Unique+Multipe " << SoloFeatureTypes::Names[featureType] <<"s," << double( readFeatSum->stats.numMappedToTranscriptome() )/g_statsAll.readN <<'\n';
-    strOut << "Reads Mapped to "<< mapfeat << ": Unique " << SoloFeatureTypes::Names[featureType] <<"s," << double( readFeatSum->stats.numMappedToTranscriptomeUnique() )/g_statsAll.readN <<'\n';
+    strOut << "Reads Mapped to "<< mapfeat << ": Unique+Multipe " << SoloFeatureTypes::Names[featureType] <<"," << double( readFeatSum->stats.numMappedToTranscriptome() )/g_statsAll.readN <<'\n';
+    strOut << "Reads Mapped to "<< mapfeat << ": Unique " << SoloFeatureTypes::Names[featureType] <<"," << double( readFeatSum->stats.numMappedToTranscriptomeUnique() )/g_statsAll.readN <<'\n';
     
     if (pSolo.cellFilter.type[0]!="None" && (featureType==SoloFeatureTypes::Gene || featureType==SoloFeatureTypes::GeneFull)) {
         //if (pSolo.cellFilter.type[0]=="CellRanger2.2") 
         {
             strOut << "Estimated Number of Cells," << filteredCells.nCells <<'\n';
 
-            strOut << "Reads in Cells Mapped to Unique " << SoloFeatureTypes::Names[featureType] << "s," << filteredCells.nReadInCells <<'\n';
-            strOut << "Fraction of Reads in Cells," << double(filteredCells.nReadInCells) / readFeatSum->stats.numMappedToTranscriptomeUnique() <<'\n';
-            strOut << "Mean Reads per Cell," << filteredCells.meanReadPerCell <<'\n';
-            strOut << "Median Reads per Cell," << filteredCells.medianReadPerCell <<'\n';
+            strOut << "Unique Reads in Cells Mapped to " << SoloFeatureTypes::Names[featureType] << "," << filteredCells.nReadInCellsUnique <<'\n';
+            strOut << "Fraction of Unique Reads in Cells," << double(filteredCells.nReadInCellsUnique) / readFeatSum->stats.numMappedToTranscriptomeUnique() <<'\n';
+            strOut << "Mean Reads per Cell," << filteredCells.meanReadPerCellUnique <<'\n';
+            strOut << "Median Reads per Cell," << filteredCells.medianReadPerCellUnique <<'\n';
 
             strOut << "UMIs in Cells," << filteredCells.nUMIinCells <<'\n';
             strOut << "Mean UMI per Cell," << filteredCells.meanUMIperCell <<'\n';
             strOut << "Median UMI per Cell," << filteredCells.medianUMIperCell <<'\n';    
 
-            strOut << "Mean "   << SoloFeatureTypes::Names[featureType] << "s per Cell," << filteredCells.meanGenePerCell <<'\n';
-            strOut << "Median " << SoloFeatureTypes::Names[featureType] << "s per Cell," << filteredCells.medianGenePerCell <<'\n';    
-            strOut << "Total "  << SoloFeatureTypes::Names[featureType] << "s Detected," << filteredCells.nGeneDetected <<'\n';    
+            strOut << "Mean "   << SoloFeatureTypes::Names[featureType] << " per Cell," << filteredCells.meanGenePerCell <<'\n';
+            strOut << "Median " << SoloFeatureTypes::Names[featureType] << " per Cell," << filteredCells.medianGenePerCell <<'\n';    
+            strOut << "Total "  << SoloFeatureTypes::Names[featureType] << " Detected," << filteredCells.nGeneDetected <<'\n';    
         };
 
         //output UMI per cell, sorted
