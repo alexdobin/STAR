@@ -288,9 +288,13 @@ void ReadAlign::alignedAnnotation()
     //solo-GeneFull
     if ( P.quant.geneFull.yes ) {
         chunkTr->geneFullAlignOverlap(nTr, trMult, P.pSolo.strand, readAnnot);
-    };
+    };   
     //solo-Gene
     if ( P.quant.gene.yes ) {
         chunkTr->classifyAlign(trMult, nTr, readAnnot);
-    };            
+    };
+    //solo-GeneFull
+    if ( P.quant.geneFull_CR.yes ) {
+        chunkTr->geneFullAlignOverlap_CR(nTr, trMult, P.pSolo.strand, readAnnot);
+    };    
 };

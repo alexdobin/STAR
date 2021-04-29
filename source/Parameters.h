@@ -294,28 +294,32 @@ class Parameters {
           bool yes; //if any quantification is done
           vector <string> mode; //quantification mode input string
 
-          struct {
-              bool yes;
-              bool bamYes;
-              bool indel;
-              bool softClip;
-              bool singleEnd;
-              int bamCompression;
-              string ban;
-          } trSAM;
+            struct {
+                bool yes;
+                bool bamYes;
+                bool indel;
+                bool softClip;
+                bool singleEnd;
+                int bamCompression;
+                string ban;
+            } trSAM;
 
-          struct {
-              bool yes;
-              string outFile;
-          } geCount;
+            struct {
+                bool yes;
+                string outFile;
+            } geCount;
 
-          struct {
-              bool yes;
-          } geneFull;
+            struct {
+                bool yes;
+            } geneFull;
+          
+            struct {
+                bool yes;
+            } geneFull_CR;
 
-          struct {
-              bool yes;
-          } gene;
+            struct {
+                bool yes;
+            } gene;
           
         } quant;
 

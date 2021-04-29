@@ -31,10 +31,24 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
     } else {
         switch (featureType) {
             case SoloFeatureTypes::Gene :
-            case SoloFeatureTypes::GeneFull : 
+            case SoloFeatureTypes::GeneFull :
+            case SoloFeatureTypes::GeneFull_CR : 
                 {
-                    set<uint32> *readGe=( featureType==SoloFeatureTypes::Gene 
-                                                      ? &readAnnot.geneConcordant : &readAnnot.geneFull ); //for Gene or GeneFull
+                    set<uint32> *readGe;
+                    switch (featureType) {
+                        case SoloFeatureTypes::Gene :
+                            readGe = &readAnnot.geneConcordant;
+                            reFe.indAnnotTr = readAnnot.geneConcordantTr; //TODO deal carefully with start/end collapsing for SmartSeq                  
+                            break;
+                        case SoloFeatureTypes::GeneFull :
+                            readGe = &readAnnot.geneFull;
+                            reFe.indAnnotTr = readAnnot.geneFullTr;                            
+                            break;
+                        case SoloFeatureTypes::GeneFull_CR :
+                            readGe = &readAnnot.geneFull_CR;
+                            reFe.indAnnotTr = readAnnot.geneFull_CR_Tr;
+                    };
+                        
                     if (readGe->size()==0) {//check genes
                         stats.V[stats.nNoFeature]++;//no gene
                     } else if (readGe->size()>1) {
@@ -49,13 +63,12 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
                                 reFe.geneMult[ii] = g | geneMultMark;
                                 ++ii;
                             };
-                            
-                            reFe.indAnnotTr = ( featureType==SoloFeatureTypes::Gene ? readAnnot.geneConcordantTr : readAnnot.geneFullTr );//TODO deal carefully with start/end collapsing for SmartSeq                  
+                                
+                            //for Smart-seq TODO fix GeneFull_CR. Can move this switch(featureType) above
                             nFeat = outputReadCB(streamReads, iRead, featureType, soloBar, reFe, readAnnot);
                         };
-                    } else {//good gene
+                    } else {//unique-gene read
                         reFe.gene = *readGe->begin();
-                        reFe.indAnnotTr = ( featureType==SoloFeatureTypes::Gene ? readAnnot.geneConcordantTr : readAnnot.geneFullTr );                        
                         nFeat = outputReadCB(streamReads, (readIndexYes ? iRead : (uint64)-1), featureType, soloBar, reFe, readAnnot);
                     };
                 };
@@ -150,6 +163,7 @@ uint32 outputReadCB(fstream *streamOut, const uint64 iRead, const int32 featureT
             
         case SoloFeatureTypes::Gene :
         case SoloFeatureTypes::GeneFull :
+        case SoloFeatureTypes::GeneFull_CR :
             
             if (reFe.geneMult.size()==0) {
                 //just gene id

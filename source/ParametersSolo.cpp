@@ -226,6 +226,12 @@ void ParametersSolo::initialize(Parameters *pPin)
             if (!featureYes[SoloFeatureTypes::Gene]) 
                 pP->quant.gene.yes=false; //if GeneFull is requested, but Gene is not, turn it off - it could have been turned on because of GX/GN attributes
         };
+        if (featureYes[SoloFeatureTypes::GeneFull_CR]) {
+            pP->quant.geneFull_CR.yes=true;
+            pP->quant.yes = true;
+            if (!featureYes[SoloFeatureTypes::Gene]) 
+                pP->quant.gene.yes=false; //if GeneFull is requested, but Gene is not, turn it off - it could have been turned on because of GX/GN attributes
+        };        
     };
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -383,10 +389,12 @@ void ParametersSolo::initialize(Parameters *pPin)
             samAttrFeature=SoloFeatureTypes::Gene;
         } else if (featureYes[SoloFeatureTypes::GeneFull]) {//if Gene is not defined
             samAttrFeature=SoloFeatureTypes::GeneFull;
+        } else if (featureYes[SoloFeatureTypes::GeneFull_CR]) {//if Gene is not defined
+            samAttrFeature=SoloFeatureTypes::GeneFull_CR;            
         } else {
             ostringstream errOut;
-            errOut << "EXITING because of fatal PARAMETERS error: CB and/or UB attributes in --outSAMattributes require --soloFeatures Gene OR/AND GeneFull.\n";
-            errOut << "SOLUTION: re-run STAR adding Gene AND/OR GeneFull to --soloFeatures\n";
+            errOut << "EXITING because of fatal PARAMETERS error: CB and/or UB attributes in --outSAMattributes require --soloFeatures Gene OR/AND GeneFull OR/AND GeneFull_CR.\n";
+            errOut << "SOLUTION: re-run STAR adding Gene AND/OR GeneFull OR/AND GeneFull_CR to --soloFeatures\n";
             exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
 
@@ -467,8 +475,9 @@ void ParametersSolo::initialize(Parameters *pPin)
                           "\nSOLUTION: use default option --soloMultiMappers Unique\n",
                             std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
-        readIndexYes[SoloFeatureTypes::Gene]=true; //TODO we only need readInfoRec here, not readInfo Array
-        readIndexYes[SoloFeatureTypes::GeneFull]=true; //TODO we only need readInfoRec here, not readInfo Array
+        readIndexYes[SoloFeatureTypes::Gene]=true;
+        readIndexYes[SoloFeatureTypes::GeneFull]=true;
+        readIndexYes[SoloFeatureTypes::GeneFull_CR]=true;
     };
 };
 

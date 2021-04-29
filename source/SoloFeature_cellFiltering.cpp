@@ -31,8 +31,9 @@ void SoloFeature::cellFiltering()
         };
         case SoloFeatureTypes::Gene:
         case SoloFeatureTypes::GeneFull:
-        case -1: {//undefined: matrix loaded from file
-
+        case SoloFeatureTypes::GeneFull_CR:            
+        case -1: //undefined: matrix loaded from file
+        {
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// cell calling (filtering)
             //do the filtering
 

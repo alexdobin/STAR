@@ -54,8 +54,6 @@ void SoloFeature::countCBgeneUMI()
         readFeatSum->addStats(*readFeatAll[ii]);
     };
     
-    //readFeatSum->stats.calcUnique(pSolo.multiMap.yes.multi && (featureType==SoloFeatureTypes::Gene || featureType==SoloFeatureTypes::GeneFull));    
-
     time(&rawTime);
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished reading reads from Solo files nCB="<<nCB <<", nReadPerCBmax="<<nReadPerCBmax;
     P.inOut->logMain <<", nMatch="<<readFeatSum->stats.V[readFeatSum->stats.nMatch]<<endl;

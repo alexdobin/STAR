@@ -23,6 +23,7 @@ void SoloFeature::outputResults(bool cellFilterYes, string outputPrefixMat)
     switch (featureType) {
         case SoloFeatureTypes::Gene :
         case SoloFeatureTypes::GeneFull :
+        case SoloFeatureTypes::GeneFull_CR :
         case SoloFeatureTypes::Velocyto :
         case SoloFeatureTypes::VelocytoSimple :
         {
@@ -112,7 +113,7 @@ void SoloFeature::outputResults(bool cellFilterYes, string outputPrefixMat)
     };
     
     //////////////////////////////////////////// output unique+multimappers
-    if (pSolo.multiMap.yes.multi && !cellFilterYes && (featureType == SoloFeatureTypes::Gene || featureType == SoloFeatureTypes::GeneFull) ) {
+    if (pSolo.multiMap.yes.multi && !cellFilterYes && (featureType == SoloFeatureTypes::Gene || featureType == SoloFeatureTypes::GeneFull || featureType == SoloFeatureTypes::GeneFull_CR) ) {
                           //skipping unique
         for (const auto &iMult: pSolo.multiMap.types) {               
             for (uint32 iDed=0; iDed<pSolo.umiDedup.yes.N; iDed++) {
