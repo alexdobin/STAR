@@ -49,11 +49,13 @@ void ReadAlignChunk::mapChunk() {//map one chunk. Input reads stream has to be s
                 if ( P.outSAMorder == "PairedKeepInputOrder" && P.runThreadN>1 ) {//output chunks into separate files
                     chunkOutBAMfile.write(chunkOutBAM,chunkOutBAMtotal);
                     chunkOutBAMfile.clear(); //in case 0 bytes were written which could set fail bit
+                    //chunkOutBAMfile.flush(); //not needed
                 } else {//standard way, directly into Aligned.out.sam file
                     //SAM output
                     if (P.runThreadN>1) pthread_mutex_lock(&g_threadChunks.mutexOutSAM);
                     P.inOut->outSAM->write(chunkOutBAM,chunkOutBAMtotal);
                     P.inOut->outSAM->clear();//in case 0 bytes were written which could set fail bit
+                    //P.inOut->outSAM->flush(); //not needed
                     if (P.runThreadN>1) pthread_mutex_unlock(&g_threadChunks.mutexOutSAM);
                 };
                 RA->outSAMstream->seekp(0,ios::beg); //rewind the chunk storage
