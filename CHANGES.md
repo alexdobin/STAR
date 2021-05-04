@@ -1,8 +1,8 @@
-STAR 2.7.9a --- 2021/02/20 ::: STARsolo updates
+STAR 2.7.9a --- 2021/05/05 ::: STARsolo updates
 =====================================================
 **Major updates:**
 * STARsolo can perform counting of multi-gene (multi-mapping) reads with --soloMultiMappers EM [Uniform Rescue PropUnqiue] options.
-* PR #1163: SIMDe takes care of correct SIMD extensions based on -m g++ flag: compilation option CXXFLAGS_SIMD is preset to -mavx2, but can be to the desired target architecture. Many thanks to Michael R. Crusoe @mr-c, Evan Nemerson @nemequ and Steffen Möller @smoe!
+* PR #1163: [SIMDe](https://github.com/simd-everywhere/simde) takes care of correct SIMD extensions based on -m g++ flag: compilation option CXXFLAGS_SIMD is preset to -mavx2, but can be to the desired target architecture. Many thanks to Michael R. Crusoe @mr-c, Evan Nemerson @nemequ and Steffen Möller @smoe!
 
 **New options and features:**
 * New option: --soloUMIfiltering MultiGeneUMI_All to filter out all UMIs mapping to multiple genes (for uniquely mapping reads)

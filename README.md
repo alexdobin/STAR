@@ -1,5 +1,5 @@
-STAR 2.7
-========
+STAR 2.7.9a
+==========
 Spliced Transcripts Alignment to a Reference
 © Alexander Dobin, 2009-2021
 https://www.ncbi.nlm.nih.gov/pubmed/23104886
@@ -52,6 +52,11 @@ Compile under Linux
 cd STAR/source
 make STAR
 ```
+For processors that do not support AVX extensions, specify the target SIMD architecture, e.g.
+```
+make STAR CXXFLAGS_SIMD=sse
+```
+
 
 Compile under Mac OS X
 ----------------------
