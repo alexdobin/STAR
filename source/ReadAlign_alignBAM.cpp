@@ -384,8 +384,13 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                         break;
 
                     case ATTR_GX:
+                        //TODO: for multimappers: output GX,GN with M, prefix and all aigns for each trOut
+                        // for non-genic, output -
+                        // for geneFull: need trOut.alignGeneFull to output GX only for genic aligns
                         if ( P.quant.gene.yes ) {
-                            if (readAnnot.geneConcordant.size()==1 && trOut.alignGenes.size()==1) //only output if read maps to a single gene, and this alignment maps to one gene
+                            if (readAnnot.geneConcordant.size()==1 && trOut.alignGenes.size()==1) 
+                                //only output if read maps to a single gene, and this trOut maps to one gene - it will be the same gene
+                                //if a read maps to multiple genomic loci, but only one gene, only one trOut will have trOut.alignGenes
                                 attrN+=bamAttrArrayWrite(chunkTr->geID[*trOut.alignGenes.begin()],"GX",attrOutArray+attrN);
                         } else if ( P.quant.geneFull.yes ) {
                             if ( readAnnot.geneFull.size()==1 ) //only output if read maps to a single gene
@@ -395,7 +400,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                             
                     case ATTR_GN:
                         if ( P.quant.gene.yes ) {                        
-                            if (readAnnot.geneConcordant.size()==1 && trOut.alignGenes.size()==1) //only output if read maps to a single gene, and this alignment maps to one gene
+                            if (readAnnot.geneConcordant.size()==1 && trOut.alignGenes.size()==1) //only output if read maps to a single gene, and trOut maps to one gene
                                 attrN+=bamAttrArrayWrite(chunkTr->geName[*trOut.alignGenes.begin()],"GN",attrOutArray+attrN);
                         } else if ( P.quant.geneFull.yes ) {
                             if ( readAnnot.geneFull.size()==1 ) //only output if read maps to a single gene

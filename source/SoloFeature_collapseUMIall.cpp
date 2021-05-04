@@ -4,8 +4,6 @@
 #include "serviceFuns.cpp"
 #include <unordered_map>
 #include "SoloCommon.h"
-#include <bitset>
-#define def_MarkNoColor  (uint32) -1
 
 inline int funCompareSolo1 (const void *a, const void *b) {
     uint32 *va= (uint32*) a;

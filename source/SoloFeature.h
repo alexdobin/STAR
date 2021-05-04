@@ -46,11 +46,18 @@ public:
     vector<uint32> indCBwl; //reverse of indCB: index of WL CBs in detected CB list
     vector<uint32> nUMIperCB, nUMIperCBsorted;//number of UMIs per CB, and the same sorted (descendant)
     vector<uint32> nGenePerCB;//number of genes (with >0 UMIs) per CB
-    vector<uint32> nReadPerCB;//number of reads per CB
+    vector<uint32> nReadPerCB;//number of reads per CB. With multimappers: all aligns per CB
+    vector<uint32> nReadPerCBunique, nReadPerCBtotal; //number of unique and multiple reads per CB
     
     vector<uint32> countCellGeneUMI;//sparsified matrix for the counts, each entry is: geneID count1 count2 ... countNcounts
     vector<uint32> countCellGeneUMIindex;//index of CBs in the count matrix
     uint32 countMatStride; //number of counts per entry in the count matrix
+    
+    struct {
+        vector<double> m;
+        vector<uint32> i;
+        uint32 s;
+    } countMatMult;
     
     vector<unordered_map<uint32, unordered_set<uint64>>> cbFeatureUMImap; //for SmartSeq counting
        

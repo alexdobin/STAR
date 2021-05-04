@@ -133,8 +133,8 @@ sjdbScore                               2
 
 sjdbInsertSave                          Basic
     string: which files to save when sjdb junctions are inserted on the fly at the mapping step
-					Basic ... only small junction / transcript files
-					All   ... all files including big Genome, SA and SAindex - this will create a complete genome directory
+                    Basic ... only small junction / transcript files
+                    All   ... all files including big Genome, SA and SAindex - this will create a complete genome directory
 
 ### Variation parameters
 varVCFfile                              -
@@ -226,7 +226,7 @@ clip5pAfterAdapterNbases    0
 limitGenomeGenerateRAM               31000000000
     int>0: maximum available RAM (bytes) for genome generation
 
-limitIObufferSize                    150000000
+limitIObufferSize                    30000000 50000000
     int>0: max available buffers size (bytes) for input/output, per thread
 
 limitOutSAMoneReadBytes              100000
@@ -265,7 +265,7 @@ outStd                          Log
                                 Log                    ... log messages
                                 SAM                    ... alignments in SAM format (which normally are output to Aligned.out.sam file), normal standard output will go into Log.std.out
                                 BAM_Unsorted           ... alignments in BAM format, unsorted. Requires --outSAMtype BAM Unsorted
-                                BAM_SortedByCoordinate ... alignments in BAM format, unsorted. Requires --outSAMtype BAM SortedByCoordinate
+                                BAM_SortedByCoordinate ... alignments in BAM format, sorted by coordinate. Requires --outSAMtype BAM SortedByCoordinate
                                 BAM_Quant              ... alignments to transcriptome in BAM format, unsorted. Requires --quantMode TranscriptomeSAM
 
 outReadsUnmapped                None
@@ -354,12 +354,12 @@ outSAMorder                     Paired
                                 Paired: one mate after the other for all paired alignments
                                 PairedKeepInputOrder: one mate after the other for all paired alignments, the order is kept the same as in the input FASTQ files
 
-outSAMprimaryFlag		OneBestScore
+outSAMprimaryFlag        OneBestScore
     string: which alignments are considered primary - all others will be marked with 0x100 bit in the FLAG
                                 OneBestScore ... only one alignment with the best score is primary
                                 AllBestScore ... all alignments with the best score are primary
 
-outSAMreadID			Standard
+outSAMreadID            Standard
     string: read ID record type
                                 Standard ... first word (until space) from the FASTx read ID line, removing /1,/2 from the end
                                 Number   ... read number (index) in the FASTx file
@@ -483,20 +483,26 @@ outFilterMatchNminOverLread     0.66
 
 outFilterIntronMotifs           None
     string: filter alignment using their motifs
-				None                           ... no filtering
-				RemoveNoncanonical             ... filter out alignments that contain non-canonical junctions
-				RemoveNoncanonicalUnannotated  ... filter out alignments that contain non-canonical unannotated junctions when using annotated splice junctions database. The annotated non-canonical junctions will be kept.
+                None                           ... no filtering
+                RemoveNoncanonical             ... filter out alignments that contain non-canonical junctions
+                RemoveNoncanonicalUnannotated  ... filter out alignments that contain non-canonical unannotated junctions when using annotated splice junctions database. The annotated non-canonical junctions will be kept.
 
 outFilterIntronStrands          RemoveInconsistentStrands
     string: filter alignments
                 RemoveInconsistentStrands      ... remove alignments that have junctions with inconsistent strands
                 None                           ... no filtering
 
+### Output splice junctions (SJ.out.tab)
+outSJtype                       Standard
+    string: type of splice junction output
+                                Standard    ... standard SJ.out.tab output
+                                None        ... no splice junction output
+
 ### Output Filtering: Splice Junctions
 outSJfilterReads                All
     string: which reads to consider for collapsed splice junctions output
-                All: all reads, unique- and multi-mappers
-                Unique: uniquely mapping reads only
+                                All     ... all reads, unique- and multi-mappers
+                                Unique  ... uniquely mapping reads only
 
 outSJfilterOverhangMin          30  12  12  12
     4 integers:    minimum overhang length for splice junctions on both sides for: (1) non-canonical motifs, (2) GT/AG and CT/AC motif, (3) GC/AG and CT/GC motif, (4) AT/AC and GT/AT motif. -1 means no output for that motif
@@ -837,7 +843,7 @@ soloStrand                  Forward
                             Reverse     ... read strand opposite to the original RNA molecule
 
 soloFeatures                Gene
-    string(s):              genomic features for which the UMI counts per Cell Barcode are collected
+    string(s): genomic features for which the UMI counts per Cell Barcode are collected
                             Gene            ... genes: reads match the gene transcript
                             SJ              ... splice junctions: reported in SJ.out.tab
                             GeneFull        ... full genes: count all reads overlapping genes' exons and introns
@@ -845,6 +851,13 @@ soloFeatures                Gene
 #####UnderDevelopment_begin : not supported - do not use
                             Transcript3p    ... quantification of transcript for 3' protocols
 #####UnderDevelopment_end
+
+soloMultiMappers            Unique
+    string(s): counting method for reads mapping to multiple genes           
+                            Unique  ... count only reads that map to unique genes
+                            Uniform ... uniformly distribute multi-genic UMIs to all genes
+                            Rescue  ... distribute UMIs proportionally to unique+uniform counts (~ first iteartion of EM)
+                            PropUnique ... distribute UMIs proportionally to unique mappers, if present, and uniformly if not.
 
 soloUMIdedup                1MM_All
     string(s):              type of UMI deduplication (collapsing) algorithm
@@ -856,11 +869,12 @@ soloUMIdedup                1MM_All
                             1MM_CR                      ... CellRanger2-4 algorithm for 1MM UMI collapsing.
 
 soloUMIfiltering            -
-    string(s)               type of UMI filtering
-                            -               ... basic filtering: remove UMIs with N and homopolymers (similar to CellRanger 2.2.0).
-                            MultiGeneUMI    ... basic + remove lower-count UMIs that map to more than one gene.
-                            MultiGeneUMI_CR ... basic + remove lower-count UMIs that map to more than one gene, matching CellRanger > 3.0.0 .
-                                                Only works with --soloUMIdedup 1MM_CR
+    string(s)               type of UMI filtering (for reads uniquely mapping to genes)
+                            -                  ... basic filtering: remove UMIs with N and homopolymers (similar to CellRanger 2.2.0).
+                            MultiGeneUMI       ... basic + remove lower-count UMIs that map to more than one gene.
+                            MultiGeneUMI_All   ... basic + remove all UMIs that map to more than one gene.
+                            MultiGeneUMI_CR    ... basic + remove lower-count UMIs that map to more than one gene, matching CellRanger > 3.0.0 .
+                                                   Only works with --soloUMIdedup 1MM_CR
                                                 
 soloOutFileNames            Solo.out/          features.tsv barcodes.tsv        matrix.mtx
     string(s)               file names for STARsolo output:
@@ -877,8 +891,8 @@ soloCellFilter              CellRanger2.2 3000 0.99 10
                                                 Can be followed by 10 numeric parameters:  nExpectedCells   maxPercentile   maxMinRatio   indMin   indMax   umiMin   umiMinFracMedian   candMaxN   FDR   simN 
                                                 The harcoded values are from CellRanger:             3000            0.99            10    45000    90000      500               0.01      20000  0.01  10000
 
-soloOutFormatFeaturesGeneField3	"Gene Expression"
-	string(s):				field 3 in the Gene features.tsv file. If "-", then no 3rd field is output.
+soloOutFormatFeaturesGeneField3    "Gene Expression"
+    string(s):                field 3 in the Gene features.tsv file. If "-", then no 3rd field is output.
 
 #####UnderDevelopment_begin : not supported - do not use
 soloClusterCBfile           -

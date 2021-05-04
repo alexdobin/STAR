@@ -53,15 +53,23 @@ void SoloFeature::processRecords()
             countCBgeneUMI();
         };
     };
+    
+    if (!(pSolo.multiMap.yes.multi && (featureType==SoloFeatureTypes::Gene || featureType==SoloFeatureTypes::GeneFull)))
+        readFeatSum->stats.V[readFeatSum->stats.nMatch] += readFeatSum->stats.V[readFeatSum->stats.nAmbigFeature];   
 
     //output
     ofstream *statsStream = &ofstrOpen(outputPrefix+"Features.stats",ERROR_OUT, P);
     readFeatSum->statsOut(*statsStream);
     statsStream->close();
     
+    time(&rawTime);
+    P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Solo: writing raw matrix" <<endl;
+
     //output nU per gene per CB
     outputResults(false,  outputPrefix + "/raw/"); //unfiltered
     
+    time(&rawTime);
+    P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Solo: cell filtering" <<endl;    
     cellFiltering();
     
     //summary stats output

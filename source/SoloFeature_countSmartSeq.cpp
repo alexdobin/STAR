@@ -137,12 +137,16 @@ void SoloFeature::countSmartSeq()
     };
 
     // sum stats
+    nReadPerCBtotal = nReadPerCB;
+    nReadPerCBunique = nReadPerCB;
+    
     uint32 nReadPerCBmax=0;
     for (uint32 icb=0; icb<nCB; icb++) {
         
         nReadPerCBmax=max(nReadPerCBmax,nReadPerCB[icb]);
-        readFeatSum->stats.V[readFeatSum->stats.nMatch] += nReadPerCB[icb];
-                
+        readFeatSum->stats.V[readFeatSum->stats.nMatch] += nReadPerCBtotal[icb];
+        readFeatSum->stats.V[readFeatSum->stats.nMatchUnique] += nReadPerCBunique[icb];
+            
         readFeatSum->stats.V[readFeatSum->stats.nUMIs] += nUMIperCB[icb];
         if (nGenePerCB[icb]>0)
             ++readFeatSum->stats.V[readFeatSum->stats.nCellBarcodes];        

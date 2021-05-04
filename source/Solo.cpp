@@ -18,7 +18,7 @@ Solo::Solo(ReadAlignChunk **RAchunkIn, Parameters &Pin, Transcriptome &inTrans)
         soloFeat[ii] = new SoloFeature(P, RAchunk, Trans, pSolo.features[ii], readBarSum, soloFeat);
 };
 
-///////////////////////////////////////////////////////////////////////////////////// post-mapping procssing only
+///////////////////////////////////////////////////////////////////////////////////// post-mapping processing only
 //overloaded: only soloCellFiltering
 Solo::Solo(Parameters &Pin, Transcriptome &inTrans)
           :  P(Pin), Trans(inTrans), pSolo(P.pSolo)

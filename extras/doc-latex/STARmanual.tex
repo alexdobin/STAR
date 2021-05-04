@@ -26,7 +26,7 @@
 \newcommand{\optvr}[1]{\sloppy\textit{\texttt{#1}}}
 
 \newcommand{\code}[1]{\sloppy\texttt{#1}}
-	
+
 \newcommand{\codelines}[1]{\begin{adjustwidth}{0.5in}{0in}
 	\raggedright\texttt{#1}
 	\end{adjustwidth}}
@@ -35,7 +35,7 @@
 
 \newcommand{\sechyperref}[1]{\hyperref[#1]{Section \ref{#1}. \nameref{#1}}}
 
-\title{STAR manual 2.7.8a}
+\title{STAR manual 2.7.9a}
 \author{Alexander Dobin\\
 dobin@cshl.edu}
 \maketitle
@@ -53,7 +53,7 @@ dobin@cshl.edu}
 \section{Getting started.}
 \subsection{Installation.}
 
-STAR source code and binaries can be downloaded from GitHub: named releases from \url{https://github.com/alexdobin/STAR/releases}, or the master branch from \url{https://github.com/alexdobin/STAR}. The pre-compiled STAR executables are  located \code{bin/} subdirectory. The \code{static} executables are the easisest to use, as they are statically compiled and are not dependents on external libraries. 
+STAR source code and binaries can be downloaded from GitHub: named releases from \url{https://github.com/alexdobin/STAR/releases}, or the master branch from \url{https://github.com/alexdobin/STAR}. The pre-compiled STAR executables are  located \code{bin/} subdirectory. The \code{static} executables are the easisest to use, as they are statically compiled and are not dependents on external libraries.
 
 To compile STAR from sources run \code{make} in the source directory for a Linux-like environment, or run \code{make STARforMac} for Mac OS X. This will produce the executable \code{'STAR'} inside the source directory.
 
@@ -72,7 +72,7 @@ STAR is compiled with gcc c++ compiler and depends only on standard gcc librarie
       \$ sudo yum install gcc-c++\\
       \$ sudo yum install glibc-static
    }
-   
+
 \paragraph{SUSE.}\hfill
 \codelines {\$ sudo zypper update\\
        \$ sudo zypper in gcc gcc-c++
@@ -138,8 +138,8 @@ Examples of acceptable genome sequence files:
 \begin{itemize}
 \item \textbf{ENSEMBL:} files marked with .dna.primary.assembly, such as:
 \url{ftp://ftp.ensembl.org/pub/release-77/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz}
-\item \textbf{GENCODE:} files marked with PRI (primary). Strongly recommended for mouse and human: \url{http://www.gencodegenes.org/}. 
-\end{itemize} 
+\item \textbf{GENCODE:} files marked with PRI (primary). Strongly recommended for mouse and human: \url{http://www.gencodegenes.org/}.
+\end{itemize}
 \subsubsection{Which annotations to use?}
 The use of the most comprehensive annotations for a given species is strongly recommended. Very importantly, chromosome names in the annotations GTF file have to match chromosome names in the FASTA genome sequence files. For example, one can use ENSEMBL FASTA files with ENSEMBL GTF files, and UCSC FASTA files with UCSC FASTA files. However, since UCSC uses \code{chr1, chr2, ...} naming convention, and ENSEMBL uses \code{1, 2, ...} naming, the ENSEMBL and UCSC FASTA and GTF files cannot be mixed together, unless chromosomes are  renamed to match between the FASTA anf GTF files.
 
@@ -175,7 +175,7 @@ The basic options to run a mapping job are as follows:
 \opt{genomeDir} specifies path to the genome directory where genome indices where generated (see \sechyperref{Generating_genome_indexes}).
 
 \item[]
-\opt{readFilesIn} name(s) (with path) of the files containing the sequences to be mapped (e.g. RNA-seq FASTQ files). If using Illumina paired-end reads, the \optvr{read1} and \optvr{read2} files have to be supplied. STAR can process both FASTA and FASTQ files. Multi-line (i.e. sequence split in multiple lines) FASTA (but not FASTQ) files are supported. 
+\opt{readFilesIn} name(s) (with path) of the files containing the sequences to be mapped (e.g. RNA-seq FASTQ files). If using Illumina paired-end reads, the \optvr{read1} and \optvr{read2} files have to be supplied. STAR can process both FASTA and FASTQ files. Multi-line (i.e. sequence split in multiple lines) FASTA (but not FASTQ) files are supported.
 
 If the read files are compressed, use the \opt{readFilesCommand} \optvr{UncompressionCommand} option, where \optvr{UncompressionCommand} is the un-compression command that takes the file name as input parameter, and sends the uncompressed output to stdout. For example, for gzipped files (*.gz) use
 \code{\opt{readFilesCommand} \optv{zcat}}
@@ -189,9 +189,9 @@ For bzip2-compressed files, use
 \subsection{Mapping multiple files in one run.}
 Multiple samples can be mapped in one run with a single output. This is equivalent to concatenating the read files before mapping, except that distinct read groups can be used in \opt{outSAMattrRGline} command to keep track of reads from different files. For single-end reads use a comma separated list (no spaces around commas), e.g.:
 
-\opt{readFilesIn} \optv{sample1.fq,sample2.fq,sample3.fq} 
+\opt{readFilesIn} \optv{sample1.fq,sample2.fq,sample3.fq}
 
-For paired-end reads, use comma separated list 
+For paired-end reads, use comma separated list
 for read1, followed by space, followed by comma separated list for read2, e.g.:
 
 \opt{readFilesIn}~\optv{s1read1.fq,s2read1.fq,s3read1.fq s1read2.fq,s2read2.fq,s3read2.fq}
@@ -203,11 +203,11 @@ For multiple read files, the corresponding read groups can be supplied with spac
 Note that this list is separated by commas surrounded by spaces (unlike \opt{readFilesIn} list).
 
 Another option for mapping multiple reads files, especially convenient for a very large number of files, is to create a file manifest and supply it in \opt{readFilesManifest} \optv{/path/to/manifest.tsv}.
-The manifest file should contain 3 tab-separated columns. For paired-end reads: 
+The manifest file should contain 3 tab-separated columns. For paired-end reads:
 
 \ofilen{read1-file-name $tab$ read2-file-name $tab$ read-group-line}
 
-For single-end reads, the 2nd column should contain the dash -: 
+For single-end reads, the 2nd column should contain the dash -:
 
 \ofilen{read1-file-name $tab$ -               $tab$ read-group-line}
 
@@ -216,7 +216,7 @@ If read-group-line does not start with ID:, it can only contain one ID field, an
 If read-group-line starts with ID:, it can contain several fields separated by $tab$, and all the fields will be copied verbatim into SAM @RG header line.
 
 \subsection{Advanced options.}
-There are many advanced options that control STAR mapping behavior. All options are briefly described in the Section \sechyperref{Description_of_all_options}. 
+There are many advanced options that control STAR mapping behavior. All options are briefly described in the Section \sechyperref{Description_of_all_options}.
 
 \subsubsection{Using annotations at the mapping stage.}
 Since 2.4.1a, the annotations can be included on the fly at the mapping step, without including them at the genome generation step. You can specify \opt{sjdbGTFfile} \optvr{/path/to/ann.gtf} and/or \opt{sjdbFileChrStartEnd} \optvr{/path/to/sj.tab}, as well as \opt{sjdbOverhang}, and any other \opt{sjdb*} options. The genome indices can be generated with or  without another set of annotations/junctions. In the latter case the new junctions will added to the old ones. STAR will insert the junctions into genome indices on the fly before mapping, which takes 1~2 minutes. The on the fly genome indices can be saved (for reuse) with \opt{sjdbInsertSave} \optv{All}, into \optvr{\_STARgenome} directory inside the current run directory.
@@ -227,7 +227,7 @@ An example of ENCODE standard options for long RNA-seq pipeline is given below:
 \item[]
 \opt{outFilterType}              BySJout\\
 reduces the number of "spurious" junctions
-\item[] 
+\item[]
 \opt{outFilterMultimapNmax}      20\\
 max number of multiple alignments allowed for a read: if exceeded, the read is considered unmapped
 \item[]
@@ -254,7 +254,7 @@ maximum genomic distance between mates
 \end{itemize}
 
 \subsection{Using shared memory for the genome indexes.}
-The \opt{genomeLoad} option controls how the genome is loaded into memory. By default, \opt{genomeLoad} \optvr{NoSharedMemory}, shared memory is not used. 
+The \opt{genomeLoad} option controls how the genome is loaded into memory. By default, \opt{genomeLoad} \optvr{NoSharedMemory}, shared memory is not used.
 
 With \opt{genomeLoad} \optvr{LoadAndKeep}, STAR loads the genome as a standard Linux shared memory piece. The genomes are identified by their unique directory paths. Before loading the genome, STAR checks if the genome has already been loaded into the shared memory.  If the genome has not been loaded, STAR  will load it and will keep it in memory even after STAR job finishes. The genome will be shared with all the other STAR jobs. You can remove the genome from the shared memory running STAR with \opt{genomeLoad} \optvr{Remove}. The shared memory piece will be physically removed only after all STAR jobs attached to it complete. With \opt{genomeLoad} \optvr{LoadAndRemove}, STAR will load genome in the shared memory, and mark it for removal, so that the genome will be removed from the shared memory once all STAR jobs using it exit. \opt{genomeLoad} \optvr{LoadAndExit}, STAR will load genome in the shared memory, and immediately exit, keeping the genome loaded in the shared memory for the future runs.
 
@@ -302,7 +302,7 @@ The \opt{outSAMmultNmax} parameter limits the number of output alignments (SAM l
 The SAM attributes can be specified by the user using \opt{outSAMattributes} \optvr{A1 A2 A3 ...} option which accept a list of 2-character SAM attributes. The attributes can be listed in any order, and will be recorded in that order in the SAM file. By default, STAR outputs \optv{NH HI AS nM} attributes.
 
 \begin{itemize}[itemsep=1pt]
-\item[]	
+\item[]
 \textbf{Presets:}
 %
 \item[]
@@ -312,7 +312,7 @@ The SAM attributes can be specified by the user using \opt{outSAMattributes} \op
 \optv{Standard} : NH HI AS nM
 %
 \item[]
-\optv{All} : NH HI AS nM NM MD jM jI MC ch 	
+\optv{All} : NH HI AS nM NM MD jM jI MC ch
 
 \textbf{Alignment:}
 %
@@ -411,7 +411,7 @@ output both unsorted and sorted files.
 \end{itemize}
 
 \subsection{Unmapped reads.}
-Unmapped reads can be output into the SAM/BAM \ofilen{Aligned.*} file(s) with 
+Unmapped reads can be output into the SAM/BAM \ofilen{Aligned.*} file(s) with
 \opt{outSAMunmapped} \optv{Within} option. \opt{outSAMunmapped} \optv{Within KeepPairs} will (redundantly) record unmapped mate for each alignment, and, in case of unsorted output, keep it adjacent to its mapped mate (this only affects multi-mapping reads).
 \optv{uT} SAM tag indicates reason for not mapping:
 \begin{itemize}[noitemsep]
@@ -430,7 +430,7 @@ Unmapped reads can be output into the SAM/BAM \ofilen{Aligned.*} file(s) with
 \end{itemize}
 
 \subsection{Splice junctions.}
-\ofilen{SJ.out.tab} contains high confidence collapsed splice junctions in tab-delimited format. 
+\ofilen{SJ.out.tab} contains high confidence collapsed splice junctions in tab-delimited format.
 Note that STAR defines the junction start/end as intronic bases, while many other software define them as exonic bases.
 The columns have the following meaning:
 %\begin{enumerate}[label=\bfseries Exercise \arabic*:]
@@ -443,7 +443,7 @@ The columns have the following meaning:
 \item[column 6:] 0: unannotated, 1: annotated in the splice junctions database. Note that in 2-pass mode, junctions detected in the 1st pass are reported as annotated, in addition to annotated junctions from GTF.
 \item[column 7:] number of uniquely mapping reads crossing the junction
 \item[column 8:] number of multi-mapping reads crossing the junction
-\item[column 9:] maximum spliced alignment overhang 
+\item[column 9:] maximum spliced alignment overhang
 \end{itemize}
 The filtering for this output file is controlled by the \optn{outSJfilter*} parameters, as described in \sechyperref{Output_Filtering:_Splice_Junctions}.
 %\subsection{Wiggle/bedGraph.}
@@ -456,7 +456,7 @@ STAR-Fusion is a software package for detecting fusion transcript from STAR chim
 
 \subsection{Chimeric alignments in the main BAM files.}
 Chimeric alignments can be included together with normal alignments in the main (sorted or unsorted) BAM file(s) using \opt{chimOutType} \optv{WithinBAM}. In these files, formatting of chimeric alignments follows the latest SAM/BAM specifications.
-   
+
 \subsection{Chimeric alignments in \ofilen{Chimeric.out.sam} .}
 With \opt{chimOutType} \optv{SeparateSAMold} STAR will output normal alignments into \ofilen{Aligned.*.sam/bam}, and will output chimeric alignments into a separate file \ofilen{Chimeric.out.sam}. Note that this option will be deprecated in the future, and the \opt{chimOutType} \optv{WithinBAM} is strongly recommended.
 Some reads may be output to both normal SAM/BAM files, and \ofilen{Chimeric.out.sam} for the following reason. STAR will output a non-chimeric alignment into \ofilen{Aligned.out.sam} with soft-clipping a portion of the read. If this portion is long enough, and it maps well and uniquely  somewhere else in the genome, there will also be a chimeric alignment output into \ofilen{Chimeric.out.sam}. For instance, if you have a paired-end read where the second mate can be split chimerically into 70 and 30 bases. The 100b of the first mate + 70b of the 2nd mate map non-chimerically,and the mapping length/score are big enough, so they will be output into \ofilen{Aligned.out.sam} file. At the same time, the chimeric segments 100-mate1 + 70-mate2 and 30-mate2 will be output into \ofilen{Chimeric.out.sam}.
@@ -465,7 +465,7 @@ Some reads may be output to both normal SAM/BAM files, and \ofilen{Chimeric.out.
 By default, or with \opt{chimOutType} \optv{Junctions}, STAR will generate \ofilen{Chimeric.out.junction} file which maybe more convenient for downstream analysis.
 The format of this file is as follows. Every line contains one chimerically aligned read, e.g.:
 \begin{verbatim}
-chr22   23632601        +       chr9    133729450       +       1       0       0      
+chr22   23632601        +       chr9    133729450       +       1       0       0
 SINATRA-0006:3:3:6387:5665#0    23632554   47M29S  133729451       47S29M40p76M
 \end{verbatim}
 
@@ -503,7 +503,7 @@ Columns 15-20 provide alignment score information and relevant metadata. These c
 \end{itemize}
 
 Unlike standard SAM, both mates are recorded in one line here. The gap of length \code{L}  between the mates is marked by the \code{p} in the CIGAR string.
-If the mates overlap, \code{L<0}. 
+If the mates overlap, \code{L<0}.
 
 For strand definitions, when aligning paired end reads, the sequence of the second mate is reverse complemented.
 
@@ -511,8 +511,8 @@ For encompassing junctions, i.e. junction type: -1=junction is between the mates
 
 To filter chimeric junctions and find the number of reads supporting each junction you could use, for example:
 \begin{verbatim}
-cat Chimeric.out.junction | 
-awk '$1!="chrM" && $4!="chrM" && $7>0 && $8+$9<=5 {print $1,$2,$3,$4,$5,$6,$7,$8,$9}' | 
+cat Chimeric.out.junction |
+awk '$1!="chrM" && $4!="chrM" && $7>0 && $8+$9<=5 {print $1,$2,$3,$4,$5,$6,$7,$8,$9}' |
 sort | uniq -c | sort -k1,1rn
 \end{verbatim}
 This will keep only the canonical junctions with the repeat length less than 5 and will remove chimeras with mitochondrion genome.
@@ -530,7 +530,7 @@ When I do it for one of our K562 runs, I get:
  15 chr3    197348574       -       chr3    195392936       +       1       1       0
  14 chr18   39584506        +       chr18   39560613        -       1       2       0
 \end{verbatim}
-Note that line 4 and 6 here are BCR/ABL fusions. You would need to filter these junctions further to see which of them connect known but not homologous genes. 
+Note that line 4 and 6 here are BCR/ABL fusions. You would need to filter these junctions further to see which of them connect known but not homologous genes.
 
 
 \section{Output in transcript coordinates.}
@@ -538,11 +538,11 @@ With \opt{quantMode} \optv{TranscriptomeSAM} option STAR will output alignments 
 
 Note, that STAR first aligns reads to entire genome, and only then searches for concordance between alignments and transcripts.This approach offers certain advantages compared to the alignment to transcriptome only, by not forcing the alignments to annotated transcripts. Note that \opt{outFilterMultimapNmax} filter only applies to genomic alignments. If an alignment passes this filter, it is converted to all possible transcriptomic alignments and all of them are output.
 
-By default, the output satisfies RSEM requirements: soft-clipping or indels are not allowed. Use \opt{quantTranscriptomeBan} \optv{Singleend} to allow insertions, deletions ans soft-clips in the transcriptomic alignments, which can be used by some expression quantification software (e.g. eXpress). 
+By default, the output satisfies RSEM requirements: soft-clipping or indels are not allowed. Use \opt{quantTranscriptomeBan} \optv{Singleend} to allow insertions, deletions ans soft-clips in the transcriptomic alignments, which can be used by some expression quantification software (e.g. eXpress).
 
 \section{Counting number of reads per gene.}
-With \opt{quantMode} \optv{GeneCounts} option STAR will count number reads per gene while mapping. 
-A read is counted if it overlaps (1nt or more) one and only one gene. Both ends of the paired-end read are checked for overlaps. 
+With \opt{quantMode} \optv{GeneCounts} option STAR will count number reads per gene while mapping.
+A read is counted if it overlaps (1nt or more) one and only one gene. Both ends of the paired-end read are checked for overlaps.
 The counts coincide with those produced by htseq-count with default parameters.
 This option requires annotations in GTF format (i.e. \emph{gene\_id} tag for each exon) specified in \opt{sjdbGTFfile} at the genome generation step or at the mapping step provided in option.
 STAR outputs read counts per gene into ReadsPerGene.out.tab file with 4 columns which correspond to different strandedness options:
@@ -569,7 +569,7 @@ For a study with multiple samples, it is recommended to collect 1st pass junctio
 \end{enumerate}
 
 \subsection{Per-sample 2-pass mapping.}
-   
+
 Annotated junctions will be included in both the 1st and 2nd passes.
 To run STAR 2-pass mapping for each sample separately, use \opt{twopassMode} \optv{Basic} option. STAR will perform the 1st pass mapping, then it will automatically extract junctions, insert them into the genome index, and, finally, re-map all reads in the 2nd mapping pass. This option can be used with annotations, which can be included either at the run-time (see \#1), or at the genome generation step.
 
@@ -588,18 +588,18 @@ This is the original 2-pass method which involves genome re-generation step in-b
 This feature improves mapping accuracy  for paired-end libraries with short insert sizes, where many reads have overlapping mates. Importantly, it allows detection of chimeric junction in the overlap region.
 
 STAR will search for an overlap between mates larger or equal to \opt{peOverlapNbasesMin} bases with proportion of mismatches in the overlap area not exceeding \opt{peOverlapMMp}.
-If the overlap is found, STAR will map merge the mates and attempt to map the resulting (single-end) sequence. 
+If the overlap is found, STAR will map merge the mates and attempt to map the resulting (single-end) sequence.
 If requested, the chimeric detection will be performed on the merged-mate sequence, thus allowing chimeric detection in the overlap region.
 If the score of this alignment higher than the original one, or if a chimeric alignment is found, STAR will report the merged-mate aligment instead of the original one.
 In the output, the merged-mate aligment will be converted back to paired-end format.
 
-The developmment of this algorithm was supported by Illumina, Inc. 
+The developmment of this algorithm was supported by Illumina, Inc.
 Many thanks to June Snedecor, Xiao Chen, and Felix Schlesinger for their extensive help in developing this feature.
 
 \section{Detection of personal variants overlapping alignments.}
-Option \opt{varVCFfile} \optvr{/path/to/vcf/file} is used to input VCF file with personal variants. Only single nucleotide variants (SNVs) are supported at the moment. 
+Option \opt{varVCFfile} \optvr{/path/to/vcf/file} is used to input VCF file with personal variants. Only single nucleotide variants (SNVs) are supported at the moment.
 Each variant is expected to have a genotype with two alleles.
-To output variants that overlap alignments, vG and vA have to be added to \opt{outSAMattributes} list. 
+To output variants that overlap alignments, vG and vA have to be added to \opt{outSAMattributes} list.
 SAM attribute vG outputs the genomic coordinate of the variant, allowing for identification of the variant.
 SAM attribute vA outputs which allele is detected in the read: $1$ or $2$ match one of the genotype alleles, $3$ - no match to genotype.
 
@@ -621,10 +621,10 @@ WASP filtering is activated with \opt{waspOutputMode} \optv{SAMtag}, which will 
 \optv{vW:i:7} - read overlaps too many variants
 
 \section{STARconsensus}
-STARconsensus allows for mapping RNA-seq reads to consensus genome. It was introduced in STAR 2.7.8a (2020/12/28).
+STARconsensus allows for mapping RNA-seq reads to consensus genome. It was introduced in STAR 2{.}7{.}7a (2020/12/28).
 
 \begin{itemize}
-\item 
+\item
 Provide the VCF file with consensus SNVs and InDels at the genome generation stage with  \opt{genomeTransformVC} \optv{ Variants.vcf}  \opt{genomeTransformType} \optv{Haploid}.
 The alternative alleles in this VCF will be inserted to the reference genome to create a "transformed" genome.
 Both the genome sequence and transcript/gene annotations are transformed.
@@ -649,9 +649,9 @@ STARsolo is a turnkey solution for analyzing droplet single cell RNA sequencing 
 STARsolo inputs the raw FASTQ reads files, and performs the following operations:
 \begin{itemize}
 	\itemsep -0.5em
-	\item 
+	\item
 	error correction and demultiplexing of cell barcodes using user-input whitelist
-	\item 
+	\item
 	mapping the reads to the reference genome using the standard STAR spliced read alignment algorithm
 	\item
 	error correction and collapsing (deduplication) of Unique Molecular Identifiers (UMIa)
@@ -669,7 +669,7 @@ Feature statistics summaries are recorded in the \optvr{Solo.out/} directory in 
 \begin{itemize}[leftmargin=1.5in]
 	\itemsep -0.3em
 	\item[\optv{nNinBarcode:}] number of reads with more than 2 Ns in cell barcode (CB)
-	\item[\optv{nUMIhomopolymer:}] number of reads with homopolymer in CB 
+	\item[\optv{nUMIhomopolymer:}] number of reads with homopolymer in CB
 	\item[\optv{nTooMany:}] not used at the moment
 	\item[\optv{nNoMatch:}] number of reads with CBs that do not match whitelist even with one mismatch
 \end{itemize}
@@ -701,7 +701,7 @@ These metrics can be grouped into more broad categories:
 
 \end{itemize}
 The three categoties above summed together should be equal to the total number of reads.
-	
+
 \section{Description of all options.}\label{Description_of_all_options}
 For each STAR version, the most up-to-date information about all STAR parameters can be found in the \code{parametersDefault} file in the STAR source directory. The parameters in the \code{parametersDefault}, as well as in the descriptions below, are grouped by function:
 \begin{itemize}
@@ -709,7 +709,7 @@ For each STAR version, the most up-to-date information about all STAR parameters
 \item[] In particular, \optn{outFilter*} parameters control the filtering of output alignments which[] you might want to tweak to fit your needs.
 \item[] Output of “chimeric” alignments is controlled by \optn{chim*} parameters.
 \item[] Genome generation is controlled by \optn{genome*} parameters.
-\item[] Annotations (splice junction database) are controlled by \optn{sjdb*} options at the genome generation step. 
+\item[] Annotations (splice junction database) are controlled by \optn{sjdb*} options at the genome generation step.
 \item[] Tweaking \optn{score*}, \optn{align*},  \optn{seed*}, \optn{win*} parameters, which requires understanding of the STAR alignment algorithm, is recommended only for advanced users.
 \end{itemize}
 

@@ -35,19 +35,46 @@ public:
     
     void initialize(ParametersSolo *pS);
     
-protected:
-    int it;
+//protected:
+//    int it;
+};
+
+class MultiMappers {
+public:
+    const static uint32 tN = 5;
+    array<string,tN> typeNames { {"Unique", "Uniform", "Rescue", "PropUnique", "EM"} };
+    enum typeI : int32 { Unique=0, Uniform=1, Rescue=2, PropUnique=3, EM=4 };
+    
+    struct {
+        bool multi; //if multimappers are requested
+        uint32_t N;
+        array<bool,tN> B;
+        bool &Unique=B[0], &Uniform=B[1], &Rescue=B[2], &PropUnique=B[3], &EM=B[4] ;
+    } yes;
+
+    struct {
+        //uint32_t N;
+        array<uint32_t,tN> I;
+        uint32_t &Unique=I[0], &Uniform=I[1], &Rescue=I[2], &PropUnique=I[3], &EM=I[4];
+        uint32_t main; //index for SAM/stats/filtering output
+    } countInd; //index in the countCellGennUMI
+    
+    vector<string> typesIn; //UMIdedup types from user options
+    vector<int32> types; //the above converted to typeI numbers
+    int32 typeMain; //the type to be used in SAM/stats/filtering output - for now just types[0]
+    
+    void initialize(ParametersSolo *pS);
 };
 
 class ParametersSolo {
 public:
     Parameters *pP;
-    
+    bool yes;
+
     //chemistry, library etc
     string typeStr;
     enum SoloTypes : int32 {None=0, CB_UMI_Simple=1, CB_UMI_Complex=2, CB_samTagOut=3, SmartSeq=4};
     SoloTypes type;
-    bool yes;
     string strandStr;
     int32 strand;   
     
@@ -80,13 +107,16 @@ public:
     vector <uint64> cbWL;    
     vector<string> cbWLstr;
     
+    MultiMappers multiMap;
+    
     //features
     vector<string> featureIn;//string of requested features
     vector<uint32> features;
     uint32 nFeatures;//=features.size(), number of requested features
     
     array<bool,SoloFeatureTypes::N> featureYes; //which features are requested
-    array<bool,SoloFeatureTypes::N> readInfoYes;//which features will readInfo (for now only Gene)
+    array<bool,SoloFeatureTypes::N> readInfoYes;//which features will need readInfo (for now only Gene and GeneFull)
+    array<bool,SoloFeatureTypes::N> readIndexYes;//which features will need recording of readIndex (for now only Gene and GeneFull, for multimappers)
     array<int32,SoloFeatureTypes::N> featureInd;//index of each feature - skips unrequested features
     
     //filtering
@@ -136,8 +166,10 @@ public:
     //multi-gene umi
     struct {
         vector<string> type;
-        bool MultiGeneUMI;
-        bool MultiGeneUMI_CR;
+        bool MultiGeneUMI       = false;
+        bool MultiGeneUMI_All   = false;
+        bool yes                = false; //true for non-CR
+        bool MultiGeneUMI_CR    = false;
     } umiFiltering;
     
     //clusters

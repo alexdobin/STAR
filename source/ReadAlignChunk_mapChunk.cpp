@@ -49,11 +49,13 @@ void ReadAlignChunk::mapChunk() {//map one chunk. Input reads stream has to be s
                 if ( P.outSAMorder == "PairedKeepInputOrder" && P.runThreadN>1 ) {//output chunks into separate files
                     chunkOutBAMfile.write(chunkOutBAM,chunkOutBAMtotal);
                     chunkOutBAMfile.clear(); //in case 0 bytes were written which could set fail bit
+                    //chunkOutBAMfile.flush(); //not needed
                 } else {//standard way, directly into Aligned.out.sam file
                     //SAM output
                     if (P.runThreadN>1) pthread_mutex_lock(&g_threadChunks.mutexOutSAM);
                     P.inOut->outSAM->write(chunkOutBAM,chunkOutBAMtotal);
                     P.inOut->outSAM->clear();//in case 0 bytes were written which could set fail bit
+                    //P.inOut->outSAM->flush(); //not needed
                     if (P.runThreadN>1) pthread_mutex_unlock(&g_threadChunks.mutexOutSAM);
                 };
                 RA->outSAMstream->seekp(0,ios::beg); //rewind the chunk storage
@@ -62,7 +64,9 @@ void ReadAlignChunk::mapChunk() {//map one chunk. Input reads stream has to be s
         };
 
         //collapse SJ buffer if needed
-        if ( chunkOutSJ->N > P.limitOutSJcollapsed ) {//this means the number of collapsed junctions is larger than the chunks size
+        if ( !P.outSJ.yes ) {
+            //do nothing
+        } else if ( chunkOutSJ->N > P.limitOutSJcollapsed ) {//this means the number of collapsed junctions is larger than the chunks size
             ostringstream errOut;
             errOut <<"EXITING because of fatal error: buffer size for SJ output is too small\n";
             errOut <<"Solution: increase input parameter --limitOutSJoneRead\n";
@@ -78,7 +82,9 @@ void ReadAlignChunk::mapChunk() {//map one chunk. Input reads stream has to be s
         };
 
         //collapse SJ1 buffer if needed
-        if ( chunkOutSJ1->N > P.limitOutSJcollapsed ) {//this means the number of collapsed junctions is larger than the chunks size
+        if ( P.outFilterBySJoutStage != 1 ) {//no outFilterBySJoutStage
+            //do nothing
+        } else if ( chunkOutSJ1->N > P.limitOutSJcollapsed ) {//this means the number of collapsed junctions is larger than the chunks size
             ostringstream errOut;
             errOut <<"EXITING because of fatal error: buffer size for SJ output is too small\n";
             errOut <<"Solution: increase input parameter --limitOutSJoneRead\n";
