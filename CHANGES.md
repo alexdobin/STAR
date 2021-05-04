@@ -9,6 +9,8 @@
 * Issue #1177: Added file checks for the --inputBAMfile .
 * Issue #1167: STARsolo CR/UR SAM tags are scrambled in TranscriptomeSAM file Aligned.toTranscriptome.out.bam. This bug appeared in 2.7.7a.
 * Issue #1166: seg-fault for STARsolo --soloCBwhitelist None (no whitelist) with barcodes longer than 16b
+* Issue #1220: corrupt SAM/BAM files for --outFilterType BySJout. The bug was introduced with the chnages in 2.7.7a.
+* Issue #1211: scrambled CB tags in BAM output for --soloCBwhitelist None --soloFeatures Gene GeneFull.
 * Fixed a bug causing seg-faults with --clipAdapterType CellRanger4 option.
 * PR #1164: SOURCE_DATE_EPOCH to make the build more reproducible
 * PR #1156: clean opal/opal.o
