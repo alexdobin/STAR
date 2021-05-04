@@ -265,7 +265,7 @@ outStd                          Log
                                 Log                    ... log messages
                                 SAM                    ... alignments in SAM format (which normally are output to Aligned.out.sam file), normal standard output will go into Log.std.out
                                 BAM_Unsorted           ... alignments in BAM format, unsorted. Requires --outSAMtype BAM Unsorted
-                                BAM_SortedByCoordinate ... alignments in BAM format, unsorted. Requires --outSAMtype BAM SortedByCoordinate
+                                BAM_SortedByCoordinate ... alignments in BAM format, sorted by coordinate. Requires --outSAMtype BAM SortedByCoordinate
                                 BAM_Quant              ... alignments to transcriptome in BAM format, unsorted. Requires --quantMode TranscriptomeSAM
 
 outReadsUnmapped                None
