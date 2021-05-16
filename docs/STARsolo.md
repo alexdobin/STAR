@@ -249,9 +249,9 @@ The multi-gene read recovery options are specified with ```--soloMultiMappers```
 uniformly distributes the multi-gene UMIs to all genes in its gene set. Each gene gets a fractional count of 1/N_genes, where N_genes is the number of genes in the set. This is the simplest possible option, and it offers higher sensitivity for gene detection at the expense of lower precision.
 
 ```
---soloMultiMappers Uniform
+--soloMultiMappers PropUnique
 ```
- distributes the multi-gene UMIs proportionally to the number of unqiue UMIs per gene. UMIs that map to genes that are not supported by unique UMIs are distributed uniformly.
+ distributes the multi-gene UMIs proportionally to the number of unique UMIs per gene. UMIs that map to genes that are not supported by unique UMIs are distributed uniformly.
 
 ```
 --soloMultiMappers EM
