@@ -764,7 +764,7 @@ waspOutputMode              None
 soloType                    None
     string(s): type of single-cell RNA-seq
                             CB_UMI_Simple   ... (a.k.a. Droplet) one UMI and one Cell Barcode of fixed length in read2, e.g. Drop-seq and 10X Chromium.
-                            CB_UMI_Complex  ... one UMI of fixed length, but multiple Cell Barcodes of varying length, as well as adapters sequences are allowed in read2 only, e.g. inDrop.
+                            CB_UMI_Complex  ... multiple Cell Barcodes of varying length, one UMI of fixed length and one adapter sequence of fixed length are allowed in read2 only (e.g. inDrop, ddSeq).
                             CB_samTagOut    ... output Cell Barcode as CR and/or CB SAm tag. No UMI counting. --readFilesIn cDNA_read1 [cDNA_read2 if paired-end] CellBarcode_read . Requires --outSAMtype BAM Unsorted [and/or SortedByCoordinate]
                             SmartSeq        ... Smart-seq: each cell in a separate FASTQ (paired- or single-end), barcodes are corresponding read-groups, no UMI sequences, alignments deduplicated according to alignment start and end (after extending soft-clipped bases)
 
@@ -811,7 +811,7 @@ soloUMIposition             -
                             --soloCBposition  3_9_3_14
 
 soloAdapterSequence         -
-    string:                 adapter sequence to anchor barcodes.
+    string:                 adapter sequence to anchor barcodes. Only one adapter sequence is allowed.
 
 soloAdapterMismatchesNmax   1
     int>0:                  maximum number of mismatches allowed in adapter sequence.
