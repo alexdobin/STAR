@@ -1,5 +1,5 @@
-
-* Added script extras/scripts/soloCountMatrixFromBAM.awk to re-create Solo count matrix from the BAM output
+* Issue #1230: fixed the bug that caused seg-faults for --runMode soloCellFiltering runs.
+* Added script extras/scripts/soloCountMatrixFromBAM.awk to re-create Solo count matrix from the BAM output.
 
 STAR 2.7.9a --- 2021/05/05 ::: STARsolo updates
 =====================================================
