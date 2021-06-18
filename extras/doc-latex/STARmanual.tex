@@ -271,6 +271,13 @@ Then run:\\
 \code{/sbin/sysctl -p}\\
 This will increase the allowed shared memory blocks to ~31GB, enough for human or mouse genome.
 
+\section{Output filtering.}\label{Output_filtering}
+\subsection{Multimappers.}
+The output of multimappers (i.e. reads mapping to multiple loci) is controlled by 
+\opt{outFilterMultimapNmax} \optv{N}. By default, \optv{N}=10. If a read maps to $\le$\optv{N} loci, it will be output, otherwise, it will be considered as unmapped and reported as "Multimapping: mapped to too many loci" in the \ofilen{Log.final.out} summary statistics file.
+
+The detection of multimappers is controlled by \opt{winAnchorMultimapNmax} option, =\optv{50} by default. This parameter should be set to at least the number of multimapping loci, i.e. \opt{winAnchorMultimapNmax} $\ge$ \opt{outFilterMultimapNmax}. Note that this parameter also controls the overall sensitivity of mapping: increasing it will change (improve) the mapping of unique mappers as well, though at the cost of slower speed.
+	
 \section{Output files.}\label{Output_files}
 STAR produces multiple output files. All files have standard name, however, you can change the file prefixes using \opt{outFileNamePrefix} \optvr{/path/to/output/dir/prefix}. By default, this parameter is \optv{./}, i.e. all output files are written in the current directory.
 \subsection{Log files.}
@@ -422,7 +429,9 @@ Unmapped reads can be output into the SAM/BAM \ofilen{Aligned.*} file(s) with
 	\item[] 4 : unmapped mate of a mapped paired-end read
 \end{itemize}
 
-\opt{outReadsUnmapped} \optv{Fastx} will output unmapped and partially mapped (i.e. mapped only one mate of a paired end read) reads into separate file(s) \ofilen{Unmapped.out.mate1(2)}, formatted the same way as input read files (i.e. FASTQ or FASTA). Appended to the read name line are tag to indicate mapping status of the read mates:
+\opt{outReadsUnmapped} \optv{Fastx} will output unmapped reads into separate file(s) \ofilen{Unmapped.out.mate1[2]}, formatted the same way as input read files (i.e. FASTQ or FASTA).
+For paired-end reads, if a read maps as a whole, but one of the mates does not map, both mates will also be output in \ofilen{Unmapped.out.mate1/2} files.
+To indicate the mapping status of the read mates, the following tags are appended to the read name:
 \begin{itemize}[noitemsep,topsep=-3pt]
 	\item[] $00$: mates were not mapped;
 	\item[] $10$: 1st mate mapped, 2nd unmapped
