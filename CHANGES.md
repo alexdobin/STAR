@@ -1,3 +1,4 @@
+* Fixed a bug introduced in 2.7.9a for --quantMode TranscriptomeSAM output that resulted in both mapped and unmapped output for some reads. Many thanks to Diane Trout (@Caltech) for helping to track this bug.
 * Issue #1177: throw an error in case the BAM file does not contain NH and AS tags for duplication removal jobs (--runMode inputAlignmentsFromBAM --bamRemoveDuplicatesType UniqueIdenticalNotMulti).
 * Issue #1262: fixed the bug that prevented EM matrix output when only EM options is specified in --soloMultiMappers.
 * Issue #1230: fixed the bug that caused seg-faults for --runMode soloCellFiltering runs.
