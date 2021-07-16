@@ -30,8 +30,8 @@ BUILD_PLACE ?= $(HOSTNAME):$(shell pwd)
 COMPTIMEPLACE := -D'COMPILATION_TIME_PLACE="$(BUILD_DATE) $(BUILD_PLACE)"'
 
 # Defaults, can be overridden by make arguments or environment
-CXXFLAGS ?= -pipe -Wall -Wextra
-CFLAGS ?= -pipe -Wall -Wextra -O3
+CXXFLAGS ?=  -Wall -Wextra
+CFLAGS ?= -Wall -Wextra -O3
 CXXFLAGS_SIMD ?= -mavx2
 
 # Unconditionally set essential flags and optimization options
