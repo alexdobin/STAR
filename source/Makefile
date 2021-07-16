@@ -12,8 +12,8 @@ CXXFLAGSextra ?=
 CXX ?= g++
 
 # pre-defined flags
-LDFLAGS_shared := -pthread -Lhtslib -Bstatic -lhts -Bdynamic -lz
-LDFLAGS_static := -static -static-libgcc -pthread -Lhtslib -lhts -lz
+LDFLAGS_shared := -pthread -Lhtslib -lhts -lz # -Bstatic -Bdynamic
+# LDFLAGS_static := -static -static-libgcc -pthread -Lhtslib -lhts -lz
 LDFLAGS_Mac :=-pthread -lz htslib/libhts.a
 LDFLAGS_Mac_static :=-pthread -lz -static-libgcc htslib/libhts.a
 LDFLAGS_gdb := $(LDFLAGS_shared)
@@ -30,8 +30,8 @@ BUILD_PLACE ?= $(HOSTNAME):$(shell pwd)
 COMPTIMEPLACE := -D'COMPILATION_TIME_PLACE="$(BUILD_DATE) $(BUILD_PLACE)"'
 
 # Defaults, can be overridden by make arguments or environment
-CXXFLAGS ?=  -w -Wall -Wextra -fPIE
-CFLAGS ?= -w -Wall -Wextra -O3 -fPIE
+CXXFLAGS ?=  -w -Wall -Wextra 
+CFLAGS ?= -w -Wall -Wextra -O3 
 CXXFLAGS_SIMD ?= -mavx2
 
 # Unconditionally set essential flags and optimization options
@@ -79,7 +79,8 @@ OBJECTS = SoloFeature_collapseUMI_Graph.o SoloFeature_collapseUMIall_multiMapper
 	sjdbLoadFromFiles.o sjdbLoadFromStream.o sjdbPrepare.o sjdbBuildIndex.o sjdbInsertJunctions.o mapThreadsSpawn.o \
 	Parameters_readFilesInit.o Parameters_openReadsFiles.cpp Parameters_closeReadsFiles.cpp Parameters_readSAMheader.o \
 	bam_cat.o serviceFuns.o GlobalVariables.cpp \
-	BAMoutput.o BAMfunctions.o ReadAlign_alignBAM.o BAMbinSortByCoordinate.o signalFromBAM.o bamRemoveDuplicates.o BAMbinSortUnmapped.o
+	BAMoutput.o BAMfunctions.o ReadAlign_alignBAM.o BAMbinSortByCoordinate.o signalFromBAM.o bamRemoveDuplicates.o BAMbinSortUnmapped.o \
+	uint128_t/uint128_t.o
 
 SOURCES := $(wildcard *.cpp) $(wildcard *.c)
 
@@ -95,6 +96,10 @@ all: cleanCompileInfo STAR$(SFX)
 opal/opal.o : opal/opal.cpp opal/opal.h
 	cd opal && \
 	$(CXX) -c -I./ -std=c++11 $(CPPFLAGS) $(CXXFLAGS) $(CXXFLAGSextra) $(CXXFLAGS_SIMD) opal.cpp
+
+uint128_t/uint128_t.o : uint128_t/uint128_t.cpp 
+	cd uint128_t && \
+	$(CXX) -c -I./ -std=c++11 $(CPPFLAGS) $(CXXFLAGS) $(CXXFLAGSextra) $(CXXFLAGS_SIMD) uint128_t.cpp
 
 .PHONY: clean
 clean:
@@ -112,7 +117,7 @@ clean_solo:
 
 .PHONY: cleanCompileInfo
 cleanCompileInfo:
-	'rm' -f STAR.o Parameters.o
+	# 'rm' -f STAR.o Parameters.o
 
 # ifneq ($(MAKECMDGOALS),clean)
 # ifneq ($(MAKECMDGOALS),CLEAN)
@@ -133,10 +138,10 @@ cleanCompileInfo:
 # endif
 # endif
 
-htslib : htslib/libhts.a
+htslib : htslib/libhts.so
 
-htslib/libhts.a :
-	$(MAKE) -C htslib lib-static
+htslib/libhts.so :
+	$(MAKE) -C htslib lib-shared
 
 parametersDefault.xxd: parametersDefault
 	xxd -i parametersDefault > parametersDefault.xxd

@@ -9,7 +9,7 @@ AR     = ar
 RANLIB = ranlib
 
 # TODO: edit cram code to remove need for -DSAMTOOLS
-CPPFLAGS += -fPIE -I. -DSAMTOOLS=1
+CPPFLAGS += -w -I. -DSAMTOOLS=1
 # TODO: probably update cram code to make it compile cleanly with -Wc++-compat
 CFLAGS   := -g -Wall -O2 $(CFLAGS)
 EXTRA_CFLAGS_PIC = -fpic
