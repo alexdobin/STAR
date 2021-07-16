@@ -1,7 +1,7 @@
 #include "SuffixArrayFuns.h"
 #include "PackedArray.h"
-#include "uint128_t/uint128_t.h"
 
+#include "uint128_t/uint128_t.h"
 typedef uint128_t uint128;
 
 inline uint medianUint2(uint a, uint b)

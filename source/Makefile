@@ -30,12 +30,12 @@ BUILD_PLACE ?= $(HOSTNAME):$(shell pwd)
 COMPTIMEPLACE := -D'COMPILATION_TIME_PLACE="$(BUILD_DATE) $(BUILD_PLACE)"'
 
 # Defaults, can be overridden by make arguments or environment
-CXXFLAGS ?=  -w -Wall -Wextra
-CFLAGS ?= -w -Wall -Wextra -O3
+CXXFLAGS ?=  -w -Wall -Wextra -fPIE
+CFLAGS ?= -w -Wall -Wextra -O3 -fPIE
 CXXFLAGS_SIMD ?= -mavx2
 
 # Unconditionally set essential flags and optimization options
-CXXFLAGS_common := -std=c++11 -fopenmp $(COMPTIMEPLACE)
+CXXFLAGS_common := -w -std=c++11 -fopenmp $(COMPTIMEPLACE)
 CXXFLAGS_main := -O3 $(CXXFLAGS_common)
 CXXFLAGS_gdb := -O0 -g3 $(CXXFLAGS_common)
 
@@ -98,6 +98,7 @@ opal/opal.o : opal/opal.cpp opal/opal.h
 
 .PHONY: clean
 clean:
+	$(MAKE) -C htslib clean
 	'rm' -f *.o opal/opal.o STAR STARstatic STARlong Depend.list parametersDefault.xxd
 
 .PHONY: CLEAN
@@ -113,23 +114,24 @@ clean_solo:
 cleanCompileInfo:
 	'rm' -f STAR.o Parameters.o
 
-ifneq ($(MAKECMDGOALS),clean)
-ifneq ($(MAKECMDGOALS),CLEAN)
-ifneq ($(MAKECMDGOALS),CLEAN)
-ifneq ($(MAKECMDGOALS),clean_solo)
-ifneq ($(MAKECMDGOALS),STARforMac)
-ifneq ($(MAKECMDGOALS),STARforMacGDB)
-Depend.list: $(SOURCES) parametersDefault.xxd htslib
-	echo $(SOURCES)
-	'rm' -f ./Depend.list
-	$(CXX) $(CXXFLAGS_common) -MM $^ >> Depend.list
-include Depend.list
-endif
-endif
-endif
-endif
-endif
-endif
+# ifneq ($(MAKECMDGOALS),clean)
+# ifneq ($(MAKECMDGOALS),CLEAN)
+# ifneq ($(MAKECMDGOALS),CLEAN)
+# ifneq ($(MAKECMDGOALS),clean_solo)
+# ifneq ($(MAKECMDGOALS),STARforMac)
+# ifneq ($(MAKECMDGOALS),STARforMacGDB)
+# Depend.list: $(SOURCES) parametersDefault.xxd htslib
+# 	echo $(SOURCES)
+# 	'rm' -f ./Depend.list
+# 	$(CXX) $(CXXFLAGS_common) -MM $^ >> Depend.list
+# 	echo Depend.list is done
+# include Depend.list
+# endif
+# endif
+# endif
+# endif
+# endif
+# endif
 
 htslib : htslib/libhts.a
 
@@ -141,7 +143,8 @@ parametersDefault.xxd: parametersDefault
 
 STAR$(SFX) : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_main) $(CXXFLAGS)
 STAR$(SFX) : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_shared) $(LDFLAGS)
-STAR$(SFX) : Depend.list parametersDefault.xxd $(OBJECTS)
+#STAR$(SFX) : Depend.list parametersDefault.xxd $(OBJECTS)
+STAR$(SFX) : parametersDefault.xxd htslib $(OBJECTS)
 	$(CXX) -o STAR$(SFX) $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
 
 STARstatic$(SFX) : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_main) $(CXXFLAGS)
