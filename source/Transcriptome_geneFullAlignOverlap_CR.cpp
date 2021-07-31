@@ -6,8 +6,8 @@ void Transcriptome::geneFullAlignOverlap_CR(uint nA, Transcript **aAll, int32 st
 {
     readAnnot.geneFull_CR={};
         
-    for (uint32 iA=0; iA<nA; iA++) {
-        Transcript &a = *aAll[iA];//one unique alignment only
+    for (uint32 iA=0; iA<nA; iA++) {//only includes aligns that are entirely inside genes (?)
+        Transcript &a = *aAll[iA];
             
         uint64 aS = a.exons[0][EX_G]; //align start
         uint64 aE = a.exons[a.nExons-1][EX_G] + a.exons[a.nExons-1][EX_L]-1; //align end
