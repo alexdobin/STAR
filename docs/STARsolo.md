@@ -1,6 +1,10 @@
 **STARsolo**: mapping, demultiplexing and quantification for single cell RNA-seq
 =================================================================================
 
+Major update in STAR 2.7.9a (2021/05/05)
+-----------------------------------------
+* [**Counting *multi-gene* (multimapping) reads**](#multi-gene-reads)
+
 Major updates in STAR 2.7.8a (2021/02/20)
 -----------------------------------------
 * [**Cell calling (filtering) similar to CellRanger:**](#emptydrop-like-filtering)
@@ -181,7 +185,7 @@ int>0:                  maximum number of mismatches allowed in adapter sequence
 
 --------------------------------------
 Cell filtering (calling)
---------------------
+--------------------------------------
 In addition to raw, unfiltered output of gene/cell counts, STARsolo performs cell filtering (a.k.a. cell calling), which aims to select a subset of cells that are likely to be "real" cells as opposed to empty droplets (containing ambient RNA).
 Two types of filtering are presently implemented: simple (knee-like) and advanced EmptyDrop-like. The selected filtering is also used to produce summary statistics for filtered cells in the Summary.csv file, which is similar to CellRanger's summary and is useful for Quality Control.
 
@@ -230,9 +234,40 @@ Quantification of different transcriptomic features
         --soloFeatures Gene GeneFull SJ Velocyto
         ```
 
+------------------------------------------------------
+Multi-gene reads
+------------------------------------------------------        
+Multi-gene reads are concordant with (i.e. align equally well to) transcripts of two or more genes. One class of multi-gene read are those that map uniquely to a genomic region where two or more genes overlap. Another class are those reads that map to multiple loci in the genome, with each locus annotated to a different gene.
+
+Including multi-gene reads allows for more accurate gene quantification and, more importantly, enables detection of gene expression from certain classes of genes that are supported only by multi-gene reads, such as overlapping genes and highly similar paralog families.
+
+The multi-gene read recovery options are specified with ```--soloMultiMappers```. Several algorithms are implemented:
+
+```
+--soloMultiMappers Uniform
+```
+uniformly distributes the multi-gene UMIs to all genes in its gene set. Each gene gets a fractional count of 1/N_genes, where N_genes is the number of genes in the set. This is the simplest possible option, and it offers higher sensitivity for gene detection at the expense of lower precision.
+
+```
+--soloMultiMappers PropUnique
+```
+ distributes the multi-gene UMIs proportionally to the number of unique UMIs per gene. UMIs that map to genes that are not supported by unique UMIs are distributed uniformly.
+
+```
+--soloMultiMappers EM
+```
+uses Maximum Likelihood Estimation (MLE) to distribute multi-gene UMIs among their genes, taking into account other UMIs (both unique- and multi-gene) from the same cell (i.e. with the same CB). Expectation-Maximization (EM) algorithm is used to find the gene expression values that maximize the likelihood function. Recovering multi-gene reads via MLE-EM model was previously used to quantify transposable elements in bulk RNA-seq {[TEtranscripts](https://doi.org/10.1093/bioinformatics/btv422)} and in scRNA-seq {[Alevin](https://doi.org/10.1186/s13059-019-1670-y); [Kallisto-bustools](http://www.nature.com/articles/s41587-021-00870-2)}.
+
+```
+--soloMultiMappers Rescue
+```
+distributes multi-gene UMIs to their gene set proportionally to the sum of the number of unique-gene UMIs and uniformly distributed multi-gene UMIs in each gene [Mortazavi et al](https://www.nature.com/articles/nmeth.1226). It can be thought of as the first step of the EM algorithm.
+
+Any combination of these options can be specified and different multi-gene falvors will be output into different files. The unique-gene UMI counts are output into the *matrix.mtx* file in the *raw/Gene* directory, while the sum of unique+multi-gene UMI counts will be output into *UniqueAndMult-EM.mtx,  UniqueAndMult-PropUnique.mtx,  UniqueAndMult-Rescue.mtx,  UniqueAndMult-Uniform.mtx* files.
+
 --------------------------------------
 BAM tags
------------------
+--------------------------------------
 * To output BAM tags into SAM/BAM file, add them to the list of standard tags in
     ```
     --outSAMattributes NH HI nM AS CR UR CB UB GX GN sS sQ sM

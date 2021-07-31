@@ -83,9 +83,11 @@ void SoloFeature::cellFiltering()
 
             filteredCells.nUMIinCells += nUMIperCB[icb]; //nUMIperCB was calculated for umiDedup-main
             
-            filteredCells.nReadInCells += nReadPerCBtotal[icb];
-            filteredCells.nReadInCellsUnique += nReadPerCBunique[icb];            
-            filteredCells.nReadPerCellUnique.push_back(nReadPerCBunique[icb]);
+            if (nReadPerCBunique.size()>0) {//for CellFiltering only, read information is not available
+                filteredCells.nReadInCells += nReadPerCBtotal[icb];
+                filteredCells.nReadInCellsUnique += nReadPerCBunique[icb];            
+                filteredCells.nReadPerCellUnique.push_back(nReadPerCBunique[icb]);
+            };
             
             uint32 ng1 = 0; //number of genes detected in this cell
             for (uint32 ig=0; ig<nGenePerCB[icb]; ig++) {

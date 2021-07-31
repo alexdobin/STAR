@@ -1,3 +1,13 @@
+STAR 2.7.9a --- 2021/05/05 ::: STARsolo updates
+=====================================================
+
+* [**Counting *multi-gene* (multimapping) reads**](#multi-gene-reads)
+* STARsolo uses [SIMDe](https://github.com/simd-everywhere/simde) package which support different types of SIMD extensions. For processors that do not support AVX extensions, specify the target SIMD architecture, e.g.
+```
+make STAR CXXFLAGS_SIMD=sse
+```
+
+
 STAR 2.7.8a --- 2021/02/20
 ===========================
 **Major STARsolo updates and many bug fixes**

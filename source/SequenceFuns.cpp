@@ -250,7 +250,7 @@ int64 convertNuclStrToInt64(const string S, uint64 &intOut) {
     intOut=0;
     int64 posN=-1;
     for (uint64 ii=0; ii<S.size(); ii++) {
-        uint64 nt = (uint64) convertNt01234(S.at(ii));
+        uint64 nt = (uint64) convertNt01234(S[ii]);
         if (nt>3) {//N
             if (posN>=0)
                 return -2; //two Ns

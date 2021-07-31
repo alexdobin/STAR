@@ -4,6 +4,8 @@
 
 void ReadAlign::outputAlignments() {
   
+    outBAMbytes=0;
+    
     if (mapGen.pGe.gType==101) {//temporary
         ReadAlign::spliceGraphWriteSAM();
         return;
@@ -13,7 +15,7 @@ void ReadAlign::outputAlignments() {
     
     if (outFilterBySJoutPass) {//otherwise align is held for the 2nd stage of outFilterBySJout
         ////////////////////////////////////
-        if (unmapType<0) {//passed mappedFilter. Unmapped reads can have nTr>0 - "too many loci"
+        if (unmapType<0) {//passed mappedFilter. Unmapped reads can have nTr>0
             if (nTr>1) {//multimappers
                 statsRA.mappedReadsM++;
                 unmapType = -2; //not sure if this used
@@ -35,7 +37,7 @@ void ReadAlign::outputAlignments() {
         soloRead->readBar->getCBandUMI(Read0, Qual0, readLengthOriginal, readNameExtra[0], readFilesIndex, readName);
 
         //transcripts: need to be run after CB/UMI are obtained to output CR/UR tags
-        if ( P.quant.trSAM.yes ) {
+        if ( P.quant.trSAM.yes && unmapType<0) {//Aligned.toTranscriptome output, only for mapped
             quantTranscriptome(chunkTr, nTr, trMult,  alignTrAll);
         };        
         

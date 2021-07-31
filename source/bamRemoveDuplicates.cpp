@@ -181,7 +181,14 @@ void bamRemoveDuplicates(const string bamFileName, const string bamFileNameOut, 
             bamA->data=((uint8_t*) bamP)+9*4+((bamP[3]<<24)>>24)+((bamP[4]<<16)>>16)*4+(bamP[5]+1)/2+bamP[5];//add length for: core, name, cigar, seq, qual
             bamA->l_data=((uint8_t*) bamP)+bamP[0]+1-bamA->data;
 
-            nMult=bam_aux2i(bam_aux_get(bamA,"NH"));
+            uint8_t *tagP = bam_aux_get(bamA,"NH");
+            if (tagP==0) {
+                ostringstream errOut;
+                errOut <<"EXITING because of fatal ERROR: SAM tag NH is missing from a read, but it's required for deduplication. \n";
+                errOut <<"SOLUTION: re-generate BAM file with NH and AS tags.";
+                exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
+            };
+            nMult=bam_aux2i(tagP);
 
             if (nMult==1 || (nMult>1 && P.removeDuplicates.markMulti))
             {
@@ -204,7 +211,15 @@ void bamRemoveDuplicates(const string bamFileName, const string bamFileNameOut, 
                 uint32* bamP1=(uint32*) aD[pp*2];//pointer to the 1st mate of the pair
                 bamA->data=((uint8_t*) bamP1)+9*4+((bamP1[3]<<24)>>24)+((bamP1[4]<<16)>>16)*4+(bamP1[5]+1)/2+bamP1[5];//add length for: core, name, cigar, seq, qual
                 bamA->l_data=((uint8_t*) bamP1)+bamP1[0]+1-bamA->data;
-                int score1=bam_aux2i(bam_aux_get(bamA,"AS"));
+
+                uint8_t *tagP = bam_aux_get(bamA,"AS");
+                if (tagP==0) {
+                    ostringstream errOut;
+                    errOut <<"EXITING because of fatal ERROR: SAM tag AS is missing from a read, but it's required for deduplication. \n";
+                    errOut <<"SOLUTION: re-generate BAM file with NH and AS tags.";
+                    exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
+                };
+                int score1=bam_aux2i(tagP);
                 if (score1>bScore) {
                     bScore=score1;
                     bP=pp;

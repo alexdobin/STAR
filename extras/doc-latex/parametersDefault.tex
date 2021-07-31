@@ -228,7 +228,7 @@
   \optValue{31000000000}
   \optLine{int{\textgreater}0: maximum available RAM (bytes) for genome generation} 
 \optName{limitIObufferSize}
-  \optValue{150000000}
+  \optValue{30000000 50000000}
   \optLine{int{\textgreater}0: max available buffers size (bytes) for input/output, per thread} 
 \optName{limitOutSAMoneReadBytes}
   \optValue{100000}
@@ -272,7 +272,7 @@
   \optOpt{Log}   \optOptLine{log messages}
   \optOpt{SAM}   \optOptLine{alignments in SAM format (which normally are output to Aligned.out.sam file), normal standard output will go into Log.std.out}
   \optOpt{BAM{\textunderscore}Unsorted}   \optOptLine{alignments in BAM format, unsorted. Requires --outSAMtype BAM Unsorted}
-  \optOpt{BAM{\textunderscore}SortedByCoordinate}   \optOptLine{alignments in BAM format, unsorted. Requires --outSAMtype BAM SortedByCoordinate}
+  \optOpt{BAM{\textunderscore}SortedByCoordinate}   \optOptLine{alignments in BAM format, sorted by coordinate. Requires --outSAMtype BAM SortedByCoordinate}
   \optOpt{BAM{\textunderscore}Quant}   \optOptLine{alignments to transcriptome in BAM format, unsorted. Requires --quantMode TranscriptomeSAM}
 \end{optOptTable}
 \optName{outReadsUnmapped}
@@ -558,13 +558,25 @@
   \optOpt{None}   \optOptLine{no filtering}
 \end{optOptTable}
 \end{optTable}
+\optSection{Output splice junctions (SJ.out.tab)}\label{Output_splice_junctions_(SJ.out.tab)}
+\begin{optTable}
+\optName{outSJtype}
+  \optValue{Standard}
+  \optLine{string: type of splice junction output} 
+\begin{optOptTable}
+  \optOpt{Standard}   \optOptLine{standard SJ.out.tab output}
+  \optOpt{None}   \optOptLine{no splice junction output}
+\end{optOptTable}
+\end{optTable}
 \optSection{Output Filtering: Splice Junctions}\label{Output_Filtering:_Splice_Junctions}
 \begin{optTable}
 \optName{outSJfilterReads}
   \optValue{All}
   \optLine{string: which reads to consider for collapsed splice junctions output} 
-  \optLine{All: all reads, unique- and multi-mappers} 
-  \optLine{Unique: uniquely mapping reads only} 
+\begin{optOptTable}
+  \optOpt{All}   \optOptLine{all reads, unique- and multi-mappers}
+  \optOpt{Unique}   \optOptLine{uniquely mapping reads only}
+\end{optOptTable}
 \optName{outSJfilterOverhangMin}
   \optValue{30 12 12 12}
   \optLine{4 integers:    minimum overhang length for splice junctions on both sides for: (1) non-canonical motifs, (2) GT/AG and CT/AC motif, (3) GC/AG and CT/GC motif, (4) AT/AC and GT/AT motif. -1 means no output for that motif} 
@@ -958,11 +970,20 @@
 \end{optOptTable}
 \optName{soloFeatures}
   \optValue{Gene}
-  \optLine{string(s):              genomic features for which the UMI counts per Cell Barcode are collected} 
+  \optLine{string(s): genomic features for which the UMI counts per Cell Barcode are collected} 
 \begin{optOptTable}
   \optOpt{Gene}   \optOptLine{genes: reads match the gene transcript}
   \optOpt{SJ}   \optOptLine{splice junctions: reported in SJ.out.tab}
   \optOpt{GeneFull}   \optOptLine{full genes: count all reads overlapping genes' exons and introns}
+\end{optOptTable}
+\optName{soloMultiMappers}
+  \optValue{Unique}
+  \optLine{string(s): counting method for reads mapping to multiple genes           } 
+\begin{optOptTable}
+  \optOpt{Unique}   \optOptLine{count only reads that map to unique genes}
+  \optOpt{Uniform}   \optOptLine{uniformly distribute multi-genic UMIs to all genes}
+  \optOpt{Rescue}   \optOptLine{distribute UMIs proportionally to unique+uniform counts (~ first iteartion of EM)}
+  \optOpt{PropUnique}   \optOptLine{distribute UMIs proportionally to unique mappers, if present, and uniformly if not.}
 \end{optOptTable}
 \optName{soloUMIdedup}
   \optValue{1MM{\textunderscore}All}
@@ -977,10 +998,11 @@
 \end{optOptTable}
 \optName{soloUMIfiltering}
   \optValue{-}
-  \optLine{string(s)               type of UMI filtering} 
+  \optLine{string(s)               type of UMI filtering (for reads uniquely mapping to genes)} 
 \begin{optOptTable}
   \optOpt{-}   \optOptLine{basic filtering: remove UMIs with N and homopolymers (similar to CellRanger 2.2.0).}
   \optOpt{MultiGeneUMI}   \optOptLine{basic + remove lower-count UMIs that map to more than one gene.}
+  \optOpt{MultiGeneUMI{\textunderscore}All}   \optOptLine{basic + remove all UMIs that map to more than one gene.}
   \optOpt{MultiGeneUMI{\textunderscore}CR}   \optOptLine{basic + remove lower-count UMIs that map to more than one gene, matching CellRanger {\textgreater} 3.0.0 .}
 \end{optOptTable}
   \optLine{Only works with --soloUMIdedup 1MM{\textunderscore}CR} 
@@ -1005,5 +1027,5 @@
   \optLine{The harcoded values are from CellRanger:             3000            0.99            10    45000    90000      500               0.01      20000  0.01  10000} 
 \optName{soloOutFormatFeaturesGeneField3}
   \optValue{"Gene Expression"}
-  \optLine{string(s):				field 3 in the Gene features.tsv file. If "-", then no 3rd field is output.} 
+  \optLine{string(s):                field 3 in the Gene features.tsv file. If "-", then no 3rd field is output.} 
 \end{optTable}

@@ -213,13 +213,13 @@ clip5pNbases                 0
 
 #####UnderDevelopment_begin : not supported - do not use   
 clip5pAdapterSeq            -
-    string(s): adapter sequences to clip from 5p of each mate.  If one value is given, it will be assumed the same for both mates.
+    string(s): adapter sequences to clip from 5p of each mate, separated by space.
 
 clip5pAdapterMMp            0.1
-    double(s): max proportion of mismatches for 5p adapter clipping for each mate.  If one value is given, it will be assumed the same for both mates.
+    double(s): max proportion of mismatches for 5p adapter clipping for each mate, separated by space
 
 clip5pAfterAdapterNbases    0
-    int(s): number of bases to clip from 5p of each mate after the adapter clipping. If one value is given, it will be assumed the same for both mates.
+    int(s): number of bases to clip from 5p of each mate after the adapter clipping, separated by space.
 #####UnderDevelopment_end
 
 ### Limits
@@ -265,7 +265,7 @@ outStd                          Log
                                 Log                    ... log messages
                                 SAM                    ... alignments in SAM format (which normally are output to Aligned.out.sam file), normal standard output will go into Log.std.out
                                 BAM_Unsorted           ... alignments in BAM format, unsorted. Requires --outSAMtype BAM Unsorted
-                                BAM_SortedByCoordinate ... alignments in BAM format, unsorted. Requires --outSAMtype BAM SortedByCoordinate
+                                BAM_SortedByCoordinate ... alignments in BAM format, sorted by coordinate. Requires --outSAMtype BAM SortedByCoordinate
                                 BAM_Quant              ... alignments to transcriptome in BAM format, unsorted. Requires --quantMode TranscriptomeSAM
 
 outReadsUnmapped                None
@@ -764,7 +764,7 @@ waspOutputMode              None
 soloType                    None
     string(s): type of single-cell RNA-seq
                             CB_UMI_Simple   ... (a.k.a. Droplet) one UMI and one Cell Barcode of fixed length in read2, e.g. Drop-seq and 10X Chromium.
-                            CB_UMI_Complex  ... one UMI of fixed length, but multiple Cell Barcodes of varying length, as well as adapters sequences are allowed in read2 only, e.g. inDrop.
+                            CB_UMI_Complex  ... multiple Cell Barcodes of varying length, one UMI of fixed length and one adapter sequence of fixed length are allowed in read2 only (e.g. inDrop, ddSeq).
                             CB_samTagOut    ... output Cell Barcode as CR and/or CB SAm tag. No UMI counting. --readFilesIn cDNA_read1 [cDNA_read2 if paired-end] CellBarcode_read . Requires --outSAMtype BAM Unsorted [and/or SortedByCoordinate]
                             SmartSeq        ... Smart-seq: each cell in a separate FASTQ (paired- or single-end), barcodes are corresponding read-groups, no UMI sequences, alignments deduplicated according to alignment start and end (after extending soft-clipped bases)
 
@@ -811,7 +811,7 @@ soloUMIposition             -
                             --soloCBposition  3_9_3_14
 
 soloAdapterSequence         -
-    string:                 adapter sequence to anchor barcodes.
+    string:                 adapter sequence to anchor barcodes. Only one adapter sequence is allowed.
 
 soloAdapterMismatchesNmax   1
     int>0:                  maximum number of mismatches allowed in adapter sequence.
@@ -854,10 +854,11 @@ soloFeatures                Gene
 
 soloMultiMappers            Unique
     string(s): counting method for reads mapping to multiple genes           
-                            Unique  ... count only reads that map to unique genes
-                            Uniform ... uniformly distribute multi-genic UMIs to all genes
-                            Rescue  ... distribute UMIs proportionally to unique+uniform counts (~ first iteartion of EM)
+                            Unique     ... count only reads that map to unique genes
+                            Uniform    ... uniformly distribute multi-genic UMIs to all genes
+                            Rescue     ... distribute UMIs proportionally to unique+uniform counts (~ first iteartion of EM)
                             PropUnique ... distribute UMIs proportionally to unique mappers, if present, and uniformly if not.
+                            EM         ... multi-gene UMIs are distributed using Expectation Maximization algorithm
 
 soloUMIdedup                1MM_All
     string(s):              type of UMI deduplication (collapsing) algorithm

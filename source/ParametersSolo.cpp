@@ -657,5 +657,5 @@ void MultiMappers::initialize(ParametersSolo* pS)
     typeMain = types[0]; //main is the 0th entry in typesIn
     countInd.main = 1;   //hard-coded - 1 column is always main
     
-    yes.multi = yes.Uniform | yes.Rescue;
+    yes.multi = yes.Uniform | yes.Rescue | yes.PropUnique | yes.EM;
 };
