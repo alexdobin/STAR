@@ -14,6 +14,7 @@ SoloFeature::SoloFeature(Parameters &Pin, ReadAlignChunk **RAchunk, Transcriptom
         case SoloFeatureTypes::Gene :
         case SoloFeatureTypes::GeneFull :
         case SoloFeatureTypes::GeneFull_CR :
+        case SoloFeatureTypes::GeneFull_ExonOverIntron :
         case SoloFeatureTypes::Velocyto :
             featuresNumber=Trans.nGe;
             break;

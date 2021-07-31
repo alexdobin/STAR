@@ -295,8 +295,12 @@ void ReadAlign::alignedAnnotation()
     if ( P.quant.gene.yes ) {
         chunkTr->classifyAlign(trMult, nTr, readAnnot);
     };
-    //solo-GeneFull
+    //solo-GeneFull_CR
     if ( P.quant.geneFull_CR.yes ) {
         chunkTr->geneFullAlignOverlap_CR(nTr, trMult, P.pSolo.strand, readAnnot);
-    };    
+    };
+    //solo-GeneFull_ExonOverIntron
+    if ( P.quant.geneFull_ExonOverIntron.yes ) {
+        chunkTr->geneFullAlignOverlap_ExonOverIntron(nTr, trMult, P.pSolo.strand, readAnnot);
+    };
 };

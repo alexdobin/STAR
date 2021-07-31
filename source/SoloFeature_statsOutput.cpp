@@ -44,7 +44,9 @@ void SoloFeature::statsOutput()
     strOut << "Reads Mapped to "<< mapfeat << ": Unique+Multipe " << SoloFeatureTypes::Names[featureType] <<"," << double( readFeatSum->stats.numMappedToTranscriptome() )/g_statsAll.readN <<'\n';
     strOut << "Reads Mapped to "<< mapfeat << ": Unique " << SoloFeatureTypes::Names[featureType] <<"," << double( readFeatSum->stats.numMappedToTranscriptomeUnique() )/g_statsAll.readN <<'\n';
     
-    if (pSolo.cellFilter.type[0]!="None" && (featureType==SoloFeatureTypes::Gene || featureType==SoloFeatureTypes::GeneFull || featureType==SoloFeatureTypes::GeneFull_CR)) {
+    if (pSolo.cellFilter.type[0]!="None"
+        && (featureType==SoloFeatureTypes::Gene || featureType==SoloFeatureTypes::GeneFull
+         || featureType==SoloFeatureTypes::GeneFull_ExonOverIntron || featureType==SoloFeatureTypes::GeneFull_CR)) {
         //if (pSolo.cellFilter.type[0]=="CellRanger2.2") 
         {
             strOut << "Estimated Number of Cells," << filteredCells.nCells <<'\n';

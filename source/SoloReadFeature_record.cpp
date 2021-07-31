@@ -32,7 +32,8 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
         switch (featureType) {
             case SoloFeatureTypes::Gene :
             case SoloFeatureTypes::GeneFull :
-            case SoloFeatureTypes::GeneFull_CR : 
+            case SoloFeatureTypes::GeneFull_CR :
+            case SoloFeatureTypes::GeneFull_ExonOverIntron :
                 {
                     set<uint32> *readGe;
                     switch (featureType) {
@@ -43,6 +44,10 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
                         case SoloFeatureTypes::GeneFull :
                             readGe = &readAnnot.geneFull;
                             reFe.indAnnotTr = readAnnot.geneFullTr;                            
+                            break;
+                        case SoloFeatureTypes::GeneFull_ExonOverIntron :
+                            readGe = &readAnnot.geneFull_ExonOverIntron;
+                            reFe.indAnnotTr = readAnnot.geneFull_ExonOverIntron_Tr;
                             break;
                         case SoloFeatureTypes::GeneFull_CR :
                             readGe = &readAnnot.geneFull_CR;
@@ -164,7 +169,7 @@ uint32 outputReadCB(fstream *streamOut, const uint64 iRead, const int32 featureT
         case SoloFeatureTypes::Gene :
         case SoloFeatureTypes::GeneFull :
         case SoloFeatureTypes::GeneFull_CR :
-            
+        case SoloFeatureTypes::GeneFull_ExonOverIntron :
             if (reFe.geneMult.size()==0) {
                 //just gene id
                 *streamOut << soloBar.umiB <<' ';//UMI

@@ -319,6 +319,10 @@ class Parameters {
 
             struct {
                 bool yes;
+            } geneFull_ExonOverIntron;
+
+            struct {
+                bool yes;
             } gene;
           
         } quant;

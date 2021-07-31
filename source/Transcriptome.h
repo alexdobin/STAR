@@ -50,6 +50,7 @@ public:
     void quantsAllocate(); //allocate quants structure
     void quantsOutput(); //output quantification files
     void geneFullAlignOverlap(uint nA, Transcript **aAll, int32 strandType, ReadAnnotations &readAnnot);
+    void geneFullAlignOverlap_ExonOverIntron(uint nA, Transcript **aAll, int32 strandType, ReadAnnotations &readAnnot);
     void geneFullAlignOverlap_CR(uint nA, Transcript **aAll, int32 strandType, ReadAnnotations &readAnnot);
     void classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnnotations &readAnnot);
     
