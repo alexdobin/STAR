@@ -61,6 +61,13 @@ void Solo::processAndOutput()
         ofstream *statsStream = &ofstrOpen(P.outFileNamePrefix+pSolo.outFileNames[0]+"Barcodes.stats",ERROR_OUT, P);
         readBarSum->statsOut(*statsStream);
         statsStream->close();
+
+        //pseudocounts
+        if (pSolo.CBmatchWL.mm1_multi_pc) {
+            for (uint32 ii=0; ii<pSolo.cbWLsize; ii++) {
+                readBarSum->cbReadCountExact[ii]++;//add one to exact counts
+            };
+        };
     };
     
     if (pSolo.type==pSolo.SoloTypes::CB_samTagOut)

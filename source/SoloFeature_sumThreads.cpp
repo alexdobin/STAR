@@ -38,6 +38,13 @@ void SoloFeature::sumThreads()
             readBarSum->cbReadCountExact[icb]=ii->second;
             ++icb;
         };
+
+        //pseudocounts
+        if (pSolo.CBmatchWL.mm1_multi_pc) {
+            for (uint32 ii=0; ii<pSolo.cbWLsize; ii++) {
+                readBarSum->cbReadCountExact[ii]++;//add one to exact counts
+            };
+        };
     };
 
     // if restarting from _STARtmp/solo* file
@@ -80,11 +87,5 @@ void SoloFeature::sumThreads()
         };
     };
     
-    //pseudocounts
-    if (pSolo.CBmatchWL.mm1_multi_pc) {
-        for (uint32 ii=0; ii<pSolo.cbWLsize; ii++) {
-            readBarSum->cbReadCountExact[ii]++;//add one to exact counts
-        };
-    };
 };
     
