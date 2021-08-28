@@ -297,7 +297,7 @@ void ReadAlign::alignedAnnotation()
     };
     //solo-GeneFull_CR
     if ( P.quant.geneFull_CR.yes ) {
-        chunkTr->geneFullAlignOverlap_CR(nTr, trMult, P.pSolo.strand, readAnnot);
+        chunkTr->alignExonOverlap(nTr, trMult, P.pSolo.strand, readAnnot);
     };
     //solo-GeneFull_ExonOverIntron
     if ( P.quant.geneFull_ExonOverIntron.yes ) {
