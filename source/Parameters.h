@@ -315,7 +315,7 @@ class Parameters {
           
             struct {
                 bool yes;
-            } geneFull_CR;
+            } geneFull_Ex50pAS;
 
             struct {
                 bool yes;

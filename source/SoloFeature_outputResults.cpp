@@ -23,7 +23,7 @@ void SoloFeature::outputResults(bool cellFilterYes, string outputPrefixMat)
     switch (featureType) {
         case SoloFeatureTypes::Gene :
         case SoloFeatureTypes::GeneFull :
-        case SoloFeatureTypes::GeneFull_CR :
+        case SoloFeatureTypes::GeneFull_Ex50pAS :
         case SoloFeatureTypes::GeneFull_ExonOverIntron :
         case SoloFeatureTypes::Velocyto :
         case SoloFeatureTypes::VelocytoSimple :
@@ -40,7 +40,10 @@ void SoloFeature::outputResults(bool cellFilterYes, string outputPrefixMat)
             break;
         };
         case SoloFeatureTypes::SJ :
-            symlink("../../../SJ.out.tab", (outputPrefixMat+pSolo.outFileNames[1]).c_str());
+            if ( symlink("../../../SJ.out.tab", (outputPrefixMat+pSolo.outFileNames[1]).c_str()) != 0 )
+                 exitWithError("EXITING because of fatal OUTPUT FILE error: could not sym-link ../../../SJ.out.tab into" + outputPrefixMat+pSolo.outFileNames[1] +
+                      "\nSOLUTION: check the path and permisssions\n",
+                       std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
     };
 
     ////////////////////////////////////////////////////////////////////////////
@@ -116,7 +119,7 @@ void SoloFeature::outputResults(bool cellFilterYes, string outputPrefixMat)
     //////////////////////////////////////////// output unique+multimappers
     if (pSolo.multiMap.yes.multi && !cellFilterYes
         && (featureType == SoloFeatureTypes::Gene || featureType == SoloFeatureTypes::GeneFull
-         || featureType == SoloFeatureTypes::GeneFull_ExonOverIntron || featureType == SoloFeatureTypes::GeneFull_CR) ) {
+         || featureType == SoloFeatureTypes::GeneFull_ExonOverIntron || featureType == SoloFeatureTypes::GeneFull_Ex50pAS) ) {
                           //skipping unique
         for (const auto &iMult: pSolo.multiMap.types) {               
             for (uint32 iDed=0; iDed<pSolo.umiDedup.yes.N; iDed++) {

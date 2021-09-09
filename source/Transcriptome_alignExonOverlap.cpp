@@ -9,8 +9,8 @@ int32 alignBlocksOverlapExons(Transcript &aG, uint16 exN1, uint32 *exSE1, uint64
 
 void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandType, ReadAnnotations &readAnnot)
 {
-    readAnnot.geneFull_CR={};
-    readAnnot.geneFull_CR_Tr=-1;
+    readAnnot.geneFull_Ex50pAS={};
+    readAnnot.geneFull_Ex50pAS_Tr=-1;
 
     struct GeneStrOverlapAlign {
         uint32 g;
@@ -56,10 +56,10 @@ void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandTyp
             bool sjConcord;
             int32 nOverlap = alignBlocksOverlapExons(aG, trExN[tr1], exSE+2*trExI[tr1], trS[tr1], sjConcord);
             if ( nOverlap>=0 ) {
-                bool str1 = (strandType==0 ? aG.Str : 1-aG.Str) == (trStr[tr1]-1);
+                bool str1 = int(strandType==0 ? aG.Str : 1-aG.Str) == (trStr[tr1]-1);
                 str1 = str1 || (strandType==-1);
 
-                uint64 exl=0;
+                int exl=0;
                 for (uint64 iex=0; iex<aG.nExons;iex++)
                     exl += aG.exons[iex][EX_L];
 
@@ -71,10 +71,8 @@ void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandTyp
                                                             str1 && nOverlap>exl/2, 
                                                             !str1 && nOverlap>exl/2,
                                                             str1,
-                                                            
                                                         } 
                                      });
-                
 
                 /* matches Gene
                 vGeneInfo1.push_back({trGene[tr1], iag, {
@@ -103,7 +101,7 @@ void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandTyp
                     sjann = sjann & (aG.canonSJ[iex]<0 || aG.sjAnnot[iex]!=0);
 
                 if ( str1 && nOverlap==exl && sjConcord ) {//this should match geneConcordant
-                    readAnnot.geneFull_CR.insert(trGene[tr1]);
+                    readAnnot.geneFull_Ex50pAS.insert(trGene[tr1]);
                 };
                 */               
             };
@@ -112,7 +110,7 @@ void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandTyp
         } while (trEmax[tr1]>=aGend && tr1>0);
     };
 
-    {//prune geneFull_CR according to priorities
+    {//prune geneFull_Ex50pAS according to priorities
         /*
         bool bTranscr = false; //transcriptomic
         bool bExonic = false; //sense, exonic: >=50% exonic
@@ -149,15 +147,15 @@ void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandTyp
         if (bTranscr) {
             for (auto &v1: vGeneInfo1)
                 if ( v1.tr )
-                    readAnnot.geneFull_CR.insert(v1.g);
+                    readAnnot.geneFull_Ex50pAS.insert(v1.g);
         } else if (bExonic) {
             for (auto &v1: vGeneInfo1)
                 if ( v1.ex )
-                    readAnnot.geneFull_CR.insert(v1.g);
+                    readAnnot.geneFull_Ex50pAS.insert(v1.g);
         } else if (bIntronic) {
             for (auto &v1: vGeneInfo1)
                 if ( v1.in )
-                    readAnnot.geneFull_CR.insert(v1.g);
+                    readAnnot.geneFull_Ex50pAS.insert(v1.g);
         };
         */
 
@@ -171,14 +169,16 @@ void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandTyp
            };
         };
 
+        readAnnot.geneFull_Ex50pAS_Al.resize(nA,-1);
         for ( uint32 it=0; it<otFinal.size(); it++ ) {
             if ( otFinal[it] ) {
                 if (otAS[it])
                     return; //AS reads are not counted TODO: add to stats
                 for ( auto &v1: vGeneInfo1 ) {
                     if ( v1.ot[it] ) {
-                        readAnnot.geneFull_CR.insert(v1.g);
-                        readAnnot.geneFull_CR_Tr = v1.ia;
+                        readAnnot.geneFull_Ex50pAS.insert(v1.g);
+                        readAnnot.geneFull_Ex50pAS_Tr = v1.ia;
+                        readAnnot.geneFull_Ex50pAS_Al[v1.ia] = v1.g;
                     };
                 };
                 break;//first otFinal wins
@@ -186,8 +186,8 @@ void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandTyp
         };
 
         /*//debug
-        if ( readAnnot.geneFull_CR != readAnnot.geneFull_ExonOverIntron  
-           || (readAnnot.geneFull_CR.size()>0 && readAnnot.geneFull_CR_Tr != readAnnot.geneFull_ExonOverIntron_Tr) ) {
+        if ( readAnnot.geneFull_Ex50pAS != readAnnot.geneFull_ExonOverIntron  
+           || (readAnnot.geneFull_Ex50pAS.size()>0 && readAnnot.geneFull_Ex50pAS_Tr != readAnnot.geneFull_ExonOverIntron_Tr) ) {
             cout << 0;
         };
         */        
@@ -235,7 +235,5 @@ int32 alignBlocksOverlapExons(Transcript &aG, uint16 exN1, uint32 *exSE1, uint64
                 i1++;//2 is on the right of 1
         };
     };
-
-
     return nOverlap;
 };

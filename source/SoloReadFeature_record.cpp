@@ -32,7 +32,7 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
         switch (featureType) {
             case SoloFeatureTypes::Gene :
             case SoloFeatureTypes::GeneFull :
-            case SoloFeatureTypes::GeneFull_CR :
+            case SoloFeatureTypes::GeneFull_Ex50pAS :
             case SoloFeatureTypes::GeneFull_ExonOverIntron :
                 {
                     set<uint32> *readGe;
@@ -49,9 +49,9 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
                             readGe = &readAnnot.geneFull_ExonOverIntron;
                             reFe.indAnnotTr = readAnnot.geneFull_ExonOverIntron_Tr;
                             break;
-                        case SoloFeatureTypes::GeneFull_CR :
-                            readGe = &readAnnot.geneFull_CR;
-                            reFe.indAnnotTr = readAnnot.geneFull_CR_Tr;
+                        case SoloFeatureTypes::GeneFull_Ex50pAS :
+                            readGe = &readAnnot.geneFull_Ex50pAS;
+                            reFe.indAnnotTr = readAnnot.geneFull_Ex50pAS_Tr;
                     };
                         
                     if (readGe->size()==0) {//check genes
@@ -69,7 +69,7 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
                                 ++ii;
                             };
                                 
-                            //for Smart-seq TODO fix GeneFull_CR. Can move this switch(featureType) above
+                            //for Smart-seq TODO fix GeneFull_Ex50pAS. Can move this switch(featureType) above
                             nFeat = outputReadCB(streamReads, iRead, featureType, soloBar, reFe, readAnnot);
                         };
                     } else {//unique-gene read
@@ -168,7 +168,7 @@ uint32 outputReadCB(fstream *streamOut, const uint64 iRead, const int32 featureT
             
         case SoloFeatureTypes::Gene :
         case SoloFeatureTypes::GeneFull :
-        case SoloFeatureTypes::GeneFull_CR :
+        case SoloFeatureTypes::GeneFull_Ex50pAS :
         case SoloFeatureTypes::GeneFull_ExonOverIntron :
             if (reFe.geneMult.size()==0) {
                 //just gene id

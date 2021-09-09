@@ -226,8 +226,8 @@ void ParametersSolo::initialize(Parameters *pPin)
             if (!featureYes[SoloFeatureTypes::Gene]) 
                 pP->quant.gene.yes=false; //if GeneFull is requested, but Gene is not, turn it off - it could have been turned on because of GX/GN attributes
         };
-        if (featureYes[SoloFeatureTypes::GeneFull_CR]) {
-            pP->quant.geneFull_CR.yes = true;
+        if (featureYes[SoloFeatureTypes::GeneFull_Ex50pAS]) {
+            pP->quant.geneFull_Ex50pAS.yes = true;
             pP->quant.yes = true;
             if (!featureYes[SoloFeatureTypes::Gene]) 
                 pP->quant.gene.yes=false; //if GeneFull is requested, but Gene is not, turn it off - it could have been turned on because of GX/GN attributes
@@ -396,12 +396,12 @@ void ParametersSolo::initialize(Parameters *pPin)
             samAttrFeature=SoloFeatureTypes::GeneFull;
         } else if (featureYes[SoloFeatureTypes::GeneFull_ExonOverIntron]) {//if Gene is not defined
             samAttrFeature=SoloFeatureTypes::GeneFull_ExonOverIntron;             
-        } else if (featureYes[SoloFeatureTypes::GeneFull_CR]) {//if Gene is not defined
-            samAttrFeature=SoloFeatureTypes::GeneFull_CR;
+        } else if (featureYes[SoloFeatureTypes::GeneFull_Ex50pAS]) {//if Gene is not defined
+            samAttrFeature=SoloFeatureTypes::GeneFull_Ex50pAS;
         } else {
             ostringstream errOut;
-            errOut << "EXITING because of fatal PARAMETERS error: CB and/or UB attributes in --outSAMattributes require --soloFeatures Gene OR/AND GeneFull OR/AND GeneFull_CR.\n";
-            errOut << "SOLUTION: re-run STAR adding Gene AND/OR GeneFull OR/AND GeneFull_CR OR/AND GeneFull_ExonOverIntron to --soloFeatures\n";
+            errOut << "EXITING because of fatal PARAMETERS error: CB and/or UB attributes in --outSAMattributes require --soloFeatures Gene OR/AND GeneFull OR/AND GeneFull_Ex50pAS.\n";
+            errOut << "SOLUTION: re-run STAR adding Gene AND/OR GeneFull OR/AND GeneFull_Ex50pAS OR/AND GeneFull_ExonOverIntron to --soloFeatures\n";
             exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
         };
 
@@ -484,7 +484,7 @@ void ParametersSolo::initialize(Parameters *pPin)
         };
         readIndexYes[SoloFeatureTypes::Gene]=true;
         readIndexYes[SoloFeatureTypes::GeneFull]=true;
-        readIndexYes[SoloFeatureTypes::GeneFull_CR]=true;
+        readIndexYes[SoloFeatureTypes::GeneFull_Ex50pAS]=true;
         readIndexYes[SoloFeatureTypes::GeneFull_ExonOverIntron]=true;
     };
 };

@@ -49,7 +49,8 @@ void Parameters::openReadsFiles()
 
             for (uint32 ifile=0; ifile<readFilesN; ifile++) {
                 
-                system(("ls -lL " + readFilesNames[imate][ifile] + " > "+ outFileTmp+"/readFilesIn.info 2>&1").c_str());
+                if ( system(("ls -lL " + readFilesNames[imate][ifile] + " > "+ outFileTmp+"/readFilesIn.info 2>&1").c_str()) !=0 )
+                    warningMessage(" Could not ls " + readFilesNames[imate][ifile], std::cerr, inOut->logMain, *this);
 
                 ifstream readFilesIn_info((outFileTmp+"/readFilesIn.info").c_str());
                 inOut->logMain <<readFilesIn_info.rdbuf();

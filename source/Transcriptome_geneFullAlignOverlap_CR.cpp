@@ -4,7 +4,7 @@
 
 void Transcriptome::geneFullAlignOverlap_CR(uint nA, Transcript **aAll, int32 strandType, ReadAnnotations &readAnnot)
 {
-    readAnnot.geneFull_CR={};
+    readAnnot.geneFull_Ex50pAS={};
         
     for (uint32 iA=0; iA<nA; iA++) {//only includes aligns that are entirely inside genes (?)
         Transcript &a = *aAll[iA];
@@ -19,8 +19,8 @@ void Transcriptome::geneFullAlignOverlap_CR(uint nA, Transcript **aAll, int32 st
             if (geneFull.e[gi1]>=aE) {//this gene contains the block:  gene-end is to the right of block start
                 int32 str1 = geneFull.str[gi1]==1 ? a.Str : 1-a.Str;
                 if (strandType==-1 || strandType==str1)  {
-                    readAnnot.geneFull_CR.insert(geneFull.g[gi1]);
-                    readAnnot.geneFull_CR_Tr=iA;
+                    readAnnot.geneFull_Ex50pAS.insert(geneFull.g[gi1]);
+                    readAnnot.geneFull_Ex50pAS_Tr=iA;
                 };
             };
             --gi1;// go to the previous gene

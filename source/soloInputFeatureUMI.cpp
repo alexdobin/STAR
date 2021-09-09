@@ -13,7 +13,7 @@ bool soloInputFeatureUMI(fstream *strIn, int32 featureType, bool readInfoYes, ar
     switch (featureType) {
         case SoloFeatureTypes::Gene :
         case SoloFeatureTypes::GeneFull :
-        case SoloFeatureTypes::GeneFull_CR :
+        case SoloFeatureTypes::GeneFull_Ex50pAS :
         case SoloFeatureTypes::GeneFull_ExonOverIntron :
             *strIn >> feature;
             break;

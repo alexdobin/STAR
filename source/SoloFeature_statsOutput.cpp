@@ -46,7 +46,7 @@ void SoloFeature::statsOutput()
     
     if (pSolo.cellFilter.type[0]!="None"
         && (featureType==SoloFeatureTypes::Gene || featureType==SoloFeatureTypes::GeneFull
-         || featureType==SoloFeatureTypes::GeneFull_ExonOverIntron || featureType==SoloFeatureTypes::GeneFull_CR)) {
+         || featureType==SoloFeatureTypes::GeneFull_ExonOverIntron || featureType==SoloFeatureTypes::GeneFull_Ex50pAS)) {
         //if (pSolo.cellFilter.type[0]=="CellRanger2.2") 
         {
             strOut << "Estimated Number of Cells," << filteredCells.nCells <<'\n';
