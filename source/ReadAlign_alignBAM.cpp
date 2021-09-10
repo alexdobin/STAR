@@ -397,7 +397,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                                 attrN+=bamAttrArrayWrite(chunkTr->geID[*readAnnot.geneFull.begin()],"GX",attrOutArray+attrN);
                         } else if ( P.quant.geneFull_ExonOverIntron.yes ) {
                             if ( readAnnot.geneFull_ExonOverIntron.size()==1 ) //only output if read maps to a single gene
-                                attrN+=bamAttrArrayWrite(chunkTr->geID[*readAnnot.geneFull_Ex50pAS.begin()],"GX",attrOutArray+attrN);                                
+                                attrN+=bamAttrArrayWrite(chunkTr->geID[*readAnnot.geneFull_ExonOverIntron.begin()],"GX",attrOutArray+attrN);                                
                         } else if ( P.quant.geneFull_Ex50pAS.yes ) {
                             if ( readAnnot.geneFull_Ex50pAS.size()==1 ) //only output if read maps to a single gene
                                 attrN+=bamAttrArrayWrite(chunkTr->geID[*readAnnot.geneFull_Ex50pAS.begin()],"GX",attrOutArray+attrN);                            
@@ -413,7 +413,7 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                                 attrN+=bamAttrArrayWrite(chunkTr->geName[*readAnnot.geneFull.begin()],"GN",attrOutArray+attrN);
                         } else if ( P.quant.geneFull_ExonOverIntron.yes ) {
                             if ( readAnnot.geneFull_ExonOverIntron.size()==1 ) //only output if read maps to a single gene
-                                attrN+=bamAttrArrayWrite(chunkTr->geName[*readAnnot.geneFull_Ex50pAS.begin()],"GN",attrOutArray+attrN);                                
+                                attrN+=bamAttrArrayWrite(chunkTr->geName[*readAnnot.geneFull_ExonOverIntron.begin()],"GN",attrOutArray+attrN);                                
                         } else if ( P.quant.geneFull_Ex50pAS.yes ) {
                             if ( readAnnot.geneFull_Ex50pAS.size()==1 ) //only output if read maps to a single gene
                                 attrN+=bamAttrArrayWrite(chunkTr->geName[*readAnnot.geneFull_Ex50pAS.begin()],"GN",attrOutArray+attrN);                            
