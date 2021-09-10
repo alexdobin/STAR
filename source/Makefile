@@ -29,13 +29,23 @@ BUILD_PLACE ?= $(HOSTNAME):$(shell pwd)
 
 COMPTIMEPLACE := -D'COMPILATION_TIME_PLACE="$(BUILD_DATE) $(BUILD_PLACE)"'
 
+
+GIT_CHECK := $(shell git status 1> /dev/null 2> /dev/null && echo 0)
+ifeq ($(GIT_CHECK),0)
+	GIT_DIFF := $(shell git diff --name-only | tr '\n' ' ')
+    GIT_BRANCH_COMMIT_DIFF := $(shell git status | head -n 1) ; \
+                                                    $(shell git log | head -n 1) ; \
+                                                    diff files: $(GIT_DIFF)
+endif
+GIT_BRANCH_COMMIT_DIFF := -D'GIT_BRANCH_COMMIT_DIFF="$(GIT_BRANCH_COMMIT_DIFF)"'
+
 # Defaults, can be overridden by make arguments or environment
 CXXFLAGS ?= -pipe -Wall -Wextra
 CFLAGS ?= -pipe -Wall -Wextra -O3
 CXXFLAGS_SIMD ?= -mavx2
 
 # Unconditionally set essential flags and optimization options
-CXXFLAGS_common := -std=c++11 -fopenmp $(COMPTIMEPLACE)
+CXXFLAGS_common := -std=c++11 -fopenmp $(COMPTIMEPLACE) $(GIT_BRANCH_COMMIT_DIFF)
 CXXFLAGS_main := -O3 $(CXXFLAGS_common)
 CXXFLAGS_gdb := -O0 -g3 $(CXXFLAGS_common)
 

@@ -846,7 +846,9 @@ soloFeatures                Gene
     string(s): genomic features for which the UMI counts per Cell Barcode are collected
                             Gene            ... genes: reads match the gene transcript
                             SJ              ... splice junctions: reported in SJ.out.tab
-                            GeneFull        ... full genes: count all reads overlapping genes' exons and introns
+                            GeneFull        ... full gene (pre-mRNA): count all reads overlapping genes' exons and introns
+                            GeneFull_ExonOverIntron ... full gene (pre-mRNA): count all reads overlapping genes' exons and introns: prioritize 100% overlap with exons
+                            GeneFull_Ex50pAS        ... full gene (pre-RNA): count all reads overlapping genes' exons and introns: prioritize >50% overlap with exons. Do not count reads with 100% exonic overlap in the antisense direction.
 
 #####UnderDevelopment_begin : not supported - do not use
                             Transcript3p    ... quantification of transcript for 3' protocols
