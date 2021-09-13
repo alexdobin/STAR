@@ -114,6 +114,7 @@ public:
     vector<uint32> features;
     uint32 nFeatures;//=features.size(), number of requested features
     
+    int32 featureFirst; //which feature is the first on the list
     array<bool,SoloFeatureTypes::N> featureYes; //which features are requested
     array<bool,SoloFeatureTypes::N> readInfoYes;//which features will need readInfo (for now only Gene and GeneFull)
     array<bool,SoloFeatureTypes::N> readIndexYes;//which features will need recording of readIndex (for now only Gene and GeneFull, for multimappers)

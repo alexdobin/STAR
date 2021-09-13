@@ -185,12 +185,15 @@ void ParametersSolo::initialize(Parameters *pPin)
     //////////////////////////////////// features
     featureInd.fill(-1);
     featureYes.fill(false);
+    featureFirst = -1;
     for (uint32 ii=0; ii<SoloFeatureTypes::Names.size(); ii++) {
         for (auto &fin : featureIn) {
             if (fin==SoloFeatureTypes::Names[ii]) {
                 featureYes[ii]=true;
                 features.push_back(ii);
                 featureInd[ii]=features.size()-1;
+                if (featureFirst == -1)
+                    featureFirst = ii; //recored the first feature on the list
                 break;
             };
         };
@@ -387,29 +390,22 @@ void ParametersSolo::initialize(Parameters *pPin)
                       "SOLUTION: instead, use UR (uncorrected UMI) in --outSAMattributes\n",   std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
     
-    ////////////////////////////////////////////////////////////////readInfo
+    ////////////////////////////////////////////////////////////////readInfoYes: which feature is used to fill readInfo. Only one feature is allowed
     readInfoYes.fill(false);
-    if (samAttrYes) {//pSolo.samAttrFeature=0 by default, so need to check samAttrYes
-        if (featureYes[SoloFeatureTypes::Gene]) {
-            samAttrFeature=SoloFeatureTypes::Gene;
-        } else if (featureYes[SoloFeatureTypes::GeneFull]) {//if Gene is not defined
-            samAttrFeature=SoloFeatureTypes::GeneFull;
-        } else if (featureYes[SoloFeatureTypes::GeneFull_ExonOverIntron]) {//if Gene is not defined
-            samAttrFeature=SoloFeatureTypes::GeneFull_ExonOverIntron;             
-        } else if (featureYes[SoloFeatureTypes::GeneFull_Ex50pAS]) {//if Gene is not defined
-            samAttrFeature=SoloFeatureTypes::GeneFull_Ex50pAS;
+    if (featureYes[SoloFeatureTypes::VelocytoSimple] || featureYes[SoloFeatureTypes::Velocyto]) {//turn readInfo on for Gene needed by VelocytoSimple
+        readInfoYes[SoloFeatureTypes::Gene]=true;
+    } else if (samAttrYes){//pSolo.samAttrFeature=0 by default, so need to check samAttrYes
+        if (   featureFirst == SoloFeatureTypes::Gene || featureFirst == SoloFeatureTypes::GeneFull ||
+               featureFirst == SoloFeatureTypes::GeneFull_Ex50pAS || featureFirst == SoloFeatureTypes::GeneFull_ExonOverIntron ) {
+            samAttrFeature = featureFirst;
         } else {
             ostringstream errOut;
             errOut << "EXITING because of fatal PARAMETERS error: CB and/or UB attributes in --outSAMattributes require --soloFeatures Gene OR/AND GeneFull OR/AND GeneFull_Ex50pAS.\n";
             errOut << "SOLUTION: re-run STAR adding Gene AND/OR GeneFull OR/AND GeneFull_Ex50pAS OR/AND GeneFull_ExonOverIntron to --soloFeatures\n";
             exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
-        };
-
-        readInfoYes[samAttrFeature]=true;
+        };            
     };
-    if (featureYes[SoloFeatureTypes::VelocytoSimple] || featureYes[SoloFeatureTypes::Velocyto]) //turn readInfo on for Gene needed by VelocytoSimple
-        readInfoYes[SoloFeatureTypes::Gene]=true;
-    
+    readInfoYes[samAttrFeature]=true;
     readIndexYes = readInfoYes;
        
     ///////////////////////////////////////////////////////////////////umi filtering
