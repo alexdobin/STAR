@@ -403,9 +403,9 @@ void ParametersSolo::initialize(Parameters *pPin)
             errOut << "EXITING because of fatal PARAMETERS error: CB and/or UB attributes in --outSAMattributes require --soloFeatures Gene OR/AND GeneFull OR/AND GeneFull_Ex50pAS.\n";
             errOut << "SOLUTION: re-run STAR adding Gene AND/OR GeneFull OR/AND GeneFull_Ex50pAS OR/AND GeneFull_ExonOverIntron to --soloFeatures\n";
             exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
-        };            
+        };
+        readInfoYes[samAttrFeature]=true;
     };
-    readInfoYes[samAttrFeature]=true;
     readIndexYes = readInfoYes;
        
     ///////////////////////////////////////////////////////////////////umi filtering

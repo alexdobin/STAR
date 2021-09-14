@@ -2,17 +2,17 @@
 #include "serviceFuns.cpp"
 #include "ReadAnnotations.h"
 
-void Transcriptome::geneFullAlignOverlap_ExonOverIntron(uint nA, Transcript **aAll, int32 strandType, ReadAnnotations &readAnnot)
+void Transcriptome::geneFullAlignOverlap_ExonOverIntron(uint nA, Transcript **aAll, int32 strandType, ReadAnnotFeature &annFeat, ReadAnnotFeature &annFeatGeneConcordant)
 {
-    if (readAnnot.geneConcordant.size()>0) {//if concordant genes were found for this read, prioritize them over intronic overlap
-        readAnnot.geneFull_ExonOverIntron = readAnnot.geneConcordant;
-        readAnnot.geneFull_ExonOverIntron_Tr = readAnnot.geneConcordantTr;
+    if (annFeatGeneConcordant.fSet.size()>0) {//if concordant genes were found for this read, prioritize them over intronic overlap
+        annFeat = annFeatGeneConcordant;
         return;
     }
 
     //calculate overlap with introns
-    readAnnot.geneFull_ExonOverIntron={};
-        
+    annFeat.fSet={};
+    annFeat.fAlign.resize(nA,-1);
+
     for (uint32 iA=0; iA<nA; iA++) {//only includes aligns that are entirely inside genes (?)
         Transcript &a = *aAll[iA];
             
@@ -26,8 +26,8 @@ void Transcriptome::geneFullAlignOverlap_ExonOverIntron(uint nA, Transcript **aA
             if (geneFull.e[gi1]>=aE) {//this gene contains the block:  gene-end is to the right of block start
                 int32 str1 = geneFull.str[gi1]==1 ? a.Str : 1-a.Str;
                 if (strandType==-1 || strandType==str1)  {
-                    readAnnot.geneFull_ExonOverIntron.insert(geneFull.g[gi1]);
-                    readAnnot.geneFull_ExonOverIntron_Tr=iA;
+                    annFeat.fSet.insert(geneFull.g[gi1]);
+                    annFeat.fAlign[iA]=geneFull.g[gi1];
                 };
             };
             --gi1;// go to the previous gene

@@ -49,11 +49,11 @@ public:
     void geneCountsAddAlign(uint nA, Transcript **aAll, vector<int32> &gene1); //add one alignment to gene counts
     void quantsAllocate(); //allocate quants structure
     void quantsOutput(); //output quantification files
-    void geneFullAlignOverlap(uint nA, Transcript **aAll, int32 strandType, ReadAnnotations &readAnnot);
-    void geneFullAlignOverlap_ExonOverIntron(uint nA, Transcript **aAll, int32 strandType, ReadAnnotations &readAnnot);
-    void geneFullAlignOverlap_CR(uint nA, Transcript **aAll, int32 strandType, ReadAnnotations &readAnnot);
+    void geneFullAlignOverlap(uint nA, Transcript **aAll, int32 strandType, ReadAnnotFeature &annFeat);
+    void geneFullAlignOverlap_ExonOverIntron(uint nA, Transcript **aAll, int32 strandType, ReadAnnotFeature &annFeat, ReadAnnotFeature &annFeatGeneConcordant);
+    //void geneFullAlignOverlap_CR(uint nA, Transcript **aAll, int32 strandType, ReadAnnotations &readAnnot);
     void classifyAlign(Transcript **alignG, uint64 nAlignG, ReadAnnotations &readAnnot);
-    void alignExonOverlap(uint nA, Transcript **aAll, int32 strandType, ReadAnnotations &readAnnot);
+    void alignExonOverlap(uint nA, Transcript **aAll, int32 strandType, ReadAnnotFeature &annFeat);
 
 private:
     Parameters &P; //normal "genomic" parameters

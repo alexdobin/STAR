@@ -7,10 +7,9 @@
 
 int32 alignBlocksOverlapExons(Transcript &aG, uint16 exN1, uint32 *exSE1, uint64 trStart1, bool &sjConcord);
 
-void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandType, ReadAnnotations &readAnnot)
+void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandType, ReadAnnotFeature &annFeat)
 {
-    readAnnot.geneFull_Ex50pAS={};
-    readAnnot.geneFull_Ex50pAS_Tr=-1;
+    annFeat.fSet={};
 
     struct GeneStrOverlapAlign {
         uint32 g;
@@ -101,7 +100,7 @@ void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandTyp
                     sjann = sjann & (aG.canonSJ[iex]<0 || aG.sjAnnot[iex]!=0);
 
                 if ( str1 && nOverlap==exl && sjConcord ) {//this should match geneConcordant
-                    readAnnot.geneFull_Ex50pAS.insert(trGene[tr1]);
+                    annFeat.fSet.insert(trGene[tr1]);
                 };
                 */               
             };
@@ -147,15 +146,15 @@ void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandTyp
         if (bTranscr) {
             for (auto &v1: vGeneInfo1)
                 if ( v1.tr )
-                    readAnnot.geneFull_Ex50pAS.insert(v1.g);
+                    annFeat.fSet.insert(v1.g);
         } else if (bExonic) {
             for (auto &v1: vGeneInfo1)
                 if ( v1.ex )
-                    readAnnot.geneFull_Ex50pAS.insert(v1.g);
+                    annFeat.fSet.insert(v1.g);
         } else if (bIntronic) {
             for (auto &v1: vGeneInfo1)
                 if ( v1.in )
-                    readAnnot.geneFull_Ex50pAS.insert(v1.g);
+                    annFeat.fSet.insert(v1.g);
         };
         */
 
@@ -169,28 +168,20 @@ void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandTyp
            };
         };
 
-        readAnnot.geneFull_Ex50pAS_Al.resize(nA,-1);
+        annFeat.fAlign.resize(nA,-1);
         for ( uint32 it=0; it<otFinal.size(); it++ ) {
             if ( otFinal[it] ) {
                 if (otAS[it])
                     return; //AS reads are not counted TODO: add to stats
                 for ( auto &v1: vGeneInfo1 ) {
                     if ( v1.ot[it] ) {
-                        readAnnot.geneFull_Ex50pAS.insert(v1.g);
-                        readAnnot.geneFull_Ex50pAS_Tr = v1.ia;
-                        readAnnot.geneFull_Ex50pAS_Al[v1.ia] = v1.g;
+                        annFeat.fSet.insert(v1.g);
+                        annFeat.fAlign[v1.ia] = v1.g;
                     };
                 };
                 break;//first otFinal wins
             };
-        };
-
-        /*//debug
-        if ( readAnnot.geneFull_Ex50pAS != readAnnot.geneFull_ExonOverIntron  
-           || (readAnnot.geneFull_Ex50pAS.size()>0 && readAnnot.geneFull_Ex50pAS_Tr != readAnnot.geneFull_ExonOverIntron_Tr) ) {
-            cout << 0;
-        };
-        */        
+        };      
     };
 };
 

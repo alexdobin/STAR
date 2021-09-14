@@ -23,7 +23,8 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
        
     ReadSoloFeatures reFe;
     reFe.alignOut=alignOut;
-    
+    reFe.indAnnotTr = 0;    
+
     uint32 nFeat=0; //number of features in this read (could be >1 for SJs)
     if (nTr==0) {//unmapped
         stats.V[stats.nUnmapped]++;
@@ -35,29 +36,22 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
             case SoloFeatureTypes::GeneFull_Ex50pAS :
             case SoloFeatureTypes::GeneFull_ExonOverIntron :
                 {
-                    set<uint32> *readGe;
-                    switch (featureType) {
-                        case SoloFeatureTypes::Gene :
-                            readGe = &readAnnot.geneConcordant;
-                            reFe.indAnnotTr = readAnnot.geneConcordantTr; //TODO deal carefully with start/end collapsing for SmartSeq                  
-                            break;
-                        case SoloFeatureTypes::GeneFull :
-                            readGe = &readAnnot.geneFull;
-                            reFe.indAnnotTr = readAnnot.geneFullTr;                            
-                            break;
-                        case SoloFeatureTypes::GeneFull_ExonOverIntron :
-                            readGe = &readAnnot.geneFull_ExonOverIntron;
-                            reFe.indAnnotTr = readAnnot.geneFull_ExonOverIntron_Tr;
-                            break;
-                        case SoloFeatureTypes::GeneFull_Ex50pAS :
-                            readGe = &readAnnot.geneFull_Ex50pAS;
-                            reFe.indAnnotTr = readAnnot.geneFull_Ex50pAS_Tr;
+                    auto *readGe = &readAnnot.annotFeatures[featureType].fSet;
+
+                    if (soloBar.pSolo.type==soloBar.pSolo.SoloTypes::SmartSeq) {
+                        for (uint32 itr=0; itr<nTr; itr++) {
+                            if (readAnnot.annotFeatures[featureType].fAlign[itr] > 0) {
+                                reFe.indAnnotTr = itr;
+                                break;//indAnnotTr is the first genic align, and is used for Smart-seq deduplication, below in outputReadCB()
+                                    //TODO this may need to be fixed for Smart-seq multimappers
+                            };
+                        };
                     };
                         
                     if (readGe->size()==0) {//check genes
                         stats.V[stats.nNoFeature]++;//no gene
                     } else if (readGe->size()>1) {
-                        stats.V[stats.nAmbigFeature]++;//multigene
+                        stats.V[stats.nAmbigFeature]++;//multi-gene reads
                         if (nTr>1)
                             stats.V[stats.nAmbigFeatureMultimap]++;//multigene caused by multimapper
                             
@@ -69,10 +63,9 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
                                 ++ii;
                             };
                                 
-                            //for Smart-seq TODO fix GeneFull_Ex50pAS. Can move this switch(featureType) above
                             nFeat = outputReadCB(streamReads, iRead, featureType, soloBar, reFe, readAnnot);
                         };
-                    } else {//unique-gene read
+                    } else {//unique-gene reads
                         reFe.gene = *readGe->begin();
                         nFeat = outputReadCB(streamReads, (readIndexYes ? iRead : (uint64)-1), featureType, soloBar, reFe, readAnnot);
                     };
@@ -82,14 +75,14 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
             case SoloFeatureTypes::SJ : 
                 if (nTr>1) {//reject all multimapping junctions
                     stats.V[stats.nAmbigFeatureMultimap]++;
-                } else if (readAnnot.geneConcordant.size()>1){//for SJs, still check genes, no feature if multi-gene
-                    stats.V[stats.nAmbigFeature]++;
+                //} else if (readAnnot.geneConcordant.size()>1){//for SJs, still check genes, no feature if multi-gene
+                //    stats.V[stats.nAmbigFeature]++;
                 } else {//one gene or no gene
                     alignOut[0]->extractSpliceJunctions(reFe.sj, reFe.sjAnnot);
-                    if ( reFe.sj.empty() || (reFe.sjAnnot && readAnnot.geneConcordant.size()==0) ) {//no junctions, or annotated junction but no gene (i.e. read does not fully match transcript)
+                    //if ( reFe.sj.empty() || (reFe.sjAnnot && readAnnot.geneConcordant.size()==0) ) {//no junctions, or annotated junction but no gene (i.e. read does not fully match transcript)
+                    if ( reFe.sj.empty() ) {
                         stats.V[stats.nNoFeature]++;
                     } else {//good junction
-                        reFe.indAnnotTr=0;                        
                         nFeat = outputReadCB(streamReads, (readIndexYes ? iRead : (uint64)-1), featureType, soloBar, reFe, readAnnot);
                     };
                 };                  

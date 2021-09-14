@@ -289,7 +289,7 @@ void ReadAlign::alignedAnnotation()
     };
     //solo-GeneFull
     if ( P.quant.geneFull.yes ) {
-        chunkTr->geneFullAlignOverlap(nTr, trMult, P.pSolo.strand, readAnnot);
+        chunkTr->geneFullAlignOverlap(nTr, trMult, P.pSolo.strand, readAnnot.annotFeatures[SoloFeatureTypes::GeneFull]);
     };   
     //solo-Gene
     if ( P.quant.gene.yes ) {
@@ -297,10 +297,10 @@ void ReadAlign::alignedAnnotation()
     };
     //solo-GeneFull_ExonOverIntron
     if ( P.quant.geneFull_ExonOverIntron.yes ) {
-        chunkTr->geneFullAlignOverlap_ExonOverIntron(nTr, trMult, P.pSolo.strand, readAnnot);
+        chunkTr->geneFullAlignOverlap_ExonOverIntron(nTr, trMult, P.pSolo.strand, readAnnot.annotFeatures[SoloFeatureTypes::GeneFull_ExonOverIntron], readAnnot.annotFeatures[SoloFeatureTypes::Gene]);
     };
     //solo-GeneFull_Ex50pAS
     if ( P.quant.geneFull_Ex50pAS.yes ) {
-        chunkTr->alignExonOverlap(nTr, trMult, P.pSolo.strand, readAnnot);
+        chunkTr->alignExonOverlap(nTr, trMult, P.pSolo.strand, readAnnot.annotFeatures[SoloFeatureTypes::GeneFull_Ex50pAS]);
     };    
 };
