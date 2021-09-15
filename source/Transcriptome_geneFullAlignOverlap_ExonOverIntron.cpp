@@ -12,7 +12,7 @@ void Transcriptome::geneFullAlignOverlap_ExonOverIntron(uint nA, Transcript **aA
     //calculate overlap with introns
     annFeat.fSet={};
     annFeat.fAlign = {};    
-    annFeat.fAlign.resize(nA,-1);
+    annFeat.fAlign.resize(nA);
 
     for (uint32 iA=0; iA<nA; iA++) {//only includes aligns that are entirely inside genes (?)
         Transcript &a = *aAll[iA];
@@ -28,7 +28,7 @@ void Transcriptome::geneFullAlignOverlap_ExonOverIntron(uint nA, Transcript **aA
                 int32 str1 = geneFull.str[gi1]==1 ? a.Str : 1-a.Str;
                 if (strandType==-1 || strandType==str1)  {
                     annFeat.fSet.insert(geneFull.g[gi1]);
-                    annFeat.fAlign[iA]=geneFull.g[gi1];
+                    annFeat.fAlign[iA].insert(geneFull.g[gi1]);
                 };
             };
             --gi1;// go to the previous gene

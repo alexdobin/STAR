@@ -40,7 +40,7 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
 
                     if (soloBar.pSolo.type==soloBar.pSolo.SoloTypes::SmartSeq) {
                         for (uint32 itr=0; itr<nTr; itr++) {
-                            if (readAnnot.annotFeatures[featureType].fAlign[itr] > 0) {
+                            if (readAnnot.annotFeatures[featureType].fAlign[itr].size() > 0) {
                                 reFe.indAnnotTr = itr;
                                 break;//indAnnotTr is the first genic align, and is used for Smart-seq deduplication, below in outputReadCB()
                                     //TODO this may need to be fixed for Smart-seq multimappers

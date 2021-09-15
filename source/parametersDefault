@@ -328,7 +328,8 @@ outSAMattributes                Standard
                                 vW          ... 1 - alignment passes WASP filtering; 2,3,4,5,6,7 - alignment does not pass WASP filtering. Requires --waspOutputMode SAMtag.
                                 ***STARsolo:
                                 CR CY UR UY ... sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing.
-                                GX GN       ... gene ID and gene name.                                
+                                GX GN       ... gene ID and gene name for unique-gene reads.
+                                gx gn       ... gene IDs and gene names for unique- and multi-gene reads.
                                 CB UB       ... error-corrected cell barcodes and UMIs for solo* demultiplexing. Requires --outSAMtype BAM SortedByCoordinate.
                                 sM          ... assessment of CB and UMI.
                                 sS          ... sequence of the entire barcode (CB,UMI,adapter).

@@ -1,3 +1,5 @@
+* Implemented Solo BAM tags gx gn: output ';'-separated gene IDs and names for both unique- and multi-gene reads. Note that GX/GN tags are used to output gene ID/name for unique-gene reads.
+* Changed Solo BAM tags GX GN behavior: for missing values, "-" is output instead of omitting the tag.
 * Changed Solo BAM tags output for multiple --soloFeatures: now the first feature on the list is used for GX,GN,XB,UB tags.
 * Changed Solo SJ behavior: it no longer depend on the whether the alignment is concordant to a Gene.
 * Implemented --soloFeatures GeneFull_ExonOverIntron GeneFull_Ex50pAS options which prioritize exonic over intronic overlaps for pre-mRNA counting.

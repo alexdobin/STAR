@@ -186,7 +186,7 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
     std::bitset<velocytoTypeGeneBits> reAnn; //initialized to 0 (false)
 
     annFeat.fAlign = {};       
-    annFeat.fAlign.resize(nAlignG,-1);       
+    annFeat.fAlign.resize(nAlignG);       
     for (uint iag=0; iag<nAlignG; iag++) {
         
         Transcript &aG=*alignG[iag];
@@ -218,7 +218,7 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
                 readAnnot.transcriptConcordant.push_back({tr1,(uint32) distTTS});
 
                 annFeat.fSet.insert(trGene[tr1]);//genes for all alignments
-                annFeat.fAlign[iag]=trGene[tr1];
+                annFeat.fAlign[iag].insert(trGene[tr1]);
             };
             
             if ((P.pSolo.featureYes[SoloFeatureTypes::Velocyto] || P.pSolo.featureYes[SoloFeatureTypes::VelocytoSimple]) && nAlignG==1) {//another calculation for velocyto with minOverlapMinusOne=6

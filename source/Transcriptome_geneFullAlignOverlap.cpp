@@ -6,7 +6,7 @@ void Transcriptome::geneFullAlignOverlap(uint nA, Transcript **aAll, int32 stran
 {
     annFeat.fSet={};
     annFeat.fAlign = {};
-    annFeat.fAlign.resize(nA,-1);
+    annFeat.fAlign.resize(nA);
     for (uint32 iA=0; iA<nA; iA++) {
         Transcript &a = *aAll[iA];//one unique alignment only
 
@@ -22,7 +22,7 @@ void Transcriptome::geneFullAlignOverlap(uint nA, Transcript **aAll, int32 stran
                     int32 str1 = geneFull.str[gi1]==1 ? a.Str : 1-a.Str;
                     if (strandType==-1 || strandType==str1)  {
                         annFeat.fSet.insert(geneFull.g[gi1]);
-                        annFeat.fAlign[iA] = geneFull.g[gi1];
+                        annFeat.fAlign[iA].insert(geneFull.g[gi1]);
                     };
                 };
                 --gi1;// go to the previous gene

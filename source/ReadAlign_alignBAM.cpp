@@ -96,12 +96,11 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
         calcCIGAR(trOut, nMates, iExMate, leftMate);
     };
 
-
     int32 gxgnGene = -1; //gene to output in GX/GN
     if (P.outSAMattrPresent.GX || P.outSAMattrPresent.GN) {
         auto annFeat = readAnnot.annotFeatures[P.pSolo.samAttrFeature];
-        if (annFeat.fSet.size()==1 && annFeat.fAlign[iTrOut]>0)
-            gxgnGene = annFeat.fAlign[iTrOut];
+        if (annFeat.fSet.size()==1 && annFeat.fAlign[iTrOut].size()==1)
+            gxgnGene = *annFeat.fAlign[iTrOut].begin();
     };
 
     for (uint imate=0;imate < (alignType<0 ? nMates:P.readNmates);imate++) { //not readNends: this is about alignments
@@ -392,14 +391,46 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                         break;
 
                     case ATTR_GX:
-                        if (gxgnGene > 0)
-                            attrN+=bamAttrArrayWrite(chunkTr->geID[gxgnGene],"GX",attrOutArray+attrN);
+                        {
+                            string algenes = gxgnGene<0 ? "-" : chunkTr->geID[gxgnGene];
+                            attrN+=bamAttrArrayWrite(algenes, "GX",attrOutArray+attrN);
+                        };
                         break;
                             
                     case ATTR_GN:
-                        if (gxgnGene > 0)
-                            attrN+=bamAttrArrayWrite(chunkTr->geName[gxgnGene],"GN",attrOutArray+attrN);
-                        break;                        
+                        {
+                            string algenes = gxgnGene<0 ? "-" : chunkTr->geName[gxgnGene];
+                            attrN+=bamAttrArrayWrite(algenes, "GN",attrOutArray+attrN);
+                        };
+                        break;       
+
+                    case ATTR_gx:
+                        {
+                            string algenes;
+                            for (auto &gg: readAnnot.annotFeatures[P.pSolo.samAttrFeature].fAlign[iTrOut])
+                                algenes += chunkTr->geID[gg] + ";";
+                            if (algenes.size()>0) {
+                                algenes.pop_back();
+                            } else {
+                                algenes = "-";
+                            };
+                            attrN+=bamAttrArrayWrite(algenes,"gx",attrOutArray+attrN);                            
+                        };
+                        break;
+
+                    case ATTR_gn:
+                        {
+                            string algenes;
+                            for (auto &gg: readAnnot.annotFeatures[P.pSolo.samAttrFeature].fAlign[iTrOut])
+                                algenes += chunkTr->geName[gg] + ";";
+                            if (algenes.size()>0) {
+                                algenes.pop_back();
+                            } else {
+                                algenes = "-";
+                            };
+                            attrN+=bamAttrArrayWrite(algenes,"gn",attrOutArray+attrN);                            
+                        };
+                        break;                                                       
                         
                     case ATTR_sM:
                         attrN+=bamAttrArrayWrite(soloRead->readBar->cbMatch,"sM",attrOutArray+attrN);

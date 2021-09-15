@@ -30,6 +30,8 @@ void Parameters::samAttributes(){//everything related to SAM attributes
     outSAMattrPresent.UB=false;
     outSAMattrPresent.GX=false;
     outSAMattrPresent.GN=false;
+    outSAMattrPresent.gx=false;
+    outSAMattrPresent.gn=false;    
     outSAMattrPresent.sM=false;
     outSAMattrPresent.sS=false;    
     outSAMattrPresent.sQ=false;
@@ -137,7 +139,15 @@ void Parameters::samAttributes(){//everything related to SAM attributes
         } else if (vAttr1.at(ii)== "GN") {
             outSAMattrOrder.push_back(ATTR_GN);
             outSAMattrOrderQuant.push_back(ATTR_GN);
-            outSAMattrPresent.GN=true; 
+            outSAMattrPresent.GN=true;
+        } else if (vAttr1.at(ii)== "gx") {
+            outSAMattrOrder.push_back(ATTR_gx);
+            outSAMattrOrderQuant.push_back(ATTR_gx);
+            outSAMattrPresent.gx=true;            
+        } else if (vAttr1.at(ii)== "gn") {
+            outSAMattrOrder.push_back(ATTR_gn);
+            outSAMattrOrderQuant.push_back(ATTR_gn);
+            outSAMattrPresent.gn=true;            
         } else if (vAttr1.at(ii)== "sM") {
             outSAMattrOrder.push_back(ATTR_sM);
             outSAMattrOrderQuant.push_back(ATTR_sM);
