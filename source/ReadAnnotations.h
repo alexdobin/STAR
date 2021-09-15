@@ -13,10 +13,10 @@ public:
 
 class ReadAnnotations {
 public:
-            set<uint32> geneFull, geneFull_Ex50pAS, geneFull_ExonOverIntron, geneConcordant;
-            uint32 geneFullTr, geneFull_Ex50pAS_Tr, geneFull_ExonOverIntron_Tr, geneConcordantTr; //index of the annotated align - for multimappers that aligned to one gene only
+            //set<uint32> geneFull, geneFull_Ex50pAS, geneFull_ExonOverIntron, geneConcordant;
+            //uint32 geneFullTr, geneFull_Ex50pAS_Tr, geneFull_ExonOverIntron_Tr, geneConcordantTr; //index of the annotated align - for multimappers that aligned to one gene only
             
-            vector<int32> geneFull_Al, geneFull_Ex50pAS_Al, geneFull_ExonOverIntron_Al, geneConcordant_Al; //gene for each align
+            //vector<int32> geneFull_Al, geneFull_Ex50pAS_Al, geneFull_ExonOverIntron_Al, geneConcordant_Al; //gene for each align
 
             array<ReadAnnotFeature, SoloFeatureTypes::N> annotFeatures;
 

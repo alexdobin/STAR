@@ -186,12 +186,11 @@ void ParametersSolo::initialize(Parameters *pPin)
     featureInd.fill(-1);
     featureYes.fill(false);
     featureFirst = -1;
-    for (uint32 ii=0; ii<SoloFeatureTypes::Names.size(); ii++) {
-        for (auto &fin : featureIn) {
+    for (auto &fin : featureIn) {
+        for (uint32 ii=0; ii<SoloFeatureTypes::Names.size(); ii++) {
             if (fin==SoloFeatureTypes::Names[ii]) {
                 featureYes[ii]=true;
                 features.push_back(ii);
-                featureInd[ii]=features.size()-1;
                 if (featureFirst == -1)
                     featureFirst = ii; //recored the first feature on the list
                 break;
@@ -199,6 +198,9 @@ void ParametersSolo::initialize(Parameters *pPin)
         };
     };
     nFeatures=features.size();
+    std::sort(features.begin(), features.end());
+    for (uint32 ii=0; ii<nFeatures; ii++)
+        featureInd[features[ii]]=ii;
 
     if (nFeatures != featureIn.size()) {
         ostringstream errOut;

@@ -225,9 +225,10 @@ void Parameters::samAttributes(){//everything related to SAM attributes
     samAttrRequiresBAM(outSAMattrPresent.GX, "GX");
     samAttrRequiresBAM(outSAMattrPresent.GN, "GN");
     
-    if (outSAMattrPresent.GX || outSAMattrPresent.GN) {
-        quant.gene.yes=true;
-        quant.yes=true;
+    if (outSAMattrPresent.GX || outSAMattrPresent.GN) {//in case GX/GN were requested without Solo
+        quant.gene.yes = true;
+        quant.yes = true;
+        pSolo.samAttrFeature = SoloFeatureTypes::Gene;//TODO: this is a hack... need to perform read annotations independent of Solo
     };
 };
 

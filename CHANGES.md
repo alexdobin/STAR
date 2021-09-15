@@ -1,3 +1,4 @@
+* Changed Solo BAM tags output for multiple --soloFeatures: now the first feature on the list is used for GX,GN,XB,UB tags.
 * Changed Solo SJ behavior: it no longer depend on the whether the alignment is concordant to a Gene.
 * Implemented --soloFeatures GeneFull_ExonOverIntron GeneFull_Ex50pAS options which prioritize exonic over intronic overlaps for pre-mRNA counting.
 * Fixed a bug that resulted in slightly different solo counts if --soloFeatures Gene and GeneFull were used together with --soloCBmatchWLtype 1MM_multi_pseudocounts option.

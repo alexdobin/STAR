@@ -5,6 +5,7 @@
 void Transcriptome::geneFullAlignOverlap(uint nA, Transcript **aAll, int32 strandType, ReadAnnotFeature &annFeat)
 {
     annFeat.fSet={};
+    annFeat.fAlign = {};
     annFeat.fAlign.resize(nA,-1);
     for (uint32 iA=0; iA<nA; iA++) {
         Transcript &a = *aAll[iA];//one unique alignment only
