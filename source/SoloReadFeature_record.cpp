@@ -27,7 +27,7 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
 
     uint32 nFeat=0; //number of features in this read (could be >1 for SJs)
     if (nTr==0) {//unmapped
-        stats.V[stats.nUnmapped]++;
+        stats.V[stats.noUnmapped]++;
         
     } else {
         switch (featureType) {
@@ -49,11 +49,11 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
                     };
                         
                     if (readGe->size()==0) {//check genes
-                        stats.V[stats.nNoFeature]++;//no gene
+                        stats.V[stats.noNoFeature]++;//no gene
                     } else if (readGe->size()>1) {
-                        stats.V[stats.nAmbigFeature]++;//multi-gene reads
+                        stats.V[stats.yesWLmatch_MultiFeature]++;//multi-gene reads
                         if (nTr>1)
-                            stats.V[stats.nAmbigFeatureMultimap]++;//multigene caused by multimapper
+                            stats.V[stats.yessubWLmatch_MultiFeatureMultiGenomic]++;//multigene caused by multimapper
                             
                         if (pSolo.multiMap.yes.multi) {//output multimappers
                             reFe.geneMult.resize(readGe->size());
@@ -74,14 +74,14 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
         
             case SoloFeatureTypes::SJ : 
                 if (nTr>1) {//reject all multimapping junctions
-                    stats.V[stats.nAmbigFeatureMultimap]++;
+                    stats.V[stats.yessubWLmatch_MultiFeatureMultiGenomic]++;
                 //} else if (readAnnot.geneConcordant.size()>1){//for SJs, still check genes, no feature if multi-gene
-                //    stats.V[stats.nAmbigFeature]++;
+                //    stats.V[stats.yesWLmatch_MultiFeature]++;
                 } else {//one gene or no gene
                     alignOut[0]->extractSpliceJunctions(reFe.sj, reFe.sjAnnot);
                     //if ( reFe.sj.empty() || (reFe.sjAnnot && readAnnot.geneConcordant.size()==0) ) {//no junctions, or annotated junction but no gene (i.e. read does not fully match transcript)
                     if ( reFe.sj.empty() ) {
-                        stats.V[stats.nNoFeature]++;
+                        stats.V[stats.noNoFeature]++;
                     } else {//good junction
                         nFeat = outputReadCB(streamReads, (readIndexYes ? iRead : (uint64)-1), featureType, soloBar, reFe, readAnnot);
                     };
@@ -90,7 +90,7 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
         
             case SoloFeatureTypes::Transcript3p : 
                 if (readAnnot.transcriptConcordant.size()==0 || soloBar.cbMatch>1) {//do not record ambiguous CB  
-                    stats.V[stats.nNoFeature]++;
+                    stats.V[stats.noNoFeature]++;
                 } else {
                     nFeat = outputReadCB(streamReads, iRead, featureType, soloBar, reFe, readAnnot);
                 };                
@@ -114,7 +114,7 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
                     *streamReads <<'\n';
                     nFeat=1;
                 } else {
-                    stats.V[stats.nNoFeature]++;
+                    stats.V[stats.noNoFeature]++;
                 };
                 break; //no need to go with downstream processing                
                 

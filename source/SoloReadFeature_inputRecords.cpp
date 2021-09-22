@@ -19,7 +19,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
     while (soloInputFeatureUMI(streamReads, featureType, readIndexYes, P.sjAll, iread, cbmatch, feature, umi, trIdDist)) {
         if (feature == (uint32)(-1) && !readIndexYes) {//no feature => no record, this can happen for SJs
             streamReads->ignore((uint32)-1, '\n');
-            //stats.V[stats.nNoFeature]++; //need separate category for this
+            //stats.V[stats.noNoFeature]++; //need separate category for this
             continue;
         };
 
@@ -27,7 +27,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
             *streamReads >> cb;
 
             if ( pSolo.CBmatchWL.oneExact && cbmatch==1 && cbReadCountTotal[cb]==0 && feature!=(uint32)(-1) ) {//single 1MM match, no exact matches to this CB
-                stats.V[stats.nNoExactMatch]++;
+                stats.V[stats.noNoExactWLmatch]++;
                 continue;
             };
 
@@ -43,7 +43,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
                 };
                 cbP[cb]+=cbPstride;
                 if (cbmatch==0)
-                    stats.V[stats.nExactMatch]++;
+                    stats.V[stats.yessubWLmatchExact]++;
             } else if (readInfoYes) {//no feature - record readInfo
                 readInfo[iread].cb=cb;
                 readInfo[iread].umi=umi;
@@ -85,7 +85,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
                     readInfo[iread].umi=umi;
                 };    
             } else if (feature != (uint32)(-1)) {
-                stats.V[stats.nTooMany]++;
+                stats.V[stats.noTooManyWLmatches]++;
             };
         };
     };

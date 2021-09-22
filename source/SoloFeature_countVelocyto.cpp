@@ -138,8 +138,8 @@ void SoloFeature::countVelocyto()
             continue;
         
         nGenePerCB[iCB]+=geneC.size();
-        readFeatSum->stats.V[readFeatSum->stats.nUMIs] += nUMIperCB[iCB];
-        ++readFeatSum->stats.V[readFeatSum->stats.nCellBarcodes];
+        readFeatSum->stats.V[readFeatSum->stats.yesUMIs] += nUMIperCB[iCB];
+        ++readFeatSum->stats.V[readFeatSum->stats.yesCellBarcodes];
         
         if (countCellGeneUMI.size() < countCellGeneUMIindex[iCB+1] + geneC.size()*countMatStride) //allocated vector too small
             countCellGeneUMI.resize(countCellGeneUMI.size()*2);        

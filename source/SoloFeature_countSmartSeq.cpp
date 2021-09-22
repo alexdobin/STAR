@@ -144,15 +144,15 @@ void SoloFeature::countSmartSeq()
     for (uint32 icb=0; icb<nCB; icb++) {
         
         nReadPerCBmax=max(nReadPerCBmax,nReadPerCB[icb]);
-        readFeatSum->stats.V[readFeatSum->stats.nMatch] += nReadPerCBtotal[icb];
-        readFeatSum->stats.V[readFeatSum->stats.nMatchUnique] += nReadPerCBunique[icb];
+        readFeatSum->stats.V[readFeatSum->stats.yesWLmatch] += nReadPerCBtotal[icb];
+        readFeatSum->stats.V[readFeatSum->stats.yesWLmatch_UniqueFeature] += nReadPerCBunique[icb];
             
-        readFeatSum->stats.V[readFeatSum->stats.nUMIs] += nUMIperCB[icb];
+        readFeatSum->stats.V[readFeatSum->stats.yesUMIs] += nUMIperCB[icb];
         if (nGenePerCB[icb]>0)
-            ++readFeatSum->stats.V[readFeatSum->stats.nCellBarcodes];        
+            ++readFeatSum->stats.V[readFeatSum->stats.yesCellBarcodes];        
     };
     
-    readFeatSum->stats.V[readFeatSum->stats.nExactMatch]=readFeatSum->stats.V[readFeatSum->stats.nMatch];            
+    readFeatSum->stats.V[readFeatSum->stats.yessubWLmatchExact]=readFeatSum->stats.V[readFeatSum->stats.yesWLmatch];            
     
     time(&rawTime);
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished SmartSeq counting" <<endl;

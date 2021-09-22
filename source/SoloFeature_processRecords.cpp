@@ -55,7 +55,7 @@ void SoloFeature::processRecords()
     };
     
     if (!(pSolo.multiMap.yes.multi && (featureType==SoloFeatureTypes::Gene || featureType==SoloFeatureTypes::GeneFull)))
-        readFeatSum->stats.V[readFeatSum->stats.nMatch] += readFeatSum->stats.V[readFeatSum->stats.nAmbigFeature];   
+        readFeatSum->stats.V[readFeatSum->stats.yesWLmatch] += readFeatSum->stats.V[readFeatSum->stats.yesWLmatch_MultiFeature];   
 
     //output
     ofstream *statsStream = &ofstrOpen(outputPrefix+"Features.stats",ERROR_OUT, P);

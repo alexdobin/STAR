@@ -77,12 +77,12 @@ void SoloReadBarcode::matchCBtoWL(string &cbSeq1, string &cbQual1, vector<uint64
         };
     };
     if (cbMatch1==0) {//no matches
-        //stats.V[stats.nNoMatch]++;
+        //stats.V[stats.noNoWLmatch]++;
         cbMatch1=-1;
     } else if (cbMatch1==1) {//1 match, no need to record the quality
         cbMatchString1 = to_string(cbMatchInd1[0]);
     } else if (!pSolo.CBmatchWL.mm1_multi) {//>1 matches, but this is not allowed
-        //stats.V[stats.nTooMany]++;
+        //stats.V[stats.noTooManyWLmatches]++;
         cbMatch1=-3;
         cbMatchInd1.clear();
         cbMatchString1="";
@@ -95,32 +95,32 @@ void SoloReadBarcode::addStats(const int32 cbMatch1)
         return;
     
     if (cbMatch1>1) {
-        stats.V[stats.nMismatchToMultWL]++;
+        stats.V[stats.noTooManyWLmatches]++;
         return;
     };
     
     switch (cbMatch1) {
         case 0:
             cbReadCountExact[cbMatchInd[0]]++;//note that this simply counts reads per exact CB, no checks of genes or UMIs
-            stats.V[stats.nExactMatch]++;
+            stats.V[stats.yesWLmatchExact]++;
             break;
         case 1:
-            stats.V[stats.nMismatchOneWL]++;
+            stats.V[stats.yesWLmatchWithMM]++;
             break;
         case -1 :
-            stats.V[stats.nNoMatch]++;
+            stats.V[stats.noNoWLmatch]++;
             break;
         case -2 :
-            stats.V[stats.nNinCB]++;
+            stats.V[stats.noNinCB]++;
             break;
         case -3 :
-            stats.V[stats.nTooMany]++;
+            stats.V[stats.noTooManyWLmatches]++;
             break;
         case -11 :            
-            stats.V[stats.nNoCB]++;
+            stats.V[stats.nNoCB]++;//CB sequence cannot be extracted
             break;
         case -12 :
-            stats.V[stats.nMismatchesInMultCB]++;            
+            stats.V[stats.noTooManyMM]++;            
             break;
     };
 };
@@ -129,12 +129,12 @@ void SoloReadBarcode::addStats(const int32 cbMatch1)
 bool SoloReadBarcode::convertCheckUMI()
 {//check UMIs, return if bad UMIs
     if (convertNuclStrToInt64(umiSeq,umiB)!=-1) {//convert and check for Ns
-        stats.V[stats.nNinUMI]++;//UMIs are not allowed to have Ns
+        stats.V[stats.noNinUMI]++;//UMIs are not allowed to have Ns
         umiCheck=-23;
         return false;
     };
     if (umiB==homoPolymer[0] || umiB==homoPolymer[1] || umiB==homoPolymer[2] || umiB==homoPolymer[3]) {
-        stats.V[stats.nUMIhomopolymer]++;
+        stats.V[stats.noUMIhomopolymer]++;
         umiCheck=-24;        
         return false;
     };
@@ -298,14 +298,14 @@ void SoloReadBarcode::getCBandUMI(char **readSeq, char **readQual, uint64 *readL
         uint32 adapterStart=0;
         if (pSolo.adapterYes) {
             if (localAlignHammingDist(bSeq, pSolo.adapterSeq, adapterStart) > pSolo.adapterMismatchesNmax) {
-                stats.V[stats.nNoAdapter]++;
+                stats.V[stats.noNoAdapter]++;
                 cbMatch=-21;
                 return; //no adapter found
             };
         };
 
         if (!pSolo.umiV.extractBarcode(bSeq, bQual, adapterStart, umiSeq, umiQual)) {
-            stats.V[stats.nNoUMI]++;
+            stats.V[stats.noNoUMI]++;
             cbMatch=-22;
             return;
         };

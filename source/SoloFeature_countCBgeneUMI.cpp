@@ -47,7 +47,7 @@ void SoloFeature::countCBgeneUMI()
     for (uint32 iCB=0; iCB<nCB; iCB++) {
         nReadPerCB[iCB] = (rCBpa[indCB[iCB]]-rCBp[iCB])/rguStride;  //number of reads that were matched to WL, rCBpa accumulated reference to the last element+1
         nReadPerCBmax=max(nReadPerCBmax,nReadPerCB[iCB]);
-        //readFeatSum->stats.V[readFeatSum->stats.nMatch] += nReadPerCB[iCB];
+        //readFeatSum->stats.V[readFeatSum->stats.yesWLmatch] += nReadPerCB[iCB];
     };    
     
     for (int ii=0; ii<P.runThreadN; ii++) {
@@ -56,7 +56,7 @@ void SoloFeature::countCBgeneUMI()
     
     time(&rawTime);
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished reading reads from Solo files nCB="<<nCB <<", nReadPerCBmax="<<nReadPerCBmax;
-    P.inOut->logMain <<", nMatch="<<readFeatSum->stats.V[readFeatSum->stats.nMatch]<<endl;
+    P.inOut->logMain <<", yesWLmatch="<<readFeatSum->stats.V[readFeatSum->stats.yesWLmatch]<<endl;
     
     //////////////////////////////////////////////////////////////////////////////
     /////////////////////////// collapse each CB
@@ -82,12 +82,12 @@ void SoloFeature::countCBgeneUMI()
         
         collapseUMIall(icb, umiArray);
         
-        readFeatSum->stats.V[readFeatSum->stats.nUMIs] += nUMIperCB[icb];
+        readFeatSum->stats.V[readFeatSum->stats.yesUMIs] += nUMIperCB[icb];
         if (nGenePerCB[icb]>0) //nGenePerCB contains only unique
-            ++readFeatSum->stats.V[readFeatSum->stats.nCellBarcodes];
+            ++readFeatSum->stats.V[readFeatSum->stats.yesCellBarcodes];
         
-        readFeatSum->stats.V[readFeatSum->stats.nMatch] += nReadPerCBtotal[icb];        
-        readFeatSum->stats.V[readFeatSum->stats.nMatchUnique ] += nReadPerCBunique[icb];        
+        readFeatSum->stats.V[readFeatSum->stats.yesWLmatch] += nReadPerCBtotal[icb];        
+        readFeatSum->stats.V[readFeatSum->stats.yesWLmatch_UniqueFeature ] += nReadPerCBunique[icb];        
     };
         
     delete[] rGeneUMI;
