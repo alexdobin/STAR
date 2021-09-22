@@ -159,6 +159,7 @@ public:
         bool oneExact; //CBs require at least one exact match
         bool mm1_multi_pc; //use psedocounts while calculating probabilities of multi-matches
         bool mm1_multi_Nbase; //allow multimatching to WL for CBs with N-bases
+        bool ParseBio_ED3; //allow EditDistance <=3
     } CBmatchWL;
     
     //UMIdedup
@@ -195,5 +196,7 @@ public:
     void umiSwapHalves(uint32 &umi);
     void complexWLstrings();
     void cellFiltering();
+
+    void init_CBmatchWL();
 };
 #endif

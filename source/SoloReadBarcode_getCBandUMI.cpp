@@ -334,18 +334,42 @@ void SoloReadBarcode::getCBandUMI(char **readSeq, char **readQual, uint64 *readL
             if (!cbMatchGood)
                 continue; //continue - to be able to record full cbSeq, cbQual, but no need to match to the WL
             
-            int32 cbMatch1;
-            vector<uint64> cbMatchInd1;
-            matchCBtoWL(cbSeq1, cbQual1, cb.wl[cbSeq1.size()], cbMatch1, cbMatchInd1, cbMatchString); //cbMatchString is not used for now, multiple matches are not allowed
-            if (cbMatch1<0) {//no match
-                cbMatchGood=false;
-                cbMatch = cbMatch1;
-            } else if (cbMatch1>0 && cbMatch>0) {//this barcode has >1 1MM match, or previous barcode had a mismatch
-                cbMatchGood=false;
-                cbMatch = -12; //marks mismatches in multiple barcodes
-            } else {//good match
-                cbMatchInd[0] += cb.wlFactor*(cbMatchInd1[0]+cb.wlAdd[cbSeq1.size()]);
-                cbMatch=max(cbMatch,cbMatch1);//1 wins over 0
+            uint64 cbLen1 = cbSeq1.size();
+            if ( pSolo.CBmatchWL.ParseBio_ED3 ) {
+                cbMatch=0; //0: no MM, 1: >=1MM. 2: multi-match: not allowed for this option
+                uintCB cbB1;
+                int64 posN=convertNuclStrToInt64(cbSeq1,cbB1);
+                if (posN!=-1) {//Ns in barcode: no good match
+                    cbMatch = -2;
+                    cbMatchGood = false;
+                } else {
+                    int64 cbI=binarySearchExact<uint64>(cbB1,cb.wl[cbSeq1.size()].data(),cb.wl[cbLen1].size());
+                    if (cbI<0) {//exact match
+                        cbI=binarySearchExact<uint64>(cbB1,cb.wlEd[cbLen1].data(),cb.wlEd[cbLen1].size());
+                        if (cbI>=0) {//find match in the edited list
+                            cbMatch = 1; //>=1MM
+                            cbI = cb.wlEdInd[cbLen1][cbI];
+                            cbMatchInd[0] += cb.wlFactor*(cbI+cb.wlAdd[cbLen1]);
+                        } else {
+                            cbMatch = -1;
+                            cbMatchGood = false;
+                        };
+                    };
+                };
+            } else {// Exact or 1MM
+                int32 cbMatch1;
+                vector<uint64> cbMatchInd1;
+                matchCBtoWL(cbSeq1, cbQual1, cb.wl[cbLen1], cbMatch1, cbMatchInd1, cbMatchString); //cbMatchString is not used for now, multiple matches are not allowed
+                if (cbMatch1<0) {//no match
+                    cbMatchGood=false;
+                    cbMatch = cbMatch1;
+                } else if (cbMatch1>0 && cbMatch>0) {//this barcode has >1 1MM match, or previous barcode had a mismatch
+                    cbMatchGood=false;
+                    cbMatch = -12; //marks mismatches in multiple barcodes
+                } else {//good match
+                    cbMatchInd[0] += cb.wlFactor*(cbMatchInd1[0]+cb.wlAdd[cbLen1]);
+                    cbMatch=max(cbMatch,cbMatch1);//1 wins over 0
+                };
             };
         };
         cbSeq.pop_back();//remove last "_" from file

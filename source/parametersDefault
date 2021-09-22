@@ -825,7 +825,7 @@ soloCBmatchWLtype           1MM_multi
                                                                 Allowed CBs have to have at least one read with exact match. This option matches best with CellRanger 2.2.0
                             1MM_multi_pseudocounts          ... same as 1MM_Multi, but pseudocounts of 1 are added to all whitelist barcodes.
                             1MM_multi_Nbase_pseudocounts    ... same as 1MM_multi_pseudocounts, multimatching to WL is allowed for CBs with N-bases. This option matches best with CellRanger >= 3.0.0
-                                                                
+                            ParseBio_ED3                    ... allow up to edit distance of 3 fpr each of the barcodes. May include one deletion + one insertion. Only works with --soloType CB_UMI_Complex. Matches to multiple passlist barcdoes are not allowed. Similar to ParseBio Split-seq pipeline. 
 
 soloInputSAMattrBarcodeSeq  -
     string(s):              when inputting reads from a SAM file (--readsFileType SAM SE/PE), these SAM attributes mark the barcode sequence (in proper order).

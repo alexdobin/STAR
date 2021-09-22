@@ -244,6 +244,9 @@ void ParametersSolo::initialize(Parameters *pPin)
         };          
     };
     
+    //initialize CB match to WL types
+    init_CBmatchWL();
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////umiDedup
     umiDedup.initialize(this);
@@ -365,7 +368,7 @@ void ParametersSolo::initialize(Parameters *pPin)
                 cbV[icb].wl.at(len1).push_back(cb1);
             };
             
-            cbV[icb].sortWhiteList();
+            cbV[icb].sortWhiteList(this);
             cbV[icb].wlFactor=cbWLsize;
             cbWLsize *= cbV[icb].totalSize;
         };
@@ -431,45 +434,7 @@ void ParametersSolo::initialize(Parameters *pPin)
                       std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
     
-    {//CBmatchWL
-        if ( (typeStr=="CB_UMI_Complex" || typeStr=="CB_samTagOut") && (CBmatchWL.type!="Exact" && CBmatchWL.type!="1MM") ) {
-            ostringstream errOut;
-            errOut << "EXITING because of fatal PARAMETERS error: --soloCBmatchWLtype "<< CBmatchWL.type << " does not work with --soloType " << typeStr << "\n";
-            errOut << "SOLUTION: use allowed option: use --soloCBmatchWLtype Exact (exact matches only) OR 1MM (one match with 1 mismatched base)\n";
-            exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
-        };
-        
-        
-        CBmatchWL.mm1 = false;
-        CBmatchWL.mm1_multi = false;
-        CBmatchWL.mm1_multi_pc = false;        
-        CBmatchWL.mm1_multi_Nbase = false;
-        CBmatchWL.oneExact = false; //if true, for a CB matching with 1 mismatch to a WL-CB, requires at least one other read to match this WL-CB. 
-                                  //this is true for all options except pseudocount
-            
-        if (CBmatchWL.type=="Exact") {    
-            CBmatchWL.oneExact=true;
-        } else if (CBmatchWL.type=="1MM") {
-            CBmatchWL.mm1=true;
-            CBmatchWL.oneExact=true;        
-        } else if (CBmatchWL.type=="1MM_multi") {
-            CBmatchWL.mm1=true;
-            CBmatchWL.mm1_multi=true;
-            CBmatchWL.oneExact=true;    
-        } else if (CBmatchWL.type=="1MM_multi_pseudocounts") {
-            CBmatchWL.mm1=true;
-            CBmatchWL.mm1_multi=true;
-            CBmatchWL.mm1_multi_pc=true;
-        } else if (CBmatchWL.type=="1MM_multi_Nbase_pseudocounts") {
-            CBmatchWL.mm1=true;
-            CBmatchWL.mm1_multi=true;
-            CBmatchWL.mm1_multi_pc=true;
-            CBmatchWL.mm1_multi_Nbase = true;
-        } else {
-            exitWithError("EXITING because of fatal PARAMETERS error: unrecognized option in --soloCBmatchWLtype " +CBmatchWL.type + "\nSOLUTION: use allowed options: Exact or 1MM or 1MM_multi or 1MM_multi_pseudocounts 1MM_multi_Nbase_pseudocounts\n",
-                            std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
-        };
-    };
+
     
     //////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////// MultiMappers
@@ -500,28 +465,28 @@ void ParametersSolo::complexWLstrings() {
     cbWLstr.resize(cbWLsize);
     
     for (auto &cb : cbV) {//initialize
-        cb.icb=0;
-        cb.ilen=cb.minLen;
+        cb.iCB=0;
+        cb.iLen=cb.minLen;
     };
 
     for (uint32 ii=0; ii<cbWLsize; ii++) {//cycle over full WL
         for (uint64 ii=0; ii<cbV.size(); ii++) {//check for overflow and re-calculate all indexes
             SoloBarcode &cb=cbV[ii];
-            if (cb.icb == cb.wl[cb.ilen].size()) {//advance length
-                cb.ilen++;
-                cb.icb=0;//reset icb
+            if (cb.iCB == cb.wl[cb.iLen].size()) {//advance length
+                cb.iLen++;
+                cb.iCB=0;//reset iCB
             };
-            if (cb.ilen == cb.wl.size()){//advance barcode
-                cbV[ii+1].icb++;
-                cb.ilen=cb.minLen;//reset length
+            if (cb.iLen == cb.wl.size()){//advance barcode
+                cbV[ii+1].iCB++;
+                cb.iLen=cb.minLen;//reset length
             };
         };
         
         for (auto &cb : cbV) 
-            cbWLstr[ii] += convertNuclInt64toString(cb.wl[cb.ilen][cb.icb], cb.ilen) + "_";
+            cbWLstr[ii] += convertNuclInt64toString(cb.wl[cb.iLen][cb.iCB], cb.iLen) + "_";
         cbWLstr[ii].pop_back();
         
-        cbV[0].icb++;//shift by one for the next CB
+        cbV[0].iCB++;//shift by one for the next CB
     };
 };
 
@@ -664,4 +629,53 @@ void MultiMappers::initialize(ParametersSolo* pS)
     countInd.main = 1;   //hard-coded - 1 column is always main
     
     yes.multi = yes.Uniform | yes.Rescue | yes.PropUnique | yes.EM;
+};
+
+////////////////////////////////////////////////////
+void ParametersSolo::init_CBmatchWL()
+{//CBmatchWL
+    bool incomp1 =        typeStr=="CB_UMI_Complex" && (CBmatchWL.type!="Exact" && CBmatchWL.type!="1MM" && CBmatchWL.type!="ParseBio_ED3");
+    incomp1 = incomp1 || (typeStr=="CB_samTagOut"   && (CBmatchWL.type!="Exact" && CBmatchWL.type!="1MM"));
+    incomp1 = incomp1 || (typeStr!="CB_UMI_Complex" &&  CBmatchWL.type=="ParseBio_ED3");
+    
+    if ( incomp1 ) {
+        ostringstream errOut;
+        errOut << "EXITING because of fatal PARAMETERS error: --soloCBmatchWLtype "<< CBmatchWL.type << " does not work with --soloType " << typeStr << "\n";
+        errOut << "SOLUTION: use allowed option: use --soloCBmatchWLtype Exact (exact matches only) OR 1MM (one match with 1 mismatched base)\n";
+        exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+    };
+    
+    
+    CBmatchWL.mm1 = false;
+    CBmatchWL.mm1_multi = false;
+    CBmatchWL.mm1_multi_pc = false;        
+    CBmatchWL.mm1_multi_Nbase = false;
+    CBmatchWL.oneExact = false; //if true, for a CB matching with 1 mismatch to a WL-CB, requires at least one other read to match this WL-CB. 
+                                //this is true for all options except pseudocount
+    CBmatchWL.ParseBio_ED3 = false;
+        
+    if (CBmatchWL.type=="Exact") {    
+        CBmatchWL.oneExact=true;
+    } else if (CBmatchWL.type=="1MM") {
+        CBmatchWL.mm1=true;
+        CBmatchWL.oneExact=true;        
+    } else if (CBmatchWL.type=="1MM_multi") {
+        CBmatchWL.mm1=true;
+        CBmatchWL.mm1_multi=true;
+        CBmatchWL.oneExact=true;    
+    } else if (CBmatchWL.type=="1MM_multi_pseudocounts") {
+        CBmatchWL.mm1=true;
+        CBmatchWL.mm1_multi=true;
+        CBmatchWL.mm1_multi_pc=true;
+    } else if (CBmatchWL.type=="1MM_multi_Nbase_pseudocounts") {
+        CBmatchWL.mm1=true;
+        CBmatchWL.mm1_multi=true;
+        CBmatchWL.mm1_multi_pc=true;
+        CBmatchWL.mm1_multi_Nbase = true;
+    } else if (CBmatchWL.type=="ParseBio_ED3") {
+        CBmatchWL.ParseBio_ED3=true;
+    } else {
+        exitWithError("EXITING because of fatal PARAMETERS error: unrecognized option in --soloCBmatchWLtype " +CBmatchWL.type + "\nSOLUTION: use allowed options: Exact or 1MM or 1MM_multi or 1MM_multi_pseudocounts 1MM_multi_Nbase_pseudocounts\n",
+                        std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+    };
 };
