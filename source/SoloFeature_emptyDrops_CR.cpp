@@ -10,7 +10,8 @@ double logMultinomialPDFsparse(const vector<double> &ambProfileLogP, const vecto
 void SoloFeature::emptyDrops_CR()
 {
     if (nCB<=pSolo.cellFilter.eDcr.indMin) {
-        P.inOut->logMain << "emptyDrops_CR filtering: no empty cells found: nCB=" << nCB <<"   emptyCellMinIndex="<< pSolo.cellFilter.eDcr.indMin << "\n";
+        P.inOut->logMain << "emptyDrops_CR filtering: total number of cells: nCB=" << nCB <<" is smaller than emptyCellMinIndex="<< pSolo.cellFilter.eDcr.indMin
+                         << ", which is the starting index for the *true empty* cells. The additional non-empty cells will not be detected.\n";
         return;
     };
     
