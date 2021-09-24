@@ -1,3 +1,4 @@
+* Issue #1316: fixed the seg-fault which occurred if --soloType CB_samTagOut and --soloCBwhitelist None are used together.
 * Changed Solo summary statistics outputs in Barcodes.stats and Features.stats files.
 * Implemented --soloCBmatchWLtype ParseBio_ED3 to allow multiple mismatches and one insertion+deletion for --soloType CB_UMI_Complex.
 * Implemented Solo BAM tags gx gn: output ';'-separated gene IDs and names for both unique- and multi-gene reads. Note that GX/GN tags are used to output gene ID/name for unique-gene reads.

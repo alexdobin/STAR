@@ -282,7 +282,11 @@ void SoloReadBarcode::getCBandUMI(char **readSeq, char **readQual, uint64 *readL
         matchCBtoWL(cbSeq, cbQual, pSolo.cbWL, cbMatch, cbMatchInd, cbMatchString);
 
         if ( cbMatch==0 || cbMatch==1 ) {
-        	cbSeqCorrected=pSolo.cbWLstr[cbMatchInd[0]];
+            if (pSolo.cbWLyes) {
+        	    cbSeqCorrected = pSolo.cbWLstr[cbMatchInd[0]];
+            } else {
+                cbSeqCorrected = cbSeq; //no WL - no correction
+            };
         } else {
         	cbSeqCorrected="";
         };
