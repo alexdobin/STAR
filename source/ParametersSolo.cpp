@@ -220,29 +220,27 @@ void ParametersSolo::initialize(Parameters *pPin)
         exitWithError(errOut, std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
     
-    if (type != SoloTypes::CB_samTagOut) {//gene quantification is needed
-        if (featureYes[SoloFeatureTypes::Gene]) {
-            pP->quant.gene.yes = true;
-            pP->quant.yes = true;
-        };
-        if (featureYes[SoloFeatureTypes::GeneFull]) {
-            pP->quant.geneFull.yes = true;
-            pP->quant.yes = true;
-            if (!featureYes[SoloFeatureTypes::Gene]) 
-                pP->quant.gene.yes=false; //if GeneFull is requested, but Gene is not, turn it off - it could have been turned on because of GX/GN attributes
-        };
-        if (featureYes[SoloFeatureTypes::GeneFull_Ex50pAS]) {
-            pP->quant.geneFull_Ex50pAS.yes = true;
-            pP->quant.yes = true;
-            if (!featureYes[SoloFeatureTypes::Gene]) 
-                pP->quant.gene.yes=false; //if GeneFull is requested, but Gene is not, turn it off - it could have been turned on because of GX/GN attributes
-        };
-        if (featureYes[SoloFeatureTypes::GeneFull_ExonOverIntron]) {
-            pP->quant.geneFull_ExonOverIntron.yes = true;
-            pP->quant.gene.yes = true; //needed to prioritize exons over introns
-            pP->quant.yes = true;
-        };          
+    if (featureYes[SoloFeatureTypes::Gene]) {
+        pP->quant.gene.yes = true;
+        pP->quant.yes = true;
     };
+    if (featureYes[SoloFeatureTypes::GeneFull]) {
+        pP->quant.geneFull.yes = true;
+        pP->quant.yes = true;
+        if (!featureYes[SoloFeatureTypes::Gene]) 
+            pP->quant.gene.yes=false; //if GeneFull is requested, but Gene is not, turn it off - it could have been turned on because of GX/GN attributes
+    };
+    if (featureYes[SoloFeatureTypes::GeneFull_Ex50pAS]) {
+        pP->quant.geneFull_Ex50pAS.yes = true;
+        pP->quant.yes = true;
+        if (!featureYes[SoloFeatureTypes::Gene]) 
+            pP->quant.gene.yes=false; //if GeneFull is requested, but Gene is not, turn it off - it could have been turned on because of GX/GN attributes
+    };
+    if (featureYes[SoloFeatureTypes::GeneFull_ExonOverIntron]) {
+        pP->quant.geneFull_ExonOverIntron.yes = true;
+        pP->quant.gene.yes = true; //needed to prioritize exons over introns
+        pP->quant.yes = true;
+    };          
     
     //initialize CB match to WL types
     init_CBmatchWL();

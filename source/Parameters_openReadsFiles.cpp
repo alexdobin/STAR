@@ -56,10 +56,10 @@ void Parameters::openReadsFiles()
                 inOut->logMain <<readFilesIn_info.rdbuf();
 
                 {//try to open the files - throw an error if a file cannot be opened
-					ifstream rftry(readFilesNames.at(imate).back().c_str());
+					ifstream rftry(readFilesNames[imate][ifile].c_str());
 					if (!rftry.good()){
 						exitWithError("EXITING: because of fatal INPUT file error: could not open read file: " + \
-									   readFilesNames.at(imate).back() + \
+									   readFilesNames[imate][ifile] + \
 									   "\nSOLUTION: check that this file exists and has read permision.\n", \
 									   std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
 					};
