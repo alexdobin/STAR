@@ -199,7 +199,11 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                         newFile=true;
                     } else {//error
                         ostringstream errOut;
-                        errOut << ERROR_OUT <<" EXITING because of FATAL ERROR in input reads: unknown file format: the read ID should start with @ or > \n";
+                        string str1;
+                        std::getline(P.inOut->readIn[0], str1);
+                        errOut << ERROR_OUT <<" EXITING because of FATAL ERROR in input reads: wrong read ID line format: the read ID lines should start with @ or > \n";
+                        errOut << "Offending line for read # " << P.iReadAll+1 << "\n" << word1 <<" "<< str1 << "\n";
+                        errOut << "SOLUTION: verify and correct the input read files\n";
                         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
                     };
                 };
