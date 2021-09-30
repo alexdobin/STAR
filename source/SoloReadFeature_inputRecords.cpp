@@ -27,7 +27,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
             *streamReads >> cb;
 
             if ( pSolo.CBmatchWL.oneExact && cbmatch==1 && cbReadCountTotal[cb]==0 && feature!=(uint32)(-1) ) {//single 1MM match, no exact matches to this CB
-                stats.V[stats.noNoExactWLmatch]++;
+                stats.V[stats.noMMtoWLwithoutExact]++;
                 continue;
             };
 

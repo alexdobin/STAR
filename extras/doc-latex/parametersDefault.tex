@@ -18,6 +18,13 @@
 \optName{runMode}
   \optValue{alignReads}
   \optLine{string: type of the run.} 
+\begin{optOptTable}
+  \optOpt{alignReads}   \optOptLine{map reads}
+  \optOpt{genomeGenerate}   \optOptLine{generate genome files}
+  \optOpt{inputAlignmentsFromBAM}   \optOptLine{input alignments from BAM. Presently only works with --outWigType and --bamRemoveDuplicates options.}
+  \optOpt{liftOver}   \optOptLine{lift-over of GTF files (--sjdbGTFfile) between genome assemblies using chain file(s) from --genomeChainFiles.}
+  \optOpt{soloCellFiltering  {\textless}/path/to/raw/count/dir/{\textgreater}   {\textless}/path/to/output/prefix{\textgreater}}   \optOptLine{STARsolo cell filtering ("calling") without remapping, followed by the path to raw count directory and output (filtered) prefix}
+\end{optOptTable}
 \optName{runThreadN}
   \optValue{1}
   \optLine{int: number of threads to run STAR} 
@@ -357,7 +364,8 @@
   \optLine{***STARsolo:} 
 \begin{optOptTable}
   \optOpt{CR CY UR UY}   \optOptLine{sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing.}
-  \optOpt{GX GN}   \optOptLine{gene ID and gene name.}
+  \optOpt{GX GN}   \optOptLine{gene ID and gene name for unique-gene reads.}
+  \optOpt{gx gn}   \optOptLine{gene IDs and gene names for unique- and multi-gene reads.}
   \optOpt{CB UB}   \optOptLine{error-corrected cell barcodes and UMIs for solo* demultiplexing. Requires --outSAMtype BAM SortedByCoordinate.}
   \optOpt{sM}   \optOptLine{assessment of CB and UMI.}
   \optOpt{sS}   \optOptLine{sequence of the entire barcode (CB,UMI,adapter).}
@@ -879,7 +887,7 @@
   \optLine{string(s): type of single-cell RNA-seq} 
 \begin{optOptTable}
   \optOpt{CB{\textunderscore}UMI{\textunderscore}Simple}   \optOptLine{(a.k.a. Droplet) one UMI and one Cell Barcode of fixed length in read2, e.g. Drop-seq and 10X Chromium.}
-  \optOpt{CB{\textunderscore}UMI{\textunderscore}Complex}   \optOptLine{one UMI of fixed length, but multiple Cell Barcodes of varying length, as well as adapters sequences are allowed in read2 only, e.g. inDrop.}
+  \optOpt{CB{\textunderscore}UMI{\textunderscore}Complex}   \optOptLine{multiple Cell Barcodes of varying length, one UMI of fixed length and one adapter sequence of fixed length are allowed in read2 only (e.g. inDrop, ddSeq).}
   \optOpt{CB{\textunderscore}samTagOut}   \optOptLine{output Cell Barcode as CR and/or CB SAm tag. No UMI counting. --readFilesIn cDNA{\textunderscore}read1 [cDNA{\textunderscore}read2 if paired-end] CellBarcode{\textunderscore}read . Requires --outSAMtype BAM Unsorted [and/or SortedByCoordinate]}
   \optOpt{SmartSeq}   \optOptLine{Smart-seq: each cell in a separate FASTQ (paired- or single-end), barcodes are corresponding read-groups, no UMI sequences, alignments deduplicated according to alignment start and end (after extending soft-clipped bases)}
 \end{optOptTable}
@@ -933,7 +941,7 @@
   \optLine{--soloCBposition  3{\textunderscore}9{\textunderscore}3{\textunderscore}14} 
 \optName{soloAdapterSequence}
   \optValue{-}
-  \optLine{string:                 adapter sequence to anchor barcodes.} 
+  \optLine{string:                 adapter sequence to anchor barcodes. Only one adapter sequence is allowed.} 
 \optName{soloAdapterMismatchesNmax}
   \optValue{1}
   \optLine{int{\textgreater}0:                  maximum number of mismatches allowed in adapter sequence.} 
@@ -949,6 +957,7 @@
 \begin{optOptTable}
   \optOpt{1MM{\textunderscore}multi{\textunderscore}pseudocounts}   \optOptLine{same as 1MM{\textunderscore}Multi, but pseudocounts of 1 are added to all whitelist barcodes.}
   \optOpt{1MM{\textunderscore}multi{\textunderscore}Nbase{\textunderscore}pseudocounts}   \optOptLine{same as 1MM{\textunderscore}multi{\textunderscore}pseudocounts, multimatching to WL is allowed for CBs with N-bases. This option matches best with CellRanger {\textgreater}= 3.0.0}
+  \optOpt{ParseBio{\textunderscore}ED3}   \optOptLine{allow up to edit distance of 3 fpr each of the barcodes. May include one deletion + one insertion. Only works with --soloType CB{\textunderscore}UMI{\textunderscore}Complex. Matches to multiple passlist barcdoes are not allowed. Similar to ParseBio Split-seq pipeline.}
 \end{optOptTable}
 \optName{soloInputSAMattrBarcodeSeq}
   \optValue{-}
@@ -974,7 +983,9 @@
 \begin{optOptTable}
   \optOpt{Gene}   \optOptLine{genes: reads match the gene transcript}
   \optOpt{SJ}   \optOptLine{splice junctions: reported in SJ.out.tab}
-  \optOpt{GeneFull}   \optOptLine{full genes: count all reads overlapping genes' exons and introns}
+  \optOpt{GeneFull}   \optOptLine{full gene (pre-mRNA): count all reads overlapping genes' exons and introns}
+  \optOpt{GeneFull{\textunderscore}ExonOverIntron}   \optOptLine{full gene (pre-mRNA): count all reads overlapping genes' exons and introns: prioritize 100% overlap with exons}
+  \optOpt{GeneFull{\textunderscore}Ex50pAS}   \optOptLine{full gene (pre-RNA): count all reads overlapping genes' exons and introns: prioritize {\textgreater}50% overlap with exons. Do not count reads with 100% exonic overlap in the antisense direction.}
 \end{optOptTable}
 \optName{soloMultiMappers}
   \optValue{Unique}
@@ -982,8 +993,9 @@
 \begin{optOptTable}
   \optOpt{Unique}   \optOptLine{count only reads that map to unique genes}
   \optOpt{Uniform}   \optOptLine{uniformly distribute multi-genic UMIs to all genes}
-  \optOpt{Rescue}   \optOptLine{distribute UMIs proportionally to unique+uniform counts (~ first iteartion of EM)}
+  \optOpt{Rescue}   \optOptLine{distribute UMIs proportionally to unique+uniform counts (~ first iteration of EM)}
   \optOpt{PropUnique}   \optOptLine{distribute UMIs proportionally to unique mappers, if present, and uniformly if not.}
+  \optOpt{EM}   \optOptLine{multi-gene UMIs are distributed using Expectation Maximization algorithm}
 \end{optOptTable}
 \optName{soloUMIdedup}
   \optValue{1MM{\textunderscore}All}

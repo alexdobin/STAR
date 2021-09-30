@@ -99,8 +99,10 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
     int32 gxgnGene = -1; //gene to output in GX/GN
     if (P.outSAMattrPresent.GX || P.outSAMattrPresent.GN) {
         auto annFeat = readAnnot.annotFeatures[P.pSolo.samAttrFeature];
-        if (annFeat.fSet.size()==1 && annFeat.fAlign[iTrOut].size()==1)
+        if (annFeat.fSet.size()==1 && iTrOut < annFeat.fAlign.size() && annFeat.fAlign[iTrOut].size()==1) {
+            //                        2nd condition needed when this function is called to output transcriptomic alignments, where GX/GN are not allowed, and iTrOut can be large
             gxgnGene = *annFeat.fAlign[iTrOut].begin();
+        };
     };
 
     for (uint imate=0;imate < (alignType<0 ? nMates:P.readNmates);imate++) { //not readNends: this is about alignments

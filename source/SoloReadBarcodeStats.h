@@ -5,11 +5,11 @@
 class SoloReadBarcodeStats {
 public:
     vector<string> names;
-    enum {      noNoAdapter,  noNoUMI,    nNoCB,   noNinCB,   noNinUMI,   noUMIhomopolymer,  noNoWLmatch,   noTooManyMM,   noTooManyWLmatches,   yesWLmatchExact,   yesWLmatchWithMM,  nStats};
+    enum {      noNoAdapter,  noNoUMI,    noNoCB,   noNinCB,   noNinUMI,   noUMIhomopolymer,  noNoWLmatch,   noTooManyMM,   noTooManyWLmatches,   yesWLmatchExact,   yesOneWLmatchWithMM,   yesMultWLmatchWithMM, nStats};
     uint64 V[nStats];    
     SoloReadBarcodeStats() 
     {
-        names={"noNoAdapter", "noNoUMI", "nNoCB", "noNinCB", "noNinUMI", "noUMIhomopolymer","noNoWLmatch", "noTooManyMM", "noTooManyWLmatches", "yesWLmatchExact", "yesWLmatchWithMM"};
+        names={"noNoAdapter", "noNoUMI", "noNoCB", "noNinCB", "noNinUMI", "noUMIhomopolymer","noNoWLmatch", "noTooManyMM", "noTooManyWLmatches", "yesWLmatchExact", "yesOneWLmatchWithMM", "yesMultWLmatchWithMM"};
         for (uint32 ii=0; ii<nStats; ii++)
             V[ii]=0;
     };

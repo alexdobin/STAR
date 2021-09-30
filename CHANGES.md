@@ -1,3 +1,5 @@
+* Issue #1223: fixed the N_unmapped value reported in ReadsPerGene.out.tab. The single-end (i.e. partially mapped alignment are not excluded from N_unmapped.
+* Issues #535, #1350: fixed a long-standing problem that resulted in a seg-fault whem mapping to the rabbit genome.
 * Issue #1316: fixed the seg-fault which occurred if --soloType CB_samTagOut and --soloCBwhitelist None are used together.
 * Changed Solo summary statistics outputs in Barcodes.stats and Features.stats files.
 * Implemented --soloCBmatchWLtype ParseBio_ED3 to allow multiple mismatches and one insertion+deletion for --soloType CB_UMI_Complex.

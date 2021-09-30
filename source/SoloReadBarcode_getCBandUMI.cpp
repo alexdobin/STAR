@@ -82,7 +82,6 @@ void SoloReadBarcode::matchCBtoWL(string &cbSeq1, string &cbQual1, vector<uint64
     } else if (cbMatch1==1) {//1 match, no need to record the quality
         cbMatchString1 = to_string(cbMatchInd1[0]);
     } else if (!pSolo.CBmatchWL.mm1_multi) {//>1 matches, but this is not allowed
-        //stats.V[stats.noTooManyWLmatches]++;
         cbMatch1=-3;
         cbMatchInd1.clear();
         cbMatchString1="";
@@ -93,20 +92,18 @@ void SoloReadBarcode::addStats(const int32 cbMatch1)
 {
     if (!pSolo.cbWLyes) //no stats if no WL
         return;
-    
-    if (cbMatch1>1) {
-        stats.V[stats.noTooManyWLmatches]++;
-        return;
-    };
-    
+       
     switch (cbMatch1) {
-        case 0:
+        case 0://exact matches
             cbReadCountExact[cbMatchInd[0]]++;//note that this simply counts reads per exact CB, no checks of genes or UMIs
             stats.V[stats.yesWLmatchExact]++;
             break;
-        case 1:
-            stats.V[stats.yesWLmatchWithMM]++;
+        case 1: //one WL match counted here, but they may still get rejected in SoloReadFeature_inputRecords.cpp
+            stats.V[stats.yesOneWLmatchWithMM]++;
             break;
+        default: //multiple WL matches are counted here, but they may still get rejected in SoloReadFeature_inputRecords.cpp
+            stats.V[stats.yesMultWLmatchWithMM]++;
+            break;            
         case -1 :
             stats.V[stats.noNoWLmatch]++;
             break;
@@ -117,7 +114,7 @@ void SoloReadBarcode::addStats(const int32 cbMatch1)
             stats.V[stats.noTooManyWLmatches]++;
             break;
         case -11 :            
-            stats.V[stats.nNoCB]++;//CB sequence cannot be extracted
+            stats.V[stats.noNoCB]++;//CB sequence cannot be extracted
             break;
         case -12 :
             stats.V[stats.noTooManyMM]++;            

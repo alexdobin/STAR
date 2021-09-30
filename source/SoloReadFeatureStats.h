@@ -5,18 +5,18 @@
 class SoloReadFeatureStats {
 public:
     vector<string> names;
-    enum {      noUnmapped,  noNoFeature,  noTooManyWLmatches,  noNoExactWLmatch,  yesWLmatch,  yessubWLmatchExact, yesWLmatch_UniqueFeature,  yesWLmatch_MultiFeature,  yessubWLmatch_MultiFeatureMultiGenomic,  yesCellBarcodes,  yesUMIs, nStats};
+    enum {      noUnmapped,  noNoFeature,  noTooManyWLmatches,  noMMtoWLwithoutExact,  yesWLmatch,  yessubWLmatchExact, yesWLmatch_UniqueFeature,  yesWLmatch_MultiFeature,  yessubWLmatch_MultiFeatureMultiGenomic,  yesCellBarcodes,  yesUMIs, nStats};
     uint64 V[nStats];    
     SoloReadFeatureStats() 
     {
-        names={"noUnmapped","noNoFeature","noTooManyWLmatches","noNoExactWLmatch","yesWLmatch","yessubWLmatchExact","yesWLmatch_UniqueFeature","yesWLmatch_MultiFeature","yessubWLmatch_MultiFeatureMultiGenomic","yesCellBarcodes","yesUMIs"};
+        names={"noUnmapped","noNoFeature","noTooManyWLmatches","noMMtoWLwithoutExact","yesWLmatch","yessubWLmatchExact","yesWLmatch_UniqueFeature","yesWLmatch_MultiFeature","yessubWLmatch_MultiFeatureMultiGenomic","yesCellBarcodes","yesUMIs"};
         for (uint32 ii=0; ii<nStats; ii++)
             V[ii]=0;
     };
     
     uint64 numInvalidBarcodes()
     {
-        return V[noTooManyWLmatches]+V[noNoExactWLmatch];
+        return V[noTooManyWLmatches]+V[noMMtoWLwithoutExact];
     };
     
     uint64 numMappedToTranscriptome()
