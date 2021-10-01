@@ -40,6 +40,7 @@ void SoloFeature::outputResults(bool cellFilterYes, string outputPrefixMat)
             break;
         };
         case SoloFeatureTypes::SJ :
+            remove((outputPrefixMat+pSolo.outFileNames[1]).c_str()); //remove symlink before creating it
             if ( symlink("../../../SJ.out.tab", (outputPrefixMat+pSolo.outFileNames[1]).c_str()) != 0 )
                  exitWithError("EXITING because of fatal OUTPUT FILE error: could not sym-link ../../../SJ.out.tab into" + outputPrefixMat+pSolo.outFileNames[1] +
                       "\nSOLUTION: check the path and permisssions\n",
