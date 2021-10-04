@@ -119,6 +119,11 @@ void SoloReadBarcode::addStats(const int32 cbMatch1)
         case -12 :
             stats.V[stats.noTooManyMM]++;            
             break;
+        case -23:
+            stats.V[stats.noNinUMI]++;//UMIs are not allowed to have Ns
+            break;
+        case -24:
+            stats.V[stats.noUMIhomopolymer]++;            
     };
 };
 
@@ -126,12 +131,10 @@ void SoloReadBarcode::addStats(const int32 cbMatch1)
 bool SoloReadBarcode::convertCheckUMI()
 {//check UMIs, return if bad UMIs
     if (convertNuclStrToInt64(umiSeq,umiB)!=-1) {//convert and check for Ns
-        stats.V[stats.noNinUMI]++;//UMIs are not allowed to have Ns
         umiCheck=-23;
         return false;
     };
     if (umiB==homoPolymer[0] || umiB==homoPolymer[1] || umiB==homoPolymer[2] || umiB==homoPolymer[3]) {
-        stats.V[stats.noUMIhomopolymer]++;
         umiCheck=-24;        
         return false;
     };
@@ -266,6 +269,7 @@ void SoloReadBarcode::getCBandUMI(char **readSeq, char **readQual, uint64 *readL
             cbMatch=umiCheck;
             cbMatchString="";
             cbMatchInd.clear();
+            addStats(cbMatch);
             return;
         };
 

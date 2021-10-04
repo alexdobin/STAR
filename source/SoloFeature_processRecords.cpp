@@ -54,8 +54,10 @@ void SoloFeature::processRecords()
         };
     };
     
-    if (!(pSolo.multiMap.yes.multi && (featureType==SoloFeatureTypes::Gene || featureType==SoloFeatureTypes::GeneFull)))
-        readFeatSum->stats.V[readFeatSum->stats.yesWLmatch] += readFeatSum->stats.V[readFeatSum->stats.yesWLmatch_MultiFeature];   
+    // no need to include multi-gene in yesWLmatch:
+    // for multi-gene options, it's already done in _collapseUMI_ function
+    //if (!(pSolo.multiMap.yes.multi && (featureType==SoloFeatureTypes::Gene || featureType==SoloFeatureTypes::GeneFull)))
+    //    readFeatSum->stats.V[readFeatSum->stats.yesWLmatch] += readFeatSum->stats.V[readFeatSum->stats.MultiFeature];   
 
     //output
     ofstream *statsStream = &ofstrOpen(outputPrefix+"Features.stats",ERROR_OUT, P);

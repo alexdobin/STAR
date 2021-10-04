@@ -5,11 +5,11 @@
 class SoloReadFeatureStats {
 public:
     vector<string> names;
-    enum {      noUnmapped,  noNoFeature,  noTooManyWLmatches,  noMMtoWLwithoutExact,  yesWLmatch,  yessubWLmatchExact, yesWLmatch_UniqueFeature,  yesWLmatch_MultiFeature,  yessubWLmatch_MultiFeatureMultiGenomic,  yesCellBarcodes,  yesUMIs, nStats};
+    enum {      noUnmapped,  noNoFeature,  noTooManyWLmatches,  noMMtoWLwithoutExact,  MultiFeature,  subMultiFeatureMultiGenomic,  yesWLmatch,  yessubWLmatchExact, yessubWLmatch_UniqueFeature,  yesCellBarcodes,  yesUMIs, nStats};
     uint64 V[nStats];    
     SoloReadFeatureStats() 
     {
-        names={"noUnmapped","noNoFeature","noTooManyWLmatches","noMMtoWLwithoutExact","yesWLmatch","yessubWLmatchExact","yesWLmatch_UniqueFeature","yesWLmatch_MultiFeature","yessubWLmatch_MultiFeatureMultiGenomic","yesCellBarcodes","yesUMIs"};
+        names={"noUnmapped","noNoFeature","noTooManyWLmatches","noMMtoWLwithoutExact","MultiFeature","subMultiFeatureMultiGenomic","yesWLmatch","yessubWLmatchExact","yessubWLmatch_UniqueFeature","yesCellBarcodes","yesUMIs"};
         for (uint32 ii=0; ii<nStats; ii++)
             V[ii]=0;
     };
@@ -28,21 +28,21 @@ public:
     void calcUnique(bool multYes)
     {
         if ( multYes  ) {//multi-genic reads were counted in yesWLmatch
-            V[yesWLmatch_UniqueFeature] = V[yesWLmatch] - V[yesWLmatch_MultiFeature];
+            V[yessubWLmatch_UniqueFeature] = V[yesWLmatch] - V[MultiFeature];
         } else {//no multi-genic reads
-            V[yesWLmatch_UniqueFeature] =  V[yesWLmatch];
+            V[yessubWLmatch_UniqueFeature] =  V[yesWLmatch];
         };
     };
     */
     
     uint64 numMappedToTranscriptomeUnique()
     {
-        return V[yesWLmatch_UniqueFeature];
+        return V[yessubWLmatch_UniqueFeature];
     };
     
     double numSequencingSaturation()
     {
-        return 1.0 - double(V[yesUMIs])/V[yesWLmatch_UniqueFeature]; //yesUMIs is calculated for unqiue-gene reads
+        return 1.0 - double(V[yesUMIs])/V[yessubWLmatch_UniqueFeature]; //yesUMIs is calculated for unqiue-gene reads
     };
 };
 

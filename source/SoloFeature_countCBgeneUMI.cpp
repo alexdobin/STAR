@@ -87,7 +87,7 @@ void SoloFeature::countCBgeneUMI()
             ++readFeatSum->stats.V[readFeatSum->stats.yesCellBarcodes];
         
         readFeatSum->stats.V[readFeatSum->stats.yesWLmatch] += nReadPerCBtotal[icb];        
-        readFeatSum->stats.V[readFeatSum->stats.yesWLmatch_UniqueFeature ] += nReadPerCBunique[icb];        
+        readFeatSum->stats.V[readFeatSum->stats.yessubWLmatch_UniqueFeature ] += nReadPerCBunique[icb];        
     };
         
     delete[] rGeneUMI;

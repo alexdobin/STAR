@@ -51,9 +51,9 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
                     if (readGe->size()==0) {//check genes
                         stats.V[stats.noNoFeature]++;//no gene
                     } else if (readGe->size()>1) {
-                        stats.V[stats.yesWLmatch_MultiFeature]++;//multi-gene reads
+                        stats.V[stats.MultiFeature]++;//multi-gene reads
                         if (nTr>1)
-                            stats.V[stats.yessubWLmatch_MultiFeatureMultiGenomic]++;//multigene caused by multimapper
+                            stats.V[stats.subMultiFeatureMultiGenomic]++;//multigene caused by multimapper
                             
                         if (pSolo.multiMap.yes.multi) {//output multimappers
                             reFe.geneMult.resize(readGe->size());
@@ -74,9 +74,9 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
         
             case SoloFeatureTypes::SJ : 
                 if (nTr>1) {//reject all multimapping junctions
-                    stats.V[stats.yessubWLmatch_MultiFeatureMultiGenomic]++;
+                    stats.V[stats.subMultiFeatureMultiGenomic]++;
                 //} else if (readAnnot.geneConcordant.size()>1){//for SJs, still check genes, no feature if multi-gene
-                //    stats.V[stats.yesWLmatch_MultiFeature]++;
+                //    stats.V[stats.MultiFeature]++;
                 } else {//one gene or no gene
                     alignOut[0]->extractSpliceJunctions(reFe.sj, reFe.sjAnnot);
                     //if ( reFe.sj.empty() || (reFe.sjAnnot && readAnnot.geneConcordant.size()==0) ) {//no junctions, or annotated junction but no gene (i.e. read does not fully match transcript)
