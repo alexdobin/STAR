@@ -349,7 +349,9 @@ void SoloReadBarcode::getCBandUMI(char **readSeq, char **readQual, uint64 *readL
                     cbMatchGood = false;
                 } else {
                     int64 cbI=binarySearchExact<uint64>(cbB1,cb.wl[cbSeq1.size()].data(),cb.wl[cbLen1].size());
-                    if (cbI<0) {//exact match
+                    if (cbI>=0) {//exact match
+                        cbMatchInd[0] += cb.wlFactor*(cbI+cb.wlAdd[cbLen1]);
+                    } else {//no exact match
                         cbI=binarySearchExact<uint64>(cbB1,cb.wlEd[cbLen1].data(),cb.wlEd[cbLen1].size());
                         if (cbI>=0) {//find match in the edited list
                             cbMatch = 1; //>=1MM

@@ -291,11 +291,11 @@ class Parameters {
         //input
 
         struct {
-          bool yes; //if any quantification is done
+          bool yes=false; //if any quantification is done
           vector <string> mode; //quantification mode input string
 
             struct {
-                bool yes;
+                bool yes=false;
                 bool bamYes;
                 bool indel;
                 bool softClip;
@@ -305,36 +305,36 @@ class Parameters {
             } trSAM;
 
             struct {
-                bool yes;
+                bool yes=false;
                 string outFile;
             } geCount;
 
             struct {
-                bool yes;
+                bool yes=false;
             } geneFull;
           
             struct {
-                bool yes;
+                bool yes=false;
             } geneFull_Ex50pAS;
 
             struct {
-                bool yes;
+                bool yes=false;
             } geneFull_ExonOverIntron;
 
             struct {
-                bool yes;
+                bool yes=false;
             } gene;
           
         } quant;
 
         //variation parameters
         struct {
-            bool yes;
+            bool yes=false;
             string vcfFile;
         } var;
 
         struct {
-            bool yes;
+            bool yes=false;
             bool SAMtag;
             string outputMode;
         } wasp;
