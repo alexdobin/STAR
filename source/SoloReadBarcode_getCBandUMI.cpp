@@ -289,7 +289,7 @@ void SoloReadBarcode::getCBandUMI(char **readSeq, char **readQual, uint64 *readL
                 cbSeqCorrected = cbSeq; //no WL - no correction
             };
         } else {
-        	cbSeqCorrected="";
+        	cbSeqCorrected="-";
         };
         
     ///////////////////////////CB_UMI_Complex

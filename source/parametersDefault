@@ -648,7 +648,7 @@ alignInsertionFlush     None
 
 ### Paired-End reads
 peOverlapNbasesMin          0
-    int>=0:             minimum number of overlap bases to trigger mates merging and realignment
+    int>=0:             minimum number of overlap bases to trigger mates merging and realignment. Specify >0 value to switch on the "merginf of overlapping mates" algorithm.
 
 peOverlapMMp                0.01
     real, >=0 & <1:     maximum proportion of mismatched bases in the overlap area

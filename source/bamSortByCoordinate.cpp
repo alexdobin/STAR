@@ -20,13 +20,18 @@ void bamSortByCoordinate (Parameters &P, ReadAlignChunk **RAchunk, Genome &genom
             };
             if (binS>maxMem) maxMem=binS;
         };
+
+        uint64 unmappedReadsN = 0;
+        for (int it=0; it<P.runThreadN; it++)
+            unmappedReadsN += RAchunk[it]->chunkOutBAMcoord->binTotalN[nBins-1];
+
         P.inOut->logMain << "Max memory needed for sorting = "<<maxMem<<endl;
         if (maxMem>P.limitBAMsortRAM) {
             ostringstream errOut;
             errOut <<"EXITING because of fatal ERROR: not enough memory for BAM sorting: \n";
             errOut <<"SOLUTION: re-run STAR with at least --limitBAMsortRAM " <<maxMem+1000000000;
             exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
-        } else if(maxMem==0) {
+        } else if(maxMem==0 && unmappedReadsN==0) {//both mapped and unmapped reads are absent
             P.inOut->logMain << "WARNING: nothing to sort - no output alignments" <<endl;
             BGZF *bgzfOut;
             bgzfOut=bgzf_open(P.outBAMfileCoordName.c_str(),("w"+to_string((long long) P.outBAMcompression)).c_str());
