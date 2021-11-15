@@ -13,13 +13,21 @@ BEGINFILE {
         next;
     };
     C[$1 "_" $2][ARGIND]=$3;
+    CB[$2][ARGIND]=1;
 }
 
 END {
     for (gc in C) {
+        split(gc,a,"_");
+        if (CB[a[2]][1]!=1 || CB[a[2]][2]!=1)
+            continue; # only cells present in both 1 and 2 are considered
+
+        n++;
         c2=C[gc][2]+0;
         c1=C[gc][1]+0;
         rd=(c2-c1)/(c2>c1 ? c2:c1);
+
+        print c1, c2 > "counts.txt";
  
         MARD += (rd>0 ? rd:-rd);
         if (rd==1) NrdP1++;
@@ -34,8 +42,7 @@ END {
         
     };
 
-    n=length(C);
-    print "MARD", MARD/n, NrdM1, Nrd0, NrdP1;
+    print "MARD", MARD/n, NrdM1, Nrd0, NrdP1, n-NrdM1-Nrd0-NrdP1;
     print "R2", (n*sum12-sum1[1]*sum1[2])^2 / (n*sum2[1]-(sum1[1])^2) / (n*sum2[2]-(sum1[2])^2);
 
 };

@@ -27,7 +27,7 @@ void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandTyp
     struct GeneInfo1 {
         uint32 g;
         uint32 ia;
-        OverlapTypes ot; //overlap types, prioritized: transcriptomic
+        OverlapTypes ot; //overlap types, prioritized
     };
     vector<GeneInfo1> vGeneInfo1;
     vGeneInfo1.reserve(256); //TODO: check if this affects speed

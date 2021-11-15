@@ -27,7 +27,7 @@ void SoloBarcode::sortWhiteList(ParametersSolo *pSolo)
             totalSize += wl[ilen1].size();
 
             if (pSolo->CBmatchWL.ParseBio_ED3) {//add mismatches
-                wlAddMismatches(3, ilen1, wl[ilen1], wlEd[ilen1], wlEdInd[ilen1]);
+                wlAddMismatches(2, ilen1, wl[ilen1], wlEd[ilen1], wlEdInd[ilen1]);
             };
 
         };
