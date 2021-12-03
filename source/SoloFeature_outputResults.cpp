@@ -202,7 +202,7 @@ void SoloFeature::outputResults(bool cellFilterYes, string outputPrefixMat)
                 ofstream &countMatrixStream=ofstrOpen(matrixFileName, ERROR_OUT, P);
                 
                 //header
-                countMatrixStream <<"%%MatrixMarket matrix coordinate float general\n";
+                countMatrixStream <<"%%MatrixMarket matrix coordinate real general\n";
                 countMatrixStream <<"%\n";
                 countMatrixStream << featuresNumber <<' '<< pSolo.cbWLsize <<' '<< nCellGeneEntries << '\n';
                 countMatrixStream << matOutStringStream.str();
