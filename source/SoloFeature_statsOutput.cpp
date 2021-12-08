@@ -77,4 +77,11 @@ void SoloFeature::statsOutput()
     };
     
     strOut.close();
+
+    ///////////////////////////////////////////////// readStatsOutput
+    if (pSolo.readStatsYes[featureType]) {
+        ofstream &strOut=ofstrOpen(outputPrefix+"CellReads.stats", ERROR_OUT, P);
+        strOut.close();
+    };
+
 };

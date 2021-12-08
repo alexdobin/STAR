@@ -62,7 +62,7 @@ void SoloFeature::countSmartSeq()
         int64 cb;
         vector<uint32> trIdDist; //not used
         bool readInfoYes=false;
-        while (soloInputFeatureUMI(redistrFilesStreams[ired], featureType, readInfoYes, P.sjAll, iread, cbmatch, feature, umi, trIdDist)) {//cycle over file records
+        while (soloInputFeatureUMI(redistrFilesStreams[ired], featureType, readInfoYes, P.sjAll, iread, cbmatch, feature, umi, trIdDist, readFlagCounts)) {//cycle over file records
             
             *redistrFilesStreams[ired] >> cb;
             

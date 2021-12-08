@@ -1,6 +1,8 @@
 #ifndef H_SoloCommon
 #define H_SoloCommon
 
+#include <unordered_map>
+
 typedef struct{
     uint64 cb; 
     uint32 umi;
@@ -19,5 +21,43 @@ typedef uint32 uintRead;
 #define velocytoTypeGeneBits 4
 #define velocytoTypeGeneBitShift 28
 #define geneMultMark (((uint32)1)<<31)
+
+class SoloReadFlagClass
+{
+public:
+    typedef uint32 typeFlag;
+    typeFlag flag=0;
+    enum: uint32 {genomeU, genomeM, featureU, featureM, exonic, antisense, mito, cbPerfect, cbMMunique, cbMMmultiple, counted, nBits};
+
+    /* lookup table, probably not efficient
+        typeFlag bitMask[nBits], bitInt[nBits];
+        
+        void SoloReadFlagClass() {
+            for (uint32 ibit=0; ibit< nBits; ibit++) {
+                bitInt[ii] = ((typeFlag)1) << ibit;
+                bitMask[ii] = ~ bitInt[ii];
+            };
+
+        };
+    */
+
+    unordered_map < uintCB, array<uint64,nBits> > flagCounts;
+
+    void setBit(uint32 ibit) {
+        flag |= ((typeFlag)1) << ibit;
+    };
+
+    typeFlag checkBit(uint32 ibit) {
+        return (flag>>ibit) & ((typeFlag)1);
+    };
+
+    void countsAdd(uintCB cb) {//adds flag bits to the count for a given cb
+        auto cbInserted = flagCounts.insert({cb, {} });
+        for (uint32 ibit=0; ibit< nBits; ibit++) {
+            (*cbInserted.first).second[ibit] += (uint64) checkBit(ibit);
+        };
+    };
+
+};
 
 #endif

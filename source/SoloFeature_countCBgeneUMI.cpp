@@ -38,8 +38,9 @@ void SoloFeature::countCBgeneUMI()
 
     ///////////////////////////////////////////////////////////////////////////
     ////////////// Input records
+    readFlagCounts.flagCounts.reserve(nCB*3/2);
     for (int ii=0; ii<P.runThreadN; ii++) {//TODO: this can be parallelized
-        readFeatAll[ii]->inputRecords(rCBpa, rguStride, readBarSum->cbReadCountExact, readInfo);
+        readFeatAll[ii]->inputRecords(rCBpa, rguStride, readBarSum->cbReadCountExact, readInfo, readFlagCounts);
     };
 
     nReadPerCB.resize(nCB);

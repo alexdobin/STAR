@@ -14,8 +14,8 @@ public:
     Transcript **alignOut;
 };
 
-uint32 outputReadCB(fstream *streamOut, const uint64 iRead, const int32 featureType, SoloReadBarcode &soloBar, const ReadSoloFeatures &reFe, const ReadAnnotations &readAnnot);
-
+uint32 outputReadCB(fstream *streamOut, const uint64 iRead, const int32 featureType, SoloReadBarcode &soloBar, 
+                    const ReadSoloFeatures &reFe, const ReadAnnotations &readAnnot, const SoloReadFlagClass &readFlag);
 void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **alignOut, uint64 iRead, ReadAnnotations &readAnnot)
 {
     if (pSolo.type==0 || soloBar.cbMatch<0)
@@ -63,11 +63,11 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
                                 ++ii;
                             };
                                 
-                            nFeat = outputReadCB(streamReads, iRead, featureType, soloBar, reFe, readAnnot);
+                            nFeat = outputReadCB(streamReads, iRead, featureType, soloBar, reFe, readAnnot, readFlag);
                         };
                     } else {//unique-gene reads
                         reFe.gene = *readGe->begin();
-                        nFeat = outputReadCB(streamReads, (readIndexYes ? iRead : (uint64)-1), featureType, soloBar, reFe, readAnnot);
+                        nFeat = outputReadCB(streamReads, (readIndexYes ? iRead : (uint64)-1), featureType, soloBar, reFe, readAnnot, readFlag);
                     };
                 };
                 break;
@@ -83,7 +83,7 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
                     if ( reFe.sj.empty() ) {
                         stats.V[stats.noNoFeature]++;
                     } else {//good junction
-                        nFeat = outputReadCB(streamReads, (readIndexYes ? iRead : (uint64)-1), featureType, soloBar, reFe, readAnnot);
+                        nFeat = outputReadCB(streamReads, (readIndexYes ? iRead : (uint64)-1), featureType, soloBar, reFe, readAnnot, readFlag);
                     };
                 };                  
                 break;
@@ -92,7 +92,7 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
                 if (readAnnot.transcriptConcordant.size()==0 || soloBar.cbMatch>1) {//do not record ambiguous CB  
                     stats.V[stats.noNoFeature]++;
                 } else {
-                    nFeat = outputReadCB(streamReads, iRead, featureType, soloBar, reFe, readAnnot);
+                    nFeat = outputReadCB(streamReads, iRead, featureType, soloBar, reFe, readAnnot, readFlag);
                 };                
                 if (readAnnot.transcriptConcordant.size()==1 && readAnnot.transcriptConcordant[0][1] < transcriptDistCount.size()) {
                     //read maps to one transcript - use for distTTS distribution function
@@ -108,7 +108,7 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
                     sort(readAnnot.trVelocytoType.begin(), readAnnot.trVelocytoType.end(),
                          [](const trTypeStruct &t1, const trTypeStruct &t2) {return t1.tr < t2.tr;});
 
-                    *streamReads << iRead <<' '<< readAnnot.trVelocytoType.size();
+                    *streamReads << iRead <<' '<< readFlag.flag <<' '<< readAnnot.trVelocytoType.size();
                     for (auto &tt: readAnnot.trVelocytoType)
                          *streamReads <<' '<< tt.tr <<' '<< (uint32) tt.type;
                     *streamReads <<'\n';
@@ -122,7 +122,7 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
     };//if (nTr==0)
     
     if (nFeat==0 && readInfoYes) {//no feature, but readInfo requested
-        outputReadCB(streamReads, iRead, (uint32)-1, soloBar, reFe, readAnnot);
+        outputReadCB(streamReads, iRead, (uint32)-1, soloBar, reFe, readAnnot, readFlag);
     };
     
     if (nFeat==0)
@@ -138,7 +138,8 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
     return;
 };
 
-uint32 outputReadCB(fstream *streamOut, const uint64 iRead, const int32 featureType, SoloReadBarcode &soloBar, const ReadSoloFeatures &reFe, const ReadAnnotations &readAnnot)
+uint32 outputReadCB(fstream *streamOut, const uint64 iRead, const int32 featureType, SoloReadBarcode &soloBar, 
+                    const ReadSoloFeatures &reFe, const ReadAnnotations &readAnnot, const SoloReadFlagClass &readFlag)
 {   
     /*format of the temp output file
      * UMI [iRead] type feature* cbMatchString
@@ -156,7 +157,7 @@ uint32 outputReadCB(fstream *streamOut, const uint64 iRead, const int32 featureT
     switch (featureType) {
         case -1 :
             //no feature, output for readInfo
-            *streamOut << soloBar.umiB <<' '<< iRead <<' '<< -1 <<' '<< soloBar.cbMatch <<' '<< soloBar.cbMatchString <<'\n';
+            *streamOut << soloBar.umiB <<' '<< iRead <<' '<< readFlag.flag <<' '<< -1 <<' '<< soloBar.cbMatch <<' '<< soloBar.cbMatchString <<'\n';
             break;
             
         case SoloFeatureTypes::Gene :
@@ -167,12 +168,12 @@ uint32 outputReadCB(fstream *streamOut, const uint64 iRead, const int32 featureT
                 //just gene id
                 *streamOut << soloBar.umiB <<' ';//UMI
                 if ( iRead != (uint64)-1 )
-                    *streamOut << iRead <<' ';//iRead
+                    *streamOut << iRead <<' '<< readFlag.flag <<' ';//iRead
                 *streamOut << reFe.gene <<' '<< soloBar.cbMatch <<' '<< soloBar.cbMatchString <<'\n';;
             } else {
                 for (auto &g : reFe.geneMult) {
                     *streamOut << soloBar.umiB <<' ';//UMI
-                    *streamOut << iRead <<' ';//iRead is always output for multiGene
+                    *streamOut << iRead <<' '<< readFlag.flag <<' ';//iRead is always output for multiGene
                     *streamOut << g <<' '<< soloBar.cbMatch <<' '<< soloBar.cbMatchString <<'\n';;
                 };
                 nout = reFe.geneMult.size();
@@ -184,7 +185,7 @@ uint32 outputReadCB(fstream *streamOut, const uint64 iRead, const int32 featureT
             for (auto &sj : reFe.sj) {
                 *streamOut << soloBar.umiB <<' ';//UMI
                 if ( iRead != (uint64)-1 )
-                    *streamOut << iRead <<' ';//iRead            
+                    *streamOut << iRead <<' '<< readFlag.flag <<' ';//iRead            
                 *streamOut << sj[0] <<' '<< sj[1] <<' '<< soloBar.cbMatch <<' '<< soloBar.cbMatchString <<'\n';
             };
             nout=reFe.sj.size();

@@ -27,6 +27,8 @@ public:
     fstream *streamReads;
 
     string cbSeq, umiSeq, cbQual, umiQual;
+
+    SoloReadFlagClass readFlag;
     
     SoloReadFeatureStats stats;
 
@@ -35,7 +37,7 @@ public:
     void addCounts(const SoloReadFeature &soloCBin);
     void addStats(const SoloReadFeature &soloCBin);
     void statsOut(ofstream &streamOut);
-    void inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32> &cbReadCountTotal, vector<readInfoStruct> &readInfo);
+    void inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32> &cbReadCountTotal, vector<readInfoStruct> &readInfo, SoloReadFlagClass &readFlagCounts);
 
 private:
     const int32 featureType;

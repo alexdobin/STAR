@@ -2,13 +2,15 @@
 #include "SoloReadFeature.h"
 #include "binarySearch2.h"
 
-bool soloInputFeatureUMI(fstream *strIn, int32 featureType, bool readInfoYes, array<vector<uint64>,2> &sjAll, uint64 &iread, int32 &cbmatch, uint32 &feature, uint64 &umi, vector<uint32> &featVecU32)
+bool soloInputFeatureUMI(fstream *strIn, int32 featureType, bool readInfoYes, array<vector<uint64>,2> &sjAll, uint64 &iread, 
+                            int32 &cbmatch, uint32 &feature, uint64 &umi, vector<uint32> &featVecU32, SoloReadFlagClass &readFlagCounts)
 {
     if (!(*strIn >> umi)) //end of file
         return false;
 
-    if (readInfoYes)
-        *strIn >> iread;
+    if (readInfoYes) {
+        *strIn >> iread >> readFlagCounts.flag;
+    };
 
     switch (featureType) {
         case SoloFeatureTypes::Gene :

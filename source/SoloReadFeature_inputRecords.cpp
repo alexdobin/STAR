@@ -5,18 +5,19 @@
 #include "soloInputFeatureUMI.h"
 #include "serviceFuns.cpp"
 
-void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32> &cbReadCountTotal, vector<readInfoStruct> &readInfo)
+void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32> &cbReadCountTotal, vector<readInfoStruct> &readInfo, SoloReadFlagClass &readFlagCounts)
 {   
     streamReads->flush();
     streamReads->seekg(0,std::ios::beg);
 
     //////////////////////////////////////////// standard features
     uint32 feature;
-    uint64 umi, iread;
+    uint64 umi, iread, prevIread=(uint64)-1;
     int32 cbmatch;
     int64 cb;
     vector<uint32> trIdDist;
-    while (soloInputFeatureUMI(streamReads, featureType, readIndexYes, P.sjAll, iread, cbmatch, feature, umi, trIdDist)) {
+    
+    while (soloInputFeatureUMI(streamReads, featureType, readIndexYes, P.sjAll, iread, cbmatch, feature, umi, trIdDist, readFlagCounts)) {
         if (feature == (uint32)(-1) && !readIndexYes) {//no feature => no record, this can happen for SJs
             streamReads->ignore((uint32)-1, '\n');
             //stats.V[stats.noNoFeature]++; //need separate category for this
@@ -34,21 +35,36 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
             if (!pSolo.cbWLyes) //if no-WL, the full cbInteger was recorded - now has to be placed in order
                 cb=binarySearchExact<uintCB>(cb, pSolo.cbWL.data(), pSolo.cbWLsize);
 
-            //record feature ingle-number feature
-            if (feature != (uint32)(-1)) {
+            //record feature
+            if (feature != (uint32)(-1)) {//good feature, will be counted
                 cbP[cb][0]=feature;
                 cbP[cb][1]=umi;
-                if (readIndexYes) {
-                    cbP[cb][2]=iread;
-                };
-                cbP[cb]+=cbPstride;
+
                 if (cbmatch==0)
                     stats.V[stats.yessubWLmatchExact]++;
+
+                if (readIndexYes) {
+                    cbP[cb][2]=iread;
+                    readFlagCounts.setBit(readFlagCounts.counted);
+                };
+
+                cbP[cb]+=cbPstride;
+
             } else if (readInfoYes) {//no feature - record readInfo
                 readInfo[iread].cb=cb;
                 readInfo[iread].umi=umi;
             };
-            
+
+            if (readIndexYes && iread != prevIread) {
+                prevIread = iread; //for multi-gene reads
+                if (cbmatch==0) {
+                    readFlagCounts.setBit(readFlagCounts.cbPerfect);
+                } else {
+                    readFlagCounts.setBit(readFlagCounts.cbMMunique);
+                };
+                readFlagCounts.countsAdd(cb);
+            };
+
         } else {//multiple matches
             #ifdef MATCH_CellRanger
             double ptot=0.0, pmax=0.0, pin;
@@ -78,12 +94,17 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
                     cbP[cb][1]=umi;
                     if (readIndexYes) {
                         cbP[cb][2]=iread;
+                        readFlagCounts.setBit(readFlagCounts.counted);
                     };
                     cbP[cb]+=cbPstride;
                 } else if (readInfoYes) {//no feature - record readInfo
                     readInfo[iread].cb=cb;
                     readInfo[iread].umi=umi;
-                };    
+                };
+                if (readIndexYes) {
+                    readFlagCounts.setBit(readFlagCounts.cbMMmultiple);
+                    readFlagCounts.countsAdd(cb);
+                };
             } else if (feature != (uint32)(-1)) {
                 stats.V[stats.noTooManyWLmatches]++;
             };

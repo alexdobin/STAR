@@ -410,6 +410,14 @@ void ParametersSolo::initialize(Parameters *pPin)
         readInfoYes[samAttrFeature]=true;
     };
     readIndexYes = readInfoYes;
+
+    /////////////////////////////////////////////////////////////////// readFlag output
+    if (true) {
+        readStatsYes.fill(true);
+        readStatsYes[SoloFeatureTypes::VelocytoSimple] = false; //this could be allowed, but it will have the same info as Gene
+        readStatsYes[SoloFeatureTypes::Velocyto] = false;
+        readIndexYes = readStatsYes; //this is fine since readStats output is done for all features
+    };
        
     ///////////////////////////////////////////////////////////////////umi filtering
     if (umiFiltering.type[0]=="MultiGeneUMI") {
