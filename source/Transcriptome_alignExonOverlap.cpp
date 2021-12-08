@@ -31,9 +31,10 @@ void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandTyp
     vGeneInfo1.reserve(256); //TODO: check if this affects speed
     OverlapTypes otAS={false,true,false,true,false}; //which OverlapTypes is antisense, it will not be counted
 
-    //GeneFullClosest3p
+    /*//GeneFullClosest3p
     uint64 minDist3p=(uint64)-1;
     uint32 minDist3pGene=(uint32)-1;
+    */
 
     for (uint32 iag=0; iag<nA; iag++) {
         
@@ -57,6 +58,7 @@ void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandTyp
             bool str1 = int(strandType==0 ? aG.Str : 1-aG.Str) == (trStr[tr1]-1);
             str1 = str1 || (strandType==-1);
 
+            /*
             //GeneFullClosest3p
             if ( str1 ) {
                 uint64 dist3p = ( aG.Str==0 ? trE[tr1]-aGend : aGstart-trS[tr1] );
@@ -66,6 +68,7 @@ void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandTyp
                     continue;
                 };
             };
+            */
 
             bool sjConcord;
             int32 nOverlap = alignBlocksOverlapExons(aG, trExN[tr1], exSE+2*trExI[tr1], trS[tr1], sjConcord);
@@ -122,6 +125,7 @@ void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandTyp
         } while (trEmax[tr1]>=aGend && tr1>0);
     };
 
+    /*
     {//GeneFullClosest3p
         annFeat.fSet={};
         annFeat.fAlign = {};
@@ -132,6 +136,7 @@ void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandTyp
         };
         return;
     };
+    */
 
     {//prune geneFull_Ex50pAS according to priorities
         /*

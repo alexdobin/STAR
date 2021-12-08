@@ -340,7 +340,7 @@ void SoloReadBarcode::getCBandUMI(char **readSeq, char **readQual, uint64 *readL
                 continue; //continue - to be able to record full cbSeq, cbQual, but no need to match to the WL
             
             uint64 cbLen1 = cbSeq1.size();
-            if ( pSolo.CBmatchWL.ParseBio_ED3 ) {
+            if ( pSolo.CBmatchWL.EditDist_2 ) {
                 cbMatch=0; //0: no MM, 1: >=1MM. 2: multi-match: not allowed for this option
                 uintCB cbB1;
                 int64 posN=convertNuclStrToInt64(cbSeq1,cbB1);

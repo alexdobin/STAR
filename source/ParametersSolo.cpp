@@ -632,9 +632,9 @@ void MultiMappers::initialize(ParametersSolo* pS)
 ////////////////////////////////////////////////////
 void ParametersSolo::init_CBmatchWL()
 {//CBmatchWL
-    bool incomp1 =        typeStr=="CB_UMI_Complex" && (CBmatchWL.type!="Exact" && CBmatchWL.type!="1MM" && CBmatchWL.type!="ParseBio_ED3");
+    bool incomp1 =        typeStr=="CB_UMI_Complex" && (CBmatchWL.type!="Exact" && CBmatchWL.type!="1MM" && CBmatchWL.type!="EditDist_2");
     incomp1 = incomp1 || (typeStr=="CB_samTagOut"   && (CBmatchWL.type!="Exact" && CBmatchWL.type!="1MM"));
-    incomp1 = incomp1 || (typeStr!="CB_UMI_Complex" &&  CBmatchWL.type=="ParseBio_ED3");
+    incomp1 = incomp1 || (typeStr!="CB_UMI_Complex" &&  CBmatchWL.type=="EditDist_2");
     
     if ( incomp1 ) {
         ostringstream errOut;
@@ -650,7 +650,7 @@ void ParametersSolo::init_CBmatchWL()
     CBmatchWL.mm1_multi_Nbase = false;
     CBmatchWL.oneExact = false; //if true, for a CB matching with 1 mismatch to a WL-CB, requires at least one other read to match this WL-CB. 
                                 //this is true for all options except pseudocount
-    CBmatchWL.ParseBio_ED3 = false;
+    CBmatchWL.EditDist_2 = false;
         
     if (CBmatchWL.type=="Exact") {    
         CBmatchWL.oneExact=true;
@@ -670,8 +670,8 @@ void ParametersSolo::init_CBmatchWL()
         CBmatchWL.mm1_multi=true;
         CBmatchWL.mm1_multi_pc=true;
         CBmatchWL.mm1_multi_Nbase = true;
-    } else if (CBmatchWL.type=="ParseBio_ED3") {
-        CBmatchWL.ParseBio_ED3=true;
+    } else if (CBmatchWL.type=="EditDist_2") {
+        CBmatchWL.EditDist_2=true;
     } else {
         exitWithError("EXITING because of fatal PARAMETERS error: unrecognized option in --soloCBmatchWLtype " +CBmatchWL.type + "\nSOLUTION: use allowed options: Exact or 1MM or 1MM_multi or 1MM_multi_pseudocounts 1MM_multi_Nbase_pseudocounts\n",
                         std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);

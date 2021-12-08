@@ -11,7 +11,7 @@ void SoloBarcode::sortWhiteList(ParametersSolo *pSolo)
     totalSize=0;
     minLen=(uint32)-1;
     wlAdd.resize( wl.size() );
-    if (pSolo->CBmatchWL.ParseBio_ED3) {
+    if (pSolo->CBmatchWL.EditDist_2) {
         wlEd.resize( wl.size() );
         wlEdInd.resize( wl.size() );
     };
@@ -26,7 +26,7 @@ void SoloBarcode::sortWhiteList(ParametersSolo *pSolo)
             wl[ilen1].resize(std::distance(wl[ilen1].begin(),un1));
             totalSize += wl[ilen1].size();
 
-            if (pSolo->CBmatchWL.ParseBio_ED3) {//add mismatches
+            if (pSolo->CBmatchWL.EditDist_2) {//add mismatches
                 wlAddMismatches(2, ilen1, wl[ilen1], wlEd[ilen1], wlEdInd[ilen1]);
             };
 
