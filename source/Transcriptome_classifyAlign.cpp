@@ -256,6 +256,7 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
         } while (trEmax[tr1]>=aGend && tr1>0);
     };
     
+    annFeat.exonic = annFeat.fSet.size()>0;
     //VelocytoSimple logic
     readAnnot.geneVelocytoSimple[0]=(reGe+2==0 ? (uint32)-1 : reGe);//-2 marks no gene, convert to -1 which marks either no gene or multigene - no output     
     readAnnot.geneVelocytoSimple[1]=reAnn.to_ulong();

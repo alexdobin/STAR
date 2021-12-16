@@ -193,6 +193,12 @@ public:
     //constants
     uint32 umiMaskLow, umiMaskHigh; //low/high half bit-mask or UMIs
 
+    //readStats
+    struct {
+        string type; //input parameter
+        bool yes;
+    } readStats;
+
     void initialize(Parameters *pPin);
     void umiSwapHalves(uint32 &umi);
     void complexWLstrings();

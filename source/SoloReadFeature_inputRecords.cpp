@@ -24,45 +24,39 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
             continue;
         };
 
+        bool readIsCounted = false;
+
         if (cbmatch<=1) {//single match
             *streamReads >> cb;
 
             if ( pSolo.CBmatchWL.oneExact && cbmatch==1 && cbReadCountTotal[cb]==0 && feature!=(uint32)(-1) ) {//single 1MM match, no exact matches to this CB
                 stats.V[stats.noMMtoWLwithoutExact]++;
-                continue;
-            };
 
-            if (!pSolo.cbWLyes) //if no-WL, the full cbInteger was recorded - now has to be placed in order
-                cb=binarySearchExact<uintCB>(cb, pSolo.cbWL.data(), pSolo.cbWLsize);
+            } else {
 
-            //record feature
-            if (feature != (uint32)(-1)) {//good feature, will be counted
-                cbP[cb][0]=feature;
-                cbP[cb][1]=umi;
+                if (!pSolo.cbWLyes) //if no-WL, the full cbInteger was recorded - now has to be placed in order
+                    cb=binarySearchExact<uintCB>(cb, pSolo.cbWL.data(), pSolo.cbWLsize);
 
-                if (cbmatch==0)
-                    stats.V[stats.yessubWLmatchExact]++;
+                //record feature
+                if (feature != (uint32)(-1)) {//good feature, will be counted
+                    readIsCounted = true;
 
-                if (readIndexYes) {
-                    cbP[cb][2]=iread;
-                    readFlagCounts.setBit(readFlagCounts.counted);
+                    cbP[cb][0]=feature;
+                    cbP[cb][1]=umi;
+
+                    if (cbmatch==0)
+                        stats.V[stats.yessubWLmatchExact]++;
+
+                    if (readIndexYes) {
+                        cbP[cb][2]=iread;
+                    };
+
+                    cbP[cb]+=cbPstride;
+
+                } else if (readInfoYes) {//no feature - record readInfo
+                    readInfo[iread].cb=cb;
+                    readInfo[iread].umi=umi;
                 };
-
-                cbP[cb]+=cbPstride;
-
-            } else if (readInfoYes) {//no feature - record readInfo
-                readInfo[iread].cb=cb;
-                readInfo[iread].umi=umi;
-            };
-
-            if (readIndexYes && iread != prevIread) {
-                prevIread = iread; //for multi-gene reads
-                if (cbmatch==0) {
-                    readFlagCounts.setBit(readFlagCounts.cbPerfect);
-                } else {
-                    readFlagCounts.setBit(readFlagCounts.cbMMunique);
-                };
-                readFlagCounts.countsAdd(cb);
             };
 
         } else {//multiple matches
@@ -90,24 +84,45 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
             if (ptot>0.0 && pmax>=pSolo.cbMinP*ptot) {
                 //record feature single-number feature
                 if (feature != (uint32)(-1)) {
+                    readIsCounted = true;
                     cbP[cb][0]=feature;
                     cbP[cb][1]=umi;
                     if (readIndexYes) {
                         cbP[cb][2]=iread;
-                        readFlagCounts.setBit(readFlagCounts.counted);
                     };
                     cbP[cb]+=cbPstride;
                 } else if (readInfoYes) {//no feature - record readInfo
                     readInfo[iread].cb=cb;
                     readInfo[iread].umi=umi;
                 };
-                if (readIndexYes) {
-                    readFlagCounts.setBit(readFlagCounts.cbMMmultiple);
-                    readFlagCounts.countsAdd(cb);
-                };
             } else if (feature != (uint32)(-1)) {
                 stats.V[stats.noTooManyWLmatches]++;
             };
+        };
+
+        if ( pSolo.readStatsYes[featureType] && iread != prevIread ) {//has to be new iread to avoid muti-counting multi-gene reads
+            prevIread = iread; //for multi-gene reads
+            //readIsCounted flag was defined above
+            if ( readIsCounted ) {
+                if ( readFlagCounts.checkBit(readFlagCounts.featureU) )
+                    readFlagCounts.setBit(readFlagCounts.countedU);
+                if ( readFlagCounts.checkBit(readFlagCounts.featureM) )
+                    readFlagCounts.setBit(readFlagCounts.countedM);    
+            };
+
+            if (cbmatch==0) {
+                readFlagCounts.setBit(readFlagCounts.cbPerfect);
+            } else if (cbmatch==1) {
+                readFlagCounts.setBit(readFlagCounts.cbMMunique);
+            } else {
+                readFlagCounts.setBit(readFlagCounts.cbMMmultiple);
+            };
+            readFlagCounts.countsAdd(cb);
+
+            /* debug
+            if (readFlagCounts.checkBit(readFlagCounts.featureM))
+                cout << iread <<' '<< readFlagCounts.flagCounts[cb][readFlagCounts.featureM] << endl;
+            */
         };
     };
 };

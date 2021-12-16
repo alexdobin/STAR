@@ -81,6 +81,22 @@ void SoloFeature::statsOutput()
     ///////////////////////////////////////////////// readStatsOutput
     if (pSolo.readStatsYes[featureType]) {
         ofstream &strOut=ofstrOpen(outputPrefix+"CellReads.stats", ERROR_OUT, P);
+
+        strOut << "CB";
+        for (auto &sn: readFlagCounts.statNames)
+            strOut <<"\t"<< sn;
+
+        strOut << '\n';
+
+        for (auto &cbc: readFlagCounts.flagCounts) {
+            strOut << pSolo.cbWLstr[cbc.first];
+
+            for (uint32 ib=0; ib<readFlagCounts.nBits; ib++)
+                strOut <<'\t'<< cbc.second[ib];
+
+            strOut <<'\n';
+        };
+
         strOut.close();
     };
 

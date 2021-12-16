@@ -25,9 +25,11 @@ typedef uint32 uintRead;
 class SoloReadFlagClass
 {
 public:
+    bool yes=false;
     typedef uint32 typeFlag;
     typeFlag flag=0;
-    enum: uint32 {genomeU, genomeM, featureU, featureM, exonic, antisense, mito, cbPerfect, cbMMunique, cbMMmultiple, counted, nBits};
+    enum: uint32 {cbMatch, cbPerfect, cbMMunique, cbMMmultiple, genomeU, genomeM, featureU, featureM, exonic, antisense, mito, countedU, countedM, nBits};
+    const vector<string> statNames={"cbMatch", "cbPerfect", "cbMMunique", "cbMMmultiple", "genomeU", "genomeM", "featureU", "featureM", "exonic", "antisense", "mito", "countedU", "countedM"};
 
     /* lookup table, probably not efficient
         typeFlag bitMask[nBits], bitInt[nBits];
@@ -53,7 +55,7 @@ public:
 
     void countsAdd(uintCB cb) {//adds flag bits to the count for a given cb
         auto cbInserted = flagCounts.insert({cb, {} });
-        for (uint32 ibit=0; ibit< nBits; ibit++) {
+        for (uint32 ibit=0; ibit<nBits; ibit++) {
             (*cbInserted.first).second[ibit] += (uint64) checkBit(ibit);
         };
     };

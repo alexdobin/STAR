@@ -9,6 +9,7 @@ class ReadAnnotFeature {//annotations for one feature
 public:
     set<uint32> fSet;  //set of genes for this read
     vector<set<uint32>> fAlign; //gene for each alignment of this read
+    bool exonic, exonicAS, intronic, intronicAS;
 };
 
 class ReadAnnotations {

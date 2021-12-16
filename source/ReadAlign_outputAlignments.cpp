@@ -5,6 +5,7 @@
 void ReadAlign::outputAlignments() {
   
     outBAMbytes=0;
+    soloRead->readFlagReset();
     
     if (mapGen.pGe.gType==101) {//temporary
         ReadAlign::spliceGraphWriteSAM();

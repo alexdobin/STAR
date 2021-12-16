@@ -413,6 +413,7 @@ void ParametersSolo::initialize(Parameters *pPin)
 
     /////////////////////////////////////////////////////////////////// readFlag output
     if (true) {
+        readStats.yes = true;
         readStatsYes.fill(true);
         readStatsYes[SoloFeatureTypes::VelocytoSimple] = false; //this could be allowed, but it will have the same info as Gene
         readStatsYes[SoloFeatureTypes::Velocyto] = false;

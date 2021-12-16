@@ -16,10 +16,21 @@ public:
 
 uint32 outputReadCB(fstream *streamOut, const uint64 iRead, const int32 featureType, SoloReadBarcode &soloBar, 
                     const ReadSoloFeatures &reFe, const ReadAnnotations &readAnnot, const SoloReadFlagClass &readFlag);
+
 void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **alignOut, uint64 iRead, ReadAnnotations &readAnnot)
 {
     if (pSolo.type==0 || soloBar.cbMatch<0)
         return;
+
+    readFlag.setBit(readFlag.cbMatch); //this read has CB match in passlist
+
+    if (pSolo.readStats.yes) {//readFlag
+        if (nTr==1) {
+            readFlag.setBit(readFlag.genomeU);
+        } else if (nTr>1) {
+            readFlag.setBit(readFlag.genomeM);
+        };
+    };
        
     ReadSoloFeatures reFe;
     reFe.alignOut=alignOut;
@@ -52,6 +63,7 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
                         stats.V[stats.noNoFeature]++;//no gene
                     } else if (readGe->size()>1) {
                         stats.V[stats.MultiFeature]++;//multi-gene reads
+                        readFlag.setBit(readFlag.featureM);
                         if (nTr>1)
                             stats.V[stats.subMultiFeatureMultiGenomic]++;//multigene caused by multimapper
                             
@@ -67,13 +79,14 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
                         };
                     } else {//unique-gene reads
                         reFe.gene = *readGe->begin();
+                        readFlag.setBit(readFlag.featureU);
                         nFeat = outputReadCB(streamReads, (readIndexYes ? iRead : (uint64)-1), featureType, soloBar, reFe, readAnnot, readFlag);
                     };
                 };
                 break;
         
             case SoloFeatureTypes::SJ : 
-                if (nTr>1) {//reject all multimapping junctions
+                if (nTr>1) {//reject all multimapping reads
                     stats.V[stats.subMultiFeatureMultiGenomic]++;
                 //} else if (readAnnot.geneConcordant.size()>1){//for SJs, still check genes, no feature if multi-gene
                 //    stats.V[stats.MultiFeature]++;
@@ -83,6 +96,7 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
                     if ( reFe.sj.empty() ) {
                         stats.V[stats.noNoFeature]++;
                     } else {//good junction
+                        readFlag.setBit(readFlag.featureU);
                         nFeat = outputReadCB(streamReads, (readIndexYes ? iRead : (uint64)-1), featureType, soloBar, reFe, readAnnot, readFlag);
                     };
                 };                  
@@ -121,7 +135,7 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
         };//switch (featureType)
     };//if (nTr==0)
     
-    if (nFeat==0 && readInfoYes) {//no feature, but readInfo requested
+    if ( nFeat==0 && (readInfoYes | pSolo.readStatsYes[featureType]) ) {//no feature, but readInfo requested
         outputReadCB(streamReads, iRead, (uint32)-1, soloBar, reFe, readAnnot, readFlag);
     };
     

@@ -93,7 +93,7 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
         };
     };
 
-    if ( P.quant.geneFull.yes || P.quant.geneFull_Ex50pAS.yes || P.quant.geneFull_ExonOverIntron.yes) {
+    if ( P.quant.geneFull.yes || P.quant.geneFull_ExonOverIntron.yes ) {
         ifstream & exinfo = ifstrOpen(trInfoDir+"/exonGeTrInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
         exinfo >> exG.nEx;
 
