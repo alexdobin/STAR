@@ -34,19 +34,42 @@ void SoloFeature::countCBgeneUMI()
 
     //read and store the CB/gene/UMI from files
     time(&rawTime);
-    P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished allocating arrays for Solo " << nReadsMapped*rguStride*4.0/1024/1024/1024 <<" GB" <<endl;
+    P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished allocating arrays for Solo " << nReadsMapped*rguStride*4.0/1024/1024/1024 <<" GiB" <<endl;
 
     ///////////////////////////////////////////////////////////////////////////
     ////////////// Input records
     readFlagCounts.flagCounts.reserve(nCB*3/2);
+    vector<uint32> nReadPerCBunique1(pSolo.cbWLsize), nReadPerCBmulti1(pSolo.cbWLsize); //temp arrays to record # of reads for all cells in the WL
     for (int ii=0; ii<P.runThreadN; ii++) {//TODO: this can be parallelized
-        readFeatAll[ii]->inputRecords(rCBpa, rguStride, readBarSum->cbReadCountExact, readInfo, readFlagCounts);
+        readFeatAll[ii]->inputRecords(rCBpa, rguStride, readBarSum->cbReadCountExact, readInfo, readFlagCounts, nReadPerCBunique1, nReadPerCBmulti1);
+    };
+        
+    nReadPerCBtotal.resize(nCB);
+    nReadPerCBunique.resize(nCB);
+    for (uint32 icb=0; icb<nCB; icb++) {
+        nReadPerCBunique[icb] = nReadPerCBunique1[indCB[icb]];
+        nReadPerCBtotal[icb] = nReadPerCBunique[icb] + nReadPerCBmulti1[indCB[icb]];
+    };
+
+    //debug
+    {
+        uint64 n1=0,n2=0;
+        for (uint32 icb=0; icb<nCB; icb++) {
+            n1 += nReadPerCBtotal[icb];
+        };
+
+        for (auto &c: readFlagCounts.flagCounts) {
+            n2+= c.second[readFlagCounts.countedU] + c.second[readFlagCounts.countedM];
+        };
+
+        cout << "n1,2=" << n1<<" "<<n2<<endl;
     };
 
     nReadPerCB.resize(nCB);
     uint32 nReadPerCBmax=0;
     for (uint32 iCB=0; iCB<nCB; iCB++) {
         nReadPerCB[iCB] = (rCBpa[indCB[iCB]]-rCBp[iCB])/rguStride;  //number of reads that were matched to WL, rCBpa accumulated reference to the last element+1
+                                                                    //for multimappers this is the number of all alignments > number of reads
         nReadPerCBmax=max(nReadPerCBmax,nReadPerCB[iCB]);
         //readFeatSum->stats.V[readFeatSum->stats.yesWLmatch] += nReadPerCB[iCB];
     };    
@@ -76,9 +99,7 @@ void SoloFeature::countCBgeneUMI()
         countMatMult.m.resize(nReadsMapped*countMatMult.s/5+16);
         countMatMult.i.resize(nCB+1, 0);
     };
-    
-    nReadPerCBtotal.resize(nCB);
-    nReadPerCBunique.resize(nCB);
+
     for (uint32 icb=0; icb<nCB; icb++) {//main collapse cycle
         
         collapseUMIall(icb, umiArray);

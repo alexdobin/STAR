@@ -5,7 +5,8 @@
 #include "soloInputFeatureUMI.h"
 #include "serviceFuns.cpp"
 
-void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32> &cbReadCountTotal, vector<readInfoStruct> &readInfo, SoloReadFlagClass &readFlagCounts)
+void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32> &cbReadCountTotal, vector<readInfoStruct> &readInfo, SoloReadFlagClass &readFlagCounts,
+                                   vector<uint32> &nReadPerCBunique1, vector<uint32> &nReadPerCBmulti1)
 {   
     streamReads->flush();
     streamReads->seekg(0,std::ios::beg);
@@ -25,12 +26,15 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
         };
 
         bool readIsCounted = false;
+        bool featGood = ( feature != (uint32)(-1) );
+        bool noMMtoWLwithoutExact = false;
+        bool noTooManyWLmatches = false;
 
         if (cbmatch<=1) {//single match
             *streamReads >> cb;
 
-            if ( pSolo.CBmatchWL.oneExact && cbmatch==1 && cbReadCountTotal[cb]==0 && feature!=(uint32)(-1) ) {//single 1MM match, no exact matches to this CB
-                stats.V[stats.noMMtoWLwithoutExact]++;
+            if ( pSolo.CBmatchWL.oneExact && cbmatch==1 && cbReadCountTotal[cb]==0 ) {//single 1MM match, no exact matches to this CB
+                noMMtoWLwithoutExact = true;
 
             } else {
 
@@ -38,14 +42,11 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
                     cb=binarySearchExact<uintCB>(cb, pSolo.cbWL.data(), pSolo.cbWLsize);
 
                 //record feature
-                if (feature != (uint32)(-1)) {//good feature, will be counted
+                if (featGood) {//good feature, will be counted
                     readIsCounted = true;
 
                     cbP[cb][0]=feature;
                     cbP[cb][1]=umi;
-
-                    if (cbmatch==0)
-                        stats.V[stats.yessubWLmatchExact]++;
 
                     if (readIndexYes) {
                         cbP[cb][2]=iread;
@@ -83,7 +84,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
             };
             if (ptot>0.0 && pmax>=pSolo.cbMinP*ptot) {
                 //record feature single-number feature
-                if (feature != (uint32)(-1)) {
+                if (featGood) {
                     readIsCounted = true;
                     cbP[cb][0]=feature;
                     cbP[cb][1]=umi;
@@ -95,34 +96,57 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
                     readInfo[iread].cb=cb;
                     readInfo[iread].umi=umi;
                 };
-            } else if (feature != (uint32)(-1)) {
-                stats.V[stats.noTooManyWLmatches]++;
+            } else {
+                noTooManyWLmatches = true;
             };
         };
 
-        if ( pSolo.readStatsYes[featureType] && iread != prevIread ) {//has to be new iread to avoid muti-counting multi-gene reads
-            prevIread = iread; //for multi-gene reads
-            //readIsCounted flag was defined above
-            if ( readIsCounted ) {
-                if ( readFlagCounts.checkBit(readFlagCounts.featureU) )
-                    readFlagCounts.setBit(readFlagCounts.countedU);
-                if ( readFlagCounts.checkBit(readFlagCounts.featureM) )
-                    readFlagCounts.setBit(readFlagCounts.countedM);    
+        if ( iread != prevIread ) {//only for one align of each read, in case of multimappers
+
+            if (featGood) {
+                if (cbmatch==0) {
+                    stats.V[stats.yessubWLmatchExact]++;
+                } else if (noMMtoWLwithoutExact) {
+                    stats.V[stats.noMMtoWLwithoutExact]++;
+                } else if (noTooManyWLmatches) {
+                    stats.V[stats.noTooManyWLmatches]++;
+                };
             };
 
-            if (cbmatch==0) {
-                readFlagCounts.setBit(readFlagCounts.cbPerfect);
-            } else if (cbmatch==1) {
-                readFlagCounts.setBit(readFlagCounts.cbMMunique);
-            } else {
-                readFlagCounts.setBit(readFlagCounts.cbMMmultiple);
+            if (readIsCounted) {
+                if (feature<geneMultMark) {
+                    nReadPerCBunique1[cb]++;
+                } else {
+                    nReadPerCBmulti1[cb]++;
+                };
             };
-            readFlagCounts.countsAdd(cb);
+            if ( pSolo.readStatsYes[featureType] ) {//has to be new iread to avoid muti-counting multi-gene reads
+                prevIread = iread; //for multi-gene reads
+                //readIsCounted flag was defined above
+                if ( readIsCounted ) {
+                    if ( readFlagCounts.checkBit(readFlagCounts.featureU) )
+                        readFlagCounts.setBit(readFlagCounts.countedU);
+                    if ( readFlagCounts.checkBit(readFlagCounts.featureM) )
+                        readFlagCounts.setBit(readFlagCounts.countedM);    
+                };
 
-            /* debug
-            if (readFlagCounts.checkBit(readFlagCounts.featureM))
-                cout << iread <<' '<< readFlagCounts.flagCounts[cb][readFlagCounts.featureM] << endl;
-            */
+                if (cbmatch==0) {
+                    readFlagCounts.setBit(readFlagCounts.cbPerfect);
+                } else if (cbmatch==1) {
+                    readFlagCounts.setBit(readFlagCounts.cbMMunique);
+                } else {
+                    readFlagCounts.setBit(readFlagCounts.cbMMmultiple);
+                };
+                readFlagCounts.countsAdd(cb);
+
+                /* debug
+
+                if (readFlagCounts.flagCounts[cb][readFlagCounts.countedU]+readFlagCounts.flagCounts[cb][readFlagCounts.countedM] != nReadPerCBunique1[cb]+nReadPerCBmulti1[cb])
+                    cout << cb <<' '<< iread << endl;
+                if (readFlagCounts.checkBit(readFlagCounts.featureM))
+                    cout << iread <<' '<< readFlagCounts.flagCounts[cb][readFlagCounts.featureM] << endl;
+                */
+            };
         };
     };
 };
