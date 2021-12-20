@@ -52,7 +52,7 @@ void SoloFeature::countCBgeneUMI()
     };
 
     //debug
-    {
+    /*{
         uint64 n1=0,n2=0;
         for (uint32 icb=0; icb<nCB; icb++) {
             n1 += nReadPerCBtotal[icb];
@@ -63,7 +63,7 @@ void SoloFeature::countCBgeneUMI()
         };
 
         cout << "n1,2=" << n1<<" "<<n2<<endl;
-    };
+    };*/
 
     nReadPerCB.resize(nCB);
     uint32 nReadPerCBmax=0;

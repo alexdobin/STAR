@@ -2,6 +2,7 @@
 #define CODE_ParametersGenome
 
 #include "IncludeDefine.h"
+#include <unordered_set>
 
 class Parameters;
 
@@ -45,6 +46,12 @@ public:
     uint sjdbOverhang;
     int sjdbOverhang_par;
     int sjdbScore;
+
+    struct {
+        vector<string> mitoStrings;
+        unordered_set<uint64> mito;
+    } chrSet;
+
     
     void initialize(Parameters *Pin);
 

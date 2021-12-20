@@ -60,6 +60,9 @@ genomeTransformOutput       None
                             SJ      ... splice junctions (SJ.out.tab)
                             None    ... no transformation of the output        
 
+genomeChrSetMitochondrial   chrM M MT
+    string(s)               names of the mitochondrial chromosomes. Presently only used for STARsolo statisics output/
+
 ### Genome Indexing Parameters - only used with --runMode genomeGenerate
 genomeChrBinNbits           18
     int: =log2(chrBin), where chrBin is the size of the bins for genome storage: each chromosome will occupy an integer number of bins. For a genome with large number of contigs, it is recommended to scale this parameter as min(18, log2[max(GenomeLength/NumberOfReferences,ReadLength)]).

@@ -192,6 +192,13 @@ void Genome::chrInfoLoad() {//find chrStart,Length,nChr from Genome G
         P.inOut->logMain << ii+1 <<"\t"<< chrName[ii] <<"\t"<<chrLength[ii]<<"\t"<<chrStart[ii]<<"\n"<<flush;
         chrNameIndex[chrName[ii]]=ii;
     };
+
+    //chr sets
+    for (auto &cm: pGe.chrSet.mitoStrings) {
+        uint64 ind1 = std::find(chrName.begin(), chrName.end(), cm) - chrName.begin();
+        pGe.chrSet.mito.insert(ind1);
+    };
+
 };
 
 //////////////////////////////////////////////////////////

@@ -28,8 +28,8 @@ public:
     bool yes=false;
     typedef uint32 typeFlag;
     typeFlag flag=0;
-    enum: uint32 {cbMatch, cbPerfect, cbMMunique, cbMMmultiple, genomeU, genomeM, featureU, featureM, exonic, antisense, mito, countedU, countedM, nBits};
-    const vector<string> statNames={"cbMatch", "cbPerfect", "cbMMunique", "cbMMmultiple", "genomeU", "genomeM", "featureU", "featureM", "exonic", "antisense", "mito", "countedU", "countedM"};
+    enum: uint32 {cbMatch, cbPerfect, cbMMunique, cbMMmultiple, genomeU, genomeM, featureU, featureM, exonic, intronic, exonicAS, intronicAS, mito, countedU, countedM, nBits};
+    const vector<string> statNames={"cbMatch", "cbPerfect", "cbMMunique", "cbMMmultiple", "genomeU", "genomeM", "featureU", "featureM", "exonic", "intronic", "exonicAS", "intronicAS", "mito", "countedU", "countedM"};
 
     /* lookup table, probably not efficient
         typeFlag bitMask[nBits], bitInt[nBits];

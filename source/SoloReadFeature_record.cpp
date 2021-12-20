@@ -22,13 +22,29 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
     if (pSolo.type==0 || soloBar.cbMatch<0)
         return;
 
-    readFlag.setBit(readFlag.cbMatch); //this read has CB match in passlist
+    if (pSolo.readStatsYes[featureType]) {//readFlag
+        readFlag.setBit(readFlag.cbMatch); //this read has CB match in passlist
 
-    if (pSolo.readStats.yes) {//readFlag
         if (nTr==1) {
             readFlag.setBit(readFlag.genomeU);
         } else if (nTr>1) {
             readFlag.setBit(readFlag.genomeM);
+        };
+
+        for (uint64 itr=0; itr<nTr; itr++) {
+            if (P.pGe.chrSet.mito.count(alignOut[itr]->Chr) == 1) {
+                readFlag.setBit(readFlag.mito);
+            };
+        };
+
+        if (readAnnot.annotFeatures[featureType].exonic) {
+            readFlag.setBit(readFlag.exonic);
+        } else if (readAnnot.annotFeatures[featureType].intronic){
+            readFlag.setBit(readFlag.intronic);
+        } else if (readAnnot.annotFeatures[featureType].exonicAS){
+            readFlag.setBit(readFlag.exonicAS);            
+        } else if (readAnnot.annotFeatures[featureType].intronicAS){
+            readFlag.setBit(readFlag.intronicAS);            
         };
     };
        
