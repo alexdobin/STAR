@@ -139,13 +139,12 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
                 };
                 readFlagCounts.countsAdd(cb);
 
-                /* debug
-
-                if (readFlagCounts.flagCounts[cb][readFlagCounts.countedU]+readFlagCounts.flagCounts[cb][readFlagCounts.countedM] != nReadPerCBunique1[cb]+nReadPerCBmulti1[cb])
-                    cout << cb <<' '<< iread << endl;
-                if (readFlagCounts.checkBit(readFlagCounts.featureM))
-                    cout << iread <<' '<< readFlagCounts.flagCounts[cb][readFlagCounts.featureM] << endl;
-                */
+                // debug
+                //if (featureType==SoloFeatureTypes::Gene && readFlagCounts.flagCounts[cb][readFlagCounts.featureM]+readFlagCounts.flagCounts[cb][readFlagCounts.featureU] != readFlagCounts.flagCounts[cb][readFlagCounts.exonic])
+                //    cout << cb <<' '<< iread << endl;
+                //if (readFlagCounts.checkBit(readFlagCounts.featureM))
+                //    cout << iread <<' '<< readFlagCounts.flagCounts[cb][readFlagCounts.featureM] << endl;
+                
             };
         };
     };

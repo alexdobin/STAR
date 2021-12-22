@@ -176,17 +176,19 @@ int alignToTranscriptMinOverlap(Transcript &aG, uint trS1, uint32 *exSE1, uint16
 
 void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnnotations &readAnnot) 
 {
-    readAnnot.transcriptConcordant={};
+    // readAnnot.transcriptConcordant={};
+    // readAnnot.trVelocytoType={};
+
     ReadAnnotFeature &annFeat = readAnnot.annotFeatures[SoloFeatureTypes::Gene];
-    annFeat.fSet={};
-    readAnnot.trVelocytoType={};
-            
+    // annFeat.fSet={};
+    // annFeat.fAlign = {};       
+    // annFeat.fAlign.resize(nAlignG);    
+    // annFeat.ovType = 0;
+
     //array<bool,AlignVsTranscript::N> reAnn={false};
     uint32 reGe=(uint32)-2;//so that the first gene can be recorded
     std::bitset<velocytoTypeGeneBits> reAnn; //initialized to 0 (false)
-
-    annFeat.fAlign = {};       
-    annFeat.fAlign.resize(nAlignG);       
+       
     for (uint iag=0; iag<nAlignG; iag++) {
         
         Transcript &aG=*alignG[iag];
@@ -256,7 +258,8 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
         } while (trEmax[tr1]>=aGend && tr1>0);
     };
     
-    annFeat.exonic = annFeat.fSet.size()>0;
+    if ( annFeat.fSet.size()>0 )
+        annFeat.ovType = ReadAnnotFeature::overlapTypes::exonic;
     //VelocytoSimple logic
     readAnnot.geneVelocytoSimple[0]=(reGe+2==0 ? (uint32)-1 : reGe);//-2 marks no gene, convert to -1 which marks either no gene or multigene - no output     
     readAnnot.geneVelocytoSimple[1]=reAnn.to_ulong();

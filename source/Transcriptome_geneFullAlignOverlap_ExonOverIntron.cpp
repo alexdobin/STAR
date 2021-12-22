@@ -4,15 +4,17 @@
 
 void Transcriptome::geneFullAlignOverlap_ExonOverIntron(uint nA, Transcript **aAll, int32 strandType, ReadAnnotFeature &annFeat, ReadAnnotFeature &annFeatGeneConcordant)
 {
+    // annFeat.ovType = 0;
     if (annFeatGeneConcordant.fSet.size()>0) {//if concordant genes were found for this read, prioritize them over intronic overlap
         annFeat = annFeatGeneConcordant;
+        annFeat.ovType = ReadAnnotFeature::overlapTypes::exonic;
         return;
     };
 
     //calculate overlap with introns
-    annFeat.fSet={};
-    annFeat.fAlign = {};    
-    annFeat.fAlign.resize(nA);
+    // annFeat.fSet={};
+    // annFeat.fAlign = {};    
+    // annFeat.fAlign.resize(nA);
 
     for (uint32 iA=0; iA<nA; iA++) {//only includes aligns that are entirely inside genes (?)
         Transcript &a = *aAll[iA];
@@ -34,7 +36,8 @@ void Transcriptome::geneFullAlignOverlap_ExonOverIntron(uint nA, Transcript **aA
             --gi1;// go to the previous gene
         };
     };
-    annFeat.intronic = annFeat.fSet.size()>0;
+    if (annFeat.fSet.size()>0)
+        annFeat.ovType = ReadAnnotFeature::overlapTypes::intronic;
 };
 
 

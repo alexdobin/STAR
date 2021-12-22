@@ -37,14 +37,18 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
             };
         };
 
-        if (readAnnot.annotFeatures[featureType].exonic) {
-            readFlag.setBit(readFlag.exonic);
-        } else if (readAnnot.annotFeatures[featureType].intronic){
-            readFlag.setBit(readFlag.intronic);
-        } else if (readAnnot.annotFeatures[featureType].exonicAS){
-            readFlag.setBit(readFlag.exonicAS);            
-        } else if (readAnnot.annotFeatures[featureType].intronicAS){
-            readFlag.setBit(readFlag.intronicAS);            
+        switch (readAnnot.annotFeatures[featureType].ovType) {
+            case ReadAnnotFeature::overlapTypes::exonic : 
+                readFlag.setBit(readFlag.exonic);
+                break;
+            case ReadAnnotFeature::overlapTypes::intronic : 
+                readFlag.setBit(readFlag.intronic);
+                break;
+            case ReadAnnotFeature::overlapTypes::exonicAS : 
+                readFlag.setBit(readFlag.exonicAS);            
+                break;
+            case ReadAnnotFeature::overlapTypes::intronicAS :
+                readFlag.setBit(readFlag.intronicAS);            
         };
     };
        
@@ -98,6 +102,12 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
                         readFlag.setBit(readFlag.featureU);
                         nFeat = outputReadCB(streamReads, (readIndexYes ? iRead : (uint64)-1), featureType, soloBar, reFe, readAnnot, readFlag);
                     };
+
+                    //debug
+                    //{
+                    //    if (SoloFeatureTypes::Gene==featureType && ((readFlag.checkBit(readFlag.featureM)==1|readFlag.checkBit(readFlag.featureU)==1) != readFlag.checkBit(readFlag.exonic) ))
+                    //        cout << iRead<<" "<<readFlag.checkBit(readFlag.featureM)<<" "<<readFlag.checkBit(readFlag.featureU)<<" "<<readFlag.checkBit(readFlag.exonic)<<endl;
+                    //};                    
                 };
                 break;
         

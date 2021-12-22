@@ -9,7 +9,12 @@ class ReadAnnotFeature {//annotations for one feature
 public:
     set<uint32> fSet;  //set of genes for this read
     vector<set<uint32>> fAlign; //gene for each alignment of this read
-    bool exonic, exonicAS, intronic, intronicAS;
+    uint32 ovType;
+    enum overlapTypes {none,exonic, exonicAS, intronic, intronicAS};
+
+    void reset() {
+        fSet={}; fAlign={}; ovType = 0;
+    };
 };
 
 class ReadAnnotations {
@@ -27,7 +32,14 @@ public:
             vector<trTypeStruct> trVelocytoType;//first element is gene, then counts of transcript types
             
             //vector<array<uint64,2>> sj;
-            //bool sjAnnot;      
+            //bool sjAnnot;
+
+            void reset () {
+                transcriptConcordant = {};
+                trVelocytoType = {};
+                for (auto &raf : annotFeatures)
+                    raf.reset();
+            };
 };
 
 #endif

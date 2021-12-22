@@ -198,22 +198,22 @@ void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandTyp
         };
 
         if (otFinal[0]) {
-            annFeat.exonic = true;
+            annFeat.ovType = ReadAnnotFeature::overlapTypes::exonic;
         } else if (otFinal[1]) {
-            annFeat.exonicAS = true;
+            annFeat.ovType = ReadAnnotFeature::overlapTypes::exonicAS;
         } else if (otFinal[2]) {
-            annFeat.exonic = true;
+            annFeat.ovType = ReadAnnotFeature::overlapTypes::exonic;
         } else if (otFinal[3]) {
-            annFeat.exonicAS = true;
+            annFeat.ovType = ReadAnnotFeature::overlapTypes::exonicAS;
         } else if (otFinal[4]) {
-            annFeat.intronic = true;
+            annFeat.ovType = ReadAnnotFeature::overlapTypes::intronic;
         } else {
-            annFeat.intronicAS = true;
+            annFeat.ovType = ReadAnnotFeature::overlapTypes::intronicAS;
         };
 
-        annFeat.fSet={};
-        annFeat.fAlign = {};
-        annFeat.fAlign.resize(nA);
+        // annFeat.fSet={};
+        // annFeat.fAlign = {};
+        // annFeat.fAlign.resize(nA);
         for ( uint32 it=0; it<otFinal.size(); it++ ) {
             if ( otFinal[it] ) {
                 if (otAS[it])
