@@ -178,14 +178,15 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
 {
     // readAnnot.transcriptConcordant={};
     // readAnnot.trVelocytoType={};
+    //array<bool,AlignVsTranscript::N> reAnn={false};
+
 
     ReadAnnotFeature &annFeat = readAnnot.annotFeatures[SoloFeatureTypes::Gene];
     // annFeat.fSet={};
     // annFeat.fAlign = {};       
-    // annFeat.fAlign.resize(nAlignG);    
     // annFeat.ovType = 0;
 
-    //array<bool,AlignVsTranscript::N> reAnn={false};
+    annFeat.fAlign.resize(nAlignG);    
     uint32 reGe=(uint32)-2;//so that the first gene can be recorded
     std::bitset<velocytoTypeGeneBits> reAnn; //initialized to 0 (false)
        

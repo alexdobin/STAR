@@ -296,6 +296,7 @@ Parameters::Parameters() {//initalize parameters info
     
     parArray.push_back(new ParameterInfoVector <string>   (-1, -1, "soloInputSAMattrBarcodeSeq",&pSolo.samAtrrBarcodeSeq));
     parArray.push_back(new ParameterInfoVector <string>   (-1, -1, "soloInputSAMattrBarcodeQual",&pSolo.samAtrrBarcodeQual));
+    parArray.push_back(new ParameterInfoScalar <string>   (-1, -1, "soloCellReadStats",&pSolo.readStats.type));
 
     parameterInputName.push_back("Default");
     parameterInputName.push_back("Command-Line-Initial");

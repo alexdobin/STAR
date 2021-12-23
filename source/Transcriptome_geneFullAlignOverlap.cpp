@@ -6,8 +6,9 @@ void Transcriptome::geneFullAlignOverlap(uint nA, Transcript **aAll, int32 stran
 {
     // annFeat.fSet={};
     // annFeat.fAlign = {};
-    // annFeat.fAlign.resize(nA);
     // annFeat.ovType = 0; //exonic/intronic determination is not done
+
+    annFeat.fAlign.resize(nA);
     for (uint32 iA=0; iA<nA; iA++) {
         Transcript &a = *aAll[iA];//one unique alignment only
 

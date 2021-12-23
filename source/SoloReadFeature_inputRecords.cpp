@@ -130,14 +130,18 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
                         readFlagCounts.setBit(readFlagCounts.countedM);    
                 };
 
+                //only record this read in readFlagCounts if its CB was defined
                 if (cbmatch==0) {
                     readFlagCounts.setBit(readFlagCounts.cbPerfect);
-                } else if (cbmatch==1) {
+                    readFlagCounts.countsAdd(cb);
+                } else if (cbmatch==1 && !noMMtoWLwithoutExact) {
                     readFlagCounts.setBit(readFlagCounts.cbMMunique);
-                } else {
+                    readFlagCounts.countsAdd(cb);
+                } else if (cbmatch>1 && !noTooManyWLmatches) {
                     readFlagCounts.setBit(readFlagCounts.cbMMmultiple);
+                    readFlagCounts.countsAdd(cb);
                 };
-                readFlagCounts.countsAdd(cb);
+                
 
                 // debug
                 //if (featureType==SoloFeatureTypes::Gene && readFlagCounts.flagCounts[cb][readFlagCounts.featureM]+readFlagCounts.flagCounts[cb][readFlagCounts.featureU] != readFlagCounts.flagCounts[cb][readFlagCounts.exonic])

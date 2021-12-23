@@ -14,8 +14,8 @@ void Transcriptome::geneFullAlignOverlap_ExonOverIntron(uint nA, Transcript **aA
     //calculate overlap with introns
     // annFeat.fSet={};
     // annFeat.fAlign = {};    
-    // annFeat.fAlign.resize(nA);
-
+    
+    annFeat.fAlign.resize(nA);
     for (uint32 iA=0; iA<nA; iA++) {//only includes aligns that are entirely inside genes (?)
         Transcript &a = *aAll[iA];
             

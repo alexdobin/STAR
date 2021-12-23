@@ -213,7 +213,7 @@ void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandTyp
 
         // annFeat.fSet={};
         // annFeat.fAlign = {};
-        // annFeat.fAlign.resize(nA);
+        annFeat.fAlign.resize(nA);
         for ( uint32 it=0; it<otFinal.size(); it++ ) {
             if ( otFinal[it] ) {
                 if (otAS[it])

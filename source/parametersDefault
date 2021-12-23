@@ -900,6 +900,10 @@ soloCellFilter              CellRanger2.2 3000 0.99 10
 soloOutFormatFeaturesGeneField3    "Gene Expression"
     string(s):                field 3 in the Gene features.tsv file. If "-", then no 3rd field is output.
 
+soloCellReadStats           None
+    string:                 Output reads statistics for each CB
+                            Standard    ... standard output
+
 #####UnderDevelopment_begin : not supported - do not use
 soloClusterCBfile           -
     string:                 file containing the cluster information for cell barcodes, two columns: CB cluster_index. Only used with --soloFeatures Transcript3p

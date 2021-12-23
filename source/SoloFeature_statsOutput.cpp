@@ -85,7 +85,7 @@ void SoloFeature::statsOutput()
         strOut << "CB";
         for (auto &sn: readFlagCounts.statNames)
             strOut <<"\t"<< sn;
-
+        strOut <<"\t"<< "nUMI" <<"\t"<< "nGenes";
         strOut << '\n';
 
         for (auto &cbc: readFlagCounts.flagCounts) {
@@ -93,6 +93,12 @@ void SoloFeature::statsOutput()
 
             for (uint32 ib=0; ib<readFlagCounts.nBits; ib++)
                 strOut <<'\t'<< cbc.second[ib];
+
+            if (indCBwl[cbc.first]==(uint32)-1) {//this CB did not have any reads mapped to features
+                strOut <<'\t'<< 0 <<'\t'<< 0;
+            } else {
+                strOut <<'\t'<< nUMIperCB[indCBwl[cbc.first]] <<'\t'<< nGenePerCB[indCBwl[cbc.first]];
+            };
 
             strOut <<'\n';
         };
