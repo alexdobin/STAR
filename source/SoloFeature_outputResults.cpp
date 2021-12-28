@@ -122,6 +122,10 @@ void SoloFeature::outputResults(bool cellFilterYes, string outputPrefixMat)
         && (featureType == SoloFeatureTypes::Gene || featureType == SoloFeatureTypes::GeneFull
          || featureType == SoloFeatureTypes::GeneFull_ExonOverIntron || featureType == SoloFeatureTypes::GeneFull_Ex50pAS) ) {
                           //skipping unique
+        nUMIperCBmulti.resize(nCB);
+        nGenePerCBmulti.resize(nCB);
+        bool nGeneUMIperCBmultiFill = true; //if true, need to fill the arrays
+
         for (const auto &iMult: pSolo.multiMap.types) {               
             for (uint32 iDed=0; iDed<pSolo.umiDedup.yes.N; iDed++) {
                 string matrixFileName=outputPrefixMat + "UniqueAndMult-" + pSolo.multiMap.typeNames[iMult];
@@ -181,16 +185,23 @@ void SoloFeature::outputResults(bool cellFilterYes, string outputPrefixMat)
                                 g2 = (uint32)-1;
                             };
                             
-                            if (g1<g2) {
+                            if (g1<g2) {//only unique counts for this gene
                                 matOutStringStream << g1+1 <<' '<< cbInd1 <<' '<< c1 <<'\n';
                                 igm1 += countMatStride;
-                            } else if (g1>g2) {
+                            } else if (g1>g2) {//only multiple counts for this gene
                                 matOutStringStream << g2+1 <<' '<< cbInd1 <<' '<< c2 <<'\n';
-                                igm2 += countMatMult.s;  
-                            } else {
+                                igm2 += countMatMult.s;
+                                if (nGeneUMIperCBmultiFill) {
+                                    nUMIperCBmulti[icb] += c2;
+                                    nGenePerCBmulti[icb]++;
+                                };
+                            } else {//unique and multiple counts for this gene
                                 matOutStringStream << g1+1 <<' '<< cbInd1 <<' '<< c1+c2 <<'\n';
                                 igm1 += countMatStride;
-                                igm2 += countMatMult.s;  
+                                igm2 += countMatMult.s;
+                                if (nGeneUMIperCBmultiFill) {
+                                    nUMIperCBmulti[icb] += c2;
+                                };                                
                             };
                             
                             ++nCellGeneEntries;
@@ -198,7 +209,9 @@ void SoloFeature::outputResults(bool cellFilterYes, string outputPrefixMat)
                     };
                 };
                 //matOutStringStream.flush();
-                
+                nGeneUMIperCBmultiFill = false; //arrays were filled - only do it once
+
+
                 ofstream &countMatrixStream=ofstrOpen(matrixFileName, ERROR_OUT, P);
                 
                 //header

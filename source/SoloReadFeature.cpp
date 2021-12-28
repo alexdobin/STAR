@@ -48,6 +48,9 @@ void SoloReadFeature::addStats(const SoloReadFeature &rfIn)
 {
     for (uint32 ii=0; ii<stats.nStats; ii++)
         stats.V[ii] += rfIn.stats.V[ii];
+
+    for (uint32 ii=0; ii<readFlag.nBits; ii++)
+        readFlag.flagCountsNoCB[ii] += rfIn.readFlag.flagCountsNoCB[ii];
 };
 
 void SoloReadFeature::statsOut(ofstream &streamOut)

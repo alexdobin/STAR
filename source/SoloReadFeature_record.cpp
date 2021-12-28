@@ -19,7 +19,7 @@ uint32 outputReadCB(fstream *streamOut, const uint64 iRead, const int32 featureT
 
 void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **alignOut, uint64 iRead, ReadAnnotations &readAnnot)
 {
-    if (pSolo.type==0 || soloBar.cbMatch<0)
+    if (pSolo.type==0)
         return;
 
     if (pSolo.readStatsYes[featureType]) {//readFlag
@@ -50,7 +50,20 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
             case ReadAnnotFeature::overlapTypes::intronicAS :
                 readFlag.setBit(readFlag.intronicAS);            
         };
+
+        if (soloBar.cbMatch<0) {
+            if (readAnnot.annotFeatures[featureType].fSet.size()==1) {
+                readFlag.setBit(readFlag.featureU);
+            } else if (readAnnot.annotFeatures[featureType].fSet.size()>1){
+                readFlag.setBit(readFlag.featureM);
+            };
+            readFlag.countsAddNoCB();
+        };
     };
+
+    if (soloBar.cbMatch<0)
+        return;
+
        
     ReadSoloFeatures reFe;
     reFe.alignOut=alignOut;

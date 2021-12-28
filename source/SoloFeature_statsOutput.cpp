@@ -85,8 +85,13 @@ void SoloFeature::statsOutput()
         strOut << "CB";
         for (auto &sn: readFlagCounts.statNames)
             strOut <<"\t"<< sn;
-        strOut <<"\t"<< "nUMI" <<"\t"<< "nGenes";
+        strOut <<"\t"<< "nUMIunique" <<"\t"<< "nGenesUnique" <<"\t"<< "nUMImulti" <<"\t"<< "nGenesMulti";
         strOut << '\n';
+
+        strOut << "CBnotInPasslist";
+        for (auto &cc: readFeatSum->readFlag.flagCountsNoCB)
+            strOut <<"\t"<< cc;
+        strOut <<"\t0\t0\t0\t0\n";
 
         for (auto &cbc: readFlagCounts.flagCounts) {
             strOut << pSolo.cbWLstr[cbc.first];
@@ -95,14 +100,17 @@ void SoloFeature::statsOutput()
                 strOut <<'\t'<< cbc.second[ib];
 
             if (indCBwl[cbc.first]==(uint32)-1) {//this CB did not have any reads mapped to features
-                strOut <<'\t'<< 0 <<'\t'<< 0;
+                strOut <<'\t'<< 0 <<'\t'<< 0 <<'\t'<< 0 <<'\t'<< 0;
             } else {
                 strOut <<'\t'<< nUMIperCB[indCBwl[cbc.first]] <<'\t'<< nGenePerCB[indCBwl[cbc.first]];
+                if (nUMIperCBmulti.size()==0) {//no multi
+                    strOut <<'\t'<< 0 <<'\t'<< 0;
+                } else {
+                    strOut <<'\t'<< nUMIperCBmulti[indCBwl[cbc.first]] <<'\t'<< nGenePerCBmulti[indCBwl[cbc.first]];
+                };
             };
-
             strOut <<'\n';
         };
-
         strOut.close();
     };
 

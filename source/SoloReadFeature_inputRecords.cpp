@@ -140,6 +140,8 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
                 } else if (cbmatch>1 && !noTooManyWLmatches) {
                     readFlagCounts.setBit(readFlagCounts.cbMMmultiple);
                     readFlagCounts.countsAdd(cb);
+                } else {//no CB match
+                    readFlag.countsAddNoCB();
                 };
                 
 
