@@ -109,6 +109,6 @@ Please contact the author for a list of recommended parameters for much larger o
 
 FUNDING
 =======
-The developmenr of STAR is supported by the National Human Genome Research Institute of
+The development of STAR is supported by the National Human Genome Research Institute of
 the National Institutes of Health under Award Number R01HG009318.
 The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health.
