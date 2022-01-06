@@ -23,7 +23,6 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
         return;
 
     if (pSolo.readStatsYes[featureType]) {//readFlag
-        readFlag.setBit(readFlag.cbMatch); //this read has CB match in passlist
 
         if (nTr==1) {
             readFlag.setBit(readFlag.genomeU);

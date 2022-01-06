@@ -76,7 +76,7 @@ END {
 
 
     # write out the file - not needed
-    # exit;
+    exit;
     split("cbMatch genomeU genomeM featureU featureM mito", fnames);
     for (CB in c) {
         printf CB > "CellReads.txt";

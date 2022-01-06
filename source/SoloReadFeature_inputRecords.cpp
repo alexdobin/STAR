@@ -102,7 +102,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
         };
 
         if ( iread != prevIread ) {//only for one align of each read, in case of multimappers
-
+            prevIread = iread;
             if (featGood) {
                 if (cbmatch==0) {
                     stats.V[stats.yessubWLmatchExact]++;
@@ -121,7 +121,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
                 };
             };
             if ( pSolo.readStatsYes[featureType] ) {//has to be new iread to avoid muti-counting multi-gene reads
-                prevIread = iread; //for multi-gene reads
+                
                 //readIsCounted flag was defined above
                 if ( readIsCounted ) {
                     if ( readFlagCounts.checkBit(readFlagCounts.featureU) )
@@ -131,19 +131,21 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
                 };
 
                 //only record this read in readFlagCounts if its CB was defined
-                if (cbmatch==0) {
+                if (cbmatch==0) {//perfect CB match to WL
+                    readFlagCounts.setBit(readFlag.cbMatch); //this read has CB match in passlist
                     readFlagCounts.setBit(readFlagCounts.cbPerfect);
                     readFlagCounts.countsAdd(cb);
                 } else if (cbmatch==1 && !noMMtoWLwithoutExact) {
+                    readFlagCounts.setBit(readFlag.cbMatch); //this read has CB match in passlist
                     readFlagCounts.setBit(readFlagCounts.cbMMunique);
                     readFlagCounts.countsAdd(cb);
                 } else if (cbmatch>1 && !noTooManyWLmatches) {
+                    readFlagCounts.setBit(readFlag.cbMatch); //this read has CB match in passlist
                     readFlagCounts.setBit(readFlagCounts.cbMMmultiple);
                     readFlagCounts.countsAdd(cb);
                 } else {//no CB match
                     readFlag.countsAddNoCB();
                 };
-                
 
                 // debug
                 //if (featureType==SoloFeatureTypes::Gene && readFlagCounts.flagCounts[cb][readFlagCounts.featureM]+readFlagCounts.flagCounts[cb][readFlagCounts.featureU] != readFlagCounts.flagCounts[cb][readFlagCounts.exonic])

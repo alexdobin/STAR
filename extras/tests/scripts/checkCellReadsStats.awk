@@ -21,11 +21,11 @@ if ($fi["cbMatch"] != $fi["cbPerfect"]+$fi["cbMMunique"]+$fi["cbMMmultiple"]) {
     print "cbMatch != cbPerfect + cbMMunique + cbMMmultiple";
     exit;
 };
-#if ($fi["featureU"] != $fi["countedU"] || $fi["fetureM"]!=$fi["countedM"]) {
-#    print;
-#    print "feature!=counted";
-#    exit;
-#};
+if ($fi["featureU"] != $fi["countedU"] || $fi["featureM"]!=$fi["countedM"]) {
+    print;
+    print "feature!=counted";
+    exit;
+};
 
 for (ff=2; ff<=NF; ff++) {
     sumStats[ff] += $ff;
@@ -41,7 +41,7 @@ END {
    print "featureM", sumStats[fi["featureM"]], featStats["MultiFeature"];
    print "countedU+M", sumStats[fi["countedU"]]+sumStats[fi["countedM"]], featStats["yesWLmatch"];
    print "countedU", sumStats[fi["countedU"]], featStats["yessubWLmatch_UniqueFeature"];
-   print "nUMI", sumStats[fi["nUMI"]], featStats["yesUMIs"];
+   print "nUMIunique", sumStats[fi["nUMIunique"]], featStats["yesUMIs"];
 
    #split("noUnmapped noNoFeature noMMtoWLwithoutExact noTooManyWLmatches MultiFeature yesWLmatch", tags1);
    split("noUnmapped noNoFeature noMMtoWLwithoutExact noTooManyWLmatches yesWLmatch", tags1);
