@@ -18,6 +18,8 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
     int64 cb;
     vector<uint32> trIdDist;
     
+    uint64 nReadsIn = 0;
+
     while (soloInputFeatureUMI(streamReads, featureType, readIndexYes, P.sjAll, iread, cbmatch, feature, umi, trIdDist, readFlagCounts)) {
         if (feature == (uint32)(-1) && !readIndexYes) {//no feature => no record, this can happen for SJs
             streamReads->ignore((uint32)-1, '\n');
@@ -101,7 +103,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
             };
         };
 
-        if ( iread != prevIread ) {//only for one align of each read, in case of multimappers
+        if ( !readIndexYes || iread != prevIread ) {//no readindex OR only for one align of each read, in case of multimappers
             prevIread = iread;
             if (featGood) {
                 if (cbmatch==0) {
@@ -120,6 +122,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
                     nReadPerCBmulti1[cb]++;
                 };
             };
+            
             if ( pSolo.readStatsYes[featureType] ) {//has to be new iread to avoid muti-counting multi-gene reads
                 
                 //readIsCounted flag was defined above
@@ -130,29 +133,35 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
                         readFlagCounts.setBit(readFlagCounts.countedM);    
                 };
 
+                readFlagCounts.setBit(readFlag.cbMatch); //set this flag for both CB and no-CB, but no-CB will be counted separately below
                 //only record this read in readFlagCounts if its CB was defined
                 if (cbmatch==0) {//perfect CB match to WL
-                    readFlagCounts.setBit(readFlag.cbMatch); //this read has CB match in passlist
                     readFlagCounts.setBit(readFlagCounts.cbPerfect);
                     readFlagCounts.countsAdd(cb);
                 } else if (cbmatch==1 && !noMMtoWLwithoutExact) {
-                    readFlagCounts.setBit(readFlag.cbMatch); //this read has CB match in passlist
                     readFlagCounts.setBit(readFlagCounts.cbMMunique);
                     readFlagCounts.countsAdd(cb);
                 } else if (cbmatch>1 && !noTooManyWLmatches) {
-                    readFlagCounts.setBit(readFlag.cbMatch); //this read has CB match in passlist
                     readFlagCounts.setBit(readFlagCounts.cbMMmultiple);
                     readFlagCounts.countsAdd(cb);
                 } else {//no CB match
-                    readFlag.countsAddNoCB();
+                    readFlagCounts.countsAddNoCB();
                 };
 
                 // debug
-                //if (featureType==SoloFeatureTypes::Gene && readFlagCounts.flagCounts[cb][readFlagCounts.featureM]+readFlagCounts.flagCounts[cb][readFlagCounts.featureU] != readFlagCounts.flagCounts[cb][readFlagCounts.exonic])
+                /*nReadsIn++;
+                uint64 ntot=0;
+                for (auto &ii: readFlagCounts.flagCounts)
+                    ntot += ii.second[0];
+
+                if (nReadsIn!=ntot)
+                    cout << nReadsIn <<" "<< ntot << endl;
+                */
+                /*//if (featureType==SoloFeatureTypes::Gene && readFlagCounts.flagCounts[cb][readFlagCounts.featureM]+readFlagCounts.flagCounts[cb][readFlagCounts.featureU] != readFlagCounts.flagCounts[cb][readFlagCounts.exonic])
                 //    cout << cb <<' '<< iread << endl;
                 //if (readFlagCounts.checkBit(readFlagCounts.featureM))
                 //    cout << iread <<' '<< readFlagCounts.flagCounts[cb][readFlagCounts.featureM] << endl;
-                
+                */
             };
         };
     };

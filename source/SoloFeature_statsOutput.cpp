@@ -89,7 +89,7 @@ void SoloFeature::statsOutput()
         strOut << '\n';
 
         strOut << "CBnotInPasslist";
-        for (auto &cc: readFeatSum->readFlag.flagCountsNoCB)
+        for (auto &cc: readFlagCounts.flagCountsNoCB)
             strOut <<"\t"<< cc;
         strOut <<"\t0\t0\t0\t0\n";
 

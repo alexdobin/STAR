@@ -39,11 +39,14 @@ void SoloFeature::countCBgeneUMI()
     ///////////////////////////////////////////////////////////////////////////
     ////////////// Input records
     readFlagCounts.flagCounts.reserve(nCB*3/2);
+    readFlagCounts.flagCountsNoCB = {};
     vector<uint32> nReadPerCBunique1(pSolo.cbWLsize), nReadPerCBmulti1(pSolo.cbWLsize); //temp arrays to record # of reads for all cells in the WL
     for (int ii=0; ii<P.runThreadN; ii++) {//TODO: this can be parallelized
         readFeatAll[ii]->inputRecords(rCBpa, rguStride, readBarSum->cbReadCountExact, readInfo, readFlagCounts, nReadPerCBunique1, nReadPerCBmulti1);
+        readFeatSum->addStats(*readFeatAll[ii]);//sum stats: has to be done after inputRecords, since the stats values are updated there
     };
-        
+    readFlagCounts.countsAddNoCBarray(readFeatSum->readFlag.flagCountsNoCB);//add no-CB counts calculated in SoloReadFeature_record.cpp and not recorded to temp Solo files
+
     nReadPerCBtotal.resize(nCB);
     nReadPerCBunique.resize(nCB);
     for (uint32 icb=0; icb<nCB; icb++) {
@@ -73,10 +76,6 @@ void SoloFeature::countCBgeneUMI()
         nReadPerCBmax=max(nReadPerCBmax,nReadPerCB[iCB]);
         //readFeatSum->stats.V[readFeatSum->stats.yesWLmatch] += nReadPerCB[iCB];
     };    
-    
-    for (int ii=0; ii<P.runThreadN; ii++) {
-        readFeatSum->addStats(*readFeatAll[ii]);
-    };
     
     time(&rawTime);
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished reading reads from Solo files nCB="<<nCB <<", nReadPerCBmax="<<nReadPerCBmax;

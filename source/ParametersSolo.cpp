@@ -418,7 +418,10 @@ void ParametersSolo::initialize(Parameters *pPin)
         readStatsYes.fill(true);
         readStatsYes[SoloFeatureTypes::VelocytoSimple] = false; //this could be allowed, but it will have the same info as Gene
         readStatsYes[SoloFeatureTypes::Velocyto] = false;
-        readIndexYes = readStatsYes; //this is fine since readStats output is done for all features
+        readStatsYes[SoloFeatureTypes::SJ] = false; //output for SJ requires careful consideration for SoloReadFeature_record.cpp, for output of reads that do not have splice junction
+        for (uint32 ff=0; ff<readIndexYes.size(); ff++) {//merge with previous values
+            readIndexYes[ff] |= readStatsYes[ff];
+        };
     } else if (readStats.type != "None" ) {
         exitWithError("EXITING because of fatal PARAMETERS error: unrecognized option in --soloCellReadStats" + readStats.type
                       + "\nSOLUTION: use allowed options: None OR Standard \n",

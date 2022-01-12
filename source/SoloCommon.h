@@ -63,11 +63,16 @@ public:
     };
 
     void countsAddNoCB()
-    {
+    {//adds flag bits to the count for no-CB reads
         for (uint32 ibit=0; ibit<nBits; ibit++)
             flagCountsNoCB[ibit] += (uint64) checkBit(ibit);
     };
 
+    void countsAddNoCBarray(array<uint64,nBits> &arrIn)
+    {
+        for (uint32 ibit=0; ibit<nBits; ibit++)
+            flagCountsNoCB[ibit] += arrIn[ibit];
+    };
 
 };
 

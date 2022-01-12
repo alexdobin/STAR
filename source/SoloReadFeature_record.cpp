@@ -50,12 +50,13 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
                 readFlag.setBit(readFlag.intronicAS);            
         };
 
-        if (soloBar.cbMatch<0) {
+        if (soloBar.cbMatch<0) {//no CB match
             if (readAnnot.annotFeatures[featureType].fSet.size()==1) {
                 readFlag.setBit(readFlag.featureU);
             } else if (readAnnot.annotFeatures[featureType].fSet.size()>1){
                 readFlag.setBit(readFlag.featureM);
             };
+            readFlag.setBit(readFlag.cbMatch);//this will counts reads with no CB match
             readFlag.countsAddNoCB();
         };
     };
@@ -126,6 +127,7 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
             case SoloFeatureTypes::SJ : 
                 if (nTr>1) {//reject all multimapping reads
                     stats.V[stats.subMultiFeatureMultiGenomic]++;
+                    stats.V[stats.MultiFeature]++;
                 //} else if (readAnnot.geneConcordant.size()>1){//for SJs, still check genes, no feature if multi-gene
                 //    stats.V[stats.MultiFeature]++;
                 } else {//one gene or no gene
@@ -238,7 +240,7 @@ uint32 outputReadCB(fstream *streamOut, const uint64 iRead, const int32 featureT
                 *streamOut << soloBar.umiB <<' ';//UMI
                 if ( iRead != (uint64)-1 )
                     *streamOut << iRead <<' '<< readFlag.flag <<' ';//iRead            
-                *streamOut << sj[0] <<' '<< sj[1] <<' '<< soloBar.cbMatch <<' '<< soloBar.cbMatchString <<'\n';
+                *streamOut << sj[0] <<' '<< sj[1] <<' '<< soloBar.cbMatch <<' '<< soloBar.cbMatchString <<'\n' << flush;
             };
             nout=reFe.sj.size();
             break;

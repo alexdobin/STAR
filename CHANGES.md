@@ -1,3 +1,4 @@
+* Implemented --soloCellReadStats Standard option to output read statistics for each cell barcode.
 * Changed --soloType CB_samTagOut behavior: if barcode cennot be matched to the passlist, CB:Z:- will be recorded (previously CB tag was absent for such reads).
 * Allow to define --clip5pAdapterSeq with --clipAdapterType CellRanger4 option.
 * Issue #1223: fixed the N_unmapped value reported in ReadsPerGene.out.tab. The single-end (i.e. partially mapped alignment are not excluded from N_unmapped.

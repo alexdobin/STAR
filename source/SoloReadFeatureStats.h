@@ -5,11 +5,11 @@
 class SoloReadFeatureStats {
 public:
     vector<string> names;
-    enum {      noUnmapped,  noNoFeature,  noTooManyWLmatches,  noMMtoWLwithoutExact,  MultiFeature,  subMultiFeatureMultiGenomic,  yesWLmatch,  yessubWLmatchExact, yessubWLmatch_UniqueFeature,  yesCellBarcodes,  yesUMIs, nStats};
+    enum {      noUnmapped,  noNoFeature,  MultiFeature,  subMultiFeatureMultiGenomic, noTooManyWLmatches,  noMMtoWLwithoutExact,    yesWLmatch,  yessubWLmatchExact, yessubWLmatch_UniqueFeature,  yesCellBarcodes,  yesUMIs, nStats};
     uint64 V[nStats];    
     SoloReadFeatureStats() 
     {
-        names={"noUnmapped","noNoFeature","noTooManyWLmatches","noMMtoWLwithoutExact","MultiFeature","subMultiFeatureMultiGenomic","yesWLmatch","yessubWLmatchExact","yessubWLmatch_UniqueFeature","yesCellBarcodes","yesUMIs"};
+        names={"noUnmapped","noNoFeature","MultiFeature","subMultiFeatureMultiGenomic","noTooManyWLmatches","noMMtoWLwithoutExact","yesWLmatch","yessubWLmatchExact","yessubWLmatch_UniqueFeature","yesCellBarcodes","yesUMIs"};
         for (uint32 ii=0; ii<nStats; ii++)
             V[ii]=0;
     };
