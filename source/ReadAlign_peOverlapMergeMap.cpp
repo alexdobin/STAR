@@ -316,7 +316,8 @@ void ReadAlign::peOverlapChimericSEtoPE(const Transcript *seTrIn1, const Transcr
 
     uint segLen[2][2]; //segment length [tempTrChim][mate]
     uint segEx[2];//last exon of the mate0 [tempTrChim]
-    uint segLmin=-1LLU, i1=0,i2=0;
+    uint i1=0,i2=0; //indices of mate to eliminate i1=[tempTrChim], i2=[mate]
+    uint posOfJunctionInRead=0; //position of chimeric junction in read
     for (uint ii=0; ii<2; ii++) {
         segLen[ii][0]=0;
         segLen[ii][1]=0;
@@ -328,9 +329,15 @@ void ReadAlign::peOverlapChimericSEtoPE(const Transcript *seTrIn1, const Transcr
                 segLen[ii][1]+=tempTrChim[ii].exons[iex][EX_L];
             };
         };
+
+        //find mate with shortest mapped segment
+        //in case of tie, use longest mate as tie-breaker (where posOfJunctionInRead is highest)
+        uint readLen0=readLengthOriginal[tempTrChim[ii].exons[0][EX_iFrag]];
+        uint readLen1=readLengthOriginal[1-tempTrChim[ii].exons[0][EX_iFrag]];
         for (uint jj=0; jj<2; jj++) {
-            if (segLen[ii][jj]<segLmin || (segLen[ii][jj]==segLmin && tempTrChim[ii].exons[0][EX_G]>tempTrChim[ii-1].exons[0][EX_G])) {
-                segLmin=segLen[ii][jj];
+            uint curPosOfJunctionInRead = tempTrChim[ii].exons[jj][EX_R]>readLen0 ? readLen0+readLen1+1-tempTrChim[ii].exons[jj][EX_R] : tempTrChim[ii].exons[jj][EX_R];
+            if (segLen[ii][jj]<segLen[i1][i2] || (segLen[ii][jj]==segLen[i1][i2] && curPosOfJunctionInRead>posOfJunctionInRead)) {
+                posOfJunctionInRead=curPosOfJunctionInRead;
                 i1=ii;//tempTrChim of the shortest segment length
                 i2=jj;//mate of the shortest segment length
             };
