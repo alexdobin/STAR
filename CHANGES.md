@@ -1,3 +1,4 @@
+* PR #1425: Assign supplementary alignment to correct mate when mates fully overlap. Many thanks to Sebastian @suhrig for resolving this problem in the chimeric detection.
 * Implemented --soloCellReadStats Standard option to output read statistics for each cell barcode.
 * Changed --soloType CB_samTagOut behavior: if barcode cennot be matched to the passlist, CB:Z:- will be recorded (previously CB tag was absent for such reads).
 * Allow to define --clip5pAdapterSeq with --clipAdapterType CellRanger4 option.
