@@ -5,7 +5,10 @@
 void ReadAlign::outputAlignments() {
   
     outBAMbytes=0;
-    soloRead->readFlagReset();
+
+    if (P.pSolo.readStats.yes)
+        soloRead->readFlagReset();
+        
     readAnnot.reset();
     
     if (mapGen.pGe.gType==101) {//temporary
