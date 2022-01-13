@@ -162,7 +162,7 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
                     sort(readAnnot.trVelocytoType.begin(), readAnnot.trVelocytoType.end(),
                          [](const trTypeStruct &t1, const trTypeStruct &t2) {return t1.tr < t2.tr;});
 
-                    *streamReads << iRead <<' '<< readFlag.flag <<' '<< readAnnot.trVelocytoType.size();
+                    *streamReads << iRead <<' '<< readAnnot.trVelocytoType.size();
                     for (auto &tt: readAnnot.trVelocytoType)
                          *streamReads <<' '<< tt.tr <<' '<< (uint32) tt.type;
                     *streamReads <<'\n';
