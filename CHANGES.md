@@ -1,23 +1,31 @@
-* PR #1425: Assign supplementary alignment to correct mate when mates fully overlap. Many thanks to Sebastian @suhrig for resolving this problem in the chimeric detection.
+STAR 2.7.10a --- 2021/01/14 ::: New features, behavior changes and bug fixes
+===========================================================================
+**New options and features:**
 * Implemented --soloCellReadStats Standard option to output read statistics for each cell barcode.
-* Changed --soloType CB_samTagOut behavior: if barcode cennot be matched to the passlist, CB:Z:- will be recorded (previously CB tag was absent for such reads).
 * Allow to define --clip5pAdapterSeq with --clipAdapterType CellRanger4 option.
-* Issue #1223: fixed the N_unmapped value reported in ReadsPerGene.out.tab. The single-end (i.e. partially mapped alignment are not excluded from N_unmapped.
-* Issues #535, #1350: fixed a long-standing problem that resulted in a seg-fault whem mapping to the rabbit genome.
-* Issue #1316: fixed the seg-fault which occurred if --soloType CB_samTagOut and --soloCBwhitelist None are used together.
-* Changed Solo summary statistics outputs in Barcodes.stats and Features.stats files.
-* Implemented --soloCBmatchWLtype ParseBio_ED3 to allow multiple mismatches and one insertion+deletion for --soloType CB_UMI_Complex.
+* Implemented --soloCBmatchWLtype ED2 to allow mismatches and one insertion+deletion (edit distance <=2) for --soloType CB_UMI_Complex.
 * Implemented Solo BAM tags gx gn: output ';'-separated gene IDs and names for both unique- and multi-gene reads. Note that GX/GN tags are used to output gene ID/name for unique-gene reads.
+* Implemented --soloFeatures GeneFull_ExonOverIntron GeneFull_Ex50pAS options which prioritize exonic over intronic overlaps for pre-mRNA counting.
+* Added script extras/scripts/soloCountMatrixFromBAM.awk to re-create Solo count matrix from the BAM output.
+
+**Changes in behavior:**
+* Changed --soloType CB_samTagOut behavior: if barcode cennot be matched to the passlist, CB:Z:- will be recorded (previously CB tag was absent for such reads).
+* Changed Solo summary statistics outputs in Barcodes.stats and Features.stats files.
 * Changed Solo BAM tags GX GN behavior: for missing values, "-" is output instead of omitting the tag.
 * Changed Solo BAM tags output for multiple --soloFeatures: now the first feature on the list is used for GX,GN,XB,UB tags.
 * Changed Solo SJ behavior: it no longer depends on the whether the alignment is concordant to a Gene.
-* Implemented --soloFeatures GeneFull_ExonOverIntron GeneFull_Ex50pAS options which prioritize exonic over intronic overlaps for pre-mRNA counting.
 * Fixed a bug that resulted in slightly different solo counts if --soloFeatures Gene and GeneFull were used together with --soloCBmatchWLtype 1MM_multi_pseudocounts option.
+
+**Bug fixes**
+
+* PR #1425: Assign supplementary alignment to correct mate when mates fully overlap. Many thanks to Sebastian @suhrig for resolving this problem in the chimeric detection.
 * Fixed a bug introduced in 2.7.9a for --quantMode TranscriptomeSAM output that resulted in both mapped and unmapped output for some reads. Many thanks to Diane Trout (@Caltech) for helping to track this bug.
+* Issue #1223: fixed the N_unmapped value reported in ReadsPerGene.out.tab. The single-end (i.e. partially mapped alignment are not excluded from N_unmapped.
+* Issues #535, #1350: fixed a long-standing problem that resulted in a seg-fault whem mapping to the rabbit genome.
+* Issue #1316: fixed the seg-fault which occurred if --soloType CB_samTagOut and --soloCBwhitelist None are used together.
 * Issue #1177: throw an error in case the BAM file does not contain NH and AS tags for duplication removal jobs (--runMode inputAlignmentsFromBAM --bamRemoveDuplicatesType UniqueIdenticalNotMulti).
 * Issue #1262: fixed the bug that prevented EM matrix output when only EM option is specified in --soloMultiMappers.
 * Issue #1230: fixed the bug that caused seg-faults for --runMode soloCellFiltering runs.
-* Added script extras/scripts/soloCountMatrixFromBAM.awk to re-create Solo count matrix from the BAM output.
 
 STAR 2.7.9a --- 2021/05/05 ::: STARsolo updates
 =====================================================

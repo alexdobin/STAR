@@ -72,6 +72,9 @@
   \optOpt{SJ}   \optOptLine{splice junctions (SJ.out.tab)}
   \optOpt{None}   \optOptLine{no transformation of the output}
 \end{optOptTable}
+\optName{genomeChrSetMitochondrial}
+  \optValue{chrM M MT}
+  \optLine{string(s)               names of the mitochondrial chromosomes. Presently only used for STARsolo statisics output/} 
 \end{optTable}
 \optSection{Genome Indexing Parameters - only used with --runMode genomeGenerate}\label{Genome_Indexing_Parameters_-_only_used_with_--runMode_genomeGenerate}
 \begin{optTable}
@@ -742,7 +745,7 @@
 \begin{optTable}
 \optName{peOverlapNbasesMin}
   \optValue{0}
-  \optLine{int{\textgreater}=0:             minimum number of overlap bases to trigger mates merging and realignment} 
+  \optLine{int{\textgreater}=0:             minimum number of overlap bases to trigger mates merging and realignment. Specify {\textgreater}0 value to switch on the "merginf of overlapping mates" algorithm.} 
 \optName{peOverlapMMp}
   \optValue{0.01}
   \optLine{real, {\textgreater}=0 {\&} {\textless}1:     maximum proportion of mismatched bases in the overlap area} 
@@ -957,7 +960,7 @@
 \begin{optOptTable}
   \optOpt{1MM{\textunderscore}multi{\textunderscore}pseudocounts}   \optOptLine{same as 1MM{\textunderscore}Multi, but pseudocounts of 1 are added to all whitelist barcodes.}
   \optOpt{1MM{\textunderscore}multi{\textunderscore}Nbase{\textunderscore}pseudocounts}   \optOptLine{same as 1MM{\textunderscore}multi{\textunderscore}pseudocounts, multimatching to WL is allowed for CBs with N-bases. This option matches best with CellRanger {\textgreater}= 3.0.0}
-  \optOpt{ParseBio{\textunderscore}ED3}   \optOptLine{allow up to edit distance of 3 fpr each of the barcodes. May include one deletion + one insertion. Only works with --soloType CB{\textunderscore}UMI{\textunderscore}Complex. Matches to multiple passlist barcdoes are not allowed. Similar to ParseBio Split-seq pipeline.}
+  \optOpt{EditDist{\textunderscore}2}   \optOptLine{allow up to edit distance of 3 fpr each of the barcodes. May include one deletion + one insertion. Only works with --soloType CB{\textunderscore}UMI{\textunderscore}Complex. Matches to multiple passlist barcdoes are not allowed. Similar to ParseBio Split-seq pipeline.}
 \end{optOptTable}
 \optName{soloInputSAMattrBarcodeSeq}
   \optValue{-}
@@ -984,8 +987,8 @@
   \optOpt{Gene}   \optOptLine{genes: reads match the gene transcript}
   \optOpt{SJ}   \optOptLine{splice junctions: reported in SJ.out.tab}
   \optOpt{GeneFull}   \optOptLine{full gene (pre-mRNA): count all reads overlapping genes' exons and introns}
-  \optOpt{GeneFull{\textunderscore}ExonOverIntron}   \optOptLine{full gene (pre-mRNA): count all reads overlapping genes' exons and introns: prioritize 100% overlap with exons}
-  \optOpt{GeneFull{\textunderscore}Ex50pAS}   \optOptLine{full gene (pre-RNA): count all reads overlapping genes' exons and introns: prioritize {\textgreater}50% overlap with exons. Do not count reads with 100% exonic overlap in the antisense direction.}
+  \optOpt{GeneFull{\textunderscore}ExonOverIntron}   \optOptLine{full gene (pre-mRNA): count all reads overlapping genes' exons and introns: prioritize 100{\%} overlap with exons}
+  \optOpt{GeneFull{\textunderscore}Ex50pAS}   \optOptLine{full gene (pre-RNA): count all reads overlapping genes' exons and introns: prioritize {\textgreater}50{\%} overlap with exons. Do not count reads with 100{\%} exonic overlap in the antisense direction.}
 \end{optOptTable}
 \optName{soloMultiMappers}
   \optValue{Unique}
@@ -1040,4 +1043,10 @@
 \optName{soloOutFormatFeaturesGeneField3}
   \optValue{"Gene Expression"}
   \optLine{string(s):                field 3 in the Gene features.tsv file. If "-", then no 3rd field is output.} 
+\optName{soloCellReadStats}
+  \optValue{None}
+  \optLine{string:                 Output reads statistics for each CB} 
+\begin{optOptTable}
+  \optOpt{Standard}   \optOptLine{standard output}
+\end{optOptTable}
 \end{optTable}

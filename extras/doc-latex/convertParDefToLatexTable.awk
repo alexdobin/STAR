@@ -4,6 +4,7 @@ function substLatexSymbols() {
  gsub("<","{\\textless}");
  gsub("_","{\\textunderscore}");
  gsub("&","{\\\\&}");
+ gsub("%","{\\%}");
 };
 
 BEGIN {
