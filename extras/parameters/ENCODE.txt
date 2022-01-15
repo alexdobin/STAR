@@ -1,0 +1,9 @@
+--outFilterType                  BySJout    //reduces the number of "spurious" junctions
+--outFilterMultimapNmax          20         //max number of multiple alignments allowed for a read: if exceeded, the read is considered unmapped
+--alignSJoverhangMin             8          //min overhang for unannotated junctions
+--alignSJDBoverhangMin           1          //min overhang for annotated junctions
+--outFilterMismatchNmax          999        //max number of mismatches per pair (absolute)
+--outFilterMismatchNoverLmax     0.06       //max number of mismatches per pair relative to read length: for 2x100b, max number of mismatches is 0.06*200=12 for the paired read
+--alignIntronMin                 20         //min intron
+--alignIntronMax                 1000000    //max intron
+--alignMatesGapMax               1000000    //max genomic distance between pairs
