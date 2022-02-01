@@ -153,11 +153,10 @@ For instance, for the **10X 5' protocol**, the 1st mate contains the barcode at 
 ```
 --soloBarcodeMate 1   --clip5pNbases 39 0
 --soloType CB_UMI_Simple   --soloCBstart 1   --soloCBlen 16   --soloUMIstart 17   --soloUMIlen 10
---soloStrand Reverse
 --readFilesIn read1.fq read2.fq
 
 ```
-Note that 10X 5' protocol has reverse strand orientation.
+Note that the read files are input in the Read1 Read2 order in this case.
 
 #### Complex barcodes
 More complex barcodes are activated with ```--soloType CB_UMI_Complex``` and are described with the following parameters

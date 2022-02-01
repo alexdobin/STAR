@@ -65,7 +65,7 @@ Compile under Mac OS X
 ```bash
 # 1. Install brew (http://brew.sh/)
 # 2. Install gcc with brew:
-$ brew install gcc --without-multilib
+$ brew install gcc
 # 3. Build STAR:
 # run 'make' in the source directory
 # note that the path to c++ executable has to be adjusted to its current version
