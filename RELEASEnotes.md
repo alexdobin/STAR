@@ -1,4 +1,4 @@
-STAR 2.7.10a --- 2021/01/14 ::: New features, behavior changes and bug fixes
+STAR 2.7.10a --- 2022/01/14 ::: New features, behavior changes and bug fixes
 ============================================================================
 See [CHANGES.md](CHANGES.md)
 

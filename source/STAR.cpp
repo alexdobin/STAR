@@ -34,7 +34,7 @@
 
 void usage(int usageType) {
     cout << "Usage: STAR  [options]... --genomeDir /path/to/genome/index/   --readFilesIn R1.fq R2.fq\n";
-    cout <<"Spliced Transcripts Alignment to a Reference (c) Alexander Dobin, 2009-2020\n\n";
+    cout <<"Spliced Transcripts Alignment to a Reference (c) Alexander Dobin, 2009-2022\n\n";
     cout << "STAR version=" << STAR_VERSION << "\n";
     cout << "STAR compilation time,server,dir=" << COMPILATION_TIME_PLACE << "\n";
     cout << "For more details see:\n";

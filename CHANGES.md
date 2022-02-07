@@ -1,6 +1,6 @@
 * Issue #1469: fixed seg-fault introduced in 2.7.10a.
 
-STAR 2.7.10a --- 2021/01/14 ::: New features, behavior changes and bug fixes
+STAR 2.7.10a --- 2022/01/14 ::: New features, behavior changes and bug fixes
 ===========================================================================
 **New options and features:**
 * Implemented --soloCellReadStats Standard option to output read statistics for each cell barcode.
