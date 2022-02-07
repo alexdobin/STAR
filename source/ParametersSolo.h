@@ -196,7 +196,7 @@ public:
     //readStats
     struct {
         string type; //input parameter
-        bool yes;
+        bool yes=false;
     } readStats;
 
     void initialize(Parameters *pPin);
