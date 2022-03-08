@@ -10,7 +10,7 @@ void ParametersClip::initialize(Parameters *pPin)
     
     if (adapterType[0]!="Hamming" && adapterType[0]!="CellRanger4") {
         exitWithError("EXITING because of fatal PARAMETER error: --clipAdapterType = " + adapterType[0] + " is not a valid option\n" +
-                      "SOLUTION: use valid --adapterType options: Hamming OR CellRanger4\n", std::cerr, pPin->inOut->logMain, EXIT_CODE_PARAMETER, *pPin);
+                      "SOLUTION: use valid --clipAdapterType options: Hamming OR CellRanger4\n", std::cerr, pPin->inOut->logMain, EXIT_CODE_PARAMETER, *pPin);
     };
     
     if (adapterType[0]=="CellRanger4") {
