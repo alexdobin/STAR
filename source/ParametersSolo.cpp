@@ -397,7 +397,8 @@ void ParametersSolo::initialize(Parameters *pPin)
     readInfoYes.fill(false);
     if (featureYes[SoloFeatureTypes::VelocytoSimple] || featureYes[SoloFeatureTypes::Velocyto]) {//turn readInfo on for Gene needed by VelocytoSimple
         readInfoYes[SoloFeatureTypes::Gene]=true;
-    } else if (samAttrYes){//pSolo.samAttrFeature=0 by default, so need to check samAttrYes
+    };
+    if (samAttrYes){//pSolo.samAttrFeature=0 by default, so need to check samAttrYes
         if (   featureFirst == SoloFeatureTypes::Gene || featureFirst == SoloFeatureTypes::GeneFull ||
                featureFirst == SoloFeatureTypes::GeneFull_Ex50pAS || featureFirst == SoloFeatureTypes::GeneFull_ExonOverIntron ) {
             samAttrFeature = featureFirst;
