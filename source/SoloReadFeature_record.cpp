@@ -50,7 +50,7 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
                 readFlag.setBit(readFlag.intronicAS);            
         };
 
-        if (soloBar.cbMatch<0) {//no CB match
+        if (soloBar.cbMatch<0 && pSolo.cbWLyes) {//no CB match in the WL
             if (readAnnot.annotFeatures[featureType].fSet.size()==1) {
                 readFlag.setBit(readFlag.featureU);
             } else if (readAnnot.annotFeatures[featureType].fSet.size()>1){
@@ -189,6 +189,15 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
         cbReadCountMap[soloBar.cbMatchInd[0]] += nFeat;
     };
     
+    /*//if we wanted to record all barcodes, even those without features
+        if (!pSolo.cbWLyes) {//no WL
+        cbReadCountMap[soloBar.cbMatchInd[0]] += nFeat;
+    } else if (nFeat>0){//WL && nFeat>0
+        for (auto &cbi : soloBar.cbMatchInd)
+            cbReadCount[cbi] += nFeat;
+    };
+    */
+
     return;
 };
 

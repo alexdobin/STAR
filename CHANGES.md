@@ -1,4 +1,5 @@
-* Issue #1469: fixed seg-fault introduced in 2.7.10a.
+* Fixed a problem with STARsolo CellReads.stats output for no-passlist runs.
+* Issue #1469: fixed seg-faults introduced in 2.7.10a.
 
 STAR 2.7.10a --- 2022/01/14 ::: New features, behavior changes and bug fixes
 ===========================================================================

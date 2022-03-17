@@ -40,8 +40,11 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
 
             } else {
 
-                if (!pSolo.cbWLyes) //if no-WL, the full cbInteger was recorded - now has to be placed in order
+                if (!pSolo.cbWLyes) {//if no-WL, the full cbInteger was recorded - now has to be placed in order
                     cb=binarySearchExact<uintCB>(cb, pSolo.cbWL.data(), pSolo.cbWLsize);
+                    if (cb+1 == 0)
+                        continue; //this cb was not in the tentative WL
+                };
 
                 //record feature
                 if (featGood) {//good feature, will be counted
@@ -103,7 +106,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
             };
         };
 
-        if ( !readIndexYes || iread != prevIread ) {//no readindex OR only for one align of each read, in case of multimappers
+        if ( !readIndexYes || iread != prevIread ) {//no readindex (then only unique-gene reads are recorded) OR only for one align of each read, in case of multimappers
             prevIread = iread;
             if (featGood) {
                 if (cbmatch==0) {
