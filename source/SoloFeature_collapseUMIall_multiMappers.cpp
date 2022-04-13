@@ -488,6 +488,9 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
         };        
         
         {//write to countMatMult
+            if (countMatMult.m.size() < countMatMult.i[iCB+1] + genesM.size()*countMatMult.s*pSolo.umiDedup.yes.N + 100) //+100 just in case
+                countMatMult.m.resize((countMatMult.i[iCB+1] + genesM.size()*countMatMult.s*pSolo.umiDedup.yes.N + 100)*2);
+
             for (const auto &gm: genesM) {
                 countMatMult.m[countMatMult.i[iCB+1] + 0] = gm.first;
                     

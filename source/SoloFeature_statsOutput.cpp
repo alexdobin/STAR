@@ -41,7 +41,13 @@ void SoloFeature::statsOutput()
     
     string mapfeat=SoloFeatureTypes::Names[featureType];
     
-    strOut << "Reads Mapped to "<< mapfeat << ": Unique+Multiple " << SoloFeatureTypes::Names[featureType] <<"," << double( readFeatSum->stats.numMappedToTranscriptome() )/g_statsAll.readN <<'\n';
+    strOut << "Reads Mapped to "<< mapfeat << ": Unique+Multiple " << SoloFeatureTypes::Names[featureType] <<",";
+    if (pSolo.multiMap.yes.multi) {
+        strOut << double( readFeatSum->stats.numMappedToTranscriptome() )/g_statsAll.readN <<'\n';
+    } else {
+        strOut << "NoMulti\n";
+    };
+
     strOut << "Reads Mapped to "<< mapfeat << ": Unique " << SoloFeatureTypes::Names[featureType] <<"," << double( readFeatSum->stats.numMappedToTranscriptomeUnique() )/g_statsAll.readN <<'\n';
     
     if (pSolo.cellFilter.type[0]!="None"

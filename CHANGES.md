@@ -1,3 +1,4 @@
+* Issue #1513: If --soloMultiMappers options are not requested, output "NoMulti" in the "Reads Mapped to Gene: Unique+Multiple Gene" line of the Summary.csv file.
 * Fixed a problem with STARsolo CellReads.stats output for no-passlist runs.
 * Issue #1469: fixed seg-faults introduced in 2.7.10a.
 
