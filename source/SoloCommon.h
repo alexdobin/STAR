@@ -1,6 +1,7 @@
 #ifndef H_SoloCommon
 #define H_SoloCommon
 
+#include <array>
 #include <unordered_map>
 
 typedef struct{
