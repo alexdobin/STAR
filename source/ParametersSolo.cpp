@@ -398,10 +398,11 @@ void ParametersSolo::initialize(Parameters *pPin)
     if (featureYes[SoloFeatureTypes::VelocytoSimple] || featureYes[SoloFeatureTypes::Velocyto]) {//turn readInfo on for Gene needed by VelocytoSimple
         readInfoYes[SoloFeatureTypes::Gene]=true;
     };
+    samAttrFeature = featureFirst;
     if (samAttrYes){//pSolo.samAttrFeature=0 by default, so need to check samAttrYes
         if (   featureFirst == SoloFeatureTypes::Gene || featureFirst == SoloFeatureTypes::GeneFull ||
                featureFirst == SoloFeatureTypes::GeneFull_Ex50pAS || featureFirst == SoloFeatureTypes::GeneFull_ExonOverIntron ) {
-            samAttrFeature = featureFirst;
+            //all good
         } else {
             ostringstream errOut;
             errOut << "EXITING because of fatal PARAMETERS error: CB and/or UB attributes in --outSAMattributes require --soloFeatures Gene OR/AND GeneFull OR/AND GeneFull_Ex50pAS.\n";
