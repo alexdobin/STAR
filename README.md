@@ -20,7 +20,7 @@ MANUAL
 https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf
 
 [RELEASEnotes](https://github.com/alexdobin/STAR/blob/master/RELEASEnotes.md) contains detailed information about the latest major release
-[CHNAGES](https://github.com/alexdobin/STAR/blob/master/CHANGES.md) contains detailed information about all the changes in all releases
+[CHANGES](https://github.com/alexdobin/STAR/blob/master/CHANGES.md) contains detailed information about all the changes in all releases
 
 DIRECTORY CONTENTS
 ==================
