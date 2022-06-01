@@ -1,3 +1,4 @@
+* Issue #1543: Fixed a segfault occurring for STARsolo multimappers and large number of reads per cell.
 * Issue #1558: Fixed a bug with output of GX/GN BAM tags without CB/UB.
 * Fixed a bug with --soloMultiMappers for small number of cells cases.
 * Issue #1513: If --soloMultiMappers options are not requested, output "NoMulti" in the "Reads Mapped to Gene: Unique+Multiple Gene" line of the Summary.csv file.
