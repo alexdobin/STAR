@@ -74,8 +74,7 @@ void SoloFeature::cellFiltering()
     
     //calculate filtered statistics
 
-    bool *geneDetected = new bool[featuresNumber]; //=true if a gene was detected in at least one cell
-    memset((void*) geneDetected, 0, featuresNumber);
+    std::vector<uint32_t> geneDetected(featuresNumber, 0); //=1 if a gene was detected in at least one cell
 
     for (uint32 icb=0; icb<nCB; icb++) {
         if (filteredCells.filtVecBool[icb]) {
@@ -94,7 +93,7 @@ void SoloFeature::cellFiltering()
             for (uint32 ig=0; ig<nGenePerCB[icb]; ig++) {
                 uint32 indG1=countCellGeneUMIindex[icb]+ig*countMatStride;
                 if (countCellGeneUMI[indG1 + pSolo.umiDedup.countInd.main] > 0) {
-                    geneDetected[countCellGeneUMI[indG1]] = true; //gene is present if it's count > 0 for 
+                    geneDetected[countCellGeneUMI[indG1]] = 1; //gene is present if it's count > 0 for 
                     ng1++;
                 };
             };
@@ -110,7 +109,7 @@ void SoloFeature::cellFiltering()
     
     filteredCells.nGeneDetected=0;
     for (uint32 ii=0; ii<featuresNumber; ii++) {
-        if (geneDetected[ii])
+        if (geneDetected[ii]>0)
             filteredCells.nGeneDetected++;
     };
     
@@ -118,8 +117,8 @@ void SoloFeature::cellFiltering()
     filteredCells.meanReadPerCellUnique = filteredCells.nReadInCellsUnique / filteredCells.nCells;
     filteredCells.meanGenePerCell = filteredCells.nGeneInCells / filteredCells.nCells;
     
-    sort(filteredCells.nReadPerCellUnique.begin(), filteredCells.nReadPerCellUnique.end());
-    sort(filteredCells.nGenePerCell.begin(), filteredCells.nGenePerCell.end());
+    std::sort(filteredCells.nReadPerCellUnique.begin(), filteredCells.nReadPerCellUnique.end());
+    std::sort(filteredCells.nGenePerCell.begin(), filteredCells.nGenePerCell.end());
 
     filteredCells.medianUMIperCell = nUMIperCBsorted[filteredCells.nCells/2];
     filteredCells.medianGenePerCell = filteredCells.nGenePerCell[filteredCells.nCells/2];
