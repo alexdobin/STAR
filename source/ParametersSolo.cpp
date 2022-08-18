@@ -415,6 +415,7 @@ void ParametersSolo::initialize(Parameters *pPin)
 
     /////////////////////////////////////////////////////////////////// readFlag output
     readStats.yes = false;
+    readStatsYes.fill(false);
     if (readStats.type == "Standard") {
         readStats.yes = true;
         readStatsYes.fill(true);
