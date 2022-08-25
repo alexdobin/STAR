@@ -5,7 +5,7 @@ BEGIN {
 {
 if (substr($1,1,1)!="@") {
 
-    m=and($2,0x80)/0x80+1;
+    #m=and($2,0x80)/0x80+1;
 
     if ($1!=readNameOld) delete readSJs;
     readNameOld=$1;

@@ -1,9 +1,13 @@
-* Issue #1543: Fixed a segfault occurring for STARsolo multimappers and large number of reads per cell.
-* Issue #1558: Fixed a bug with output of GX/GN BAM tags without CB/UB.
+STAR 2.7.10b --- 2022/08/26 ::: Bug-fix release.
+===========================================================================
+* Issue #1612: fixed the problem with Solo.out/SJ/raw/features.tsv sym-link.
+* Issues #1469, #1602, #1608: fixed seg-faults introduced in 2.7.10a.
+* Issue #1619: fixed memory leak in SoloFeature_cellFiltering.cpp
+* Issue #1543: fixed a segfault occurring for STARsolo multimappers and large number of reads per cell.
+* Issue #1558: fixed a bug with output of GX/GN BAM tags without CB/UB.
+* Issue #1513: if --soloMultiMappers options are not requested, output "NoMulti" in the "Reads Mapped to Gene: Unique+Multiple Gene" line of the Summary.csv file.
 * Fixed a bug with --soloMultiMappers for small number of cells cases.
-* Issue #1513: If --soloMultiMappers options are not requested, output "NoMulti" in the "Reads Mapped to Gene: Unique+Multiple Gene" line of the Summary.csv file.
 * Fixed a problem with STARsolo CellReads.stats output for no-passlist runs.
-* Issue #1469: fixed seg-faults introduced in 2.7.10a.
 
 STAR 2.7.10a --- 2022/01/14 ::: New features, behavior changes and bug fixes
 ===========================================================================

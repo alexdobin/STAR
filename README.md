@@ -1,4 +1,4 @@
-STAR 2.7.10a
+STAR 2.7.10b
 ==========
 Spliced Transcripts Alignment to a Reference
 © Alexander Dobin, 2009-2022
@@ -37,9 +37,9 @@ Download the latest [release from](https://github.com/alexdobin/STAR/releases) a
 
 ```bash
 # Get latest STAR source from releases
-wget https://github.com/alexdobin/STAR/archive/2.7.10a.tar.gz
-tar -xzf 2.7.10a.tar.gz
-cd STAR-2.7.10a
+wget https://github.com/alexdobin/STAR/archive/2.7.10b.tar.gz
+tar -xzf 2.7.10b.tar.gz
+cd STAR-2.7.10b
 
 # Alternatively, get STAR source using git
 git clone https://github.com/alexdobin/STAR.git

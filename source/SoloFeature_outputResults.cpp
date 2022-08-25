@@ -6,6 +6,9 @@
 #include "ErrorWarning.h"
 #include "SoloFeatureTypes.h"
 
+#include<unistd.h> // for get_current_dir
+
+
 void SoloFeature::outputResults(bool cellFilterYes, string outputPrefixMat)
 {    
     //make directories   
@@ -40,10 +43,21 @@ void SoloFeature::outputResults(bool cellFilterYes, string outputPrefixMat)
             break;
         };
         case SoloFeatureTypes::SJ :
+            string sjout; //full path to SJ.out.tab with user-defined prefix
+            if (P.outFileNamePrefix[0]=='/') {
+                sjout = P.outFileNamePrefix + "SJ.out.tab";
+            } else {
+                char cwd [4096];
+                getcwd(cwd,4096);
+                sjout.append(cwd);
+                sjout += '/' + P.outFileNamePrefix + "SJ.out.tab";
+            };
+
             remove((outputPrefixMat+pSolo.outFileNames[1]).c_str()); //remove symlink before creating it
-            if ( symlink("../../../SJ.out.tab", (outputPrefixMat+pSolo.outFileNames[1]).c_str()) != 0 )
-                 exitWithError("EXITING because of fatal OUTPUT FILE error: could not sym-link ../../../SJ.out.tab into" + outputPrefixMat+pSolo.outFileNames[1] +
-                      "\nSOLUTION: check the path and permisssions\n",
+            if ( symlink(sjout.c_str(), (outputPrefixMat+pSolo.outFileNames[1]).c_str()) != 0 )
+                 exitWithError("EXITING because of fatal OUTPUT FILE error: could not sym-link "
+                      + sjout + " into " + outputPrefixMat+pSolo.outFileNames[1]
+                      + "\nSOLUTION: check the path and permisssions\n",
                        std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
     };
 
