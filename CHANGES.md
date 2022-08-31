@@ -6,6 +6,7 @@ STAR 2.7.10b --- 2022/08/26 ::: Bug-fix release.
 * Issue #1543: fixed a segfault occurring for STARsolo multimappers and large number of reads per cell.
 * Issue #1558: fixed a bug with output of GX/GN BAM tags without CB/UB.
 * Issue #1513: if --soloMultiMappers options are not requested, output "NoMulti" in the "Reads Mapped to Gene: Unique+Multiple Gene" line of the Summary.csv file.
+* Issue #719: implemented auto re-allocation of the SJ output buffer.
 * Fixed a bug with --soloMultiMappers for small number of cells cases.
 * Fixed a problem with STARsolo CellReads.stats output for no-passlist runs.
 

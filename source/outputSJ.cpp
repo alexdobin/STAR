@@ -21,8 +21,8 @@ void outputSJ(ReadAlignChunk** RAchunk, Parameters& P) {//collapses junctions fr
 
     Junction oneSJ(RAchunk[0]->RA->genOut);
     char** sjChunks = new char* [P.runThreadN+1];
-    #define OUTSJ_limitScale 5
-    OutSJ allSJ (P.limitOutSJcollapsed*OUTSJ_limitScale,P,RAchunk[0]->RA->genOut);
+    #define OUTSJ_limitScale 2
+    OutSJ allSJ (P.limitOutSJcollapsed*OUTSJ_limitScale, P, RAchunk[0]->RA->genOut);
 
     if (P.outFilterBySJoutStage!=1) {//chunkOutSJ
         for (int ic=0;ic<P.runThreadN;ic++) {//populate sjChunks with links to data
@@ -67,11 +67,15 @@ void outputSJ(ReadAlignChunk** RAchunk, Parameters& P) {//collapses junctions fr
         if (sjFilter) {//record the junction in all SJ
             memcpy(allSJ.data+allSJ.N*oneSJ.dataSize,sjChunks[icOut],oneSJ.dataSize);
             allSJ.N++;
-            if (allSJ.N == P.limitOutSJcollapsed*OUTSJ_limitScale ) {
+            if (allSJ.N == allSJ.Nstore-1 ) {
+                /*
                 ostringstream errOut;
                 errOut <<"EXITING because of fatal error: buffer size for SJ output is too small\n";
                 errOut <<"Solution: increase input parameter --limitOutSJcollapsed\n";
                 exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
+                */
+                allSJ.dataSizeIncrease();
+                P.inOut->logMain << "Increased the size of chunkOutSJ to " << allSJ.Nstore <<'\n';
             };
         };
 

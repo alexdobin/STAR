@@ -66,36 +66,44 @@ void ReadAlignChunk::mapChunk() {//map one chunk. Input reads stream has to be s
         //collapse SJ buffer if needed
         if ( !P.outSJ.yes ) {
             //do nothing
-        } else if ( chunkOutSJ->N > P.limitOutSJcollapsed ) {//this means the number of collapsed junctions is larger than the chunks size
+        } else if ( chunkOutSJ->N > chunkOutSJ->Nstore ) {//this means the number of collapsed junctions is larger than the chunks size
             ostringstream errOut;
             errOut <<"EXITING because of fatal error: buffer size for SJ output is too small\n";
             errOut <<"Solution: increase input parameter --limitOutSJoneRead\n";
             exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
-        } else if ( chunkOutSJ->N + P.limitOutSJoneRead > P.limitOutSJcollapsed || (readStatus==-1 && noReadsLeft) ) {//write buffer to disk because it's almost full, or all reads are mapped
+        } else if ( chunkOutSJ->N + P.limitOutSJoneRead > chunkOutSJ->Nstore || (readStatus==-1 && noReadsLeft) ) {//write buffer to disk because it's almost full, or all reads are mapped
             chunkOutSJ->collapseSJ();
-            if ( chunkOutSJ->N + 2*P.limitOutSJoneRead > P.limitOutSJcollapsed ) {
+            if ( chunkOutSJ->N + 2*P.limitOutSJoneRead > chunkOutSJ->Nstore ) {
+                /*
                 ostringstream errOut;
                 errOut <<"EXITING because of fatal error: buffer size for SJ output is too small\n";
                 errOut <<"Solution: increase input parameter --limitOutSJcollapsed\n";
                 exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
+                */
+                chunkOutSJ->dataSizeIncrease();
+                P.inOut->logMain << "Increased the size of chunkOutSJ to " << chunkOutSJ->Nstore <<'\n';
             };
         };
 
         //collapse SJ1 buffer if needed
         if ( P.outFilterBySJoutStage != 1 ) {//no outFilterBySJoutStage
             //do nothing
-        } else if ( chunkOutSJ1->N > P.limitOutSJcollapsed ) {//this means the number of collapsed junctions is larger than the chunks size
+        } else if ( chunkOutSJ1->N > chunkOutSJ->Nstore ) {//this means the number of collapsed junctions is larger than the chunks size
             ostringstream errOut;
             errOut <<"EXITING because of fatal error: buffer size for SJ output is too small\n";
             errOut <<"Solution: increase input parameter --limitOutSJoneRead\n";
             exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
-        } else if ( chunkOutSJ1->N + P.limitOutSJoneRead > P.limitOutSJcollapsed || (readStatus==-1 && noReadsLeft) ) {//write buffer to disk because it's almost full, or all reads are mapped
+        } else if ( chunkOutSJ1->N + P.limitOutSJoneRead > chunkOutSJ->Nstore || (readStatus==-1 && noReadsLeft) ) {//write buffer to disk because it's almost full, or all reads are mapped
             chunkOutSJ1->collapseSJ();
-            if ( chunkOutSJ1->N + 2*P.limitOutSJoneRead > P.limitOutSJcollapsed ) {
+            if ( chunkOutSJ1->N + 2*P.limitOutSJoneRead > chunkOutSJ->Nstore ) {
+                /*
                 ostringstream errOut;
                 errOut <<"EXITING because of fatal error: buffer size for SJ output is too small\n";
                 errOut <<"Solution: increase input parameter --limitOutSJcollapsed\n";
                 exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
+                */
+                chunkOutSJ->dataSizeIncrease();
+                P.inOut->logMain << "Increased the size of chunkOutSJ to " << chunkOutSJ->Nstore <<'\n';
             };
         };
 

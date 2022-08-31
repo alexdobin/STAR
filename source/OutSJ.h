@@ -38,12 +38,15 @@ class OutSJ {
 public:
     //all junctions
     char* data; //sj array[Njunctions][dataSize]
-    uint N; //number of junctions stored
+    vector<char> dataVec;
+    uint64 N, Nstore; //N=number of junctions stored; Nstore=storage size
     Junction oneSJ;
 
-    OutSJ(uint nSJmax, Parameters &Pin, Genome &genomeIn);
+    OutSJ(uint64 nSJmax, Parameters &Pin, Genome &genomeIn);
     void collapseSJ();//collapse the junctions in data
 //     int compareSJ(void* i1, void* i2);
+
+    void dataSizeIncrease();
 
 private:
     Parameters &P;
