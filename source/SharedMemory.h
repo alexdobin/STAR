@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <exception>
 #include <iostream>
+#include <sys/types.h>
 
 
 enum ErrorState {
