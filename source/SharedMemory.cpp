@@ -10,6 +10,7 @@
 #include <fcntl.h>           /* For O_* constants */
 #include <semaphore.h>
 #include <errno.h>
+#include <sys/types.h>
 
 #if defined(COMPILE_FOR_MAC) || defined(__FreeBSD__)
   //some Mac's idiosyncrasies: standard SHM libraries are very old and missing some definitions

@@ -26,7 +26,7 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
             gID[nGenes]=gid1;
             
             ++nGenes;            
-            if (gid1>=geneMultMark)
+            if (pSolo.multiMap.yes.multi && (gid1 & geneMultMark) )
                 ++nGenesMult;
         };
     };
@@ -251,7 +251,7 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
         };
     };
     
-    //////////////////////////////////////////multi-gene reads
+    //////////////////////////////////////////multi-gene reads to the end of function
     //////////////////////////////////////////
     if (pSolo.multiMap.yes.multi)
         countMatMult.i[iCB+1] = countMatMult.i[iCB];
