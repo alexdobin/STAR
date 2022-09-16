@@ -11,12 +11,11 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
-//arbitrary number for ftok function
-#define SHM_projectID 23
-
 Genome::Genome (Parameters &P, ParametersGenome &pGe): shmStart(NULL), P(P), pGe(pGe), sharedMemory(NULL)
 {
-    shmKey=ftok(pGe.gDir.c_str(),SHM_projectID);
+    struct stat stbuf;
+    stat(pGe.gDir.c_str(), &stbuf);
+    shmKey=stbuf.st_ino;
     genomeOut.g=this;//will change if genomeOut is different from genomeMain
     genomeOut.convYes=false;
     sjdbOverhang = pGe.sjdbOverhang; //will be re-defined later if another value was used for the generated genome
