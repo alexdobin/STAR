@@ -5,6 +5,7 @@
 #include "streamFuns.h"
 #include "SharedMemory.h"
 #include "genomeScanFastaFiles.h"
+#include "systemFunctions.h"
 
 #include <time.h>
 #include <cmath>
@@ -37,6 +38,10 @@ void Genome::freeMemory(){//free big chunks of memory used by genome and suffix 
         SA.deallocateArray();
         SApass2.deallocateArray();
         SAi.deallocateArray();
+
+        P.inOut->logMain << "RAM after freeing genome index memory:\n"
+                         <<  linuxProcMemory() << flush;
+
     };
 };
 

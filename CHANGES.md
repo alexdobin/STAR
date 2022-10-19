@@ -1,5 +1,7 @@
-STAR 2.7.10b --- 2022/08/26 ::: Bug-fix release.
+STAR 2.7.10b --- 2022/10/18 ::: Bug-fix release.
 ===========================================================================
+* PR #1638: Increased entropy of shmKey to avoid collisions between genomes. Many thanks to Jeff Hussmann (@jeffhussmann).
+* Issue #1577: Reduced RAM usage for large STARsolo runs.
 * Issue #1612: fixed the problem with Solo.out/SJ/raw/features.tsv sym-link.
 * Issues #1469, #1602, #1608: fixed seg-faults introduced in 2.7.10a.
 * Issue #1619: fixed memory leak in SoloFeature_cellFiltering.cpp

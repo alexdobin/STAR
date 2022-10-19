@@ -21,7 +21,6 @@ private:
     ReadAlignChunk **RAchunk;    
     Transcriptome &Trans;
     
-    const int32 featureType;   
     SoloFeature **soloFeatAll;
     
     static const uint32 umiArrayStride=3;
@@ -33,6 +32,8 @@ public:
 
     SoloReadFeature *readFeatSum, **readFeatAll;
     SoloReadBarcode *readBarSum;
+
+    const int32 featureType;   
 
     uint64 nReadsMapped, nReadsInput; //total number of mapped reads
     uint32 nCB;
@@ -78,6 +79,7 @@ public:
     vector <fstream*> redistrFilesStreams;
 
     SoloFeature(Parameters &Pin, ReadAlignChunk **RAchunk, Transcriptome &inTrans, int32 feTy, SoloReadBarcode *readBarSumIn, SoloFeature **soloFeatAll);
+    void clearLarge(); //clear large vectors
     void processRecords();
     void sumThreads();
     void countSmartSeq();

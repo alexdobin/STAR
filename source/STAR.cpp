@@ -26,6 +26,7 @@
 #include "Variation.h"
 #include "Solo.h"
 #include "samHeaders.h"
+#include "systemFunctions.h"
 
 #include "twoPassRunPass1.h"
 
@@ -199,7 +200,10 @@ int main(int argInN, char* argIn[]) {
     };
 
     time(&g_statsAll.timeFinishMap);
-    *P.inOut->logStdOut << timeMonthDayTime(g_statsAll.timeFinishMap) << " ..... finished mapping\n" <<flush;
+    *P.inOut->logStdOut << timeMonthDayTime(g_statsAll.timeFinishMap) << " ..... finished mapping\n" << flush;
+    P.inOut->logMain << timeMonthDayTime(g_statsAll.timeFinishMap) << " ..... finished mapping\n"  
+                        << "RAM after mapping:\n" <<  linuxProcMemory() << flush;
+    
 
     //no need for genome anymore, free the memory
     genomeMain.freeMemory();

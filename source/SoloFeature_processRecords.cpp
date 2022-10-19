@@ -3,6 +3,7 @@
 #include "TimeFunctions.h"
 #include "SequenceFuns.h"
 #include "ErrorWarning.h"
+#include "systemFunctions.h"
 
 void SoloFeature::processRecords()
 {
@@ -78,5 +79,9 @@ void SoloFeature::processRecords()
     statsOutput();
     
     //delete big arrays allocated in the previous functions
+    clearLarge();
     //delete[] indCB;
+
+    P.inOut->logMain << "RAM after completing solo:\n"
+                     <<  linuxProcMemory() << flush;   
 };

@@ -2,6 +2,7 @@
 #include "streamFuns.h"
 #include "TimeFunctions.h"
 #include "SequenceFuns.h"
+#include "systemFunctions.h"
 
 void SoloFeature::countCBgeneUMI()
 {    
@@ -111,8 +112,12 @@ void SoloFeature::countCBgeneUMI()
         readFeatSum->stats.V[readFeatSum->stats.yessubWLmatch_UniqueFeature ] += nReadPerCBunique[icb];        
     };
         
+    P.inOut->logMain << "RAM for solo feature "<< SoloFeatureTypes::Names[featureType] <<"\n"
+                     <<  linuxProcMemory() << flush;        
     delete[] rGeneUMI;
-    //delete[] rCBp;
+    delete[] rCBp;
+    delete[] rCBpa;
+    delete[] umiArray;
     
     time(&rawTime);
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished collapsing UMIs" <<endl;

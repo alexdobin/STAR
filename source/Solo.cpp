@@ -55,6 +55,7 @@ void Solo::processAndOutput()
             for (int ii=0; ii<P.runThreadN; ii++) {
                 readBarSum->addCounts(*RAchunk[ii]->RA->soloRead->readBar);
                 readBarSum->addStats(*RAchunk[ii]->RA->soloRead->readBar);
+                delete RAchunk[ii]->RA->soloRead->readBar; //not needed anymore
             };
         };
 
@@ -79,6 +80,9 @@ void Solo::processAndOutput()
 
         for (uint32 ii=0; ii<pSolo.nFeatures; ii++) {
             soloFeat[ii]->processRecords();
+            //if (!pSolo.readInfoYes[soloFeat[ii]->featureType]) {
+            //    delete soloFeat[ii];
+            //};
         };
 
         *P.inOut->logStdOut << timeMonthDayTime() << " ..... finished Solo counting\n" <<flush;

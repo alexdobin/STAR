@@ -6,6 +6,9 @@
 #include <unordered_map>
 #include <bitset>
 
+#include "systemFunctions.h"
+
+
 void SoloFeature::countVelocyto()
 {//velocyto counting gets info from Gene counting
     time_t rawTime;
@@ -158,4 +161,6 @@ void SoloFeature::countVelocyto()
     
     time(&rawTime);
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Velocyto counting: finished collapsing UMIs" <<endl;
+    P.inOut->logMain << "RAM for solo feature "<< SoloFeatureTypes::Names[featureType] <<"\n"
+                     <<  linuxProcMemory() << flush;   
 };

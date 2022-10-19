@@ -514,8 +514,12 @@ void SoloFeature::collapseUMIall(uint32 iCB, uint32 *umiArray)
             };
         };
     };
+    
+    delete[] gID;
+    delete[] gReadS;
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////// sorting functions
 inline int funCompareSolo1 (const void *a, const void *b) {
     uint32 *va= (uint32*) a;
