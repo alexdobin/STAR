@@ -1,4 +1,4 @@
-STAR 2.7.10b --- 2022/10/18 ::: Bug-fix release.
+STAR 2.7.10b --- 2022/10/20 ::: Bug-fix release.
 ===========================================================================
 * PR #1638: Increased entropy of shmKey to avoid collisions between genomes. Many thanks to Jeff Hussmann (@jeffhussmann).
 * Issue #1577: Reduced RAM usage for large STARsolo runs.

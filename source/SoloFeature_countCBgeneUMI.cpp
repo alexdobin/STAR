@@ -70,7 +70,7 @@ void SoloFeature::countCBgeneUMI()
     };*/
 
     nReadPerCB.resize(nCB);
-    uint32 nReadPerCBmax=0;
+    nReadPerCBmax=0;
     for (uint32 iCB=0; iCB<nCB; iCB++) {
         nReadPerCB[iCB] = (rCBpa[indCB[iCB]]-rCBp[iCB])/rguStride;  //number of reads that were matched to WL, rCBpa accumulated reference to the last element+1
                                                                     //for multimappers this is the number of all alignments > number of reads
@@ -87,7 +87,6 @@ void SoloFeature::countCBgeneUMI()
     nUMIperCB.resize(nCB);
     nGenePerCB.resize(nCB);
     
-    uint32 *umiArray = new uint32[nReadPerCBmax*umiArrayStride];//temp array for collapsing UMI
                      //dedup options        //gene ID
     countMatStride = pSolo.umiDedup.yes.N + 1;
     countCellGeneUMI.resize(nReadsMapped*countMatStride/5+16); //5 is heuristic, will be resized if needed
@@ -100,24 +99,13 @@ void SoloFeature::countCBgeneUMI()
         countMatMult.i.resize(nCB+1, 0);
     };
 
-    for (uint32 icb=0; icb<nCB; icb++) {//main collapse cycle
-        
-        collapseUMIall(icb, umiArray);
-        
-        readFeatSum->stats.V[readFeatSum->stats.yesUMIs] += nUMIperCB[icb];
-        if (nGenePerCB[icb]>0) //nGenePerCB contains only unique
-            ++readFeatSum->stats.V[readFeatSum->stats.yesCellBarcodes];
-        
-        readFeatSum->stats.V[readFeatSum->stats.yesWLmatch] += nReadPerCBtotal[icb];        
-        readFeatSum->stats.V[readFeatSum->stats.yessubWLmatch_UniqueFeature ] += nReadPerCBunique[icb];        
-    };
+    collapseUMIall();
         
     P.inOut->logMain << "RAM for solo feature "<< SoloFeatureTypes::Names[featureType] <<"\n"
                      <<  linuxProcMemory() << flush;        
     delete[] rGeneUMI;
     delete[] rCBp;
     delete[] rCBpa;
-    delete[] umiArray;
     
     time(&rawTime);
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Finished collapsing UMIs" <<endl;

@@ -18,9 +18,10 @@ std::string linuxProcMemory()
              (str1.rfind("VmSize",0) == 0) ||
              (str1.rfind("VmHWM",0) == 0)  ||
              (str1.rfind("VmRSS",0) == 0) ) {
-                 outString += str1+'\n';
+                 outString += str1+"; ";
              };
     };
+    outString += '\n';
 
     return outString;
 };

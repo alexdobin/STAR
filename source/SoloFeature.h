@@ -49,7 +49,8 @@ public:
     vector<uint32> nGenePerCB, nGenePerCBmulti;//number of genes (with >0 UMIs) per CB
     vector<uint32> nReadPerCB;//number of reads per CB. With multimappers: all aligns per CB
     vector<uint32> nReadPerCBunique, nReadPerCBtotal; //number of unique and multiple reads per CB
-    
+    uint32 nReadPerCBmax;
+
     vector<double> nUMIperCBmulti;
 
     vector<uint32> countCellGeneUMI;//sparsified matrix for the counts, each entry is: geneID count1 count2 ... countNcounts
@@ -89,7 +90,9 @@ public:
     
     void collapseUMI(uint32 iCB, uint32 *umiArray);
     void collapseUMI_CR(uint32 iCB, uint32 *umiArray);
-    void collapseUMIall(uint32 iCB, uint32 *umiArray);
+    void collapseUMIall();
+    void collapseUMIperCB(uint32 iCB, vector<uint32> &umiArray, vector<uint32> &gID,  vector<uint32> &gReadS);
+
     uint32 umiArrayCorrect_CR         (const uint32 nU0, uintUMI *umiArr, const bool readInfoRec, const bool nUMIyes, unordered_map <uintUMI,uintUMI> &umiCorr);
     uint32 umiArrayCorrect_Directional(const uint32 nU0, uintUMI *umiArr, const bool readInfoRec, const bool nUMIyes, unordered_map <uintUMI,uintUMI> &umiCorr, const int32 dirCountAdd);
     uint32 umiArrayCorrect_Graph      (const uint32 nU0, uintUMI *umiArr, const bool readInfoRec, const bool nUMIyes, unordered_map <uintUMI,uintUMI> &umiCorr);
