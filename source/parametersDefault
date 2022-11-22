@@ -229,7 +229,7 @@ limitGenomeGenerateRAM               31000000000
     int>0: maximum available RAM (bytes) for genome generation
 
 limitIObufferSize                    30000000 50000000
-    int>0: max available buffers size (bytes) for input/output, per thread
+    int(s)>0: max available buffers size (bytes) for input/output, per thread
 
 limitOutSAMoneReadBytes              100000
     int>0: max size of the SAM record (bytes) for one read. Recommended value: >(2*(LengthMate1+LengthMate2+100)*outFilterMultimapNmax
@@ -736,7 +736,7 @@ quantMode                   -
                             TranscriptomeSAM ... output SAM/BAM alignments to transcriptome into a separate file
                             GeneCounts       ... count reads per gene
 
-quantTranscriptomeBAMcompression    1       1
+quantTranscriptomeBAMcompression    1
     int: -2 to 10  transcriptome BAM compression level
                             -2  ... no BAM output
                             -1  ... default compression (6?)
@@ -792,7 +792,7 @@ soloBarcodeReadLength       1
                             1   ... equal to sum of soloCBlen+soloUMIlen
                             0   ... not defined, do not check
 
-soloBarcodeMate             0                            
+soloBarcodeMate             0
     int: identifies which read mate contains the barcode (CB+UMI) sequence
                             0   ... barcode sequence is on separate read, which should always be the last file in the --readFilesIn listed
                             1   ... barcode sequence is a part of mate 1
