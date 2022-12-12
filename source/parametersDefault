@@ -104,7 +104,7 @@ genomeType                  Full
 
 ### Splice Junctions Database
 sjdbFileChrStartEnd                     -
-    string(s): path to the files with genomic coordinates (chr <tab> start <tab> end <tab> strand) for the splice junction introns. Multiple files can be supplied wand will be concatenated.
+    string(s): path to the files with genomic coordinates (chr <tab> start <tab> end <tab> strand) for the splice junction introns. Multiple files can be supplied and will be concatenated.
 
 sjdbGTFfile                             -
     string: path to the GTF file with annotations
@@ -122,10 +122,10 @@ sjdbGTFtagExonParentGene                gene_id
     string: GTF attribute name for parent gene ID (default "gene_id" works for GTF files)
 
 sjdbGTFtagExonParentGeneName            gene_name
-    string(s): GTF attrbute name for parent gene name
+    string(s): GTF attribute name for parent gene name
 
 sjdbGTFtagExonParentGeneType            gene_type gene_biotype
-    string(s): GTF attrbute name for parent gene type
+    string(s): GTF attribute name for parent gene type
 
 sjdbOverhang                            100
     int>0: length of the donor/acceptor sequence on each side of the junctions, ideally = (mate_length - 1)
@@ -244,7 +244,7 @@ limitBAMsortRAM                         0
     int>=0: maximum available RAM (bytes) for sorting BAM. If =0, it will be set to the genome index size. 0 value can only be used with --genomeLoad NoSharedMemory option.
 
 limitSjdbInsertNsj                     1000000
-    int>=0: maximum number of junction to be inserted to the genome on the fly at the mapping stage, including those from annotations and those detected in the 1st step of the 2-pass run
+    int>=0: maximum number of junctions to be inserted to the genome on the fly at the mapping stage, including those from annotations and those detected in the 1st step of the 2-pass run
 
 limitNreadsSoft                        -1
     int: soft limit on the number of reads
@@ -306,7 +306,7 @@ outSAMstrandField               None
                                 intronMotif ... strand derived from the intron motif. This option changes the output alignments: reads with inconsistent and/or non-canonical introns are filtered out.
 
 outSAMattributes                Standard
-    string: a string of desired SAM attributes, in the order desired for the output SAM. Tags can be listed in any combination/order.
+    string(s): a string of desired SAM attributes, in the order desired for the output SAM. Tags can be listed in any combination/order.
                                 ***Presets:
                                 None        ... no attributes
                                 Standard    ... NH HI AS nM
@@ -413,7 +413,7 @@ outBAMsortingThreadN    0
     int: >=0: number of threads for BAM sorting. 0 will default to min(6,--runThreadN).
 
 outBAMsortingBinsN      50
-    int: >0:  number of genome bins fo coordinate-sorting
+    int: >0:  number of genome bins for coordinate-sorting
 
 ### BAM processing
 bamRemoveDuplicatesType  -
@@ -476,7 +476,7 @@ outFilterScoreMin               0
     int: alignment will be output only if its score is higher than or equal to this value.
 
 outFilterScoreMinOverLread      0.66
-    real: same as outFilterScoreMin, but  normalized to read length (sum of mates' lengths for paired-end reads)
+    real: same as outFilterScoreMin, but normalized to read length (sum of mates' lengths for paired-end reads)
 
 outFilterMatchNmin              0
     int: alignment will be output only if the number of matched bases is higher than or equal to this value.
@@ -651,7 +651,7 @@ alignInsertionFlush     None
 
 ### Paired-End reads
 peOverlapNbasesMin          0
-    int>=0:             minimum number of overlap bases to trigger mates merging and realignment. Specify >0 value to switch on the "merginf of overlapping mates" algorithm.
+    int>=0:             minimum number of overlapping bases to trigger mates merging and realignment. Specify >0 value to switch on the "merginf of overlapping mates" algorithm.
 
 peOverlapMMp                0.01
     real, >=0 & <1:     maximum proportion of mismatched bases in the overlap area
