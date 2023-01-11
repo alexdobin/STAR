@@ -21,7 +21,7 @@ void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandTyp
     //vGeStrOvAl.reserve(256); //TODO: check if this affects speed
 
 
-    typedef array<bool,5> OverlapTypes;
+    typedef array<bool,6> OverlapTypes;
     struct GeneInfo1 {
         uint32 g;
         uint32 ia;
@@ -29,7 +29,7 @@ void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandTyp
     };
     vector<GeneInfo1> vGeneInfo1;
     vGeneInfo1.reserve(256); //TODO: check if this affects speed
-    OverlapTypes otAS={false,true,false,true,false}; //which OverlapTypes is antisense, it will not be counted
+    OverlapTypes otAS={false,true,false,true,false,true}; //which OverlapTypes is antisense, it will not be counted
 
     /*//GeneFullClosest3p
     uint64 minDist3p=(uint64)-1;
@@ -86,6 +86,7 @@ void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandTyp
                                                             str1 && nOverlap>exl/2, 
                                                             !str1 && nOverlap>exl/2,
                                                             str1,
+                                                            !str1
                                                         } 
                                      });
 
@@ -207,8 +208,10 @@ void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandTyp
             annFeat.ovType = ReadAnnotFeature::overlapTypes::exonicAS;
         } else if (otFinal[4]) {
             annFeat.ovType = ReadAnnotFeature::overlapTypes::intronic;
-        } else {
+        } else if (otFinal[5]) {
             annFeat.ovType = ReadAnnotFeature::overlapTypes::intronicAS;
+        } else {
+            annFeat.ovType = ReadAnnotFeature::overlapTypes::none; //intergenic. i.e. no overlap with genes
         };
 
         // annFeat.fSet={};

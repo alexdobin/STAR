@@ -10,7 +10,7 @@ public:
     set<uint32> fSet;  //set of genes for this read
     vector<set<uint32>> fAlign; //gene for each alignment of this read
     uint32 ovType;
-    enum overlapTypes {none,exonic, exonicAS, intronic, intronicAS};
+    enum overlapTypes {none, exonic, exonicAS, intronic, intronicAS, N};
 
     void reset() {
         fSet={}; fAlign={}; ovType = 0;

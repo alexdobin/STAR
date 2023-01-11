@@ -1,3 +1,5 @@
+* Issue #1733: Fixed the issue with counting of intronicAS reads in STARsolo CellReads.stats output with --soloFeatures GeneFull_Ex50pAS option.
+
 STAR 2.7.10b --- 2022/11/01 ::: Bug-fix release.
 ===========================================================================
 * PR #1638: Increased entropy of shmKey to avoid collisions between genomes. Many thanks to Jeff Hussmann (@jeffhussmann).
