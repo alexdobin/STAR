@@ -177,6 +177,10 @@ class ReadAlign {
         //read annotations
         ReadAnnotations readAnnot;
 
+        #ifdef DEBUG_OutputLastRead
+            ofstream lastReadStream;
+        #endif
+
         /////////////////////////////////////////////////////////////////// METHODS
         void resetN();//resets the counters to 0
         void multMapSelect();

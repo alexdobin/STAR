@@ -110,6 +110,13 @@ int ReadAlign::oneRead() {//process one read: load, map, write
     //write out alignments
     outputAlignments();
 
+    {
+    #ifdef DEBUG_OutputLastRead
+        lastReadStream.seekp(ios::beg);
+        lastReadStream << iReadAll <<" "<< readName <<endl;
+    #endif
+    };
+
     return 0;
 
 };

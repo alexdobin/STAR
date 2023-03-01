@@ -161,7 +161,7 @@ void sjdbBuildIndex (Parameters &P, char *Gsj, char *G, PackedArray &SA, PackedA
         if ( (ind1 & N2bit)>0 )
         {//- strand
             uint ind1s = mapGen1.nGenome - (ind1 & strandMask);
-            if (ind1s>mapGen.chrStart[mapGen.nChrReal])
+            if (ind1s>=mapGen.chrStart[mapGen.nChrReal])
             {//this index was an old sj, may need to shift it
                 uint sj1 = (ind1s-mapGen.chrStart[mapGen.nChrReal])/mapGen.sjdbLength;//old junction index
                 ind1s += (oldSJind[sj1]-sj1)*mapGen.sjdbLength;
@@ -172,7 +172,7 @@ void sjdbBuildIndex (Parameters &P, char *Gsj, char *G, PackedArray &SA, PackedA
             };
         } else
         {//+ strand
-            if (ind1>mapGen.chrStart[mapGen.nChrReal])
+            if (ind1>=mapGen.chrStart[mapGen.nChrReal])
             {//this index was an old sj, may need to shift it
                 uint sj1 = (ind1-mapGen.chrStart[mapGen.nChrReal])/mapGen.sjdbLength;//old junction index
                 ind1 += (oldSJind[sj1]-sj1)*mapGen.sjdbLength;

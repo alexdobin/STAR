@@ -101,6 +101,13 @@ ReadAlign::ReadAlign (Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, in
     
     //clipping
     P.pClip.initializeClipMates(clipMates);
+
+    //debug
+    {
+    #ifdef DEBUG_OutputLastRead
+        lastReadStream.open((P.outFileTmp+"/lastRead_"+to_string(iChunk)).c_str());
+    #endif
+    };
 };
 
 void ReadAlign::resetN () {//reset resets the counters to 0 for a new read
