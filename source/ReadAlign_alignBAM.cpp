@@ -365,6 +365,14 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                         break;
                     };
 
+                    case ATTR_ha:
+                    {
+                        if (mapGen.pGe.transform.type==2) {
+                            attrN+=bamAttrArrayWrite( (int32) trOut.haploType, "ha", attrOutArray+attrN );
+                        };
+                        break; 
+                    };
+
                     case ATTR_ch:
                         if (alignType<=-10)
                         {//chimeric alignment
