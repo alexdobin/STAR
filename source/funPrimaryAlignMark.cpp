@@ -1,4 +1,7 @@
-void funPrimaryAlignMark(Transcript **trMult, uint64 nTr, Parameters &P)
+#include "funPrimaryAlignMark.h"
+
+void funPrimaryAlignMark(Transcript **trMult, uint64 nTr, 
+                         Parameters &P, int maxScore, std::uniform_real_distribution<double> rngUniformReal0to1, std::mt19937 rngMultOrder)
 {
     if (nTr==1){//unique mappers
         trMult[0]->primaryFlag=true;
@@ -32,7 +35,8 @@ void funPrimaryAlignMark(Transcript **trMult, uint64 nTr, Parameters &P)
         } else if (P.outMultimapperOrder.random || P.outSAMmultNmax != (uint) -1) {
             trMult[0]->primaryFlag=true;//mark as primary the first one in the random ordered list: best scoring aligns are already in front of the list
         } else {//old way
-            trBest->primaryFlag=true;
+            //trBest->primaryFlag=true; //cannot do it, trBest may not be defined
+            trMult[0]->primaryFlag=true;
         };
     };
 };

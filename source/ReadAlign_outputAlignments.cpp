@@ -21,12 +21,21 @@ void ReadAlign::outputAlignments() {
     if (outFilterBySJoutPass) {//otherwise align is held for the 2nd stage of outFilterBySJout
         ////////////////////////////////////
         if (unmapType<0) {//passed mappedFilter. Unmapped reads can have nTr>0
-            if (nTr>1) {//multimappers
+
+            auto nTr1 = nTr;
+            auto trOut1 = trMult[0];
+
+            if (P.pGe.transform.outYes) {
+                nTr1 = alignsGenOut.alN;
+                trOut1 = alignsGenOut.alMult[0];
+            };
+
+            if (nTr1>1) {//multimappers
                 statsRA.mappedReadsM++;
                 unmapType = -2; //not sure if this used
-            } else if (nTr==1) {//unique mappers
+            } else if (nTr1==1) {//unique mappers
                 statsRA.mappedReadsU++;
-                statsRA.transcriptStats(*(trMult[0]),Lread);
+                statsRA.transcriptStats(*trOut1, Lread);
             };
 
             if (!P.pGe.transform.outSAM) {
