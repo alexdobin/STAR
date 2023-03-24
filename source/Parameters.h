@@ -330,6 +330,7 @@ class Parameters {
         //variation parameters
         struct {
             bool yes=false;
+            bool heteroOnly=false;
             string vcfFile;
         } var;
 

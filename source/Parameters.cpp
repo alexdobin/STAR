@@ -862,6 +862,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     if (wasp.outputMode=="SAMtag") {
         wasp.yes=true;
         wasp.SAMtag=true;
+        var.heteroOnly=true;
     } else if (wasp.outputMode=="None") {
         //nothing to do
     } else {

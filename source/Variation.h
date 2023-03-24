@@ -31,7 +31,7 @@ class Variation
 {
 public:
     //methods
-    Variation (Parameters &Pin, vector <uint> &chrStart, map <string,uint> &chrNameIndex); //create transcriptome structure, load and initialize parameters
+    Variation (Parameters &Pin, vector <uint> &chrStart, map <string,uint> &chrNameIndex, bool yesVar); //create transcriptome structure, load and initialize parameters
     void loadVCF(string fileIn); //load VCF file
     vector<vector<array<int,2>>> sjdbSnp(uint sjStart, uint sjEnd, uint sjdbOverhang1); //calculates snp loci in sjdb sequences
 

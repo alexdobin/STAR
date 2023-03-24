@@ -1,13 +1,30 @@
 #include "ReadAlign.h"
 
 void ReadAlign::waspMap() {
-    if (!P.wasp.yes || trBest->varAllele.size()==0) {//no variants, vW tag will not be output
+
+    if (!P.wasp.yes) {
+        waspType=-1;
+        return;  
+    };
+
+    auto nTr1 = nTr;
+    auto align1 = trBest;
+    auto Var1 = mapGen.Var;
+
+    if (P.pGe.transform.outYes) {
+        nTr1 = alignsGenOut.alN;
+        align1 = alignsGenOut.alMult[0];
+        Var1 = genOut.Var;
+        align1->variationAdjust(genOut, Read1[align1->Str==0 ? 0:2]);
+    };
+
+    if (align1->varAllele.size()==0) {//no variants, vW tag will not be output
         waspType=-1;
         return;
-    } else if (nTr>1) {//multimapping read
+    } else if (nTr1>1) {//multimapping read
         waspType=2;
         return;
-    } else if (trBest->varAllele.size()>10) {//multimapping read
+    } else if (align1->varAllele.size()>10) {//too many variants
         waspType=7;
         return;
     };
@@ -15,7 +32,7 @@ void ReadAlign::waspMap() {
 
     waspRA->copyRead(*this);
 
-    vector <char> vA=trBest->varAllele;
+    vector <char> vA=align1->varAllele;
 
     for (const auto& a : vA) {
         if (a>3) {//read has N for the variant, drop it
@@ -23,8 +40,6 @@ void ReadAlign::waspMap() {
             return;
         };
     };
-
-
 
     vector<vector<char>> vvA {{}}; //all combinations
     for (const auto& u : vA) {//cycle over vars, each time add new variant by adding 2 variants to each of the existing combinations
@@ -48,10 +63,10 @@ void ReadAlign::waspMap() {
             for (uint iv=0; iv<vA1.size(); ++iv) {//set all variants in this combination
 
                 //we assume the homo-vars are already excluded
-                char nt2=mapGen.Var->snp.nt[trBest->varInd.at(iv)][vA1.at(iv)]; //the other allele
-                uint vr=trBest->varReadCoord.at(iv);//read coordinate
+                char nt2=Var1->snp.nt[align1->varInd.at(iv)][vA1.at(iv)]; //the other allele
+                uint vr=align1->varReadCoord.at(iv);//read coordinate
 
-                if (trBest->Str==1) {//variant was found on the - strand alignment
+                if (align1->Str==1) {//variant was found on the - strand alignment
                     nt2=3-nt2;
                     vr=Lread-1-vr;
                 };
@@ -64,19 +79,28 @@ void ReadAlign::waspMap() {
             waspRA->multMapSelect();
             waspRA->mappedFilter();
 
+            auto align2 = waspRA->trBest;
+            auto nTr2 = waspRA->nTr;
+
+            if (P.pGe.transform.outYes) {
+                waspRA->transformGenome();
+                nTr2 = waspRA->alignsGenOut.alN;
+                align2 = waspRA->alignsGenOut.alMult[0];
+            };            
+
             if (waspRA->unmapType!=-1) {
                 waspType=4;
                 return;
-            } else if (waspRA->nTr>1) {
+            } else if (nTr2>1) {
                 waspType=5;
                 return;
-            } else if (waspRA->trBest->nExons!=trBest->nExons) {
+            } else if (align2->nExons!=align1->nExons) {
                 waspType=6;
                 return;
             } else {
-                for (uint ii=0; ii<trBest->nExons; ii++) {
+                for (uint ii=0; ii<align1->nExons; ii++) {
                     for (uint jj=0; jj<=2; jj++) {
-                        if (trBest->exons[ii][jj]!=waspRA->trBest->exons[ii][jj]) {
+                        if (align1->exons[ii][jj]!=align2->exons[ii][jj]) {
                             waspType=6;
                             return;//this combination maps to a different place, return with waspType 0 (set above)
                         };

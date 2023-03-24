@@ -1,3 +1,4 @@
+* Behavior change: for --wasp* ouput, the homozygous SNVs are filtered out from the VCF file.
 * Issue #1763: Fixed a bug causing segnmentation fault in rare cases for 2-pass mapping.
 * Issue #1733: Fixed the issue with counting of intronicAS reads in STARsolo CellReads.stats output with --soloFeatures GeneFull_Ex50pAS option.
 

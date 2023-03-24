@@ -9,7 +9,11 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
     if (!P.quant.yes)
         return;
 
-    trInfoDir = P.pGe.sjdbGTFfile=="-" ? P.pGe.gDir : P.sjdbInsert.outDir; //if GTF file is given at the mapping stage, it's always used for transcript info
+    if (!P.pGe.transform.outQuant) {//standard
+        trInfoDir = P.pGe.sjdbGTFfile=="-" ? P.pGe.gDir : P.sjdbInsert.outDir; //if GTF file is given at the mapping stage, it's always used for transcript info
+    } else {//transformed genome
+        trInfoDir = P.pGeOut.gDir;
+    };
 
     ifstream &geStream = ifstrOpen(trInfoDir+"/geneInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotations.gtf option at the genome generation step or mapping step", P);
     geStream >> nGe;

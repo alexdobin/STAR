@@ -5,26 +5,25 @@
 #include "serviceFuns.cpp"
 #include "ErrorWarning.h"
 
-Variation::Variation (Parameters &Pin, vector <uint> &chrStartIn, map <string,uint> &chrNameIndexIn) : P(Pin), chrStart(chrStartIn), chrNameIndex(chrNameIndexIn) {
-    if (!P.var.yes) {
+Variation::Variation (Parameters &Pin, vector <uint> &chrStartIn, map <string,uint> &chrNameIndexIn, bool yesVar) : P(Pin), chrStart(chrStartIn), chrNameIndex(chrNameIndexIn) {
+    if (yesVar) {
+        yes=true;
+
+        //not used yet
+        //varOutFileName=P.outFileNamePrefix+"Variation.out";
+        //varOutStream.open(varOutFileName);
+
+        vcfFile=P.var.vcfFile;
+        loadVCF(vcfFile);
+    } else{
         yes=false;
-        return;
     };
-
-    yes=true;
-
-    //not used yet
-    //varOutFileName=P.outFileNamePrefix+"Variation.out";
-    //varOutStream.open(varOutFileName);
-
-    vcfFile=P.var.vcfFile;
-    loadVCF(vcfFile);
-
 };
 
 void scanVCF(ifstream& vcf, Parameters& P, SNP& snp, vector <uint> &chrStart, map <string,uint> &chrNameIndex) {
     snp.N=0;
     uint nlines=0;
+    uint32 nHomoz=0;//number of homoz alleles
     while (true) {
         string chr,id, ref, alt, dummy, sample;
         uint pos;
@@ -54,6 +53,8 @@ void scanVCF(ifstream& vcf, Parameters& P, SNP& snp, vector <uint> &chrStart, ma
                 } else if (altV.at( atoi(&sample.at(0)) ).at(0)==ref.at(0) && altV.at( atoi(&sample.at(2)) ).at(0)==ref.at(0)) {
                     //both alleles are reference, no need to do anything
                     //this is a strange case in VCF when ALT allele(s) are equal to REF
+                } else if ( P.var.heteroOnly && sample.at(0)==sample.at(2) )  {
+                    nHomoz++;
                 } else {
                     array<char,3> nt1;
                     nt1[0]=convertNt01234( ref.at(0) );
@@ -68,6 +69,11 @@ void scanVCF(ifstream& vcf, Parameters& P, SNP& snp, vector <uint> &chrStart, ma
             };
         };
         getline(vcf,dummy);
+    };
+
+    if (nHomoz>0) {
+        P.inOut->logMain << "WARNING: while processing varVCFfile file=" << P.var.vcfFile 
+                         <<": found " << nHomoz << " homozygous SNPs, they will NOT be used." <<endl;
     };
 };
 

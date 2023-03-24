@@ -42,12 +42,27 @@ void twoPassRunPass1(Parameters &P, Genome &genomeMain, Transcriptome *transcrip
 //         P1.inOut->logMain.open((P1.outFileNamePrefix + "Log.out").c_str());
 
     P1.wasp.outputMode="None"; //no WASP filtering on the 1st pass
+    P1.wasp.yes = false;
+    P1.wasp.SAMtag = false;
+    
     P1.pSolo.type=P1.pSolo.SoloTypes::None; //no solo in the first pass
 
     g_statsAll.resetN();
     time(&g_statsAll.timeStartMap);
     P.inOut->logProgress << timeMonthDayTime(g_statsAll.timeStartMap) <<"\tStarted 1st pass mapping\n" <<flush;
     *P.inOut->logStdOut << timeMonthDayTime(g_statsAll.timeStartMap) << " ..... started 1st pass mapping\n" <<flush;
+
+    //no genome conversion for 1st pass
+    P1.pGe.transform.outYes = false;
+    P1.pGe.transform.outQuant = false;
+    P1.pGe.transform.outSAM = false;
+    P1.pGe.transform.outSJ = false;
+    
+    auto convYes = genomeMain.genomeOut.convYes;
+    auto gOut = genomeMain.genomeOut.g;
+
+    genomeMain.genomeOut.convYes = false;
+    genomeMain.genomeOut.g = &genomeMain;
 
     //run mapping for Pass1
     ReadAlignChunk *RAchunk1[P.runThreadN];
@@ -59,6 +74,10 @@ void twoPassRunPass1(Parameters &P, Genome &genomeMain, Transcriptome *transcrip
 //         for (int ii=0;ii<P1.runThreadN;ii++) {
 //             delete [] RAchunk[ii];
 //         };
+
+    //back to requested genome conversions
+    genomeMain.genomeOut.convYes = convYes;
+    genomeMain.genomeOut.g = gOut;
 
     time_t rawtime; time (&rawtime);
     P.inOut->logProgress << timeMonthDayTime(rawtime) <<"\tFinished 1st pass mapping\n";
