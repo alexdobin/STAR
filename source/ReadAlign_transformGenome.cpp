@@ -14,7 +14,7 @@ void ReadAlign::transformGenome()
     
     for (uint32 iTr=0; iTr<nTr; iTr++) {//convert output transcripts into new genome
         
-        trMult[iTr]->haploType = ( trMult[iTr]->Chr >= mapGen.nChrReal/2 ? 1 : 2 );
+        trMult[iTr]->haploType = ( trMult[iTr]->Chr < mapGen.nChrReal/2 ? 1 : 2 );
         
         *alignsGenOut.alMult[nTr1]=*trMult[iTr];//copy information before conversion
         if (trMult[iTr]->transformGenome(*mapGen.genomeOut.g, *alignsGenOut.alMult[nTr1])) {        
