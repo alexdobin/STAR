@@ -42,7 +42,12 @@ GIT_BRANCH_COMMIT_DIFF := -D'GIT_BRANCH_COMMIT_DIFF="$(GIT_BRANCH_COMMIT_DIFF)"'
 # Defaults, can be overridden by make arguments or environment
 CXXFLAGS ?= -pipe -Wall -Wextra
 CFLAGS ?= -pipe -Wall -Wextra -O3
-CXXFLAGS_SIMD ?= -mavx2
+ifeq ($(shell uname -m),x86_64)
+avxCXXFLAGS_SIMD ?=
+else
+avxCXXFLAGS_SIMD ?= -mavx2
+endif
+
 
 # Unconditionally set essential flags and optimization options
 CXXFLAGS_common := -std=c++11 -fopenmp $(COMPTIMEPLACE) $(GIT_BRANCH_COMMIT_DIFF)
