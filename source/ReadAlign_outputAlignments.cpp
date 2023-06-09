@@ -5,9 +5,6 @@
 void ReadAlign::outputAlignments() {
   
     outBAMbytes=0;
-
-    if (P.pSolo.readStats.yes)
-        soloRead->readFlagReset();
         
     readAnnot.reset();
     

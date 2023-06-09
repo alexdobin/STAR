@@ -43,7 +43,8 @@ void twoPassRunPass1(Parameters &P, Genome &genomeMain, Transcriptome *transcrip
 
     P1.wasp.outputMode="None"; //no WASP filtering on the 1st pass
     P1.pSolo.type=P1.pSolo.SoloTypes::None; //no solo in the first pass
-
+    P1.pSolo.yes = false;
+    
     g_statsAll.resetN();
     time(&g_statsAll.timeStartMap);
     P.inOut->logProgress << timeMonthDayTime(g_statsAll.timeStartMap) <<"\tStarted 1st pass mapping\n" <<flush;
