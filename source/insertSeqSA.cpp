@@ -20,7 +20,7 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
 
     uint GstrandBit1 = (uint) floor(log(nG+nG1)/log(2))+1;
     if (GstrandBit1<32) GstrandBit1=32; //TODO: use simple access function for SA
-    if ( GstrandBit1+1 != SA.wordLength)
+    if ( GstrandBit1+1 > SA.wordLength)
     {//sequence is too long - GstrandBit changed
         ostringstream errOut;
         errOut << "EXITING because of FATAL ERROR: cannot insert sequence on the fly because of strand GstrandBit problem\n";
