@@ -434,6 +434,19 @@ int ReadAlign::alignBAM(Transcript const &trOut, uint nTrOut, uint iTrOut, uint 
                         };
                         break;                                                       
                         
+                    case ATTR_sF:
+                        {
+                            vector<int32_t> sf(2);
+                            sf[0] = readAnnot.annotFeatures[P.pSolo.samAttrFeature].ovType;
+                            sf[1] = readAnnot.annotFeatures[P.pSolo.samAttrFeature].fSet.size();
+                            if ( (sf[0]==1 || sf[0]==3 || sf[0]==5) && readAnnot.annotFeatures[P.pSolo.samAttrFeature].fAlign[iTrOut].size()==0) {
+                                sf={-1,-1};
+                            };
+                            attrN += bamAttrArrayWrite(sf,"sF",attrOutArray+attrN);
+
+                        };
+                        break;
+
                     case ATTR_sM:
                         attrN+=bamAttrArrayWrite(soloRead->readBar->cbMatch,"sM",attrOutArray+attrN);
                         break;

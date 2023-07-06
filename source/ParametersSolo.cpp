@@ -31,6 +31,7 @@ void ParametersSolo::initialize(Parameters *pPin)
         if (   pP->outSAMattrPresent.CR  || pP->outSAMattrPresent.CY  || pP->outSAMattrPresent.UR 
             || pP->outSAMattrPresent.UY  || pP->outSAMattrPresent.CB  || pP->outSAMattrPresent.UB
             || pP->outSAMattrPresent.sS  || pP->outSAMattrPresent.sQ  || pP->outSAMattrPresent.sM
+            || pP->outSAMattrPresent.sF
            ) {
             ostringstream errOut;
             errOut <<"EXITING because of FATAL INPUT ERROR: --outSAMattributes contains CR/CY/UR/UY/CB/UB tags which are not allowed for --soloType " << typeStr <<'\n';

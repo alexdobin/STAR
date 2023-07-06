@@ -35,7 +35,8 @@ void Parameters::samAttributes(){//everything related to SAM attributes
     outSAMattrPresent.sM=false;
     outSAMattrPresent.sS=false;    
     outSAMattrPresent.sQ=false;
-    
+    outSAMattrPresent.sF=false;
+
     outSAMattrPresent.cN=false;
     
     //for quant SAM output only NH and HI flags
@@ -156,6 +157,10 @@ void Parameters::samAttributes(){//everything related to SAM attributes
             outSAMattrOrder.push_back(ATTR_sS);
             outSAMattrOrderQuant.push_back(ATTR_sS);
             outSAMattrPresent.sS=true;  
+        } else if (vAttr1.at(ii)== "sF") {
+            outSAMattrOrder.push_back(ATTR_sF);
+            outSAMattrOrderQuant.push_back(ATTR_sF);
+            outSAMattrPresent.sF=true;  
         } else if (vAttr1.at(ii)== "sQ") {
             outSAMattrOrder.push_back(ATTR_sQ);
             outSAMattrOrderQuant.push_back(ATTR_sQ);
@@ -227,6 +232,7 @@ void Parameters::samAttributes(){//everything related to SAM attributes
     samAttrRequiresBAM(outSAMattrPresent.UB, "UB");
     samAttrRequiresBAM(outSAMattrPresent.sM, "sM");
     samAttrRequiresBAM(outSAMattrPresent.sS, "sS");
+    samAttrRequiresBAM(outSAMattrPresent.sS, "sF");
     samAttrRequiresBAM(outSAMattrPresent.sQ, "sQ");
     samAttrRequiresBAM(outSAMattrPresent.rB, "rB");
     samAttrRequiresBAM(outSAMattrPresent.vG, "vG");

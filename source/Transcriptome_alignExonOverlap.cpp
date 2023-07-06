@@ -203,15 +203,15 @@ void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandTyp
         } else if (otFinal[1]) {
             annFeat.ovType = ReadAnnotFeature::overlapTypes::exonicAS;
         } else if (otFinal[2]) {
-            annFeat.ovType = ReadAnnotFeature::overlapTypes::exonic;
+            annFeat.ovType = ReadAnnotFeature::overlapTypes::exonic50p;
         } else if (otFinal[3]) {
-            annFeat.ovType = ReadAnnotFeature::overlapTypes::exonicAS;
+            annFeat.ovType = ReadAnnotFeature::overlapTypes::exonic50pAS;
         } else if (otFinal[4]) {
             annFeat.ovType = ReadAnnotFeature::overlapTypes::intronic;
         } else if (otFinal[5]) {
             annFeat.ovType = ReadAnnotFeature::overlapTypes::intronicAS;
         } else {
-            annFeat.ovType = ReadAnnotFeature::overlapTypes::none; //intergenic. i.e. no overlap with genes
+            annFeat.ovType = ReadAnnotFeature::overlapTypes::intergenic; //intergenic. i.e. no overlap with genes
         };
 
         // annFeat.fSet={};

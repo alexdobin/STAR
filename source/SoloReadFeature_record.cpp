@@ -38,12 +38,14 @@ void SoloReadFeature::record(SoloReadBarcode &soloBar, uint nTr, Transcript **al
 
         switch (readAnnot.annotFeatures[featureType].ovType) {
             case ReadAnnotFeature::overlapTypes::exonic : 
+            case ReadAnnotFeature::overlapTypes::exonic50p :
                 readFlag.setBit(readFlag.exonic);
                 break;
             case ReadAnnotFeature::overlapTypes::intronic : 
                 readFlag.setBit(readFlag.intronic);
                 break;
             case ReadAnnotFeature::overlapTypes::exonicAS : 
+            case ReadAnnotFeature::overlapTypes::exonic50pAS :
                 readFlag.setBit(readFlag.exonicAS);            
                 break;
             case ReadAnnotFeature::overlapTypes::intronicAS :
