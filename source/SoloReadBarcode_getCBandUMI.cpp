@@ -3,6 +3,8 @@
 #include "SequenceFuns.h"
 #include "ErrorWarning.h"
 #include "GlobalVariables.h"
+#include <chrono>
+#include <thread>
 
 void SoloReadBarcode::matchCBtoWL(string &cbSeq1, string &cbQual1, vector<uint64> &cbWL, int32 &cbMatch1, vector<uint64> &cbMatchInd1, string &cbMatchString1)
 {
@@ -249,15 +251,42 @@ void SoloReadBarcode::getCBandUMI(char **readSeq, char **readQual, uint64 *readL
         umiSeq=bSeq.substr(pSolo.umiS-1,pSolo.umiL);
         cbQual=bQual.substr(pSolo.cbS-1,pSolo.cbL);
         umiQual=bQual.substr(pSolo.umiS-1,pSolo.umiL);
-        
+
+
         for (uint64 ix=0; ix<cbQual.size(); ix++) {
             qualHist[(uint8)cbQual[ix]]++;
         };
         for (uint64 ix=0; ix<umiQual.size(); ix++) {
             qualHist[(uint8)umiQual[ix]]++;
+        };               
+        
+        if (pSolo.CBtype.type==1) {//sequence cb
+            matchCBtoWL(cbSeq, cbQual, pSolo.cbWL, cbMatch, cbMatchInd, cbMatchString);
+        } else if (pSolo.CBtype.type==2) {//string cb
+            /* this seg-faults
+            while (pSolo.CBtype.strMap.count(cbSeq)==0) {
+                if (pSolo.CBtype.strMtx->try_lock()) {
+                    pSolo.CBtype.strMap[cbSeq] = pSolo.CBtype.strMap.size();
+                    pSolo.CBtype.strMtx->unlock();
+                };
+                    //std::this_thread::sleep_for(std::chrono::nanoseconds(10));
+            };
+            */
+            pSolo.CBtype.strMtx->lock();
+            auto cbi = pSolo.CBtype.strMap.find(cbSeq);
+            uint32 cb1;
+            if (cbi == pSolo.CBtype.strMap.end()) {
+                pSolo.CBtype.strMap[cbSeq] = pSolo.CBtype.strMap.size();
+                cb1 = pSolo.CBtype.strMap.size();
+            } else {
+                cb1 = cbi->second;
+            };
+            pSolo.CBtype.strMtx->unlock();
+            
+            cbMatchInd.push_back(cb1);//all possible barcodes are accepted. This will overflow if CB is longer than 31b
+            cbMatchString = std::to_string(cb1);
+            cbMatch=0;
         };
-             
-        matchCBtoWL(cbSeq, cbQual, pSolo.cbWL, cbMatch, cbMatchInd, cbMatchString);
 
         if (!convertCheckUMI()) {//UMI conversion
             #ifdef MATCH_CellRanger

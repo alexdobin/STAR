@@ -92,6 +92,26 @@ void ParametersSolo::initialize(Parameters *pPin)
         exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
 
+    /////////////////////////// CB type
+    if (CBtype.typeString=="Sequence") {
+        CBtype.type = 1;
+    } else if (CBtype.typeString=="String") {
+        if (soloCBwhitelist[0]!="None") {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: --soloCBtype String cannot be used with passlist\n";
+            errOut << "SOLUTION: use --soloCBwhitelist None\n";
+            exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+
+        };
+        CBtype.type = 2;
+        CBtype.strMtx = new std::mutex;
+        CBtype.strMap.reserve(100000);        
+    } else  {
+        ostringstream errOut;
+        errOut << "EXITING because of fatal PARAMETERS error: unrecognized option in --soloCBtype="<< CBtype.typeString <<"\n";
+        errOut << "SOLUTION: use allowed option: Sequence OR String\n";
+        exitWithError(errOut.str(),std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
+    };
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////input read files
     barcodeRead=-1; 

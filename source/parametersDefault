@@ -771,6 +771,11 @@ soloType                    None
                             CB_samTagOut    ... output Cell Barcode as CR and/or CB SAm tag. No UMI counting. --readFilesIn cDNA_read1 [cDNA_read2 if paired-end] CellBarcode_read . Requires --outSAMtype BAM Unsorted [and/or SortedByCoordinate]
                             SmartSeq        ... Smart-seq: each cell in a separate FASTQ (paired- or single-end), barcodes are corresponding read-groups, no UMI sequences, alignments deduplicated according to alignment start and end (after extending soft-clipped bases)
 
+soloCBtype                  Sequence
+    string: cell barcode type
+                            Sequence: cell barcode is a sequence (standard option)
+                            String: cell barcode is an arbitrary string
+
 soloCBwhitelist             -
     string(s): file(s) with whitelist(s) of cell barcodes. Only --soloType CB_UMI_Complex allows more than one whitelist file.
                             None            ... no whitelist: all cell barcodes are allowed

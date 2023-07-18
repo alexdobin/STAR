@@ -22,21 +22,31 @@ void SoloFeature::sumThreads()
         pSolo.cbWLsize=readFeatSum->cbReadCountMap.size();
         pSolo.cbWL.resize(pSolo.cbWLsize);
         pSolo.cbWLstr.resize(pSolo.cbWLsize);
-        uint64 ii=0;
-        for (auto &cb : readFeatSum->cbReadCountMap) {
-            pSolo.cbWL[ii] = cb.first;
-            pSolo.cbWLstr[ii] = convertNuclInt64toString(pSolo.cbWL[ii],pSolo.cbL); 
-            ii++;
-        };
         readFeatSum->cbReadCount.resize(pSolo.cbWLsize);
         readBarSum->cbReadCountExact.resize(pSolo.cbWLsize);
 
-        uint64 icb=0;
-        for (auto ii=readFeatSum->cbReadCountMap.cbegin(); ii!=readFeatSum->cbReadCountMap.cend(); ++ii) {
-            pSolo.cbWL[icb]=ii->first;
-            readFeatSum->cbReadCount[icb]=ii->second;
-            readBarSum->cbReadCountExact[icb]=ii->second;
-            ++icb;
+        if (pSolo.CBtype.type==1) {//sequence cb
+            uint64 icb=0;
+            for (auto &cb : readFeatSum->cbReadCountMap) {
+                pSolo.cbWL[icb] = cb.first;
+                pSolo.cbWLstr[icb] = convertNuclInt64toString(pSolo.cbWL[icb],pSolo.cbL);
+                readFeatSum->cbReadCount[icb]=cb.second;
+                readBarSum->cbReadCountExact[icb]=cb.second;
+                icb++;
+            };
+        } else if (pSolo.CBtype.type==2) {//string cb
+            vector< std::unordered_map<string,uint32>::iterator > cbiter(pSolo.CBtype.strMap.size());
+            for (auto cbi=pSolo.CBtype.strMap.begin(); cbi!=pSolo.CBtype.strMap.end(); cbi++)
+                cbiter[cbi->second] = cbi;
+
+            uint64 icb=0;
+            for (auto &cb : readFeatSum->cbReadCountMap) {
+                pSolo.cbWL[icb] = cb.first;
+                pSolo.cbWLstr[icb] = cbiter[cb.first]->first;
+                readFeatSum->cbReadCount[icb]=cb.second;
+                readBarSum->cbReadCountExact[icb]=cb.second;
+                icb++;
+            };
         };
 
         //pseudocounts

@@ -2,6 +2,9 @@
 #define CODE_ParametersSolo
 
 #include <array>
+#include <unordered_map>
+#include <mutex>
+
 
 #include "IncludeDefine.h"
 #include "SoloBarcode.h"
@@ -152,6 +155,14 @@ public:
         
     } cellFilter;
       
+    //CBtype
+    struct {
+        string typeString;
+        int32 type;
+        std::unordered_map<string,uint32> strMap;
+        std::mutex *strMtx;
+    } CBtype;
+
     //CB match
     struct {
         string type;
