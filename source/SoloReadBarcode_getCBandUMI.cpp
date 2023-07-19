@@ -180,6 +180,7 @@ void SoloReadBarcode::getCBandUMI(char **readSeq, char **readQual, uint64 *readL
         };
         
         bSeq = {};
+        bStrings.clear();
         for (auto &tag: pSolo.samAtrrBarcodeSeq) {
             size_t pos1 = readNameExtraT.find(tag); //find tag
             if ( pos1 == std::string::npos ) {
@@ -191,7 +192,9 @@ void SoloReadBarcode::getCBandUMI(char **readSeq, char **readQual, uint64 *readL
             };
             pos1 +=6; //skip 6 chars, e.g. \tCB:Z:
             size_t pos2 = readNameExtraT.find('\t', pos1); //find next \t
-            bSeq += readNameExtraT.substr(pos1,pos2-pos1);
+            bStrings.push_back(readNameExtraT.substr(pos1,pos2-pos1));
+            bSeq += bStrings.back();
+            
         };
 
         bQual = {};        
@@ -247,20 +250,21 @@ void SoloReadBarcode::getCBandUMI(char **readSeq, char **readQual, uint64 *readL
     ////////////////// cbSeq and umiSeq, and match CB to WL, different CB_UMI types
     ///////////////////////////CB_UMI_Simple a.k.a Droplet
     if ( pSolo.type==pSolo.SoloTypes::CB_UMI_Simple ) {
-        cbSeq=bSeq.substr(pSolo.cbS-1,pSolo.cbL);
-        umiSeq=bSeq.substr(pSolo.umiS-1,pSolo.umiL);
-        cbQual=bQual.substr(pSolo.cbS-1,pSolo.cbL);
-        umiQual=bQual.substr(pSolo.umiS-1,pSolo.umiL);
 
-
-        for (uint64 ix=0; ix<cbQual.size(); ix++) {
-            qualHist[(uint8)cbQual[ix]]++;
-        };
-        for (uint64 ix=0; ix<umiQual.size(); ix++) {
-            qualHist[(uint8)umiQual[ix]]++;
-        };               
-        
         if (pSolo.CBtype.type==1) {//sequence cb
+            cbSeq=bSeq.substr(pSolo.cbS-1,pSolo.cbL);
+            umiSeq=bSeq.substr(pSolo.umiS-1,pSolo.umiL);
+            cbQual=bQual.substr(pSolo.cbS-1,pSolo.cbL);
+            umiQual=bQual.substr(pSolo.umiS-1,pSolo.umiL);
+
+
+            for (uint64 ix=0; ix<cbQual.size(); ix++) {
+                qualHist[(uint8)cbQual[ix]]++;
+            };
+            for (uint64 ix=0; ix<umiQual.size(); ix++) {
+                qualHist[(uint8)umiQual[ix]]++;
+            };               
+            
             matchCBtoWL(cbSeq, cbQual, pSolo.cbWL, cbMatch, cbMatchInd, cbMatchString);
         } else if (pSolo.CBtype.type==2) {//string cb
             /* this seg-faults
@@ -272,12 +276,14 @@ void SoloReadBarcode::getCBandUMI(char **readSeq, char **readQual, uint64 *readL
                     //std::this_thread::sleep_for(std::chrono::nanoseconds(10));
             };
             */
+            cbSeq = bStrings[0];
+            umiSeq = bStrings[1];
             pSolo.CBtype.strMtx->lock();
             auto cbi = pSolo.CBtype.strMap.find(cbSeq);
             uint32 cb1;
             if (cbi == pSolo.CBtype.strMap.end()) {
-                pSolo.CBtype.strMap[cbSeq] = pSolo.CBtype.strMap.size();
                 cb1 = pSolo.CBtype.strMap.size();
+                pSolo.CBtype.strMap[cbSeq] = cb1;
             } else {
                 cb1 = cbi->second;
             };

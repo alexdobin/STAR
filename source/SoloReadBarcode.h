@@ -15,6 +15,7 @@ public:
     
     uint32 homoPolymer[4];//homopolymer constants
     string cbSeq, umiSeq, cbQual, umiQual, bSeq, bQual;
+    vector<string> bStrings; //barcode strings from SAM tags
     string cbSeqCorrected;
     uint64 umiB;
     //int64  cbI;
