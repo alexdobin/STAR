@@ -365,6 +365,7 @@ void ParametersSolo::initialize(Parameters *pPin)
         };
         
         umiV.extractPositionsFromString(umiPositionStr);
+        umiL = 0; //this will be defined when the first barcode is processed
               
         umiV.adapterLength=adapterSeq.size();//one adapter for all
         cbWLsize=1;

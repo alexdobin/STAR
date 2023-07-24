@@ -350,6 +350,9 @@ void SoloReadBarcode::getCBandUMI(char **readSeq, char **readQual, uint64 *readL
             return;
         };
 
+        if ( pSolo.umiL == 0 )
+            pSolo.umiL = umiSeq.size();
+
         bool cbMatchGood=true;
         if (!convertCheckUMI()) {
             cbMatchGood = false;//CB matching will not be done, just extract the sequences

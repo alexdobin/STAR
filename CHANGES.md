@@ -1,6 +1,7 @@
 * Implemented --soloCBtype String option for arbitrary cell barcode strings without passlist.
 * Implemented STARsolo BAM tag sF, which outputs the feature type and number of genes for each read.
 * Fixed a GstrandBit issue for the on-the-fly insertion of extra genomic sequences.
+* Issue #1909: Fixed a bug causing wrong sequence length in the UB SAM tag for --soloType CB_UMI_Complex.
 * Issue #1871: Fixed a bug which occurs when --soloCellReadStats Standard --twopassMode Basic are used together.
 * Issue #1763: Fixed a bug causing segnmentation fault in rare cases for 2-pass mapping.
 * Issue #1733: Fixed the issue with counting of intronicAS reads in STARsolo CellReads.stats output with --soloFeatures GeneFull_Ex50pAS option.
