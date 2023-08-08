@@ -5,6 +5,7 @@
 * Issue #1871: Fixed a bug which occurs when --soloCellReadStats Standard --twopassMode Basic are used together.
 * Issue #1763: Fixed a bug causing segnmentation fault in rare cases for 2-pass mapping.
 * Issue #1733: Fixed the issue with counting of intronicAS reads in STARsolo CellReads.stats output with --soloFeatures GeneFull_Ex50pAS option.
+* Behavior change: for --wasp* ouput, the homozygous SNVs are filtered out from the VCF file.
 
 STAR 2.7.10b --- 2022/11/01 ::: Bug-fix release.
 ===========================================================================

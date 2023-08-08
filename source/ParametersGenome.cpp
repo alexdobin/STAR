@@ -33,6 +33,8 @@ void ParametersGenome::initialize(Parameters *pPin)
                 transform.outYes = transform.outSAM = true;
             } else if (ot == "SJ") {
                 transform.outYes = transform.outSJ = true;
+            } else if (ot == "Quant") {
+                transform.outYes = transform.outQuant = true;                
             } else {
                 exitWithError("EXITING because of FATAL PARAMETER ERROR: unrecognized option in --outTransformOutput = " + ot + '\n'
                               + "SOLUTION: use allowed values for --outTransformOutput: None or SAM and/or SJ\n"

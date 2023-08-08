@@ -18,18 +18,27 @@ void ReadAlign::outputAlignments() {
     if (outFilterBySJoutPass) {//otherwise align is held for the 2nd stage of outFilterBySJout
         ////////////////////////////////////
         if (unmapType<0) {//passed mappedFilter. Unmapped reads can have nTr>0
-            if (nTr>1) {//multimappers
-                statsRA.mappedReadsM++;
-                unmapType = -2; //not sure if this used
-            } else if (nTr==1) {//unique mappers
-                statsRA.mappedReadsU++;
-                statsRA.transcriptStats(*(trMult[0]),Lread);
+
+            auto nTr1 = nTr;
+            auto trOut1 = trMult[0];
+
+            if (P.pGe.transform.outYes) {
+                nTr1 = alignsGenOut.alN;
+                trOut1 = alignsGenOut.alMult[0];
             };
 
-            if (!P.pGe.transform.outSAM) {
-                ReadAlign::recordSJ(nTr, trMult, chunkOutSJ); //this will set mateMapped
-            } else {
+            if (nTr1>1) {//multimappers
+                statsRA.mappedReadsM++;
+                unmapType = -2; //not sure if this used
+            } else if (nTr1==1) {//unique mappers
+                statsRA.mappedReadsU++;
+                statsRA.transcriptStats(*trOut1, Lread);
+            };
+
+            if (P.pGe.transform.outSAM && (!P.twoPass.yes || P.twoPass.pass2) ) {//transform genome only on 2nd pass
                 ReadAlign::recordSJ(alignsGenOut.alN, alignsGenOut.alMult, chunkOutSJ);
+            } else {
+                ReadAlign::recordSJ(nTr, trMult, chunkOutSJ); //this will set mateMapped
             };            
             
             ReadAlign::alignedAnnotation();
@@ -40,15 +49,19 @@ void ReadAlign::outputAlignments() {
 
         //transcripts: need to be run after CB/UMI are obtained to output CR/UR tags
         if ( P.quant.trSAM.yes && unmapType<0) {//Aligned.toTranscriptome output, only for mapped
-            quantTranscriptome(chunkTr, nTr, trMult,  alignTrAll);
+            if (P.pGe.transform.outQuant) {
+                quantTranscriptome(chunkTr, alignsGenOut.alN,  alignsGenOut.alMult,  alignTrAll);
+            } else {
+                quantTranscriptome(chunkTr, nTr, trMult,  alignTrAll);
+            };
         };        
         
         soloRead->record((unmapType<0 ? nTr : 0), trMult, iReadAll, readAnnot); //need to supply nTr=0 for unmapped reads
 
-        if (!P.pGe.transform.outSAM) {
-            ReadAlign::writeSAM(nTr, trMult, trBest); //this will set mateMapped
-        } else {
+        if (P.pGe.transform.outSAM) {
             ReadAlign::writeSAM(alignsGenOut.alN, alignsGenOut.alMult, alignsGenOut.alBest);
+        } else {
+            ReadAlign::writeSAM(nTr, trMult, trBest); //this will set mateMapped
         };
     };    
 
@@ -287,7 +300,11 @@ void ReadAlign::alignedAnnotation()
     //TODO maybe initialize readAnnot to all empty?
     //genes
     if ( P.quant.geCount.yes ) {
-        chunkTr->geneCountsAddAlign(nTr, trMult, readAnnot.geneExonOverlap);
+        if (P.pGe.transform.outQuant) {
+            chunkTr->geneCountsAddAlign(alignsGenOut.alN, alignsGenOut.alMult, readAnnot.geneExonOverlap);
+        } else {
+            chunkTr->geneCountsAddAlign(nTr, trMult, readAnnot.geneExonOverlap);
+        };        
     };
     //solo-GeneFull
     if ( P.quant.geneFull.yes ) {

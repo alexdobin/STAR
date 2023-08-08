@@ -58,6 +58,7 @@ genomeTransformOutput       None
     string(s)               which output to transform back to original genome
                             SAM     ... SAM/BAM alignments
                             SJ      ... splice junctions (SJ.out.tab)
+                            Quant   ... quantifications (from --quantMode option)
                             None    ... no transformation of the output        
 
 genomeChrSetMitochondrial   chrM M MT

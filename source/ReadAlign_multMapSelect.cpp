@@ -53,6 +53,8 @@ void ReadAlign::multMapSelect() {//select multiple mappers from all transcripts 
         trMult[iTr]->cStart=trMult[iTr]->gStart - mapGen.chrStart[trMult[iTr]->Chr];
     };
 
+
+    //TODO: use funPrimaryAlignMark
     if (nTr==1){//unique mappers
         trMult[0]->primaryFlag=true;
     } else {//multimappers
@@ -91,4 +93,3 @@ void ReadAlign::multMapSelect() {//select multiple mappers from all transcripts 
     
     //TODO re-point trBest to the primary one. This should not make a difference in the output
 };
-

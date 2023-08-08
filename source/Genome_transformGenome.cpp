@@ -4,6 +4,7 @@
 #include "ErrorWarning.h"
 #include "serviceFuns.cpp"
 #include "GTF.h"
+#include "funPrimaryAlignMark.h"
 
 template <typename T>
 void appendVector(vector<T> &v1, const vector<T> &v2)

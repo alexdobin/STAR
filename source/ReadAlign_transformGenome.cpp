@@ -1,5 +1,6 @@
 #include "ReadAlign.h"
 #include "ErrorWarning.h"
+#include "funPrimaryAlignMark.h"
 
 void ReadAlign::transformGenome() 
 {//convert to new genome
@@ -13,7 +14,7 @@ void ReadAlign::transformGenome()
     
     for (uint32 iTr=0; iTr<nTr; iTr++) {//convert output transcripts into new genome
         
-        trMult[iTr]->haploType = ( trMult[iTr]->Chr >= mapGen.nChrReal/2 ? 1 : 2 );
+        trMult[iTr]->haploType = ( trMult[iTr]->Chr < mapGen.nChrReal/2 ? 1 : 2 );
         
         *alignsGenOut.alMult[nTr1]=*trMult[iTr];//copy information before conversion
         if (trMult[iTr]->transformGenome(*mapGen.genomeOut.g, *alignsGenOut.alMult[nTr1])) {        
@@ -45,7 +46,7 @@ void ReadAlign::transformGenome()
                     ) {//matching ends, remove one of the transcripts
                     alignsGenOut.alMult[ia1]->haploType = 0; //undefined haplotype
                     alignsGenOut.alMult[ia2]->haploType = 0;
-                    if (a1.maxScore>a2.maxScore) {
+                    if (a1.maxScore>a2.maxScore) {//keep the transcript with higher score
                         keepTr[ia2]=false;
                     } else {
                         keepTr[ia1]=false;
@@ -67,5 +68,7 @@ void ReadAlign::transformGenome()
     //             trMult[iTr] = alignsGenOut.alMult[iTr]; //point to new transcsript
         alignsGenOut.alN=nTr1;
     };
+
+    funPrimaryAlignMark(alignsGenOut.alMult, alignsGenOut.alN, P, maxScore, rngUniformReal0to1, rngMultOrder);
     
 };

@@ -23,7 +23,7 @@ public:
         string typeString;
         string vcfFile;
         vector<string> output; //which output to transform
-        bool outYes, outSAM, outSJ;
+        bool outYes, outSAM, outSJ, outQuant;
     } transform;
     
     uint gSAindexNbases;//length of the SA pre-index strings
