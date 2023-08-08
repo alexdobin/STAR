@@ -329,6 +329,7 @@ outSAMattributes                Standard
                                 vA          ... variant allele
                                 vG          ... genomic coordinate of the variant overlapped by the read.
                                 vW          ... 1 - alignment passes WASP filtering; 2,3,4,5,6,7 - alignment does not pass WASP filtering. Requires --waspOutputMode SAMtag.
+                                ha          ... haplotype (1/2) when mapping to the diploid genome. Requires genome generated with --genomeTransformType Diploid .                               
                                 ***STARsolo:
                                 CR CY UR UY ... sequences and quality scores of cell barcodes and UMIs for the solo* demultiplexing.
                                 GX GN       ... gene ID and gene name for unique-gene reads.
@@ -337,8 +338,8 @@ outSAMattributes                Standard
                                 sM          ... assessment of CB and UMI.
                                 sS          ... sequence of the entire barcode (CB,UMI,adapter).
                                 sQ          ... quality of the entire barcode.
+                                sF          ... type of feature overlap and number of features for each alignment
                                 ***Unsupported/undocumented:
-                                ha          ... haplotype (1/2) when mapping to the diploid genome. Requires genome generated with --genomeTransformType Diploid .                               
                                 rB          ... alignment block read/genomic coordinates.
                                 vR          ... read coordinate of the variant.
 

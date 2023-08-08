@@ -35,7 +35,7 @@
 
 \newcommand{\sechyperref}[1]{\hyperref[#1]{Section \ref{#1}. \nameref{#1}}}
 
-\title{STAR manual 2.7.10b}
+\title{STAR manual 2.7.11a}
 \author{Alexander Dobin\\
 dobin@cshl.edu}
 \maketitle
@@ -643,6 +643,21 @@ At the mapping stage, the reads will be mapped to the tranformed (consensus) gen
 The quantification in the transformed annotations can be performed with standard \opt{quantMode} \optv{TranscriptomeSAM} and/or \optv{GeneCounts} options.
 If desired, alignments (SAM/BAM) and spliced junctions (SJ.out.tab) can be transformed back to the original (reference) coordinates with \opt{genomeTransformOutput} \optv{SAM} and/or \optv{SJ}.
 This is useful if downstream processing relies on reference coordinates.
+\end{itemize}
+
+\section{STARdiploid}
+STARdiploid allows for mapping RNA-seq reads to diploid genome. It was introduced in STAR 2{.}7{.}11a.
+
+\begin{itemize}
+	\item
+	Provide the VCF file with diploid SNVs and InDels at the genome generation stage with  \opt{genomeTransformVC} \optv{ Variants.vcf}  \opt{genomeTransformType} \optv{Diploid}.
+	The homozygous and heterozygous alleles from this VCF will be inserted into the reference genome to create a "transformed" genome with two haplotypes.
+	Both the genome sequence and transcript/gene annotations are transformed.
+	
+	\item
+	At the mapping stage, the reads will be mapped to the diploid genome.
+	If desired, alignments (SAM/BAM), spliced junctions (SJ.out.tab) and quantifications can be transformed back to the original (reference) coordinates with \opt{genomeTransformOutput} \optv{SAM}, \optv{SJ} and/or\optv{Quant} option(s). This is useful if downstream processing relies on reference coordinates.
+	SAM attribute \optv{ha} can be added to the \opt{outSAMattribute} list to mark which haplotype the alignment belongs to: 1 - haplotype 1, 2 - haplotype 2, 0 - equally good alignment to both haplotypes.
 \end{itemize}
 
 \section{Detection of multimapping chimeras.}

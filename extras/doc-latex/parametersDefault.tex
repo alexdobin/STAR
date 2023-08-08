@@ -70,6 +70,7 @@
 \begin{optOptTable}
   \optOpt{SAM}   \optOptLine{SAM/BAM alignments}
   \optOpt{SJ}   \optOptLine{splice junctions (SJ.out.tab)}
+  \optOpt{Quant}   \optOptLine{quantifications (from --quantMode option)}
   \optOpt{None}   \optOptLine{no transformation of the output}
 \end{optOptTable}
 \optName{genomeChrSetMitochondrial}
@@ -363,6 +364,7 @@
   \optOpt{vA}   \optOptLine{variant allele}
   \optOpt{vG}   \optOptLine{genomic coordinate of the variant overlapped by the read.}
   \optOpt{vW}   \optOptLine{1 - alignment passes WASP filtering; 2,3,4,5,6,7 - alignment does not pass WASP filtering. Requires --waspOutputMode SAMtag.}
+  \optOpt{ha}   \optOptLine{haplotype (1/2) when mapping to the diploid genome. Requires genome generated with --genomeTransformType Diploid .}
 \end{optOptTable}
   \optLine{***STARsolo:} 
 \begin{optOptTable}
@@ -373,10 +375,10 @@
   \optOpt{sM}   \optOptLine{assessment of CB and UMI.}
   \optOpt{sS}   \optOptLine{sequence of the entire barcode (CB,UMI,adapter).}
   \optOpt{sQ}   \optOptLine{quality of the entire barcode.}
+  \optOpt{sF}   \optOptLine{type of feature overlap and number of features for each alignment}
 \end{optOptTable}
   \optLine{***Unsupported/undocumented:} 
 \begin{optOptTable}
-  \optOpt{ha}   \optOptLine{haplotype (1/2) when mapping to the diploid genome. Requires genome generated with --genomeTransformType Diploid .}
   \optOpt{rB}   \optOptLine{alignment block read/genomic coordinates.}
   \optOpt{vR}   \optOptLine{read coordinate of the variant.}
 \end{optOptTable}
@@ -894,6 +896,11 @@
   \optOpt{CB{\textunderscore}samTagOut}   \optOptLine{output Cell Barcode as CR and/or CB SAm tag. No UMI counting. --readFilesIn cDNA{\textunderscore}read1 [cDNA{\textunderscore}read2 if paired-end] CellBarcode{\textunderscore}read . Requires --outSAMtype BAM Unsorted [and/or SortedByCoordinate]}
   \optOpt{SmartSeq}   \optOptLine{Smart-seq: each cell in a separate FASTQ (paired- or single-end), barcodes are corresponding read-groups, no UMI sequences, alignments deduplicated according to alignment start and end (after extending soft-clipped bases)}
 \end{optOptTable}
+\optName{soloCBtype}
+  \optValue{Sequence}
+  \optLine{string: cell barcode type} 
+  \optLine{Sequence: cell barcode is a sequence (standard option)} 
+  \optLine{String: cell barcode is an arbitrary string} 
 \optName{soloCBwhitelist}
   \optValue{-}
   \optLine{string(s): file(s) with whitelist(s) of cell barcodes. Only --soloType CB{\textunderscore}UMI{\textunderscore}Complex allows more than one whitelist file.} 
