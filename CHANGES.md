@@ -1,4 +1,4 @@
-STAR 2.7.11a --- 2023/08/09 ::: STARdiploid
+STAR 2.7.11a --- 2023/08/15 ::: STARdiploid
 ===========================================
 * Implemented STARdiploid option --genomeTransformType Diploid that generates personal diploid genome. At the mapping step, --genomeTransformOutput options will transform the alignments into reference genome coordinates.
 * Implemented --soloCBtype String option for arbitrary cell barcode strings without passlist.
