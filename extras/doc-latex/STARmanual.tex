@@ -116,7 +116,7 @@ The basic options to generate genome indices are as follows:
 \item[]
 \opt{runMode} \optv{genomeGenerate} option directs STAR to run genome indices generation job.
 
-\opt{genomeDir} specifies path to the directory (henceforth called "genome directory" where the genome indices are stored. This directory has to be created (with \code{mkdir}) before STAR run and needs to have writing permissions. The file system needs to have at least 100GB of disk space available for a typical mammalian genome. It is recommended to remove all files from the genome directory before running the genome generation step. This directory path will have to be supplied at the mapping step to identify the reference genome.
+\opt{genomeDir} specifies path to the directory (henceforth called "genome directory") where the genome indices are stored. This directory has to be created (with \code{mkdir}) before STAR run and needs to have writing permissions. The file system needs to have at least 100GB of disk space available for a typical mammalian genome. It is recommended to remove all files from the genome directory before running the genome generation step. This directory path will have to be supplied at the mapping step to identify the reference genome.
 
 \item[]
 \opt{genomeFastaFiles} specifies one or more FASTA files with the genome reference sequences. Multiple reference sequences (henceforth called “chromosomes”) are allowed for each fasta file. You can rename the chromosomes’ names in the chrName.txt keeping the order of the chromosomes in the file: the names from this file will be used in all output alignment files (such as .sam). The tabs are not allowed in chromosomes’ names, and spaces are not recommended.
@@ -574,7 +574,7 @@ For the most sensitive novel junction discovery, it is recommended to run STAR i
 For a study with multiple samples, it is recommended to collect 1st pass junctions from all samples.
 \begin{enumerate}
 \item Run 1st mapping pass for all samples with "usual" parameters. Using annotations is recommended either a the genome generation step, or mapping step.
-\item Run 2nd mapping pass for all samples , listing SJ.out.tab files from all samples in \opt{sjdbFileChrStartEnd} \optvr{/path/to/sj1.tab /path/to/sj2.tab ...}.
+\item Run 2nd mapping pass for all samples, listing SJ.out.tab files from all samples in \opt{sjdbFileChrStartEnd} \optvr{/path/to/sj1.tab /path/to/sj2.tab ...}.
 \end{enumerate}
 
 \subsection{Per-sample 2-pass mapping.}
