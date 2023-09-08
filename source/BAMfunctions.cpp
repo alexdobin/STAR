@@ -1,5 +1,5 @@
 #include "BAMfunctions.h"
-#include "htslib/htslib/kstring.h"
+#include <htslib/kstring.h>
 
 
 string bam_cigarString (bam1_t *b) {//output CIGAR string
