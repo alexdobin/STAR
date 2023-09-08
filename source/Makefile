@@ -154,46 +154,46 @@ parametersDefault.xxd: parametersDefault
 STAR$(SFX) : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_main) $(CXXFLAGS)
 STAR$(SFX) : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_shared) $(LDFLAGS)
 STAR$(SFX) : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STAR$(SFX) $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o STAR$(SFX) $(OBJECTS)
 
 STARstatic$(SFX) : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_main) $(CXXFLAGS)
 STARstatic$(SFX) : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_static) $(LDFLAGS)
 STARstatic$(SFX) : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STAR$(SFX) $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o STAR$(SFX) $(OBJECTS)
 
 STARlong$(SFX) : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_main) -D'COMPILE_FOR_LONG_READS' $(CXXFLAGS)
 STARlong$(SFX) : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_shared) $(LDFLAGS)
 STARlong$(SFX) : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STARlong$(SFX) $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o STARlong$(SFX) $(OBJECTS)
 
 STARlongStatic$(SFX) : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_main) -D'COMPILE_FOR_LONG_READS' $(CXXFLAGS)
 STARlongStatic$(SFX) : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_static) $(LDFLAGS)
 STARlongStatic$(SFX) : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STARlong$(SFX) $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o STARlong$(SFX) $(OBJECTS)
 
 
 
 POSIXSHARED : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_main) -DPOSIX_SHARED_MEM $(CXXFLAGS)
 POSIXSHARED : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_shared) $(LDFLAGS)
 POSIXSHARED : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STAR$(SFX) $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o STAR$(SFX) $(OBJECTS)
 
 gdb : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_gdb) $(CXXFLAGS)
 gdb : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_gdb) $(LDFLAGS)
 gdb : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STAR $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o STAR $(OBJECTS)
 
 gdb-long : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_gdb) -D'COMPILE_FOR_LONG_READS' $(CXXFLAGS)
 gdb-long : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_gdb) $(LDFLAGS)
 gdb-long : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STARlong $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o STARlong $(OBJECTS)
 
 STARforMacStatic : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_main) -D'COMPILE_FOR_MAC' $(CXXFLAGS)
 STARforMacStatic : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_Mac_static) $(LDFLAGS)
 STARforMacStatic : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STAR $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o STAR $(OBJECTS)
 
 STARlongForMacStatic : CXXFLAGS := -D'COMPILE_FOR_LONG_READS' $(CXXFLAGSextra) $(CXXFLAGS_main) -D'COMPILE_FOR_MAC' $(CXXFLAGS)
 STARlongForMacStatic : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_Mac_static) $(LDFLAGS)
 STARlongForMacStatic : Depend.list parametersDefault.xxd $(OBJECTS)
-	$(CXX) -o STARlong $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o STARlong $(OBJECTS)
