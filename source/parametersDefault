@@ -745,10 +745,12 @@ quantTranscriptomeBAMcompression    1       1
                              0  ... no compression
                              10 ... maximum compression
 
-quantTranscriptomeBan       IndelSoftclipSingleend
-    string: prohibit various alignment type
-                            IndelSoftclipSingleend  ... prohibit indels, soft clipping and single-end alignments - compatible with RSEM
-                            Singleend               ... prohibit single-end alignments
+quantTranscriptomeSAMoutput BanSingleEnd_BanIndels_ExtendSoftclip
+    string: alignment filtering for TranscriptomeSAM output
+                            BanSingleEnd_BanIndels_ExtendSoftclip ... prohibit indels and single-end alignments, extend softclips - compatible with RSEM
+                            BanSingleEnd               ... prohibit single-end alignments, allow indels and softclips
+                            BanSingleEnd_ExtendSoftclip ... prohibit single-end alignments, extend softclips, allow indels
+
 
 ### 2-pass Mapping
 twopassMode                 None

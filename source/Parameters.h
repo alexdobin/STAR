@@ -301,7 +301,7 @@ class Parameters {
                 bool softClip;
                 bool singleEnd;
                 int bamCompression;
-                string ban;
+                string output;
             } trSAM;
 
             struct {

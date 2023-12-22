@@ -261,7 +261,7 @@ Parameters::Parameters() {//initalize parameters info
     //quant
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "quantMode", &quant.mode));
     parArray.push_back(new ParameterInfoScalar <int>     (-1, -1, "quantTranscriptomeBAMcompression", &quant.trSAM.bamCompression));
-    parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "quantTranscriptomeBan", &quant.trSAM.ban));
+    parArray.push_back(new ParameterInfoScalar <string>     (-1, -1, "quantTranscriptomeSAMoutput", &quant.trSAM.output));
 
     //2-pass
     parArray.push_back(new ParameterInfoScalar <uint>   (-1, -1, "twopass1readsN", &twoPass.pass1readsN));
@@ -912,13 +912,17 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
                     };
                     inOut->outQuantBAMfile=bgzf_open(outQuantBAMfileName.c_str(),("w"+to_string((long long) quant.trSAM.bamCompression)).c_str());
                 };
-                if (quant.trSAM.ban=="IndelSoftclipSingleend") {
+                if (quant.trSAM.output=="BanSingleEnd_BanIndels_ExtendSoftclip") {
                     quant.trSAM.indel=false;
                     quant.trSAM.softClip=false;
                     quant.trSAM.singleEnd=false;
-                } else if (quant.trSAM.ban=="Singleend") {
+                } else if (quant.trSAM.output=="BanSingleEnd") {
                     quant.trSAM.indel=true;
                     quant.trSAM.softClip=true;
+                    quant.trSAM.singleEnd=false;
+                } else if (quant.trSAM.output=="BanSingleEnd_ExtendSoftclip") {
+                    quant.trSAM.indel=true;
+                    quant.trSAM.softClip=false;
                     quant.trSAM.singleEnd=false;
                 };
             } else if  (quant.mode.at(ii)=="GeneCounts") {

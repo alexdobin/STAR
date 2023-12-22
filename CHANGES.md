@@ -1,3 +1,6 @@
+* Behavior change: replaced --quantTranscriptomeBan option with --quantTranscriptomeSAMoutput option.
+* New option: --quantTranscriptomeSAMoutput BanSingleEnd_ExtendSoftclip : prohibit single-end alignments, extend softclips, allow indels.
+
 STAR 2.7.11a --- 2023/08/15 ::: STARdiploid
 ===========================================
 * Implemented STARdiploid option --genomeTransformType Diploid that generates personal diploid genome. At the mapping step, --genomeTransformOutput options will transform the alignments into reference genome coordinates.
