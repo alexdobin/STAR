@@ -55,14 +55,14 @@ genomeFileSizes             0
     uint(s)>0: genome files exact sizes in bytes. Typically, this should not be defined by the user.
     
 genomeTransformOutput       None
-    string(s)               which output to transform back to original genome
+    string(s):              which output to transform back to original genome
                             SAM     ... SAM/BAM alignments
                             SJ      ... splice junctions (SJ.out.tab)
                             Quant   ... quantifications (from --quantMode option)
                             None    ... no transformation of the output        
 
 genomeChrSetMitochondrial   chrM M MT
-    string(s)               names of the mitochondrial chromosomes. Presently only used for STARsolo statisics output/
+    string(s):              names of the mitochondrial chromosomes. Presently only used for STARsolo statistics output/
 
 ### Genome Indexing Parameters - only used with --runMode genomeGenerate
 genomeChrBinNbits           18
@@ -105,7 +105,7 @@ genomeType                  Full
 
 ### Splice Junctions Database
 sjdbFileChrStartEnd                     -
-    string(s): path to the files with genomic coordinates (chr <tab> start <tab> end <tab> strand) for the splice junction introns. Multiple files can be supplied wand will be concatenated.
+    string(s): path to the files with genomic coordinates (chr <tab> start <tab> end <tab> strand) for the splice junction introns. Multiple files can be supplied and will be concatenated.
 
 sjdbGTFfile                             -
     string: path to the GTF file with annotations
@@ -123,10 +123,10 @@ sjdbGTFtagExonParentGene                gene_id
     string: GTF attribute name for parent gene ID (default "gene_id" works for GTF files)
 
 sjdbGTFtagExonParentGeneName            gene_name
-    string(s): GTF attrbute name for parent gene name
+    string(s): GTF attribute name for parent gene name
 
 sjdbGTFtagExonParentGeneType            gene_type gene_biotype
-    string(s): GTF attrbute name for parent gene type
+    string(s): GTF attribute name for parent gene type
 
 sjdbOverhang                            100
     int>0: length of the donor/acceptor sequence on each side of the junctions, ideally = (mate_length - 1)
@@ -230,7 +230,7 @@ limitGenomeGenerateRAM               31000000000
     int>0: maximum available RAM (bytes) for genome generation
 
 limitIObufferSize                    30000000 50000000
-    int>0: max available buffers size (bytes) for input/output, per thread
+    int(s)>0: max available buffers size (bytes) for input/output, per thread
 
 limitOutSAMoneReadBytes              100000
     int>0: max size of the SAM record (bytes) for one read. Recommended value: >(2*(LengthMate1+LengthMate2+100)*outFilterMultimapNmax
@@ -245,7 +245,7 @@ limitBAMsortRAM                         0
     int>=0: maximum available RAM (bytes) for sorting BAM. If =0, it will be set to the genome index size. 0 value can only be used with --genomeLoad NoSharedMemory option.
 
 limitSjdbInsertNsj                     1000000
-    int>=0: maximum number of junction to be inserted to the genome on the fly at the mapping stage, including those from annotations and those detected in the 1st step of the 2-pass run
+    int>=0: maximum number of junctions to be inserted to the genome on the fly at the mapping stage, including those from annotations and those detected in the 1st step of the 2-pass run
 
 limitNreadsSoft                        -1
     int: soft limit on the number of reads
@@ -256,12 +256,12 @@ outFileNamePrefix               ./
 
 outTmpDir                       -
     string: path to a directory that will be used as temporary by STAR. All contents of this directory will be removed!
-            - the temp directory will default to outFileNamePrefix_STARtmp
+                                - ... the temp directory will default to outFileNamePrefix_STARtmp
 
 outTmpKeep                      None
-    string: whether to keep the tempporary files after STAR runs is finished
+    string: whether to keep the temporary files after STAR runs is finished
                                 None ... remove all temporary files
-                                All .. keep all files
+                                All ... keep all files
 
 outStd                          Log
     string: which output will be directed to stdout (standard out)
@@ -307,7 +307,7 @@ outSAMstrandField               None
                                 intronMotif ... strand derived from the intron motif. This option changes the output alignments: reads with inconsistent and/or non-canonical introns are filtered out.
 
 outSAMattributes                Standard
-    string: a string of desired SAM attributes, in the order desired for the output SAM. Tags can be listed in any combination/order.
+    string(s): a string of desired SAM attributes, in the order desired for the output SAM. Tags can be listed in any combination/order.
                                 ***Presets:
                                 None        ... no attributes
                                 Standard    ... NH HI AS nM
@@ -415,7 +415,7 @@ outBAMsortingThreadN    0
     int: >=0: number of threads for BAM sorting. 0 will default to min(6,--runThreadN).
 
 outBAMsortingBinsN      50
-    int: >0:  number of genome bins fo coordinate-sorting
+    int: >0:  number of genome bins for coordinate-sorting
 
 ### BAM processing
 bamRemoveDuplicatesType  -
@@ -478,7 +478,7 @@ outFilterScoreMin               0
     int: alignment will be output only if its score is higher than or equal to this value.
 
 outFilterScoreMinOverLread      0.66
-    real: same as outFilterScoreMin, but  normalized to read length (sum of mates' lengths for paired-end reads)
+    real: same as outFilterScoreMin, but normalized to read length (sum of mates' lengths for paired-end reads)
 
 outFilterMatchNmin              0
     int: alignment will be output only if the number of matched bases is higher than or equal to this value.
@@ -540,28 +540,28 @@ scoreGapNoncan               -8
     int: non-canonical junction penalty (in addition to scoreGap)
 
 scoreGapGCAG                 -4
-    GC/AG and CT/GC junction penalty (in addition to scoreGap)
+    int: GC/AG and CT/GC junction penalty (in addition to scoreGap)
 
 scoreGapATAC                 -8
-    AT/AC  and GT/AT junction penalty  (in addition to scoreGap)
+    int: AT/AC  and GT/AT junction penalty  (in addition to scoreGap)
 
 scoreGenomicLengthLog2scale   -0.25
-    extra score logarithmically scaled with genomic length of the alignment: scoreGenomicLengthLog2scale*log2(genomicLength)
+    int: extra score logarithmically scaled with genomic length of the alignment: scoreGenomicLengthLog2scale*log2(genomicLength)
 
 scoreDelOpen                 -2
-    deletion open penalty
+    int: deletion open penalty
 
 scoreDelBase                 -2
-    deletion extension penalty per base (in addition to scoreDelOpen)
+    int: deletion extension penalty per base (in addition to scoreDelOpen)
 
 scoreInsOpen                 -2
-    insertion open penalty
+    int: insertion open penalty
 
 scoreInsBase                 -2
-    insertion extension penalty per base (in addition to scoreInsOpen)
+    int: insertion extension penalty per base (in addition to scoreInsOpen)
 
 scoreStitchSJshift           1
-    maximum score reduction while searching for SJ boundaries in the stitching step
+    int: maximum score reduction while searching for SJ boundaries in the stitching step
 
 
 ### Alignments and Seeding
@@ -594,13 +594,13 @@ seedMapMin              5
     int>0: min length of seeds to be mapped
 
 alignIntronMin              21
-    minimum intron size: genomic gap is considered intron if its length>=alignIntronMin, otherwise it is considered Deletion
+    int: minimum intron size, genomic gap is considered intron if its length>=alignIntronMin, otherwise it is considered Deletion
 
 alignIntronMax              0
-    maximum intron size, if 0, max intron size will be determined by (2^winBinNbits)*winAnchorDistNbins
+    int: maximum intron size, if 0, max intron size will be determined by (2^winBinNbits)*winAnchorDistNbins
 
 alignMatesGapMax            0
-    maximum gap between two mates, if 0, max intron gap will be determined by (2^winBinNbits)*winAnchorDistNbins
+    int: maximum gap between two mates, if 0, max intron gap will be determined by (2^winBinNbits)*winAnchorDistNbins
 
 alignSJoverhangMin          5
     int>0: minimum overhang (i.e. block size) for spliced alignments
@@ -653,7 +653,7 @@ alignInsertionFlush     None
 
 ### Paired-End reads
 peOverlapNbasesMin          0
-    int>=0:             minimum number of overlap bases to trigger mates merging and realignment. Specify >0 value to switch on the "merginf of overlapping mates" algorithm.
+    int>=0:             minimum number of overlapping bases to trigger mates merging and realignment. Specify >0 value to switch on the "merginf of overlapping mates" algorithm.
 
 peOverlapMMp                0.01
     real, >=0 & <1:     maximum proportion of mismatched bases in the overlap area
@@ -738,7 +738,7 @@ quantMode                   -
                             TranscriptomeSAM ... output SAM/BAM alignments to transcriptome into a separate file
                             GeneCounts       ... count reads per gene
 
-quantTranscriptomeBAMcompression    1       1
+quantTranscriptomeBAMcompression    1
     int: -2 to 10  transcriptome BAM compression level
                             -2  ... no BAM output
                             -1  ... default compression (6?)
@@ -801,14 +801,14 @@ soloBarcodeReadLength       1
                             1   ... equal to sum of soloCBlen+soloUMIlen
                             0   ... not defined, do not check
 
-soloBarcodeMate             0                            
+soloBarcodeMate             0
     int: identifies which read mate contains the barcode (CB+UMI) sequence
                             0   ... barcode sequence is on separate read, which should always be the last file in the --readFilesIn listed
                             1   ... barcode sequence is a part of mate 1
                             2   ... barcode sequence is a part of mate 2
 
 soloCBposition              -
-    strings(s)              position of Cell Barcode(s) on the barcode read.
+    strings(s):             position of Cell Barcode(s) on the barcode read.
                             Presently only works with --soloType CB_UMI_Complex, and barcodes are assumed to be on Read2.
                             Format for each barcode: startAnchor_startPosition_endAnchor_endPosition
                             start(end)Anchor defines the Anchor Base for the CB: 0: read start; 1: read end; 2: adapter start; 3: adapter end
@@ -818,7 +818,7 @@ soloCBposition              -
                             --soloCBposition  0_0_2_-1  3_1_3_8
 
 soloUMIposition             -
-    string                  position of the UMI on the barcode read, same as soloCBposition
+    string:                  position of the UMI on the barcode read, same as soloCBposition
                             Example: inDrop (Zilionis et al, Nat. Protocols, 2017):
                             --soloCBposition  3_9_3_14
 
@@ -884,7 +884,7 @@ soloUMIdedup                1MM_All
                             1MM_CR                      ... CellRanger2-4 algorithm for 1MM UMI collapsing.
 
 soloUMIfiltering            -
-    string(s)               type of UMI filtering (for reads uniquely mapping to genes)
+    string(s):              type of UMI filtering (for reads uniquely mapping to genes)
                             -                  ... basic filtering: remove UMIs with N and homopolymers (similar to CellRanger 2.2.0).
                             MultiGeneUMI       ... basic + remove lower-count UMIs that map to more than one gene.
                             MultiGeneUMI_All   ... basic + remove all UMIs that map to more than one gene.
@@ -892,7 +892,7 @@ soloUMIfiltering            -
                                                    Only works with --soloUMIdedup 1MM_CR
                                                 
 soloOutFileNames            Solo.out/          features.tsv barcodes.tsv        matrix.mtx
-    string(s)               file names for STARsolo output:
+    string(s):              file names for STARsolo output:
                             file_name_prefix   gene_names   barcode_sequences   cell_feature_count_matrix
 
 soloCellFilter              CellRanger2.2 3000 0.99 10
