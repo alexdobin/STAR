@@ -1,4 +1,6 @@
-* Behavior change: replaced --quantTranscriptomeBan option with --quantTranscriptomeSAMoutput option.
+STAR 2.7.11b --- 2024/01/24 ::: Minor in one parameter.
+===========================================
+* Replaced --quantTranscriptomeBan parameter with --quantTranscriptomeSAMoutput with more explicit naming of options. The default behavior is not affected.
 * New option: --quantTranscriptomeSAMoutput BanSingleEnd_ExtendSoftclip : prohibit single-end alignments, extend softclips, allow indels.
 
 STAR 2.7.11a --- 2023/08/15 ::: STARdiploid

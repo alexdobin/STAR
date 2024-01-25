@@ -66,7 +66,7 @@
   \optLine{uint(s){\textgreater}0: genome files exact sizes in bytes. Typically, this should not be defined by the user.} 
 \optName{genomeTransformOutput}
   \optValue{None}
-  \optLine{string(s)               which output to transform back to original genome} 
+  \optLine{string(s):              which output to transform back to original genome} 
 \begin{optOptTable}
   \optOpt{SAM}   \optOptLine{SAM/BAM alignments}
   \optOpt{SJ}   \optOptLine{splice junctions (SJ.out.tab)}
@@ -75,7 +75,7 @@
 \end{optOptTable}
 \optName{genomeChrSetMitochondrial}
   \optValue{chrM M MT}
-  \optLine{string(s)               names of the mitochondrial chromosomes. Presently only used for STARsolo statisics output/} 
+  \optLine{string(s):              names of the mitochondrial chromosomes. Presently only used for STARsolo statistics output/} 
 \end{optTable}
 \optSection{Genome Indexing Parameters - only used with --runMode genomeGenerate}\label{Genome_Indexing_Parameters_-_only_used_with_--runMode_genomeGenerate}
 \begin{optTable}
@@ -107,7 +107,7 @@
 \begin{optTable}
 \optName{sjdbFileChrStartEnd}
   \optValue{-}
-  \optLine{string(s): path to the files with genomic coordinates (chr {\textless}tab{\textgreater} start {\textless}tab{\textgreater} end {\textless}tab{\textgreater} strand) for the splice junction introns. Multiple files can be supplied wand will be concatenated.} 
+  \optLine{string(s): path to the files with genomic coordinates (chr {\textless}tab{\textgreater} start {\textless}tab{\textgreater} end {\textless}tab{\textgreater} strand) for the splice junction introns. Multiple files can be supplied and will be concatenated.} 
 \optName{sjdbGTFfile}
   \optValue{-}
   \optLine{string: path to the GTF file with annotations} 
@@ -125,10 +125,10 @@
   \optLine{string: GTF attribute name for parent gene ID (default "gene{\textunderscore}id" works for GTF files)} 
 \optName{sjdbGTFtagExonParentGeneName}
   \optValue{gene{\textunderscore}name}
-  \optLine{string(s): GTF attrbute name for parent gene name} 
+  \optLine{string(s): GTF attribute name for parent gene name} 
 \optName{sjdbGTFtagExonParentGeneType}
   \optValue{gene{\textunderscore}type gene{\textunderscore}biotype}
-  \optLine{string(s): GTF attrbute name for parent gene type} 
+  \optLine{string(s): GTF attribute name for parent gene type} 
 \optName{sjdbOverhang}
   \optValue{100}
   \optLine{int{\textgreater}0: length of the donor/acceptor sequence on each side of the junctions, ideally = (mate{\textunderscore}length - 1)} 
@@ -240,7 +240,7 @@
   \optLine{int{\textgreater}0: maximum available RAM (bytes) for genome generation} 
 \optName{limitIObufferSize}
   \optValue{30000000 50000000}
-  \optLine{int{\textgreater}0: max available buffers size (bytes) for input/output, per thread} 
+  \optLine{int(s){\textgreater}0: max available buffers size (bytes) for input/output, per thread} 
 \optName{limitOutSAMoneReadBytes}
   \optValue{100000}
   \optLine{int{\textgreater}0: max size of the SAM record (bytes) for one read. Recommended value: {\textgreater}(2*(LengthMate1+LengthMate2+100)*outFilterMultimapNmax} 
@@ -255,7 +255,7 @@
   \optLine{int{\textgreater}=0: maximum available RAM (bytes) for sorting BAM. If =0, it will be set to the genome index size. 0 value can only be used with --genomeLoad NoSharedMemory option.} 
 \optName{limitSjdbInsertNsj}
   \optValue{1000000}
-  \optLine{int{\textgreater}=0: maximum number of junction to be inserted to the genome on the fly at the mapping stage, including those from annotations and those detected in the 1st step of the 2-pass run} 
+  \optLine{int{\textgreater}=0: maximum number of junctions to be inserted to the genome on the fly at the mapping stage, including those from annotations and those detected in the 1st step of the 2-pass run} 
 \optName{limitNreadsSoft}
   \optValue{-1}
   \optLine{int: soft limit on the number of reads} 
@@ -268,14 +268,16 @@
 \optName{outTmpDir}
   \optValue{-}
   \optLine{string: path to a directory that will be used as temporary by STAR. All contents of this directory will be removed!} 
-  \optLine{- the temp directory will default to outFileNamePrefix{\textunderscore}STARtmp} 
+\begin{optOptTable}
+  \optOpt{-}   \optOptLine{the temp directory will default to outFileNamePrefix{\textunderscore}STARtmp}
+\end{optOptTable}
 \optName{outTmpKeep}
   \optValue{None}
-  \optLine{string: whether to keep the tempporary files after STAR runs is finished} 
+  \optLine{string: whether to keep the temporary files after STAR runs is finished} 
 \begin{optOptTable}
   \optOpt{None}   \optOptLine{remove all temporary files}
+  \optOpt{All}   \optOptLine{keep all files}
 \end{optOptTable}
-  \optLine{All .. keep all files} 
 \optName{outStd}
   \optValue{Log}
   \optLine{string: which output will be directed to stdout (standard out)} 
@@ -337,7 +339,7 @@
 \end{optOptTable}
 \optName{outSAMattributes}
   \optValue{Standard}
-  \optLine{string: a string of desired SAM attributes, in the order desired for the output SAM. Tags can be listed in any combination/order.} 
+  \optLine{string(s): a string of desired SAM attributes, in the order desired for the output SAM. Tags can be listed in any combination/order.} 
   \optLine{***Presets:} 
 \begin{optOptTable}
   \optOpt{None}   \optOptLine{no attributes}
@@ -468,7 +470,7 @@
   \optLine{int: {\textgreater}=0: number of threads for BAM sorting. 0 will default to min(6,--runThreadN).} 
 \optName{outBAMsortingBinsN}
   \optValue{50}
-  \optLine{int: {\textgreater}0:  number of genome bins fo coordinate-sorting} 
+  \optLine{int: {\textgreater}0:  number of genome bins for coordinate-sorting} 
 \end{optTable}
 \optSection{BAM processing}\label{BAM_processing}
 \begin{optTable}
@@ -548,7 +550,7 @@
   \optLine{int: alignment will be output only if its score is higher than or equal to this value.} 
 \optName{outFilterScoreMinOverLread}
   \optValue{0.66}
-  \optLine{real: same as outFilterScoreMin, but  normalized to read length (sum of mates' lengths for paired-end reads)} 
+  \optLine{real: same as outFilterScoreMin, but normalized to read length (sum of mates' lengths for paired-end reads)} 
 \optName{outFilterMatchNmin}
   \optValue{0}
   \optLine{int: alignment will be output only if the number of matched bases is higher than or equal to this value.} 
@@ -624,28 +626,28 @@
   \optLine{int: non-canonical junction penalty (in addition to scoreGap)} 
 \optName{scoreGapGCAG}
   \optValue{-4}
-  \optLine{GC/AG and CT/GC junction penalty (in addition to scoreGap)} 
+  \optLine{int: GC/AG and CT/GC junction penalty (in addition to scoreGap)} 
 \optName{scoreGapATAC}
   \optValue{-8}
-  \optLine{AT/AC  and GT/AT junction penalty  (in addition to scoreGap)} 
+  \optLine{int: AT/AC  and GT/AT junction penalty  (in addition to scoreGap)} 
 \optName{scoreGenomicLengthLog2scale}
   \optValue{-0.25}
-  \optLine{extra score logarithmically scaled with genomic length of the alignment: scoreGenomicLengthLog2scale*log2(genomicLength)} 
+  \optLine{int: extra score logarithmically scaled with genomic length of the alignment: scoreGenomicLengthLog2scale*log2(genomicLength)} 
 \optName{scoreDelOpen}
   \optValue{-2}
-  \optLine{deletion open penalty} 
+  \optLine{int: deletion open penalty} 
 \optName{scoreDelBase}
   \optValue{-2}
-  \optLine{deletion extension penalty per base (in addition to scoreDelOpen)} 
+  \optLine{int: deletion extension penalty per base (in addition to scoreDelOpen)} 
 \optName{scoreInsOpen}
   \optValue{-2}
-  \optLine{insertion open penalty} 
+  \optLine{int: insertion open penalty} 
 \optName{scoreInsBase}
   \optValue{-2}
-  \optLine{insertion extension penalty per base (in addition to scoreInsOpen)} 
+  \optLine{int: insertion extension penalty per base (in addition to scoreInsOpen)} 
 \optName{scoreStitchSJshift}
   \optValue{1}
-  \optLine{maximum score reduction while searching for SJ boundaries in the stitching step} 
+  \optLine{int: maximum score reduction while searching for SJ boundaries in the stitching step} 
 \end{optTable}
 \optSection{Alignments and Seeding}\label{Alignments_and_Seeding}
 \begin{optTable}
@@ -678,13 +680,13 @@
   \optLine{int{\textgreater}0: min length of seeds to be mapped} 
 \optName{alignIntronMin}
   \optValue{21}
-  \optLine{minimum intron size: genomic gap is considered intron if its length{\textgreater}=alignIntronMin, otherwise it is considered Deletion} 
+  \optLine{int: minimum intron size, genomic gap is considered intron if its length{\textgreater}=alignIntronMin, otherwise it is considered Deletion} 
 \optName{alignIntronMax}
   \optValue{0}
-  \optLine{maximum intron size, if 0, max intron size will be determined by (2\^{}winBinNbits)*winAnchorDistNbins} 
+  \optLine{int: maximum intron size, if 0, max intron size will be determined by (2\^{}winBinNbits)*winAnchorDistNbins} 
 \optName{alignMatesGapMax}
   \optValue{0}
-  \optLine{maximum gap between two mates, if 0, max intron gap will be determined by (2\^{}winBinNbits)*winAnchorDistNbins} 
+  \optLine{int: maximum gap between two mates, if 0, max intron gap will be determined by (2\^{}winBinNbits)*winAnchorDistNbins} 
 \optName{alignSJoverhangMin}
   \optValue{5}
   \optLine{int{\textgreater}0: minimum overhang (i.e. block size) for spliced alignments} 
@@ -747,7 +749,7 @@
 \begin{optTable}
 \optName{peOverlapNbasesMin}
   \optValue{0}
-  \optLine{int{\textgreater}=0:             minimum number of overlap bases to trigger mates merging and realignment. Specify {\textgreater}0 value to switch on the "merginf of overlapping mates" algorithm.} 
+  \optLine{int{\textgreater}=0:             minimum number of overlapping bases to trigger mates merging and realignment. Specify {\textgreater}0 value to switch on the "merginf of overlapping mates" algorithm.} 
 \optName{peOverlapMMp}
   \optValue{0.01}
   \optLine{real, {\textgreater}=0 {\&} {\textless}1:     maximum proportion of mismatched bases in the overlap area} 
@@ -847,7 +849,7 @@
   \optOpt{GeneCounts}   \optOptLine{count reads per gene}
 \end{optOptTable}
 \optName{quantTranscriptomeBAMcompression}
-  \optValue{1 1}
+  \optValue{1}
   \optLine{int: -2 to 10  transcriptome BAM compression level} 
 \begin{optOptTable}
   \optOpt{-2}   \optOptLine{no BAM output}
@@ -855,12 +857,13 @@
   \optOpt{0}   \optOptLine{no compression}
   \optOpt{10}   \optOptLine{maximum compression}
 \end{optOptTable}
-\optName{quantTranscriptomeBan}
-  \optValue{IndelSoftclipSingleend}
-  \optLine{string: prohibit various alignment type} 
+\optName{quantTranscriptomeSAMoutput}
+  \optValue{BanSingleEnd{\textunderscore}BanIndels{\textunderscore}ExtendSoftclip}
+  \optLine{string: alignment filtering for TranscriptomeSAM output} 
 \begin{optOptTable}
-  \optOpt{IndelSoftclipSingleend}   \optOptLine{prohibit indels, soft clipping and single-end alignments - compatible with RSEM}
-  \optOpt{Singleend}   \optOptLine{prohibit single-end alignments}
+  \optOpt{BanSingleEnd{\textunderscore}BanIndels{\textunderscore}ExtendSoftclip}   \optOptLine{prohibit indels and single-end alignments, extend softclips - compatible with RSEM}
+  \optOpt{BanSingleEnd}   \optOptLine{prohibit single-end alignments, allow indels and softclips}
+  \optOpt{BanSingleEnd{\textunderscore}ExtendSoftclip}   \optOptLine{prohibit single-end alignments, extend softclips, allow indels}
 \end{optOptTable}
 \end{optTable}
 \optSection{2-pass Mapping}\label{2-pass_Mapping}
@@ -936,7 +939,7 @@
 \end{optOptTable}
 \optName{soloCBposition}
   \optValue{-}
-  \optLine{strings(s)              position of Cell Barcode(s) on the barcode read.} 
+  \optLine{strings(s):             position of Cell Barcode(s) on the barcode read.} 
   \optLine{Presently only works with --soloType CB{\textunderscore}UMI{\textunderscore}Complex, and barcodes are assumed to be on Read2.} 
   \optLine{Format for each barcode: startAnchor{\textunderscore}startPosition{\textunderscore}endAnchor{\textunderscore}endPosition} 
   \optLine{start(end)Anchor defines the Anchor Base for the CB: 0: read start; 1: read end; 2: adapter start; 3: adapter end} 
@@ -946,7 +949,7 @@
   \optLine{--soloCBposition  0{\textunderscore}0{\textunderscore}2{\textunderscore}-1  3{\textunderscore}1{\textunderscore}3{\textunderscore}8} 
 \optName{soloUMIposition}
   \optValue{-}
-  \optLine{string                  position of the UMI on the barcode read, same as soloCBposition} 
+  \optLine{string:                  position of the UMI on the barcode read, same as soloCBposition} 
   \optLine{Example: inDrop (Zilionis et al, Nat. Protocols, 2017):} 
   \optLine{--soloCBposition  3{\textunderscore}9{\textunderscore}3{\textunderscore}14} 
 \optName{soloAdapterSequence}
@@ -1020,7 +1023,7 @@
 \end{optOptTable}
 \optName{soloUMIfiltering}
   \optValue{-}
-  \optLine{string(s)               type of UMI filtering (for reads uniquely mapping to genes)} 
+  \optLine{string(s):              type of UMI filtering (for reads uniquely mapping to genes)} 
 \begin{optOptTable}
   \optOpt{-}   \optOptLine{basic filtering: remove UMIs with N and homopolymers (similar to CellRanger 2.2.0).}
   \optOpt{MultiGeneUMI}   \optOptLine{basic + remove lower-count UMIs that map to more than one gene.}
@@ -1030,7 +1033,7 @@
   \optLine{Only works with --soloUMIdedup 1MM{\textunderscore}CR} 
 \optName{soloOutFileNames}
   \optValue{Solo.out/ features.tsv barcodes.tsv matrix.mtx}
-  \optLine{string(s)               file names for STARsolo output:} 
+  \optLine{string(s):              file names for STARsolo output:} 
   \optLine{file{\textunderscore}name{\textunderscore}prefix   gene{\textunderscore}names   barcode{\textunderscore}sequences   cell{\textunderscore}feature{\textunderscore}count{\textunderscore}matrix} 
 \optName{soloCellFilter}
   \optValue{CellRanger2.2 3000 0.99 10}
