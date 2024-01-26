@@ -30,8 +30,8 @@
 #define ERROR_OUT string ( __FILE__ ) +":"+ to_string ( (uint) __LINE__ ) +":"+ string ( __FUNCTION__ )
 
 //external libs
-#define SAMTOOLS_BGZF_H "htslib/htslib/bgzf.h"
-#define SAMTOOLS_SAM_H  "htslib/htslib/sam.h"
+#define SAMTOOLS_BGZF_H <htslib/bgzf.h>
+#define SAMTOOLS_SAM_H  <htslib/sam.h>
 
 using namespace std;
 
