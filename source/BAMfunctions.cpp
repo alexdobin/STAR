@@ -154,12 +154,12 @@ int bamAttrArrayWriteSAMtags(string &attrStr, char *attrArray, Parameters &P) {/
 
         if (attr1.empty())
             continue; //extra tab at the beginning, or consecutive tabs
-            
+
         uint16_t tagn = * ( (uint16_t*) attr1.c_str() );
         if ( !P.readFiles.samAttrKeepAll && P.readFiles.samAttrKeep.count(tagn)==0 )
-            continue; //skip tags not contained the list            
+            continue; //skip tags not contained the list
 
-        switch (attr1.at(3)) {//TODO: support other tag types (vector tags)
+        switch (attr1.at(3)) {//TODO: support other tag types
             case 'i':
             {
                 int32 a1=stol(attr1.substr(5));
@@ -174,6 +174,7 @@ int bamAttrArrayWriteSAMtags(string &attrStr, char *attrArray, Parameters &P) {/
             };
                 break;
             case 'Z':
+            case 'B':
             {
                 string a1=attr1.substr(5);
                 nattr += bamAttrArrayWrite(a1,attr1.c_str(),attrArray+nattr);
@@ -190,5 +191,3 @@ int bamAttrArrayWriteSAMtags(string &attrStr, char *attrArray, Parameters &P) {/
 
     return nattr;
 };
-
-
