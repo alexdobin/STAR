@@ -907,7 +907,7 @@ soloCellFilter              CellRanger2.2 3000 0.99 10
                                                 The harcoded values are from CellRanger:             3000            0.99            10    45000    90000      500               0.01      20000  0.01  10000
 
 soloOutFormatFeaturesGeneField3    "Gene Expression"
-    string(s):                field 3 in the Gene features.tsv file. If "-", then no 3rd field is output.
+    string(s):                field 3 in the Gene features.tsv file. If "+", then GeneBiotype is used. If "-", then no 3rd field is output.
 
 soloCellReadStats           None
     string:                 Output reads statistics for each CB
