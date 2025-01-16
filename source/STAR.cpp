@@ -30,7 +30,7 @@
 
 #include "twoPassRunPass1.h"
 
-#include "htslib/htslib/sam.h"
+#include <htslib/sam.h>
 #include "parametersDefault.xxd"
 
 void usage(int usageType)

@@ -10,13 +10,22 @@ CXXFLAGSextra ?=
 
 # user may define the compiler
 CXX ?= g++
+CC ?= gcc
 
 # pre-defined flags
-LDFLAGS_shared := -pthread -Lhtslib -Bstatic -lhts -Bdynamic -lz
-LDFLAGS_static := -static -static-libgcc -pthread -Lhtslib -lhts -lz
+LDFLAGS_shared := -pthread -lhts -Bdynamic -lz
+LDFLAGS_static := -static -static-libgcc -pthread -lhts -lz
 LDFLAGS_Mac :=-pthread -lz htslib/libhts.a
 LDFLAGS_Mac_static :=-pthread -lz -static-libgcc htslib/libhts.a
 LDFLAGS_gdb := $(LDFLAGS_shared)
+
+PKGCONFIG ?= pkg-config
+PKGLIBS := htslib zlib
+PKGCPPFLAGS := $(shell $(PKGCONFIG) --cflags $(PKGLIBS))
+PKGLDFLAGS := $(shell $(PKGCONFIG) --libs $(PKGLIBS))
+
+LDFLAGSextra += $(PKGLDFLAGS)
+CXXFLAGSextra += $(PKGCPPFLAGS)
 
 DATE_FMT = --iso-8601=seconds
 ifdef SOURCE_DATE_EPOCH
@@ -45,7 +54,7 @@ CFLAGS ?= -pipe -Wall -Wextra -O3
 CXXFLAGS_SIMD ?= -mavx2
 
 # Unconditionally set essential flags and optimization options
-CXXFLAGS_common := -std=c++11 -fopenmp $(COMPTIMEPLACE) $(GIT_BRANCH_COMMIT_DIFF)
+CXXFLAGS_common := -std=c++11 -fopenmp $(COMPTIMEPLACE) $(CCFLAGS_common_add)
 CXXFLAGS_main := -O3 $(CXXFLAGS_common)
 CXXFLAGS_gdb := -O0 -g3 $(CXXFLAGS_common)
 
@@ -91,18 +100,28 @@ OBJECTS = systemFunctions.o funPrimaryAlignMark.o \
 	sjdbLoadFromFiles.o sjdbLoadFromStream.o sjdbPrepare.o sjdbBuildIndex.o sjdbInsertJunctions.o mapThreadsSpawn.o \
 	Parameters_readFilesInit.o Parameters_openReadsFiles.cpp Parameters_closeReadsFiles.cpp Parameters_readSAMheader.o \
 	bam_cat.o serviceFuns.o GlobalVariables.cpp \
-	BAMoutput.o BAMfunctions.o ReadAlign_alignBAM.o BAMbinSortByCoordinate.o signalFromBAM.o bamRemoveDuplicates.o BAMbinSortUnmapped.o
+	BAMoutput.o BAMfunctions.o ReadAlign_alignBAM.o BAMbinSortByCoordinate.o signalFromBAM.o bamRemoveDuplicates.o BAMbinSortUnmapped.o \
+	$(MMAP_MALLOC_SRC_DIR)/libmmap_allocator.a
 
 SOURCES := $(wildcard *.cpp) $(wildcard *.c)
 
+MMAP_MALLOC_SRC_DIR = mmap_malloc
+MMAP_MALLOC_LIB_SRCS = $(wildcard $(MMAP_MALLOC_SRC_DIR)/*.c)
+MMAP_MALLOC_OBJ_FILES = $(patsubst $(MMAP_MALLOC_SRC_DIR)/%.c,$(MMAP_MALLOC_SRC_DIR)/%.o,$(MMAP_MALLOC_LIB_SRCS))
+
+$(MMAP_MALLOC_SRC_DIR)/%.o : $(MMAP_MALLOC_SRC_DIR)/%.c
+	$(CC) -Wall -fPIC -pthread -O3 -Immap_malloc -c $< -o $@
 
 %.o : %.cpp
-	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(CXXFLAGSextra) $(COMPTIMEPLACE) $<
 
 %.o : %.c
-	$(CXX) -c $(CPPFLAGS) $(CFLAGS) $<
+	$(CXX) -c $(CPPFLAGS) $(CFLAGS) $(CXXFLAGSextra) $(COMPTIMEPLACE) $<
 
 all: cleanCompileInfo STAR$(SFX)
+
+$(MMAP_MALLOC_SRC_DIR)/libmmap_allocator.a: $(MMAP_MALLOC_OBJ_FILES)
+	ar r $@ $^
 
 opal/opal.o : opal/opal.cpp opal/opal.h
 	cd opal && \
@@ -114,8 +133,6 @@ clean:
 
 .PHONY: CLEAN
 CLEAN: clean
-	$(MAKE) -C htslib clean
-
 
 .PHONY: clean_solo
 clean_solo:
@@ -131,7 +148,7 @@ ifneq ($(MAKECMDGOALS),CLEAN)
 ifneq ($(MAKECMDGOALS),clean_solo)
 ifneq ($(MAKECMDGOALS),STARforMac)
 ifneq ($(MAKECMDGOALS),STARforMacGDB)
-Depend.list: $(SOURCES) parametersDefault.xxd htslib
+Depend.list: $(SOURCES) parametersDefault.xxd
 	echo $(SOURCES)
 	'rm' -f ./Depend.list
 	$(CXX) $(CXXFLAGS_common) -MM $^ >> Depend.list
@@ -142,11 +159,6 @@ endif
 endif
 endif
 endif
-
-htslib : htslib/libhts.a
-
-htslib/libhts.a :
-	$(MAKE) -C htslib lib-static
 
 parametersDefault.xxd: parametersDefault
 	xxd -i parametersDefault > parametersDefault.xxd

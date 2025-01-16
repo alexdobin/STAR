@@ -4,6 +4,7 @@
 #include <fstream>
 #include <unordered_map>
 #include <unordered_set>
+#include "mmap_allocator.hpp"
 
 #include "IncludeDefine.h"
 #include "ReadAlignChunk.h"
@@ -53,7 +54,7 @@ public:
 
     vector<double> nUMIperCBmulti;
 
-    vector<uint32> countCellGeneUMI;//sparsified matrix for the counts, each entry is: geneID count1 count2 ... countNcounts
+    vector<uint32, galaxy::mmap_allocator<uint32>> countCellGeneUMI;//sparsified matrix for the counts, each entry is: geneID count1 count2 ... countNcounts
     vector<uint32> countCellGeneUMIindex;//index of CBs in the count matrix
     uint32 countMatStride; //number of counts per entry in the count matrix
     

@@ -6,7 +6,7 @@
 #include <map>
 #include <random>
 
-double logMultinomialPDFsparse(const vector<double> &ambProfileLogP, const vector<uint32> &countCellGeneUMI, const uint32 stride, const uint32 shift, const int64 start, const uint32 nGenes, const vector<double> &logFactorial);
+double logMultinomialPDFsparse(const vector<double> &ambProfileLogP, const vector<uint32, galaxy::mmap_allocator<uint32>> &countCellGeneUMI, const uint32 stride, const uint32 shift, const int64 start, const uint32 nGenes, const vector<double> &logFactorial);
 void SoloFeature::emptyDrops_CR()
 {
     if (nCB<=pSolo.cellFilter.eDcr.indMin) {
@@ -216,7 +216,7 @@ void SoloFeature::emptyDrops_CR()
     return;
 };
 
-double logMultinomialPDFsparse(const vector<double> &ambProfileLogP, const vector<uint32> &countCellGeneUMI, const uint32 stride, const uint32 shift, const int64 start, const uint32 nGenes, const vector<double> &logFactorial)
+double logMultinomialPDFsparse(const vector<double> &ambProfileLogP, const vector<uint32, galaxy::mmap_allocator<uint32>> &countCellGeneUMI, const uint32 stride, const uint32 shift, const int64 start, const uint32 nGenes, const vector<double> &logFactorial)
 {
     uint32 sumCount=0;
     double sumLogFac=0.0, sumCountLogP=0.0;
