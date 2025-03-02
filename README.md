@@ -62,6 +62,7 @@ make STAR CXXFLAGS_SIMD=sse
 Compile under Mac OS X
 ----------------------
 
+For Intel-based Macs:
 ```bash
 # 1. Install brew (http://brew.sh/)
 # 2. Install gcc with brew:
@@ -69,10 +70,38 @@ $ brew install gcc
 # 3. Build STAR:
 # run 'make' in the source directory
 # note that the path to c++ executable has to be adjusted to its current version
-$cd source
-$make STARforMacStatic CXX=/usr/local/Cellar/gcc/8.2.0/bin/g++-8
-# 4. Make it availible through the terminal
-$cp STAR /usr/local/bin
+$ cd source
+$ make STARforMacStatic CXX=/usr/local/Cellar/gcc/8.2.0/bin/g++-8
+# 4. Make it available through the terminal
+$ cp STAR /usr/local/bin/
+```
+
+For Apple Silicon (M1/M2/M3) Macs:
+```bash
+# 1. Install brew (http://brew.sh/)
+# 2. Install gcc:
+brew install gcc
+
+# 3. Find the gcc compiler path:
+brew list gcc | grep c++-
+
+# 4. Clone STAR repository:
+git clone https://github.com/alexdobin/STAR.git
+cd STAR/source/
+
+# 5. Build STAR (adjust gcc version as needed):
+make STARforMacStatic CXX=/opt/homebrew/Cellar/gcc/14.2.0_1/bin/c++-14
+
+# 6. Verify compilation:
+./STAR --version
+./STAR --help
+
+# 7. Make it available through the terminal
+sudo cp STAR /usr/local/bin/
+
+# 8. Verify installation:
+which STAR
+STAR --version
 ```
 
 All platforms - non-standard gcc
