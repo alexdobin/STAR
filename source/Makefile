@@ -106,7 +106,7 @@ all: cleanCompileInfo STAR$(SFX)
 
 opal/opal.o : opal/opal.cpp opal/opal.h
 	cd opal && \
-	$(CXX) -c -I./ -std=c++11 $(CPPFLAGS) $(CXXFLAGS) $(CXXFLAGSextra) $(CXXFLAGS_SIMD) opal.cpp
+	$(CXX) -c -I./ -std=c++11 $(CPPFLAGS) $(CXXFLAGS) $(CXXFLAGSextra) opal.cpp
 
 .PHONY: clean
 clean:
