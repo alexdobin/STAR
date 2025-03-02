@@ -2,6 +2,9 @@
 #include "ErrorWarning.h"
 #include <fstream>
 #include <sys/stat.h>
+#include <spawn.h>    // Add this for posix_spawn
+#include <errno.h>
+
 void Parameters::openReadsFiles() 
 {
     if (readFilesCommandString=="") {//read from file
@@ -78,25 +81,49 @@ void Parameters::openReadsFiles()
             chmod(readsCommandFileName.at(imate).c_str(),S_IXUSR | S_IRUSR | S_IWUSR);
 
             readFilesCommandPID[imate]=0;
+            
+            // Prepare spawn attributes and actions
+            posix_spawnattr_t attr;
+            posix_spawn_file_actions_t actions;
+            
+            if (posix_spawnattr_init(&attr) != 0 ||
+                posix_spawn_file_actions_init(&actions) != 0) {
+                ostringstream errOut;
+                errOut << "EXITING: because of fatal EXECUTION error: Failed initializing spawn attributes\n";
+                errOut << errno << ": " << strerror(errno) << "\n";
+                exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+            }
 
-            ostringstream errOut;
-            pid_t PID=vfork();
-            switch (PID) {
-                case -1:
-                    errOut << "EXITING: because of fatal EXECUTION error: Failed vforking readFilesCommand\n";
-                    errOut << errno << ": " << strerror(errno) << "\n";
-                    exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-                    break;
-
-                case 0:
-                    //this is the child
-                    execlp(readsCommandFileName.at(imate).c_str(), readsCommandFileName.at(imate).c_str(), (char*) NULL);
-                    exit(0);
-
-                default:
-                    //this is the father, record PID of the children
-                    readFilesCommandPID[imate]=PID;
+            // Prepare arguments
+            char* argv[] = {
+                const_cast<char*>(readsCommandFileName.at(imate).c_str()),
+                nullptr
             };
+            
+            // Spawn the process
+            pid_t PID;
+            int status = posix_spawn(
+                &PID,
+                readsCommandFileName.at(imate).c_str(),
+                &actions,
+                &attr,
+                argv,
+                nullptr  // Use current environment
+            );
+
+            // Clean up spawn attributes and actions
+            posix_spawnattr_destroy(&attr);
+            posix_spawn_file_actions_destroy(&actions);
+
+            if (status != 0) {
+                ostringstream errOut;
+                errOut << "EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand\n";
+                errOut << errno << ": " << strerror(errno) << "\n";
+                exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+            }
+
+            // Record the PID
+            readFilesCommandPID[imate] = PID;
 
             inOut->readIn[imate].open(readFilesInTmp.at(imate).c_str());
         };
