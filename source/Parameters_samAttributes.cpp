@@ -237,7 +237,6 @@ void Parameters::samAttributes(){//everything related to SAM attributes
     samAttrRequiresBAM(outSAMattrPresent.rB, "rB");
     samAttrRequiresBAM(outSAMattrPresent.vG, "vG");
     samAttrRequiresBAM(outSAMattrPresent.vA, "vA");
-    samAttrRequiresBAM(outSAMattrPresent.vW, "vW");
     samAttrRequiresBAM(outSAMattrPresent.GX, "GX");
     samAttrRequiresBAM(outSAMattrPresent.GN, "GN");
     
