@@ -292,6 +292,8 @@ int main(int argInN, char *argIn[])
     *P.inOut->logStdOut << timeMonthDayTime(g_statsAll.timeFinish) << " ..... finished successfully\n"
                         << flush;
 
+    P.closeReadsFiles(); // Clean up processes BEFORE removing files
+
     P.inOut->logMain << "ALL DONE!\n"
                      << flush;
     if (P.outTmpKeep == "None")
@@ -299,7 +301,6 @@ int main(int argInN, char *argIn[])
         sysRemoveDir(P.outFileTmp);
     };
 
-    P.closeReadsFiles(); // this will kill the readFilesCommand processes if necessary
     // genomeMain.~Genome(); //need explicit call because of the 'delete P.inOut' below, which will destroy P.inOut->logStdOut
     if (genomeMain.sharedMemory != NULL)
     { // need explicit call because this destructor will write to files which are deleted by 'delete P.inOut' below
