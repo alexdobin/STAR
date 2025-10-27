@@ -77,21 +77,52 @@ void bamSortByCoordinate (Parameters &P, ReadAlignChunk **RAchunk, Genome &genom
                 };
             };
 
-            //concatenate all BAM files, using bam_cat
-            char **bamBinNames = new char* [nBins];
-            vector <string> bamBinNamesV;
-            for (uint32 ibin=0; ibin<nBins; ibin++) {
-
-                bamBinNamesV.push_back(P.outBAMsortTmpDir+"/b"+std::to_string((uint) ibin));
-                struct stat buffer;
-                if (stat (bamBinNamesV.back().c_str(), &buffer) != 0) {//check if file exists
-                    bamBinNamesV.pop_back();
-                };
-            };
-            for (uint32 ibin=0; ibin<bamBinNamesV.size(); ibin++) {
+            // Output format detection
+            std::string outFormat = P.outSAMtype.empty() ? "BAM" : P.outSAMtype[0];
+            if (outFormat == "CRAM" || outFormat == "SAM" || outFormat == "BAM") {
+                // Open output with hts_open
+                const char* mode = (outFormat == "CRAM") ? "wc" : (outFormat == "SAM" ? "w" : "wb");
+                htsFile* htsOut = hts_open(P.outBAMfileCoordName.c_str(), mode);
+                if (!htsOut) {
+                    ostringstream errOut;
+                    errOut << "EXITING because of fatal ERROR: could not open output file: " << P.outBAMfileCoordName << "\n";
+                    exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
+                }
+                // Write header
+                bam_hdr_t* header = sam_hdr_parse(P.samHeaderSortedCoord.size(), P.samHeaderSortedCoord.c_str());
+                sam_hdr_write(htsOut, header);
+                // For each bin, read and write records
+                for (uint32 ibin=0; ibin<nBins; ibin++) {
+                    std::string binFile = P.outBAMsortTmpDir+"/b"+std::to_string((uint) ibin);
+                    struct stat buffer;
+                    if (stat(binFile.c_str(), &buffer) != 0) continue;
+                    BGZF* in = bgzf_open(binFile.c_str(), "r");
+                    if (!in) continue;
+                    bam1_t* b = bam_init1();
+                    while (bam_read1(in, b) >= 0) {
+                        sam_write1(htsOut, header, b);
+                    }
+                    bam_destroy1(b);
+                    bgzf_close(in);
+                }
+                sam_hdr_destroy(header);
+                hts_close(htsOut);
+            } else {
+                // Default: BAM output using bam_cat
+                char **bamBinNames = new char* [nBins];
+                vector <string> bamBinNamesV;
+                for (uint32 ibin=0; ibin<nBins; ibin++) {
+                    bamBinNamesV.push_back(P.outBAMsortTmpDir+"/b"+std::to_string((uint) ibin));
+                    struct stat buffer;
+                    if (stat (bamBinNamesV.back().c_str(), &buffer) != 0) {
+                        bamBinNamesV.pop_back();
+                    }
+                }
+                for (uint32 ibin=0; ibin<bamBinNamesV.size(); ibin++) {
                     bamBinNames[ibin] = (char*) bamBinNamesV.at(ibin).c_str();
-            };
-            bam_cat(bamBinNamesV.size(), bamBinNames, 0, P.outBAMfileCoordName.c_str());
+                }
+                bam_cat(bamBinNamesV.size(), bamBinNames, 0, P.outBAMfileCoordName.c_str());
+            }
         };
     };    
 };

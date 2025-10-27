@@ -5,7 +5,12 @@
 #include SAMTOOLS_BGZF_H
 #include "Parameters.h"
 
-class BAMoutput {//
+extern "C" {
+#include "htslib/htslib/hts.h"
+#include "htslib/htslib/sam.h"
+}
+
+class BAMoutput {
 public:
     //sorted output
     BAMoutput (int iChunk, string tmpDir, Parameters &Pin);
@@ -13,7 +18,8 @@ public:
     void coordBins ();
     void coordFlush ();
     //unsorted output
-    BAMoutput (BGZF *bgzfBAMin, Parameters &Pin);
+    BAMoutput (BGZF *bgzfBAMin, Parameters &Pin); // legacy BAM
+    BAMoutput (htsFile *htsOut, Parameters &Pin); // new: generic (SAM/BAM/CRAM)
     void unsortedOneAlign (char *bamIn, uint bamSize, uint bamSize2);
     void unsortedFlush ();
     void coordUnmappedPrepareBySJout();
@@ -29,7 +35,8 @@ private:
     char **binStart; //pointers to starts of the bins
     uint64 *binBytes, binBytes1;//number of bytes currently written to each bin
     ofstream **binStream;//output streams for each bin
-    BGZF *bgzfBAM;
+    BGZF *bgzfBAM; // legacy BAM
+    htsFile *htsOut; // new: generic (SAM/BAM/CRAM)
     Parameters &P;
     string bamDir;
 };

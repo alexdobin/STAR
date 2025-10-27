@@ -39,29 +39,50 @@ ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome 
         chunkOutBAMtotal=0;
     };
 
+    // Detect output format and open with hts_open if needed
+    auto get_hts_mode = [](const std::string& format) -> const char* {
+        if (format == "CRAM") return "wc";
+        if (format == "BAM") return "wb";
+        if (format == "SAM") return "w";
+        return nullptr;
+    };
+
+    std::string outFormat = P.outSAMtype.empty() ? "BAM" : P.outSAMtype[0];
+
     if (P.outBAMunsorted) {
-        chunkOutBAMunsorted = new BAMoutput (P.inOut->outBAMfileUnsorted, P);
+        if (outFormat == "CRAM" || outFormat == "SAM" || outFormat == "BAM") {
+            htsFile* htsOut = hts_open(P.outBAMfileUnsortedName.c_str(), get_hts_mode(outFormat));
+            chunkOutBAMunsorted = new BAMoutput(htsOut, P);
+        } else {
+            chunkOutBAMunsorted = new BAMoutput(P.inOut->outBAMfileUnsorted, P);
+        }
         RA->outBAMunsorted = chunkOutBAMunsorted;
     } else {
-        chunkOutBAMunsorted=NULL;
-        RA->outBAMunsorted=NULL;
-    };
+        chunkOutBAMunsorted = NULL;
+        RA->outBAMunsorted = NULL;
+    }
 
     if (P.outBAMcoord) {
-        chunkOutBAMcoord = new BAMoutput (iChunk, P.outBAMsortTmpDir, P);
+        // Coordinate sorted output is handled via temp bins, keep as is for now
+        chunkOutBAMcoord = new BAMoutput(iChunk, P.outBAMsortTmpDir, P);
         RA->outBAMcoord = chunkOutBAMcoord;
     } else {
-        chunkOutBAMcoord=NULL;
-        RA->outBAMcoord=NULL;
-    };
+        chunkOutBAMcoord = NULL;
+        RA->outBAMcoord = NULL;
+    }
 
-    if ( P.quant.trSAM.bamYes ) {
-        chunkOutBAMquant = new BAMoutput (P.inOut->outQuantBAMfile,P);
+    if (P.quant.trSAM.bamYes) {
+        if (outFormat == "CRAM" || outFormat == "SAM" || outFormat == "BAM") {
+            htsFile* htsOut = hts_open(P.outQuantBAMfileName.c_str(), get_hts_mode(outFormat));
+            chunkOutBAMquant = new BAMoutput(htsOut, P);
+        } else {
+            chunkOutBAMquant = new BAMoutput(P.inOut->outQuantBAMfile, P);
+        }
         RA->outBAMquant = chunkOutBAMquant;
     } else {
-        chunkOutBAMquant=NULL;
-        RA->outBAMquant=NULL;
-    };
+        chunkOutBAMquant = NULL;
+        RA->outBAMquant = NULL;
+    }
 
     if (P.outSJ.yes) {
         chunkOutSJ  = new OutSJ (P.limitOutSJcollapsed, P, mapGen);
