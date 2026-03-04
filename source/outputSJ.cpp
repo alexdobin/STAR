@@ -117,12 +117,15 @@ void outputSJ(ReadAlignChunk** RAchunk, Parameters& P) {//collapses junctions fr
                 sjFilter[sjA[ii*3+1]] = sjFilter[sjA[ii*3+1]] && ( minDist >= (uint) P.outSJfilterDistToOtherSJmin[(sjA[ii*3+2]+1)/2] );
             };
         };
+        delete[] sjA;
     };
 
-    //output junctions
-    P.sjAll[0].reserve(allSJ.N);
-    P.sjAll[1].reserve(allSJ.N);
-
+    // output junctions (only when Solo SJ feature is requested)
+    const bool keepSJforSolo = P.pSolo.yes && P.pSolo.featureYes[SoloFeatureTypes::SJ];
+    if (keepSJforSolo) {
+        P.sjAll[0].reserve(allSJ.N);
+        P.sjAll[1].reserve(allSJ.N);
+    };
     if (P.outFilterBySJoutStage!=1) {//output file
         ofstream outSJfileStream((P.outFileNamePrefix+"SJ.out.tab").c_str());
         ofstream outSJtmpStream((P.outFileTmp+"SJ.start_gap.tsv").c_str());
@@ -131,8 +134,10 @@ void outputSJ(ReadAlignChunk** RAchunk, Parameters& P) {//collapses junctions fr
                 oneSJ.junctionPointer(allSJ.data,ii);
                 oneSJ.outputStream(outSJfileStream);//write to file
                 outSJtmpStream << *oneSJ.start <<'\t'<< *oneSJ.gap <<'\n';
-                P.sjAll[0].push_back(*oneSJ.start);
-                P.sjAll[1].push_back(*oneSJ.gap);
+                if (keepSJforSolo) {
+                    P.sjAll[0].push_back(*oneSJ.start);
+                    P.sjAll[1].push_back(*oneSJ.gap);
+                };
             };
         };
         outSJfileStream.close();
@@ -160,4 +165,6 @@ void outputSJ(ReadAlignChunk** RAchunk, Parameters& P) {//collapses junctions fr
             };
         };
     };
+    delete[] sjFilter;
+    delete[] sjChunks;
 };
