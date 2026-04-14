@@ -274,7 +274,6 @@ class Parameters {
         } sjdbInsert;
 
         //storage limits
-        uint64 limitGenomeGenerateRAM;
         vector<uint64> limitIObufferSize; //max size of the in/out buffer, bytes
         uint64 limitOutSAMoneReadBytes;
         uint64 limitOutSJoneRead, limitOutSJcollapsed;

@@ -226,9 +226,6 @@ clip5pAfterAdapterNbases    0
 #####UnderDevelopment_end
 
 ### Limits
-limitGenomeGenerateRAM               31000000000
-    int>0: maximum available RAM (bytes) for genome generation
-
 limitIObufferSize                    30000000 50000000
     int(s)>0: max available buffers size (bytes) for input/output, per thread
 
