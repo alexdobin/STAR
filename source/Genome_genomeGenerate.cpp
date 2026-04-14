@@ -230,7 +230,8 @@ void Genome::genomeGenerate() {
             };
         };
 
-        uint saChunkSize=(P.limitGenomeGenerateRAM-nG1alloc)/8/P.runThreadN; //number of SA indexes per chunk
+        uint required_memory_sa = nG1alloc/3;
+        uint saChunkSize = required_memory_sa/8/P.runThreadN; //number of SA indexes per chunk
         saChunkSize=saChunkSize*6/10; //allow extra space for qsort
         //uint saChunkN=((nSA/saChunkSize+1)/P.runThreadN+1)*P.runThreadN;//ensure saChunkN is divisible by P.runThreadN
         //saChunkSize=nSA/saChunkN+100000;//final chunk size
