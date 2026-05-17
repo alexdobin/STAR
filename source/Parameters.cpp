@@ -10,11 +10,30 @@
 #include "signalFromBAM.h"
 #include "bamRemoveDuplicates.h"
 #include "streamFuns.h"
+#include "GenomeInsertOverlay.h"
 
 //for mkfifo
 #include <sys/stat.h>
+#include <cstdlib>
+#include <limits.h>
 
 #define PAR_NAME_PRINT_WIDTH 30
+
+namespace {
+string canonicalPathForCompare(string pathIn)
+{
+    while (pathIn.size()>1 && pathIn.back()=='/') {
+        pathIn.erase(pathIn.end()-1);
+    };
+
+    char resolvedPath[PATH_MAX];
+    if (realpath(pathIn.c_str(), resolvedPath)!=NULL) {
+        return string(resolvedPath);
+    };
+
+    return pathIn;
+}
+}
 
 Parameters::Parameters() {//initalize parameters info
 
@@ -40,6 +59,8 @@ Parameters::Parameters() {//initalize parameters info
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "genomeDir", &pGe.gDir));
     parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "genomeLoad", &pGe.gLoad));
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "genomeFastaFiles", &pGe.gFastaFiles));
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "genomeInsertOutDir", &pGe.gInsertOutDir));
+    parArray.push_back(new ParameterInfoScalar <string> (-1, -1, "genomeInsertOutMode", &pGe.gInsertOutMode));
     parArray.push_back(new ParameterInfoVector <string> (-1, -1, "genomeChainFiles", &pGe.gChainFiles));
     parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "genomeSAindexNbases", &pGe.gSAindexNbases));
     parArray.push_back(new ParameterInfoScalar <uint> (-1, -1, "genomeChrBinNbits", &pGe.gChrBinNbits));
@@ -477,6 +498,7 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     iReadAll=0;
     
     pGe.initialize(this);
+    genomeInsertOverlayLoad(*this);
 
     //directory permissions TODO: this needs to be done before outPrefixFileName is created
     if (runDirPermIn=="User_RWX") {
@@ -582,6 +604,27 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
     runMode=runModeIn[0];
     if (runMode=="alignReads") {
         inOut->logProgress.open((outFileNamePrefix + "Log.progress.out").c_str());
+    } else if (runMode=="genomeInsert") {
+        if (pGe.gFastaFiles.at(0)=="-") {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal INPUT ERROR: --runMode genomeInsert requires --genomeFastaFiles with sequences to add\n";
+            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };
+        if (pGe.gInsertOutDir=="-") {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal INPUT ERROR: --runMode genomeInsert requires --genomeInsertOutDir\n";
+            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };
+        if (canonicalPathForCompare(pGe.gInsertOutDir)==canonicalPathForCompare(pGe.gDir)) {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal INPUT ERROR: --genomeInsertOutDir cannot be the same directory as --genomeDir\n";
+            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };
+        if (pGe.gLoad!="NoSharedMemory") {
+            ostringstream errOut;
+            errOut << "EXITING because of fatal PARAMETERS error: --runMode genomeInsert requires --genomeLoad NoSharedMemory\n";
+            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };
     } else if (runMode=="inputAlignmentsFromBAM") {
         //at the moment, only wiggle output is implemented
         if (outWigFlags.yes) {
@@ -1016,6 +1059,13 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
     };
 
+    if (runMode=="genomeInsert" && pGe.sjdbFileChrStartEnd.at(0)!="-") {
+        ostringstream errOut;
+        errOut << "EXITING because of fatal PARAMETERS error: --runMode genomeInsert does not support --sjdbFileChrStartEnd\n";
+        errOut << "SOLUTION: use --sjdbGTFfile to annotate inserted sequences, or omit splice junction insertion parameters\n" <<flush;
+        exitWithError(errOut.str(),std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+    };
+
     if (runMode=="alignReads" && sjdbInsert.yes )
     {//run-time genome directory, this is needed for genome files generated on the fly
         if (pGe.sjdbOverhang<=0) {
@@ -1029,6 +1079,15 @@ void Parameters::inputParameters (int argInN, char* argIn[]) {//input parameters
         if (mkdir (sjdbInsert.outDir.c_str(),runDirPerm)!=0) {
             ostringstream errOut;
             errOut <<"EXITING because of fatal ERROR: could not make run-time genome directory directory: "<< sjdbInsert.outDir<<"\n";
+            errOut <<"SOLUTION: please check the path and writing permissions \n";
+            exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
+        };
+    } else if (runMode=="genomeInsert" && sjdbInsert.yes ) {
+        sjdbInsert.outDir=outFileTmp+"/genomeInsertSJDB/";
+        sysRemoveDir (sjdbInsert.outDir);
+        if (mkdir (sjdbInsert.outDir.c_str(),runDirPerm)!=0) {
+            ostringstream errOut;
+            errOut <<"EXITING because of fatal ERROR: could not make genomeInsert annotation directory: "<< sjdbInsert.outDir<<"\n";
             errOut <<"SOLUTION: please check the path and writing permissions \n";
             exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
         };

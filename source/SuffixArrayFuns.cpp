@@ -17,7 +17,7 @@ uint compareSeqToGenome(Genome &mapGen, char** s2, uint S, uint N, uint L, uint 
 
     register int64 ii;
 
-    uint SAstr=mapGen.SA[iSA];
+    uint SAstr=mapGen.SAvalue(iSA);
     bool dirG = (SAstr>>mapGen.GstrandBit) == 0; //forward or reverse strand of the genome
     SAstr &= mapGen.GstrandMask;
 
@@ -218,7 +218,35 @@ int compareRefEnds (Genome &mapGen, uint64 SAstr,  uint64 gInsert, bool strG, bo
     };
 };
 
-uint compareSeqToGenome1(Genome &mapGen, char** s2, uint S, uint N, uint L, uint iSA, bool dirR, uint64 gInsert, int & compRes)
+uint genomeInsertSAshift(uint ind1, uint nG, uint nG1, uint nG2, uint strandBit)
+{
+    // genomeInsert moves existing SJDB sequence to make room for inserted FASTA.
+    // Apply that coordinate shift lazily during SA search/copy so the original
+    // suffix array does not need a full pre-pass rewrite.
+    if (nG1==0)
+    {
+        return ind1;
+    };
+
+    uint N2bit=1LLU << strandBit;
+    uint strandMask=~N2bit;
+    if ( (ind1 & N2bit)>0 )
+    {//- strand
+        if ( (ind1 & strandMask)>=nG2 )
+        {//the first nG bases
+            ind1+=nG1;
+        };
+    } else
+    {//+ strand
+        if ( ind1>=nG )
+        {//the last nG2 bases
+            ind1+=nG1;
+        };
+    };
+    return ind1;
+};
+
+uint compareSeqToGenome1(Genome &mapGen, char** s2, uint S, uint N, uint L, uint iSA, bool dirR, uint64 gInsert, int & compRes, uint nG, uint nG1, uint nG2)
 {
     /* compare s to g, find the maximum identity length
      * s2[0] read sequence; s2[1] complementary sequence
@@ -233,7 +261,7 @@ uint compareSeqToGenome1(Genome &mapGen, char** s2, uint S, uint N, uint L, uint
 
     register int64 ii;
 
-    uint SAstr=mapGen.SA[iSA];
+    uint SAstr=genomeInsertSAshift(mapGen.SAvalue(iSA), nG, nG1, nG2, mapGen.GstrandBit);
     bool dirG = (SAstr>>mapGen.GstrandBit) == 0; //forward or reverse strand of the genome
     SAstr &= mapGen.GstrandMask;
     char *g=mapGen.G;
@@ -296,6 +324,11 @@ uint compareSeqToGenome1(Genome &mapGen, char** s2, uint S, uint N, uint L, uint
 
 uint suffixArraySearch1(Genome &mapGen, char** s, uint S, uint N, uint64 gInsert, bool strR, uint i1, uint i2, uint L)
 {
+    return suffixArraySearch1(mapGen, s, S, N, gInsert, strR, i1, i2, L, 0, 0, 0);
+};
+
+uint suffixArraySearch1(Genome &mapGen, char** s, uint S, uint N, uint64 gInsert, bool strR, uint i1, uint i2, uint L, uint nG, uint nG1, uint nG2)
+{
     /* binary search in SA space
      * s[0],s[1] - query sequence, complementary sequence
      * S - start offset
@@ -311,14 +344,14 @@ uint suffixArraySearch1(Genome &mapGen, char** s, uint S, uint N, uint64 gInsert
 
     int compRes;
 
-    uint L1=compareSeqToGenome1(mapGen,s,S,N,L,i1,strR,gInsert,compRes);
+    uint L1=compareSeqToGenome1(mapGen,s,S,N,L,i1,strR,gInsert,compRes,nG,nG1,nG2);
     if (compRes<0)
     {// the sequence is smaller than the first index of the SA, cannot proceed
         L=L1;
         return 0;
     };
 
-    uint L2=compareSeqToGenome1(mapGen, s,S,N,L,i2,strR,gInsert,compRes);
+    uint L2=compareSeqToGenome1(mapGen, s,S,N,L,i2,strR,gInsert,compRes,nG,nG1,nG2);
     if (compRes>0)
     {//the sequence is bigger than the last SA index, return a huge number
         L=L2;
@@ -330,7 +363,7 @@ uint suffixArraySearch1(Genome &mapGen, char** s, uint S, uint N, uint64 gInsert
     uint i3=i1,L3=L1; //in case i1+1>=i2 an not iteration of the loope below is ever made
     while (i1+1<i2) {//main binary search loop
         i3=medianUint2(i1,i2);
-        L3=compareSeqToGenome1(mapGen,s,S,N,L,i3,strR,gInsert,compRes);//cannot do this because these sj sequences contains spacers=5
+        L3=compareSeqToGenome1(mapGen,s,S,N,L,i3,strR,gInsert,compRes,nG,nG1,nG2);//cannot do this because these sj sequences contains spacers=5
         if (L3==N) {//this should not really happen
             L=N;
             return i3;

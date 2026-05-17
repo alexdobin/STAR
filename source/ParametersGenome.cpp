@@ -5,9 +5,21 @@
 void ParametersGenome::initialize(Parameters *pPin)
 {
     pP=pPin;
+    gInsertOverlay=false;
+    gInsertOverlayDeltaFile="-";
+    gInsertOverlayGTFhasJunctions=false;
     
     if (gDir.back()!='/') {
         gDir += '/';
+    };
+    if (gInsertOutDir!="-" && gInsertOutDir.back()!='/') {
+        gInsertOutDir += '/';
+    };
+    if (gInsertOutMode!="Full" && gInsertOutMode!="Overlay" && gInsertOutMode!="Delta") {
+        ostringstream errOut;
+        errOut << "EXITING because of FATAL PARAMETER ERROR: unrecognized option in --genomeInsertOutMode = " << gInsertOutMode << "\n";
+        errOut << "SOLUTION: use one of the allowed values for --genomeInsertOutMode : Full, Overlay or Delta\n";
+        exitWithError(errOut.str(), std::cerr, pP->inOut->logMain, EXIT_CODE_PARAMETER, *pP);
     };
     
     //genome transformation

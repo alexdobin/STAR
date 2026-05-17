@@ -62,7 +62,7 @@ OBJECTS = systemFunctions.o funPrimaryAlignMark.o \
 	SoloReadFeature.o SoloReadFeature_record.o SoloReadFeature_inputRecords.o \
 	Solo.o SoloFeature.o SoloFeature_outputResults.o SoloFeature_processRecords.o SoloFeature_addBAMtags.o \
 	ReadAlign_transformGenome.o Genome_transformGenome.o Transcript_convertGenomeCigar.o \
-	twoPassRunPass1.o samHeaders.o Genome_genomeLoad.o Genome_genomeOutLoad.o Transcript_transformGenome.o ReadAlign_outputSpliceGraphSAM.o \
+	twoPassRunPass1.o samHeaders.o GenomeInsertOverlay.o GenomeInsertAnnotations.o Genome_genomeLoad.o Genome_genomeOutLoad.o Transcript_transformGenome.o ReadAlign_outputSpliceGraphSAM.o \
 	ReadAlign_mapOneReadSpliceGraph.o SpliceGraph.o SpliceGraph_swScoreSpliced.o SpliceGraph_swTraceBack.o \
 	SpliceGraph_findSuperTr.o sjAlignSplit.o \
 	GTF.o GTF_transcriptGeneSJ.o GTF_superTranscript.o SuperTranscriptome.o \
@@ -84,7 +84,7 @@ OBJECTS = systemFunctions.o funPrimaryAlignMark.o \
 	stitchWindowAligns.o extendAlign.o stitchAlignToTranscript.o \
 	ChimericSegment.cpp ChimericAlign.cpp ChimericAlign_chimericJunctionOutput.o ChimericAlign_chimericBAMoutput.o ChimericAlign_chimericStitching.o \
 	Genome_genomeGenerate.o genomeParametersWrite.o genomeScanFastaFiles.o genomeSAindex.o \
-	Genome_insertSequences.o insertSeqSA.o funCompareUintAndSuffixes.o funCompareUintAndSuffixesMemcmp.o \
+	Genome_insertSequences.o Genome_validateGenomeInsertAnnotations.o Genome_writeGenomeIndex.o insertSeqSA.o funCompareUintAndSuffixes.o funCompareUintAndSuffixesMemcmp.o \
 	TimeFunctions.o ErrorWarning.o streamFuns.o stringSubstituteAll.o \
 	Transcriptome.o Transcriptome_quantAlign.o Transcriptome_geneFullAlignOverlap.o \
 	ReadAlign_quantTranscriptome.o Quantifications.o Transcriptome_geneCountsAddAlign.o \

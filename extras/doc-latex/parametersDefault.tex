@@ -21,6 +21,7 @@
 \begin{optOptTable}
   \optOpt{alignReads}   \optOptLine{map reads}
   \optOpt{genomeGenerate}   \optOptLine{generate genome files}
+  \optOpt{genomeInsert}   \optOptLine{add named FASTA sequences to an existing genome index and write a complete updated index, overlay, or cached delta directory}
   \optOpt{inputAlignmentsFromBAM}   \optOptLine{input alignments from BAM. Presently only works with --outWigType and --bamRemoveDuplicates options.}
   \optOpt{liftOver}   \optOptLine{lift-over of GTF files (--sjdbGTFfile) between genome assemblies using chain file(s) from --genomeChainFiles.}
   \optOpt{soloCellFiltering  {\textless}/path/to/raw/count/dir/{\textgreater}   {\textless}/path/to/output/prefix{\textgreater}}   \optOptLine{STARsolo cell filtering ("calling") without remapping, followed by the path to raw count directory and output (filtered) prefix}
@@ -43,7 +44,7 @@
 \begin{optTable}
 \optName{genomeDir}
   \optValue{./GenomeDir/}
-  \optLine{string: path to the directory where genome files are stored (for --runMode alignReads) or will be generated (for --runMode generateGenome)} 
+  \optLine{string: path to the directory where genome files are stored (for --runMode alignReads and --runMode genomeInsert) or will be generated (for --runMode generateGenome)}
 \optName{genomeLoad}
   \optValue{NoSharedMemory}
   \optLine{string: mode of shared memory usage for the genome files. Only used with --runMode alignReads.} 
@@ -57,7 +58,18 @@
 \optName{genomeFastaFiles}
   \optValue{-}
   \optLine{string(s): path(s) to the fasta files with the genome sequences, separated by spaces. These files should be plain text FASTA files, they *cannot* be zipped.} 
-  \optLine{Required for the genome generation (--runMode genomeGenerate). Can also be used in the mapping (--runMode alignReads) to add extra (new) sequences to the genome (e.g. spike-ins).} 
+  \optLine{Required for the genome generation (--runMode genomeGenerate). Can also be used in the mapping (--runMode alignReads) to add extra (new) sequences to the genome (e.g. spike-ins), or with --runMode genomeInsert to persistently add named sequences to an existing genome index.}
+\optName{genomeInsertOutDir}
+  \optValue{-}
+  \optLine{string: path to the output genome directory for --runMode genomeInsert. The input --genomeDir is read but not modified; the contents written to --genomeInsertOutDir are controlled by --genomeInsertOutMode. Use --sjdbGTFfile to add annotations for inserted sequences only.}
+\optName{genomeInsertOutMode}
+  \optValue{Full}
+  \optLine{string: output mode for --runMode genomeInsert.}
+\begin{optOptTable}
+  \optOpt{Full}   \optOptLine{write a complete updated genome index to --genomeInsertOutDir}
+  \optOpt{Overlay}   \optOptLine{write a small overlay directory that refers to the base --genomeDir and inserted FASTA/GTF files. The overlay can be used as --genomeDir with --runMode alignReads}
+  \optOpt{Delta}   \optOptLine{write an overlay directory plus a cached suffix insertion plan. The delta can be used as --genomeDir with --runMode alignReads to avoid repeating suffix search and sorting for the inserted FASTA}
+\end{optOptTable}
 \optName{genomeChainFiles}
   \optValue{-}
   \optLine{string: chain files for genomic liftover. Only used with --runMode liftOver .} 
@@ -110,7 +122,7 @@
   \optLine{string(s): path to the files with genomic coordinates (chr {\textless}tab{\textgreater} start {\textless}tab{\textgreater} end {\textless}tab{\textgreater} strand) for the splice junction introns. Multiple files can be supplied and will be concatenated.} 
 \optName{sjdbGTFfile}
   \optValue{-}
-  \optLine{string: path to the GTF file with annotations} 
+  \optLine{string: path to the GTF file with annotations. With --runMode genomeInsert, this GTF must contain annotations for inserted sequences only.}
 \optName{sjdbGTFchrPrefix}
   \optValue{-}
   \optLine{string: prefix for chromosome names in a GTF file (e.g. 'chr' for using ENSMEBL annotations with UCSC genomes)} 

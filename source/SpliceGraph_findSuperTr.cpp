@@ -46,7 +46,7 @@ void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, 
 		seedSuperTr.clear();
 		seedSuperTr.resize(iSA2-iSA1+1);
         for (uint64 isa=iSA1;isa<=iSA2;isa++) {//loop through seed SA boundaries
-            uint64 a1 = mapGen.SA[isa];
+            uint64 a1 = mapGen.SAvalue(isa);
             uint64 aStr = a1 >> mapGen.GstrandBit;
             a1 = a1 & mapGen.GstrandMask; //remove strand bit
             if (aStr==1)
@@ -183,4 +183,3 @@ void SpliceGraph::findSuperTr(const char *readSeq, const char *readSeqRevCompl, 
     RA->nW=nSuperTr;
     return;
 };
-

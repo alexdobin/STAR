@@ -21,6 +21,13 @@ Genome::Genome (Parameters &P, ParametersGenome &pGe): shmStart(NULL), P(P), pGe
     genomeOut.convYes=false;
     sjdbOverhang = pGe.sjdbOverhang; //will be re-defined later if another value was used for the generated genome
     sjdbLength = pGe.sjdbOverhang==0 ? 0 : pGe.sjdbOverhang*2+1;
+    genomeInsertSA.yes=false;
+    genomeInsertSA.indArray=NULL;
+    genomeInsertSA.nInd=0;
+    genomeInsertSA.nG=0;
+    genomeInsertSA.nG1=0;
+    genomeInsertSA.nG2=0;
+    genomeInsertSA.N2bit=0;
 };
 
 // Genome::~Genome()
@@ -76,6 +83,60 @@ uint Genome::OpenStream(string name, ifstream & stream, uint size)
     };
 
     return size;
+};
+
+void Genome::genomeInsertSAsetup(uint64 *indArray, uint64 nInd, uint64 nG, uint64 nG1, uint64 nG2, uint N2bit)
+{
+    genomeInsertSA.yes=true;
+    genomeInsertSA.indArray=indArray;
+    genomeInsertSA.nInd=nInd;
+    genomeInsertSA.nG=nG;
+    genomeInsertSA.nG1=nG1;
+    genomeInsertSA.nG2=nG2;
+    genomeInsertSA.N2bit=N2bit;
+};
+
+uint Genome::SAvalue(uint iSA)
+{
+    if (!genomeInsertSA.yes) {
+        return SA[iSA];
+    };
+
+    uint64 left=0;
+    uint64 right=genomeInsertSA.nInd;
+    while (left<right) {
+        uint64 middle=(left+right)/2;
+        uint64 outputIndex=genomeInsertSA.indArray[2*middle]+middle;
+        if (outputIndex<iSA) {
+            left=middle+1;
+        } else {
+            right=middle;
+        };
+    };
+
+    if (left<genomeInsertSA.nInd && genomeInsertSA.indArray[2*left]+left==iSA) {
+        uint64 insertIndex=genomeInsertSA.indArray[2*left+1];
+        return insertIndex<genomeInsertSA.nG1
+                ? insertIndex+genomeInsertSA.nG
+                : (insertIndex-genomeInsertSA.nG1+genomeInsertSA.nG2) | genomeInsertSA.N2bit;
+    };
+
+    uint ind1=SA[iSA-left];
+    if (genomeInsertSA.nG1==0) {
+        return ind1;
+    };
+
+    uint strandMask=~genomeInsertSA.N2bit;
+    if ((ind1 & genomeInsertSA.N2bit)>0) {
+        if ((ind1 & strandMask)>=genomeInsertSA.nG2) {
+            ind1+=genomeInsertSA.nG1;
+        };
+    } else {
+        if (ind1>=genomeInsertSA.nG) {
+            ind1+=genomeInsertSA.nG1;
+        };
+    };
+    return ind1;
 };
 
 

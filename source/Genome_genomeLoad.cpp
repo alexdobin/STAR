@@ -59,6 +59,7 @@ void Genome::genomeLoad(){//allocate and load Genome
 
         P1.inOut = P.inOut;
         P1.scanAllLines(parFile,3,-1);
+        genomeFastaFilesLoaded = P1.pGe.gFastaFiles;
         parFile.close();
     } else {
         ostringstream errOut;
@@ -250,7 +251,17 @@ void Genome::genomeLoad(){//allocate and load Genome
         };
 
         try {
-            if (P.sjdbInsert.pass1 || P.sjdbInsert.pass2) {
+            bool genomeInsertVirtualSA = genomeInsertL>0 && pGe.gInsertOverlayDeltaFile!="-" && !pGe.gInsertOverlayGTFhasJunctions && P.runMode=="alignReads";
+            if (genomeInsertVirtualSA && P.twoPass.yes) {
+                ostringstream errOut;
+                errOut << "EXITING because of fatal PARAMETERS error: delta genome insert overlay does not support --twopassMode\n";
+                errOut << "SOLUTION: use a full genomeInsert output directory for two-pass mapping\n";
+                exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
+            };
+            if (genomeInsertVirtualSA) {
+                G1=new char[nGenome+L+L+genomeInsertL];
+                SA.allocateArray();
+            } else if (P.sjdbInsert.pass1 || P.sjdbInsert.pass2) {
                 //reserve extra memory for insertion at the 1st and/or 2nd step
                 nGenomeInsert=nGenome+genomeInsertL;
                 nSAinsert=nSA+2*genomeInsertL;
