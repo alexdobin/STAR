@@ -13,6 +13,96 @@
 
 #include "funCompareUintAndSuffixes.h"
 
+static uint sjdbSortBucket(uint64 key, uint64 keyRange, uint bucketN)
+{
+    uint bucket=(uint) (((uint128) key*bucketN)/keyRange);
+    return bucket<bucketN ? bucket : bucketN-1;
+};
+
+static bool sjdbSortIndicesParallel(Parameters &P, uint64* indArray, uint nInd, uint64 keyRange, char* Gsj)
+{
+    g_funCompareUintAndSuffixes_G=Gsj;
+
+    if (P.runThreadN<4 || nInd<1000000 || keyRange==0) {
+        qsort((void*) indArray, nInd, 2*sizeof(uint64), funCompareUintAndSuffixes);
+        return false;
+    };
+
+    uint bucketN=1;
+    while (bucketN<(uint) P.runThreadN*64 && bucketN<16384) {
+        bucketN <<= 1;
+    };
+    if (bucketN>nInd) {
+        bucketN=1;
+        while ((bucketN<<1)<=nInd) bucketN <<= 1;
+    };
+    if (bucketN<2) {
+        qsort((void*) indArray, nInd, 2*sizeof(uint64), funCompareUintAndSuffixes);
+        return false;
+    };
+
+    const uint64 indBytes=2*nInd*sizeof(uint64);
+    const uint64 auxBytes=indBytes + (uint64) P.runThreadN*bucketN*2*sizeof(uint64) + (bucketN+1)*sizeof(uint64);
+    if (P.limitGenomeGenerateRAM>0 && auxBytes>P.limitGenomeGenerateRAM/4) {
+        qsort((void*) indArray, nInd, 2*sizeof(uint64), funCompareUintAndSuffixes);
+        return false;
+    };
+
+    vector<uint64> bucketCount((uint) P.runThreadN*bucketN,0);
+    #pragma omp parallel num_threads(P.runThreadN)
+    {
+        uint tid=(uint) omp_get_thread_num();
+        uint64* threadBucketCount=bucketCount.data()+tid*bucketN;
+        #pragma omp for schedule(static)
+        for (uint ii=0; ii<nInd; ii++) {
+            ++threadBucketCount[sjdbSortBucket(indArray[2*ii],keyRange,bucketN)];
+        };
+    };
+
+    vector<uint64> bucketStart(bucketN+1,0);
+    for (uint iBucket=0; iBucket<bucketN; iBucket++) {
+        uint64 bucketTotal=0;
+        for (int iThread=0; iThread<P.runThreadN; iThread++) {
+            bucketTotal += bucketCount[(uint) iThread*bucketN+iBucket];
+        };
+        bucketStart[iBucket+1]=bucketStart[iBucket]+bucketTotal;
+    };
+
+    vector<uint64> bucketThreadStart((uint) P.runThreadN*bucketN,0);
+    for (uint iBucket=0; iBucket<bucketN; iBucket++) {
+        uint64 offset=bucketStart[iBucket];
+        for (int iThread=0; iThread<P.runThreadN; iThread++) {
+            bucketThreadStart[(uint) iThread*bucketN+iBucket]=offset;
+            offset += bucketCount[(uint) iThread*bucketN+iBucket];
+        };
+    };
+
+    uint64* indArray1=new uint64[2*nInd+2];
+    #pragma omp parallel num_threads(P.runThreadN)
+    {
+        uint tid=(uint) omp_get_thread_num();
+        uint64* threadBucketStart=bucketThreadStart.data()+tid*bucketN;
+        #pragma omp for schedule(static)
+        for (uint ii=0; ii<nInd; ii++) {
+            uint iBucket=sjdbSortBucket(indArray[2*ii],keyRange,bucketN);
+            uint64 jj=threadBucketStart[iBucket]++;
+            indArray1[2*jj]=indArray[2*ii];
+            indArray1[2*jj+1]=indArray[2*ii+1];
+        };
+    };
+
+    #pragma omp parallel for num_threads(P.runThreadN) schedule(dynamic,1)
+    for (int iBucket=0; iBucket<(int) bucketN; iBucket++) {
+        qsort((void*) (indArray1+2*bucketStart[(uint) iBucket]),
+              bucketStart[(uint) iBucket+1]-bucketStart[(uint) iBucket],
+              2*sizeof(uint64), funCompareUintAndSuffixes);
+    };
+
+    memcpy(indArray,indArray1,indBytes);
+    delete [] indArray1;
+    return true;
+};
+
 void sjdbBuildIndex (Parameters &P, char *Gsj, char *G, PackedArray &SA, PackedArray &SA2, PackedArray &SAi, Genome &mapGen, Genome &mapGen1) {
 
     #define SPACER_CHAR GENOME_spacingChar
@@ -98,10 +188,10 @@ void sjdbBuildIndex (Parameters &P, char *Gsj, char *G, PackedArray &SA, PackedA
         };
     };
 
-    g_funCompareUintAndSuffixes_G=Gsj;
-    qsort((void*) indArray, nInd, 2*sizeof(uint64), funCompareUintAndSuffixes);
+    bool parallelSort=sjdbSortIndicesParallel(P, indArray, nInd, mapGen1.nSA+1, Gsj);
     time ( &rawtime );
-    P.inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished sorting SA indicesL nInd="<<nInd <<endl;
+    P.inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished sorting SA indicesL nInd="<<nInd
+                       << " strategy=" << (parallelSort ? "parallel-bucket" : "qsort") <<endl;
 
     indArray[2*nInd]=-999; //mark the last junction
     indArray[2*nInd+1]=-999; //mark the last junction
@@ -259,30 +349,51 @@ void sjdbBuildIndex (Parameters &P, char *Gsj, char *G, PackedArray &SA, PackedA
 
     };
 
+    // Cache the first N/spacer position for each junction suffix. Most suffixes
+    // have no N in the SAindex prefix, so the SAi marking pass can skip them.
+    vector<uint8> sjdbFirstN(2*nGsj+1,mapGen.pGe.gSAindexNbases);
+    uint nextN=2*nGsj;
+    for (int64 ii=2*(int64)nGsj; ii>=0; ii--) {
+        if (Gsj[ii]>3) {
+            nextN=(uint) ii;
+        };
+        uint nDist=nextN-(uint) ii;
+        if (nDist<mapGen.pGe.gSAindexNbases) {
+            sjdbFirstN[ii]=(uint8) nDist;
+        };
+    };
+
+    uint64 sjdbSAiNmarkN=0;
     for (uint isj=0;isj<nInd;isj++) {
+        uint isjG=indArray[2*isj+1];
+        uint iL=sjdbFirstN[isjG];
+        if (iL>=mapGen.pGe.gSAindexNbases) {
+            continue;
+        };
+        sjdbSAiNmarkN++;
+
         int64 ind1=0;
-        for (uint iL=0; iL < mapGen.pGe.gSAindexNbases; iL++) {
-            uint g=(uint) Gsj[indArray[2*isj+1]+iL];
+        for (uint iL0=0; iL0<iL; iL0++) {
             ind1 <<= 2;
-            if (g>3) {//this iSA contains N, need to mark the previous
-                for (uint iL1=iL; iL1 < mapGen.pGe.gSAindexNbases; iL1++) {
-                    ind1+=3;
-                    int64 ind2=mapGen.genomeSAindexStart[iL1]+ind1;
-                    for (; ind2>=0; ind2--) {//find previous index that is not absent
-                        if ( (SAi[ind2] & mapGen.SAiMarkAbsentMaskC)==0 ) {
-                            break;
-                        };
-                    };
-                    SAi.writePacked(ind2,SAi[ind2] | mapGen.SAiMarkNmaskC);
-                    ind1 <<= 2;
+            ind1 += (uint) Gsj[isjG+iL0];
+        };
+
+        ind1 <<= 2;
+        for (uint iL1=iL; iL1 < mapGen.pGe.gSAindexNbases; iL1++) {
+            ind1+=3;
+            int64 ind2=mapGen.genomeSAindexStart[iL1]+ind1;
+            for (; ind2>=0; ind2--) {//find previous index that is not absent
+                if ( (SAi[ind2] & mapGen.SAiMarkAbsentMaskC)==0 ) {
+                    break;
                 };
-                break;
-            } else {
-                ind1 += g;
             };
+            SAi.writePacked(ind2,SAi[ind2] | mapGen.SAiMarkNmaskC);
+            ind1 <<= 2;
         };
     };
     time ( &rawtime );
+    P.inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished SAi N marking: candidates=" << sjdbSAiNmarkN
+                       << " strategy=first-N-cache" <<endl;
     P.inOut->logMain  << timeMonthDayTime(rawtime) << "   Finished SAi" <<endl;
 
     //change parameters, most parameters are already re-defined in sjdbPrepare.cpp

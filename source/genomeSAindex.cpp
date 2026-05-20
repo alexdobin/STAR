@@ -3,6 +3,93 @@
 #include "SuffixArrayFuns.h"
 #include "ErrorWarning.h"
 
+struct SAindexEvent {
+    uint isa;
+    uint indFull;
+    int iL4;
+};
+
+static bool SAindexEventEqual(uint indFull1, int iL41, uint indFull2, int iL42)
+{
+    return indFull1==indFull2 && iL41==iL42;
+};
+
+static void SAindexProcessEvent(PackedArray &SAi, Genome &mapGen, uint isa, uint indFull, int iL4, uint* ind0)
+{
+    for (uint iL=0; iL < mapGen.pGe.gSAindexNbases; iL++) {//calculate index
+
+        uint indPref = indFull >> (2*(mapGen.pGe.gSAindexNbases-1-iL));
+
+        if ( (int)iL==iL4 ) {//this suffix contains N and does not belong in SAi
+            for (uint iL1=iL; iL1 < mapGen.pGe.gSAindexNbases; iL1++) {
+                SAi.writePacked(mapGen.genomeSAindexStart[iL1]+ind0[iL1],SAi[mapGen.genomeSAindexStart[iL1]+ind0[iL1]] | mapGen.SAiMarkNmaskC);
+            };
+            break;//break the iL cycle
+        };
+
+        if ( indPref > ind0[iL] || isa==0 ) {//new && good index, record it
+
+            SAi.writePacked(mapGen.genomeSAindexStart[iL]+indPref, isa);
+
+            for (uint ii=ind0[iL]+1; ii<indPref; ii++) {//index is not present, record to the last present suffix
+                SAi.writePacked(mapGen.genomeSAindexStart[iL]+ii, isa | mapGen.SAiMarkAbsentMaskC);
+            };
+            ind0[iL]=indPref;
+
+        } else if ( indPref < ind0[iL] ) {
+            ostringstream errOut;
+            errOut << "BUG: next index is smaller than previous, EXITING\n" <<flush;
+            exitWithError(errOut.str(),std::cerr, mapGen.P.inOut->logMain, EXIT_CODE_INPUT_FILES, mapGen.P);
+        };
+    };
+};
+
+static void SAindexScanEventsParallel(char *G, PackedArray &SA, Parameters &P, Genome &mapGen, uint iSA1, uint iSA2, vector<SAindexEvent> &events)
+{
+    const uint nSA=iSA2-iSA1+1;
+    const uint chunkN=min<uint>(nSA, max<uint>(1, P.runThreadN*4));
+    const int threadN=(int) min<uint>(P.runThreadN, chunkN);
+    vector<vector<SAindexEvent> > eventsByChunk(chunkN);
+
+    #pragma omp parallel for num_threads(threadN) schedule(static)
+    for (uint iChunk=0; iChunk<chunkN; iChunk++) {
+        const uint iStart=iSA1 + nSA*iChunk/chunkN;
+        const uint iEnd=iSA1 + nSA*(iChunk+1)/chunkN;
+
+        vector<SAindexEvent> &chunkEvents=eventsByChunk[iChunk];
+        chunkEvents.reserve((iEnd-iStart)/32+1);
+
+        int iL4prev=-1;
+        uint indFullPrev=0;
+        if (iStart>iSA1) {
+            indFullPrev=funCalcSAiFromSA(G,SA,mapGen,iStart-1,mapGen.pGe.gSAindexNbases,iL4prev);
+        };
+
+        for (uint isa=iStart; isa<iEnd; isa++) {
+            int iL4=0;
+            uint indFull=funCalcSAiFromSA(G,SA,mapGen,isa,mapGen.pGe.gSAindexNbases,iL4);
+            if (isa==iSA1 || !SAindexEventEqual(indFull, iL4, indFullPrev, iL4prev)) {
+                SAindexEvent event;
+                event.isa=isa;
+                event.indFull=indFull;
+                event.iL4=iL4;
+                chunkEvents.push_back(event);
+            };
+            indFullPrev=indFull;
+            iL4prev=iL4;
+        };
+    };
+
+    uint eventN=0;
+    for (uint iChunk=0; iChunk<chunkN; iChunk++) {
+        eventN += eventsByChunk[iChunk].size();
+    };
+    events.reserve(eventN);
+    for (uint iChunk=0; iChunk<chunkN; iChunk++) {
+        events.insert(events.end(), eventsByChunk[iChunk].begin(), eventsByChunk[iChunk].end());
+    };
+};
+
 void genomeSAindex(char * G, PackedArray & SA, Parameters & P, PackedArray & SAi, Genome &mapGen)
  {
     mapGen.genomeSAindexStart = new uint [mapGen.pGe.gSAindexNbases+1];
@@ -116,54 +203,39 @@ void genomeSAindex(char * G, PackedArray & SA, Parameters & P, PackedArray & SAi
 
 void genomeSAindexChunk(char * G, PackedArray & SA, Parameters & P, PackedArray & SAi, uint iSA1, uint iSA2, Genome &mapGen)
 {
+    const bool parallelEvents=P.runThreadN>=16 && iSA1==0 && iSA2+1==mapGen.nSA;
+
+    P.inOut->logMain << "SAindex traversal strategy: " << (parallelEvents ? "parallel-events" : "skip-search") << "\n" << flush;
+
     uint* ind0=new uint[mapGen.pGe.gSAindexNbases];
 
     for (uint ii=0; ii<mapGen.pGe.gSAindexNbases; ii++) {
         ind0[ii]=-1;//this is needed in case "AAA...AAA",i.e. indPref=0 is not present in the genome for some lengths
     };
 
-    PackedArray SAi1;
-    SAi1=SAi;
-    SAi1.allocateArray();
+    if (parallelEvents) {
+        vector<SAindexEvent> events;
+        SAindexScanEventsParallel(G, SA, P, mapGen, iSA1, iSA2, events);
 
-    uint isaStep=mapGen.nSA/(1llu<<(2*mapGen.pGe.gSAindexNbases))+1;
+        P.inOut->logMain << "SAindex event count: " << events.size() << "\n" << flush;
+        for (uint iEvent=0; iEvent<events.size(); iEvent++) {
+            SAindexProcessEvent(SAi, mapGen, events[iEvent].isa, events[iEvent].indFull, events[iEvent].iL4, ind0);
+        };
+    } else {
+        uint isaStep=mapGen.nSA/(1llu<<(2*mapGen.pGe.gSAindexNbases))+1;
 //     isaStep=8;
 
-    uint isa=iSA1;
-    int iL4;
-    uint indFull=funCalcSAiFromSA(G,SA,mapGen,isa,mapGen.pGe.gSAindexNbases,iL4);
-    while (isa<=iSA2) {//for all suffixes
-        for (uint iL=0; iL < mapGen.pGe.gSAindexNbases; iL++) {//calculate index
+        uint isa=iSA1;
+        int iL4;
+        uint indFull=funCalcSAiFromSA(G,SA,mapGen,isa,mapGen.pGe.gSAindexNbases,iL4);
+        while (isa<=iSA2) {//for all suffixes
+            SAindexProcessEvent(SAi, mapGen, isa, indFull, iL4, ind0);
 
-            uint indPref = indFull >> (2*(mapGen.pGe.gSAindexNbases-1-iL));
+            //find next index not equal to the current one
+            funSAiFindNextIndex(G, SA, isaStep, isa, indFull, iL4, mapGen);//indFull and iL4 have been already defined at the previous step
 
-            if ( (int)iL==iL4 ) {//this suffix contains N and does not belong in SAi
-                for (uint iL1=iL; iL1 < mapGen.pGe.gSAindexNbases; iL1++) {
-                    SAi.writePacked(mapGen.genomeSAindexStart[iL1]+ind0[iL1],SAi[mapGen.genomeSAindexStart[iL1]+ind0[iL1]] | mapGen.SAiMarkNmaskC);
-                };
-                break;//break the iL cycle
-            };
-
-            if ( indPref > ind0[iL] || isa==0 ) {//new && good index, record it
-
-                SAi.writePacked(mapGen.genomeSAindexStart[iL]+indPref, isa);
-
-                for (uint ii=ind0[iL]+1; ii<indPref; ii++) {//index is not present, record to the last present suffix
-                    SAi.writePacked(mapGen.genomeSAindexStart[iL]+ii, isa | mapGen.SAiMarkAbsentMaskC);
-                };
-                ind0[iL]=indPref;
-
-            } else if ( indPref < ind0[iL] ) {
-                ostringstream errOut;
-                errOut << "BUG: next index is smaller than previous, EXITING\n" <<flush;
-                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
-            };
-        };
-
-        //find next index not equal to the current one
-        funSAiFindNextIndex(G, SA, isaStep, isa, indFull, iL4, mapGen);//indFull and iL4 have been already defined at the previous step
-
-    };//isa cycle
+        };//isa cycle
+    };
 
     for (uint iL=0; iL < mapGen.pGe.gSAindexNbases; iL++) {//fill up unfilled indexes
     	for (uint ii=mapGen.genomeSAindexStart[iL]+ind0[iL]+1; ii<mapGen.genomeSAindexStart[iL+1]; ii++) {
