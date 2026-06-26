@@ -151,6 +151,15 @@ htslib/libhts.a :
 parametersDefault.xxd: parametersDefault
 	xxd -i parametersDefault > parametersDefault.xxd
 
+# parametersDefault.xxd is a generated header #include'd by Parameters.cpp and
+# STAR.cpp. Under parallel builds (make -jN) those objects could be compiled
+# before xxd had generated the header, causing intermittent build failures
+# (issue #2672). Order-only (|) prerequisite guarantees the header is generated
+# before any object is compiled, while not forcing a full rebuild when only its
+# timestamp changes; the real content dependency for Parameters.o/STAR.o is
+# still provided by Depend.list.
+$(OBJECTS): | parametersDefault.xxd
+
 STAR$(SFX) : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_main) $(CXXFLAGS)
 STAR$(SFX) : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_shared) $(LDFLAGS)
 STAR$(SFX) : Depend.list parametersDefault.xxd $(OBJECTS)
