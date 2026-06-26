@@ -18,13 +18,14 @@ ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome 
     RA->iRead=0;
 
     chunkIn=new char* [P.readNends];
-    readInStream=new istringstream* [P.readNends];
-    
+    readInStream=new istream* [P.readNends];
+    readInStreamBuf=new ExtBufStreambuf [P.readNends];
+
     for (uint ii=0;ii<P.readNends;ii++) {
        chunkIn[ii]=new char[P.chunkInSizeBytesArray];//reserve more space to finish loading one read
        memset(chunkIn[ii],'\n',P.chunkInSizeBytesArray);
-       readInStream[ii] = new istringstream;
-       readInStream[ii]->rdbuf()->pubsetbuf(chunkIn[ii],P.chunkInSizeBytesArray);
+       readInStreamBuf[ii].setReadBuffer(chunkIn[ii],P.chunkInSizeBytesArray);
+       readInStream[ii] = new istream(&readInStreamBuf[ii]);
        RA->readInStream[ii]=readInStream[ii];
     };
 
@@ -32,8 +33,8 @@ ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome 
     if (P.outSAMbool) {
         chunkOutBAM=new char [P.chunkOutBAMsizeBytes];
         RA->outBAMarray=chunkOutBAM;
-        chunkOutBAMstream=new ostringstream;
-        chunkOutBAMstream->rdbuf()->pubsetbuf(chunkOutBAM,P.chunkOutBAMsizeBytes);
+        chunkOutBAMstreamBuf.setWriteBuffer(chunkOutBAM,P.chunkOutBAMsizeBytes);
+        chunkOutBAMstream=new ostream(&chunkOutBAMstreamBuf);
         RA->outSAMstream=chunkOutBAMstream;
         RA->outSAMstream->seekp(0,ios::beg);
         chunkOutBAMtotal=0;

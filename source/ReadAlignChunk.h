@@ -8,6 +8,7 @@
 #include "Transcriptome.h"
 #include "BAMoutput.h"
 #include "Quantifications.h"
+#include "ExtBufStreambuf.h"
 
 class ReadAlignChunk {//chunk of reads and alignments
 public:
@@ -25,8 +26,10 @@ public:
     BAMoutput *chunkOutBAMcoord, *chunkOutBAMunsorted, *chunkOutBAMquant;
     Quantifications *chunkQuants;
     
-    istringstream** readInStream;
-    ostringstream*  chunkOutBAMstream;
+    istream** readInStream;
+    ExtBufStreambuf* readInStreamBuf; //external-buffer streambufs backing readInStream (one per mate)
+    ostream*  chunkOutBAMstream;
+    ExtBufStreambuf chunkOutBAMstreamBuf; //external-buffer streambuf backing chunkOutBAMstream
     ofstream chunkOutBAMfile;
     string chunkOutBAMfileName;
 
