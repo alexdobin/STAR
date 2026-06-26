@@ -2,7 +2,14 @@
 #include "ErrorWarning.h"
 #include <fstream>
 #include <sys/stat.h>
-void Parameters::openReadsFiles() 
+#include <spawn.h>
+#include <unistd.h>
+
+// environ is declared in <unistd.h> on glibc but not on macOS; declare it
+// explicitly so posix_spawnp can pass the current environment on every platform.
+extern char **environ;
+
+void Parameters::openReadsFiles()
 {
     if (readFilesCommandString=="") {//read from file
         for (uint ii=0;ii<readFilesIn.size();ii++) {//open readIn files
@@ -79,24 +86,30 @@ void Parameters::openReadsFiles()
 
             readFilesCommandPID[imate]=0;
 
+            // Run the generated readsCommand script through a shell using
+            // posix_spawnp. Invoking it explicitly as "<shell> <script>" means
+            // the script does not need a #! shebang line (none is written by
+            // default, i.e. when --sysShell is "-") and we do not rely on
+            // execvp's ENOEXEC -> /bin/sh fallback, which posix_spawn does not
+            // provide. This fixes "Failed spawning readFilesCommand" on macOS
+            // (issue #2663). posix_spawnp also avoids the undefined behavior of
+            // the previous vfork()+exit(0): calling exit() in a vfork child
+            // flushes the parent's stdio buffers and runs atexit handlers in the
+            // shared address space, and reported success even when exec failed.
             ostringstream errOut;
-            pid_t PID=vfork();
-            switch (PID) {
-                case -1:
-                    errOut << "EXITING: because of fatal EXECUTION error: Failed vforking readFilesCommand\n";
-                    errOut << errno << ": " << strerror(errno) << "\n";
-                    exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
-                    break;
-
-                case 0:
-                    //this is the child
-                    execlp(readsCommandFileName.at(imate).c_str(), readsCommandFileName.at(imate).c_str(), (char*) NULL);
-                    exit(0);
-
-                default:
-                    //this is the father, record PID of the children
-                    readFilesCommandPID[imate]=PID;
+            string readsCommandShell = (sysShell!="-" ? sysShell : "/bin/sh");
+            char* spawnArgv[] = { const_cast<char*>(readsCommandShell.c_str()),
+                                  const_cast<char*>(readsCommandFileName.at(imate).c_str()),
+                                  (char*) NULL };
+            pid_t PID=0;
+            int spawnErr = posix_spawnp(&PID, readsCommandShell.c_str(), NULL, NULL, spawnArgv, environ);
+            if (spawnErr != 0) {
+                errOut << "EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand: "
+                       << readsCommandShell << " " << readsCommandFileName.at(imate) << "\n";
+                errOut << spawnErr << ": " << strerror(spawnErr) << "\n";
+                exitWithError(errOut.str(), std::cerr, inOut->logMain, EXIT_CODE_PARAMETER, *this);
             };
+            readFilesCommandPID[imate]=PID; //record PID of the child
 
             inOut->readIn[imate].open(readFilesInTmp.at(imate).c_str());
         };
