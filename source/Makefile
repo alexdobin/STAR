@@ -11,18 +11,48 @@ CXXFLAGSextra ?=
 # user may define the compiler
 CXX ?= g++
 
+# ---- Platform / architecture detection -----------------------------------
+UNAME_S := $(shell uname -s)
+UNAME_M := $(shell uname -m)
+
+# ---- OpenMP flags --------------------------------------------------------
+# GNU/Linux: -fopenmp links libgomp automatically.
+# macOS + Apple clang: needs -Xpreprocessor -fopenmp at compile time, plus an
+# explicit libomp include path and -lomp at link time (no bundled OpenMP).
+ifeq ($(UNAME_S),Darwin)
+    LIBOMP ?= $(shell brew --prefix libomp 2>/dev/null)
+    ifeq ($(LIBOMP),)
+        ifneq ($(wildcard /opt/homebrew/opt/libomp/include/omp.h),)
+            LIBOMP := /opt/homebrew/opt/libomp
+        else
+            LIBOMP := /usr/local/opt/libomp
+        endif
+    endif
+    OPENMP_CXXFLAGS := -Xpreprocessor -fopenmp -I$(LIBOMP)/include
+    OPENMP_LDFLAGS  := -L$(LIBOMP)/lib -lomp
+else
+    OPENMP_CXXFLAGS := -fopenmp
+    OPENMP_LDFLAGS  :=
+endif
+
 # pre-defined flags
 LDFLAGS_shared := -pthread -Lhtslib -Bstatic -lhts -Bdynamic -lz
 LDFLAGS_static := -static -static-libgcc -pthread -Lhtslib -lhts -lz
-LDFLAGS_Mac :=-pthread -lz htslib/libhts.a
-LDFLAGS_Mac_static :=-pthread -lz -static-libgcc htslib/libhts.a
+# macOS: Apple clang has no -static-libgcc, and a fully static binary is not
+# supported. "Static" here means htslib is linked as a static archive; the
+# OpenMP runtime (libomp) is linked via $(OPENMP_LDFLAGS), defined below.
+LDFLAGS_Mac        := -pthread -lz htslib/libhts.a $(OPENMP_LDFLAGS)
+LDFLAGS_Mac_static := -pthread -lz htslib/libhts.a $(OPENMP_LDFLAGS)
+LDFLAGS_Mac_dynamic := -pthread -lz htslib/libhts.a $(OPENMP_LDFLAGS)
 LDFLAGS_gdb := $(LDFLAGS_shared)
 
 DATE_FMT = --iso-8601=seconds
 ifdef SOURCE_DATE_EPOCH
     BUILD_DATE ?= $(shell date -u -d "@$(SOURCE_DATE_EPOCH)" "$(DATE_FMT)" 2>/dev/null || date -u -r "$(SOURCE_DATE_EPOCH)" "$(DATE_FMT)" 2>/dev/null || date -u "$(DATE_FMT)")
 else
-    BUILD_DATE ?= $(shell date "$(DATE_FMT)")
+    # GNU date supports --iso-8601; BSD/macOS date does not, so fall back to
+    # a portable strftime format.
+    BUILD_DATE ?= $(shell date "$(DATE_FMT)" 2>/dev/null || date -u "+%Y-%m-%dT%H:%M:%S%z")
 endif
 
 BUILD_PLACE ?= $(HOSTNAME):$(shell pwd)
@@ -42,10 +72,19 @@ GIT_BRANCH_COMMIT_DIFF := -D'GIT_BRANCH_COMMIT_DIFF="$(GIT_BRANCH_COMMIT_DIFF)"'
 # Defaults, can be overridden by make arguments or environment
 CXXFLAGS ?= -pipe -Wall -Wextra
 CFLAGS ?= -pipe -Wall -Wextra -O3
-CXXFLAGS_SIMD ?= -mavx2
+# SIMD flags: AVX2 on x86_64, NEON (via SIMDe) elsewhere.
+# opal.cpp uses SIMDe with SIMDE_ENABLE_NATIVE_ALIASES; on arm64/aarch64,
+# dropping -mavx2 lets SIMDe map AVX2 intrinsics onto NEON automatically.
+ifeq ($(UNAME_M),x86_64)
+    CXXFLAGS_SIMD ?= -mavx2
+else ifeq ($(UNAME_M),amd64)
+    CXXFLAGS_SIMD ?= -mavx2
+else
+    CXXFLAGS_SIMD ?= -march=armv8-a+simd
+endif
 
 # Unconditionally set essential flags and optimization options
-CXXFLAGS_common := -std=c++11 -fopenmp $(COMPTIMEPLACE) $(GIT_BRANCH_COMMIT_DIFF)
+CXXFLAGS_common := -std=c++11 $(OPENMP_CXXFLAGS) $(COMPTIMEPLACE) $(GIT_BRANCH_COMMIT_DIFF)
 CXXFLAGS_main := -O3 $(CXXFLAGS_common)
 CXXFLAGS_gdb := -O0 -g3 $(CXXFLAGS_common)
 
@@ -129,15 +168,11 @@ ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),CLEAN)
 ifneq ($(MAKECMDGOALS),CLEAN)
 ifneq ($(MAKECMDGOALS),clean_solo)
-ifneq ($(MAKECMDGOALS),STARforMac)
-ifneq ($(MAKECMDGOALS),STARforMacGDB)
 Depend.list: $(SOURCES) parametersDefault.xxd htslib
 	echo $(SOURCES)
 	'rm' -f ./Depend.list
 	$(CXX) $(CXXFLAGS_common) -MM $^ >> Depend.list
 include Depend.list
-endif
-endif
 endif
 endif
 endif
@@ -196,4 +231,17 @@ STARforMacStatic : Depend.list parametersDefault.xxd $(OBJECTS)
 STARlongForMacStatic : CXXFLAGS := -D'COMPILE_FOR_LONG_READS' $(CXXFLAGSextra) $(CXXFLAGS_main) -D'COMPILE_FOR_MAC' $(CXXFLAGS)
 STARlongForMacStatic : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_Mac_static) $(LDFLAGS)
 STARlongForMacStatic : Depend.list parametersDefault.xxd $(OBJECTS)
+	$(CXX) -o STARlong $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
+
+# Native macOS build (Apple clang). Links htslib statically and libomp
+# dynamically. On Apple Silicon this produces an arm64-native binary; on Intel
+# Macs an x86_64 binary. Build with:  make STARforMac CXX=clang++
+STARforMac : CXXFLAGS := $(CXXFLAGSextra) $(CXXFLAGS_main) -D'COMPILE_FOR_MAC' $(CXXFLAGS)
+STARforMac : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_Mac_dynamic) $(LDFLAGS)
+STARforMac : Depend.list parametersDefault.xxd $(OBJECTS)
+	$(CXX) -o STAR $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
+
+STARlongForMac : CXXFLAGS := -D'COMPILE_FOR_LONG_READS' $(CXXFLAGSextra) $(CXXFLAGS_main) -D'COMPILE_FOR_MAC' $(CXXFLAGS)
+STARlongForMac : LDFLAGS := $(LDFLAGSextra) $(LDFLAGS_Mac_dynamic) $(LDFLAGS)
+STARlongForMac : Depend.list parametersDefault.xxd $(OBJECTS)
 	$(CXX) -o STARlong $(CXXFLAGS) $(OBJECTS) $(LDFLAGS)
