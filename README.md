@@ -12,8 +12,8 @@ https://groups.google.com/d/forum/rna-star
 
 HARDWARE/SOFTWARE REQUIREMENTS
 ==============================
-  * x86-64 compatible processors
-  * 64 bit Linux or Mac OS X
+  * x86-64 compatible processors, or ARM64/AArch64 (incl. Apple Silicon) via SIMDe
+  * 64 bit Linux or Mac OS X (Intel or Apple Silicon)
 
 MANUAL
 ======
@@ -62,17 +62,27 @@ make STAR CXXFLAGS_SIMD=sse
 Compile under Mac OS X
 ----------------------
 
+Native build with Apple clang (recommended, works on both Apple Silicon and Intel):
+
 ```bash
 # 1. Install brew (http://brew.sh/)
-# 2. Install gcc with brew:
-$ brew install gcc
-# 3. Build STAR:
-# run 'make' in the source directory
-# note that the path to c++ executable has to be adjusted to its current version
-$cd source
-$make STARforMacStatic CXX=/usr/local/Cellar/gcc/8.2.0/bin/g++-8
-# 4. Make it availible through the terminal
-$cp STAR /usr/local/bin
+# 2. Install the OpenMP runtime (Apple clang has no bundled OpenMP):
+brew install libomp
+# 3. Build STAR (the Makefile auto-detects the libomp prefix and the CPU arch;
+#    on Apple Silicon it produces an arm64-native binary via SIMDe -> NEON):
+cd source
+make STARforMac CXX=clang++
+# 4. Make it available through the terminal:
+cp STAR /usr/local/bin
+```
+
+Alternatively, build with Homebrew gcc:
+
+```bash
+brew install gcc
+cd source
+# adjust the g++ path/version to the one installed by brew
+make STARforMacStatic CXX=$(brew --prefix)/bin/g++-14
 ```
 
 All platforms - non-standard gcc
