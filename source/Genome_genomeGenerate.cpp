@@ -28,8 +28,8 @@ uint globalL;
 
 inline int funCompareSuffixes ( const void *a, const void *b){
 
-    uint *ga=(uint*)((globalG-7LLU)+(*((uint*)a)));
-    uint *gb=(uint*)((globalG-7LLU)+(*((uint*)b)));
+    const char *ga=(globalG-7LLU)+(*((uint*)a));
+    const char *gb=(globalG-7LLU)+(*((uint*)b));
 
     uint jj=0;
     int  ii=0;
@@ -37,8 +37,8 @@ inline int funCompareSuffixes ( const void *a, const void *b){
     uint8 *va1, *vb1;
 
     while (jj < globalL) {
-        va=*(ga-jj);
-        vb=*(gb-jj);
+        memcpy(&va, ga-jj*sizeof(uint), sizeof(va));
+        memcpy(&vb, gb-jj*sizeof(uint), sizeof(vb));
 
         #define has5(v) ((((v)^0x0505050505050505) - 0x0101010101010101) & ~((v)^0x0505050505050505) & 0x8080808080808080)
 

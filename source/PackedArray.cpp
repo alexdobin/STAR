@@ -20,8 +20,10 @@ void PackedArray::writePacked( uint jj, uint x) {
    uint S=b%8LLU;
 
    x = x << S;
-   uint* a1 = (uint*) (charArray+B);
-   *a1 = ( (*a1) & ~(bitRecMask<<S) ) | x;
+   uint a1;
+   memcpy(&a1, charArray+B, sizeof(a1));
+   a1 = (a1 & ~(bitRecMask<<S)) | x;
+   memcpy(charArray+B, &a1, sizeof(a1));
 };
 
 void PackedArray::pointArray(char* pointerCharIn) {

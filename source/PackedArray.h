@@ -26,7 +26,8 @@ inline uint PackedArray::operator [] (uint ii) {
    uint B=b/8;
    uint S=b%8;
 
-   uint a1 = *((uint*) (charArray+B));
+   uint a1;
+   memcpy(&a1, charArray+B, sizeof(a1));
    a1 = ((a1>>S)<<wordCompLength)>>wordCompLength;
    return a1;
 };
