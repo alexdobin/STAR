@@ -5,8 +5,8 @@ OutSJ::OutSJ (uint nSJmax, Parameters &Pin, Genome &genomeIn) : oneSJ(genomeIn),
 
     //data = new char [oneSJ.dataSize*nSJmax]; //allocate big array of SJ loci and properties
     Nstore = nSJmax;
-    dataVec.resize(oneSJ.dataSize*Nstore);
-    data = dataVec.data();
+    dataVec.resize(oneSJ.dataSize*Nstore/sizeof(dataVec[0]));
+    data = reinterpret_cast<char*>(dataVec.data());
     memset(data,0,oneSJ.dataSize*Nstore);
     N=0;//initialize the counter
 };
@@ -61,8 +61,8 @@ void OutSJ::collapseSJ() {//collapse junctions. Simple version now: re-sort ever
 
 void OutSJ::dataSizeIncrease() {
     Nstore *= 2;
-    dataVec.resize(oneSJ.dataSize*Nstore);
-    data = dataVec.data();
+    dataVec.resize(oneSJ.dataSize*Nstore/sizeof(dataVec[0]));
+    data = reinterpret_cast<char*>(dataVec.data());
 };
 
 Junction::Junction(Genome &genOut) : genOut(genOut) {

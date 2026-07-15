@@ -11,7 +11,7 @@ public:
     const static uint strandP=gapP+sizeof(uint32);
     const static uint motifP=strandP+sizeof(char);
     const static uint annotP=motifP+sizeof(char);
-    const static uint countUniqueP=annotP+sizeof(char);
+    const static uint countUniqueP=((annotP+sizeof(char)+alignof(uint32)-1)/alignof(uint32))*alignof(uint32);
     const static uint countMultipleP=countUniqueP+sizeof(uint32);
     const static uint overhangLeftP=countMultipleP+sizeof(uint32);
     const static uint overhangRightP=overhangLeftP+sizeof(uint16);
@@ -22,7 +22,7 @@ public:
     uint32 *countUnique, *countMultiple;
     uint16 *overhangLeft, *overhangRight;
 
-    const static uint dataSize=overhangRightP+sizeof(uint16);
+    const static uint dataSize=((overhangRightP+sizeof(uint16)+alignof(uint64)-1)/alignof(uint64))*alignof(uint64);
 
     Junction(Genome &genomeIn);
     void junctionPointer(char* sjPoint, uint isj);
@@ -38,7 +38,7 @@ class OutSJ {
 public:
     //all junctions
     char* data; //sj array[Njunctions][dataSize]
-    vector<char> dataVec;
+    vector<uint64> dataVec;
     uint64 N, Nstore; //N=number of junctions stored; Nstore=storage size
     Junction oneSJ;
 
@@ -56,4 +56,3 @@ private:
 int compareSJ(const void* i1, const void* i2); //external functions
 
 #endif
-
