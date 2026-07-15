@@ -109,7 +109,8 @@ uint insertSeqSA(PackedArray & SA, PackedArray & SA1, PackedArray & SAi, char * 
     */
 
     g_funCompareUintAndSuffixesMemcmp_G=seq1[0];
-    g_funCompareUintAndSuffixesMemcmp_L=mapGen.pGe.gSuffixLengthMax/sizeof(uint64_t);
+    g_funCompareUintAndSuffixesMemcmp_N=2*nG1;
+    g_funCompareUintAndSuffixesMemcmp_L=mapGen.pGe.gSuffixLengthMax;
     qsort((void*) indArray, nInd, 2*sizeof(uint64_t), funCompareUintAndSuffixesMemcmp);
 
 //     qsort((void*) indArray, nInd, 2*sizeof(uint64), funCompareUint2);
