@@ -13,6 +13,7 @@ void Transcript::reset() {
 //         polyXnMM[ii]=0;
 //     };
     primaryFlag=false;
+    sjYes=false;
 
     rStart=0; roStart=0; rLength=0; gStart=0; gLength=0; //read and genomic coordinates
 

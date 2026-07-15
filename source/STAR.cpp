@@ -124,11 +124,14 @@ int main(int argInN, char *argIn[])
         exit(1);
     };
 
-    // transcripome placeholder
-    Transcriptome *transcriptomeMain = NULL;
-
     // this will execute --runMode soloCellFiltering and exit
-    Solo soloCellFilter(P, *transcriptomeMain);
+    if (P.runMode == "soloCellFiltering")
+    {
+        Transcriptome transcriptomeCellFilter(P);
+        Solo soloCellFilter(P, transcriptomeCellFilter);
+    };
+
+    Transcriptome *transcriptomeMain = NULL;
 
     ////////////////////////////////////////////////////////////////////////
     ///////////////////////////////// Genome
@@ -169,10 +172,8 @@ int main(int argInN, char *argIn[])
     //////////////////////////////////// 2-pass 1st pass
     twoPassRunPass1(P, genomeMain, transcriptomeMain, sjdbLoci);
 
-    if (P.quant.yes)
-    { // load transcriptome
-        transcriptomeMain = new Transcriptome(P);
-    };
+    // The constructor is a no-op when transcriptome data are not needed.
+    transcriptomeMain = new Transcriptome(P);
 
     // initialize Stats
     g_statsAll.resetN();
@@ -252,7 +253,7 @@ int main(int argInN, char *argIn[])
         outputSJ(RAchunk, P);
 
     // solo counts
-    Solo soloMain(RAchunk, P, *RAchunk[0]->chunkTr);
+    Solo soloMain(RAchunk, P, *transcriptomeMain);
     soloMain.processAndOutput();
 
     if (P.quant.geCount.yes)
