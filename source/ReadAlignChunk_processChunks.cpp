@@ -163,11 +163,9 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                             if (P.outSAMreadID=="Number") {
                                 chunkInSizeBytesTotal[imate] += sprintf(chunkIn[imate] + chunkInSizeBytesTotal[imate], ">%llu", P.iReadAll);
                             } else {
-                                P.inOut->readIn[imate] >> (chunkIn[imate] + chunkInSizeBytesTotal[imate]);
+                                P.inOut->readIn[imate].getline(chunkIn[imate] + chunkInSizeBytesTotal[imate], DEF_readNameSeqLengthMax + 1);
                                 chunkInSizeBytesTotal[imate] += strlen(chunkIn[imate] + chunkInSizeBytesTotal[imate]);
                             };
-
-                            P.inOut->readIn[imate].ignore(DEF_readNameSeqLengthMax,'\n');
 
                             chunkInSizeBytesTotal[imate] += sprintf(chunkIn[imate] + chunkInSizeBytesTotal[imate], " %llu %c %i \n", P.iReadAll, 'N', P.readFilesIndex);
                         };
