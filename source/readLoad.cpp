@@ -16,7 +16,10 @@ int readLoad(istream& readInStream, Parameters& P, uint& Lread, uint& LreadOrigi
     istringstream line1str(line1);
     
     readName[0]=0;//clear char array
-    line1str >> readName; //TODO check that it does not overflow the array
+    string readNameStr;
+    line1str >> readNameStr;
+    strncpy(readName, readNameStr.c_str(), DEF_readNameLengthMax-1);
+    readName[DEF_readNameLengthMax-1] = 0; // ensure null-termination
     if (strlen(readName)>=DEF_readNameLengthMax-1) {
         ostringstream errOut;
         errOut << "EXITING because of FATAL ERROR in reads input: read name is too long:" << readInStream.gcount()<<"\nRead Name="<<readName<<"\nDEF_readNameLengthMax="<<DEF_readNameLengthMax<<'\n';
