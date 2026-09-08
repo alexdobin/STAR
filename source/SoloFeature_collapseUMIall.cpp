@@ -527,8 +527,8 @@ void SoloFeature::collapseUMIperCB(uint32 iCB, vector<uint32> &umiArray, vector<
                     if (pSolo.multiMap.yes.EM)
                         countMatMult.m[ind1 + pSolo.multiMap.countInd.EM] = gEem[indDedup][gm.second];                    
                     
-                    countMatMult.i[iCB+1] += countMatMult.s;
                 };
+                countMatMult.i[iCB+1] += countMatMult.s;
             };
         };
     };
