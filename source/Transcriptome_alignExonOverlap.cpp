@@ -56,7 +56,7 @@ void Transcriptome::alignExonOverlap(uint nA, Transcript **aAll, int32 strandTyp
                 continue;
                  
             bool str1 = int(strandType==0 ? aG.Str : 1-aG.Str) == (trStr[tr1]-1);
-            str1 = str1 || (strandType==-1);
+            str1 = str1 || (strandType==-1) || (trStr[tr1]==0); //transcripts with undefined strand ('.') accept reads from both strands
 
             /*
             //GeneFullClosest3p

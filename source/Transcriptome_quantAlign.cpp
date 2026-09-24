@@ -104,7 +104,7 @@ uint32 Transcriptome::quantAlign (Transcript &aG, Transcript *aTall) {
                 int aStatus=alignToTranscript(aG, trS[tr1], trStr[tr1], exSE+2*trExI[tr1], exLenCum+trExI[tr1], trExN[tr1], aTall[nAtr]);
                 if (aStatus==1) {//align conforms with the transcript
                     aTall[nAtr].Chr = tr1;
-                    aTall[nAtr].Str = trStr[tr1]==1 ? aG.Str : 1-aG.Str; //TODO strandedness
+                    aTall[nAtr].Str = trStr[tr1]==2 ? 1-aG.Str : aG.Str; //transcripts with undefined strand ('.') are output on the + strand, consistent with the coordinate conversion in alignToTranscript
                     ++nAtr;
                 };
         };

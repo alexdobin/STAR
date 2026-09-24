@@ -22,7 +22,7 @@ void Transcriptome::geneFullAlignOverlap(uint nA, Transcript **aAll, int32 stran
             while (gi1>=0 && geneFull.eMax[gi1]>=a.exons[ib][EX_G]) {//these exons may overlap this block
                 if (geneFull.e[gi1]>=a.exons[ib][EX_G]) {//this gene overlaps the block
                     int32 str1 = geneFull.str[gi1]==1 ? a.Str : 1-a.Str;
-                    if (strandType==-1 || strandType==str1)  {
+                    if (strandType==-1 || geneFull.str[gi1]==0 || strandType==str1)  {//genes with undefined strand ('.') accept reads from both strands
                         annFeat.fSet.insert(geneFull.g[gi1]);
                         annFeat.fAlign[iA].insert(geneFull.g[gi1]);
                     };

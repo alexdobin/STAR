@@ -205,7 +205,7 @@ void Transcriptome::classifyAlign (Transcript **alignG, uint64 nAlignG, ReadAnno
         do {//cycle back through all the transcripts
             --tr1;
             if ( aGend>trE[tr1] ||
-                 (P.pSolo.strand >= 0 && (trStr[tr1]==1 ? aG.Str : 1-aG.Str) != (uint32)P.pSolo.strand) ) //!(this transcript contains the read, and has correct strand)
+                 (P.pSolo.strand >= 0 && trStr[tr1]>0 && (trStr[tr1]==1 ? aG.Str : 1-aG.Str) != (uint32)P.pSolo.strand) ) //!(this transcript contains the read, and has correct strand); transcripts with undefined strand ('.') accept reads from both strands, as --quantMode GeneCounts does
                      continue;
                  
             array<uint32, 2> distTrEnds;     

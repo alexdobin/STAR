@@ -1,3 +1,7 @@
+STAR 2.7.11c --- unreleased
+===========================================
+* Issue #2707: Fixed the strand of Aligned.toTranscriptome.out.bam records for transcripts whose GTF strand is undefined ('.'): the strand flag was inverted and the sequence reverse-complemented while the transcript coordinates were those of the + strand. Such transcripts are now output like + transcripts. STARsolo --soloStrand Forward/Reverse counting (Gene, GeneFull, GeneFull_ExonOverIntron, GeneFull_Ex50pAS) now accepts reads from both strands for genes with undefined strand, as --quantMode GeneCounts already did; previously sense reads of such genes were dropped with Forward and counted with Reverse. New regression test: extras/tests/scripts/testUndefinedStrand.sh.
+
 STAR 2.7.11b --- 2024/01/24 ::: Minor in one parameter.
 ===========================================
 * Replaced --quantTranscriptomeBan parameter with --quantTranscriptomeSAMoutput with more explicit naming of options. The default behavior is not affected.
