@@ -28,7 +28,7 @@ void Transcriptome::geneFullAlignOverlap_ExonOverIntron(uint nA, Transcript **aA
         while (gi1>=0 && geneFull.eMax[gi1]>=aE) {//these genes may overlap this block
             if (geneFull.e[gi1]>=aE) {//this gene contains the block:  gene-end is to the right of block start
                 int32 str1 = geneFull.str[gi1]==1 ? a.Str : 1-a.Str;
-                if (strandType==-1 || strandType==str1)  {
+                if (strandType==-1 || geneFull.str[gi1]==0 || strandType==str1)  {//genes with undefined strand ('.') accept reads from both strands
                     annFeat.fSet.insert(geneFull.g[gi1]);
                     annFeat.fAlign[iA].insert(geneFull.g[gi1]);
                 };
