@@ -26,7 +26,12 @@ private:
     static const uint32 umiArrayStride=3;
     enum {rguG, rguU, rguR};
     uint32 rguStride;
-    
+    bool readIndex64; //read index does not fit into uint32 (nReadsInput>=2^32): its high 32 bits are stored in the rguR+1 column
+    uint64 rguReadIndex(const uint32 *rgu) const
+    {//read index of the rGeneUMI record rgu
+        return readIndex64 ? ( (uint64)rgu[rguR] | ((uint64)rgu[rguR+1] << 32) ) : (uint64)rgu[rguR];
+    };
+
 public:
     ParametersSolo &pSolo;
 

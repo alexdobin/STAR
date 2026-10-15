@@ -23,6 +23,7 @@ void SoloFeature::countVelocyto()
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Velocyto counting: allocated arrays" <<endl;
     
     //////////// input records
+    uint64 nReadsNoVelocytoCB=0;
     for (int iThread=0; iThread<P.runThreadN; iThread++) {//TODO: this can be parallelized
         fstream *streamReads = readFeatAll[iThread]->streamReads;
         streamReads->flush();
@@ -38,6 +39,11 @@ void SoloFeature::countVelocyto()
             };
 
             uint32 iCB=indCBwl[cb];
+            if (iCB == (uint32)-1) {//Gene CB of this read has no Velocyto reads. Should not happen, guards against out-of-bounds access
+                ++nReadsNoVelocytoCB;
+                streamReads->ignore((uint32)-1, '\n');
+                continue;
+            };
             nReadPerCB[iCB]++;//simple estimate
             
             if (cuTrTypes[iCB].count(umi)>0 && cuTrTypes[iCB][umi].empty()) {//intersection is empty, no need to load this transcript
@@ -78,6 +84,9 @@ void SoloFeature::countVelocyto()
         };        
     };   
     
+    if (nReadsNoVelocytoCB>0)
+        P.inOut->logMain << "WARNING: Velocyto counting skipped " << nReadsNoVelocytoCB << " reads whose Gene cell barcode has no Velocyto reads" <<endl;
+
     time(&rawTime);
     P.inOut->logMain << timeMonthDayTime(rawTime) << " ... Velocyto counting: finished input" <<endl;
 
