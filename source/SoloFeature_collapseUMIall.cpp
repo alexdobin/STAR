@@ -7,6 +7,7 @@
 
 inline int funCompareSolo1 (const void *a, const void *b);          //defined below
 inline int funCompare_uint32_1_2_0 (const void *a, const void *b);
+inline int funCompare_uint32_1_3_2_0 (const void *a, const void *b);
 
 void SoloFeature::collapseUMIall() 
 {
@@ -189,7 +190,7 @@ void SoloFeature::collapseUMIperCB(uint32 iCB, vector<uint32> &umiArray, vector<
         
         if (readInfo.size()>0) {//record cb/umi for each read
             for (uint32 iR=0; iR<gReadS[iG+1]-gReadS[iG]; iR+=rguStride) {//cycle over reads
-                uint64 iread1 = rGU1[iR+rguR];
+                uint64 iread1 = rguReadIndex(rGU1+iR);
                 readInfo[iread1].cb = indCB[iCB] ;
                 uint32 umi=rGU1[iR+rguU];
                 
@@ -251,7 +252,7 @@ void SoloFeature::collapseUMIperCB(uint32 iCB, vector<uint32> &umiArray, vector<
             for (uint32 iG=0; iG<nGenes; iG++) {//cycle over genes
                 uint32 *rGU1=rGU+gReadS[iG];            
                 for (uint32 iR=0; iR<gReadS[iG+1]-gReadS[iG]; iR+=rguStride) {//cycle over reads
-                    uint64 iread1 = rGU1[iR+rguR];
+                    uint64 iread1 = rguReadIndex(rGU1+iR);
                     readInfo[iread1].cb = indCB[iCB];
                     uint32 umi=rGU1[iR+rguU];
                     
@@ -278,7 +279,7 @@ void SoloFeature::collapseUMIperCB(uint32 iCB, vector<uint32> &umiArray, vector<
         
         if (readInfo.size()>0) {
             for (uint32 iR=gReadS[nGenes]; iR<gReadS[nGenes+nGenesMult]; iR+=rguStride) {//cycle over multi-gene reads to record their CB and UMI, no corrections
-                uint64 iread1 = rGU[iR+rguR];
+                uint64 iread1 = rguReadIndex(rGU+iR);
                 readInfo[iread1].cb = indCB[iCB];
                 readInfo[iread1].umi = rGU[iR+rguU];
             };
@@ -292,7 +293,7 @@ void SoloFeature::collapseUMIperCB(uint32 iCB, vector<uint32> &umiArray, vector<
             uint32 nRm=( gReadS[nGenes+nGenesMult] - gReadS[nGenes] ) / rguStride;
             
             //sort by UMI, then by read, then by gene
-            qsort(rGUm, nRm, rguStride*sizeof(uint32), funCompare_uint32_1_2_0);//there is no need to sort by read or gene actually
+            qsort(rGUm, nRm, rguStride*sizeof(uint32), readIndex64 ? funCompare_uint32_1_3_2_0 : funCompare_uint32_1_2_0);//there is no need to sort by read or gene actually
             
             std::unordered_map<uint32, uint32> geneReadCount; //number of reads per gene
             uint32 nRumi=0;
@@ -316,7 +317,7 @@ void SoloFeature::collapseUMIperCB(uint32 iCB, vector<uint32> &umiArray, vector<
                 if (skipUMI)
                     continue; //this UMI is skipped because it was among uniquely mapped
                 
-                uintRead read1 = rGUm[iR+2];
+                uintRead read1 = rguReadIndex(rGUm+iR);
                 if (read1 != readPrev) {
                     ++nRumi;
                     readPrev = read1;
@@ -561,6 +562,31 @@ inline int funCompare_uint32_1_2_0 (const void *a, const void *b) {
     if (va[1]>vb[1]) {
         return 1;
     } else if (va[1]<vb[1]) {
+        return -1;
+    } else if (va[2]>vb[2]){
+        return 1;
+    } else if (va[2]<vb[2]){
+        return -1;
+    } else if (va[0]>vb[0]){
+        return 1;
+    } else if (va[0]<vb[0]){
+        return -1;
+    } else {
+        return 0;
+    };
+};
+
+inline int funCompare_uint32_1_3_2_0 (const void *a, const void *b) {//as funCompare_uint32_1_2_0, for the 64-bit read index stored in columns 2 (low) and 3 (high)
+    uint32 *va= (uint32*) a;
+    uint32 *vb= (uint32*) b;
+
+    if (va[1]>vb[1]) {
+        return 1;
+    } else if (va[1]<vb[1]) {
+        return -1;
+    } else if (va[3]>vb[3]){
+        return 1;
+    } else if (va[3]<vb[3]){
         return -1;
     } else if (va[2]>vb[2]){
         return 1;

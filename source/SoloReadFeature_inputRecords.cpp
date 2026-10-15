@@ -54,7 +54,9 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
                     cbP[cb][1]=umi;
 
                     if (readIndexYes) {
-                        cbP[cb][2]=iread;
+                        cbP[cb][2]=(uint32)iread;
+                        if (cbPstride==4) //64-bit read index, see SoloFeature::countCBgeneUMI
+                            cbP[cb][3]=(uint32)(iread>>32);
                     };
 
                     cbP[cb]+=cbPstride;
@@ -94,7 +96,9 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
                     cbP[cb][0]=feature;
                     cbP[cb][1]=umi;
                     if (readIndexYes) {
-                        cbP[cb][2]=iread;
+                        cbP[cb][2]=(uint32)iread;
+                        if (cbPstride==4) //64-bit read index, see SoloFeature::countCBgeneUMI
+                            cbP[cb][3]=(uint32)(iread>>32);
                     };
                     cbP[cb]+=cbPstride;
                 } else if (readInfoYes) {//no feature - record readInfo

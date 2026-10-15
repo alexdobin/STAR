@@ -16,7 +16,7 @@ typedef struct{
 
 typedef uint32 uintUMI;
 typedef uint64 uintCB;
-typedef uint32 uintRead;
+typedef uint64 uintRead;
 
 #define uintUMIbits 32
 #define velocytoTypeGeneBits 4

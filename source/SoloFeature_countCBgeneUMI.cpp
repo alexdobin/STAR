@@ -9,8 +9,16 @@ void SoloFeature::countCBgeneUMI()
     time_t rawTime;
     
     rguStride=2;
-    if (pSolo.readIndexYes[featureType])
+    readIndex64=false;
+    if (pSolo.readIndexYes[featureType]) {
         rguStride=3; //to keep readI column
+        if (nReadsInput > (uint64)(uint32)-1) {//read index does not fit into uint32: keep its high 32 bits in the 4th column
+            readIndex64=true;
+            rguStride=4;
+            time(&rawTime);
+            P.inOut->logMain << timeMonthDayTime(rawTime) << " ... nReadsInput >= 2^32: Solo read index will be stored in 64 bits" <<endl;
+        };
+    };
 
     if (pSolo.readInfoYes[featureType]) {
         readInfo.resize(nReadsInput,{(uint64)-1,(uint32)-1});
