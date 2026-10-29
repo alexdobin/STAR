@@ -6,6 +6,13 @@
 #include <stdio.h>
 #define fstream_Chunk_Max 2147483647
 #include <cstring>
+#include <thread>
+#include <vector>
+#if defined(__unix__) || defined(__APPLE__)
+#include <fcntl.h>
+#include <unistd.h>
+#include <cerrno>
+#endif
 
 void createDirectory(const string dirPathIn, const mode_t dirPerm, const string dirParameter, Parameters &P)
 {
@@ -46,6 +53,47 @@ unsigned long long fstreamReadBig(std::ifstream &S, char* A, unsigned long long 
     S.read(A+C,N%fstream_Chunk_Max);
     C+=S.gcount();
     return C;
+};
+
+#if defined(__unix__) || defined(__APPLE__)
+static void preadRange(int fd, char* A, unsigned long long offset, unsigned long long N, unsigned long long *nRead) {
+    unsigned long long C=0;
+    while (C<N) {
+        unsigned long long chunk = min(N-C, (unsigned long long) fstream_Chunk_Max);
+        ssize_t r=pread(fd, A+C, chunk, (off_t) (offset+C));
+        if (r<0 && errno==EINTR)
+            continue;
+        if (r<=0)
+            break;
+        C+=r;
+    };
+    *nRead=C;
+};
+#endif
+
+unsigned long long fstreamReadBigParallel(std::ifstream &S, const std::string &fileName, unsigned long long offset, char* A, unsigned long long N, int nThreads) {
+#if defined(__unix__) || defined(__APPLE__)
+    int fd = nThreads>1 ? open(fileName.c_str(), O_RDONLY) : -1;
+    if (fd>=0) {
+        const unsigned long long blockAlign=2LLU<<20;//each thread fills whole 2 MB pages of A
+        unsigned long long block=(N/nThreads+blockAlign-1)/blockAlign*blockAlign;
+        vector<unsigned long long> nRead(nThreads,0);
+        vector<std::thread> threads;
+        for (int it=0; it<nThreads && it*block<N; it++)
+            threads.emplace_back(preadRange, fd, A+it*block, offset+it*block, min(block, N-it*block), &nRead[it]);
+        for (auto &th : threads)
+            th.join();
+        close(fd);
+        unsigned long long C=0;//bytes read contiguously from the start, as S.read would report
+        for (unsigned it=0; it<threads.size(); it++) {
+            C+=nRead[it];
+            if (nRead[it]<min(block, N-it*block))
+                break;
+        };
+        return C;
+    };
+#endif
+    return fstreamReadBig(S, A, N);//one thread, or no POSIX pread: S is positioned at offset
 };
 
 void fstreamWriteBig(std::ofstream &S, char* A, unsigned long long N, std::string fileName, std::string errorID, Parameters &P) {

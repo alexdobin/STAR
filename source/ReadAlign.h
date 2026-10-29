@@ -139,6 +139,8 @@ class ReadAlign {
 
         //binned alignments
         uintWinBin **winBin; //binned genome: window ID (number) per bin
+        vector<uint> winBinWritten; //winBin ranges written since the last reset: strand, first bin, last bin
+        void winBinWrittenAdd(uint str, uint b1, uint b2) {winBinWritten.push_back(str); winBinWritten.push_back(b1); winBinWritten.push_back(b2);};
 
         //alignments
         uiPC *PC; //pieces coordinates
@@ -200,7 +202,12 @@ class ReadAlign {
         void outputTranscriptSJ(Transcript const &trOut, uint nTrOut, OutSJ *outStream, uint sjReadStartN );
         string outputTranscriptCIGARp(Transcript const &trOut);
         int createExtendWindowsWithAlign(uint a1, uint aStr); //extends and windows with one alignment
-        void assignAlignToWindow(uint a1, uint aLength, uint aStr, uint aNrep, uint aFrag, uint aRstart,bool aAnchor, uint sjA); //assigns one alignment to a window
+        void assignAlignToWindow(uint a1, uint aLength, uint aStr, uint aNrep, uint aFrag, uint aRstart,bool aAnchor, uint sjA) {//assigns one alignment to a window
+            uint iW=winBin[aStr][a1>>P.winBinNbits];
+            if (iW==uintWinBinMax || (!aAnchor && aLength < WALrec[iW]) ) return; //alignment does not belong to any window, or it's shorter than rec-length
+            assignAlignToWindowIn(iW, a1, aLength, aNrep, aFrag, aRstart, aAnchor, sjA);
+        };
+        void assignAlignToWindowIn(uint iW, uint a1, uint aLength, uint aNrep, uint aFrag, uint aRstart,bool aAnchor, uint sjA); //records an alignment in window iW
 
         void mappedFilter();
         void chimericDetection();

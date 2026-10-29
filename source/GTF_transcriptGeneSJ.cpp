@@ -1,122 +1,70 @@
 #include "GTF.h"
 #include "serviceFuns.cpp"
 #include "streamFuns.h"
+#include <algorithm>
+#include <cstdlib>
+#include <tuple>
 
-//#include <ctime>
-#include <map>
+struct GTFexgeRow {//exon start/end/strand/gene/transcript, sorted by all five
+    uint64 exStart, exEnd, exStrand, geID, trID;
+    bool operator<(const GTFexgeRow &b) const {
+        return std::tie(exStart,exEnd,exStrand,geID,trID) < std::tie(b.exStart,b.exEnd,b.exStrand,b.geID,b.trID);
+    };
+};
+struct GTFextrRow {//transcript start/end/ID, exon start/end and gene, sorted by the first five
+    uint64 trStart, trEnd, trID, exStart, exEnd, geID;
+    bool operator<(const GTFextrRow &b) const {
+        return std::tie(trStart,trEnd,trID,exStart,exEnd) < std::tie(b.trStart,b.trEnd,b.trID,b.exStart,b.exEnd);
+    };
+};
+struct GTFsjRow {//junction start/end/strand/gene, sorted by start/end
+    uint64 start, end, str, gene;
+    bool operator<(const GTFsjRow &b) const {
+        return start<b.start || (start==b.start && end<b.end);
+    };
+};
 
-#define GTF_extrLoci_size 6
-#define GTF_extrTrStart(ii) ((ii)*GTF_extrLoci_size)
-#define GTF_extrTrEnd(ii) ((ii)*GTF_extrLoci_size+1)
-#define GTF_extrTrID(ii) ((ii)*GTF_extrLoci_size+2)
-#define GTF_extrExStart(ii) ((ii)*GTF_extrLoci_size+3)
-#define GTF_extrExEnd(ii) ((ii)*GTF_extrLoci_size+4)
-#define GTF_extrGeID(ii) ((ii)*GTF_extrLoci_size+5)
+static GTF *gtfWritePending=NULL;//its table writes are finished before exit()
+static void gtfWriteJoinAtExit()
+{
+    if (gtfWritePending!=NULL)
+        gtfWritePending->writeJoin();
+};
 
-#define GTF_exgeLoci_size 5
-#define GTF_exgeExStart(ii) ((ii)*GTF_exgeLoci_size+0)
-#define GTF_exgeExEnd(ii) ((ii)*GTF_exgeLoci_size+1)
-#define GTF_exgeExStrand(ii) ((ii)*GTF_exgeLoci_size+2)
-#define GTF_exgeGeID(ii) ((ii)*GTF_exgeLoci_size+3)
-#define GTF_exgeTrID(ii) ((ii)*GTF_exgeLoci_size+4)
-
-uint64 GTF::transcriptGeneSJ(const string &dirOut) 
+uint64 GTF::transcriptGeneSJ(const string &dirOut, bool writeLater)
 {//sort exonLoci by transcript ID and exon coordinates
  //fills sjdbLoci from GTF junctions
-    
+ //the tables are written on threads: complete on return or, with writeLater, after writeJoin()
     if (!gtfYes)
         return 0;
-    
+
     exonN=exonLoci.size();
-    qsort((void*) exonLoci.data(), exonN, sizeof(uint64)*exL, funCompareUint2);
+    std::stable_sort(exonLoci.begin(), exonLoci.end(), [](const array<uint64,exL> &a, const array<uint64,exL> &b) {//the order of glibc's qsort (a stable merge sort) with funCompareUint2
+        return a[exT]<b[exT] || (a[exT]==b[exT] && a[exS]<b[exS]);
+    });
 
-    {//exon-gene data structures: exon start/end/strand/gene/transcript
-        //re-sort exons by exons loci
-        uint64* exgeLoci=new uint64 [exonN*GTF_exgeLoci_size]; //this also contains transcripts start and end
+    writeJoin();
+    ofstream *exgeOut=&ofstrOpen(dirOut+"/exonGeTrInfo.tab",ERROR_OUT,P);
 
-        for (uint64 iex=0; iex<exonN; iex++) {
-            exgeLoci[GTF_exgeExStart(iex)]=exonLoci[iex][exS];
-            exgeLoci[GTF_exgeExEnd(iex)]=exonLoci[iex][exE];
-            exgeLoci[GTF_exgeExStrand(iex)]=transcriptStrand[exonLoci[iex][exT]];
-            exgeLoci[GTF_exgeGeID(iex)]=exonLoci[iex][exG];
-            exgeLoci[GTF_exgeTrID(iex)]=exonLoci[iex][exT];
-        };
-
-        qsort((void*) exgeLoci, exonN, sizeof(uint64)*GTF_exgeLoci_size, funCompareArrays<uint64,5>);
-
-        ofstream & exgeOut = ofstrOpen(dirOut+"/exonGeTrInfo.tab",ERROR_OUT,P);
-        exgeOut<<exonN<<"\n";
-        for (uint64 iex=0; iex<exonN; iex++) {
-             exgeOut<<exgeLoci[GTF_exgeExStart(iex)] <<"\t"<<  exgeLoci[GTF_exgeExEnd(iex)] <<"\t"<< exgeLoci[GTF_exgeExStrand(iex)] \
-              <<"\t"<< exgeLoci[GTF_exgeGeID(iex)] <<"\t"<< exgeLoci[GTF_exgeTrID(iex)] <<"\n"; //the last value, transript-number, is worng here since tranascripts are re-sorted later
-        };
-        exgeOut.close();
-
-        ofstream & geOut = ofstrOpen(dirOut+"/geneInfo.tab",ERROR_OUT,P);
-        geOut << geneID.size() << "\n";
-        for (uint64 ig=0; ig<geneID.size(); ig++) {//just geneID for now
-            geOut << geneID[ig] <<"\t"<< geneAttr[ig][0] <<"\t"<< geneAttr[ig][1] <<"\n";
-        };
-        geOut.close();
-
+    static bool atExitSet=false;
+    if (!atExitSet) {
+        atexit(gtfWriteJoinAtExit);
+        atExitSet=true;
     };
 
-    {//exon-transcript data structures
-        //re-sort transcripts by transcript start/end
-        uint64* extrLoci=new uint64 [exonN*GTF_extrLoci_size]; //this also contains transcripts start and end
+    ofstream *geOut=&ofstrOpen(dirOut+"/geneInfo.tab",ERROR_OUT,P);
 
-        uint64 trex1=0;
-        for (uint64 iex=0; iex<=exonN; iex++) {
-            if (iex==exonN || exonLoci[iex][exT] != exonLoci[trex1][exT]) {
-                for (uint64 iex1=trex1; iex1<iex; iex1++) {//go back and fill the trend
-                    extrLoci[GTF_extrTrEnd(iex1)]=exonLoci[iex-1][exE];
-                };
-                if (iex==exonN) break;
-                trex1=iex;
-            };
-            extrLoci[GTF_extrTrStart(iex)]=exonLoci[trex1][exS];
-            extrLoci[GTF_extrTrID(iex)]=exonLoci[iex][exT];
-            extrLoci[GTF_extrExStart(iex)]=exonLoci[iex][exS];
-            extrLoci[GTF_extrExEnd(iex)]=exonLoci[iex][exE];
-            extrLoci[GTF_extrGeID(iex)]=exonLoci[iex][exG];
-        };
-
-        qsort((void*) extrLoci, exonN, sizeof(uint64)*GTF_extrLoci_size, funCompareArrays<uint64,5>);
-
-        ofstream trOut ((dirOut+"/transcriptInfo.tab").c_str());
-        trOut<<transcriptID.size() << "\n";
-        ofstream exOut ((dirOut+"/exonInfo.tab").c_str());
-        exOut<<exonN<<"\n";
-
-        uint64 trid=extrLoci[GTF_extrTrID(0)];
-        uint64 trex=0;
-        uint64 trstart=extrLoci[GTF_extrTrStart(0)];
-        uint64 trend=extrLoci[GTF_extrTrEnd(0)];
-        uint64 exlen=0;
-        for (uint64 iex=0;iex<=exonN; iex++) {
-            if (iex==exonN || extrLoci[GTF_extrTrID(iex)] != trid) {//start of the new transcript
-                //write out previous transcript
-                trOut << transcriptID.at(trid) <<"\t"<< extrLoci[GTF_extrTrStart(iex-1)]<<"\t"<< extrLoci[GTF_extrTrEnd(iex-1)] \
-                       <<"\t"<< trend << "\t"<< (uint64) transcriptStrand[trid]  <<"\t"<< iex-trex <<"\t"<<trex<<"\t"<<extrLoci[GTF_extrGeID(iex-1)]<<"\n";
-                if (iex==exonN) break;
-                trid=extrLoci[GTF_extrTrID(iex)];
-                trstart=extrLoci[GTF_extrTrStart(iex)];
-                trex=iex;
-                trend=max(trend,extrLoci[GTF_extrTrEnd(iex-1)]);
-                exlen=0;
-            };
-            exOut << extrLoci[GTF_extrExStart(iex)]-trstart <<"\t"<< extrLoci[GTF_extrExEnd(iex)]-trstart <<"\t"<< exlen <<"\n";
-            exlen+=extrLoci[GTF_extrExEnd(iex)]-extrLoci[GTF_extrExStart(iex)]+1;
-        };
-        trOut.close();
-        exOut.close();
+    gtfWritePending=this;
+    try {
+        writeThread[0]=std::thread(&GTF::writeTables, this, exgeOut, geOut, dirOut);
+    } catch (const std::system_error &) {//no thread: write here
+        writeTables(exgeOut, geOut, dirOut);
     };
 
     //make junctions
-    const uint64 sjStride=4;
-    uint64* sjLoci = new uint64 [exonN*sjStride];
+    vector<GTFsjRow> sjLoci;
+    sjLoci.reserve(exonN);
     uint64 trIDn=exonLoci[0][exT];
-    uint64 sjN=0;
     for (uint64 iex=1; iex<exonN; iex++) {
         if (trIDn==exonLoci[iex][exT]) {
                 uint64 chr1=genome.chrBin[exonLoci[iex][exS] >> genome.pGe.gChrBinNbits];
@@ -126,49 +74,38 @@ uint64 GTF::transcriptGeneSJ(const string &dirOut)
                 P.inOut->logMain << genome.chrName[chr1] <<"\t"<< exonLoci[iex-1][exS]+1-genome.chrStart[chr1] << "\t"<< exonLoci[iex-1][exE]+1-genome.chrStart[chr1]  <<"\n";
                 P.inOut->logMain << genome.chrName[chr1] <<"\t"<< exonLoci[iex][exS]  +1-genome.chrStart[chr1] << "\t"<< exonLoci[iex][exE]  +1-genome.chrStart[chr1]  <<"\n";
             } else {
-                sjLoci[sjN*sjStride]=exonLoci[iex-1][exE]+1;
-                sjLoci[sjN*sjStride+1]=exonLoci[iex][exS]-1;
-                sjLoci[sjN*sjStride+2]=(uint64) transcriptStrand[trIDn];
-                sjLoci[sjN*sjStride+3]=exonLoci[iex][exG]+1;//genes are numbered from 1
-                sjN++;
+                sjLoci.push_back({exonLoci[iex-1][exE]+1, exonLoci[iex][exS]-1, (uint64) transcriptStrand[trIDn], exonLoci[iex][exG]+1});//genes are numbered from 1
             };
         } else {
             trIDn=exonLoci[iex][exT];
         };
     };
 
-    qsort((void*) sjLoci, sjN, sizeof(uint64)*sjStride, funCompareUint2);
+    std::stable_sort(sjLoci.begin(), sjLoci.end());//the order of glibc's qsort with funCompareUint2
 
     char strandChar[3]={'.','+','-'};
     uint64 sjdbN1=sjdbLoci.chr.size();
     sjdbLoci.gene.resize(sjdbN1); //need to resize in case sjdbLoci was loaded from files without gene attribute. TODO make sure gene is always present
-    for (uint64 ii=0;ii<sjN;ii++) {
-        if ( ii==0 || (sjLoci[ii*sjStride]!=sjLoci[(ii-1)*sjStride])
-                   || (sjLoci[ii*sjStride+1]!=sjLoci[(ii-1)*sjStride+1])
-                   || (sjLoci[ii*sjStride+2]!=sjLoci[(ii-1)*sjStride+2]) ) {
-            uint64 chr1=genome.chrBin[sjLoci[ii*sjStride] >> genome.pGe.gChrBinNbits];
+    for (uint64 ii=0;ii<sjLoci.size();ii++) {
+        if ( ii==0 || (sjLoci[ii].start!=sjLoci[ii-1].start)
+                   || (sjLoci[ii].end!=sjLoci[ii-1].end)
+                   || (sjLoci[ii].str!=sjLoci[ii-1].str) ) {
+            uint64 chr1=genome.chrBin[sjLoci[ii].start >> genome.pGe.gChrBinNbits];
             sjdbLoci.chr.push_back(genome.chrName[chr1]);
-            sjdbLoci.start.push_back(sjLoci[ii*sjStride]+1-genome.chrStart[chr1]);
-            sjdbLoci.end.push_back(sjLoci[ii*sjStride+1]+1-genome.chrStart[chr1]);
-            sjdbLoci.str.push_back(strandChar[sjLoci[ii*sjStride+2]]);
-            sjdbLoci.gene.push_back({sjLoci[ii*sjStride+3]});
+            sjdbLoci.start.push_back(sjLoci[ii].start+1-genome.chrStart[chr1]);
+            sjdbLoci.end.push_back(sjLoci[ii].end+1-genome.chrStart[chr1]);
+            sjdbLoci.str.push_back(strandChar[sjLoci[ii].str]);
+            sjdbLoci.gene.push_back({sjLoci[ii].gene});
         } else {
-            sjdbLoci.gene.back().insert(sjLoci[ii*sjStride+3]);
+            sjdbLoci.gene.back().insert(sjLoci[ii].gene);
         };
     };
 
-    ofstream sjdbList ((dirOut+"/sjdbList.fromGTF.out.tab").c_str());
-    for (uint64 ii=sjdbN1;ii<sjdbLoci.chr.size(); ii++) {
-        sjdbList << sjdbLoci.chr.at(ii)<<"\t"<< sjdbLoci.start.at(ii) << "\t"<< sjdbLoci.end.at(ii)  <<"\t"<< sjdbLoci.str.at(ii);
-
-        auto gg=sjdbLoci.gene[ii].cbegin();//iterator for genes
-        sjdbList <<"\t"<< *gg;
-        ++gg;
-        for (; gg!=sjdbLoci.gene[ii].cend(); gg++)
-            sjdbList <<","<< *gg;
-        sjdbList<<"\n";
+    try {//until writeJoin, sjdbLoci's chr, start, end, str and gene are only read
+        writeThread[1]=std::thread(&GTF::writeSjdbList, this, dirOut, sjdbN1, (uint64) sjdbLoci.chr.size());
+    } catch (const std::system_error &) {
+        writeSjdbList(dirOut, sjdbN1, sjdbLoci.chr.size());
     };
-    sjdbList.close();
 
     sjdbLoci.priority.resize(sjdbLoci.chr.size(),20);
 
@@ -179,5 +116,120 @@ uint64 GTF::transcriptGeneSJ(const string &dirOut)
     time(&rawTime);
     P.inOut->logMain     << timeMonthDayTime(rawTime) <<" ..... finished GTF processing\n\n" <<flush;
 
+    if (!writeLater)
+        writeJoin();
+
     return sjdbLoci.chr.size()-sjdbN1;
+};
+
+void GTF::writeJoin()
+{
+    for (auto &t : writeThread) {
+        if (t.joinable())
+            t.join();
+    };
+    if (gtfWritePending==this)
+        gtfWritePending=NULL;
+};
+
+GTF::~GTF()
+{
+    writeJoin();
+};
+
+void GTF::writeTables(ofstream *exgeOutP, ofstream *geOutP, const string dirOut)
+{//exonGeTrInfo.tab, geneInfo.tab, transcriptInfo.tab and exonInfo.tab; reads only exonN, the sorted exonLoci, transcriptStrand, transcriptID, geneID and geneAttr
+    {//exon-gene data structures: exon start/end/strand/gene/transcript
+        //re-sort exons by exons loci
+        vector<GTFexgeRow> exgeLoci(exonN);
+        for (uint64 iex=0; iex<exonN; iex++) {
+            exgeLoci[iex]={exonLoci[iex][exS], exonLoci[iex][exE], transcriptStrand[exonLoci[iex][exT]], exonLoci[iex][exG], exonLoci[iex][exT]};
+        };
+
+        std::stable_sort(exgeLoci.begin(), exgeLoci.end());//the order of glibc's qsort with funCompareArrays<uint64,5>
+
+        ofstream &exgeOut=*exgeOutP;
+        exgeOut<<exonN<<"\n";
+        for (uint64 iex=0; iex<exonN; iex++) {
+             exgeOut<<exgeLoci[iex].exStart <<"\t"<<  exgeLoci[iex].exEnd <<"\t"<< exgeLoci[iex].exStrand \
+              <<"\t"<< exgeLoci[iex].geID <<"\t"<< exgeLoci[iex].trID <<"\n"; //the last value, transript-number, is worng here since tranascripts are re-sorted later
+        };
+        exgeOut.close();
+        delete exgeOutP;
+
+        ofstream &geOut=*geOutP;
+        geOut << geneID.size() << "\n";
+        for (uint64 ig=0; ig<geneID.size(); ig++) {//just geneID for now
+            geOut << geneID[ig] <<"\t"<< geneAttr[ig][0] <<"\t"<< geneAttr[ig][1] <<"\n";
+        };
+        geOut.close();
+        delete geOutP;
+    };
+
+    {//exon-transcript data structures
+        //re-sort transcripts by transcript start/end
+        vector<GTFextrRow> extrLoci(exonN); //this also contains transcripts start and end
+
+        uint64 trex1=0;
+        for (uint64 iex=0; iex<=exonN; iex++) {
+            if (iex==exonN || exonLoci[iex][exT] != exonLoci[trex1][exT]) {
+                for (uint64 iex1=trex1; iex1<iex; iex1++) {//go back and fill the trend
+                    extrLoci[iex1].trEnd=exonLoci[iex-1][exE];
+                };
+                if (iex==exonN) break;
+                trex1=iex;
+            };
+            extrLoci[iex].trStart=exonLoci[trex1][exS];
+            extrLoci[iex].trID=exonLoci[iex][exT];
+            extrLoci[iex].exStart=exonLoci[iex][exS];
+            extrLoci[iex].exEnd=exonLoci[iex][exE];
+            extrLoci[iex].geID=exonLoci[iex][exG];
+        };
+
+        std::stable_sort(extrLoci.begin(), extrLoci.end());//the order of glibc's qsort with funCompareArrays<uint64,5>
+
+        ofstream trOut ((dirOut+"/transcriptInfo.tab").c_str());
+        trOut<<transcriptID.size() << "\n";
+        ofstream exOut ((dirOut+"/exonInfo.tab").c_str());
+        exOut<<exonN<<"\n";
+
+        uint64 trid=extrLoci[0].trID;
+        uint64 trex=0;
+        uint64 trstart=extrLoci[0].trStart;
+        uint64 trend=extrLoci[0].trEnd;
+        uint64 exlen=0;
+        for (uint64 iex=0;iex<=exonN; iex++) {
+            if (iex==exonN || extrLoci[iex].trID != trid) {//start of the new transcript
+                //write out previous transcript
+                trOut << transcriptID.at(trid) <<"\t"<< extrLoci[iex-1].trStart<<"\t"<< extrLoci[iex-1].trEnd \
+                       <<"\t"<< trend << "\t"<< (uint64) transcriptStrand[trid]  <<"\t"<< iex-trex <<"\t"<<trex<<"\t"<<extrLoci[iex-1].geID<<"\n";
+                if (iex==exonN) break;
+                trid=extrLoci[iex].trID;
+                trstart=extrLoci[iex].trStart;
+                trex=iex;
+                trend=max(trend,extrLoci[iex-1].trEnd);
+                exlen=0;
+            };
+            exOut << extrLoci[iex].exStart-trstart <<"\t"<< extrLoci[iex].exEnd-trstart <<"\t"<< exlen <<"\n";
+            exlen+=extrLoci[iex].exEnd-extrLoci[iex].exStart+1;
+        };
+        trOut.close();
+        exOut.close();
+    };
+};
+
+void GTF::writeSjdbList(const string dirOut, uint64 sjdbN1, uint64 sjdbN2)
+{//sjdbList.fromGTF.out.tab: the junctions sjdbN1..sjdbN2-1 transcriptGeneSJ added to sjdbLoci
+    ofstream sjdbList ((dirOut+"/sjdbList.fromGTF.out.tab").c_str());
+    for (uint64 ii=sjdbN1;ii<sjdbN2; ii++) {
+        sjdbList << sjdbLoci.chr.at(ii)<<"\t"<< sjdbLoci.start.at(ii) << "\t"<< sjdbLoci.end.at(ii)  <<"\t"<< sjdbLoci.str.at(ii);
+
+        auto gg=sjdbLoci.gene[ii].cbegin();//iterator for genes
+        sjdbList <<"\t"<< *gg;
+        ++gg;
+        for (; gg!=sjdbLoci.gene[ii].cend(); gg++)
+            sjdbList <<","<< *gg;
+        sjdbList<<"\n";
+    };
+    sjdbList.close();
 };

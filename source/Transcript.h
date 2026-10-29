@@ -61,6 +61,8 @@ public:
     std::set <uint32> alignGenes;
 
     Transcript(); //resets to 0
+    Transcript(const Transcript &t); //copies exon rows 0..nExons only, see copyRowsScalars
+    Transcript& operator=(const Transcript &t);
     void reset(); //reset to 0
     void resetMapG(); // reset map to 0
     void resetMapG(uint); // reset map to 0 for Lread bases
@@ -77,7 +79,7 @@ public:
     bool convertGenomeCigar(Genome &genOut, Transcript & A);
 
 private:
-
+    void copyRowsScalars(const Transcript &t);
 };
 
 #endif

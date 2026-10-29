@@ -118,6 +118,8 @@ uint findMultRange(Genome &mapGen, uint i3, uint L3, uint i1, uint L1, uint i1a,
     };
     while ( (i1b+1<i1a)|(i1b>i1a+1) ) { //L1a is the target length, i1a...i1b is the initial range, i1c,L1c is the value in the middle
         uint i1c=medianUint2(i1a,i1b);
+        prefetchSuffixStart(mapGen, medianUint2(i1a,i1c), L1b); //the next midpoint is one of these two
+        prefetchSuffixStart(mapGen, medianUint2(i1c,i1b), L1b);
         //uint L1c=identityLength(&g[mapGen.SA[i3]+L1b],&g[mapGen.SA[i1c]+L1b],L3-L1b)+L1b;
         uint L1c=compareSeqToGenome(mapGen,s,S,L3,L1b,i1c,dirR,compRes);
         if (L1c==L3) {
@@ -141,6 +143,7 @@ uint maxMappableLength(Genome &mapGen, char** s, uint S, uint N, uint i1, uint i
 
     uint L1,L2,i3,L3,L1a,L1b,L2a,L2b,i1a,i1b,i2a,i2b;
 
+    prefetchSuffixStart(mapGen, i2, L);
     L1=compareSeqToGenome(mapGen,s,S,N,L,i1,dirR,compRes);
     L2=compareSeqToGenome(mapGen,s,S,N,L,i2,dirR,compRes);
 
@@ -164,6 +167,8 @@ uint maxMappableLength(Genome &mapGen, char** s, uint S, uint N, uint i1, uint i
     i3=i1;L3=L1; //in case i1+1>=i2 an not iteration of the loope below is ever made
     while (i1+1<i2) {//main binary search loop
         i3=medianUint2(i1,i2);
+        prefetchSuffixStart(mapGen, medianUint2(i1,i3), L); //the next midpoint is one of these two
+        prefetchSuffixStart(mapGen, medianUint2(i3,i2), L);
         L3=compareSeqToGenome(mapGen,s,S,N,L,i3,dirR,compRes);
 
         if (L3==N) break; //found exact match, exit the binary search

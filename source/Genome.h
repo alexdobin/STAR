@@ -8,7 +8,10 @@
 #include "Variation.h"
 #include "SuperTranscriptome.h"
 
+#include <memory>
+
 class GTF;
+class GTFearly;
 
 class Genome {
 private:
@@ -61,6 +64,8 @@ public:
 
     //SuperTranscriptome genome
     SuperTranscriptome *superTr;
+
+    std::shared_ptr<GTFearly> gtfEarly;//GTF exon lines being parsed on a thread (GTF::loadEarly), taken by the next GTF constructed for this genome
 
     Genome (Parameters &P, ParametersGenome &pGe);
     //~Genome();

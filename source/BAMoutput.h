@@ -30,6 +30,10 @@ private:
     uint64 *binBytes, binBytes1;//number of bytes currently written to each bin
     ofstream **binStream;//output streams for each bin
     BGZF *bgzfBAM;
+    char* bgzfArray;//the unsorted buffer compressed into BGZF blocks
+    struct libdeflate_compressor *compressor;
+    int compressorLevel;
+    void unsortedWrite ();
     Parameters &P;
     string bamDir;
 };

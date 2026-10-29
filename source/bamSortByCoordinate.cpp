@@ -44,11 +44,47 @@ void bamSortByCoordinate (Parameters &P, ReadAlignChunk **RAchunk, Genome &genom
             outBAMwriteHeader(bgzfOut,P.samHeaderSortedCoord,genome.chrNameAll,genome.chrLengthAll);
             bgzf_close(bgzfOut);
         } else {//sort
+            // Each sorted bin file is appended to the output as soon as all bins before it are done,
+            // so the output is written, and its writeback started, while later bins are sorted.
+            bam_cat_t *catOut = bam_cat_open(0, P.outBAMfileCoordName.c_str());
+            vector <char> binDone(nBins, 0);
+            uint32 binNext=0; //next bin to append
+            bool binWriter=false; //a thread is appending
+            auto binFinished = [&](uint32 ibin) {
+                bool write=false;
+                #pragma omp critical(bamCatFrontier)
+                {
+                    binDone[ibin]=1;
+                    if (!binWriter) {
+                        binWriter=true;
+                        write=true;
+                    };
+                };
+                while (write) {
+                    int64 kbin=-1;
+                    #pragma omp critical(bamCatFrontier)
+                    {
+                        if (binNext<nBins && binDone[binNext]) {
+                            kbin=binNext++;
+                        } else {
+                            binWriter=false;
+                            write=false;
+                        };
+                    };
+                    if (kbin>=0) {
+                        string binName=P.outBAMsortTmpDir+"/b"+std::to_string((uint) kbin);
+                        struct stat buffer;
+                        if (stat (binName.c_str(), &buffer) == 0) //empty bins have no file
+                            bam_cat_append(catOut, binName.c_str());
+                    };
+                };
+            };
+
             uint totalMem=0;
             #pragma omp parallel num_threads(P.outBAMsortingThreadNactual)
             #pragma omp for schedule (dynamic,1)
             for (uint32 ibin1=0; ibin1<nBins; ibin1++) {
-                uint32 ibin=nBins-1-ibin1;//reverse order to start with the last bin - unmapped reads
+                uint32 ibin = ibin1==0 ? nBins-1 : ibin1-1;//the last bin (unmapped reads) first, then the others in output order
 
                 uint binN=0, binS=0;
                 for (int it=0; it<P.runThreadN; it++) {//collect sizes from threads
@@ -56,7 +92,10 @@ void bamSortByCoordinate (Parameters &P, ReadAlignChunk **RAchunk, Genome &genom
                     binS += RAchunk[it]->chunkOutBAMcoord->binTotalBytes[ibin];
                 };
 
-                if (binS==0) continue; //empty bin
+                if (binS==0) {//empty bin
+                    binFinished(ibin);
+                    continue;
+                };
 
                 if (ibin == nBins-1) {//last bin for unmapped reads
                     BAMbinSortUnmapped(ibin,P.runThreadN,P.outBAMsortTmpDir, P, genome, solo);
@@ -75,23 +114,10 @@ void bamSortByCoordinate (Parameters &P, ReadAlignChunk **RAchunk, Genome &genom
                     #pragma omp critical
                     totalMem-=newMem;//"release" RAM
                 };
+                binFinished(ibin);
             };
 
-            //concatenate all BAM files, using bam_cat
-            char **bamBinNames = new char* [nBins];
-            vector <string> bamBinNamesV;
-            for (uint32 ibin=0; ibin<nBins; ibin++) {
-
-                bamBinNamesV.push_back(P.outBAMsortTmpDir+"/b"+std::to_string((uint) ibin));
-                struct stat buffer;
-                if (stat (bamBinNamesV.back().c_str(), &buffer) != 0) {//check if file exists
-                    bamBinNamesV.pop_back();
-                };
-            };
-            for (uint32 ibin=0; ibin<bamBinNamesV.size(); ibin++) {
-                    bamBinNames[ibin] = (char*) bamBinNamesV.at(ibin).c_str();
-            };
-            bam_cat(bamBinNamesV.size(), bamBinNames, 0, P.outBAMfileCoordName.c_str());
+            bam_cat_close(catOut);
         };
     };    
 };

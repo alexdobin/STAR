@@ -12,6 +12,7 @@ void BAMbinSortUnmapped(uint32 iBin, uint nThreads, string dirBAMsort, Parameter
         errOut <<"SOLUTION: check that the disk is not full, increase the max number of open files with Linux command ulimit -n before running STAR";
         exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
     };
+    bgzf_temporary(bgzfBin);
 
     outBAMwriteHeader(bgzfBin,P.samHeaderSortedCoord,genome.chrNameAll,genome.chrLengthAll);
 

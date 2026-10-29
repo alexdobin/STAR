@@ -3,11 +3,8 @@
 #include "ReadAlign.h"
 #include "ErrorWarning.h"
 
-void ReadAlign::assignAlignToWindow(uint a1, uint aLength, uint aStr, uint aNrep, uint aFrag, uint aRstart, bool aAnchor, uint sjA) {
-
-    uint iW=winBin[aStr][a1>>P.winBinNbits];
-
-    if (iW==uintWinBinMax || (!aAnchor && aLength < WALrec[iW]) ) return; //alignment does not belong to any window, or it's shorter than rec-length
+void ReadAlign::assignAlignToWindowIn(uint iW, uint a1, uint aLength, uint aNrep, uint aFrag, uint aRstart, bool aAnchor, uint sjA) {
+    //iW: the window winBin gives the alignment; the inline assignAlignToWindow (ReadAlign.h) returns early when there is none
 
     //check if this alignment overlaps with any other alignment in the window, record the longest of the two
     {//do not check for overlap if this is an sj-align

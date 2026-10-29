@@ -359,7 +359,7 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
 
             for (uint ii=rBstart;ii<rBstart+L;ii++) Score+=scoreMatch; //add QS for mapped portions
 
-            Transcript trExtend;
+            ExtendAlignResult trExtend;
 
             //TODO: compare extensions to the left and right, pick the best one to be performed first
             //otherwise if a large nMM is reached in the 2st extension, it will prevent the 2nd extension
@@ -370,11 +370,10 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
             //AATATTTGGAACACTTATGTGAAAAATGATTTGTTTTTCTGAAATTTACGTTTCTCTCTGAGTCCTGTAACTGTCC
 
 
-            trExtend.reset();
             if ( extendAlign(R, G, rAend+1, gAend+1, 1, 1, DEF_readSeqLengthMax, trA->nMatch, trA->nMM, outFilterMismatchNmaxTotal, P.outFilterMismatchNoverLmax, \
-                             P.alignEndsType.ext[trA->exons[trA->nExons-1][EX_iFrag]][1], &trExtend) ) {
+                             P.alignEndsType.ext[trA->exons[trA->nExons-1][EX_iFrag]][1], trExtend) ) {
 
-                trA->add(&trExtend);
+                addExtension(*trA, trExtend);
                 Score += trExtend.maxScore;
 
                 trA->exons[trA->nExons-1][EX_L] += trExtend.extendL;
@@ -385,13 +384,12 @@ intScore stitchAlignToTranscript(uint rAend, uint gAend, uint rBstart, uint gBst
             trA->exons[trA->nExons][EX_L] = L;
             trA->nMatch += L;
 
-            trExtend.reset();
             //if end extension needs to be forced, use large length. Otherwise, only extend until the beginning of the transcript
             uint extlen=P.alignEndsType.ext[iFragB][1] ? DEF_readSeqLengthMax : gBstart-trA->exons[0][EX_G]+trA->exons[0][EX_R];
             if ( extendAlign(R, G, rBstart-1, gBstart-1, -1, -1, extlen, trA->nMatch, trA->nMM, outFilterMismatchNmaxTotal, P.outFilterMismatchNoverLmax, \
-                             P.alignEndsType.ext[iFragB][1], &trExtend) ) {
+                             P.alignEndsType.ext[iFragB][1], trExtend) ) {
 
-                trA->add(&trExtend);
+                addExtension(*trA, trExtend);
                 Score += trExtend.maxScore;
 
                 trA->exons[trA->nExons][EX_R] -= trExtend.extendL;

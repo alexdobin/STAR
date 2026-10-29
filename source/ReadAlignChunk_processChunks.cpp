@@ -11,6 +11,11 @@ inline void removeStringEndControl(string &str);
 void ReadAlignChunk::processChunks() {//read-map-write chunks
     noReadsLeft=false; //true if there no more reads left in the file
     bool newFile=false; //new file marker in the input stream
+    //each thread's first chunk of a mapping phase is full size, later ones 1/16 of it, so the threads finish the phase together
+    uint64 chunkInSizeBytesSmall = P.chunkInSizeBytes/16;
+    if (chunkInSizeBytesSmall==0) //a limit of 0 reads nothing
+        chunkInSizeBytesSmall = P.chunkInSizeBytes;
+    uint64 chunkInSizeBytesMax = P.chunkInSizeBytes;
     while (!noReadsLeft) {//continue until the input EOF
             //////////////read a chunk from input files and store in memory
         if (P.outFilterBySJoutStage<2) {//read chunks from input file
@@ -19,7 +24,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
 
             chunkInSizeBytesTotal={0,0};
             
-            while (chunkInSizeBytesTotal[0] < P.chunkInSizeBytes && chunkInSizeBytesTotal[1] < P.chunkInSizeBytes && P.inOut->readIn[0].good() && P.inOut->readIn[1].good()) {
+            while (chunkInSizeBytesTotal[0] < chunkInSizeBytesMax && chunkInSizeBytesTotal[1] < chunkInSizeBytesMax && P.inOut->readIn[0].good() && P.inOut->readIn[1].good()) {
                 char nextChar=P.inOut->readIn[0].peek();
                 if (P.iReadAll==P.readMapNumber) {//do not read any more reads
                     break;
@@ -236,6 +241,7 @@ void ReadAlignChunk::processChunks() {//read-map-write chunks
                 chunkIn[imate][chunkInSizeBytesTotal[imate]]='\n';//extra empty line at the end of the chunks
 
             if (P.runThreadN>1) pthread_mutex_unlock(&g_threadChunks.mutexInRead);
+            chunkInSizeBytesMax = chunkInSizeBytesSmall;
 
         } else {//read from one file per thread
             noReadsLeft=true;

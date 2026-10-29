@@ -132,6 +132,13 @@ int main(int argInN, char *argIn[])
 
     ////////////////////////////////////////////////////////////////////////
     ///////////////////////////////// Genome
+    std::shared_ptr<TranscriptomeEarly> transcriptomeEarly;
+    if (P.quant.yes && P.runMode == "alignReads" && P.runThreadN > 1 && P.pGe.sjdbGTFfile == "-" && !P.pGe.transform.outQuant
+        && (P.pGe.gLoad == "NoSharedMemory" || P.pGe.gLoad == "LoadAndKeep" || P.pGe.gLoad == "LoadAndRemove"))
+    { // the transcript tables come from the genome directory: read them beside the genome load
+        transcriptomeEarly = Transcriptome::loadEarly(P);
+    };
+
     Genome genomeMain(P, P.pGe);
     genomeMain.genomeLoad();
 
@@ -171,7 +178,10 @@ int main(int argInN, char *argIn[])
 
     if (P.quant.yes)
     { // load transcriptome
-        transcriptomeMain = new Transcriptome(P);
+        if (transcriptomeEarly)
+            transcriptomeMain = Transcriptome::takeEarly(transcriptomeEarly, P);
+        else
+            transcriptomeMain = new Transcriptome(P);
     };
 
     // initialize Stats
@@ -192,10 +202,7 @@ int main(int argInN, char *argIn[])
 
     // prepare chunks and spawn mapping threads
     ReadAlignChunk *RAchunk[P.runThreadN];
-    for (int ii = 0; ii < P.runThreadN; ii++)
-    {
-        RAchunk[ii] = new ReadAlignChunk(P, genomeMain, transcriptomeMain, ii);
-    };
+    ReadAlignChunk::buildAll(P, genomeMain, transcriptomeMain, RAchunk);
 
     if (P.runRestart.type != 1)
         mapThreadsSpawn(P, RAchunk);

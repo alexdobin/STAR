@@ -8,12 +8,40 @@
 #include "PackedArray.h"
 #include "GlobalVariables.h"
 #include <time.h>
+#include <stdint.h>
+
+#if defined(__GNUC__)
+//always_inline: GCC 13 deletes calls to an out-of-line function whose only effects are prefetches
+__attribute__((always_inline)) static inline void prefetchWindowGenome(const char *G, uiWA *WAw, uint nA)
+{//start loading the genome lines of a window's aligns, from 64 bytes before each align to 64 bytes after it, at most 32 lines; no effect on results
+    uint nLines=0;
+    uintptr_t prevLo=1, prevHi=0; //line range of the previous align; collinear aligns often share lines
+    for (uint ia=0; ia<nA && nLines<32; ia++) {
+        uintptr_t lo=((uintptr_t)G+WAw[ia][WA_gStart]-64) & ~(uintptr_t)63;
+        uintptr_t hi=((uintptr_t)G+WAw[ia][WA_gStart]+WAw[ia][WA_Length]+64) & ~(uintptr_t)63;
+        if (lo>=prevLo && lo<=prevHi)
+            lo=prevHi+64;
+        for (uintptr_t a=lo; a<=hi && nLines<32; a+=64, nLines++)
+            __builtin_prefetch((const void*)a);
+        if (lo<=hi) {
+            prevLo=lo;
+            prevHi=hi;
+        };
+    };
+};
+#else
+static inline void prefetchWindowGenome(const char *, uiWA *, uint) {};
+#endif
 
 void ReadAlign::stitchPieces(char **R, uint Lread) {
 
-    //zero-out winBin
-    memset(winBin[0],255,sizeof(winBin[0][0])*P.winBinN);
-    memset(winBin[1],255,sizeof(winBin[0][0])*P.winBinN);
+    //zero-out winBin: only the bins the previous read wrote
+    for (uint ii=0; ii<winBinWritten.size(); ii+=3) {
+        uintWinBin *wB=winBin[winBinWritten[ii]];
+        for (uint ib=winBinWritten[ii+1]; ib<=winBinWritten[ii+2]; ib++)
+            wB[ib]=uintWinBinMax;
+    };
+    winBinWritten.clear();
 
 
 //     for (uint iWin=0;iWin<nWall;iWin++) {//zero out winBin
@@ -54,15 +82,10 @@ void ReadAlign::stitchPieces(char **R, uint Lread) {
                 uint aStr = a1 >> mapGen.GstrandBit;
                 a1 &= mapGen.GstrandMask; //remove strand bit
 
-                //convert to positive strand
-                if (aDir==1 && aStr==0) {
-                    aStr=1;
-                } else if (aDir==0 && aStr==1) {
-                    a1 = mapGen.nGenome - (aLength+a1);
-                } else if (aDir==1 && aStr==1) {
-                    aStr=0;
-                    a1 = mapGen.nGenome - (aLength+a1);
-                };
+                //convert to positive strand, without branches: the strand bit of consecutive SA entries is unpredictable
+                uint a1rev = mapGen.nGenome - (aLength+a1);
+                a1 = aStr==1 ? a1rev : a1;
+                aStr ^= aDir;
 
                 //final strand
                 if (revertStrand) { //modified strand according to user input CHECK!!!!
@@ -101,6 +124,8 @@ void ReadAlign::stitchPieces(char **R, uint Lread) {
                 wb--;
                 winBin[ WC[iWin][WC_Str] ][ wb ]=(uintWinBin) iWin;
             };
+            if (wb<WC[iWin][WC_gStart])
+                winBinWrittenAdd(WC[iWin][WC_Str], wb, WC[iWin][WC_gStart]-1);
             WC[iWin][WC_gStart] = wb;
 
             wb=WC[iWin][WC_gEnd];
@@ -108,6 +133,8 @@ void ReadAlign::stitchPieces(char **R, uint Lread) {
                 wb++;
                 winBin[ WC[iWin][WC_Str] ][ wb ]=(uintWinBin) iWin;
             };
+            if (wb>WC[iWin][WC_gEnd])
+                winBinWrittenAdd(WC[iWin][WC_Str], WC[iWin][WC_gEnd]+1, wb);
             WC[iWin][WC_gEnd] = wb;
 
 
@@ -145,17 +172,12 @@ void ReadAlign::stitchPieces(char **R, uint Lread) {
             a1 &= mapGen.GstrandMask; //remove strand bit
             uint aRstart=PC[iP][PC_rStart];
 
-            //convert to positive strand
-            if (aDir==1 && aStr==0) {
-                aStr=1;
-                aRstart = Lread - (aLength+aRstart);
-            } else if (aDir==0 && aStr==1) {
-                aRstart = Lread - (aLength+aRstart);
-                a1 = mapGen.nGenome - (aLength+a1);
-            } else if (aDir==1 && aStr==1) {
-                aStr=0;
-                a1 = mapGen.nGenome - (aLength+a1);
-            };
+            //convert to positive strand, without branches (see the loop above)
+            uint a1rev = mapGen.nGenome - (aLength+a1);
+            uint aRrev = Lread - (aLength+aRstart);
+            a1 = aStr==1 ? a1rev : a1;
+            aStr ^= aDir;
+            aRstart = aStr==1 ? aRrev : aRstart;
 
             //final strand
             if (revertStrand) { //modified strand according to user input CHECK!!!!
@@ -266,9 +288,19 @@ std::time(&timeStart);
     uint iW1=0;//index of non-empty windows
     uint trNtotal=0; //total number of recorded transcripts
 
+    uint iWpf=0; //next window with aligns, whose genome lines are prefetched one window ahead
+    while (iWpf<nW && nWA[iWpf]==0) iWpf++;
+    if (iWpf<nW)
+        prefetchWindowGenome(mapGen.G, WA[iWpf], nWA[iWpf]);
+
     for (uint iW=0; iW<nW; iW++) {//transcripts for all windows
 
         if (nWA[iW]==0) continue; //the window does not contain any aligns because it was merged with other windows
+
+        iWpf=iW+1;
+        while (iWpf<nW && nWA[iWpf]==0) iWpf++;
+        if (iWpf<nW)
+            prefetchWindowGenome(mapGen.G, WA[iWpf], nWA[iWpf]);
 
 //         {//debug
 //             if ( WA[iW][0][WA_iFrag]==WA[iW][nWA[iW]-1][WA_iFrag] ) continue;

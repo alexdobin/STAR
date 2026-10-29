@@ -197,6 +197,20 @@ hwrite(hFILE *fp, const void *buffer, size_t nbytes)
 */
 int hflush(hFILE *fp) HTS_RESULT_USED;
 
+/*!
+  @abstract  For writing streams, write buffered output to the underlying
+             stream without the backend's flush (fsync for files)
+  @return    0 if successful, or EOF if an error occurred.
+*/
+int hflush_buffer(hFILE *fp) HTS_RESULT_USED;
+
+/*!
+  @abstract  For writing file streams on Linux, whether writeback to disk is
+             started every 16 MB written (the default), so that a closing
+             hflush has little left to write
+*/
+void hfile_set_writeback(hFILE *fp, int enable);
+
 #ifdef __cplusplus
 }
 #endif

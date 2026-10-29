@@ -32,6 +32,7 @@ int ReadAlign::createExtendWindowsWithAlign(uint a1, uint aStr) {
                 for (uint ii=iBin+1; ii<=aBin; ii++) {//mark al bins with the existing windows ID
                     wB[ii]=iWin;
                 };
+                winBinWrittenAdd(aStr, iBin+1, aBin);
             };
         };
 
@@ -57,12 +58,14 @@ int ReadAlign::createExtendWindowsWithAlign(uint a1, uint aStr) {
                 for (uint ii=aBin; ii<=iBin; ii++) {//mark al bins with the existing windows ID
                     wB[ii]=iWin;
                 };
+                winBinWrittenAdd(aStr, aBin, iBin);
             };
         };
 
 
         if (!flagMergeLeft && !flagMergeRight) {//no merging, a new window was added
             wB[aBin]=iWin=nW; //add new window ID for now, may change it later
+            winBinWrittenAdd(aStr, aBin, aBin);
             WC[iWin][WC_Chr]=mapGen.chrBin[aBin >> P.winBinChrNbits];
             WC[iWin][WC_Str]=aStr;
             WC[iWin][WC_gEnd]=WC[iWin][WC_gStart]=aBin;

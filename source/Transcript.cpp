@@ -5,6 +5,71 @@ Transcript::Transcript()
     reset();
 };
 
+Transcript::Transcript(const Transcript &t)
+    : cigar(t.cigar), varInd(t.varInd), varGenCoord(t.varGenCoord), varReadCoord(t.varReadCoord), varAllele(t.varAllele), alignGenes(t.alignGenes)
+{
+    copyRowsScalars(t);
+};
+
+Transcript& Transcript::operator=(const Transcript &t)
+{
+    if (this != &t) {
+        copyRowsScalars(t);
+        cigar=t.cigar;
+        varInd=t.varInd;
+        varGenCoord=t.varGenCoord;
+        varReadCoord=t.varReadCoord;
+        varAllele=t.varAllele;
+        alignGenes=t.alignGenes;
+    };
+    return *this;
+};
+
+void Transcript::copyRowsScalars(const Transcript &t)
+{//the per-exon arrays are copied for rows 0..nExons (row nExons is read by a few callers), not all MAX_N_EXONS
+ //rows past those keep the destination's old values. Every scalar member must be listed here.
+    uint nRows = t.nExons<MAX_N_EXONS ? t.nExons+1 : MAX_N_EXONS;
+    const uint kRows = MAX_N_EXONS<4 ? MAX_N_EXONS : 4; //fixed-size copy of the first rows, the rest only when live
+    memcpy(exons, t.exons, kRows*sizeof(exons[0]));
+    memcpy(shiftSJ, t.shiftSJ, kRows*sizeof(shiftSJ[0]));
+    memcpy(canonSJ, t.canonSJ, kRows*sizeof(canonSJ[0]));
+    memcpy(sjAnnot, t.sjAnnot, kRows*sizeof(sjAnnot[0]));
+    memcpy(sjStr, t.sjStr, kRows*sizeof(sjStr[0]));
+    if (nRows>kRows) {
+        memcpy(exons+kRows, t.exons+kRows, (nRows-kRows)*sizeof(exons[0]));
+        memcpy(shiftSJ+kRows, t.shiftSJ+kRows, (nRows-kRows)*sizeof(shiftSJ[0]));
+        memcpy(canonSJ+kRows, t.canonSJ+kRows, (nRows-kRows)*sizeof(canonSJ[0]));
+        memcpy(sjAnnot+kRows, t.sjAnnot+kRows, (nRows-kRows)*sizeof(sjAnnot[0]));
+        memcpy(sjStr+kRows, t.sjStr+kRows, (nRows-kRows)*sizeof(sjStr[0]));
+    };
+
+    intronMotifs[0]=t.intronMotifs[0]; intronMotifs[1]=t.intronMotifs[1]; intronMotifs[2]=t.intronMotifs[2];
+    sjMotifStrand=t.sjMotifStrand;
+    sjYes=t.sjYes;
+    nExons=t.nExons;
+    readLengthOriginal=t.readLengthOriginal; readLength=t.readLength;
+    Lread=t.Lread; readLengthPairOriginal=t.readLengthPairOriginal;
+    iRead=t.iRead;
+    readNmates=t.readNmates;
+    readName=t.readName;
+    iFrag=t.iFrag;
+    rStart=t.rStart; roStart=t.roStart; rLength=t.rLength; gStart=t.gStart; gLength=t.gLength; cStart=t.cStart;
+    Chr=t.Chr; Str=t.Str; roStr=t.roStr;
+    haploType=t.haploType;
+    primaryFlag=t.primaryFlag;
+    nMatch=t.nMatch;
+    nMM=t.nMM;
+    mappedLength=t.mappedLength;
+    extendL=t.extendL;
+    maxScore=t.maxScore;
+    nGap=t.nGap; lGap=t.lGap;
+    nDel=t.nDel;
+    nIns=t.nIns;
+    lDel=t.lDel;
+    lIns=t.lIns;
+    nUnique=t.nUnique; nAnchor=t.nAnchor;
+};
+
 void Transcript::reset() {
     extendL=0;
 

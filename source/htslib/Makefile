@@ -133,7 +133,30 @@ LIBHTS_OBJS = \
 	cram/string_alloc.o \
 	cram/thread_pool.o \
 	cram/vlen.o \
-	cram/zfio.o
+	cram/zfio.o \
+	$(LIBDEFLATE_OBJS)
+
+# libdeflate v1.26 (https://github.com/ebiggers/libdeflate, MIT, see
+# libdeflate/COPYING): the files its compressor and crc32 need, unmodified.
+# The two cpu_features.c get distinct object names so that ar keeps both.
+LIBDEFLATE_OBJS = \
+	libdeflate/lib/deflate_compress.o \
+	libdeflate/lib/crc32.o \
+	libdeflate/lib/utils.o \
+	libdeflate/lib/x86_cpu_features.o \
+	libdeflate/lib/arm_cpu_features.o
+
+libdeflate/lib/x86_cpu_features.o: libdeflate/lib/x86/cpu_features.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ libdeflate/lib/x86/cpu_features.c
+
+libdeflate/lib/x86_cpu_features.pico: libdeflate/lib/x86/cpu_features.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(EXTRA_CFLAGS_PIC) -c -o $@ libdeflate/lib/x86/cpu_features.c
+
+libdeflate/lib/arm_cpu_features.o: libdeflate/lib/arm/cpu_features.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ libdeflate/lib/arm/cpu_features.c
+
+libdeflate/lib/arm_cpu_features.pico: libdeflate/lib/arm/cpu_features.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(EXTRA_CFLAGS_PIC) -c -o $@ libdeflate/lib/arm/cpu_features.c
 
 
 libhts.a: $(LIBHTS_OBJS)
@@ -169,7 +192,7 @@ cram_structs_h = cram/cram_structs.h cram/thread_pool.h cram/string_alloc.h htsl
 cram_open_trace_file_h = cram/open_trace_file.h cram/mFILE.h
 hfile_internal_h = hfile_internal.h $(htslib_hfile_h)
 
-bgzf.o bgzf.pico: bgzf.c config.h $(htslib_hts_h) $(htslib_bgzf_h) $(htslib_hfile_h) htslib/khash.h
+bgzf.o bgzf.pico: bgzf.c config.h $(htslib_hts_h) $(htslib_bgzf_h) $(htslib_hfile_h) htslib/khash.h libdeflate/libdeflate.h
 kstring.o kstring.pico: kstring.c htslib/kstring.h
 knetfile.o knetfile.pico: knetfile.c htslib/knetfile.h
 hfile.o hfile.pico: hfile.c $(htslib_hfile_h) $(hfile_internal_h)
@@ -275,7 +298,7 @@ testclean:
 	-rm -f test/*.tmp test/*.tmp.*
 
 mostlyclean: testclean
-	-rm -f *.o *.pico cram/*.o cram/*.pico test/*.o test/*.dSYM version.h
+	-rm -f *.o *.pico cram/*.o cram/*.pico libdeflate/lib/*.o libdeflate/lib/*.pico test/*.o test/*.dSYM version.h
 
 clean: mostlyclean clean-$(SHLIB_FLAVOUR)
 	-rm -f libhts.a $(BUILT_PROGRAMS) $(BUILT_TEST_PROGRAMS)

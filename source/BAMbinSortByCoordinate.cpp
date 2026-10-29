@@ -3,13 +3,25 @@
 #include "serviceFuns.cpp"
 #include "BAMfunctions.h"
 #include "SequenceFuns.h"
+#include <algorithm>
+
+//coordinate sort key; (coord, iRead, offset) is unique within a bin, so any correct sort gives one order
+struct BinSortKey {
+    uint coord, iRead, offset;
+};
+
+static inline bool binSortKeyLess(const BinSortKey &x, const BinSortKey &y) {
+    if (x.coord!=y.coord) return x.coord<y.coord;
+    if (x.iRead!=y.iRead) return x.iRead<y.iRead;
+    return x.offset<y.offset;
+};
 
 void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, string dirBAMsort, Parameters &P, Genome &genome, Solo &solo) {
 
     if (binS==0) return; //nothing to do for empty bins
     //allocate arrays
     char *bamIn=new char[binS+1];
-    uint *startPos=new uint[binN*3];
+    BinSortKey *startPos=new BinSortKey[binN];
 
     uint bamInBytes=0;
     //load all aligns
@@ -41,15 +53,15 @@ void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, st
 
     for (uint ib=0,ia=0;ia<binN;ia++) {
         uint32 *bamIn32=(uint32*) (bamIn+ib);
-        startPos[ia*3]  =( ((uint) bamIn32[1]) << 32) | ( (uint)bamIn32[2] );
-        startPos[ia*3+2]=ib;
+        startPos[ia].coord  =( ((uint) bamIn32[1]) << 32) | ( (uint)bamIn32[2] );
+        startPos[ia].offset=ib;
         ib+=bamIn32[0]+sizeof(uint32);//note that size of the BAM record does not include the size record itself
-        startPos[ia*3+1]=*( (uint*) (bamIn+ib) ); //read order
+        startPos[ia].iRead=*( (uint*) (bamIn+ib) ); //read order
         ib+=sizeof(uint);
     };
 
     //sort
-    qsort((void*) startPos, binN, sizeof(uint)*3, funCompareArrays<uint,3>);
+    std::sort(startPos, startPos+binN, binSortKeyLess);
 
     BGZF *bgzfBin;
     bgzfBin=bgzf_open((dirBAMsort+"/b"+to_string((uint) iBin)).c_str(),("w"+to_string((long long) P.outBAMcompression)).c_str());
@@ -59,12 +71,13 @@ void BAMbinSortByCoordinate(uint32 iBin, uint binN, uint binS, uint nThreads, st
         errOut <<"SOLUTION: check that the disk is not full, increase the max number of open files with Linux command ulimit -n before running STAR";
         exitWithError(errOut.str(), std::cerr, P.inOut->logMain, EXIT_CODE_PARAMETER, P);
     };
+    bgzf_temporary(bgzfBin);
 
     outBAMwriteHeader(bgzfBin,P.samHeaderSortedCoord,genome.chrNameAll,genome.chrLengthAll);
     //send ordered aligns to bgzf one-by-one
     char bam1[BAM_ATTR_MaxSize];//temp array
     for (uint ia=0;ia<binN;ia++) {
-        char* bam0=bamIn+startPos[ia*3+2];
+        char* bam0=bamIn+startPos[ia].offset;
         uint32 size0=*((uint32*) bam0)+sizeof(uint32);
         
         if (solo.pSolo.samAttrYes)

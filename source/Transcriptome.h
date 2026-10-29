@@ -2,6 +2,7 @@
 #define CODE_Transcriptome
 
 #include <set>
+#include <memory>
 
 #include "IncludeDefine.h"
 #include "Parameters.h"
@@ -9,6 +10,8 @@
 #include "Quantifications.h"
 #include "AlignVsTranscript.h"
 #include "ReadAnnotations.h"
+
+class TranscriptomeEarly;
 
 class Transcriptome {
 public:
@@ -44,7 +47,9 @@ public:
     Quantifications *quants;
 
     //methods:
-    Transcriptome (Parameters &Pin); //create transcriptome structure, load and initialize parameters
+    Transcriptome (Parameters &Pin, TranscriptomeEarly *earlyIn=NULL); //create transcriptome structure, load and initialize parameters; earlyIn: on the thread started by loadEarly
+    static std::shared_ptr<TranscriptomeEarly> loadEarly(Parameters &P); //construct on a thread; empty if no thread starts
+    static Transcriptome *takeEarly(std::shared_ptr<TranscriptomeEarly> &early, Parameters &P); //wait for that thread, write its Log.out lines, raise its fatal error
     uint32 quantAlign (Transcript &aG, Transcript *aTall);//transform coordinates for all aligns from genomic in RA to transcriptomic in RAtr
     void geneCountsAddAlign(uint nA, Transcript **aAll, vector<int32> &gene1); //add one alignment to gene counts
     void quantsAllocate(); //allocate quants structure
@@ -57,6 +62,11 @@ public:
 
 private:
     Parameters &P; //normal "genomic" parameters
+    TranscriptomeEarly *early; //set only while the constructor runs on the thread started by loadEarly
+
+    std::ifstream & trOpen(std::string fileName, std::string errorID, std::string solutionString);
+    void fatal(const string &message, int errorInt);
+    ostream & logOut();
 
 };
 

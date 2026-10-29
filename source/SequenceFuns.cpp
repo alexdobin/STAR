@@ -2,95 +2,54 @@
 #include <assert.h>  
 
 void complementSeqNumbers(char* ReadsIn, char* ReadsOut, uint Lread) {//complement the numeric sequences
-    for (uint jj=0;jj<Lread;jj++) {
-        switch (int(ReadsIn[jj])){
-            case (3): ReadsOut[jj]=char(0);break;
-            case (2): ReadsOut[jj]=char(1);break;
-            case (1): ReadsOut[jj]=char(2);break;
-            case (0): ReadsOut[jj]=char(3);break;
-            default:  ReadsOut[jj]=ReadsIn[jj];
-        };
+    for (uint jj=0;jj<Lread;jj++) {//0-3 map to 3-0; every other byte, negative chars included, maps to itself
+        unsigned char c=(unsigned char)ReadsIn[jj];
+        ReadsOut[jj]=char(c<4 ? 3-c : c);
     };
+};
+
+//per-byte tables indexed by the unsigned input byte (a switch per base compiles to a mispredicted indirect jump)
+//convertNucleotidesToNumbers: A/a 0, C/c 1, G/g 2, T/t 3, every other byte 4
+static const char convNuclTable[256]={
+    4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
+    4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
+    4,0,4,1,4,4,4,2,4,4,4,4,4,4,4,4,4,4,4,4,3,4,4,4,4,4,4,4,4,4,4,4,
+    4,0,4,1,4,4,4,2,4,4,4,4,4,4,4,4,4,4,4,4,3,4,4,4,4,4,4,4,4,4,4,4,
+    4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
+    4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
+    4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
+    4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
+};
+//revComplementNucleotides: the IUPAC complement of A C G T N R Y K M S W B D V H and their lower case; every other byte maps to itself
+static const unsigned char revComplNuclTable[256]={
+    0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
+    16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,
+    32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,
+    48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,
+    64,84,86,71,72,69,70,67,68,73,74,77,76,75,78,79,
+    80,81,89,83,65,85,66,87,88,82,90,91,92,93,94,95,
+    96,116,118,103,104,101,102,99,100,105,106,109,108,107,110,111,
+    112,113,121,115,97,117,98,119,120,114,122,123,124,125,126,127,
+    128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,
+    144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,
+    160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,
+    176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,
+    192,193,194,195,196,197,198,199,200,201,202,203,204,205,206,207,
+    208,209,210,211,212,213,214,215,216,217,218,219,220,221,222,223,
+    224,225,226,227,228,229,230,231,232,233,234,235,236,237,238,239,
+    240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255,
 };
 
 void revComplementNucleotides(char* ReadsIn, char* ReadsOut, uint Lread) {//complement the numeric sequences
     for (uint jj=0;jj<Lread;jj++) {
-        switch (ReadsIn[Lread-1-jj]){
-            case ('A'): ReadsOut[jj]='T';break;
-            case ('C'): ReadsOut[jj]='G';break;
-            case ('G'): ReadsOut[jj]='C';break;
-            case ('T'): ReadsOut[jj]='A';break;
-            case ('N'): ReadsOut[jj]='N';break;
-            case ('R'): ReadsOut[jj]='Y';break;
-            case ('Y'): ReadsOut[jj]='R';break;
-            case ('K'): ReadsOut[jj]='M';break;
-            case ('M'): ReadsOut[jj]='K';break;
-            case ('S'): ReadsOut[jj]='S';break;
-            case ('W'): ReadsOut[jj]='W';break;
-            case ('B'): ReadsOut[jj]='V';break;
-            case ('D'): ReadsOut[jj]='H';break;
-            case ('V'): ReadsOut[jj]='B';break;
-            case ('H'): ReadsOut[jj]='D';break;
-
-            case ('a'): ReadsOut[jj]='t';break;
-            case ('c'): ReadsOut[jj]='g';break;
-            case ('g'): ReadsOut[jj]='c';break;
-            case ('t'): ReadsOut[jj]='a';break;
-            case ('n'): ReadsOut[jj]='n';break;
-            case ('r'): ReadsOut[jj]='y';break;
-            case ('y'): ReadsOut[jj]='r';break;
-            case ('k'): ReadsOut[jj]='m';break;
-            case ('m'): ReadsOut[jj]='k';break;
-            case ('s'): ReadsOut[jj]='s';break;
-            case ('w'): ReadsOut[jj]='w';break;
-            case ('b'): ReadsOut[jj]='v';break;
-            case ('d'): ReadsOut[jj]='h';break;
-            case ('v'): ReadsOut[jj]='b';break;
-            case ('h'): ReadsOut[jj]='d';break;
-
-            default:   ReadsOut[jj]=ReadsIn[Lread-1-jj];
-        };
+        ReadsOut[jj]=char(revComplNuclTable[(unsigned char)ReadsIn[Lread-1-jj]]);
     };
 };
 
 void revComplementNucleotides(string &seq) {//complement the numeric sequences
     string seq1(seq);
     for (uint jj=0;jj<seq.size();jj++) {
-        switch (seq1[seq.size()-1-jj]){
-            case ('A'): seq[jj]='T';break;
-            case ('C'): seq[jj]='G';break;
-            case ('G'): seq[jj]='C';break;
-            case ('T'): seq[jj]='A';break;
-            case ('N'): seq[jj]='N';break;
-            case ('R'): seq[jj]='Y';break;
-            case ('Y'): seq[jj]='R';break;
-            case ('K'): seq[jj]='M';break;
-            case ('M'): seq[jj]='K';break;
-            case ('S'): seq[jj]='S';break;
-            case ('W'): seq[jj]='W';break;
-            case ('B'): seq[jj]='V';break;
-            case ('D'): seq[jj]='H';break;
-            case ('V'): seq[jj]='B';break;
-            case ('H'): seq[jj]='D';break;
-
-            case ('a'): seq[jj]='t';break;
-            case ('c'): seq[jj]='g';break;
-            case ('g'): seq[jj]='c';break;
-            case ('t'): seq[jj]='a';break;
-            case ('n'): seq[jj]='n';break;
-            case ('r'): seq[jj]='y';break;
-            case ('y'): seq[jj]='r';break;
-            case ('k'): seq[jj]='m';break;
-            case ('m'): seq[jj]='k';break;
-            case ('s'): seq[jj]='s';break;
-            case ('w'): seq[jj]='w';break;
-            case ('b'): seq[jj]='v';break;
-            case ('d'): seq[jj]='h';break;
-            case ('v'): seq[jj]='b';break;
-            case ('h'): seq[jj]='d';break;
-
-            default:   seq[jj]=seq1[seq.size()-1-jj];
-        };
+        seq[jj]=char(revComplNuclTable[(unsigned char)seq1[seq.size()-1-jj]]);
     };
 };
 
@@ -130,19 +89,8 @@ void nuclPackBAM(char* ReadsIn, char* ReadsOut, uint Lread) {//pack nucleotides 
 
 void convertNucleotidesToNumbers(const char* R0, char* R1, const uint Lread) {//transform sequence  from ACGT into 0-1-2-3 code
     for (uint jj=0;jj<Lread;jj++) {
-                    switch (int(R0[jj])){
-                        case (65): case(97):
-                            R1[jj]=char(0);break;//A
-                        case (67): case(99):
-                            R1[jj]=char(1);break;//C
-                        case (71): case(103):
-                            R1[jj]=char(2);break;//G
-                        case (84): case(116):
-                            R1[jj]=char(3);break;//T
-                        default:
-                            R1[jj]=char(4);//anything else is converted to N
-                    };
-                };
+        R1[jj]=convNuclTable[(unsigned char)R0[jj]];//anything else is converted to N
+    };
 };
 
 void convertCapitalBasesToNum(uint8_t *rS, uint64_t N)

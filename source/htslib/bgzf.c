@@ -37,6 +37,7 @@
 #include "htslib/hts.h"
 #include "htslib/bgzf.h"
 #include "htslib/hfile.h"
+#include "libdeflate/libdeflate.h"
 
 #define BLOCK_HEADER_LENGTH 18
 #define BLOCK_FOOTER_LENGTH 8
@@ -213,27 +214,51 @@ BGZF *bgzf_hopen(hFILE *hfp, const char *mode)
 	return fp;
 }
 
-static int bgzf_compress(void *_dst, int *dlen, void *src, int slen, int level)
+// libdeflate stores payloads up to 55 - 4*level bytes uncompressed (BTYPE 0) at
+// levels >= 1, so those, and the empty end-of-file block, still go through zlib.
+#define BGZF_ZLIB_MAX_PAYLOAD 55
+
+// *ldc caches a libdeflate compressor made for level *ldc_level.
+static int bgzf_compress(void *_dst, int *dlen, void *src, int slen, int level,
+		struct libdeflate_compressor **ldc, int *ldc_level)
 {
 	uint32_t crc;
-	z_stream zs;
 	uint8_t *dst = (uint8_t*)_dst;
+	int avail = *dlen - BLOCK_HEADER_LENGTH - BLOCK_FOOTER_LENGTH;
+	size_t clen;
 
 	// compress the body
-	zs.zalloc = NULL; zs.zfree = NULL;
-	zs.next_in  = (Bytef*)src;
-	zs.avail_in = slen;
-	zs.next_out = dst + BLOCK_HEADER_LENGTH;
-	zs.avail_out = *dlen - BLOCK_HEADER_LENGTH - BLOCK_FOOTER_LENGTH;
-	if (deflateInit2(&zs, level, Z_DEFLATED, -15, 8, Z_DEFAULT_STRATEGY) != Z_OK) return -1; // -15 to disable zlib header/footer
-	if (deflate(&zs, Z_FINISH) != Z_STREAM_END) return -1;
-	if (deflateEnd(&zs) != Z_OK) return -1;
-	*dlen = zs.total_out + BLOCK_HEADER_LENGTH + BLOCK_FOOTER_LENGTH;
+	if (level != 0 && slen <= BGZF_ZLIB_MAX_PAYLOAD) {
+		z_stream zs;
+		zs.zalloc = NULL; zs.zfree = NULL;
+		zs.next_in  = (Bytef*)src;
+		zs.avail_in = slen;
+		zs.next_out = dst + BLOCK_HEADER_LENGTH;
+		zs.avail_out = avail;
+		if (deflateInit2(&zs, level, Z_DEFLATED, -15, 8, Z_DEFAULT_STRATEGY) != Z_OK) return -1; // -15 to disable zlib header/footer
+		if (deflate(&zs, Z_FINISH) != Z_STREAM_END) return -1;
+		if (deflateEnd(&zs) != Z_OK) return -1;
+		clen = zs.total_out;
+	} else {
+		// upstream htslib's map from zlib levels (-1 is 6) to libdeflate's 0-12;
+		// libdeflate's levels 2-9 can compress BAM worse than its level 1
+		static const int lvl_map[10] = {0, 1, 2, 3, 5, 6, 7, 8, 10, 12};
+		int lvl = lvl_map[level < 0 ? 6 : level > 9 ? 9 : level];
+		if (*ldc == NULL || *ldc_level != lvl) {
+			libdeflate_free_compressor(*ldc);
+			*ldc = libdeflate_alloc_compressor(lvl);
+			if (*ldc == NULL) return -1;
+			*ldc_level = lvl;
+		}
+		clen = libdeflate_deflate_compress(*ldc, src, slen, dst + BLOCK_HEADER_LENGTH, avail);
+		if (clen == 0) return -1;
+	}
+	*dlen = clen + BLOCK_HEADER_LENGTH + BLOCK_FOOTER_LENGTH;
 	// write the header
 	memcpy(dst, g_magic, BLOCK_HEADER_LENGTH); // the last two bytes are a place holder for the length of the block
 	packInt16(&dst[16], *dlen - 1); // write the compressed length; -1 to fit 2 bytes
 	// write the footer
-	crc = crc32(crc32(0L, NULL, 0L), (Bytef*)src, slen);
+	crc = libdeflate_crc32(0, src, slen);
 	packInt32((uint8_t*)&dst[*dlen - 8], crc);
 	packInt32((uint8_t*)&dst[*dlen - 4], slen);
 	return 0;
@@ -243,12 +268,19 @@ static int bgzf_compress(void *_dst, int *dlen, void *src, int slen, int level)
 static int deflate_block(BGZF *fp, int block_length)
 {
 	int comp_size = BGZF_MAX_BLOCK_SIZE;
-	if (bgzf_compress(fp->compressed_block, &comp_size, fp->uncompressed_block, block_length, fp->compress_level) != 0) {
+	if (bgzf_compress(fp->compressed_block, &comp_size, fp->uncompressed_block, block_length, fp->compress_level,
+			&fp->compressor, &fp->compressor_level) != 0) {
 		fp->errcode |= BGZF_ERR_ZLIB;
 		return -1;
 	}
 	fp->block_offset = 0;
 	return comp_size;
+}
+
+int bgzf_compress_block(void *dst, int *dlen, const void *src, int slen, int level,
+		struct libdeflate_compressor **ldc, int *ldc_level)
+{
+	return bgzf_compress(dst, dlen, (void*)src, slen, level, ldc, ldc_level);
 }
 
 // Inflate the block in fp->compressed_block into fp->uncompressed_block
@@ -547,6 +579,8 @@ typedef struct {
 	struct bgzf_mtaux_t *mt;
 	void *buf;
 	int i, errcode, toproc, compress_level;
+	struct libdeflate_compressor *compressor;
+	int compressor_level;
 } worker_t;
 
 typedef struct bgzf_mtaux_t {
@@ -574,7 +608,8 @@ static int worker_aux(worker_t *w)
 	w->errcode = 0;
 	for (i = w->i; i < w->mt->curr; i += w->mt->n_threads) {
 		int clen = BGZF_MAX_BLOCK_SIZE;
-		if (bgzf_compress(w->buf, &clen, w->mt->blk[i], w->mt->len[i], w->compress_level) != 0)
+		if (bgzf_compress(w->buf, &clen, w->mt->blk[i], w->mt->len[i], w->compress_level,
+				&w->compressor, &w->compressor_level) != 0)
 			w->errcode |= BGZF_ERR_ZLIB;
 		memcpy(w->mt->blk[i], w->buf, clen);
 		w->mt->len[i] = clen;
@@ -631,7 +666,10 @@ static void mt_destroy(mtaux_t *mt)
 	for (i = 1; i < mt->n_threads; ++i) pthread_join(mt->tid[i], 0); // worker 0 is effectively launched by the master thread
 	// free other data allocated on heap
 	for (i = 0; i < mt->n_blks; ++i) free(mt->blk[i]);
-	for (i = 0; i < mt->n_threads; ++i) free(mt->w[i].buf);
+	for (i = 0; i < mt->n_threads; ++i) {
+		free(mt->w[i].buf);
+		libdeflate_free_compressor(mt->w[i].compressor);
+	}
 	free(mt->blk); free(mt->len); free(mt->w); free(mt->tid);
 	pthread_cond_destroy(&mt->cv);
 	pthread_mutex_destroy(&mt->lock);
@@ -765,7 +803,7 @@ int bgzf_close(BGZF* fp)
 		fp->compress_level = -1;
 		block_length = deflate_block(fp, 0); // write an empty block
 		if (hwrite(fp->fp, fp->compressed_block, block_length) < 0
-			|| hflush(fp->fp) != 0) {
+			|| (fp->is_temporary ? hflush_buffer(fp->fp) : hflush(fp->fp)) != 0) {
 			fp->errcode |= BGZF_ERR_IO;
 			return -1;
 		}
@@ -781,11 +819,18 @@ int bgzf_close(BGZF* fp)
 	ret = hclose(fp->fp);
 	if (ret != 0) return -1;
     bgzf_index_destroy(fp);
+	libdeflate_free_compressor(fp->compressor);
 	free(fp->uncompressed_block);
 	free(fp->compressed_block);
 	free_cache(fp);
 	free(fp);
 	return 0;
+}
+
+void bgzf_temporary(BGZF *fp)
+{
+	fp->is_temporary = 1;
+	hfile_set_writeback(fp->fp, 0);
 }
 
 void bgzf_set_cache_size(BGZF *fp, int cache_size)

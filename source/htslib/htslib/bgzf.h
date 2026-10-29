@@ -43,6 +43,7 @@
 
 struct hFILE;
 struct bgzf_mtaux_t;
+struct libdeflate_compressor;
 typedef struct __bgzidx_t bgzidx_t;
 
 struct BGZF {
@@ -57,6 +58,9 @@ struct BGZF {
     bgzidx_t *idx;      // BGZF index
     int idx_build_otf;  // build index on the fly, set by bgzf_index_build_init()
     z_stream *gz_stream;// for gzip-compressed files
+    int is_temporary;   // set by bgzf_temporary()
+    struct libdeflate_compressor *compressor; // writing: made on the first block, for compressor_level
+    int compressor_level;
 };
 #ifndef HTS_BGZF_TYPEDEF
 typedef struct BGZF BGZF;
@@ -114,6 +118,13 @@ extern "C" {
 	int bgzf_close(BGZF *fp);
 
 	/**
+	 * Mark a file opened for writing as temporary, to be read back and
+	 * deleted: its data is not pushed to disk while it is written, and
+	 * bgzf_close does not sync it.
+	 */
+	void bgzf_temporary(BGZF *fp);
+
+	/**
 	 * Read up to _length_ bytes from the file storing into _data_.
 	 *
 	 * @param fp     BGZF file handler
@@ -157,6 +168,16 @@ extern "C" {
 	 * @return       number of bytes actually written; -1 on error
 	 */
 	ssize_t bgzf_raw_write(BGZF *fp, const void *data, size_t length);
+
+	/**
+	 * Compress slen (<= BGZF_BLOCK_SIZE) bytes at src into one complete BGZF
+	 * block at dst, as bgzf_write does at this level; *dlen holds dst's
+	 * capacity on entry and the block's length on return. *ldc (NULL at
+	 * first) and *ldc_level keep the caller's compressor between calls.
+	 * Returns 0, or -1 on error.
+	 */
+	int bgzf_compress_block(void *dst, int *dlen, const void *src, int slen, int level,
+			struct libdeflate_compressor **ldc, int *ldc_level);
 
 	/**
 	 * Write the data in the buffer to the file.

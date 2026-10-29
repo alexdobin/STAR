@@ -5,6 +5,7 @@
 #include "streamFuns.h"
 #include "SharedMemory.h"
 #include "genomeScanFastaFiles.h"
+#include "GTF.h"
 
 //addresses with respect to shmStart of several genome values
 #define SHM_sizeG 0
@@ -127,6 +128,12 @@ void Genome::genomeLoad(){//allocate and load Genome
     pGe.gType=1;
     if (P1.pGe.gTypeString=="SuperTranscriptome")
         pGe.gType=101;
+
+    if (&pGe==&P.pGe && P.runMode=="alignReads" && P.sjdbInsert.pass1 && P.runThreadN>1 && pGe.gLoad=="NoSharedMemory"
+        && pGe.gFastaFiles.at(0)=="-" && pGe.gType!=101 && sjdbOverhang>0 && pGe.sjdbGTFfile!="-" && chrNameIndex.size()>0) {
+        //sjdbInsertJunctions will parse the GTF: start it now, beside the load; extra fasta sequences would change the chromosomes it reads
+        GTF::loadEarly(*this, P, P.sjdbInsert.outDir);
+    };
 
     P.inOut->logMain << "Started loading the genome: " << asctime (localtime ( &rawtime ))<<"\n"<<flush;
 
@@ -270,6 +277,7 @@ void Genome::genomeLoad(){//allocate and load Genome
                 };
 
                 G1=new char[nGenomePass2+L+L];
+                adviseHugePages(G1, nGenomePass2+L+L);
 
                 SApass2.defineBits(GstrandBit+1,nSApass2);
                 SApass2.allocateArray();
@@ -284,9 +292,11 @@ void Genome::genomeLoad(){//allocate and load Genome
             } else {//no sjdb insertions
                 if (genomeInsertL==0) {// no sequence insertion, simple allocation
                     G1=new char[nGenome+L+L];
+                    adviseHugePages(G1, nGenome+L+L);
                     SA.allocateArray();
                 } else {
                     G1=new char[nGenome+L+L+genomeInsertL];
+                    adviseHugePages(G1, nGenome+L+L+genomeInsertL);
                     SAinsert.defineBits(GstrandBit+1,nSA+2*genomeInsertL);//TODO: re-define GstrandBit if necessary
                     SAinsert.allocateArray();
                     SA.pointArray(SAinsert.charArray+SAinsert.lengthByte-SA.lengthByte);
@@ -312,7 +322,8 @@ void Genome::genomeLoad(){//allocate and load Genome
         P.inOut->logMain <<"Genome file size: "<<nGenome <<" bytes; state: good=" <<GenomeIn.good()\
                 <<" eof="<<GenomeIn.eof()<<" fail="<<GenomeIn.fail()<<" bad="<<GenomeIn.bad()<<"\n"<<flush;
         P.inOut->logMain <<"Loading Genome ... " << flush;
-        uint64 genomeReadBytesN=fstreamReadBig(GenomeIn,G,nGenome);
+        int loadThreadN=min(P.runThreadN, 8);//past 8 threads the load gets little faster and costs more CPU time
+        uint64 genomeReadBytesN=fstreamReadBigParallel(GenomeIn,pGe.gDir+"/Genome",0,G,nGenome,loadThreadN);
         P.inOut->logMain <<"done! state: good=" <<GenomeIn.good()\
                          <<" eof="<<GenomeIn.eof()<<" fail="<<GenomeIn.fail()<<" bad="<<GenomeIn.bad()<<"; loaded "<<genomeReadBytesN<<" bytes\n" << flush;
         GenomeIn.close();
@@ -326,13 +337,13 @@ void Genome::genomeLoad(){//allocate and load Genome
         P.inOut->logMain <<"SA file size: "<<SA.lengthByte <<" bytes; state: good=" <<SAin.good()\
                 <<" eof="<<SAin.eof()<<" fail="<<SAin.fail()<<" bad="<<SAin.bad()<<"\n"<<flush;
         P.inOut->logMain <<"Loading SA ... " << flush;
-        genomeReadBytesN=fstreamReadBig(SAin,SA.charArray, SA.lengthByte);
+        genomeReadBytesN=fstreamReadBigParallel(SAin,pGe.gDir+"/SA",0,SA.charArray, SA.lengthByte,loadThreadN);
         P.inOut->logMain <<"done! state: good=" <<SAin.good()\
                 <<" eof="<<SAin.eof()<<" fail="<<SAin.fail()<<" bad="<<SAin.bad()<<"; loaded "<<genomeReadBytesN<<" bytes\n" << flush;
         SAin.close();
 
         P.inOut->logMain <<"Loading SAindex ... " << flush;
-        SAiInBytes +=fstreamReadBig(SAiIn,SAi.charArray, SAi.lengthByte);
+        SAiInBytes +=fstreamReadBigParallel(SAiIn,pGe.gDir+"/SAindex",SAiInBytes,SAi.charArray, SAi.lengthByte,loadThreadN);
         P.inOut->logMain <<"done: "<<SAiInBytes<<" bytes\n" << flush;
     };
 

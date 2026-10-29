@@ -21,6 +21,8 @@ class PackedArray {
 //     PackedArray(uint N);
 };
 
+void adviseHugePages(char* array, uint nBytes);//ask for transparent huge pages on the 2 MB blocks inside a large array, before it is first touched
+
 inline uint PackedArray::operator [] (uint ii) {
    uint b=ii*wordLength;
    uint B=b/8;
@@ -29,6 +31,16 @@ inline uint PackedArray::operator [] (uint ii) {
    uint a1 = *((uint*) (charArray+B));
    a1 = ((a1>>S)<<wordCompLength)>>wordCompLength;
    return a1;
+};
+
+inline void PackedArray::writePacked( uint jj, uint x) {
+   uint b=jj*wordLength;
+   uint B=b/8LLU;
+   uint S=b%8LLU;
+
+   x = x << S;
+   uint* a1 = (uint*) (charArray+B);
+   *a1 = ( (*a1) & ~(bitRecMask<<S) ) | x;
 };
 
 #endif

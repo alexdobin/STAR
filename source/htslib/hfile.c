@@ -22,6 +22,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.  */
 
+#if defined(__linux__) && !defined(_GNU_SOURCE)
+#define _GNU_SOURCE // sync_file_range
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -204,6 +207,11 @@ int hflush(hFILE *fp)
     return 0;
 }
 
+int hflush_buffer(hFILE *fp)
+{
+    return flush_buffer(fp) < 0 ? EOF : 0;
+}
+
 /* Called only from hputc(), when our buffer is already full.  */
 int hputc2(int c, hFILE *fp)
 {
@@ -311,7 +319,78 @@ typedef struct {
     hFILE base;
     int fd;
     int is_socket:1;
+    unsigned writeback:1;
+    off_t wb_written, wb_started; // bytes written; bytes handed to writeback
 } hFILE_fd;
+
+#if defined(__linux__) && defined(SYNC_FILE_RANGE_WRITE)
+// Start writeback every this many bytes written, so that a closing fsync
+// waits for little. sync_file_range blocks while the device queue is full,
+// so a worker thread makes the calls, on a dup of the descriptor.
+#define WRITEBACK_KICK_BYTES (16 << 20)
+#include <pthread.h>
+#include <signal.h>
+#define WRITEBACK_QUEUE 64
+static struct { int fd; off_t offset, length; } wb_queue[WRITEBACK_QUEUE];
+static unsigned wb_head, wb_tail;
+static int wb_running;
+static pthread_mutex_t wb_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t wb_cond = PTHREAD_COND_INITIALIZER;
+static pthread_once_t wb_once = PTHREAD_ONCE_INIT;
+
+static void *wb_worker(void *arg)
+{
+    (void) arg;
+    for (;;) {
+        int fd;
+        off_t offset, length;
+        pthread_mutex_lock(&wb_mutex);
+        while (wb_head == wb_tail) pthread_cond_wait(&wb_cond, &wb_mutex);
+        fd = wb_queue[wb_head % WRITEBACK_QUEUE].fd;
+        offset = wb_queue[wb_head % WRITEBACK_QUEUE].offset;
+        length = wb_queue[wb_head % WRITEBACK_QUEUE].length;
+        wb_head++;
+        pthread_mutex_unlock(&wb_mutex);
+        (void) sync_file_range(fd, offset, length, SYNC_FILE_RANGE_WRITE);
+        close(fd);
+    }
+    return NULL;
+}
+
+static void wb_start(void)
+{
+    pthread_t thread;
+    pthread_attr_t attr;
+    sigset_t all, old;
+    if (pthread_attr_init(&attr) != 0) return;
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    sigfillset(&all);
+    pthread_sigmask(SIG_SETMASK, &all, &old); // the worker takes no signals
+    wb_running = pthread_create(&thread, &attr, wb_worker, NULL) == 0;
+    pthread_sigmask(SIG_SETMASK, &old, NULL);
+    pthread_attr_destroy(&attr);
+}
+
+static void wb_kick(int fd, off_t offset, off_t length)
+{
+    int dfd;
+    pthread_once(&wb_once, wb_start);
+    if (!wb_running) return;
+    dfd = fcntl(fd, F_DUPFD_CLOEXEC, 0);
+    if (dfd < 0) return;
+    pthread_mutex_lock(&wb_mutex);
+    if (wb_tail - wb_head < WRITEBACK_QUEUE) {
+        wb_queue[wb_tail % WRITEBACK_QUEUE].fd = dfd;
+        wb_queue[wb_tail % WRITEBACK_QUEUE].offset = offset;
+        wb_queue[wb_tail % WRITEBACK_QUEUE].length = length;
+        wb_tail++;
+        dfd = -1;
+        pthread_cond_signal(&wb_cond);
+    }
+    pthread_mutex_unlock(&wb_mutex);
+    if (dfd >= 0) close(dfd); // queue full: skip this kick
+}
+#endif
 
 static ssize_t fd_read(hFILE *fpv, void *buffer, size_t nbytes)
 {
@@ -332,6 +411,17 @@ static ssize_t fd_write(hFILE *fpv, const void *buffer, size_t nbytes)
         n = fp->is_socket?  send(fp->fd, buffer, nbytes, 0)
                          : write(fp->fd, buffer, nbytes);
     } while (n < 0 && errno == EINTR);
+#if defined(__linux__) && defined(SYNC_FILE_RANGE_WRITE)
+    if (n > 0 && fp->writeback && !fp->is_socket) {
+        fp->wb_written += n;
+        if (fp->wb_written - fp->wb_started >= WRITEBACK_KICK_BYTES) {
+            int save = errno;
+            wb_kick(fp->fd, fp->wb_started, fp->wb_written - fp->wb_started);
+            errno = save;
+            fp->wb_started = fp->wb_written;
+        }
+    }
+#endif
     return n;
 }
 
@@ -377,6 +467,11 @@ static const struct hFILE_backend fd_backend =
     fd_read, fd_write, fd_seek, fd_flush, fd_close
 };
 
+void hfile_set_writeback(hFILE *fpv, int enable)
+{
+    if (fpv->backend == &fd_backend) ((hFILE_fd *) fpv)->writeback = enable != 0;
+}
+
 static size_t blksize(int fd)
 {
     struct stat sbuf;
@@ -395,6 +490,8 @@ static hFILE *hopen_fd(const char *filename, const char *mode)
 
     fp->fd = fd;
     fp->is_socket = 0;
+    fp->writeback = 1;
+    fp->wb_written = fp->wb_started = 0;
     fp->base.backend = &fd_backend;
     return &fp->base;
 
@@ -411,6 +508,8 @@ hFILE *hdopen(int fd, const char *mode)
 
     fp->fd = fd;
     fp->is_socket = (strchr(mode, 's') != NULL);
+    fp->writeback = 1;
+    fp->wb_written = fp->wb_started = 0;
     fp->base.backend = &fd_backend;
     return &fp->base;
 }

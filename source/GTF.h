@@ -6,6 +6,9 @@
 #include "SjdbClass.h"
 #include "Genome.h"
 #include "SuperTranscriptome.h"
+#include <thread>
+
+class GTFearly;
 
 class GTF {
 private:
@@ -13,6 +16,13 @@ private:
     Parameters &P;
     string dirOut;
     SjdbClass &sjdbLoci;
+
+    GTF(Genome &genomeIn, Parameters &Pin, const string &dirOut, SjdbClass &sjdbLoci, GTFearly &early);
+    void loadExons(ostream &logOut, ostream &errStream, string *fatalError);
+
+    std::thread writeThread[2];//transcriptGeneSJ's table writes: writeTables, writeSjdbList
+    void writeTables(ofstream *exgeOutP, ofstream *geOutP, const string dirOut);
+    void writeSjdbList(const string dirOut, uint64 sjdbN1, uint64 sjdbN2);
 public:
     bool gtfYes; 
 
@@ -29,7 +39,10 @@ public:
     SuperTranscriptome superTrome;
     
     GTF(Genome &genomeIn, Parameters &Pin, const string &dirOut, SjdbClass &sjdbLoci);
-    uint64 transcriptGeneSJ(const string &dirOut);
+    ~GTF();
+    static void loadEarly(Genome &genome, Parameters &P, const string &dirOut);
+    uint64 transcriptGeneSJ(const string &dirOut, bool writeLater=false);//with writeLater, the tables it writes are complete after writeJoin()
+    void writeJoin();
     void superTranscript();
 };
 

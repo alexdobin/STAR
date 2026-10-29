@@ -10,14 +10,76 @@ inline int funCompare_uint32_1_2_0 (const void *a, const void *b);
 
 void SoloFeature::collapseUMIall() 
 {
-    vector<uint32> umiArray(nReadPerCBmax*umiArrayStride);//temp array for collapsing UMI
-    vector<uint32> gID(min(2*featuresNumber,nReadPerCBmax)+1); //gene IDs, 2* is needed because each gene can have unique and multi-mappers
-    vector<uint32> gReadS(min(2*featuresNumber,nReadPerCBmax)+1); //start of gene reads TODO: allocate this array in the 2nd half of rGU
+    //blocks of consecutive CBs with similar read numbers are collapsed on P.runThreadN threads, each block into its own buffers,
+    //which are then concatenated in CB order, so the count matrices do not depend on the number of threads
+    const int nThreads = max(1, P.runThreadN);
+    uint64 nReadsAll = 0;
+    for (uint32 icb=0; icb<nCB; icb++)
+        nReadsAll += nReadPerCB[icb];
+    const uint64 blockReads = nReadsAll/(32*(uint64)nThreads) + 1;
+    vector<uint32> blockCB(1, 0); //first CB of each block, then nCB
+    vector<uint64> blockN; //number of reads in each block
+    for (uint64 icb=0, nr=0; icb<nCB; icb++) {
+        nr += nReadPerCB[icb];
+        if (nr >= blockReads || icb+1 == nCB) {
+            blockCB.push_back(icb+1);
+            blockN.push_back(nr);
+            nr = 0;
+        };
+    };
+    const uint32 nBlocks = blockCB.size()-1;
+    vector<uint32> blockOrder(nBlocks); //largest blocks first, so that a CB with many reads does not start last
+    for (uint32 ib=0; ib<nBlocks; ib++)
+        blockOrder[ib] = ib;
+    std::stable_sort(blockOrder.begin(), blockOrder.end(), [&blockN](uint32 a, uint32 b) {return blockN[a] > blockN[b];});
+    vector<vector<uint32>> blockCGU(nBlocks);
+    vector<vector<double>> blockMM(nBlocks);
 
-    for (uint32 icb=0; icb<nCB; icb++) {//main collapse cycle
-        
-        collapseUMIperCB(icb, umiArray, gID, gReadS);
-        
+    #pragma omp parallel num_threads(nThreads)
+    {
+        vector<uint32> umiArray(nReadPerCBmax*umiArrayStride);//temp array for collapsing UMI
+        vector<uint32> gID(min(2*featuresNumber,nReadPerCBmax)+1); //gene IDs, 2* is needed because each gene can have unique and multi-mappers
+        vector<uint32> gReadS(min(2*featuresNumber,nReadPerCBmax)+1); //start of gene reads TODO: allocate this array in the 2nd half of rGU
+
+        #pragma omp for schedule(dynamic,1)
+        for (uint32 io=0; io<nBlocks; io++) {
+            uint32 ib = blockOrder[io];
+            blockCGU[ib].resize(blockN[ib]*countMatStride/5+16); //5 is heuristic, will be resized if needed
+            if (pSolo.multiMap.yes.multi)
+                blockMM[ib].resize(blockN[ib]*countMatMult.s/5+16);
+
+            uint32 cguI = 0, mmI = 0; //end of the block's records
+            for (uint32 icb=blockCB[ib]; icb<blockCB[ib+1]; icb++) {
+                uint32 cgu0 = cguI, mm0 = mmI;
+                collapseUMIperCB(icb, umiArray, gID, gReadS, blockCGU[ib], cguI, blockMM[ib], mmI);
+                countCellGeneUMIindex[icb+1] = cguI - cgu0; //size of the CB's records, summed into the index below
+                if (pSolo.multiMap.yes.multi)
+                    countMatMult.i[icb+1] = mmI - mm0;
+            };
+        };
+    };
+
+    for (uint32 icb=0; icb<nCB; icb++)
+        countCellGeneUMIindex[icb+1] += countCellGeneUMIindex[icb];
+    countCellGeneUMI.assign(countCellGeneUMIindex[nCB]+16, 0);
+    if (pSolo.multiMap.yes.multi) {
+        for (uint32 icb=0; icb<nCB; icb++)
+            countMatMult.i[icb+1] += countMatMult.i[icb];
+        countMatMult.m.assign(countMatMult.i[nCB]+16, 0);
+    };
+
+    #pragma omp parallel for num_threads(nThreads) schedule(dynamic,1)
+    for (uint32 ib=0; ib<nBlocks; ib++) {
+        uint32 cb0 = blockCB[ib], cb1 = blockCB[ib+1];
+        std::copy(blockCGU[ib].begin(), blockCGU[ib].begin() + (countCellGeneUMIindex[cb1]-countCellGeneUMIindex[cb0]), countCellGeneUMI.begin()+countCellGeneUMIindex[cb0]);
+        vector<uint32>().swap(blockCGU[ib]);
+        if (pSolo.multiMap.yes.multi) {
+            std::copy(blockMM[ib].begin(), blockMM[ib].begin() + (countMatMult.i[cb1]-countMatMult.i[cb0]), countMatMult.m.begin()+countMatMult.i[cb0]);
+            vector<double>().swap(blockMM[ib]);
+        };
+    };
+
+    for (uint32 icb=0; icb<nCB; icb++) {//sum stats
         readFeatSum->stats.V[readFeatSum->stats.yesUMIs] += nUMIperCB[icb];
         if (nGenePerCB[icb]>0) //nGenePerCB contains only unique
             ++readFeatSum->stats.V[readFeatSum->stats.yesCellBarcodes];
@@ -27,8 +89,9 @@ void SoloFeature::collapseUMIall()
     };
 };
 
-void SoloFeature::collapseUMIperCB(uint32 iCB, vector<uint32> &umiArray, vector<uint32> &gID,  vector<uint32> &gReadS)
-{
+void SoloFeature::collapseUMIperCB(uint32 iCB, vector<uint32> &umiArray, vector<uint32> &gID,  vector<uint32> &gReadS, vector<uint32> &cguV, uint32 &cgu1, vector<double> &mmV, uint32 &mm1)
+{//the CB's countCellGeneUMI records are written to cguV from cgu1, its countMatMult records to mmV from mm1; both return the end
+    const uint32 cgu0 = cgu1, mm0 = mm1;
 
     uint32 *rGU=rCBp[iCB];
     uint32 rN=nReadPerCB[iCB]; //with multimappers, this is the number of all aligns, not reads
@@ -91,12 +154,12 @@ void SoloFeature::collapseUMIperCB(uint32 iCB, vector<uint32> &umiArray, vector<
     
     vector<unordered_map <uintUMI,uintUMI>> umiCorrected(nGenes);
 
-    if (countCellGeneUMI.size() < countCellGeneUMIindex[iCB] + nGenes*countMatStride)
-        countCellGeneUMI.resize((countCellGeneUMI.size() + nGenes*countMatStride )*2);//allocated vector too small
+    if (cguV.size() < cgu0 + nGenes*countMatStride)
+        cguV.resize((cguV.size() + nGenes*countMatStride )*2);//allocated vector too small
     
     nGenePerCB[iCB]=0;
     nUMIperCB[iCB]=0;
-    countCellGeneUMIindex[iCB+1]=countCellGeneUMIindex[iCB];
+    cgu1=cgu0;
     
     /////////////////////////////////////////////
     /////////// main cycle over genes with unique-gene-mappers
@@ -150,40 +213,40 @@ void SoloFeature::collapseUMIperCB(uint32 iCB, vector<uint32> &umiArray, vector<
             
             
         if (pSolo.umiDedup.yes.NoDedup)
-            countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.NoDedup] = nR0;
+            cguV[cgu1 + pSolo.umiDedup.countInd.NoDedup] = nR0;
 
         if (nU0>0) {//otherwise no need to count
             if (pSolo.umiDedup.yes.Exact)
-                countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.Exact] = nU0;
+                cguV[cgu1 + pSolo.umiDedup.countInd.Exact] = nU0;
                 
             if (pSolo.umiDedup.yes.CR)
-                countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.CR] = 
+                cguV[cgu1 + pSolo.umiDedup.countInd.CR] = 
                     umiArrayCorrect_CR(nU0, umiArray.data(), readInfo.size()>0 && pSolo.umiDedup.typeMain==UMIdedup::typeI::CR, true, umiCorrected[iG]);
                 
             if (pSolo.umiDedup.yes.Directional)
-                countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.Directional] = 
+                cguV[cgu1 + pSolo.umiDedup.countInd.Directional] = 
                     umiArrayCorrect_Directional(nU0, umiArray.data(), readInfo.size()>0 && pSolo.umiDedup.typeMain==UMIdedup::typeI::Directional, true, umiCorrected[iG], 0);
                     
             if (pSolo.umiDedup.yes.Directional_UMItools)
-                countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.Directional_UMItools] = 
+                cguV[cgu1 + pSolo.umiDedup.countInd.Directional_UMItools] = 
                     umiArrayCorrect_Directional(nU0, umiArray.data(), readInfo.size()>0 && pSolo.umiDedup.typeMain==UMIdedup::typeI::Directional_UMItools, true, umiCorrected[iG], -1);                    
                 
             //this changes umiArray, so it should be last call
             if (pSolo.umiDedup.yes.All)
-                countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.All] = 
+                cguV[cgu1 + pSolo.umiDedup.countInd.All] = 
                     umiArrayCorrect_Graph(nU0, umiArray.data(), readInfo.size()>0 && pSolo.umiDedup.typeMain==UMIdedup::typeI::All, true, umiCorrected[iG]);
         };//if (nU0>0)
         
         {//check any count>0 and finalize record for this gene
             uint32 totcount=0;
-            for (uint32 ii=countCellGeneUMIindex[iCB+1]+1; ii<countCellGeneUMIindex[iCB+1]+countMatStride; ii++) {
-                totcount += countCellGeneUMI[ii];
+            for (uint32 ii=cgu1+1; ii<cgu1+countMatStride; ii++) {
+                totcount += cguV[ii];
             };
             if (totcount>0) {//at least one umiDedup type is non-0
-                countCellGeneUMI[countCellGeneUMIindex[iCB+1] + 0] = gID[iG];
+                cguV[cgu1 + 0] = gID[iG];
                 nGenePerCB[iCB]++;
-                nUMIperCB[iCB] += countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.main];
-                countCellGeneUMIindex[iCB+1] = countCellGeneUMIindex[iCB+1] + countMatStride;//iCB+1 accumulates the index
+                nUMIperCB[iCB] += cguV[cgu1 + pSolo.umiDedup.countInd.main];
+                cgu1 = cgu1 + countMatStride;//iCB+1 accumulates the index
             };
         };        
         
@@ -242,9 +305,9 @@ void SoloFeature::collapseUMIperCB(uint32 iCB, vector<uint32> &umiArray, vector<
                 continue; //no counts for this gene
             nGenePerCB[iCB]++;
             nUMIperCB[iCB] += geneCounts[ig];
-            countCellGeneUMI[countCellGeneUMIindex[iCB+1] + 0] = gID[ig];
-            countCellGeneUMI[countCellGeneUMIindex[iCB+1] + pSolo.umiDedup.countInd.CR] = geneCounts[ig];
-            countCellGeneUMIindex[iCB+1] = countCellGeneUMIindex[iCB+1] + countMatStride;//iCB+1 accumulates the index
+            cguV[cgu1 + 0] = gID[ig];
+            cguV[cgu1 + pSolo.umiDedup.countInd.CR] = geneCounts[ig];
+            cgu1 = cgu1 + countMatStride;//iCB+1 accumulates the index
         };
         
         if (readInfo.size()>0) {//record cb/umi for each read
@@ -272,7 +335,7 @@ void SoloFeature::collapseUMIperCB(uint32 iCB, vector<uint32> &umiArray, vector<
     //////////////////////////////////////////multi-gene reads to the end of function
     //////////////////////////////////////////
     if (pSolo.multiMap.yes.multi)
-        countMatMult.i[iCB+1] = countMatMult.i[iCB];
+        mm1 = mm0;
     
     if (nGenesMult>0) {//process multigene reads
         
@@ -373,10 +436,10 @@ void SoloFeature::collapseUMIperCB(uint32 iCB, vector<uint32> &umiArray, vector<
             for (uint32 indDedup=0; indDedup < pSolo.umiDedup.yes.N; indDedup++) {
                 vector<double> gEu(genesM.size(), 0);
                 {//collect unique gene counts
-                    for (uint32 igm=countCellGeneUMIindex[iCB]; igm<countCellGeneUMIindex[iCB+1]; igm+=countMatStride) {
-                        uint32 g1 = countCellGeneUMI[igm];
+                    for (uint32 igm=cgu0; igm<cgu1; igm+=countMatStride) {
+                        uint32 g1 = cguV[igm];
                         if (genesM.count(g1)>0)
-                            gEu[genesM[g1]]=(double)countCellGeneUMI[igm+1+indDedup];
+                            gEu[genesM[g1]]=(double)cguV[igm+1+indDedup];
                     };
                 };
                 
@@ -405,10 +468,10 @@ void SoloFeature::collapseUMIperCB(uint32 iCB, vector<uint32> &umiArray, vector<
             for (uint32 indDedup=0; indDedup < pSolo.umiDedup.yes.N; indDedup++) {
                 vector<double> gEu(genesM.size(), 0);
                 {//collect unique gene counts
-                    for (uint32 igm=countCellGeneUMIindex[iCB]; igm<countCellGeneUMIindex[iCB+1]; igm+=countMatStride) {
-                        uint32 g1 = countCellGeneUMI[igm];
+                    for (uint32 igm=cgu0; igm<cgu1; igm+=countMatStride) {
+                        uint32 g1 = cguV[igm];
                         if (genesM.count(g1)>0)
-                            gEu[genesM[g1]]=(double)countCellGeneUMI[igm+1+indDedup];
+                            gEu[genesM[g1]]=(double)cguV[igm+1+indDedup];
                     };
                 };
                 
@@ -438,10 +501,10 @@ void SoloFeature::collapseUMIperCB(uint32 iCB, vector<uint32> &umiArray, vector<
             for (uint32 indDedup=0; indDedup < pSolo.umiDedup.yes.N; indDedup++) {
                 vector<double> gEu(genesM.size(), 0);
                 {//collect unique gene counts
-                    for (uint32 igm=countCellGeneUMIindex[iCB]; igm<countCellGeneUMIindex[iCB+1]; igm+=countMatStride) {
-                        uint32 g1 = countCellGeneUMI[igm];
+                    for (uint32 igm=cgu0; igm<cgu1; igm+=countMatStride) {
+                        uint32 g1 = cguV[igm];
                         if (genesM.count(g1)>0)
-                            gEu[genesM[g1]]=(double)countCellGeneUMI[igm+1+indDedup];
+                            gEu[genesM[g1]]=(double)cguV[igm+1+indDedup];
                     };
                 };
                 
@@ -506,28 +569,28 @@ void SoloFeature::collapseUMIperCB(uint32 iCB, vector<uint32> &umiArray, vector<
         };        
         
         {//write to countMatMult
-            if (countMatMult.m.size() < countMatMult.i[iCB+1] + genesM.size()*countMatMult.s*pSolo.umiDedup.yes.N + 100) //+100 just in case
-                countMatMult.m.resize((countMatMult.i[iCB+1] + genesM.size()*countMatMult.s*pSolo.umiDedup.yes.N + 100)*2);
+            if (mmV.size() < mm1 + genesM.size()*countMatMult.s*pSolo.umiDedup.yes.N + 100) //+100 just in case
+                mmV.resize((mm1 + genesM.size()*countMatMult.s*pSolo.umiDedup.yes.N + 100)*2);
 
             for (const auto &gm: genesM) {
-                countMatMult.m[countMatMult.i[iCB+1] + 0] = gm.first;
+                mmV[mm1 + 0] = gm.first;
                     
                 for (uint32 indDedup=0; indDedup < pSolo.umiDedup.yes.N; indDedup++) {
-                    uint32 ind1 = countMatMult.i[iCB+1] + indDedup;
+                    uint32 ind1 = mm1 + indDedup;
                     
                     if (pSolo.multiMap.yes.Uniform)
-                        countMatMult.m[ind1 + pSolo.multiMap.countInd.Uniform] = gEuniform[gm.second];
+                        mmV[ind1 + pSolo.multiMap.countInd.Uniform] = gEuniform[gm.second];
                         
                     if (pSolo.multiMap.yes.Rescue)
-                        countMatMult.m[ind1 + pSolo.multiMap.countInd.Rescue] = gErescue[indDedup][gm.second];
+                        mmV[ind1 + pSolo.multiMap.countInd.Rescue] = gErescue[indDedup][gm.second];
                         
                     if (pSolo.multiMap.yes.PropUnique)
-                        countMatMult.m[ind1 + pSolo.multiMap.countInd.PropUnique] = gEpropUnique[indDedup][gm.second];
+                        mmV[ind1 + pSolo.multiMap.countInd.PropUnique] = gEpropUnique[indDedup][gm.second];
                         
                     if (pSolo.multiMap.yes.EM)
-                        countMatMult.m[ind1 + pSolo.multiMap.countInd.EM] = gEem[indDedup][gm.second];                    
+                        mmV[ind1 + pSolo.multiMap.countInd.EM] = gEem[indDedup][gm.second];                    
                     
-                    countMatMult.i[iCB+1] += countMatMult.s;
+                    mm1 += countMatMult.s;
                 };
             };
         };

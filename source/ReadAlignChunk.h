@@ -36,7 +36,10 @@ public:
     int iThread; //current thread
     uint chunkOutBAMtotal; //total number of bytes in the write buffer
 
-    ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk);
+    ostringstream *logBuf; //this chunk's Log.out lines while the chunks are built concurrently (buildAll); NULL: written to Log.out directly
+
+    ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk, ostringstream *logBufIn=NULL);
+    static void buildAll(Parameters &P, Genome &genomeIn, Transcriptome *TrIn, ReadAlignChunk **RAchunk);
     void processChunks();
     void mapChunk();
     void chunkFstreamOpen(string filePrefix, int iChunk, fstream &fstreamOut);

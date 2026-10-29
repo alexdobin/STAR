@@ -1,9 +1,55 @@
 #include "ReadAlignChunk.h"
 #include <pthread.h>
+#include <thread>
+#include <system_error>
 #include "ErrorWarning.h"
+#include "GlobalVariables.h"
+#ifdef __GLIBC__
+#include <malloc.h>
+#endif
 
-ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk) : P(Pin), mapGen(genomeIn) {//initialize chunk
+void ReadAlignChunk::buildAll(Parameters &P, Genome &genomeIn, Transcriptome *TrIn, ReadAlignChunk **RAchunk)
+{//new ReadAlignChunk for each of the P.runThreadN chunks; above 1 thread, one thread per chunk, and the chunks' Log.out lines written in chunk order after all are built
+    int nChunks=P.runThreadN;
+    if (nChunks<2) {
+        for (int ii=0; ii<nChunks; ii++)
+            RAchunk[ii]=new ReadAlignChunk(P, genomeIn, TrIn, ii);
+        return;
+    };
 
+    vector<ostringstream> logBufs(nChunks);
+    vector<std::thread> threads;
+    threads.reserve(nChunks-1);
+    vector<int> unstarted;//chunks whose thread could not be created: built on this thread
+#ifdef M_TOP_PAD
+    mallopt(M_TOP_PAD, 64<<20);//a new thread arena then starts with its whole heap writable; grown page by page, its mprotect calls serialize the other threads' page faults
+#endif
+    for (int ii=1; ii<nChunks; ii++) {
+        try {
+            threads.emplace_back([&P, &genomeIn, TrIn, RAchunk, &logBufs, ii]() {RAchunk[ii]=new ReadAlignChunk(P, genomeIn, TrIn, ii, &logBufs[ii]);});
+        } catch (const std::system_error &) {
+            unstarted.push_back(ii);
+        };
+    };
+    RAchunk[0]=new ReadAlignChunk(P, genomeIn, TrIn, 0, &logBufs[0]);
+    for (int ii : unstarted)
+        RAchunk[ii]=new ReadAlignChunk(P, genomeIn, TrIn, ii, &logBufs[ii]);
+    for (auto &th : threads)
+        th.join();
+#ifdef M_TOP_PAD
+    mallopt(M_TOP_PAD, 128*1024);//glibc's default
+#endif
+
+    for (int ii=0; ii<nChunks; ii++) {
+        P.inOut->logMain << logBufs[ii].str();
+        RAchunk[ii]->logBuf=NULL;
+    };
+    P.inOut->logMain << flush;
+};
+
+ReadAlignChunk::ReadAlignChunk(Parameters& Pin, Genome &genomeIn, Transcriptome *TrIn, int iChunk, ostringstream *logBufIn) : P(Pin), mapGen(genomeIn) {//initialize chunk
+
+    logBuf=logBufIn;
     iThread=iChunk;
 
     if ( P.quant.yes ) {//allocate transcriptome structures
@@ -117,7 +163,8 @@ void ReadAlignChunk::chunkFstreamOpen(string filePrefix, int iChunk, fstream &fs
     ostringstream fNameStream1;
     fNameStream1 << filePrefix << iChunk;
     string fName1=fNameStream1.str();
-    P.inOut->logMain << "Opening the file: " << fName1 << " ... " <<flush;
+    ostream &logOut = logBuf!=NULL ? (ostream&) *logBuf : (ostream&) P.inOut->logMain;
+    logOut << "Opening the file: " << fName1 << " ... " <<flush;
 
     remove(fName1.c_str()); //remove the file
     fstreamOut.open(fName1.c_str(),ios::out); //create empty file
@@ -125,13 +172,18 @@ void ReadAlignChunk::chunkFstreamOpen(string filePrefix, int iChunk, fstream &fs
     fstreamOut.open(fName1.c_str(), ios::in | ios::out); //re-open the file in in/out mode
 
     if (fstreamOut.fail()) {
-        P.inOut->logMain << "failed!\n";
+        logOut << "failed!\n";
+        if (logBuf!=NULL) {//under the mutex exitWithError keeps until the exit, so never after another thread's exit began
+            pthread_mutex_lock(&g_threadChunks.mutexError);
+            P.inOut->logMain << logBuf->str() << flush;
+            pthread_mutex_unlock(&g_threadChunks.mutexError);
+        };
         ostringstream errOut;
         errOut << "EXITING because of FATAL ERROR: could not create output file "<< fName1 << "\n";
         errOut << "Solution: check that you have permission to write this file\n";
         exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_INPUT_FILES, P);
     };
-    P.inOut->logMain << "ok" <<endl;
+    logOut << "ok" <<endl;
 };
 
 void ReadAlignChunk::chunkFstreamCat (fstream &chunkOut, ofstream &allOut, bool mutexFlag, pthread_mutex_t &mutexVal){

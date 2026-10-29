@@ -11,6 +11,7 @@
 void sjdbInsertJunctions(Parameters & P, Genome & mapGen, Genome & mapGen1, SjdbClass & sjdbLoci)
 {
     time_t rawtime;
+    std::unique_ptr<GTF> gtf;//its tables are written on threads until writeJoin below
 
     if (mapGen.sjdbN>0 && sjdbLoci.chr.size()==0) {
         //load from the saved genome, only if the loading did not happen already (if sjdb insertion happens at the 1st pass, sjdbLoci will be populated
@@ -39,8 +40,8 @@ void sjdbInsertJunctions(Parameters & P, Genome & mapGen, Genome & mapGen1, Sjdb
         //at the 2nd pass these are already in the sjdbLoci
         //with runMode=="genomeGenerate", the junctions from GTF and File are already loaded
         sjdbLoadFromFiles(P, sjdbLoci);
-        GTF gtf(mapGen, P, P.sjdbInsert.outDir, sjdbLoci);
-        gtf.transcriptGeneSJ(P.sjdbInsert.outDir);
+        gtf.reset(new GTF(mapGen, P, P.sjdbInsert.outDir, sjdbLoci));
+        gtf->transcriptGeneSJ(P.sjdbInsert.outDir, true);
     };
 
     //char *Gsj=new char [2*mapGen.sjdbLength*sjdbLoci.chr.size()*(P.var.yes ? 2:1)+1];//array to store junction sequences, will be filled in sjdbPrepare
@@ -99,4 +100,7 @@ void sjdbInsertJunctions(Parameters & P, Genome & mapGen, Genome & mapGen1, Sjdb
 
     //re-calculate genome-related parameters
     P.winBinN = mapGen.nGenome/(1LLU << P.winBinNbits)+1;
+
+    if (gtf)
+        gtf->writeJoin();//before mapping, and before Transcriptome reads the tables
 };

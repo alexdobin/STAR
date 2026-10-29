@@ -4,7 +4,7 @@
 #include "ErrorWarning.h"
 #include "serviceFuns.cpp"
 
-Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
+Transcriptome::Transcriptome (Parameters &Pin, TranscriptomeEarly *earlyIn) : P(Pin), early(earlyIn) {
 
     if (!P.quant.yes)
         return;
@@ -15,7 +15,7 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
         trInfoDir = P.pGeOut.gDir;
     };
 
-    ifstream &geStream = ifstrOpen(trInfoDir+"/geneInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotations.gtf option at the genome generation step or mapping step", P);
+    ifstream &geStream = trOpen(trInfoDir+"/geneInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotations.gtf option at the genome generation step or mapping step");
     geStream >> nGe;
     geID.resize(nGe);
     geName.resize(nGe);
@@ -31,7 +31,7 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
 
     if ( P.quant.trSAM.yes || P.quant.gene.yes || P.quant.geneFull_Ex50pAS.yes ) {//load exon-transcript structures
         //load tr and ex info
-        ifstream & trinfo = ifstrOpen(trInfoDir+"/transcriptInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step",P);
+        ifstream & trinfo = trOpen(trInfoDir+"/transcriptInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step");
         trinfo >> nTr;
         trS=new uint [nTr];
         trE=new uint [nTr];
@@ -52,14 +52,14 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
                 ostringstream errOut;
                 errOut <<"EXITING because of FATAL GENOME INDEX FILE error: transcriptInfo.tab is corrupt, or is incompatible with the current STAR version\n";
                 errOut <<"SOLUTION: re-generate genome index";
-                exitWithError(errOut.str(),std::cerr, P.inOut->logMain, EXIT_CODE_GENOME_FILES, P);
+                fatal(errOut.str(), EXIT_CODE_GENOME_FILES);
             };
 
         };
-        P.inOut->logMain << "Loaded transcript database, nTr="<<nTr<<endl;
+        logOut() << "Loaded transcript database, nTr="<<nTr<<endl;
         trinfo.close();
 
-        ifstream & exinfo = ifstrOpen(trInfoDir+"/exonInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
+        ifstream & exinfo = trOpen(trInfoDir+"/exonInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step");
         exinfo >> nEx;
         exSE = new uint32 [2*nEx];
         exLenCum = new uint32 [nEx];
@@ -71,12 +71,12 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
             trLen[ii]=exLenCum[iex1]+exSE[2*iex1+1]-exSE[2*iex1]+1;
         };
         
-        P.inOut->logMain << "Loaded exon database, nEx="<<nEx<<endl;
+        logOut() << "Loaded exon database, nEx="<<nEx<<endl;
         exinfo.close();
     };
     //load exon-gene structures
     if ( P.quant.geCount.yes ) {
-        ifstream & exinfo = ifstrOpen(trInfoDir+"/exonGeTrInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
+        ifstream & exinfo = trOpen(trInfoDir+"/exonGeTrInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step");
         exinfo >> exG.nEx;
         exG.s=new uint64[exG.nEx];
         exG.e=new uint64[exG.nEx];
@@ -98,7 +98,7 @@ Transcriptome::Transcriptome (Parameters &Pin) : P(Pin){
     };
 
     if ( P.quant.geneFull.yes || P.quant.geneFull_ExonOverIntron.yes ) {
-        ifstream & exinfo = ifstrOpen(trInfoDir+"/exonGeTrInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step", P);
+        ifstream & exinfo = trOpen(trInfoDir+"/exonGeTrInfo.tab", ERROR_OUT, "SOLUTION: utilize --sjdbGTFfile /path/to/annotantions.gtf option at the genome generation step or mapping step");
         exinfo >> exG.nEx;
 
         geneFull.s=new uint64[nGe];
@@ -187,4 +187,87 @@ void Transcriptome::quantsOutput() {
         qOut << "\n";
     };
     qOut.close();
+};
+
+//below the constructor, so that its ERROR_OUT line numbers stay as they were
+#include <thread>
+#include <system_error>
+
+class TranscriptomeEarly {//the Transcriptome constructed on a thread while genomeLoad reads the genome arrays
+public:
+    ostringstream logOut;//its Log.out lines, written by takeEarly
+    string fatalError;//its fatal error, raised by takeEarly
+    int fatalCode;
+    Transcriptome *tr;
+    std::thread thread;
+    TranscriptomeEarly() : fatalCode(0), tr(NULL) {};
+    ~TranscriptomeEarly() {
+        if (thread.joinable())
+            thread.join();
+    };
+};
+
+struct TranscriptomeFatal {};//thrown on that thread once fatalError is stored
+
+std::shared_ptr<TranscriptomeEarly> Transcriptome::loadEarly(Parameters &P)
+{//reads only P and the files in trInfoDir, which nothing writes before the Transcriptome is constructed
+    std::shared_ptr<TranscriptomeEarly> early=std::make_shared<TranscriptomeEarly>();
+    TranscriptomeEarly *e=early.get();
+    try {
+        e->thread=std::thread([e, &P]() {
+            try {
+                e->tr=new Transcriptome(P, e);
+            } catch (const TranscriptomeFatal &) {
+            };
+        });
+    } catch (const std::system_error &) {//no thread: takeEarly is not called, the Transcriptome is constructed as usual
+        return std::shared_ptr<TranscriptomeEarly>();
+    };
+    return early;
+};
+
+Transcriptome *Transcriptome::takeEarly(std::shared_ptr<TranscriptomeEarly> &early, Parameters &P)
+{
+    std::shared_ptr<TranscriptomeEarly> e=early;
+    early.reset();
+    e->thread.join();
+    P.inOut->logMain << e->logOut.str() <<flush;
+    if (e->fatalError!="")
+        exitWithError(e->fatalError,std::cerr, P.inOut->logMain, e->fatalCode, P);
+    e->tr->early=NULL;
+    return e->tr;
+};
+
+std::ifstream & Transcriptome::trOpen(std::string fileName, std::string errorID, std::string solutionString)
+{//ifstrOpen; on the early thread its error is stored instead of exiting
+    if (early==NULL)
+        return ifstrOpen(fileName, errorID, solutionString, P);
+
+    std::ifstream & ifStream = *new std::ifstream(fileName.c_str());
+    if (ifStream.fail()) {//ifstrOpen's message
+        ostringstream errOut;
+        errOut << errorID<<": exiting because of *INPUT FILE* error: could not open input file "<< fileName <<"\n";
+        errOut << "Solution: check that the file exists and you have read permission for this file\n";
+        if (solutionString.size()>0) {
+            errOut << "          "<< solutionString <<"\n";
+        };
+        fatal(errOut.str(), EXIT_CODE_FILE_OPEN);
+    };
+    return ifStream;
+};
+
+void Transcriptome::fatal(const string &message, int errorInt)
+{
+    if (early==NULL)
+        exitWithError(message,std::cerr, P.inOut->logMain, errorInt, P);
+    early->fatalError=message;
+    early->fatalCode=errorInt;
+    throw TranscriptomeFatal();
+};
+
+ostream & Transcriptome::logOut()
+{
+    if (early==NULL)
+        return P.inOut->logMain;
+    return early->logOut;
 };

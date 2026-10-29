@@ -5,9 +5,82 @@
 #include "soloInputFeatureUMI.h"
 #include "serviceFuns.cpp"
 
+namespace {
+struct SoloSinkDirect {//writes the shared arrays as each record is parsed
+    uint32 **cbP;
+    uint32 cbPstride;
+    bool readIndexYes;
+    vector<uint32> &nReadPerCBunique1, &nReadPerCBmulti1;
+
+    void record(int64 cb, uint32 feature, uint64 umi, uint64 iread)
+    {
+        cbP[cb][0]=feature;
+        cbP[cb][1]=umi;
+
+        if (readIndexYes) {
+            cbP[cb][2]=iread;
+        };
+
+        cbP[cb]+=cbPstride;
+    };
+    void countUnique(int64 cb) {nReadPerCBunique1[cb]++;};
+    void countMulti(int64 cb) {nReadPerCBmulti1[cb]++;};
+    void countsAdd(SoloReadFlagClass &readFlagCounts, int64 cb) {readFlagCounts.countsAdd(cb);};
+};
+
+struct SoloSinkBuffer {//stores the records for replayRecords, and the order in which CBs first enter flagCounts
+    vector<SoloRecordBuf> &recs;
+    vector<uintCB> &flagCountsOrder;
+
+    void record(int64 cb, uint32 feature, uint64 umi, uint64 iread)
+    {
+        recs.push_back({(uint64)cb, feature, (uint32)umi, (uint32)iread, 0});
+    };
+    //a count always follows the record() of the same read
+    void countUnique(int64) {recs.back().nReadInc=1;};
+    void countMulti(int64) {recs.back().nReadInc=2;};
+    void countsAdd(SoloReadFlagClass &readFlagCounts, int64 cb)
+    {
+        auto cbInserted = readFlagCounts.flagCounts.insert({(uintCB)cb, {} });
+        if (cbInserted.second)
+            flagCountsOrder.push_back(cb);
+        for (uint32 ibit=0; ibit<readFlagCounts.nBits; ibit++) {
+            (*cbInserted.first).second[ibit] += (uint64) readFlagCounts.checkBit(ibit);
+        };
+    };
+};
+};
+
 void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32> &cbReadCountTotal, vector<readInfoStruct> &readInfo, SoloReadFlagClass &readFlagCounts,
                                    vector<uint32> &nReadPerCBunique1, vector<uint32> &nReadPerCBmulti1)
-{   
+{
+    SoloSinkDirect sink{cbP, cbPstride, readIndexYes, nReadPerCBunique1, nReadPerCBmulti1};
+    inputRecordsT(sink, cbReadCountTotal, readInfo, readFlagCounts);
+};
+
+void SoloReadFeature::inputRecordsBuffered(vector<uint32> &cbReadCountTotal, vector<readInfoStruct> &readInfo, SoloReadFlagClass &readFlagCounts,
+                                           vector<SoloRecordBuf> &recs, vector<uintCB> &flagCountsOrder)
+{
+    SoloSinkBuffer sink{recs, flagCountsOrder};
+    inputRecordsT(sink, cbReadCountTotal, readInfo, readFlagCounts);
+};
+
+void SoloReadFeature::replayRecords(uint32 **cbP, uint32 cbPstride, const vector<SoloRecordBuf> &recs, vector<uint32> &nReadPerCBunique1, vector<uint32> &nReadPerCBmulti1)
+{
+    SoloSinkDirect sink{cbP, cbPstride, readIndexYes, nReadPerCBunique1, nReadPerCBmulti1};
+    for (const auto &r : recs) {
+        sink.record(r.cb, r.feature, r.umi, r.iread);
+        if (r.nReadInc==1) {
+            sink.countUnique(r.cb);
+        } else if (r.nReadInc==2) {
+            sink.countMulti(r.cb);
+        };
+    };
+};
+
+template <class Sink>
+void SoloReadFeature::inputRecordsT(Sink &sink, vector<uint32> &cbReadCountTotal, vector<readInfoStruct> &readInfo, SoloReadFlagClass &readFlagCounts)
+{
     streamReads->flush();
     streamReads->seekg(0,std::ios::beg);
 
@@ -50,14 +123,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
                 if (featGood) {//good feature, will be counted
                     readIsCounted = true;
 
-                    cbP[cb][0]=feature;
-                    cbP[cb][1]=umi;
-
-                    if (readIndexYes) {
-                        cbP[cb][2]=iread;
-                    };
-
-                    cbP[cb]+=cbPstride;
+                    sink.record(cb, feature, umi, iread);
 
                 } else if (readInfoYes) {//no feature - record readInfo
                     readInfo[iread].cb=cb;
@@ -91,12 +157,7 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
                 //record feature single-number feature
                 if (featGood) {
                     readIsCounted = true;
-                    cbP[cb][0]=feature;
-                    cbP[cb][1]=umi;
-                    if (readIndexYes) {
-                        cbP[cb][2]=iread;
-                    };
-                    cbP[cb]+=cbPstride;
+                    sink.record(cb, feature, umi, iread);
                 } else if (readInfoYes) {//no feature - record readInfo
                     readInfo[iread].cb=cb;
                     readInfo[iread].umi=umi;
@@ -120,9 +181,9 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
 
             if (readIsCounted) {
                 if (feature<geneMultMark) {
-                    nReadPerCBunique1[cb]++;
+                    sink.countUnique(cb);
                 } else {
-                    nReadPerCBmulti1[cb]++;
+                    sink.countMulti(cb);
                 };
             };
             
@@ -140,13 +201,13 @@ void SoloReadFeature::inputRecords(uint32 **cbP, uint32 cbPstride, vector<uint32
                 //only record this read in readFlagCounts if its CB was defined
                 if (cbmatch==0) {//perfect CB match to WL
                     readFlagCounts.setBit(readFlagCounts.cbPerfect);
-                    readFlagCounts.countsAdd(cb);
+                    sink.countsAdd(readFlagCounts, cb);
                 } else if (cbmatch==1 && !noMMtoWLwithoutExact) {
                     readFlagCounts.setBit(readFlagCounts.cbMMunique);
-                    readFlagCounts.countsAdd(cb);
+                    sink.countsAdd(readFlagCounts, cb);
                 } else if (cbmatch>1 && !noTooManyWLmatches) {
                     readFlagCounts.setBit(readFlagCounts.cbMMmultiple);
-                    readFlagCounts.countsAdd(cb);
+                    sink.countsAdd(readFlagCounts, cb);
                 } else {//no CB match
                     readFlagCounts.countsAddNoCB();
                 };

@@ -42,9 +42,35 @@ void SoloFeature::countCBgeneUMI()
     readFlagCounts.flagCounts.reserve(nCB*3/2);
     readFlagCounts.flagCountsNoCB = {};
     vector<uint32> nReadPerCBunique1(pSolo.cbWLsize), nReadPerCBmulti1(pSolo.cbWLsize); //temp arrays to record # of reads for all cells in the WL
-    for (int ii=0; ii<P.runThreadN; ii++) {//TODO: this can be parallelized
-        readFeatAll[ii]->inputRecords(rCBpa, rguStride, readBarSum->cbReadCountExact, readInfo, readFlagCounts, nReadPerCBunique1, nReadPerCBmulti1);
-        readFeatSum->addStats(*readFeatAll[ii]);//sum stats: has to be done after inputRecords, since the stats values are updated there
+    if (P.runThreadN==1) {
+        for (int ii=0; ii<P.runThreadN; ii++) {
+            readFeatAll[ii]->inputRecords(rCBpa, rguStride, readBarSum->cbReadCountExact, readInfo, readFlagCounts, nReadPerCBunique1, nReadPerCBmulti1);
+            readFeatSum->addStats(*readFeatAll[ii]);//sum stats: has to be done after inputRecords, since the stats values are updated there
+        };
+    } else {//parse the files concurrently, then make the shared writes in file order, as the serial loop does
+        vector<vector<SoloRecordBuf>> recs(P.runThreadN);
+        vector<SoloReadFlagClass> flagCountsFile(P.runThreadN);
+        vector<vector<uintCB>> flagCountsOrder(P.runThreadN);
+
+        #pragma omp parallel for num_threads(P.runThreadN) schedule(dynamic,1)
+        for (int ii=0; ii<P.runThreadN; ii++)
+            readFeatAll[ii]->inputRecordsBuffered(readBarSum->cbReadCountExact, readInfo, flagCountsFile[ii], recs[ii], flagCountsOrder[ii]);
+
+        for (int ii=0; ii<P.runThreadN; ii++) {
+            readFeatAll[ii]->replayRecords(rCBpa, rguStride, recs[ii], nReadPerCBunique1, nReadPerCBmulti1);
+            vector<SoloRecordBuf>().swap(recs[ii]);
+
+            //CBs enter flagCounts in the serial loop's order, so the unordered_map is built the same way
+            for (auto cb : flagCountsOrder[ii]) {
+                auto &cIn = flagCountsFile[ii].flagCounts.find(cb)->second;
+                auto &cOut = readFlagCounts.flagCounts.insert({cb, {} }).first->second;
+                for (uint32 ibit=0; ibit<readFlagCounts.nBits; ibit++)
+                    cOut[ibit] += cIn[ibit];
+            };
+            readFlagCounts.countsAddNoCBarray(flagCountsFile[ii].flagCountsNoCB);
+
+            readFeatSum->addStats(*readFeatAll[ii]);
+        };
     };
     readFlagCounts.countsAddNoCBarray(readFeatSum->readFlag.flagCountsNoCB);//add no-CB counts calculated in SoloReadFeature_record.cpp and not recorded to temp Solo files
 
@@ -89,13 +115,12 @@ void SoloFeature::countCBgeneUMI()
     
                      //dedup options        //gene ID
     countMatStride = pSolo.umiDedup.yes.N + 1;
-    countCellGeneUMI.resize(nReadsMapped*countMatStride/5+16); //5 is heuristic, will be resized if needed
+    //countCellGeneUMI and countMatMult.m are sized in collapseUMIall
     countCellGeneUMIindex.resize(nCB+1, 0);
     
     if (pSolo.multiMap.yes.multi) {
                     //gene   //uniform  //rescue
         countMatMult.s = 1 + pSolo.multiMap.yes.N * pSolo.umiDedup.yes.N;
-        countMatMult.m.resize(nReadsMapped*countMatMult.s/5+16);
         countMatMult.i.resize(nCB+1, 0);
     };
 

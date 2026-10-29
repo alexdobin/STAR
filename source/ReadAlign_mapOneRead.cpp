@@ -2,6 +2,88 @@
 #include "SequenceFuns.h"
 #include "Stats.h"
 #include "serviceFuns.cpp"
+#include "SuffixArrayFuns.h"
+
+//The first seed search of each chain in mapOneRead's loops does not depend on the others, and each is three dependent
+//misses (SAi, SA, genome byte); loading one level for all of them before the loops overlaps the misses.
+//Prefetches and reads only: the searches are unchanged.
+#if defined(__GNUC__)
+//always_inline: GCC 13 deletes calls to an out-of-line function whose only effects are prefetches
+__attribute__((always_inline))
+#endif
+static inline void prefetchChainFirstSeeds(Genome &mapGen, Parameters &P, char *R, uint **splitR, uint Nsplit, uint seedSearchStartLmax)
+{
+    const uint nMax=32;
+    uint saiInd[nMax], Lseed[nMax], iSAa[nMax], iSAb[nMax], iSAc[nMax];
+    uint n=0;
+    const uint Lsai=P.pGe.gSAindexNbases;
+
+    //the chains' first seeds, as the loops compute them with Lmapped=0 (iDir=1, istart=0 is included though it runs only when
+    //the forward search does not map the whole piece)
+    for (uint ip=0; ip<Nsplit && n<nMax; ip++) {
+        uint Nstart = P.seedSearchStartLmax>0 && seedSearchStartLmax<splitR[1][ip] ? splitR[1][ip]/seedSearchStartLmax+1 : 1;
+        uint Lstart = splitR[1][ip]/Nstart;
+        for (uint iDir=0; iDir<2; iDir++) {
+            for (uint istart=0; istart<Nstart && n<nMax && istart*Lstart + P.seedMapMin < splitR[1][ip]; istart++) {
+                uint Shift = iDir==0 ? ( splitR[0][ip] + istart*Lstart ) : ( splitR[0][ip] + splitR[1][ip] - istart*Lstart-1);
+                uint Lmax=min(Lsai, splitR[1][ip] - istart*Lstart);
+                uint ind1=0;
+                if (iDir==0) {
+                    for (uint ii=0;ii<Lmax;ii++)
+                        ind1 = (ind1<<2) + ((uint) R[Shift+ii]);
+                } else {
+                    for (uint ii=0;ii<Lmax;ii++)
+                        ind1 = (ind1<<2) + ( 3-((uint) R[Shift-ii]) );
+                };
+                saiInd[n]=mapGen.genomeSAindexStart[Lmax-1]+ind1;
+                Lseed[n]=Lmax;
+                prefetchPackedWords(mapGen.SAi, saiInd[n], saiInd[n]+1);
+                ++n;
+            };
+        };
+    };
+
+    //prefetch targets for a present, N-free full-length prefix (others are skipped): its SA range, which ends before the next prefix's start
+    const uint saiEnd=mapGen.genomeSAindexStart[Lsai];
+    uint m=0;
+    for (uint k=0; k<n; k++) {
+        if (Lseed[k]!=Lsai || saiInd[k]+1>=saiEnd)
+            continue;
+        uint i1=mapGen.SAi[saiInd[k]];
+        if ( (i1 & (mapGen.SAiMarkAbsentMaskC | mapGen.SAiMarkNmaskC)) != 0 )
+            continue;
+        uint i2=mapGen.SAi[saiInd[k]+1];
+        if ( (i2 & mapGen.SAiMarkAbsentMaskC) == 0 ) {
+            i2 = (i2 & mapGen.SAiMarkNmask) - 1;
+        } else if ( (mapGen.SAi[saiEnd-1] & mapGen.SAiMarkAbsentMaskC) == 0 ) {//an absent next prefix holds the next present prefix's start, trusted only when the level ends present; maxMappableLength2strands searches to nSA-1 here, so this range only aims the prefetches
+            i2 = (i2 & mapGen.SAiMarkNmask & mapGen.SAiMarkAbsentMask) - 1;
+        } else {
+            continue;
+        };
+        prefetchPackedWords(mapGen.SA, i1, i1);
+        if (i2!=i1)
+            prefetchPackedWords(mapGen.SA, i2, i2);
+        uint i3=i1;
+        if (i1+1<i2) {
+            i3=i1/2 + i2/2 + (i1%2 + i2%2)/2;
+            prefetchPackedWords(mapGen.SA, i3, i3);
+        };
+        iSAa[m]=i1;
+        iSAb[m]=i2;
+        iSAc[m]=i3;
+        ++m;
+    };
+
+    //the genome byte where each entry compare (both range ends) and the first midpoint's compare start; the midpoint's
+    //starts at min(L1,L2)>=Lsai, usually in the same cache line
+    for (uint k=0; k<m; k++) {
+        prefetchSuffixStart(mapGen, iSAa[k], Lsai);
+        if (iSAb[k]!=iSAa[k])
+            prefetchSuffixStart(mapGen, iSAb[k], Lsai);
+        if (iSAc[k]!=iSAa[k])
+            prefetchSuffixStart(mapGen, iSAc[k], Lsai);
+    };
+};
 
 int ReadAlign::mapOneRead() {
 
@@ -40,6 +122,7 @@ int ReadAlign::mapOneRead() {
 
     uint seedSearchStartLmax=min(P.seedSearchStartLmax, // 50
                                   (uint) (P.seedSearchStartLmaxOverLread*(Lread-1))); // read length
+    prefetchChainFirstSeeds(mapGen, P, Read1[0], splitR, Nsplit, seedSearchStartLmax);
     // align all good pieces
     for (uint ip=0; ip<Nsplit; ip++) {
 

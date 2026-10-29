@@ -5,7 +5,7 @@
 #include <cmath>
 #include <ctime>
 
-void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, uint tG2, Transcript trA, \
+void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, uint tG2, Transcript &trA, \
                         uint Lread, uiWA* WA, char* R, Genome &mapGen, \
                         Parameters& P, Transcript** wTr, uint* nWinTr, ReadAlign *RA) {
     //recursively stitch aligns for one gene
@@ -16,7 +16,7 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
     if (iA>=nA) {//no more aligns to add, finalize the transcript
 
         //extend first
-        Transcript trAstep1;
+        ExtendAlignResult trAstep1;
 
         int vOrder[2]; //decide in which order to extend: extend the 5' of the read first
 
@@ -39,13 +39,12 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
             case 0: //extend at start
 
             if (trA.rStart>0) {// if transcript does not start at base, extend to the read start
-                trAstep1.reset();
                 uint imate=trA.exons[0][EX_iFrag];
                 if ( extendAlign(R, mapGen.G, trA.rStart-1, trA.gStart-1, -1, -1, trA.rStart, tR2-trA.rStart+1, \
                                  trA.nMM, RA->outFilterMismatchNmaxTotal, P.outFilterMismatchNoverLmax, \
-                                 P.alignEndsType.ext[imate][(int)(trA.Str!=imate)], &trAstep1) ) {//if could extend
+                                 P.alignEndsType.ext[imate][(int)(trA.Str!=imate)], trAstep1) ) {//if could extend
 
-                    trA.add(&trAstep1);
+                    addExtension(trA, trAstep1);
                     Score += trAstep1.maxScore;
 
                     trA.exons[0][EX_R] = trA.rStart = trA.rStart - trAstep1.extendL;
@@ -60,13 +59,12 @@ void stitchWindowAligns(uint iA, uint nA, int Score, bool WAincl[], uint tR2, ui
             case 1: //extend at end
 
             if ( tR2<Lread ) {//extend alignment to the read end
-                trAstep1.reset();
                 uint imate=trA.exons[trA.nExons-1][EX_iFrag];
                 if ( extendAlign(R, mapGen.G, tR2+1, tG2+1, +1, +1, Lread-tR2-1, tR2-trA.rStart+1, \
                                  trA.nMM, RA->outFilterMismatchNmaxTotal,  P.outFilterMismatchNoverLmax, \
-                                 P.alignEndsType.ext[imate][(int)(imate==trA.Str)], &trAstep1) ) {//if could extend
+                                 P.alignEndsType.ext[imate][(int)(imate==trA.Str)], trAstep1) ) {//if could extend
 
-                    trA.add(&trAstep1);
+                    addExtension(trA, trAstep1);
                     Score += trAstep1.maxScore;
 
                     tR2 += trAstep1.extendL;

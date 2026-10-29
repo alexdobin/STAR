@@ -31,6 +31,9 @@ BAMoutput::BAMoutput (int iChunk, string tmpDir, Parameters &Pin) : P(Pin){//all
 
     binSize1=binStart[nBins-1]-binStart[0];
     nBins=1;//start with one bin to estimate genomic bin sizes
+    bgzfArray=NULL;//not used
+    compressor=NULL;
+    compressorLevel=0;
 };
 
 BAMoutput::BAMoutput (BGZF *bgzfBAMin, Parameters &Pin) : P(Pin){//allocate BAM array with one bin, streamed directly into bgzf file
@@ -39,6 +42,9 @@ BAMoutput::BAMoutput (BGZF *bgzfBAMin, Parameters &Pin) : P(Pin){//allocate BAM 
     bamArray = new char [bamArraySize];
     binBytes1=0;
     bgzfBAM=bgzfBAMin;
+    bgzfArray=NULL;//allocated at the first write
+    compressor=NULL;
+    compressorLevel=0;
     //not used
     binSize=0;
     binStream=NULL;
@@ -54,12 +60,7 @@ void BAMoutput::unsortedOneAlign (char *bamIn, uint bamSize, uint bamSize2) {//r
     if (bamSize==0) return; //no output, could happen if one of the mates is not mapped
 
     if (binBytes1+bamSize2 > bamArraySize) {//write out this buffer
-
-        if (g_threadChunks.threadBool) pthread_mutex_lock(&g_threadChunks.mutexOutSAM);
-        bgzf_write(bgzfBAM,bamArray,binBytes1);
-        if (g_threadChunks.threadBool) pthread_mutex_unlock(&g_threadChunks.mutexOutSAM);
-
-        binBytes1=0;//rewind the buffer
+        unsortedWrite();
     };
 
     memcpy(bamArray+binBytes1, bamIn, bamSize);
@@ -68,8 +69,40 @@ void BAMoutput::unsortedOneAlign (char *bamIn, uint bamSize, uint bamSize2) {//r
 };
 
 void BAMoutput::unsortedFlush () {//flush all alignments
+    unsortedWrite();
+};
+
+void BAMoutput::unsortedWrite () {//append the buffer to the BGZF file and rewind it
+    if (binBytes1==0)
+        return;
+
+    //compress outside mutexOutSAM into whole BGZF blocks (the buffer's last block may be short); htslib writes it otherwise
+    bool deflated = bgzfBAM->is_compressed && bgzfBAM->mt==NULL && !bgzfBAM->idx_build_otf;
+    uint64 bgzfBytes=0;
+    if (deflated) {
+        if (bgzfArray==NULL)
+            bgzfArray=new char [ (bamArraySize+BGZF_BLOCK_SIZE-1)/BGZF_BLOCK_SIZE*BGZF_MAX_BLOCK_SIZE ];
+        for (uint64 ib=0; ib<binBytes1; ib+=BGZF_BLOCK_SIZE) {
+            int blockLen=BGZF_MAX_BLOCK_SIZE;
+            if (bgzf_compress_block(bgzfArray+bgzfBytes, &blockLen, bamArray+ib, (int) min((uint64) BGZF_BLOCK_SIZE, binBytes1-ib),
+                                    bgzfBAM->compress_level, &compressor, &compressorLevel) != 0) {
+                deflated=false;
+                break;
+            };
+            bgzfBytes += blockLen;
+        };
+    };
+
     if (g_threadChunks.threadBool) pthread_mutex_lock(&g_threadChunks.mutexOutSAM);
-    bgzf_write(bgzfBAM,bamArray,binBytes1);
+    if (deflated) {
+        if (bgzfBAM->block_offset>0)
+            bgzf_flush(bgzfBAM);//bytes still pending in the handle (the header) precede this buffer
+        if (bgzf_raw_write(bgzfBAM,bgzfArray,bgzfBytes) != (ssize_t) bgzfBytes)
+            bgzfBAM->errcode |= BGZF_ERR_IO;
+        bgzfBAM->block_address += bgzfBytes;
+    } else {
+        bgzf_write(bgzfBAM,bamArray,binBytes1);
+    };
     if (g_threadChunks.threadBool) pthread_mutex_unlock(&g_threadChunks.mutexOutSAM);
     binBytes1=0;//rewind the buffer
 };
